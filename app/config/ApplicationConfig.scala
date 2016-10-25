@@ -41,6 +41,8 @@ trait ApplicationConfig {
   val callbackCsvPageUrl: String
   val enableRetrieveSubmissionData: Boolean
   val sentViaSchedulerNoOfRowsLimit: Int
+
+  val ggSignInUrl: String
 }
 
 object ApplicationConfig extends ApplicationConfig with ServicesConfig {
@@ -69,6 +71,8 @@ object ApplicationConfig extends ApplicationConfig with ServicesConfig {
   override lazy val successCsvPageUrl: String = frontendHost + loadConfig(s"$env.microservice.services.ers-returns-frontend.csv-success-page")
   override lazy val failureCsvPageUrl: String = frontendHost + loadConfig(s"$env.microservice.services.ers-returns-frontend.csv-failure-page")
   override lazy val callbackCsvPageUrl: String = platformHostUrl + loadConfig(s"$env.microservice.services.ers-returns-frontend.csv-callback-page")
+
+  override val ggSignInUrl: String = configuration.getString(s"$env.government-gateway-sign-in.host").getOrElse("")
 
   override lazy val enableRetrieveSubmissionData: Boolean = Try(loadConfig(s"$env.settings.enable-retrieve-submission-data").toBoolean).getOrElse(false)
   override lazy val sentViaSchedulerNoOfRowsLimit: Int = {

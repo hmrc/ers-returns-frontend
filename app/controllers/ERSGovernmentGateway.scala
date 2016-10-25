@@ -16,7 +16,8 @@
 
 package controllers
 
-import uk.gov.hmrc.play.frontend.auth.{TaxRegime, GovernmentGateway}
+import config.ApplicationConfig
+import uk.gov.hmrc.play.frontend.auth.{GovernmentGateway, TaxRegime}
 import uk.gov.hmrc.play.frontend.auth.connectors.domain.Accounts
 import utils.ExternalUrls
 import play.api.mvc.{AnyContent, Request, Result}
@@ -25,7 +26,8 @@ import play.api.mvc.Results.Redirect
 
 object ERSGovernmentGateway extends GovernmentGateway {
   override def continueURL = ExternalUrls.loginCallback
-  override def loginURL = ExternalUrls.signIn
+  //override def loginURL = ExternalUrls.signIn
+  override def loginURL = ApplicationConfig.ggSignInUrl
 
   override def handleSessionTimeout(implicit request: Request[_]): Future[Result] = {
     Future.successful(Redirect(routes.AuthorizationController.timedOut().url))
