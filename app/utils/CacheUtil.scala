@@ -107,6 +107,7 @@ trait CacheUtil {
       res.get.as[T]
     }recover{
       case e: NoSuchElementException => {
+				Logger.error(s"[CacheUtil][fetch] Nothing found in the cache for $key - $e")
         throw new NoSuchElementException
       }
       case _ : Throwable => {
@@ -124,7 +125,8 @@ trait CacheUtil {
       res.get.as[T]
     } recover {
       case e: NoSuchElementException => {
-        throw new NoSuchElementException
+				Logger.error(s"[CacheUtil][fetch] Nothing found in the cache for $key - $e")
+				throw new NoSuchElementException
       }
       case er : Throwable => {
         Logger.error(s"fetch with 2 params failed to get key $key for $cacheId with exception ${er.getMessage}, timestamp: ${System.currentTimeMillis()}.")
@@ -140,7 +142,7 @@ trait CacheUtil {
       res
     } recover {
       case e: NoSuchElementException => {
-        throw new NoSuchElementException
+				throw new NoSuchElementException
       }
       case _: Throwable => {
         Logger.error(s"fetchOption with 2 params failed to get key $key for $cacheId with exception, timestamp: ${System.currentTimeMillis()}.")
@@ -148,7 +150,7 @@ trait CacheUtil {
       }
     }
   }
-  
+
 
 
   @throws(classOf[NoSuchElementException])
@@ -167,7 +169,7 @@ trait CacheUtil {
       }
     }
   }
-  
+
   def getAltAmmendsData(schemeRef: String)(implicit hc: HeaderCarrier, ec: ExecutionContext, request: Request[AnyRef]): Future[(Option[AltAmendsActivity], Option[AlterationAmends])] = {
     fetchOption[AltAmendsActivity](CacheUtil.altAmendsActivity, schemeRef).flatMap {
       altamends =>

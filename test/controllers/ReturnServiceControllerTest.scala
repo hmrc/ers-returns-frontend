@@ -128,7 +128,7 @@ class ReturnServiceControllerTest extends UnitSpec with ERSFakeApplicationConfig
       val controllerUnderTest = buildFakeReturnServiceController()
       controllerUnderTest.fetchMapVal = "withMatchingSchemeRef"
 
-      val result = controllerUnderTest.cacheParams(ersRequestObject)(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionIdCSOP("GET"), hc)
+      val result = controllerUnderTest.cacheParams(ersRequestObject)(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"), hc)
       status(result) shouldBe Status.OK
       val document = Jsoup.parse(contentAsString(result))
       document.getElementsByTag("h1").text() should include(Messages("ers_start.page_title", ersRequestObject.getSchemeName))
@@ -140,7 +140,7 @@ class ReturnServiceControllerTest extends UnitSpec with ERSFakeApplicationConfig
       val controllerUnderTest = buildFakeReturnServiceController()
       controllerUnderTest.fetchMapVal = "withNonMatchingSchemeRef"
 
-      val result = controllerUnderTest.cacheParams(ersRequestObject)(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionIdCSOP("GET"), hc)
+      val result = controllerUnderTest.cacheParams(ersRequestObject)(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"), hc)
       status(result) shouldBe Status.OK
     }
   }
