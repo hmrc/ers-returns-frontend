@@ -19,7 +19,6 @@ package models.upscan
 import java.net.URL
 import java.time.Instant
 
-import play.api.Logger
 import play.api.data.validation.ValidationError
 import play.api.libs.json._
 

@@ -17,8 +17,7 @@
 package models
 
 import org.joda.time.DateTime
-import play.api.libs.json.Json
-
+import play.api.libs.json.{Json, OFormat}
 
 case class SchemeInfo (
                         schemeRef: String,
@@ -30,7 +29,7 @@ case class SchemeInfo (
                       )
 
 object SchemeInfo {
-  implicit val format = Json.format[SchemeInfo]
+  implicit val format: OFormat[SchemeInfo] = Json.format[SchemeInfo]
 }
 case class ErsMetaData(
                               schemeInfo:SchemeInfo,
@@ -42,7 +41,7 @@ case class ErsMetaData(
                                )
 
 object ErsMetaData {
-  implicit val format = Json.format[ErsMetaData]
+  implicit val format: OFormat[ErsMetaData] = Json.format[ErsMetaData]
 }
 
 case class AlterationAmends(
@@ -54,7 +53,7 @@ case class AlterationAmends(
                            )
 
 object AlterationAmends {
-  implicit val format = Json.format[AlterationAmends]
+  implicit val format: OFormat[AlterationAmends] = Json.format[AlterationAmends]
 }
 case class CompanyDetails(
                               companyName: String,
@@ -68,12 +67,12 @@ case class CompanyDetails(
                               corporationRef: Option[String]
                               )
 object CompanyDetails {
-  implicit val format = Json.format[CompanyDetails]
+  implicit val format: OFormat[CompanyDetails] = Json.format[CompanyDetails]
 }
 case class CompanyDetailsList(companies: List[CompanyDetails])
 
 object CompanyDetailsList {
-  implicit val format = Json.format[CompanyDetailsList]
+  implicit val format: OFormat[CompanyDetailsList] = Json.format[CompanyDetailsList]
 }
 case class  GroupSchemeInfo(
                              groupScheme: Option[String],
@@ -81,7 +80,7 @@ case class  GroupSchemeInfo(
 
 )
 object GroupSchemeInfo {
-  implicit val format = Json.format[GroupSchemeInfo]
+  implicit val format: OFormat[GroupSchemeInfo] = Json.format[GroupSchemeInfo]
 }
 
 case class ErsSummary(
@@ -99,19 +98,6 @@ case class ErsSummary(
                         nofOfRows: Option[Int],
                         transferStatus: Option[String]
                         )
-
-object ErsModelFormats {
-
-  import play.api.libs.json.Json
-
-  implicit val schemeInfoFormat = Json.format[SchemeInfo]
-  implicit val formatRSParams = Json.format[ErsMetaData]
-  implicit val formatAAParams = Json.format[AlterationAmends]
-  implicit val formatOfCompanyDetails = Json.format[CompanyDetails]
-  implicit val formatOfCompanyDetailsList = Json.format[CompanyDetailsList]
-  implicit val formatGRSIParams = Json.format[GroupSchemeInfo]
-  implicit val formatOfSchemeOrganiser = Json.format[SchemeOrganiserDetails]
-  implicit val formatOfTrusteeDetails = Json.format[TrusteeDetails]
-  implicit val formatOfTrusteeDetailsList = Json.format[TrusteeDetailsList]
-  implicit val formatCombinedAll = Json.format[ErsSummary]
+object ErsSummary {
+  implicit val format: OFormat[ErsSummary] = Json.format[ErsSummary]
 }

@@ -16,115 +16,62 @@
 
 package controllers
 
-import java.util.NoSuchElementException
-
 import akka.stream.Materializer
-import config.ApplicationConfig
-import metrics.Metrics
+import helpers.ErsTestHelper
 import models.{ErsMetaData, _}
 import org.joda.time.DateTime
 import org.jsoup.Jsoup
-import org.mockito.ArgumentMatchers
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito._
 import org.scalatestplus.play.OneAppPerSuite
 import play.api.Application
 import play.api.Play.current
 import play.api.http.Status
-import play.api.i18n.Messages
 import play.api.i18n.Messages.Implicits._
+import play.api.i18n.{Messages, MessagesApi}
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json
 import play.api.libs.json.JsString
-import play.api.mvc.Request
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
-import services.SessionService
-import uk.gov.hmrc.auth.core.PlayAuthConnector
-import uk.gov.hmrc.http.cache.client.{CacheMap, ShortLivedCache}
-import uk.gov.hmrc.http.{HeaderCarrier, HttpGet, HttpPost, HttpResponse}
+import uk.gov.hmrc.http.HttpResponse
+import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.test.UnitSpec
 import utils.Fixtures.ersRequestObject
-import utils.{AuthHelper, CacheUtil, ERSFakeApplicationConfig, Fixtures}
+import utils.{ERSFakeApplicationConfig, Fixtures}
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 
-class ReturnServiceControllerTest extends UnitSpec with ERSFakeApplicationConfig with AuthHelper with OneAppPerSuite {
+class ReturnServiceControllerTest extends UnitSpec with ERSFakeApplicationConfig with ErsTestHelper with OneAppPerSuite {
 
   override lazy val app: Application = new GuiceApplicationBuilder().configure(config).build()
-  implicit lazy val mat: Materializer = app.materializer
-  implicit val request: Request[_] = FakeRequest()
+	lazy val messagesApi: MessagesApi = app.injector.instanceOf[MessagesApi]
+	implicit lazy val mat: Materializer = app.materializer
+	val hundred = 100
 
-  lazy val mockHttp: HttpPost = mock[HttpPost]
-  lazy val mockHttpGet: HttpGet = mock[HttpGet]
-  lazy val mockSessionCache: SessionService = mock[SessionService]
   lazy val ExpectedRedirectionUrlIfNotSignedIn = "/gg/sign-in?continue=/submit-your-ers-return"
-  lazy val schemeInfo = SchemeInfo("XA1100000000000", DateTime.now, "1", "2016", "EMI", "EMI")
+  lazy val schemeInfo: SchemeInfo = SchemeInfo("XA1100000000000", DateTime.now, "1", "2016", "EMI", "EMI")
   lazy val rsc: ErsMetaData = new ErsMetaData(schemeInfo, "ipRef", Some("aoRef"), "empRef", Some("agentRef"), Some("sapNumber"))
+	lazy val rscAsRequestObject: RequestObject = RequestObject(Some("aoRef"), Some("2014/15"), Some("AA0000000000000"), Some("MyScheme"),
+			Some("CSOP"), Some("agentRef"), Some("empRef"), Some("ts"), Some("hmac"))
 
-  def buildFakeReturnServiceController(accessThresholdValue: Int = 100) = new ReturnServiceController {
-		override val authConnector: PlayAuthConnector = mockAuthConnector
+  def buildFakeReturnServiceController(accessThresholdValue: Int = hundred): ReturnServiceController =
+		new ReturnServiceController(messagesApi, mockAuthConnector, mockErsUtil, mockAppConfig) {
 
-    val accessDeniedUrl = "/denied.html"
-    var fetchMapVal = "e"
+		override lazy val accessThreshold: Int = accessThresholdValue
+    override val accessDeniedUrl: String = "/denied.html"
+		val cacheResponse: Future[CacheMap] = Future.successful(CacheMap("1", Map("key" -> JsString("result"))))
 
-
-    when(
-      mockHttp.POST[ValidatorData, HttpResponse](ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())
-    ).thenReturn(
-      Future.successful(HttpResponse(OK))
-    )
-
-    override val cacheUtil: CacheUtil = new CacheUtil {
-      override val sessionService: SessionService = mockSessionCache
-
-      override def cache[T](key: String, body: T)(implicit hc:HeaderCarrier, ec:ExecutionContext, formats: json.Format[T], request: Request[AnyRef]) = {
-        Future.successful(CacheMap("1", Map(key -> JsString("result"))))
-      }
-
-      override def cache[T](key: String, body: T, ref: String)(implicit hc:HeaderCarrier, formats: json.Format[T], request: Request[AnyRef]) = {
-        Future.successful(CacheMap("1", Map(key -> JsString("result"))))
-      }
-
-      @throws(classOf[NoSuchElementException])
-      override def fetch[T](key: String, cacheId: String)(implicit hc: HeaderCarrier, formats: json.Format[T], request: Request[AnyRef]): Future[T] = {
-
-        fetchMapVal match {
-          case "e" =>
-            Future(throw new NoSuchElementException)
-
-          case "withSchemeType" =>
-            Future.successful(rsc.asInstanceOf[T])
-
-          case "withZeroErrorCount" =>
-            Future.successful(rsc.asInstanceOf[T])
-          case "withErrorCountSchemeTypeFileNameFileType" =>
-            Future.successful(rsc.asInstanceOf[T])
-
-          case "withSchemeAndFileType" =>
-            Future.successful(rsc.asInstanceOf[T])
-
-          case "withMatchingSchemeRef" =>
-            Future.successful(rsc.asInstanceOf[T])
-
-          case "withNonMatchingSchemeRef" =>
-            Future.successful(rsc.asInstanceOf[T])
-        }
-      }
-
-      override def shortLivedCache: ShortLivedCache = mock[ShortLivedCache]
-    }
-    override val accessThreshold: Int = accessThresholdValue
-    override val metrics: Metrics = mock[Metrics]
+    when(mockHttp.POST[ValidatorData, HttpResponse](any(), any(), any())(any(), any(), any(), any()))
+			.thenReturn(Future.successful(HttpResponse(OK)))
+		when(mockErsUtil.cache(any(), any())(any(), any(), any(), any())).thenReturn(cacheResponse)
+		when(mockErsUtil.cache(any(), any(),any())(any(), any(), any())).thenReturn(cacheResponse)
+		when(mockErsUtil.fetch[RequestObject](any(), any())(any(), any(), any())).thenReturn(Future.successful(rscAsRequestObject))
   }
-
-  val schemeRef: String = Fixtures.schemeRef
-
 
   "Calling ReturnServiceController.cacheParams with existing cache storage for the given schemeId and schemeRef" should {
     "retrieve the stored cache and redirect to the initial start page" in {
       val controllerUnderTest = buildFakeReturnServiceController()
-      controllerUnderTest.fetchMapVal = "withMatchingSchemeRef"
 
       val result = controllerUnderTest.cacheParams(ersRequestObject)(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"), hc)
       status(result) shouldBe Status.OK
@@ -136,8 +83,6 @@ class ReturnServiceControllerTest extends UnitSpec with ERSFakeApplicationConfig
   "Calling ReturnServiceController.cacheParams with no matching cache storage for the given schemeId and schemeRef" should {
     "create a new cache object and redirect to the initial start page" in {
       val controllerUnderTest = buildFakeReturnServiceController()
-      controllerUnderTest.fetchMapVal = "withNonMatchingSchemeRef"
-
       val result = controllerUnderTest.cacheParams(ersRequestObject)(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"), hc)
       status(result) shouldBe Status.OK
     }
@@ -159,7 +104,7 @@ class ReturnServiceControllerTest extends UnitSpec with ERSFakeApplicationConfig
       implicit val fakeRequest = Fixtures.buildFakeRequestWithSessionId("?")
       val controllerUnderTest = buildFakeReturnServiceController(accessThresholdValue = 0)
       val result = await(controllerUnderTest.hmacCheck()(fakeRequest))
-      Helpers.redirectLocation(result).get.startsWith(ApplicationConfig.ggSignInUrl) shouldBe true
+      Helpers.redirectLocation(result).get.startsWith(mockAppConfig.ggSignInUrl) shouldBe true
     }
   }
 
@@ -169,7 +114,7 @@ class ReturnServiceControllerTest extends UnitSpec with ERSFakeApplicationConfig
       implicit val fakeRequest = Fixtures.buildFakeRequestWithSessionId("?")
       val controllerUnderTest = buildFakeReturnServiceController(accessThresholdValue = 0)
       val result = await(controllerUnderTest.startPage()(fakeRequest))
-      Helpers.redirectLocation(result).get.startsWith(ApplicationConfig.ggSignInUrl) shouldBe true
+      Helpers.redirectLocation(result).get.startsWith(mockAppConfig.ggSignInUrl) shouldBe true
     }
   }
 

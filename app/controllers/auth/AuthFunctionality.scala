@@ -32,16 +32,18 @@ import scala.concurrent.{ExecutionContext, Future}
 
 trait AuthFunctionality extends AuthorisedFunctions {
 
-  lazy val signInUrl: String = ApplicationConfig.ggSignInUrl
-  val origin: String = "ers-returns-frontend"
+	val appConfig: ApplicationConfig
+
+	lazy val signInUrl: String = appConfig.ggSignInUrl
+  lazy val origin: String = appConfig.appName
 
   def loginParams: Map[String, Seq[String]] = Map(
-    "continue" -> Seq(ExternalUrls.loginCallback),
+    "continue" -> Seq(appConfig.loginCallback),
     "origin" -> Seq(origin)
   )
 
 	private def handleException(implicit request: Request[AnyContent]): PartialFunction[Throwable, Result] = {
-		case _: NoActiveSession => Redirect(ApplicationConfig.ggSignInUrl, loginParams)
+		case _: NoActiveSession => Redirect(signInUrl, loginParams)
 		case er: AuthorisationException =>
 			Logger.error(s"[AuthFunctionality][handleException] Auth exception: $er")
 			Redirect(controllers.routes.ApplicationController.unauthorised().url)
@@ -64,8 +66,4 @@ trait AuthFunctionality extends AuthorisedFunctions {
 					body(ERSAuthData(authorisedEnrolments.enrolments, affinityGroup))
 			} recover handleException
 	}
-
-
-
-
 }

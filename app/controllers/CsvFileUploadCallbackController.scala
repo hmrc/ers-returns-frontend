@@ -16,30 +16,34 @@
 
 package controllers
 
-import akka.actor.ActorSystem
-import config.{ApplicationConfig, ERSFileValidatorAuthConnector}
+import config.ApplicationConfig
+import connectors.ErsConnector
+import javax.inject.{Inject, Singleton}
 import models.upscan._
+import play.api.Logger
+import play.api.i18n.MessagesApi
 import play.api.libs.json.JsValue
 import play.api.mvc.Action
-import play.api.{Logger, Play}
-import services.SessionService
-import uk.gov.hmrc.play.frontend.controller.FrontendController
-import utils.CacheUtil
+import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
+import uk.gov.hmrc.play.bootstrap.controller.FrontendController
+import utils.ERSUtil
 
 import scala.concurrent.Future
 import scala.util.control.NonFatal
 
-trait CsvFileUploadCallbackController extends FrontendController with ErsConstants {
-  val cacheUtil: CacheUtil
-  val appConfig: ApplicationConfig
-  implicit val actorSystem: ActorSystem = Play.current.actorSystem
-  private val logger = Logger(this.getClass)
+@Singleton
+class CsvFileUploadCallbackController @Inject()(val messagesApi: MessagesApi,
+																								val ersConnector: ErsConnector,
+																								val authConnector: DefaultAuthConnector,
+																								implicit val ersUtil: ERSUtil,
+																								implicit val appConfig: ApplicationConfig
+																							 ) extends FrontendController {
 
   def callback(uploadId: UploadId, scRef: String): Action[JsValue] = Action.async(parse.json) {
     implicit request =>
       request.body.validate[UpscanCallback].fold (
         invalid = errors => {
-          logger.error(s"Failed to validate UpscanCallback json with errors: $errors")
+          Logger.error(s"[CsvFileUploadCallbackController][callback] Failed to validate UpscanCallback json with errors: $errors")
           Future.successful(BadRequest)
         },
         valid = callback => {
@@ -47,25 +51,19 @@ trait CsvFileUploadCallbackController extends FrontendController with ErsConstan
             case callback: UpscanReadyCallback =>
               UploadedSuccessfully(callback.uploadDetails.fileName, callback.downloadUrl.toExternalForm)
             case UpscanFailedCallback(_, details) =>
-              logger.warn(s"CSV Callback for upload id: ${uploadId.value} failed. Reason: ${details.failureReason}. Message: ${details.message}")
+              Logger.warn(s"[CsvFileUploadCallbackController][callback] CSV Callback for upload id: ${uploadId.value} failed. Reason: ${details.failureReason}. Message: ${details.message}")
               Failed
           }
-          logger.info(s"Updating CSV callback for upload id: ${uploadId.value} to ${uploadStatus.getClass.getSimpleName}")
-          cacheUtil.cache(s"${CacheUtil.CHECK_CSV_FILES}-${uploadId.value}", uploadStatus, scRef).map {
+          Logger.info(s"[CsvFileUploadCallbackController][callback] Updating CSV callback for " +
+						s"upload id: ${uploadId.value} to ${uploadStatus.getClass.getSimpleName}")
+          ersUtil.cache(s"${ersUtil.CHECK_CSV_FILES}-${uploadId.value}", uploadStatus, scRef).map {
             _ => Ok
           } recover {
             case NonFatal(e) =>
-              logger.error(s"Failed to update cache after Upscan callback for UploadID: ${uploadId.value}, ScRef: $scRef", e)
+              Logger.error(s"[CsvFileUploadCallbackController][callback] Failed to update cache after Upscan callback for UploadID: ${uploadId.value}, ScRef: $scRef", e)
               InternalServerError("Exception occurred when attempting to store data")
           }
         }
       )
   }
-}
-
-object CsvFileUploadCallbackController extends CsvFileUploadCallbackController {
-  val authConnector = ERSFileValidatorAuthConnector
-  val sessionService = SessionService
-  override val appConfig: ApplicationConfig = ApplicationConfig
-  override val cacheUtil: CacheUtil = CacheUtil
 }

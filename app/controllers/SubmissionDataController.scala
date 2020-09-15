@@ -18,27 +18,26 @@ package controllers
 
 import config.ApplicationConfig
 import connectors.ErsConnector
+import javax.inject.{Inject, Singleton}
 import models.ERSAuthData
 import play.api.Logger
-import play.api.Play.current
-import play.api.i18n.Messages
-import play.api.i18n.Messages.Implicits._
+import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.{Action, AnyContent, Request, Result}
-import uk.gov.hmrc.play.frontend.auth.AuthContext
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
+import uk.gov.hmrc.play.bootstrap.controller.FrontendController
+import utils.ERSUtil
 
 import scala.concurrent.Future
-import uk.gov.hmrc.http.HeaderCarrier
-import utils.CacheUtil
 
-object SubmissionDataController extends SubmissionDataController {
-  override val ersConnector: ErsConnector = ErsConnector
-  override val cacheUtil: CacheUtil = CacheUtil
-}
-
-trait SubmissionDataController extends ERSReturnBaseController with Authenticator {
-
-  val ersConnector: ErsConnector
+@Singleton
+class SubmissionDataController @Inject()(val messagesApi: MessagesApi,
+																				 val authConnector: DefaultAuthConnector,
+																				 val ersConnector: ErsConnector,
+																				 implicit val ersUtil: ERSUtil,
+																				 implicit val appConfig: ApplicationConfig
+																				) extends FrontendController with Authenticator with I18nSupport {
 
   def createSchemeInfoFromURL(request: Request[Any]): Option[JsObject] = {
 
@@ -69,7 +68,7 @@ trait SubmissionDataController extends ERSReturnBaseController with Authenticato
 
     Logger.debug("Retrieve Submission Data Request")
 
-    if (ApplicationConfig.enableRetrieveSubmissionData) {
+    if (appConfig.enableRetrieveSubmissionData) {
 
       Logger.debug("Retrieve SubmissionData Enabled")
 
@@ -79,32 +78,41 @@ trait SubmissionDataController extends ERSReturnBaseController with Authenticato
         ersConnector.retrieveSubmissionData(data.get).map { res =>
           res.status match {
             case OK => Ok(res.body)
-            case _ => {
-              Logger.error(s"RetrieveSubmissionData status: ${res.status}")
-              getGlobalErrorPage
-            }
-          }
+            case _ =>
+							Logger.error(s"[SubmissionDataController][getRetrieveSubmissionData] retrieve status: ${res.status}")
+							getGlobalErrorPage
+					}
         }.recover {
-          case ex: Exception => {
-            Logger.error(s"RetrieveSubmissionData Exception: ${ex.getMessage}")
-            getGlobalErrorPage
-          }
-        }
+          case ex: Exception =>
+						Logger.error(s"[SubmissionDataController][getRetrieveSubmissionData] retrieve Exception: ${ex.getMessage}")
+						getGlobalErrorPage
+				}
 
       }
       else {
-        Future.successful(NotFound(views.html.global_error(Messages("ers_not_found.title"), Messages("ers_not_found.heading"), Messages("ers_not_found.message"))))
+        Future.successful(NotFound(views.html.global_error(
+					"ers_not_found.title",
+					"ers_not_found.heading",
+					"ers_not_found.message"
+				)))
       }
     }
     else {
       Logger.debug("Retrieve SubmissionData Disabled")
-      Future.successful(NotFound(views.html.global_error(Messages("ers_not_found.title"), Messages("ers_not_found.heading"), Messages("ers_not_found.message"))))
+      Future.successful(NotFound(views.html.global_error(
+				"ers_not_found.title",
+				"ers_not_found.heading",
+				"ers_not_found.message"
+			)))
     }
   }
 
-  def getGlobalErrorPage(implicit request: Request[_], messages: Messages) = Ok(views.html.global_error(
-    messages("ers.global_errors.title"),
-    messages("ers.global_errors.heading"),
-    messages("ers.global_errors.message"))(request, messages))
+	def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result = {
+		Ok(views.html.global_error(
+			"ers.global_errors.title",
+			"ers.global_errors.heading",
+			"ers.global_errors.message"
+		)(request, messages, appConfig))
+	}
 
 }

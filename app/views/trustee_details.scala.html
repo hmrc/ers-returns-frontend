@@ -14,88 +14,90 @@
  * limitations under the License.
  *@
 
-@(requestObject: RequestObject, groupSchemeActivity: String, index: Int, trusteeDetails: Form[models.TrusteeDetails])(implicit request: Request[AnyRef], flash: Flash, context: config.ErsContext, messages: Messages)
+@import utils.ERSUtil
+@import config.ApplicationConfig
+@import utils.CountryCodes
+@(requestObject: RequestObject, groupSchemeActivity: String, index: Int, trusteeDetails: Form[models.TrusteeDetails])(implicit request: Request[AnyRef], flash: Flash, messages: Messages, countryCodes: CountryCodes, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 
 @import uk.gov.hmrc.play.views.html.helpers
-@import utils.PageBuilder._
 @import views.html.helpers.error_overview
 @import views.html.templates._
 
 @schemeId = @{requestObject.getSchemeId}
 
 @scripts = {
-    <script src='@routes.AssetsController.at("javascripts/ers_company.js")'> </script>
+    <script src='@routes.Assets.at("javascripts/ers_company.js")'> </script>
 }
 
-@ers_main(title = Messages("ers.add_trustee.page_title"), scripts) {
+@ers_main(title = messages("ers.add_trustee.page_title"), scripts) {
 
     @reference(requestObject.getPageTitle)
-    <p class="font-xsmall"><a href="@getPageBackLink(schemeId, PAGE_TRUSTEE_DETAILS, groupSchemeActivity)" class="link-back">@Html(Messages("ers.back"))</a></p>
-    @header(Messages("ers_trustee_details.title"))
+    <p class="font-xsmall"><a href="@ersUtil.getPageBackLink(schemeId, ersUtil.PAGE_TRUSTEE_DETAILS, groupSchemeActivity)" class="link-back">@Html(messages("ers.back"))</a></p>
+    @header(messages("ers_trustee_details.title"))
     @helpers.form(action = routes.TrusteeController.trusteeDetailsSubmit(index)) {
         @error_overview(trusteeDetails)
         <div class="form-group">
             <fieldset class="inline">
                 <legend>
-                    <span class="form-label">@Messages("ers_trustee_details.question")</span>
+                    <span class="form-label">@messages("ers_trustee_details.question")</span>
                 </legend>
                 <div class="form-field">
-                    <label class="block-label @if(trusteeDetails(trusteeDetailsFields.country).value.contains(DEFAULT_COUNTRY) || trusteeDetails(trusteeDetailsFields.country).value.isEmpty) {selected}" for="uk-radio-button">
-                        <input id="uk-radio-button" name="radio-inline-group" value="1" type="radio" @if(trusteeDetails(trusteeDetailsFields.country).value.contains(DEFAULT_COUNTRY) || trusteeDetails(trusteeDetailsFields.country).value.isEmpty) {checked="checked"}>@Messages("ers_trustee_details.uk")
+                    <label class="block-label @if(trusteeDetails(trusteeDetailsFields.country).value.contains(ersUtil.DEFAULT_COUNTRY) || trusteeDetails(trusteeDetailsFields.country).value.isEmpty) {selected}" for="uk-radio-button">
+                        <input id="uk-radio-button" name="radio-inline-group" value="1" type="radio" @if(trusteeDetails(trusteeDetailsFields.country).value.contains(ersUtil.DEFAULT_COUNTRY) || trusteeDetails(trusteeDetailsFields.country).value.isEmpty) {checked="checked"}>@messages("ers_trustee_details.uk")
                     </label>
-                    <label class="block-label @if(!trusteeDetails(trusteeDetailsFields.country).value.contains(DEFAULT_COUNTRY) && trusteeDetails(trusteeDetailsFields.country).value.isDefined) {selected}" for="overseas-radio-button">
-                        <input id="overseas-radio-button" name="radio-inline-group" value="2" type="radio" @if(!trusteeDetails(trusteeDetailsFields.country).value.contains(DEFAULT_COUNTRY) && trusteeDetails(trusteeDetailsFields.country).value.isDefined) {checked="checked"}>@Messages("ers_trustee_details.overseas")
+                    <label class="block-label @if(!trusteeDetails(trusteeDetailsFields.country).value.contains(ersUtil.DEFAULT_COUNTRY) && trusteeDetails(trusteeDetailsFields.country).value.isDefined) {selected}" for="overseas-radio-button">
+                        <input id="overseas-radio-button" name="radio-inline-group" value="2" type="radio" @if(!trusteeDetails(trusteeDetailsFields.country).value.contains(ersUtil.DEFAULT_COUNTRY) && trusteeDetails(trusteeDetailsFields.country).value.isDefined) {checked="checked"}>@messages("ers_trustee_details.overseas")
                     </label>
                 </div>
             </fieldset>
         </div>
-        <div class="form-group @if(trusteeDetails.errors(trusteeDetailsFields.name)) {error}">
+        <div class="form-group @if(trusteeDetails.error(trusteeDetailsFields.name).isDefined) {error}">
             <label for="name" class="form-label" id="nameLbl">
-                <span>@Messages("ers_trustee_details.name")</span>
-                @if(trusteeDetails.errors(trusteeDetailsFields.name)) {<span class="error-message">@trusteeDetails.errors(trusteeDetailsFields.name).head.message</span>}
+                <span>@messages("ers_trustee_details.name")</span>
+                @if(trusteeDetails.error(trusteeDetailsFields.name).isDefined) {<span class="error-message">@trusteeDetails.errors(trusteeDetailsFields.name).head.message</span>}
             </label>
             <input id="name" type="text" class="form-control" name="name" value="@trusteeDetails(trusteeDetailsFields.name).value">
         </div>
-        <div class="form-group @if(trusteeDetails.errors(trusteeDetailsFields.addressLine1)) {error}">
+        <div class="form-group @if(trusteeDetails.error(trusteeDetailsFields.addressLine1).isDefined) {error}">
             <label for="addressLine1" class="form-label" id="addressLine1Lbl">
-                <span>@Messages("ers_trustee_details.address")</span>
-                <span class="visuallyhidden">@Messages("ers_trustee_details.addressLine1")</span>
-                @if(trusteeDetails.errors(trusteeDetailsFields.addressLine1)) {<span class="error-message">@trusteeDetails.errors(trusteeDetailsFields.addressLine1).head.message</span>}
+                <span>@messages("ers_trustee_details.address")</span>
+                <span class="visuallyhidden">@messages("ers_trustee_details.addressLine1")</span>
+                @if(trusteeDetails.error(trusteeDetailsFields.addressLine1).isDefined) {<span class="error-message">@trusteeDetails.errors(trusteeDetailsFields.addressLine1).head.message</span>}
             </label>
             <input id="addressLine1" type="text" class="form-control address-line" name="addressLine1" value="@trusteeDetails(trusteeDetailsFields.addressLine1).value">
         </div>
-        <div class='form-group @if(trusteeDetails.errors(trusteeDetailsFields.addressLine2)) {error}'>
+        <div class='form-group @if(trusteeDetails.error(trusteeDetailsFields.addressLine2).isDefined) {error}'>
             <label for="addressLine2" class="form-label" id="addressLine2Lbl">
-                <span class="visuallyhidden">@Messages("ers_trustee_details.addressLine2")</span>
-                @if(trusteeDetails.errors(trusteeDetailsFields.addressLine2)) {<span class="error-message">@trusteeDetails.errors(trusteeDetailsFields.addressLine2).head.message</span>}
+                <span class="visuallyhidden">@messages("ers_trustee_details.addressLine2")</span>
+                @if(trusteeDetails.error(trusteeDetailsFields.addressLine2).isDefined) {<span class="error-message">@trusteeDetails.errors(trusteeDetailsFields.addressLine2).head.message</span>}
             </label>
             <input id="addressLine2" type="text" class="form-control address-line" name="addressLine2" value="@trusteeDetails(trusteeDetailsFields.addressLine2).value">
         </div>
-        <div class='form-group @if(trusteeDetails.errors(trusteeDetailsFields.addressLine3)) {error}'>
+        <div class='form-group @if(trusteeDetails.error(trusteeDetailsFields.addressLine3).isDefined) {error}'>
             <label for="addressLine3" class="form-label" id="addressLine3Lbl">
-                <span class="visuallyhidden">@Messages("ers_trustee_details.addressLine3")</span>
-                @if(trusteeDetails.errors(trusteeDetailsFields.addressLine3)) {<span class="error-message">@trusteeDetails.errors(trusteeDetailsFields.addressLine3).head.message</span>}
+                <span class="visuallyhidden">@messages("ers_trustee_details.addressLine3")</span>
+                @if(trusteeDetails.error(trusteeDetailsFields.addressLine3).isDefined) {<span class="error-message">@trusteeDetails.errors(trusteeDetailsFields.addressLine3).head.message</span>}
             </label>
             <input id="addressLine3" type="text" class="form-control address-line" name="addressLine3" value="@trusteeDetails(trusteeDetailsFields.addressLine3).value">
         </div>
-        <div class='form-group @if(trusteeDetails.errors(trusteeDetailsFields.addressLine4)) {error}'>
+        <div class='form-group @if(trusteeDetails.error(trusteeDetailsFields.addressLine4).isDefined) {error}'>
             <label for="addressLine4" class="form-label" id="addressLine4Lbl">
-                <span class="visuallyhidden">@Messages("ers_trustee_details.addressLine4")</span>
-                @if(trusteeDetails.errors(trusteeDetailsFields.addressLine4)) {<span class="error-message">@trusteeDetails.errors(trusteeDetailsFields.addressLine4).head.message</span>}
+                <span class="visuallyhidden">@messages("ers_trustee_details.addressLine4")</span>
+                @if(trusteeDetails.error(trusteeDetailsFields.addressLine4).isDefined) {<span class="error-message">@trusteeDetails.errors(trusteeDetailsFields.addressLine4).head.message</span>}
             </label>
             <input id="addressLine4" type="text" class="form-control address-line" name="addressLine4" value="@trusteeDetails(trusteeDetailsFields.addressLine4).value">
         </div>
-        <div class="form-group postcode-group @if(trusteeDetails.errors(trusteeDetailsFields.postcode)) {error}">
+        <div class="form-group postcode-group @if(trusteeDetails.error(trusteeDetailsFields.postcode).isDefined) {error}">
             <label for="postcode" class="form-label" id="postcodeLbl">
-                @if(trusteeDetails(trusteeDetailsFields.country).value == Some(DEFAULT_COUNTRY) || trusteeDetails(trusteeDetailsFields.country).value == None) {@Messages("ers_trustee_details.postcode")} else {@Messages("ers_trustee_details.postcode_zipcode")}
+                @if(trusteeDetails(trusteeDetailsFields.country).value.contains(ersUtil.DEFAULT_COUNTRY) || trusteeDetails(trusteeDetailsFields.country).value.isEmpty) {@messages("ers_trustee_details.postcode")} else {@messages("ers_trustee_details.postcode_zipcode")}
             </label>
-            @if(trusteeDetails.errors(trusteeDetailsFields.postcode)) {<span class="error-message">@trusteeDetails.errors(trusteeDetailsFields.postcode).head.message.</span>}
+            @if(trusteeDetails.error(trusteeDetailsFields.postcode).isDefined) {<span class="error-message">@trusteeDetails.errors(trusteeDetailsFields.postcode).head.message.</span>}
             <input id="postcode" type="text" class="form-control" name="postcode" value="@trusteeDetails(trusteeDetailsFields.postcode).value">
         </div>
         <div class="form-group country-group">
-            <label for="country" class="form-label" id="countryLbl">@Messages("ers_trustee_details.country")</label>
+            <label for="country" class="form-label" id="countryLbl">@messages("ers_trustee_details.country")</label>
             @views.html.includes.countries(trusteeDetails(trusteeDetailsFields.country).value)
         </div>
-        <input role="button" id="continue" class="button" type="submit" value="@Html(Messages("ers.continue"))" >
+        <input role="button" id="continue" class="button" type="submit" value="@Html(messages("ers.continue"))" >
     }
 }

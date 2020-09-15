@@ -14,43 +14,85 @@
  * limitations under the License.
  */
 
-package services
+package services.audit
 
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito._
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.{Matchers, WordSpec}
-import play.api.test.FakeRequest
-import services.audit.{AuditService, AuditServiceConnector}
-import uk.gov.hmrc.play.audit.model.DataEvent
+import play.api.test.Helpers._
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.audit.http.connector.AuditResult
+import uk.gov.hmrc.play.audit.http.connector.AuditResult.{Disabled, Failure, Success}
+import uk.gov.hmrc.play.audit.model.DataEvent
+import uk.gov.hmrc.play.bootstrap.audit.DefaultAuditConnector
 
-class AuditServiceTest   extends WordSpec with Matchers {
-  "auditer should send message" in {
+import scala.concurrent.Future
 
-    implicit val request = FakeRequest()
+class AuditServiceTest extends WordSpec with Matchers with MockitoSugar {
 
-    implicit var hc = new HeaderCarrier
+	val mockAuditConnector: DefaultAuditConnector = mock[DefaultAuditConnector]
+	implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    val auditConnectorObj = new AuditServiceConnector  {
-      var lastDataEvent : Option[DataEvent]  = None
-      override def auditData(dataEvent : DataEvent)(implicit hc : HeaderCarrier) : Unit = {
-        lastDataEvent = Some(dataEvent)
-      }
-    }
+	val dataEvent: DataEvent = DataEvent(
+		auditSource = "ers-returns-frontend",
+		auditType = "transactionName",
+		eventId = "fakeId",
+		tags = Map("test" -> "test"),
+		detail = Map("test" -> "details")
+	)
 
-    val auditTest = new AuditService {
-      override def auditConnector = auditConnectorObj
-    }
+	//TODO replace these with wiremock type tests?
+	"sendEvent" should {
+		class TestAuditService(auditResult: AuditResult) extends AuditService {
+			override val auditConnector: DefaultAuditConnector = mockAuditConnector
+			override def buildEvent(transactionName: String, details: Map[String, String])(implicit hc: HeaderCarrier): DataEvent = dataEvent
+			when(auditConnector.sendEvent(any())(any(), any())).thenReturn(Future.successful(auditResult))
+		}
 
-    auditTest.sendEvent("source",  Map("details1" -> "randomDetail"))
+		"return a Success" in {
+			val testAuditService = new TestAuditService(Success)
+			val result = testAuditService.sendEvent("transactionName", Map("test" -> "details"))
+			await(result) shouldBe Success
+		}
 
-    val dataEvent : DataEvent = auditConnectorObj.lastDataEvent.get
-    dataEvent should not equal(Nil)
-    dataEvent.auditSource should equal("ers-returns-frontend")
-    dataEvent.auditType should equal("source")
+		"return a Disabled" in {
+			val testAuditService = new TestAuditService(Disabled)
+			val result = testAuditService.sendEvent("transactionName", Map("test" -> "details"))
+			await(result) shouldBe Disabled
+		}
 
-    val tags = dataEvent.tags
-    tags("dateTime") should not equal(Nil)
+		"return a Failure" in {
+			val testAuditService = new TestAuditService(Failure("it failed"))
+			val result = testAuditService.sendEvent("transactionName", Map("test" -> "details"))
+			await(result) shouldBe Failure("it failed")
+		}
+	}
 
-    val details = dataEvent.detail
-    details("details1") should equal("randomDetail")
-  }
+	"buildEvent" should {
+		class TestAuditService extends AuditService {
+			override val auditConnector: DefaultAuditConnector = mockAuditConnector
+			override def generateTags(hc: HeaderCarrier): Map[String, String] = Map("test" -> "test")
+		}
+
+		"return a valid DataEvent" in {
+			val testAuditService = new TestAuditService
+			val result = testAuditService.buildEvent("transactionName", Map("test" -> "details"))
+			result.auditSource shouldBe dataEvent.auditSource
+			result.auditType shouldBe dataEvent.auditType
+			result.detail shouldBe dataEvent.detail
+			result.tags shouldBe dataEvent.tags
+
+		}
+	}
+
+	"generateTags" should {
+		class TestAuditService extends AuditService {override val auditConnector: DefaultAuditConnector = mockAuditConnector}
+		val testAuditService = new TestAuditService
+
+		"include the dateTime parameter in the returned Map" in {
+			val result = testAuditService.generateTags(HeaderCarrier())
+			result.contains("dateTime") shouldBe true
+		}
+	}
 }

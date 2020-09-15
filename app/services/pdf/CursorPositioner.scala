@@ -28,33 +28,29 @@ object CursorPositionerFactory extends CursorPositionerFactory {
 
 class CursorPositioner() {
   val pageLimit = 40
-  var currentPos = (40, 750)
+  var currentPos: (Int, Int) = (40, 750)
   var fontSize = 12.0f
 
-  def beginHeader() = {
+  def beginHeader(): Unit = {
     currentPos = (40, 750)
   }
 
-  def endHeader() = {
+  def endHeader(): Unit = {
     currentPos = (40, 650)
   }
 
-  def getCursorPosition() : (Int, Int) = {
-    currentPos
-  }
-
   // functions that are used to draw the header block
-  def getIndentedHeaderPos() : (Int, Int) = {
+  def getIndentedHeaderPos: (Int, Int) = {
     currentPos = (45, currentPos._2 - 30)
     currentPos
   }
 
-  def getHeaderRelativeStart() : (Int, Int) = {
+  def getHeaderRelativeStart: (Int, Int) = {
     currentPos = (currentPos._1 + 50, currentPos._2 + 20)
     currentPos
   }
 
-  def getImageRelativeStart() : (Int, Int) = {
+  def getImageRelativeStart: (Int, Int) = {
     currentPos = (currentPos._1, currentPos._2 - 40)
     currentPos
   }

@@ -40,23 +40,22 @@ trait ErsContentsStreamer {
   def drawLine() : Boolean
 }
 
-class ApachePdfContentsStreamer(ersSummary : ErsSummary) extends ErsContentsStreamer{
+class ApachePdfContentsStreamer(ersSummary : ErsSummary) extends ErsContentsStreamer {
   Logger.debug("ers-returns-frontend using the apache pdf contents streamer")
 
   val LEFT_MRGIN = 40
   val RIGHT_MARGIN = 520
 
-  lazy val document = Some(new PDDocument()) : Option[PDDocument]
+  lazy val document: Option[PDDocument] = Some(new PDDocument()) : Option[PDDocument]
 
   lazy val font: Option[PDFont] = try{
     Logger.debug("ers-returns-frontend about to load arialMt.ttf font")
     Some(PDTrueTypeFont.loadTTF(document.get, getClass.getResourceAsStream("/org/apache/pdfbox/resources/ttf/ArialMT.ttf")))
   }catch {
-    case e: Exception => {
-      Logger.error("can not load the font for the pdf")
-      throw e
-    }
-  }
+    case e: Exception =>
+			Logger.error("can not load the font for the pdf")
+			throw e
+	}
   var contentStream : Option[PDPageContentStream] = None
   var cursorPositioner : Option[CursorPositioner] = None
 
@@ -99,10 +98,10 @@ class ApachePdfContentsStreamer(ersSummary : ErsSummary) extends ErsContentsStre
   }
 
   def savePageContent() : Boolean = {
-    if(contentStream != None) {
+    if(contentStream.isDefined) {
      Logger.debug("ers-returns-frontend saving page content")
-       contentStream.get.saveGraphicsState
-      contentStream.get.close
+			contentStream.get.saveGraphicsState()
+      contentStream.get.close()
       contentStream = None
       return true
     }
@@ -122,7 +121,7 @@ class ApachePdfContentsStreamer(ersSummary : ErsSummary) extends ErsContentsStre
   }
 
   def drawLine() : Boolean = {
-    val nextPos = cursorPositioner.get.getCursorPosition
+    val nextPos = cursorPositioner.get.currentPos
     contentStream.get.drawLine(LEFT_MRGIN, nextPos._2, nextPos._1 + RIGHT_MARGIN, nextPos._2)
 
     true
@@ -131,17 +130,16 @@ class ApachePdfContentsStreamer(ersSummary : ErsSummary) extends ErsContentsStre
   def drawText(string: String, fontSize: Float)(implicit messages: Messages) : Boolean = {
 
     cursorPositioner.get.fontSize = fontSize
-    val lines = getLines(string, 530, font.get, fontSize)
+    val lines = getLines(string, font.get, fontSize)
 
     for (line <- lines) {
       try {
         cursorPositioner.get.advanceCursorToNextLine
       } catch {
-        case e: IndexOutOfBoundsException => {
-          createNewPage
-        }
-      }
-      val pos = cursorPositioner.get.getCursorPosition()
+        case _: IndexOutOfBoundsException =>
+					createNewPage
+			}
+      val pos = cursorPositioner.get.currentPos
       drawText(line, pos._1, pos._2, fontSize)
     }
 
@@ -154,10 +152,10 @@ class ApachePdfContentsStreamer(ersSummary : ErsSummary) extends ErsContentsStre
 
     addTextToPdf(stringToShow, x, y, fontSize)
 
-    cursorPositioner.get.getCursorPosition
+    cursorPositioner.get.currentPos
   }
 
-  private def addTextToPdf(string: String, x : Int, y : Int, fontSize : Float) = {
+  private def addTextToPdf(string: String, x : Int, y : Int, fontSize : Float): Unit = {
     contentStream.get.beginText()
     contentStream.get.setFont(font.get, fontSize)
     contentStream.get.moveTextPositionByAmount(x, y)
@@ -165,7 +163,7 @@ class ApachePdfContentsStreamer(ersSummary : ErsSummary) extends ErsContentsStre
     contentStream.get.endText()
   }
 
-  private def getLines(text : String, allowedWidth : Int, font : PDFont, fontSize : Float): List[String]= {
+  private def getLines(text: String, font: PDFont, fontSize: Float): List[String]= {
 
     var lines : List[String] = List[String]()
 
@@ -175,13 +173,13 @@ class ApachePdfContentsStreamer(ersSummary : ErsSummary) extends ErsContentsStre
 
     for(word <- words) {
 
-      if(!myLine.isEmpty()) {
+      if(!myLine.isEmpty) {
         myLine += " "
       }
 
       val size = (fontSize * font.getStringWidth(myLine + word) / 1000).toInt
 
-      if(size > allowedWidth) {
+      if(size > 530) {
         lines = lines :+ myLine
         myLine = word
       } else {
@@ -202,7 +200,7 @@ class ApachePdfContentsStreamer(ersSummary : ErsSummary) extends ErsContentsStre
     try {
       val pathToCrownPng = getClass.getResource("/resources/crown.png")
       val crownImg = ImageIO.read(pathToCrownPng)
-      val imagePos = cursorPositioner.getImageRelativeStart()
+      val imagePos = cursorPositioner.getImageRelativeStart
 
       contentStream.get.drawImage(new PDJpeg(document.get, crownImg, 1.0f),
         imagePos._1,
@@ -221,14 +219,16 @@ class ApachePdfContentsStreamer(ersSummary : ErsSummary) extends ErsContentsStre
 
   private def addPageHeaderText(cursorPositioner: CursorPositioner)(implicit messages: Messages) {
 
-    var pos = cursorPositioner.getHeaderRelativeStart()
+    var pos = cursorPositioner.getHeaderRelativeStart
     drawText(Messages("ers.pdf.header"), pos._1, pos._2, 16)
 
-    pos = cursorPositioner.getIndentedHeaderPos()
-    drawText(s"${ersSummary.metaData.schemeInfo.schemeType} - ${ersSummary.metaData.schemeInfo.schemeRef} - ${DateUtils.getFullTaxYear(ersSummary.metaData.schemeInfo.taxYear)}", pos._1, pos._2, 12)
+    pos = cursorPositioner.getIndentedHeaderPos
+    drawText(s"${ersSummary.metaData.schemeInfo.schemeType} - " +
+			s"${ersSummary.metaData.schemeInfo.schemeRef} - " +
+			s"${DateUtils.getFullTaxYear(ersSummary.metaData.schemeInfo.taxYear)}", pos._1, pos._2, 12)
 
     drawText("", 20)
 
-    drawLine
+    drawLine()
   }
 }

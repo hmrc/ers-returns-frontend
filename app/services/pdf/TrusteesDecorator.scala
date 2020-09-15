@@ -18,25 +18,29 @@ package services.pdf
 
 import models.TrusteeDetailsList
 import play.api.i18n.Messages
+import utils.DecoratorConstants._
 
-class TrusteesDecorator(trusteesList: Option[TrusteeDetailsList], headingFontSize: Float, answerFontSize: Float, lineSpacer: Float, blockSpacer: Float) extends Decorator {
+class TrusteesDecorator(trusteesList: Option[TrusteeDetailsList],
+												headingFontSize: Float = headingFontSizeDefault,
+												answerFontSize: Float = answerFontSizeDefault,
+												lineSpacer: Float = lineSpacerDefault,
+												blockSpacer: Float = blockSpacerDefault
+											 ) extends Decorator {
 
   def decorate(streamer: ErsContentsStreamer)(implicit messages: Messages): Unit = {
+    if (trusteesList.isDefined) {
+			streamer.drawText("", lineSpacer)
+			streamer.drawText(Messages("ers_trustee_summary.title"), headingFontSize)
+			streamer.drawText("", lineSpacer)
 
-    if (!trusteesList.isDefined)
-      return
+			for (trustee <- trusteesList.get.trustees) {
+				streamer.drawText(trustee.name, answerFontSize)
+				streamer.drawText("", lineSpacer)
+			}
 
-    streamer.drawText("", lineSpacer)
-    streamer.drawText(Messages("ers_trustee_summary.title"), headingFontSize)
-    streamer.drawText("", lineSpacer)
-
-    for (trustee <- trusteesList.get.trustees) {
-      streamer.drawText(trustee.name, answerFontSize)
-      streamer.drawText("", lineSpacer)
-    }
-
-    streamer.drawText("", blockSpacer)
-    streamer.drawLine()
-    streamer.drawText("", blockSpacer)
+			streamer.drawText("", blockSpacer)
+			streamer.drawLine()
+			streamer.drawText("", blockSpacer)
+		}
   }
 }

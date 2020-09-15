@@ -17,28 +17,32 @@
 package services.pdf
 
 import play.api.i18n.Messages
+import utils.DecoratorConstants._
 
-class AlterationsAmendsDecorator(map: Map[String, String], headingFontSize: Float, answerFontSize: Float, lineSpacer: Float, blockSize: Float) extends Decorator {
+class AlterationsAmendsDecorator(map: Map[String, String],
+																 headingFontSize: Float = headingFontSizeDefault,
+																 answerFontSize: Float = answerFontSizeDefault,
+																 lineSpacer: Float = lineSpacerDefault,
+																 blockSize: Float = blockSpacerDefault
+																) extends Decorator {
 
-  private def addTextToPdf(streamer: ErsContentsStreamer, text: String, fontSize: Float, lineSpacer: Float)(implicit messages: Messages): Unit = {
+  private def addTextToPdf(streamer: ErsContentsStreamer, text: String, fontSize: Float, lineSpacer: Float)
+													(implicit messages: Messages): Unit = {
     streamer.drawText(text, fontSize)
     streamer.drawText("", lineSpacer)
   }
 
   def decorate(streamer: ErsContentsStreamer)(implicit messages: Messages): Unit = {
+    if(map.nonEmpty) {
+			addTextToPdf(streamer, map("title"), headingFontSize, lineSpacer)
 
-    if(map.isEmpty)
-      return
+			Array("option1", "option2", "option3", "option4", "option5").foreach { key =>
+				if (map.contains(key)) addTextToPdf(streamer, s"${map(key)}.", answerFontSize, lineSpacer)
+			}
 
-    addTextToPdf(streamer, map("title"), headingFontSize, lineSpacer)
-
-    Array("option1", "option2", "option3", "option4", "option5").map { key =>
-      if(map.contains(key))
-        addTextToPdf(streamer, s"${map(key)}.", answerFontSize, lineSpacer)
-    }
-
-    streamer.drawText("", blockSize)
-    streamer.drawLine()
-    streamer.drawText("", blockSize)
+			streamer.drawText("", blockSize)
+			streamer.drawLine()
+			streamer.drawText("", blockSize)
+		}
   }
 }

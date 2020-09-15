@@ -14,8 +14,7 @@
  * limitations under the License.
  *@
 
-@(showSignOutLink: Boolean)(implicit request: Request[AnyRef], messages: Messages)
+@import config.ApplicationConfig
+@(showSignOutLink: Boolean)(implicit request: Request[_], messages: Messages, appConfig: ApplicationConfig)
 
-@import controllers.auth.ExternalUrls
-
-@if(showSignOutLink) {<li><a href="@ExternalUrls.signOut" id="sign-out">@Html(Messages("ers.signout"))</a></li>}
+@if(showSignOutLink) {<li><a href="@appConfig.signOut" id="sign-out">@Html(messages("ers.signout"))</a></li>}

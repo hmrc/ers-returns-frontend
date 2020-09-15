@@ -20,18 +20,19 @@ import models.ERSAuthData
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import org.mockito.stubbing.OngoingStubbing
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.domain.EmpRef
+import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 
 import scala.concurrent.Future
 
 trait AuthHelper extends MockitoSugar {
 
 	type RetrievalType = Enrolments ~ Option[AffinityGroup]
-	lazy val mockAuthConnector: PlayAuthConnector = mock[PlayAuthConnector]
+	lazy val mockAuthConnector: DefaultAuthConnector = mock[DefaultAuthConnector]
 	val agentOnlyEnrolmentSet: Set[Enrolment] = Set(Enrolment("HMRC-AGENT-AGENT", Seq(EnrolmentIdentifier("AgentRefNumber", "JARN1234567")), "activated"))
 	val invalidEnrolmentSet: Set[Enrolment] = Set(Enrolment("HMRC-TEST-ORG", Seq(EnrolmentIdentifier("TestRefNumber", "XN1200000100001")), "activated"))
 	val ersEnrolmentSet: Set[Enrolment] = Set(Enrolment("IR-PAYE", Seq(EnrolmentIdentifier("TaxOfficeNumber", "123"), EnrolmentIdentifier("TaxOfficeReference", "4567890")), "activated"))

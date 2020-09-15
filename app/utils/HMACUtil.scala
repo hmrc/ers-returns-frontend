@@ -17,17 +17,17 @@
 package utils
 
 
+import config.ApplicationConfig
 import javax.crypto.Mac
 import javax.crypto.SecretKey
 import javax.crypto.spec.SecretKeySpec
 import models.RequestObject
 import org.apache.commons.codec.binary.Base64
-import org.joda.time.{Seconds, DateTime}
-
-object HMACUtil extends HMACUtil {
-}
+import org.joda.time.{DateTime, Seconds}
 
 trait HMACUtil {
+
+	val appConfig: ApplicationConfig
 
   val TIME_RANGE: Int = 300 // seconds
 
@@ -36,14 +36,8 @@ trait HMACUtil {
     val generatedHMAC: Array[Byte] = sha1Bytes(urlParams.concatenateParameters)
     val urlParamsHMAC: Array[Byte] = Base64.decodeBase64(urlParams.getHMAC)
 
-    val hmacIsEqual: Boolean = java.util.Arrays.equals(generatedHMAC, urlParamsHMAC)
-
-    if (hmacIsEqual) {
-      return true
-    }
-
-    return false
-  }
+    java.util.Arrays.equals(generatedHMAC, urlParamsHMAC)
+	}
 
   def decodeSecretKey(s: String): SecretKey = {
 
@@ -55,7 +49,7 @@ trait HMACUtil {
   def sha1Bytes(s: String): Array[Byte] = {
 
     val mac: Mac = Mac.getInstance("HmacSHA1")
-    mac.init(decodeSecretKey(ExternalUrls.hmacToken))
+    mac.init(decodeSecretKey(appConfig.hmacToken))
     val bytes = mac.doFinal(s.getBytes("UTF-8"))
     bytes
   }
@@ -72,26 +66,17 @@ trait HMACUtil {
       }
     }
     catch {
-      case ne: NumberFormatException =>
+      case _: NumberFormatException =>
     }
 
     false
   }
 
   def isHmacAndTimestampValid(requestObject: RequestObject): Boolean = {
-
-    if (ExternalUrls.hmacOnSwitch.toBoolean) {
-
-      if (HMACUtil.timeIsValid(requestObject) && HMACUtil.verifyHMAC(requestObject)) {
-        true
-      }
-      else {
-        false
-      }
-    }
-    else {
+    if (appConfig.hmacOnSwitch) {
+     timeIsValid(requestObject) && verifyHMAC(requestObject)
+    } else {
       true
     }
   }
-
 }

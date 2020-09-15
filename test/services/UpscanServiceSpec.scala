@@ -19,7 +19,7 @@ package services
 import connectors.UpscanConnector
 import models.upscan.{Reference, UploadId, UpscanInitiateRequest, UpscanInitiateResponse}
 import org.mockito.ArgumentCaptor
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.OneAppPerSuite
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder

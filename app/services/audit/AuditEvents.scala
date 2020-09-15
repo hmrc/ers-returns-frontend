@@ -16,47 +16,44 @@
 
 package services.audit
 
-import models.{ErsMetaData}
+import javax.inject.{Inject, Singleton}
+import models.ErsMetaData
 import org.apache.commons.lang3.exception.ExceptionUtils
 import play.api.mvc.Request
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.audit.http.connector.AuditResult
+import uk.gov.hmrc.play.bootstrap.audit.DefaultAuditConnector
 
+import scala.concurrent.Future
 
-object AuditEvents extends AuditEvents {
-  override def auditService : AuditService = AuditService
-}
+@Singleton
+class AuditEvents @Inject()(val auditConnector: DefaultAuditConnector) extends AuditService {
 
-trait AuditEvents {
-  def auditService: AuditService
-
-  def auditRunTimeError(exception : Throwable, contextInfo : String, rsc: ErsMetaData, bundle : String) (implicit request: Request[_], hc: HeaderCarrier) : Unit = {
-    auditService.sendEvent("RunTimeError",
+  def auditRunTimeError(exception : Throwable, contextInfo : String, rsc: ErsMetaData, bundle : String)
+											 (implicit request: Request[_], hc: HeaderCarrier) : Unit = {
+    sendEvent("RunTimeError",
       Map("ErrorMessage" -> exception.getMessage,
         "Context" -> contextInfo,
         "ReturnServiceCache" -> eventMap(rsc, bundle).toString,
         "StackTrace" -> ExceptionUtils.getStackTrace(exception)))
   }
 
-  def ErsSubmissionAuditEvent(rsc : ErsMetaData, bundle : String)(implicit request: Request[_], hc: HeaderCarrier): Boolean = {
-
-    auditService.sendEvent("ErsReturnsFrontendSubmission", eventMap(rsc, bundle))
-    true
-
-  }
+	def ersSubmissionAuditEvent(rsc: ErsMetaData, bundle: String)(implicit hc: HeaderCarrier): Future[AuditResult] = {
+		sendEvent("ErsReturnsFrontendSubmission", eventMap(rsc, bundle))
+	}
 
   def eventMap(rsc : ErsMetaData, bundle : String): Map[String,String] = {
     Map(
-      "schemeRef" -> rsc.schemeInfo.schemeRef.toString,
-      "schemeId" -> rsc.schemeInfo.schemeId.toString,
-      "taxYear" -> rsc.schemeInfo.taxYear.toString,
-      "schemeName" -> rsc.schemeInfo.schemeName.toString,
-      "schemeType" -> rsc.schemeInfo.schemeType.toString,
+      "schemeRef" -> rsc.schemeInfo.schemeRef,
+      "schemeId" -> rsc.schemeInfo.schemeId,
+      "taxYear" -> rsc.schemeInfo.taxYear,
+      "schemeName" -> rsc.schemeInfo.schemeName,
+      "schemeType" -> rsc.schemeInfo.schemeType,
       "aoRef" -> rsc.aoRef.getOrElse(""),
-      "empRef" -> rsc.empRef.toString,
+      "empRef" -> rsc.empRef,
       "agentRef" -> rsc.agentRef.getOrElse(""),
       "sapNumber" -> rsc.sapNumber.getOrElse(""),
       "bundleRed" -> bundle
     )
   }
-
 }

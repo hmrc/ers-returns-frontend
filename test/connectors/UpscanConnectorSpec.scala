@@ -16,20 +16,27 @@
 
 package connectors
 
+import com.github.tomakehurst.wiremock.client.WireMock._
 import models.upscan.{PreparedUpload, Reference, UploadForm, UpscanInitiateRequest}
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.OneAppPerSuite
 import play.api.Application
+import play.api.http.Status._
 import play.api.inject.guice.GuiceApplicationBuilder
-import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, NotFoundException, Upstream5xxResponse}
+import play.api.libs.json.Json
+import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, Upstream5xxResponse}
 import uk.gov.hmrc.play.test.UnitSpec
 import utils.WireMockHelper
-import com.github.tomakehurst.wiremock.client.WireMock._
-import play.api.http.Status._
-import play.api.libs.json.Json
-
 
 class UpscanConnectorSpec extends UnitSpec with OneAppPerSuite with MockitoSugar with WireMockHelper {
+
+	lazy val connector: UpscanConnector = app.injector.instanceOf[UpscanConnector]
+	implicit val hc: HeaderCarrier = HeaderCarrier()
+	val request: UpscanInitiateRequest = UpscanInitiateRequest("callbackUrl", "successRedirectUrl", "errorRedirectUrl")
+	override def fakeApplication(): Application = new GuiceApplicationBuilder()
+		.configure(
+			"microservice.services.upscan.port" -> server.port()
+		).build()
 
   "getUpscanFormData" should {
     "return a UpscanInitiateResponse" when {
@@ -58,7 +65,7 @@ class UpscanConnectorSpec extends UnitSpec with OneAppPerSuite with MockitoSugar
                 .withStatus(BAD_REQUEST)
             )
         )
-        a [BadRequestException] should be thrownBy await(connector.getUpscanFormData(request))
+        a[BadRequestException] should be thrownBy await(connector.getUpscanFormData(request))
       }
 
       "upscan returns 5xx response" in {
@@ -69,16 +76,8 @@ class UpscanConnectorSpec extends UnitSpec with OneAppPerSuite with MockitoSugar
                 .withStatus(SERVICE_UNAVAILABLE)
             )
         )
-        an [Upstream5xxResponse] should be thrownBy await(connector.getUpscanFormData(request))
+        an[Upstream5xxResponse] should be thrownBy await(connector.getUpscanFormData(request))
       }
     }
   }
-
-  lazy val connector: UpscanConnector = app.injector.instanceOf[UpscanConnector]
-  implicit val hc: HeaderCarrier = HeaderCarrier()
-  val request = UpscanInitiateRequest("callbackUrl", "successRedirectUrl", "errorRedirectUrl")
-  override def fakeApplication(): Application = new GuiceApplicationBuilder()
-    .configure(
-      "microservice.services.upscan.port" -> server.port()
-    ).build()
 }

@@ -14,11 +14,12 @@
  * limitations under the License.
  *@
 
+@import config.ApplicationConfig
 @(title: String,
     scripts: Html = Html(""),
     showSignOutLink: Boolean = true,
     showUserResearchBanner: Boolean = false
-)(mainContent: Html)(implicit request: Request[AnyRef], context: config.ErsContext, messages: Messages)
+)(mainContent: Html)(implicit request: Request[_], messages: Messages, appConfig: ApplicationConfig)
 
 @import uk.gov.hmrc.play.views.html.layouts
 
@@ -32,7 +33,7 @@
 }
 
 
-@main(applicationConfig = config.ApplicationConfig,
+@main(
     title,
     headerNav = Some(views.helpers.HeaderNav(title = Some(Messages("ers.header")),
     showBetaLink = false,

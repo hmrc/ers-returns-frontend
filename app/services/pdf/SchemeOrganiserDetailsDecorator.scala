@@ -19,8 +19,16 @@ package services.pdf
 import models.SchemeOrganiserDetails
 import play.api.i18n.Messages
 import utils.CountryCodes
+import utils.DecoratorConstants._
 
-class SchemeOrganiserDetailseDecorator(title: String, schemeOrganiser: SchemeOrganiserDetails, headingFontSize: Float, answerFontSize: Float, lineSpacer: Float, blockSpacer: Float) extends Decorator{
+class SchemeOrganiserDetailsDecorator(title: String,
+																			schemeOrganiser: SchemeOrganiserDetails,
+																			countryCodes: CountryCodes,
+																			headingFontSize: Float = headingFontSizeDefault,
+																			answerFontSize: Float = answerFontSizeDefault,
+																			lineSpacer: Float = lineSpacerDefault,
+																			blockSpacer: Float = blockSpacerDefault
+																			) extends Decorator {
 
   def decorate(streamer: ErsContentsStreamer)(implicit messages: Messages): Unit = {
     streamer.drawText(title, headingFontSize)
@@ -44,7 +52,7 @@ class SchemeOrganiserDetailseDecorator(title: String, schemeOrganiser: SchemeOrg
       streamer.drawText("", lineSpacer)
     }
     if (schemeOrganiser.country.isDefined) {
-      streamer.drawText(CountryCodes.getCountry(schemeOrganiser.country.getOrElse("")).get, answerFontSize)
+      streamer.drawText(countryCodes.getCountry(schemeOrganiser.country.getOrElse("")).get, answerFontSize)
       streamer.drawText("", lineSpacer)
     }
     if (schemeOrganiser.postcode.isDefined) {

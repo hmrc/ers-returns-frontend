@@ -14,17 +14,11 @@
  * limitations under the License.
  */
 
-import com.google.inject.AbstractModule
-import config.{ApplicationConfig, ApplicationConfigImpl, WSHttp}
-import uk.gov.hmrc.http.HttpPost
+package utils
 
-class Module extends AbstractModule {
-
-  override def configure(): Unit = {
-    // Bind the actions for DI
-    bind(classOf[ApplicationConfig]).to(classOf[ApplicationConfigImpl])
-    bind(classOf[HttpPost]).toInstance(WSHttp)
-  }
-
-
+object DecoratorConstants {
+	val lineSpacerDefault = 10
+	val blockSpacerDefault = 20
+	val headingFontSizeDefault = 16
+	val answerFontSizeDefault = 12
 }

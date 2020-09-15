@@ -22,25 +22,32 @@ import akka.stream.Materializer
 import org.scalatestplus.play.OneServerPerSuite
 import play.api.Play.current
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.{Application, Play}
+import play.api.{Application, Environment, Play}
 import uk.gov.hmrc.play.test.UnitSpec
 
-class CountryCodeTest extends UnitSpec with OneServerPerSuite with ERSFakeApplicationConfig {
+class CountryCodesSpec extends UnitSpec with OneServerPerSuite with ERSFakeApplicationConfig {
 
   override lazy val app: Application = new GuiceApplicationBuilder().configure(config).build()
-  implicit lazy val mat: Materializer = app.materializer
+	lazy val appEnvironment: Environment = app.injector.instanceOf[Environment]
+	implicit lazy val mat: Materializer = app.materializer
 
   object TestCountryCodes extends CountryCodes {
+		override def environment: Environment = appEnvironment
     override val jsonInputStream: Option[InputStream] = Play.application.resourceAsStream("country-code-test.json")
   }
 
+	trait Setup {
+		val countryCodes = new CountryCodesImpl(appEnvironment)
+	}
+
   "CountryCode countries" should {
-    "return a string of countries" in {
-      val countries = CountryCodes.countries
+    "return a string of countries" in new Setup {
+			val countries: String = countryCodes.countries
       countries should include("Andorra")
       countries should include("Germany")
       countries should include("France")
     }
+
     "not return a string of countries" in {
       intercept[Exception] {
         TestCountryCodes.countries
@@ -49,12 +56,11 @@ class CountryCodeTest extends UnitSpec with OneServerPerSuite with ERSFakeApplic
   }
 
   "CountryCode getCountry" should {
-    "return a country from a country code" in {
-      CountryCodes.getCountry("AD") should be(Some("Andorra"))
-      CountryCodes.getCountry("DE") should be(Some("Germany"))
-      CountryCodes.getCountry("FR") should be(Some("France"))
-
-      CountryCodes.getCountry("ZZ") should be(None)
+    "return a country from a country code" in new Setup {
+      countryCodes.getCountry("AD") should be(Some("Andorra"))
+      countryCodes.getCountry("DE") should be(Some("Germany"))
+      countryCodes.getCountry("FR") should be(Some("France"))
+      countryCodes.getCountry("ZZ") should be(None)
     }
   }
 

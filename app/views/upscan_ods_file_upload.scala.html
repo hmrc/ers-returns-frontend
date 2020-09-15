@@ -18,11 +18,12 @@
 @import views.html.includes.upscan_file_upload_form
 @import models.upscan.UpscanInitiateResponse
 
-@(requestObject: RequestObject, upscanInitiateResponse: UpscanInitiateResponse)(implicit request: Request[AnyRef], context: config.ErsContext, messages: Messages)
+@import config.ApplicationConfig
+@(requestObject: RequestObject, upscanInitiateResponse: UpscanInitiateResponse)(implicit request: Request[AnyRef], messages: Messages, appConfig: ApplicationConfig)
 
 
 @scripts = {
-	<script src='@routes.AssetsController.at("javascripts/ers_ods_scripts.js")'> </script>
+	<script src='@routes.Assets.at("javascripts/ers_ods_scripts.js")'> </script>
 }
 
 @ers_main(title = messages("ers.upload_ods_file.page_title"), scripts) {

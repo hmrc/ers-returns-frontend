@@ -17,56 +17,39 @@
 package controllers
 
 import _root_.models._
-import connectors.ErsConnector
-import metrics.Metrics
-import org.joda.time.DateTime
+import config._
+import javax.inject.{Inject, Singleton}
 import play.Logger
-import play.api.Play
-import play.api.i18n.Messages
+import play.api.Play.current
+import play.api.i18n.Messages.Implicits._
+import play.api.i18n.{Messages, MessagesApi}
 import play.api.libs.json.{Json, OFormat}
 import play.api.mvc._
-import uk.gov.hmrc.play.frontend.auth.{AllowAll, AuthContext}
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
+import uk.gov.hmrc.play.bootstrap.controller.FrontendController
+import utils.SessionKeys.{BUNDLE_REF, DATE_TIME_SUBMITTED}
 import utils._
-import config._
 
 import scala.concurrent.Future
-import play.api.Play.current
-import play.api.i18n.Messages
-import play.api.i18n.Messages.Implicits._
-import uk.gov.hmrc.http.HeaderCarrier
-import utils.SessionKeys.{BUNDLE_REF, DATE_TIME_SUBMITTED}
 
-object ReturnServiceController extends ReturnServiceController {
-  override val cacheUtil: CacheUtil = CacheUtil
+@Singleton
+class ReturnServiceController @Inject()(val messagesApi: MessagesApi,
+																				val authConnector: DefaultAuthConnector,
+																				implicit val ersUtil: ERSUtil,
+																				implicit val appConfig: ApplicationConfig
+																			 ) extends FrontendController with Authenticator {
 
-  override val accessThreshold = Play.current.configuration.getInt("accessThreshold").getOrElse(100)
-  override val accessDeniedUrl = "/outage-ers-frontend/index.html"
-  override val metrics = Metrics
-}
-
-trait ErsConstants {
-  val screenSchemeInfo = "screenSchemeInfo"
-  implicit val context: ErsContext = ErsContextImpl
-}
-
-trait ReturnServiceController extends ERSReturnBaseController with Authenticator with ErsConstants {
-
-  val accessDeniedUrl: String
-
-  val cacheUtil: CacheUtil
-
-  val accessThreshold: Int
-  val metrics: Metrics
+	lazy val accessThreshold: Int = appConfig.accessThreshold
+	val accessDeniedUrl = "/outage-ers-frontend/index.html"
 
   def cacheParams(ersRequestObject: RequestObject)(implicit request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
-
     implicit val formatRSParams: OFormat[RequestObject] = Json.format[RequestObject]
 
-    Logger.debug("Meta Data created --> " + ersRequestObject)
     Logger.debug("Request Object created --> " + ersRequestObject)
-    cacheUtil.cache(CacheUtil.ersMetaData, ersRequestObject.toErsMetaData, ersRequestObject.getSchemeReference).flatMap { _ =>
+    ersUtil.cache(ersUtil.ersMetaData, ersRequestObject.toErsMetaData, ersRequestObject.getSchemeReference).flatMap { _ =>
       Logger.info(s"[ReturnServiceController][cacheParams]Meta Data Cached --> ${ersRequestObject.toErsMetaData}")
-      cacheUtil.cache(CacheUtil.ersRequestObject, ersRequestObject) flatMap {
+      ersUtil.cache(ersUtil.ersRequestObject, ersRequestObject) flatMap {
         _ => {
           Logger.info(s"[ReturnServiceController][cacheParams] Request Object Cached -->  $ersRequestObject")
 					Future.successful(showInitialStartPage(ersRequestObject)(request, hc))
@@ -97,21 +80,21 @@ trait ReturnServiceController extends ERSReturnBaseController with Authenticator
       implicit request =>
 				authorisedByGovGateway {
 					implicit user =>
-					Logger.info("HMAC Check Authenticated")
+					Logger.info("[ReturnServiceController][hmacCheck] HMAC Check Authenticated")
 					if (request.getQueryString("ersSchemeRef").getOrElse("") == "") {
-						Logger.warn("Missing SchemeRef in URL")
+						Logger.warn("[ReturnServiceController][hmacCheck] Missing SchemeRef in URL")
 						Future(getGlobalErrorPage)
 					} else {
-						if (HMACUtil.isHmacAndTimestampValid(getRequestParameters(request))) {
-							Logger.info("HMAC Check Valid")
+						if (ersUtil.isHmacAndTimestampValid(getRequestParameters(request))) {
+							Logger.info("[ReturnServiceController][hmacCheck] HMAC Check Valid")
 							try {
 								cacheParams(getRequestParameters(request))
 							} catch {
-								case e: Throwable => Logger.warn(s"Caught exception ${e.getMessage}", e)
+								case e: Throwable => Logger.warn(s"[ReturnServiceController][hmacCheck] Caught exception ${e.getMessage}", e)
 									Future(getGlobalErrorPage)
 							}
 						} else {
-							Logger.warn("HMAC Check Invalid")
+							Logger.warn("[ReturnServiceController][hmacCheck] HMAC Check Invalid")
 							showUnauthorisedPage(request)
 						}
 					}
@@ -122,24 +105,27 @@ trait ReturnServiceController extends ERSReturnBaseController with Authenticator
 													(implicit request: Request[AnyRef], hc: HeaderCarrier): Result = {
     val sessionData = s"${requestObject.getSchemeId} - ${requestObject.getPageTitle}"
     Ok(views.html.start(requestObject)).
-      withSession(request.session + (screenSchemeInfo -> sessionData) - BUNDLE_REF - DATE_TIME_SUBMITTED)
+      withSession(request.session + ("screenSchemeInfo" -> sessionData) - BUNDLE_REF - DATE_TIME_SUBMITTED)
   }
 
   def startPage(): Action[AnyContent] = authorisedByGG {
     implicit user =>
       implicit request =>
-        cacheUtil.fetch[RequestObject](CacheUtil.ersRequestObject).map{
+        ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).map{
           result =>
             Ok(views.html.start(result)).withSession(request.session - BUNDLE_REF - DATE_TIME_SUBMITTED)
         }
   }
 
-  def showUnauthorisedPage(request: Request[AnyRef]): Future[Result] = {
-    Future.successful(Ok(views.html.unauthorised()(request, context)))
+  def showUnauthorisedPage(implicit request: Request[AnyRef]): Future[Result] = {
+    Future.successful(Ok(views.html.unauthorised()))
   }
 
-  def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result = Ok(views.html.global_error(
-    messages("ers.global_errors.title"),
-    messages("ers.global_errors.heading"),
-    messages("ers.global_errors.message"))(request, messages))
+	def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result = {
+		Ok(views.html.global_error(
+			"ers.global_errors.title",
+			"ers.global_errors.heading",
+			"ers.global_errors.message"
+		)(request, messages, appConfig))
+	}
 }

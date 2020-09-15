@@ -16,52 +16,55 @@
 
 package controllers
 
-import connectors.ErsConnector
+import config.ApplicationConfig
+import javax.inject.{Inject, Singleton}
 import models._
 import models.upscan.{UploadedSuccessfully, UpscanCsvFilesCallback, UpscanCsvFilesCallbackList}
-import play.api.Play.current
-import play.api.i18n.Messages
-import play.api.i18n.Messages.Implicits._
-import play.api.mvc.{Action, AnyContent, LegacyI18nSupport, Request, Result}
-import play.api.{Configuration, Logger, Play}
-import services.SessionService
+import play.api.Logger
+import play.api.i18n.{I18nSupport, Messages, MessagesApi}
+import play.api.mvc._
 import services.pdf.{ApachePdfContentsStreamer, ErsReceiptPdfBuilderService}
-import uk.gov.hmrc.play.frontend.auth.AuthContext
-import utils.{CacheUtil, PageBuilder}
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
+import uk.gov.hmrc.play.bootstrap.controller.FrontendController
+import utils.ERSUtil
 
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.Future
-import uk.gov.hmrc.http.HeaderCarrier
 
-trait PdfGenerationController extends ERSReturnBaseController with Authenticator with LegacyI18nSupport {
-  val cacheUtil: CacheUtil
-  val pdfBuilderService: ErsReceiptPdfBuilderService
-
+@Singleton
+class PdfGenerationController @Inject()(val messagesApi: MessagesApi,
+																				val authConnector: DefaultAuthConnector,
+																				val pdfBuilderService: ErsReceiptPdfBuilderService,
+																				implicit val ersUtil: ERSUtil,
+																				implicit val appConfig: ApplicationConfig
+																			 ) extends FrontendController with Authenticator with I18nSupport {
 
   def buildPdfForBundle(bundle: String, dateSubmitted: String): Action[AnyContent] = authorisedForAsync() {
     implicit user =>
       implicit request =>
-        cacheUtil.fetch[RequestObject](cacheUtil.ersRequestObject).flatMap { requestObject =>
+        ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
           generatePdf(requestObject, bundle, dateSubmitted)
         }
   }
 
-  def generatePdf(requestObject: RequestObject, bundle: String, dateSubmitted: String)(implicit authContext: ERSAuthData, request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
+  def generatePdf(requestObject: RequestObject, bundle: String, dateSubmitted: String)
+								 (implicit authContext: ERSAuthData, request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
 
     Logger.debug("ers returns frontend getting into the controller to generate the pdf")
-    val cache: Future[ErsMetaData] = cacheUtil.fetch[ErsMetaData](CacheUtil.ersMetaData, requestObject.getSchemeReference)
+    val cache: Future[ErsMetaData] = ersUtil.fetch[ErsMetaData](ersUtil.ersMetaData, requestObject.getSchemeReference)
     cache.flatMap { all =>
       Logger.debug("ers returns frontend pdf generation: got the metadata")
-      cacheUtil.getAllData(bundle, all).flatMap { alldata =>
+      ersUtil.getAllData(bundle, all).flatMap { alldata =>
         Logger.debug("ers returns frontend generation: got the cache map")
 
-        cacheUtil.fetchAll(requestObject.getSchemeReference).map { all =>
+        ersUtil.fetchAll(requestObject.getSchemeReference).map { all =>
           val filesUploaded: ListBuffer[String] = ListBuffer()
-          if (all.getEntry[ReportableEvents](CacheUtil.reportableEvents).get.isNilReturn.get == PageBuilder.OPTION_UPLOAD_SPREEDSHEET) {
-            val fileType = all.getEntry[CheckFileType](CacheUtil.FILE_TYPE_CACHE).get.checkFileType.get
-            if (fileType == PageBuilder.OPTION_CSV) {
-              val csvCallback = all.getEntry[UpscanCsvFilesCallbackList](CacheUtil.CHECK_CSV_FILES).getOrElse (
-                throw new Exception(s"Cache data missing for key: ${CacheUtil.CHECK_CSV_FILES} in CacheMap")
+          if (all.getEntry[ReportableEvents](ersUtil.reportableEvents).get.isNilReturn.get == ersUtil.OPTION_UPLOAD_SPREEDSHEET) {
+            val fileType = all.getEntry[CheckFileType](ersUtil.FILE_TYPE_CACHE).get.checkFileType.get
+            if (fileType == ersUtil.OPTION_CSV) {
+              val csvCallback = all.getEntry[UpscanCsvFilesCallbackList](ersUtil.CHECK_CSV_FILES).getOrElse (
+                throw new Exception(s"Cache data missing for key: ${ersUtil.CHECK_CSV_FILES} in CacheMap")
               )
               val csvFilesCallback: List[UpscanCsvFilesCallback] = if(csvCallback.areAllFilesSuccessful()) {
                 csvCallback.files.collect{
@@ -70,12 +73,12 @@ trait PdfGenerationController extends ERSReturnBaseController with Authenticator
               } else {
                 throw new Exception("Not all files have been complete")
               }
-              
+
               for (file <- csvFilesCallback) {
-                filesUploaded += PageBuilder.getPageElement(requestObject.getSchemeId, PageBuilder.PAGE_CHECK_CSV_FILE, file.fileId + ".file_name")
+                filesUploaded += ersUtil.getPageElement(requestObject.getSchemeId, ersUtil.PAGE_CHECK_CSV_FILE, file.fileId + ".file_name")
               }
             } else {
-              filesUploaded += all.getEntry[String](CacheUtil.FILE_NAME_CACHE).get
+              filesUploaded += all.getEntry[String](ersUtil.FILE_NAME_CACHE).get
             }
           }
           val pdf = pdfBuilderService.createPdf(new ApachePdfContentsStreamer(alldata), alldata, Some(filesUploaded), dateSubmitted).toByteArray
@@ -84,27 +87,22 @@ trait PdfGenerationController extends ERSReturnBaseController with Authenticator
             .withHeaders(CONTENT_DISPOSITION -> s"inline; filename=$bundle-confirmation.pdf")
         } recover {
           case e: Throwable =>
-            Logger.error(s"Problem fetching file list from cache ${e.getMessage}.", e)
+            Logger.error(s"[PdfGenerationController][generatePdf] Problem fetching file list from cache ${e.getMessage}.", e)
             getGlobalErrorPage
         }
       }.recover {
         case e: Throwable =>
-          Logger.error(s"Problem saving Pdf Receipt ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
+          Logger.error(s"[PdfGenerationController][generatePdf] Problem saving Pdf Receipt ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
           getGlobalErrorPage
       }
     }
   }
 
-  def getGlobalErrorPage(implicit request: Request[_], messages: Messages) = Ok(views.html.global_error(
-    messages("ers.global_errors.title"),
-    messages("ers.global_errors.heading"),
-    messages("ers.global_errors.message"))(request, messages))
-}
-
-object PdfGenerationController extends PdfGenerationController {
-  val currentConfig: Configuration = Play.current.configuration
-  val sessionService = SessionService
-  val ersConnector: ErsConnector = ErsConnector
-  override val cacheUtil: CacheUtil = CacheUtil
-  override val pdfBuilderService: ErsReceiptPdfBuilderService = ErsReceiptPdfBuilderService
+	def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result = {
+		Ok(views.html.global_error(
+			"ers.global_errors.title",
+			"ers.global_errors.heading",
+			"ers.global_errors.message"
+		)(request, messages, appConfig))
+	}
 }

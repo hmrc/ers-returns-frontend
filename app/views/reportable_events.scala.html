@@ -14,42 +14,43 @@
  * limitations under the License.
  *@
 
-@(requestObject: RequestObject, activity: Option[String], reportableEvents: Form[models.ReportableEvents])(implicit request: Request[AnyRef], flash: Flash, context: config.ErsContext, messages: Messages)
+@import utils.ERSUtil
+@import config.ApplicationConfig
+@(requestObject: RequestObject, activity: Option[String], reportableEvents: Form[models.ReportableEvents])(implicit request: Request[AnyRef], flash: Flash, messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 @* type of activity template *@
 @schemeId = @{requestObject.getSchemeId}
 @import uk.gov.hmrc.play.views.html.helpers
-@import utils.PageBuilder._
 @import views.html.helpers.error_overview
 @import views.html.templates._
 
-@scripts = {<script src='@routes.AssetsController.at("javascripts/ers_scripts.js")'> </script>}
+@scripts = {<script src='@routes.Assets.at("javascripts/ers_scripts.js")'> </script>}
 
-@ers_main(title = Messages("ers.reportable_events.page_title"), scripts) {
+@ers_main(title = messages("ers.reportable_events.page_title"), scripts) {
 
 	@reference(requestObject.getPageTitle)
-	<p class="font-xsmall"><a href="@routes.ReturnServiceController.startPage" class="link-back">@Html(Messages("ers.back"))</a></p>
-	@header(getPageElement(schemeId, PAGE_CHOOSE, "question"))
+	<p class="font-xsmall"><a href="@routes.ReturnServiceController.startPage" class="link-back">@Html(messages("ers.back"))</a></p>
+	@header(ersUtil.getPageElement(schemeId, ersUtil.PAGE_CHOOSE, "question"))
 	@helpers.form(action = routes.ReportableEventsController.reportableEventsSelected) {
 		@error_overview(reportableEvents)
 		<div class="form-group @if(reportableEvents.hasErrors) {error}">
 			<fieldset class="inline">
 				<legend id="isNilReturnLbl">
-					<span class="visuallyhidden">@Html(getPageElement(schemeId, PAGE_CHOOSE, "question"))</span>
-					@if(reportableEvents.hasErrors){<span class="error-message">@Html(Messages("ers_choose.err.message"))</span>}
+					<span class="visuallyhidden">@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_CHOOSE, "question"))</span>
+					@if(reportableEvents.hasErrors){<span class="error-message">@Html(messages("ers_choose.err.message"))</span>}
 				</legend>
 				<div class="form-field">
-					<label id="upload-spreadsheet-radio-buttonLbl" for="upload-spreadsheet-radio-button" class="block-label @(if(activity == OPTION_UPLOAD_SPREEDSHEET) "selected")">
-						<input id="upload-spreadsheet-radio-button" type="radio" name="isNilReturn" value=@OPTION_UPLOAD_SPREEDSHEET @(if(activity.get == OPTION_UPLOAD_SPREEDSHEET) "checked" else "")>
-						@Html(Messages("ers_choose.option_1"))<br>
+					<label id="upload-spreadsheet-radio-buttonLbl" for="upload-spreadsheet-radio-button" class="block-label @(if(activity contains ersUtil.OPTION_UPLOAD_SPREEDSHEET) "selected")">
+						<input id="upload-spreadsheet-radio-button" type="radio" name="isNilReturn" value=@ersUtil.OPTION_UPLOAD_SPREEDSHEET @(if(activity.get == ersUtil.OPTION_UPLOAD_SPREEDSHEET) "checked" else "")>
+						@Html(messages("ers_choose.option_1"))<br>
 					</label>
-					<label id="nil-return-radio-buttonLbl" for="nil-return-radio-button" class="block-label @(if(activity == OPTION_NIL_RETURN) "selected")">
-						<input id="nil-return-radio-button" type="radio" name="isNilReturn" value=@OPTION_NIL_RETURN @(if(activity.get == OPTION_NIL_RETURN) "checked" else "")>
-						@Html(Messages("ers_choose.option_2"))<br>
+					<label id="nil-return-radio-buttonLbl" for="nil-return-radio-button" class="block-label @(if(activity contains ersUtil.OPTION_NIL_RETURN) "selected")">
+						<input id="nil-return-radio-button" type="radio" name="isNilReturn" value=@ersUtil.OPTION_NIL_RETURN @(if(activity.get == ersUtil.OPTION_NIL_RETURN) "checked" else "")>
+						@Html(messages("ers_choose.option_2"))<br>
 					</label>
 				</div>
 			</fieldset>
 		</div>
-		<input role="button" id="continue" class="button" type="submit" value="@Html(Messages("ers.continue"))">
+		<input role="button" id="continue" class="button" type="submit" value="@Html(messages("ers.continue"))">
 		@spinner()
 	}
 }

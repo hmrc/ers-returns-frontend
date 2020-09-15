@@ -16,63 +16,33 @@
 
 package services.audit
 
-
 import org.joda.time.DateTime
-import play.api.mvc.{Request, Session}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.audit.http.connector.AuditConnector
+import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import uk.gov.hmrc.play.audit.model.DataEvent
-import uk.gov.hmrc.play.frontend.config.LoadAuditingConfig
+import uk.gov.hmrc.play.bootstrap.audit.DefaultAuditConnector
 
 import scala.concurrent.ExecutionContext.Implicits.global
-
-trait AuditServiceConnector {
-  def auditData(dataEvent : DataEvent)(implicit hc : HeaderCarrier) : Unit
-}
-
-object MicroserviceAuditConnector extends AuditConnector {
-  override lazy val auditingConfig = LoadAuditingConfig("auditing")
-}
-
-object AuditServiceConnector extends AuditServiceConnector {
-
-
-  lazy val auditConnector = MicroserviceAuditConnector
-
-  override def auditData(dataEvent : DataEvent)(implicit hc : HeaderCarrier) : Unit = {
-    auditConnector.sendEvent(dataEvent)
-  }
-
-}
-
-object AuditService extends AuditService {
-  override def auditConnector : AuditServiceConnector = AuditServiceConnector
-}
+import scala.concurrent.Future
 
 trait AuditService {
   val auditSource = "ers-returns-frontend"
+  val auditConnector: DefaultAuditConnector
 
-  def auditConnector : AuditServiceConnector
+  def sendEvent(transactionName : String, details: Map[String, String])(implicit hc: HeaderCarrier): Future[AuditResult] = {
+    auditConnector.sendEvent(buildEvent(transactionName, details))
+	}
 
-  def sendEvent(transactionName : String, details: Map[String, String])(implicit request: Request[_], hc: HeaderCarrier) =
-    auditConnector.auditData(buildEvent(transactionName, details))
-
-  private def buildEvent( transactionName: String,  details: Map[String, String])(implicit request: Request[_], hc: HeaderCarrier) =
+	private[audit] def buildEvent( transactionName: String,  details: Map[String, String])(implicit hc: HeaderCarrier) = {
     DataEvent(
       auditSource = auditSource,
       auditType = transactionName,
-      tags = generateTags(request.session, hc),
+      tags = generateTags(hc),
       detail = details
     )
+	}
 
-
-  private def generateTags(session: Session, hc: HeaderCarrier): Map[String, String] =
-    hc.headers.toMap ++
-      hc.headers.toMap ++
-      Map("dateTime" ->  getDateTime.toString)
-
-
-
-  private def getDateTime = new DateTime
-
+	private[audit] def generateTags(hc: HeaderCarrier): Map[String, String] = {
+      hc.headers.toMap ++ Map("dateTime" ->  new DateTime().toString)
+	}
 }

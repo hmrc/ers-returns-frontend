@@ -16,14 +16,37 @@
 
 package controllers
 
-import play.api.mvc.Action
-import uk.gov.hmrc.play.frontend.controller.FrontendController
+import config.ApplicationConfig
+import javax.inject.{Inject, Singleton}
+import play.api.i18n.{I18nSupport, Messages, MessagesApi}
+import play.api.mvc.{Action, AnyContent}
+import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
+import uk.gov.hmrc.play.bootstrap.controller.FrontendController
+import utils.ERSUtil
 
-object ApplicationController extends FrontendController with ErsConstants{
+import scala.concurrent.Future
 
-  def unauthorised = Action {
+@Singleton
+class ApplicationController @Inject()(val messagesApi: MessagesApi,
+																			val authConnector: DefaultAuthConnector,
+																			implicit val ersUtil: ERSUtil,
+																			implicit val appConfig: ApplicationConfig
+																		 ) extends FrontendController with Authenticator with I18nSupport {
+
+  def unauthorised(): Action[AnyContent] = Action {
     implicit request =>
-      Ok(views.html.unauthorised()(request, context))
+      Ok(views.html.unauthorised())
   }
 
+	def notAuthorised(): Action[AnyContent] = authorisedForAsync() {
+		implicit user =>
+			implicit request =>
+				Future.successful(Ok(views.html.not_authorised.render(request, request2Messages, appConfig)))
+	}
+
+	def timedOut(): Action[AnyContent] = Action {
+		implicit request =>
+			val loginScreenUrl = appConfig.portalDomain
+			Ok(views.html.signedOut(loginScreenUrl))
+	}
 }

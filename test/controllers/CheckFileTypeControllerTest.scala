@@ -17,54 +17,39 @@
 package controllers
 
 import akka.stream.Materializer
+import helpers.ErsTestHelper
 import models.{CheckFileType, RequestObject, RsFormMappings}
 import org.jsoup.Jsoup
-import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
-import org.scalatest.mockito.MockitoSugar
-import org.scalatestplus.play.OneAppPerSuite
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.{Application, Logger}
 import play.api.http.Status
 import play.api.i18n.{Lang, Messages, MessagesApi}
-import play.api.inject.Injector
-import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.Request
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.auth.core.PlayAuthConnector
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.test.UnitSpec
 import utils.Fixtures.ersRequestObject
-import utils.{AuthHelper, CacheUtil, ERSFakeApplicationConfig, Fixtures, PageBuilder}
+import utils.{ERSFakeApplicationConfig, Fixtures}
 
 import scala.concurrent.Future
 
-class CheckFileTypeControllerTest extends UnitSpec with GuiceOneAppPerSuite with ERSFakeApplicationConfig with AuthHelper {
+class CheckFileTypeControllerTest extends UnitSpec with GuiceOneAppPerSuite with ERSFakeApplicationConfig with ErsTestHelper {
 
   val messagesApi: MessagesApi = app.injector.instanceOf[MessagesApi]
   implicit val messages: Messages = messagesApi.preferred(Seq(Lang.get("en").get))
   implicit val requests: Request[_] = FakeRequest()
-
   implicit lazy val mat: Materializer = app.materializer
 
   "Check File Type Page GET" should {
 
     def buildFakeCheckingServiceController(
-                                            fileType: Future[CheckFileType] = Future.successful(CheckFileType(Some(PageBuilder.OPTION_CSV))),
+                                            fileType: Future[CheckFileType] = Future.successful(CheckFileType(Some("csv"))),
                                             requestObject: Future[RequestObject] = Future.successful(ersRequestObject)
-                                          ): CheckFileTypeController = new CheckFileTypeController {
-      val mockCacheUtil: CacheUtil = mock[CacheUtil]
-      override val cacheUtil: CacheUtil = mockCacheUtil
-			override val authConnector: PlayAuthConnector = mockAuthConnector
-      when(
-        mockCacheUtil.fetch[CheckFileType](refEq(CacheUtil.FILE_TYPE_CACHE), any())(any(), any(), any())
-      ).thenReturn(fileType)
-
-      when(
-        mockCacheUtil.fetch[RequestObject](any())(any(), any(), any(), any())
-      ).thenReturn(requestObject)
+                                          ): CheckFileTypeController = new CheckFileTypeController(messagesApi, mockAuthConnector, mockErsUtil, mockAppConfig) {
+      when(mockErsUtil.fetch[CheckFileType](refEq("check-file-type"), any())(any(), any(), any())).thenReturn(fileType)
+      when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any(), any())).thenReturn(requestObject)
     }
 
     "give a redirect status (to company authentication frontend) on GET if user is not authenticated" in {
@@ -101,10 +86,11 @@ class CheckFileTypeControllerTest extends UnitSpec with GuiceOneAppPerSuite with
 
     "render error page if fetch on Request Object fails" in {
       val controllerUnderTest = buildFakeCheckingServiceController(requestObject = Future.failed(new Exception))
-      val result = controllerUnderTest.showCheckFileTypePage()(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc)
+			val req = Fixtures.buildFakeRequestWithSessionId("GET")
+      val result = controllerUnderTest.showCheckFileTypePage()(Fixtures.buildFakeUser, req, hc)
 
       contentAsString(result) should include(messages("ers.global_errors.message"))
-      contentAsString(result) shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage)
+      contentAsString(result) shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage(req, messages))
     }
 
   }
@@ -113,14 +99,10 @@ class CheckFileTypeControllerTest extends UnitSpec with GuiceOneAppPerSuite with
 
     def buildFakeCheckingServiceController(
                                             cache: Future[CacheMap] = Future.successful(mock[CacheMap]),
-                                           requestObject: Future[RequestObject] = Future.successful(ersRequestObject)): CheckFileTypeController = new CheckFileTypeController {
-      val mockCacheUtil: CacheUtil = mock[CacheUtil]
-      override val cacheUtil: CacheUtil = mockCacheUtil
-			override val authConnector: PlayAuthConnector = mockAuthConnector
-
-      when(mockCacheUtil.cache(matches(CacheUtil.FILE_TYPE_CACHE), any(), any())(any(), any(), any())).thenReturn(cache)
-
-      when(mockCacheUtil.fetch[RequestObject](any())(any(), any(), any(), any())).thenReturn(requestObject)
+                                           requestObject: Future[RequestObject] = Future.successful(ersRequestObject)): CheckFileTypeController =
+			new CheckFileTypeController(messagesApi, mockAuthConnector, mockErsUtil, mockAppConfig){
+      when(mockErsUtil.cache(matches("check-file-type"), any(), any())(any(), any(), any())).thenReturn(cache)
+      when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any(), any())).thenReturn(requestObject)
     }
 
     "give a redirect status (to company authentication frontend) on GET if user is not authenticated" in {
@@ -163,7 +145,7 @@ class CheckFileTypeControllerTest extends UnitSpec with GuiceOneAppPerSuite with
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val result = controllerUnderTest.showCheckFileTypeSelected()(request, hc)
       status(result) shouldBe Status.SEE_OTHER
-      result.header.headers("Location") shouldBe routes.FileUploadController.uploadFilePage.toString
+      result.header.headers("Location") shouldBe routes.FileUploadController.uploadFilePage().toString
     }
 
     "if no form errors with scheme type and save fails" in {

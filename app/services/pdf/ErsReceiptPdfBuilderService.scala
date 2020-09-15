@@ -18,29 +18,29 @@ package services.pdf
 
 import java.io.ByteArrayOutputStream
 
+import javax.inject.{Inject, Singleton}
 import models.ErsSummary
 import play.api.Logger
 import play.api.i18n.Messages
-import utils.{ContentUtil, DateUtils}
+import utils.{ContentUtil, CountryCodes, DateUtils}
 
 import scala.collection.mutable.ListBuffer
 
-object ErsReceiptPdfBuilderService extends ErsReceiptPdfBuilderService {
-}
-
-trait ErsReceiptPdfBuilderService {
+@Singleton
+class ErsReceiptPdfBuilderService @Inject()(val countryCodes: CountryCodes) extends PdfDecoratorControllerFactory {
 
   def createPdf(contentStreamer: ErsContentsStreamer, ersSummary: ErsSummary,
-                filesUpoladed: Option[ListBuffer[String]], dateSubmitted: String)(implicit messages: Messages): ByteArrayOutputStream = {
+                filesUploaded: Option[ListBuffer[String]], dateSubmitted: String)(implicit messages: Messages): ByteArrayOutputStream = {
     implicit val streamer : ErsContentsStreamer = contentStreamer
-    implicit val decorator = PdfDecoratorControllerFactory.createPdfDecoratorControllerForScheme(ersSummary.metaData.schemeInfo.schemeType, ersSummary, filesUpoladed)
+    implicit val decorator: DecoratorController = createPdfDecoratorControllerForScheme(ersSummary.metaData.schemeInfo.schemeType, ersSummary, filesUploaded)
 
     addMetaData(ersSummary, dateSubmitted)
-    addSummary(ersSummary, filesUpoladed)
+    addSummary()
     streamer.saveErsSummary()
   }
 
-  def addMetaData(ersSummary : ErsSummary, dateSubmitted: String)(implicit streamer: ErsContentsStreamer, decorator: DecoratorController, messages: Messages): Unit = {
+  def addMetaData(ersSummary : ErsSummary, dateSubmitted: String)
+								 (implicit streamer: ErsContentsStreamer, decorator: DecoratorController, messages: Messages): Unit = {
 
     val headingFontSize = 16
     val answerFontSize = 12
@@ -49,7 +49,7 @@ trait ErsReceiptPdfBuilderService {
 
     val ersMetaData = ersSummary.metaData
 
-    val pos = streamer.createNewPage
+    streamer.createNewPage
 
     Logger.info("Adding metadata")
     streamer.drawText("", blockSpacer)
@@ -80,15 +80,15 @@ trait ErsReceiptPdfBuilderService {
     Logger.info("Date Wrote:" + convertedDate)
 
     Logger.info("Save page content")
-    streamer.savePageContent
+    streamer.savePageContent()
   }
 
-  private def addSummary(ersSummary: ErsSummary, filesUploaded: Option[ListBuffer[String]])(implicit streamer: ErsContentsStreamer, decorator: DecoratorController, messages: Messages): Unit = {
+  private def addSummary()(implicit streamer: ErsContentsStreamer, decorator: DecoratorController, messages: Messages): Unit = {
     val blockSpacer = 20
 
     Logger.info("Adding ERS Summary")
 
-    val pos = streamer.createNewPage
+    streamer.createNewPage
 
     streamer.drawText(Messages("ers.pdf.summary_information"), 18)
     streamer.drawText("", blockSpacer)
@@ -99,6 +99,6 @@ trait ErsReceiptPdfBuilderService {
 
     Logger.info("Adding ERS Summary complete")
 
-    streamer.savePageContent
+    streamer.savePageContent()
   }
 }

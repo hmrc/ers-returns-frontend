@@ -14,10 +14,20 @@
  * limitations under the License.
  */
 
-package controllers
+package config
 
-import play.api.http.{HttpErrorHandler, LazyHttpErrorHandler}
+import play.api.inject.{Binding, Module}
+import play.api.{Configuration, Environment}
+import uk.gov.hmrc.play.bootstrap.http.{DefaultHttpClient, HttpClient}
+import utils.{CountryCodes, CountryCodesImpl}
 
-class AssetsController(errorHandler: HttpErrorHandler) extends AssetsBuilder(errorHandler)
+class Bindings extends Module{
+  override def bindings(environment: Environment, configuration: Configuration): Seq[Binding[_]] = {
+    bindDeps()
+  }
 
-object AssetsController extends AssetsController(LazyHttpErrorHandler)
+  private def bindDeps() = Seq(
+    bind(classOf[CountryCodes]).to(classOf[CountryCodesImpl])
+	)
+
+}

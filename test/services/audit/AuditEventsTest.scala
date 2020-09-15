@@ -14,91 +14,75 @@
  * limitations under the License.
  */
 
-package services
+package services.audit
 
-
-import models.{SchemeInfo, ErsMetaData}
-import org.apache.commons.lang3.exception.ExceptionUtils
+import models.{ErsMetaData, SchemeInfo}
 import org.joda.time.DateTime
-import org.scalatest.{Matchers, WordSpec}
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.when
+import org.scalatest.Matchers
+import org.scalatestplus.mockito.MockitoSugar
 import play.api.test.FakeRequest
-import services.audit.{AuditEvents, AuditService, AuditServiceConnector}
-import uk.gov.hmrc.play.audit.model.DataEvent
-import scala.collection.mutable.ListBuffer
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
+import uk.gov.hmrc.play.audit.model.DataEvent
+import uk.gov.hmrc.play.bootstrap.audit.DefaultAuditConnector
+import uk.gov.hmrc.play.test.UnitSpec
 
-class AuditEventsTest extends WordSpec with Matchers {
+import scala.concurrent.Future
 
-  implicit val request = FakeRequest()
-  implicit var hc = new HeaderCarrier()
-  val dateTime = new DateTime()
-  val rsc = new ErsMetaData(new SchemeInfo("",new DateTime(),"","","",""),"",Some(""),"",Some(""),Some(""))
+class AuditEventsTest extends UnitSpec with Matchers with MockitoSugar {
 
+	val mockAuditConnector: DefaultAuditConnector = mock[DefaultAuditConnector]
+	implicit val hc: HeaderCarrier = HeaderCarrier()
+	implicit val request = FakeRequest()
+	val rsc = new ErsMetaData(new SchemeInfo(
+		schemeRef = "testSchemeRef",
+		timestamp = new DateTime(),
+		schemeId = "testSchemeId",
+		taxYear = "testTaxYear",
+		schemeName = "testSchemeName",
+		schemeType = "testSchemeType"),
+		ipRef = "testIpRef",
+		aoRef = Some("testAoRef"),
+		empRef = "testEmpRef",
+		agentRef = Some("testAgentRef"),
+		sapNumber = Some("testSapNumber")
+	)
 
-  trait ObservableAuditConnector extends AuditServiceConnector {
-    val events: ListBuffer[DataEvent] = new ListBuffer[DataEvent]
+	val dataEvent: DataEvent = DataEvent(
+		auditSource = "ers-returns-frontend",
+		auditType = "transactionName",
+		tags = Map("test" -> "test"),
+		detail = Map("test" -> "details")
+	)
 
-    def observedEvents: ListBuffer[DataEvent] = events
+	val testAuditEvent = new AuditEvents(mockAuditConnector)
 
-    def addEvent(dataEvent: DataEvent): Unit = {
-      events += dataEvent
-    }
+	"ersSubmissionAuditEvent" should {
+		"do something" in {
+			when(mockAuditConnector.sendEvent(any())(any(), any())).thenReturn(Future.successful(Success))
 
-    override def auditData(dataEvent: DataEvent)(implicit hc: HeaderCarrier): Unit = {
-      addEvent(dataEvent)
-    }
-  }
+			val result = testAuditEvent.ersSubmissionAuditEvent(rsc, "bundle")
+			await(result) shouldBe Success
+		}
+	}
 
-  def createObservableAuditConnector = new ObservableAuditConnector {}
-
-  def createAuditor(observableAuditConnector: ObservableAuditConnector) = {
-
-    val testAuditService = new AuditService {
-      override def auditConnector = observableAuditConnector
-    }
-
-    new AuditEvents {
-      override def auditService: AuditService = testAuditService
-    }
-  }
-
-
-  "its should audit runtime errors" in {
-    val observableAuditConnector = createObservableAuditConnector
-    val auditor = createAuditor(observableAuditConnector)
-
-    var runtimeException : Throwable = null
-
-    try {
-      var divideByZero : Int = 0/0
-    } catch {
-      case e: Throwable => {
-        runtimeException = e
-        auditor.auditRunTimeError(e, "some context info",rsc,"bundle")
-      }
-    }
-
-    observableAuditConnector.events.length should equal(1)
-
-    val event = observableAuditConnector.events.head
-
-    event.auditType should equal("RunTimeError")
-
-    event.detail("ErrorMessage") should equal(runtimeException.getMessage)
-    event.detail("StackTrace") should equal(ExceptionUtils.getStackTrace(runtimeException))
-    event.detail("Context") should equal("some context info")
-  }
-
-  "submit transfer results audit event" in {
-    val observableAuditConnector = createObservableAuditConnector
-    val auditor = createAuditor(observableAuditConnector)
-    auditor.ErsSubmissionAuditEvent(rsc, "bundle")
-
-    observableAuditConnector.events.length should equal(1)
-
-    val event = observableAuditConnector.events.head
-
-    event.auditType should equal("ErsReturnsFrontendSubmission")
-  }
-
+	"eventMap" should {
+		"return a valid Map" in {
+			val eventMap = Map(
+				"schemeRef" -> "testSchemeRef",
+				"schemeId" -> "testSchemeId",
+				"taxYear" -> "testTaxYear",
+				"schemeName" -> "testSchemeName",
+				"schemeType" -> "testSchemeType",
+				"aoRef" -> "testAoRef",
+				"empRef" -> "testEmpRef",
+				"agentRef" -> "testAgentRef",
+				"sapNumber" -> "testSapNumber",
+				"bundleRed" -> "bundle"
+			)
+			testAuditEvent.eventMap(rsc, "bundle") shouldBe eventMap
+		}
+	}
 }

@@ -16,7 +16,7 @@
 
 package services.pdf
 
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import uk.gov.hmrc.play.test.UnitSpec
 
 class CursorPositionerSpec extends UnitSpec with MockitoSugar{
@@ -25,8 +25,8 @@ class CursorPositionerSpec extends UnitSpec with MockitoSugar{
 
   "header block start" should {
     "set start header to top of the page" in {
-      cursorPositioner.beginHeader
-      cursorPositioner.getCursorPosition() should be ((40, 750))
+      cursorPositioner.beginHeader()
+      cursorPositioner.currentPos should be ((40, 750))
     }
   }
 
@@ -34,7 +34,7 @@ class CursorPositionerSpec extends UnitSpec with MockitoSugar{
   "cursor positioner" should {
 
     "get indented header relative position" in {
-      cursorPositioner.getIndentedHeaderPos() should be ((45, 720))
+      cursorPositioner.getIndentedHeaderPos should be ((45, 720))
     }
 
     "provide the header Image relative position in the page" in {
@@ -42,7 +42,7 @@ class CursorPositionerSpec extends UnitSpec with MockitoSugar{
     }
 
     "get header relative start position" in {
-      cursorPositioner.getHeaderRelativeStart() should be ((95, 700))
+      cursorPositioner.getHeaderRelativeStart should be ((95, 700))
     }
 
     "report that the next line cursor position" in {
@@ -74,8 +74,8 @@ class CursorPositionerSpec extends UnitSpec with MockitoSugar{
 
   "header block finish" should {
     "set cursor position after the block header" in {
-      cursorPositioner.endHeader
-      cursorPositioner.getCursorPosition() should be ((40, 650))
+      cursorPositioner.endHeader()
+      cursorPositioner.currentPos should be ((40, 650))
     }
 
     "set carret position after the block header" in {

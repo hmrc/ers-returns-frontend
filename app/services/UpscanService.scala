@@ -29,20 +29,19 @@ import scala.concurrent.Future
 
 class UpscanService @Inject()(
                              applicationConfig: ApplicationConfig,
-                             upscanConnector: UpscanConnector,
-                             environment: Environment
+                             upscanConnector: UpscanConnector
                              ) {
 
   val isSecure: Boolean = applicationConfig.upscanProtocol == "https"
   lazy val redirectUrlBase: String = applicationConfig.upscanRedirectBase
-  private implicit def urlToString(c: Call): String = redirectUrlBase + c.url
+  private def urlToString(c: Call): String = redirectUrlBase + c.url
   def getUpscanFormDataCsv(uploadId: UploadId, scRef: String)(implicit hc: HeaderCarrier, request: Request[AnyRef]): Future[UpscanInitiateResponse] = {
     val callback = controllers.routes.CsvFileUploadCallbackController.callback(uploadId, scRef)
       .absoluteURL(isSecure)
 
     val success = controllers.routes.CsvFileUploadController.success(uploadId)
     val failure = controllers.routes.CsvFileUploadController.failure()
-    val upscanInitiateRequest = UpscanInitiateRequest(callback, success, failure)
+    val upscanInitiateRequest = UpscanInitiateRequest(callback, urlToString(success), urlToString(failure))
     upscanConnector.getUpscanFormData(upscanInitiateRequest)
   }
 
@@ -52,8 +51,7 @@ class UpscanService @Inject()(
 
     val success = controllers.routes.FileUploadController.success()
     val failure = controllers.routes.FileUploadController.failure()
-    val upscanInitiateRequest = UpscanInitiateRequest(callback, success, failure)
+    val upscanInitiateRequest = UpscanInitiateRequest(callback, urlToString(success), urlToString(failure))
     upscanConnector.getUpscanFormData(upscanInitiateRequest)
   }
-
 }

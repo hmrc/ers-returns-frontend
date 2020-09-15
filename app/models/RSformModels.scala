@@ -20,18 +20,18 @@ import org.joda.time.DateTime
 import play.api.i18n.Messages
 import play.api.libs.json.{Json, OFormat}
 import play.api.mvc.Request
-import utils.{DateUtils, PageBuilder}
+import utils.DateUtils
 
 case class RS_scheme(scheme: String)
 
 case class ReportableEvents(isNilReturn: Option[String])
 object ReportableEvents {
-  implicit val format = Json.format[ReportableEvents]
+  implicit val format: OFormat[ReportableEvents] = Json.format[ReportableEvents]
 }
 
 case class CheckFileType(checkFileType: Option[String])
 object CheckFileType {
-  implicit val format = Json.format[CheckFileType]
+  implicit val format: OFormat[CheckFileType] = Json.format[CheckFileType]
 }
 
 case class RS_schemeType (schemeType: String)
@@ -40,12 +40,12 @@ case class RS_groupSchemeType(groupSchemeType: String)
 
 case class RS_groupScheme(groupScheme: Option[String])
 object RS_groupScheme {
-  implicit val format = Json.format[RS_groupScheme]
+  implicit val format: OFormat[RS_groupScheme] = Json.format[RS_groupScheme]
 }
 
 case class AltAmendsActivity(altActivity: String)
 object AltAmendsActivity {
-  implicit val format = Json.format[AltAmendsActivity]
+  implicit val format: OFormat[AltAmendsActivity] = Json.format[AltAmendsActivity]
 }
 
 case class AltAmends(
@@ -56,7 +56,7 @@ case class AltAmends(
                          altAmendsOther: Option[String]
                          )
 object AltAmends {
-  implicit val format = Json.format[AltAmends]
+  implicit val format: OFormat[AltAmends] = Json.format[AltAmends]
 }
 
 case class SchemeOrganiserDetails(
@@ -71,7 +71,7 @@ case class SchemeOrganiserDetails(
                                       corporationRef: Option[String]
                                       )
 object SchemeOrganiserDetails {
-  implicit val format = Json.format[SchemeOrganiserDetails]
+  implicit val format: OFormat[SchemeOrganiserDetails] = Json.format[SchemeOrganiserDetails]
 }
 
 case class TrusteeDetails(
@@ -84,23 +84,23 @@ case class TrusteeDetails(
                               postcode: Option[String]
                               )
 object TrusteeDetails {
-  implicit val format = Json.format[TrusteeDetails]
+  implicit val format: OFormat[TrusteeDetails] = Json.format[TrusteeDetails]
 }
 
 
 case class TrusteeDetailsList(trustees: List[TrusteeDetails])
 object TrusteeDetailsList {
-  implicit val format = Json.format[TrusteeDetailsList]
+  implicit val format: OFormat[TrusteeDetailsList] = Json.format[TrusteeDetailsList]
 }
 
 case class CsvFiles(fileId: String, isSelected: Option[String])
 object CsvFiles {
-  implicit val format = Json.format[CsvFiles]
+  implicit val format: OFormat[CsvFiles] = Json.format[CsvFiles]
 }
 
 case class CsvFilesList(files: List[CsvFiles])
 object CsvFilesList {
-  implicit val format = Json.format[CsvFilesList]
+  implicit val format: OFormat[CsvFilesList] = Json.format[CsvFilesList]
 }
 
 case class RequestObject(
@@ -136,34 +136,31 @@ case class RequestObject(
     )
   }
 
-  def getPageTitle(implicit messages: Messages) = {
+  def getPageTitle(implicit messages: Messages): String = {
     s"${messages(s"ers.scheme.$getSchemeType")} " +
       s"- ${messages("ers.scheme.title", getSchemeNameForDisplay)} " +
       s"- $getSchemeReference - ${DateUtils.getFullTaxYear(getTaxYear)}"
   }
 
-  def getAORef = aoRef.getOrElse("")
 
-  def getTaxYear = taxYear.getOrElse("")
+  def getTaxYear: String = taxYear.getOrElse("")
 
-  def getSchemeReference = ersSchemeRef.getOrElse("")
+  def getSchemeReference: String = ersSchemeRef.getOrElse("")
 
-  def getSchemeName = schemeName.getOrElse("")
+  def getSchemeName: String = schemeName.getOrElse("")
+
+  def getSchemeType: String = schemeType.getOrElse("")
 
   def getSchemeNameForDisplay(implicit messages: Messages): String =
     if(schemeName.isDefined) messages(s"ers.${getSchemeType.toLowerCase}") else ""
 
-  def getSchemeType = schemeType.getOrElse("")
+  def getEmpRef: String = empRef.getOrElse("")
 
-  def getAgentRef = agentRef.getOrElse("")
+  def getTS: String = ts.getOrElse("")
 
-  def getEmpRef = empRef.getOrElse("")
+  def getHMAC: String = hmac.getOrElse("")
 
-  def getTS = ts.getOrElse("")
-
-  def getHMAC = hmac.getOrElse("")
-
-  def concatenateParameters = {
+  def concatenateParameters: String = {
     getNVPair("agentRef", agentRef) +
       getNVPair("aoRef", aoRef) +
       getNVPair("empRef", empRef) +
@@ -176,12 +173,12 @@ case class RequestObject(
 
   def getSchemeId: String = {
     getSchemeType.toUpperCase match {
-      case PageBuilder.CSOP => PageBuilder.SCHEME_CSOP
-      case PageBuilder.EMI => PageBuilder.SCHEME_EMI
-      case PageBuilder.SAYE => PageBuilder.SCHEME_SAYE
-      case PageBuilder.SIP => PageBuilder.SCHEME_SIP
-      case PageBuilder.OTHER => PageBuilder.SCHEME_OTHER
-      case _ => PageBuilder.DEFAULT
+      case "CSOP" => "1"
+      case "EMI" => "2"
+      case "SAYE" => "4"
+      case "SIP" => "5"
+      case "OTHER" => "3"
+      case _ => ""
     }
   }
 
@@ -189,7 +186,6 @@ case class RequestObject(
     value.map(paramName + "=" + _ + ";").getOrElse("")
   }
 }
-
 object RequestObject {
   implicit val formatRequestObject: OFormat[RequestObject] = Json.format[RequestObject]
 }

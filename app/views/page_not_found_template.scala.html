@@ -15,24 +15,24 @@
  *@
 
 @import uk.gov.hmrc.play.views.html.layouts
-@import controllers.auth.ExternalUrls
 
-@()(implicit request: Request[_], messages: Messages, context: config.ErsContext)
+@import config.ApplicationConfig
+@()(implicit request: Request[_], messages: Messages, appConfig: ApplicationConfig)
 
 @anchor(text: String, url: String) = {<a href="@url">@text</a>}
-@signoutLink = {<li><a href="@ExternalUrls.signOut" id="sign-out">@Html(Messages("ers.signout"))</a></li>}
+@signoutLink = {<li><a href="@appConfig.signOut" id="sign-out">@Html(messages("ers.signout"))</a></li>}
 @commonLinkElement = {@includes.commonLinkElements()}
 
 @mainContent = {
-    <h1>@Messages("ers.global.page.not.found.error.heading")</h1>
-    <p>@Messages("ers.global.page.not.found.error.check.web.address.correct")</p>
-    <p>@Messages("ers.global.page.not.found.error.check.web.address.full")</p>
-    <p>@Html(Messages("ers.global.page.not.found.error.contact", anchor(Messages("ers.global.page.not.found.error.contact.link.text"), Messages("ers.global.page.not.found.error.contact.link"))))</p>
+    <h1>@messages("ers.global.page.not.found.error.heading")</h1>
+    <p>@messages("ers.global.page.not.found.error.check.web.address.correct")</p>
+    <p>@messages("ers.global.page.not.found.error.check.web.address.full")</p>
+    <p>@Html(messages("ers.global.page.not.found.error.contact", anchor(messages("ers.global.page.not.found.error.contact.link.text"), messages("ers.global.page.not.found.error.contact.link"))))</p>
 }
 
-@main(title = Messages("ers.global.page.not.found.error.title"),
+@main(title = messages("ers.global.page.not.found.error.title"),
     linkElement = Some(commonLinkElement),
-    headerNav = Some(views.helpers.HeaderNav(title = Some(Messages("ers.header")),
+    headerNav = Some(views.helpers.HeaderNav(title = Some(messages("ers.header")),
     showBetaLink = false,
     links = Some(signoutLink)))) {
   @layouts.article(mainContent)

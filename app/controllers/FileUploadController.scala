@@ -18,40 +18,39 @@ package controllers
 
 import _root_.models._
 import akka.actor.ActorSystem
-import config.{ApplicationConfig, ERSFileValidatorAuthConnector}
+import config.ApplicationConfig
 import connectors.ErsConnector
+import javax.inject.{Inject, Singleton}
 import models.upscan.{Failed, UploadStatus, UploadedSuccessfully}
 import play.api.Logger
 import play.api.Play.current
-import play.api.i18n.Messages
-import play.api.i18n.Messages.Implicits._
+import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc._
 import services.{SessionService, UpscanService}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.frontend.auth.AuthContext
-import uk.gov.hmrc.play.frontend.controller.FrontendController
-import uk.gov.hmrc.auth.core.PlayAuthConnector
+import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
+import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import utils._
 import views.html.upscan_ods_file_upload
 
 import scala.concurrent.Future
 
-trait FileUploadController extends FrontendController with Authenticator with LegacyI18nSupport with Retryable {
+@Singleton
+class FileUploadController @Inject()(val messagesApi: MessagesApi,
+																		 val ersConnector: ErsConnector,
+																		 val authConnector: DefaultAuthConnector,
+																		 val sessionService: SessionService,
+																		 val upscanService: UpscanService,
+																		 implicit val ersUtil: ERSUtil,
+																		 implicit val appConfig: ApplicationConfig
+																		) extends FrontendController with Authenticator with I18nSupport with Retryable {
 
-  override val logger: Logger = Logger(this.getClass)
-
-  val sessionService: SessionService
-  val cacheUtil: CacheUtil
-  val ersConnector: ErsConnector
-  val upscanService: UpscanService = current.injector.instanceOf[UpscanService]
-  val appConfig: ApplicationConfig = ApplicationConfig
-  implicit val actorSystem: ActorSystem = current.actorSystem
-
+	implicit lazy val actorSystem: ActorSystem = current.actorSystem
 
   def uploadFilePage(): Action[AnyContent] = authorisedForAsync() {
     implicit user =>
       implicit request =>
-        val requestObjectFuture = cacheUtil.fetch[RequestObject](cacheUtil.ersRequestObject)
+        val requestObjectFuture = ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
         val upscanFormFuture = upscanService.getUpscanFormDataOds()
         (for {
           requestObject <- requestObjectFuture
@@ -61,7 +60,7 @@ trait FileUploadController extends FrontendController with Authenticator with Le
           Ok(upscan_ods_file_upload(requestObject, response))
         }) recover{
           case e: Throwable =>
-            logger.error(s"showUploadFilePage failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.", e)
+            Logger.error(s"[FileUploadController][uploadFilePage] failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.", e)
             getGlobalErrorPage
         }
   }
@@ -69,7 +68,7 @@ trait FileUploadController extends FrontendController with Authenticator with Le
   def success(): Action[AnyContent] = authorisedForAsync() {
     implicit user =>
       implicit request =>
-        val futureRequestObject: Future[RequestObject] = cacheUtil.fetch[RequestObject](cacheUtil.ersRequestObject)
+        val futureRequestObject: Future[RequestObject] = ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
         val futureCallbackData: Future[Option[UploadStatus]] = sessionService.getCallbackRecord.withRetry(appConfig.odsSuccessRetryAmount){
           opt => opt.fold(true) {
             case _: UploadedSuccessfully | Failed => true
@@ -83,22 +82,22 @@ trait FileUploadController extends FrontendController with Authenticator with Le
         } yield {
           file match {
             case Some(file: UploadedSuccessfully) =>
-              cacheUtil.cache[String](CacheUtil.FILE_NAME_CACHE, file.name, requestObject.getSchemeReference).map { _ =>
+              ersUtil.cache[String](ersUtil.FILE_NAME_CACHE, file.name, requestObject.getSchemeReference).map { _ =>
                 Redirect(routes.FileUploadController.validationResults())
               }
             case Some(Failed) =>
-              logger.warn("Upload status is failed")
+              Logger.warn("[FileUploadController][success] Upload status is failed")
               Future.successful(getGlobalErrorPage)
             case None =>
-              logger.warn(s"Failed to verify upload. No data found in cache")
+              Logger.warn(s"[FileUploadController][success] Failed to verify upload. No data found in cache")
               throw new Exception("Upload data missing in cache for ODS file.")
           }
         }).flatMap(identity) recover {
          case e: LoopException[Option[UploadStatus]] =>
-           logger.error(s"Failed to verify upload. Upload status: ${e.finalFutureData.flatten}", e)
+           Logger.error(s"[FileUploadController][success] Failed to verify upload. Upload status: ${e.finalFutureData.flatten}", e)
            getGlobalErrorPage
          case e: Exception =>
-           logger.error(s"success: failed to save ods file with exception ${e.getMessage}.", e)
+           Logger.error(s"[FileUploadController][success] failed to save ods file with exception ${e.getMessage}.", e)
            getGlobalErrorPage
        }
   }
@@ -106,28 +105,29 @@ trait FileUploadController extends FrontendController with Authenticator with Le
   def validationResults(): Action[AnyContent] = authorisedForAsync() {
     implicit user =>
       implicit request =>
-        val futureRequestObject = cacheUtil.fetch[RequestObject](CacheUtil.ersRequestObject)
+        val futureRequestObject = ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
         val futureCallbackData = sessionService.getCallbackRecord.withRetry(appConfig.odsValidationRetryAmount)(_.exists(_.isInstanceOf[UploadedSuccessfully]))
         (for {
           requestObject <- futureRequestObject
-          all <- cacheUtil.fetch[ErsMetaData](CacheUtil.ersMetaData, requestObject.getSchemeReference)
+          all <- ersUtil.fetch[ErsMetaData](ersUtil.ersMetaData, requestObject.getSchemeReference)
           connectorResponse <- ersConnector.removePresubmissionData(all.schemeInfo)
           callbackData <- futureCallbackData
           validationResponse <-
             if (connectorResponse.status == OK) {
               handleValidationResponse(callbackData.get.asInstanceOf[UploadedSuccessfully], all.schemeInfo)
             } else {
-              logger.error(s"validationResults: removePresubmissionData failed with status ${connectorResponse.status}, timestamp: ${System.currentTimeMillis()}.")
+              Logger.error(s"[FileUploadController][validationResults] removePresubmissionData failed with status ${connectorResponse.status}, " +
+								s"timestamp: ${System.currentTimeMillis()}.")
               Future.successful(getGlobalErrorPage)
             }
         } yield {
           validationResponse
         }) recover {
           case e: LoopException[Option[UploadStatus]] =>
-            logger.error(s"Failed to validate as file is not yet successfully uploaded. Current cache data: ${e.finalFutureData.flatten}", e)
+            Logger.error(s"[FileUploadController][validationResults] Failed to validate as file is not yet successfully uploaded. Current cache data: ${e.finalFutureData.flatten}", e)
             getGlobalErrorPage
           case e: Throwable =>
-            logger.error(s"validationResults: validationResults failed with Exception ${e.getMessage}", e)
+            Logger.error(s"[FileUploadController][validationResults] validationResults failed with Exception ${e.getMessage}", e)
             getGlobalErrorPage
         }
   }
@@ -136,20 +136,16 @@ trait FileUploadController extends FrontendController with Authenticator with Le
                               (implicit authContext: ERSAuthData, request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
     val schemeRef = schemeInfo.schemeRef
     ersConnector.validateFileData(callbackData, schemeInfo).map { res =>
-      logger.info(s"validationResults: Response from validator: ${res.status}, timestamp: ${System.currentTimeMillis()}.")
-
+      Logger.info(s"[FileUploadController][handleValidationResponse] Response from validator: ${res.status}, timestamp: ${System.currentTimeMillis()}.")
       res.status match {
-
         case OK =>
-          logger.warn(s"validationResults: Validation is successful for schemeRef: $schemeRef, timestamp: ${System.currentTimeMillis()}.")
-          cacheUtil.cache(cacheUtil.VALIDATED_SHEEETS, res.body, schemeRef)
+          Logger.warn(s"[FileUploadController][handleValidationResponse] Validation is successful for schemeRef: $schemeRef, timestamp: ${System.currentTimeMillis()}.")
+          ersUtil.cache(ersUtil.VALIDATED_SHEEETS, res.body, schemeRef)
           Redirect(routes.SchemeOrganiserController.schemeOrganiserPage())
-
         case ACCEPTED =>
-          logger.warn(s"validationResults: Validation is not successful for schemeRef: $schemeRef, timestamp: ${System.currentTimeMillis()}.")
+          Logger.warn(s"[FileUploadController][handleValidationResponse] Validation is not successful for schemeRef: $schemeRef, timestamp: ${System.currentTimeMillis()}.")
           Redirect(routes.FileUploadController.validationFailure())
-
-        case _ => logger.error(s"validationResults: Validate file data failed with Status ${res.status}, timestamp: ${System.currentTimeMillis()}.")
+        case _ => Logger.error(s"[FileUploadController][handleValidationResponse] Validate file data failed with Status ${res.status}, timestamp: ${System.currentTimeMillis()}.")
           getGlobalErrorPage
       }
     }
@@ -158,15 +154,15 @@ trait FileUploadController extends FrontendController with Authenticator with Le
   def validationFailure(): Action[AnyContent] = authorisedForAsync() {
     implicit user =>
       implicit request =>
-        logger.info("validationFailure: Validation Failure: " + (System.currentTimeMillis() / 1000))
+        Logger.info("[FileUploadController][validationFailure] Validation Failure: " + (System.currentTimeMillis() / 1000))
         (for {
-          requestObject <- cacheUtil.fetch[RequestObject](CacheUtil.ersRequestObject)
-          fileType      <- cacheUtil.fetch[CheckFileType](CacheUtil.FILE_TYPE_CACHE, requestObject.getSchemeReference)
+          requestObject <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
+          fileType      <- ersUtil.fetch[CheckFileType](ersUtil.FILE_TYPE_CACHE, requestObject.getSchemeReference)
         } yield {
           Ok(views.html.file_upload_errors(requestObject, fileType.checkFileType.getOrElse("")))
         }) recover {
           case e: Throwable =>
-            logger.error(s"validationResults: validationFailure failed with Exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.", e)
+            Logger.error(s"[FileUploadController][validationFailure] failed with Exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.", e)
             getGlobalErrorPage
         }
   }
@@ -177,20 +173,16 @@ trait FileUploadController extends FrontendController with Authenticator with Le
         val errorCode = request.getQueryString("errorCode").getOrElse("Unknown")
         val errorMessage = request.getQueryString("errorMessage").getOrElse("Unknown")
         val errorRequestId = request.getQueryString("errorRequestId").getOrElse("Unknown")
-        logger.error(s"Upscan Failure. errorCode: $errorCode, errorMessage: $errorMessage, errorRequestId: $errorRequestId")
+        Logger.error(s"Upscan Failure. errorCode: $errorCode, errorMessage: $errorMessage, errorRequestId: $errorRequestId")
         Future.successful(getGlobalErrorPage)
   }
 
-  def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result = Ok(views.html.global_error(
-    messages("ers.global_errors.title"),
-    messages("ers.global_errors.heading"),
-    messages("ers.global_errors.message"))(request, messages))
+	def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result = {
+		Ok(views.html.global_error(
+			"ers.global_errors.title",
+			"ers.global_errors.heading",
+			"ers.global_errors.message"
+		)(request, messages, appConfig))
+	}
 
-}
-
-object FileUploadController extends FileUploadController {
-  val authConnector: PlayAuthConnector = ERSFileValidatorAuthConnector
-  val sessionService: SessionService = SessionService
-  val ersConnector: ErsConnector = ErsConnector
-  override val cacheUtil: CacheUtil = CacheUtil
 }

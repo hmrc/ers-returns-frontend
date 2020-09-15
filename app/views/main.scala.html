@@ -14,22 +14,20 @@
  * limitations under the License.
  *@
 
-@(applicationConfig: config.ApplicationConfig = config.ApplicationConfig,
-    title: String,
+@import config.ApplicationConfig
+@(title: String,
     headerNav: Option[views.helpers.HeaderNav] = None,
     contentHeader: Option[Html] = None,
     sidebar: Html = HtmlFormat.empty,
     userLoggedIn: Boolean = false,
     supportLinkEnabled: Boolean = true,
-    getHelpForm: Html  = HtmlFormat.empty,
     linkElement : Option[Html] = None,
     scriptElement: Option[Html] = None,
     isUserResearchBannerVisible:Boolean = false
-)(mainContent: Html = HtmlFormat.empty)(implicit request: Request[_], context: config.ErsContext, messages: Messages)
+)(mainContent: Html = HtmlFormat.empty)(implicit request: Request[_], messages: Messages, applicationConfig: ApplicationConfig)
 
 @import layouts._
 @import uk.gov.hmrc.play.views.html.{helpers => uiHelpers, layouts => uiLayouts}
-@import config.CachedStaticHtmlPartialProvider
 
 @head = {
     @uiLayouts.head(linkElem = linkElement, headScripts = None)
@@ -41,7 +39,7 @@
 }
 
 @insideHeader = {
-	@if(headerNav) {
+	@if(headerNav.isDefined) {
 	    @uiLayouts.header_nav(
 	        navTitle = headerNav.get.title,
 	        navTitleLink = headerNav.get.titleLink,
@@ -50,15 +48,12 @@
 	    )
     }
 }
-@urToggle = @{
-    true
-}
 
 @afterHeader = @{
-    if(isUserResearchBannerVisible && urToggle) {
+    if(isUserResearchBannerVisible) {
             helpers.fullWidthBanner(
                 Some(helpers.fullWidthBannerContentUr(
-                    Messages("urbanner.message.text"),
+                    messages("urbanner.message.text"),
                      applicationConfig.urBannerLink,
                     externalLinkWarning = None
                 ))
@@ -69,7 +64,7 @@
 
 @bodyEnd = {
     @uiLayouts.footer(
-        analyticsToken = applicationConfig.analyticsToken,
+        analyticsToken = Option(applicationConfig.analyticsToken),
         analyticsHost = applicationConfig.analyticsHost,
         ssoUrl = None,
         scriptElem = scriptElement,
@@ -95,9 +90,7 @@
 
 
 @getHelpForm = {
-    @if(supportLinkEnabled) {
-        @get_help_form(true, false)
-    }
+	@{uiHelpers.reportAProblemLink(applicationConfig.reportAProblemPartialUrl, applicationConfig.reportAProblemNonJSUrl)}
 }
 
 
@@ -110,4 +103,4 @@
     )
 }
 
-@govuk_template(Some(title), None)(head, bodyEnd, insideHeader, afterHeader, footerTop, Some(uiLayouts.footer_links()), true)(content)
+@govuk_template(Some(title), None)(head, bodyEnd, insideHeader, afterHeader, footerTop, Some(uiLayouts.footer_links()), nav = true)(content)

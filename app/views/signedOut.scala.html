@@ -14,9 +14,10 @@
  * limitations under the License.
  *@
 
-@(loginScreenUrl: String)(implicit request: Request[AnyContent], context: config.ErsContext, messages: Messages)
+@import config.ApplicationConfig
+@(loginScreenUrl: String)(implicit request: Request[AnyContent], messages: Messages, appConfig: ApplicationConfig)
 
-@ers_main(title = Messages("ers.app_title"), scripts=Html(""), showSignOutLink = false){
-	<p>@Html(Messages("ers_signed_out.info"))</p>
-	<p><a href="@loginScreenUrl">@Html(Messages("ers_signed_out.link"))</a></p>
+@ers_main(title = messages("ers.app_title"), scripts=Html(""), showSignOutLink = false){
+	<p>@Html(messages("ers_signed_out.info"))</p>
+	<p><a href="@loginScreenUrl">@Html(messages("ers_signed_out.link"))</a></p>
 }

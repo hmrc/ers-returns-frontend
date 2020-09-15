@@ -17,32 +17,31 @@
 package controllers
 
 import _root_.models.{RsFormMappings, _}
+import config.ApplicationConfig
 import connectors.ErsConnector
+import javax.inject.{Inject, Singleton}
 import play.api.Logger
-import play.api.Play.current
-import play.api.i18n.Messages
-import play.api.i18n.Messages.Implicits._
+import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.{Action, AnyContent, Request, Result}
-import uk.gov.hmrc.play.frontend.auth.AuthContext
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
+import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import utils._
 
 import scala.concurrent.Future
-import uk.gov.hmrc.http.HeaderCarrier
 
-object ReportableEventsController extends ReportableEventsController {
-  override val cacheUtil: CacheUtil = CacheUtil
-  override val ersConnector: ErsConnector = ErsConnector
-}
-
-trait ReportableEventsController extends ERSReturnBaseController with Authenticator {
-  val ersConnector: ErsConnector
-  val cacheUtil: CacheUtil
+@Singleton
+class ReportableEventsController @Inject()(val messagesApi: MessagesApi,
+																					 val authConnector: DefaultAuthConnector,
+																					 val ersConnector: ErsConnector,
+																					 implicit val ersUtil: ERSUtil,
+																					 implicit val appConfig: ApplicationConfig
+																					) extends FrontendController with Authenticator with I18nSupport {
 
   def reportableEventsPage(): Action[AnyContent] = authorisedForAsync() {
     implicit user =>
       implicit request =>
-        cacheUtil.fetch[RequestObject](cacheUtil.ersRequestObject).flatMap { requestObj =>
-
+        ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObj =>
           updateErsMetaData(requestObj)(user, request, hc)
           showReportableEventsPage(requestObj)(user, request, hc)
         }
@@ -50,29 +49,27 @@ trait ReportableEventsController extends ERSReturnBaseController with Authentica
 
   def updateErsMetaData(requestObject: RequestObject)(implicit authContext: ERSAuthData, request: Request[AnyRef], hc: HeaderCarrier): Future[Object] = {
 		ersConnector.connectToEtmpSapRequest(requestObject.getSchemeReference).flatMap { sapNumber =>
-      cacheUtil.fetch[ErsMetaData](CacheUtil.ersMetaData, requestObject.getSchemeReference).map { metaData =>
+      ersUtil.fetch[ErsMetaData](ersUtil.ersMetaData, requestObject.getSchemeReference).map { metaData =>
         val ersMetaData = ErsMetaData(
           metaData.schemeInfo, metaData.ipRef, metaData.aoRef, metaData.empRef, metaData.agentRef, Some(sapNumber))
-        cacheUtil.cache(CacheUtil.ersMetaData, ersMetaData, requestObject.getSchemeReference).recover {
-          case e: Exception => {
-            Logger.error(s"updateErsMetaData save failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
-            getGlobalErrorPage
-          }
-        }
+        ersUtil.cache(ersUtil.ersMetaData, ersMetaData, requestObject.getSchemeReference).recover {
+          case e: Exception =>
+						Logger.error(s"[ReportableEventsController][updateErsMetaData] save failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
+						getGlobalErrorPage
+				}
       } recover {
-        case e: NoSuchElementException => {
-          Logger.error(s"updateErsMetaData fetch failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
-          getGlobalErrorPage
-        }
-      }
+        case e: NoSuchElementException =>
+					Logger.error(s"[ReportableEventsController][updateErsMetaData] fetch failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
+					getGlobalErrorPage
+			}
     }
   }
 
   def showReportableEventsPage(requestObject: RequestObject)(implicit authContext: ERSAuthData, request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
-    cacheUtil.fetch[ReportableEvents](CacheUtil.reportableEvents, requestObject.getSchemeReference).map { activity =>
+    ersUtil.fetch[ReportableEvents](ersUtil.reportableEvents, requestObject.getSchemeReference).map { activity =>
       Ok(views.html.reportable_events(requestObject, activity.isNilReturn, RsFormMappings.chooseForm.fill(activity)))
     } recover {
-      case e: NoSuchElementException =>
+      case _: NoSuchElementException =>
         val form = ReportableEvents(Some(""))
         Ok(views.html.reportable_events(requestObject, Some(""), RsFormMappings.chooseForm.fill(form)))
     }
@@ -81,10 +78,10 @@ trait ReportableEventsController extends ERSReturnBaseController with Authentica
   def reportableEventsSelected(): Action[AnyContent] = authorisedForAsync() {
     implicit user =>
       implicit request =>
-        cacheUtil.fetch[RequestObject](cacheUtil.ersRequestObject).flatMap { requestObj =>
+        ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObj =>
           showReportableEventsSelected(requestObj)(user, request) recover {
             case e: Exception =>
-              Logger.error(s"reportableEventsSelected failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
+              Logger.error(s"[ReportableEventsController][reportableEventsSelected] failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
               getGlobalErrorPage
           }
         }
@@ -96,16 +93,16 @@ trait ReportableEventsController extends ERSReturnBaseController with Authentica
         Future.successful(Ok(views.html.reportable_events(requestObject, Some(""), errors)))
       },
       formData => {
-        cacheUtil.cache(CacheUtil.reportableEvents, formData, requestObject.getSchemeReference).map { _ =>
-          if (formData.isNilReturn.get == PageBuilder.OPTION_NIL_RETURN) {
+        ersUtil.cache(ersUtil.reportableEvents, formData, requestObject.getSchemeReference).map { _ =>
+          if (formData.isNilReturn.get == ersUtil.OPTION_NIL_RETURN) {
             Redirect(routes.SchemeOrganiserController.schemeOrganiserPage())
           } else {
-            Logger.info(s"Redirecting to FileUplaod controller to get Partial, timestamp: ${System.currentTimeMillis()}.")
+            Logger.info(s"[ReportableEventsController][showReportableEventsSelected] Redirecting to FileUpload controller to get Partial, timestamp: ${System.currentTimeMillis()}.")
             Redirect(routes.CheckFileTypeController.checkFileTypePage())
           }
         } recover {
           case e: Exception =>
-            Logger.error(s"Save reportable event failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
+            Logger.error(s"[ReportableEventsController][showReportableEventsSelected] Save reportable event failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
             getGlobalErrorPage
         }
 
@@ -113,8 +110,11 @@ trait ReportableEventsController extends ERSReturnBaseController with Authentica
     )
   }
 
-  def getGlobalErrorPage(implicit request: Request[_], messages: Messages) = Ok(views.html.global_error(
-    messages("ers.global_errors.title"),
-    messages("ers.global_errors.heading"),
-    messages("ers.global_errors.message"))(request, messages))
+	def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result = {
+		Ok(views.html.global_error(
+			"ers.global_errors.title",
+			"ers.global_errors.heading",
+			"ers.global_errors.message"
+		)(request, messages, appConfig))
+	}
 }

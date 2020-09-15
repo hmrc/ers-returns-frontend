@@ -14,37 +14,38 @@
  * limitations under the License.
  *@
 
-@(requestObject: RequestObject, groupScheme: Option[String], groupSchemeForm: Form[models.RS_groupScheme])(implicit request: Request[AnyRef], flash: Flash, context: config.ErsContext, messages: Messages)
+@import utils.ERSUtil
+@import config.ApplicationConfig
+@(requestObject: RequestObject, groupScheme: Option[String], groupSchemeForm: Form[models.RS_groupScheme])(implicit request: Request[AnyRef], flash: Flash, messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 @* Is a group scheme template *@
 @schemeId = @{requestObject.getSchemeId}
 @import views.html.templates._
-@import utils.PageBuilder._
 @import views.html.helpers.error_overview
 
 
-@ers_main(title = getPageElement(schemeId, "ers", "is_group_scheme.page_title") + " " + Messages("ers.title.postfix")) {
+@ers_main(title = ersUtil.getPageElement(schemeId, "ers", "is_group_scheme.page_title") + " " + Messages("ers.title.postfix")) {
 
 	@reference(requestObject.getPageTitle)
 	<p class="font-xsmall"><a href="@routes.SchemeOrganiserController.schemeOrganiserPage()" class="link-back">@Html(Messages("ers.back"))</a></p>
-	@header(getPageElement(schemeId, PAGE_GROUP_ACTIVITY, "question"))
+	@header(ersUtil.getPageElement(schemeId, ersUtil.PAGE_GROUP_ACTIVITY, "question"))
 	@uk.gov.hmrc.play.views.html.helpers.form(action = routes.GroupSchemeController.groupSchemeSelected(schemeId)) {
-		@error_overview(groupSchemeForm, Some(getPageElement(schemeId, PAGE_GROUP_ACTIVITY, "err.message")))
+		@error_overview(groupSchemeForm, Some(ersUtil.getPageElement(schemeId, ersUtil.PAGE_GROUP_ACTIVITY, "err.message")))
 		<fieldset class="inline">
 			<div class="form-group @if(groupSchemeForm.hasErrors) {error}">
 				<legend id="groupSchemeLbl">
-					<span class="visuallyhidden">@Html(getPageElement(schemeId, PAGE_GROUP_ACTIVITY, "question"))</span>
-					@if(groupSchemeForm.hasErrors){<span class="error-message">@Html(getPageElement(schemeId, PAGE_GROUP_ACTIVITY, "err.message"))</span>}
+					<span class="visuallyhidden">@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_GROUP_ACTIVITY, "question"))</span>
+					@if(groupSchemeForm.hasErrors){<span class="error-message">@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_GROUP_ACTIVITY, "err.message"))</span>}
 				</legend>
 				<div class="form-hint">
-					<p>@Html(getPageElement(schemeId, PAGE_GROUP_ACTIVITY, "intro_para"))</p>
+					<p>@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_GROUP_ACTIVITY, "intro_para"))</p>
 				</div>
 				<div class="form-field">
-					<label for="yes" class="block-label @(if(groupScheme == OPTION_YES) "selected")">
-						<input id="yes" type="radio" name="groupScheme" value="1" @(if(groupScheme.get == OPTION_YES) "checked" else "")>
+					<label for="yes" class="block-label @(if(groupScheme contains ersUtil.OPTION_YES) "selected")">
+						<input id="yes" type="radio" name="groupScheme" value="1" @(if(groupScheme.get == ersUtil.OPTION_YES) "checked" else "")>
 						@Html(Messages("ers_group_scheme.yes"))<br>
 					</label>
-					<label for="no" class="block-label @(if(groupScheme == OPTION_NO) "selected")">
-						<input id="no" type="radio" name="groupScheme" value="2" @(if(groupScheme.get == OPTION_NO) "checked" else "")>
+					<label for="no" class="block-label @(if(groupScheme contains ersUtil.OPTION_NO) "selected")">
+						<input id="no" type="radio" name="groupScheme" value="2" @(if(groupScheme.get == ersUtil.OPTION_NO) "checked" else "")>
 						@Html(Messages("ers_group_scheme.no"))<br>
 					</label>
 				</div>

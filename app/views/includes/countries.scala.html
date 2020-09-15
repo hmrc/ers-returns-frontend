@@ -14,14 +14,14 @@
  * limitations under the License.
  *@
 
-@(countryVal: Option[String])
-
 @import utils.CountryCodes
 
-<select id="country"  class="drop-down" name="country">
+@(countryVal: Option[String])(implicit countryCodes: CountryCodes)
+
+<label for="country"></label><select id="country"  class="drop-down" name="country">
     <option value="">Select...</option>
-    @for(country <- CountryCodes.countriesMap.sortBy(_.country)) {
-    <option value = @country.countryCode @if(countryVal== Some(country.countryCode)) {selected}>
+    @for(country <- countryCodes.countriesMap.sortBy(_.country)) {
+    <option value = @country.countryCode @if(countryVal.contains(country.countryCode)) {selected}>
     @country.country
     </option>
     }

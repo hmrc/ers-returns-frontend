@@ -18,9 +18,10 @@ package controllers
 
 import akka.stream.Materializer
 import connectors.ErsConnector
+import helpers.ErsTestHelper
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.OneAppPerSuite
 import play.api.Application
 import play.api.i18n.{Lang, Messages, MessagesApi}
@@ -31,24 +32,22 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.PlayAuthConnector
 import uk.gov.hmrc.play.test.UnitSpec
-import utils.{AuthHelper, CacheUtil, ERSFakeApplicationConfig, Fixtures}
+import utils.{AuthHelper, ERSFakeApplicationConfig, Fixtures}
 
 import scala.concurrent.Future
 import uk.gov.hmrc.http.HttpResponse
 
-class SubmissionDataControllerSpec extends UnitSpec with ERSFakeApplicationConfig with AuthHelper with OneAppPerSuite {
+class SubmissionDataControllerSpec extends UnitSpec with ERSFakeApplicationConfig with ErsTestHelper with OneAppPerSuite {
 
   override lazy val app: Application = new GuiceApplicationBuilder().configure(config).build()
   implicit lazy val mat: Materializer = app.materializer
-  implicit lazy val messages: Messages = Messages(Lang("en"), app.injector.instanceOf[MessagesApi])
+	lazy val messagesApi: MessagesApi = app.injector.instanceOf[MessagesApi]
+	implicit lazy val messages: Messages = Messages(Lang("en"), messagesApi)
 
   "calling createSchemeInfoFromURL" should {
 
-    lazy val submissionDataController: SubmissionDataController = new SubmissionDataController {
-      override val ersConnector: ErsConnector = mock[ErsConnector]
-			override val authConnector: PlayAuthConnector = mockAuthConnector
-      override val cacheUtil: CacheUtil = CacheUtil
-    }
+    lazy val submissionDataController: SubmissionDataController =
+			new SubmissionDataController(messagesApi, mockAuthConnector, mockErsConnector, mockErsUtil, mockAppConfig)
 
     "return correct json if all parameters are given in request" in {
       val request = FakeRequest("GET", "/get-submission-data?schemeRef=AA0000000000000&confTime=2016-08-05T11:14:30")
@@ -74,11 +73,8 @@ class SubmissionDataControllerSpec extends UnitSpec with ERSFakeApplicationConfi
   }
 
   "calling retrieveSubmissionData" should {
-    lazy val submissionDataController: SubmissionDataController = new SubmissionDataController {
-      override val ersConnector: ErsConnector = mock[ErsConnector]
-			override val authConnector: PlayAuthConnector = mockAuthConnector
-      override val cacheUtil: CacheUtil = CacheUtil
-    }
+		lazy val submissionDataController: SubmissionDataController =
+			new SubmissionDataController(messagesApi, mockAuthConnector, mockErsConnector, mockErsUtil, mockAppConfig)
 
     "redirect to login page if user is not authenticated" in {
 			setUnauthorisedMocks()
@@ -91,12 +87,11 @@ class SubmissionDataControllerSpec extends UnitSpec with ERSFakeApplicationConfi
 
     val mockErsConnector: ErsConnector = mock[ErsConnector]
 
-		class Setup(obj: Option[JsObject] = None) extends SubmissionDataController {
-			override val ersConnector: ErsConnector = mockErsConnector
-			override val authConnector: PlayAuthConnector = mockAuthConnector
-			override def createSchemeInfoFromURL(request: Request[Any]): Option[JsObject] = obj
+		class Setup(obj: Option[JsObject] = None)
+			extends SubmissionDataController(messagesApi, mockAuthConnector, mockErsConnector, mockErsUtil, mockAppConfig) {
+			when(mockAppConfig.enableRetrieveSubmissionData).thenReturn(true)
 
-      override val cacheUtil: CacheUtil = CacheUtil
+			override def createSchemeInfoFromURL(request: Request[Any]): Option[JsObject] = obj
     }
 
     "returns NOT_FOUND if not all parameters are given" in {

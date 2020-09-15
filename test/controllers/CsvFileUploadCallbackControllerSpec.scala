@@ -20,53 +20,48 @@ import java.net.URL
 import java.time.Instant
 
 import akka.stream.Materializer
-import config.{ApplicationConfig, ApplicationConfigImpl}
+import helpers.ErsTestHelper
 import models.upscan._
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{eq => meq, _}
 import org.mockito.Mockito._
 import org.scalatest.BeforeAndAfterEach
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.OneAppPerSuite
+import play.api.i18n.MessagesApi
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json._
-import play.api.mvc.Request
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import play.api.{Application, Configuration, Environment}
+import play.api.{Application, Environment}
 import uk.gov.hmrc.http.cache.client.CacheMap
-import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
 import uk.gov.hmrc.play.test.UnitSpec
-import utils.{CacheUtil, ERSFakeApplicationConfig, UpscanData}
+import utils.{ERSFakeApplicationConfig, UpscanData}
 
 import scala.concurrent.Future
 
-class CsvFileUploadCallbackControllerSpec extends UnitSpec with ERSFakeApplicationConfig with MockitoSugar with OneAppPerSuite with BeforeAndAfterEach with UpscanData {
+class CsvFileUploadCallbackControllerSpec extends UnitSpec
+	with ERSFakeApplicationConfig with MockitoSugar with OneAppPerSuite with BeforeAndAfterEach with UpscanData with ErsTestHelper {
 
   override lazy val app: Application = new GuiceApplicationBuilder().configure(config).build()
-  lazy val environment: Environment = app.injector.instanceOf[Environment]
   implicit lazy val materializer: Materializer = app.materializer
-  implicit val request: Request[_] = FakeRequest()
-
-  val mockAuthConnector: AuthConnector = mock[AuthConnector]
-  val mockCacheUtil: CacheUtil = mock[CacheUtil]
+  lazy val environment: Environment = app.injector.instanceOf[Environment]
+	lazy val messagesApi: MessagesApi = app.injector.instanceOf[MessagesApi]
 
   def request(body: JsValue): FakeRequest[JsValue] = FakeRequest().withBody(body)
   val scRef = "scRef"
   val url: URL = new URL("http://localhost:9000/myUrl")
 
-  lazy val csvFileUploadCallbackController: CsvFileUploadCallbackController = new CsvFileUploadCallbackController {
-    lazy val authConnector: AuthConnector = mockAuthConnector
-    override val cacheUtil: CacheUtil = mockCacheUtil
-    override val appConfig: ApplicationConfig = new ApplicationConfigImpl(app.injector.instanceOf[Configuration], environment){
-      import scala.concurrent.duration._
-      override val retryDelay: FiniteDuration = 1 millisecond
-    }
+  lazy val csvFileUploadCallbackController: CsvFileUploadCallbackController =
+		new CsvFileUploadCallbackController(messagesApi, mockErsConnector, mockAuthConnector, mockErsUtil, mockAppConfig) {
+		import scala.concurrent.duration._
+    when(mockAppConfig.retryDelay).thenReturn(1 millisecond)
   }
 
   override def beforeEach(): Unit = {
-    reset(mockCacheUtil)
-    super.beforeEach()
+    reset(mockErsUtil)
+		when(mockErsUtil.CHECK_CSV_FILES).thenReturn("check-csv-files")
+		super.beforeEach()
   }
 
   "callback" should {
@@ -76,13 +71,13 @@ class CsvFileUploadCallbackControllerSpec extends UnitSpec with ERSFakeApplicati
         val callbackCaptor = ArgumentCaptor.forClass(classOf[UploadStatus])
         val body = UpscanReadyCallback(Reference("Reference"), url, UploadDetails(Instant.now(), "checkSum", "fileMimeType", "fileName"))
         val jsonBody = Json.toJson(body)
-        when(mockCacheUtil.cache(meq(s"${CacheUtil.CHECK_CSV_FILES}-${uploadId.value}"), callbackCaptor.capture, meq(scRef))(any(), any(), any()))
+        when(mockErsUtil.cache(meq(s"check-csv-files-${uploadId.value}"), callbackCaptor.capture, meq(scRef))(any(), any(), any()))
           .thenReturn(Future.successful(mock[CacheMap]))
         val result = csvFileUploadCallbackController.callback(uploadId, scRef)(request(jsonBody))
         status(result) shouldBe OK
         callbackCaptor.getValue.isInstanceOf[UploadedSuccessfully] shouldBe true
-        verify(mockCacheUtil, times(1))
-          .cache(meq(s"${CacheUtil.CHECK_CSV_FILES}-${uploadId.value}"), meq(callbackCaptor.getValue), meq(scRef))(any(), any(), any())
+        verify(mockErsUtil, times(1))
+          .cache(meq(s"check-csv-files-${uploadId.value}"), meq(callbackCaptor.getValue), meq(scRef))(any(), any(), any())
       }
     }
 
@@ -91,13 +86,13 @@ class CsvFileUploadCallbackControllerSpec extends UnitSpec with ERSFakeApplicati
         val callbackCaptor = ArgumentCaptor.forClass(classOf[UploadStatus])
         val body = UpscanFailedCallback(Reference("ref"), ErrorDetails("failed", "message"))
         val jsonBody = Json.toJson(body)
-        when(mockCacheUtil.cache(meq(s"${CacheUtil.CHECK_CSV_FILES}-${uploadId.value}"), callbackCaptor.capture, meq(scRef))(any(), any(), any()))
+        when(mockErsUtil.cache(meq(s"check-csv-files-${uploadId.value}"), callbackCaptor.capture, meq(scRef))(any(), any(), any()))
           .thenReturn(Future.successful(mock[CacheMap]))
         val result = csvFileUploadCallbackController.callback(uploadId, scRef)(request(jsonBody))
         status(result) shouldBe OK
         callbackCaptor.getValue shouldBe Failed
-        verify(mockCacheUtil, times(1))
-          .cache(meq(s"${CacheUtil.CHECK_CSV_FILES}-${uploadId.value}"), meq(callbackCaptor.getValue), meq(scRef))(any(), any(), any())
+        verify(mockErsUtil, times(1))
+          .cache(meq(s"check-csv-files-${uploadId.value}"), meq(Failed), meq(scRef))(any(), any(), any())
       }
     }
 
@@ -105,21 +100,21 @@ class CsvFileUploadCallbackControllerSpec extends UnitSpec with ERSFakeApplicati
       "updating the cache fails" in {
         val body = UpscanFailedCallback(Reference("ref"), ErrorDetails("failed", "message"))
         val jsonBody = Json.toJson(body)
-        when(mockCacheUtil.cache(meq(s"${CacheUtil.CHECK_CSV_FILES}-${uploadId.value}"), any[UploadStatus], meq(scRef))(any(), any(), any()))
+        when(mockErsUtil.cache(meq(s"check-csv-files-${uploadId.value}"), any[UploadStatus], meq(scRef))(any(), any(), any()))
           .thenReturn(Future.failed(new Exception("Test exception")))
 
         val result = await(csvFileUploadCallbackController.callback(uploadId, scRef)(request(jsonBody)))
         status(result) shouldBe INTERNAL_SERVER_ERROR
 
-        verify(mockCacheUtil, times(1))
-          .cache(meq(s"${CacheUtil.CHECK_CSV_FILES}-${uploadId.value}"), any[UploadStatus], meq(scRef))(any(), any(), any())
+        verify(mockErsUtil, times(1))
+          .cache(meq(s"check-csv-files-${uploadId.value}"), any[UploadStatus], meq(scRef))(any(), any(), any())
       }
 
       "callback data is not in the correct format" in {
         val jsonBody = Json.parse("""{"key":"value"}""")
         val result = await(csvFileUploadCallbackController.callback(uploadId, scRef)(request(jsonBody)))
         status(result) shouldBe BAD_REQUEST
-        verify(mockCacheUtil, never())
+        verify(mockErsUtil, never())
           .cache(any(), any(), meq(scRef))(any(), any(), any())
       }
     }

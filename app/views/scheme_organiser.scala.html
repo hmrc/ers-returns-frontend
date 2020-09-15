@@ -14,103 +14,105 @@
  * limitations under the License.
  *@
 
-@(requestObject: RequestObject, checkFileType: String, schemeOrganiser: Form[models.SchemeOrganiserDetails], reportableEvents: String = "2")(implicit request: Request[AnyRef], flash: Flash, context: config.ErsContext, messages: Messages)
+@import utils.ERSUtil
+@import config.ApplicationConfig
+@import utils.CountryCodes
+@(requestObject: RequestObject, checkFileType: String, schemeOrganiser: Form[models.SchemeOrganiserDetails], reportableEvents: String = "2")(implicit request: Request[AnyRef], flash: Flash, messages: Messages, countryCodes: CountryCodes, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 @schemeId = @{requestObject.getSchemeId}
 @import uk.gov.hmrc.play.views.html.helpers
-@import utils.PageBuilder._
 @import views.html.helpers.error_overview
 @import views.html.templates._
 
 @scripts = {
-	<script src='@routes.AssetsController.at("javascripts/ers_scripts.js")'> </script>
-	<script src='@routes.AssetsController.at("javascripts/ers_company.js")'> </script>
+	<script src='@routes.Assets.at("javascripts/ers_scripts.js")'> </script>
+	<script src='@routes.Assets.at("javascripts/ers_company.js")'> </script>
 }
 
-@ers_main(title = getPageElement(schemeId, PAGE_SCHEME_ORGANISER, "title") + " " + Messages("ers.title.postfix"), scripts) {
+@ers_main(title = ersUtil.getPageElement(schemeId, ersUtil.PAGE_SCHEME_ORGANISER, "title") + " " + messages("ers.title.postfix"), scripts) {
 
 	@reference(requestObject.getPageTitle)
-	<p class="font-xsmall"><a href="@getPageBackLink(schemeId, PAGE_SCHEME_ORGANISER, checkFileType, reportableEvents)" class="link-back">@Html(Messages("ers.back"))</a></p>
-	@header(getPageElement(schemeId, PAGE_SCHEME_ORGANISER, "title"))
+	<p class="font-xsmall"><a href="@ersUtil.getPageBackLink(schemeId, ersUtil.PAGE_SCHEME_ORGANISER, checkFileType, reportableEvents)" class="link-back">@Html(messages("ers.back"))</a></p>
+	@header(ersUtil.getPageElement(schemeId, ersUtil.PAGE_SCHEME_ORGANISER, "title"))
 	@helpers.form(action = routes.SchemeOrganiserController.schemeOrganiserSubmit) {
 	@error_overview(schemeOrganiser)
 
 	<div class="form-field-group">
 		<fieldset class="inline">
-			<legend class="form-label">@Messages("ers_scheme_organiser.question")</legend>
-			<label class="block-label @if(schemeOrganiser(schemeOrganiserFields.country).value.contains(DEFAULT_COUNTRY) || schemeOrganiser(schemeOrganiserFields.country).value.isEmpty) {selected}" for="uk-radio-button">
-				<input id="uk-radio-button" name="radio-inline-group" value="1" type="radio" @if(schemeOrganiser(schemeOrganiserFields.country).value.contains(DEFAULT_COUNTRY) || schemeOrganiser(schemeOrganiserFields.country).value.isEmpty) {checked="checked"}>@Messages("ers_scheme_organiser.uk")
+			<legend class="form-label">@messages("ers_scheme_organiser.question")</legend>
+			<label class="block-label @if(schemeOrganiser(schemeOrganiserFields.country).value.contains(ersUtil.DEFAULT_COUNTRY) || schemeOrganiser(schemeOrganiserFields.country).value.isEmpty) {selected}" for="uk-radio-button">
+				<input id="uk-radio-button" name="radio-inline-group" value="1" type="radio" @if(schemeOrganiser(schemeOrganiserFields.country).value.contains(ersUtil.DEFAULT_COUNTRY) || schemeOrganiser(schemeOrganiserFields.country).value.isEmpty) {checked="checked"}>@messages("ers_scheme_organiser.uk")
 			</label>
-			<label class="block-label @if(!schemeOrganiser(schemeOrganiserFields.country).value.contains(DEFAULT_COUNTRY) && schemeOrganiser(schemeOrganiserFields.country).value.isDefined) {selected}" for="overseas-radio-button">
-				<input id="overseas-radio-button" name="radio-inline-group" value="2" type="radio" @if(!schemeOrganiser(schemeOrganiserFields.country).value.contains(DEFAULT_COUNTRY) && schemeOrganiser(schemeOrganiserFields.country).value.isDefined) {checked="checked"}>@Messages("ers_scheme_organiser.overseas")
+			<label class="block-label @if(!schemeOrganiser(schemeOrganiserFields.country).value.contains(ersUtil.DEFAULT_COUNTRY) && schemeOrganiser(schemeOrganiserFields.country).value.isDefined) {selected}" for="overseas-radio-button">
+				<input id="overseas-radio-button" name="radio-inline-group" value="2" type="radio" @if(!schemeOrganiser(schemeOrganiserFields.country).value.contains(ersUtil.DEFAULT_COUNTRY) && schemeOrganiser(schemeOrganiserFields.country).value.isDefined) {checked="checked"}>@messages("ers_scheme_organiser.overseas")
 			</label>
 		</fieldset>
 	</div>
 
-	<div class="form-group @if(schemeOrganiser.errors(schemeOrganiserFields.companyName)) {error}">
+	<div class="form-group @if(schemeOrganiser.error(schemeOrganiserFields.companyName).isDefined) {error}">
 		<label for="companyName" class="form-label" id="companyNameLbl">
-			<span>@Messages("ers_scheme_organiser.company_name")</span>
-			@if(schemeOrganiser.errors(schemeOrganiserFields.companyName)) {<span class="error-message">@schemeOrganiser.errors(schemeOrganiserFields.companyName).head.message</span>}
+			<span>@messages("ers_scheme_organiser.company_name")</span>
+			@if(schemeOrganiser.error(schemeOrganiserFields.companyName).isDefined) {<span class="error-message">@schemeOrganiser.errors(schemeOrganiserFields.companyName).head.message</span>}
 		</label>
 		<input id="companyName" type="text" class="form-control" name="companyName" value="@schemeOrganiser(schemeOrganiserFields.companyName).value">
 	</div>
-	<div class="form-group @if(schemeOrganiser.errors(schemeOrganiserFields.addressLine1)) {error}">
+	<div class="form-group @if(schemeOrganiser.error(schemeOrganiserFields.addressLine1).isDefined) {error}">
 		<label for="addressLine1" class="form-label" id="addressLine1Lbl">
-			<span>@Messages("ers_scheme_organiser.address")</span>
-			<span class="visuallyhidden">@Messages("ers_scheme_organiser.addressLine1")</span>
-			@if(schemeOrganiser.errors(schemeOrganiserFields.addressLine1)) {<span class="error-message">@schemeOrganiser.errors(schemeOrganiserFields.addressLine1).head.message</span>}
+			<span>@messages("ers_scheme_organiser.address")</span>
+			<span class="visuallyhidden">@messages("ers_scheme_organiser.addressLine1")</span>
+			@if(schemeOrganiser.error(schemeOrganiserFields.addressLine1).isDefined) {<span class="error-message">@schemeOrganiser.errors(schemeOrganiserFields.addressLine1).head.message</span>}
 		</label>
 		<input id="addressLine1" type="text" class="form-control address-line" name="addressLine1" value="@schemeOrganiser(schemeOrganiserFields.addressLine1).value">
 	</div>
-	<div class='form-group @if(schemeOrganiser.errors(schemeOrganiserFields.addressLine2)) {error}'>
+	<div class='form-group @if(schemeOrganiser.error(schemeOrganiserFields.addressLine2).isDefined) {error}'>
 		<label for="addressLine2" class="form-label" id="addressLine2Lbl">
-			<span class="visuallyhidden">@Messages("ers_scheme_organiser.addressLine2")</span>
-			@if(schemeOrganiser.errors(schemeOrganiserFields.addressLine2)) {<span class="error-message">@schemeOrganiser.errors(schemeOrganiserFields.addressLine2).head.message</span>}
+			<span class="visuallyhidden">@messages("ers_scheme_organiser.addressLine2")</span>
+			@if(schemeOrganiser.error(schemeOrganiserFields.addressLine2).isDefined) {<span class="error-message">@schemeOrganiser.errors(schemeOrganiserFields.addressLine2).head.message</span>}
 		</label>
 		<input id="addressLine2" type="text" class="form-control address-line" name="addressLine2" value="@schemeOrganiser(schemeOrganiserFields.addressLine2).value">
 	</div>
-	 <div class='form-group @if(schemeOrganiser.errors(schemeOrganiserFields.addressLine3)) {error}'>
+	 <div class='form-group @if(schemeOrganiser.error(schemeOrganiserFields.addressLine3).isDefined) {error}'>
 		<label for="addressLine3" class="form-label" id="addressLine3Lbl">
-			<span class="visuallyhidden">@Messages("ers_scheme_organiser.addressLine3")</span>
-			@if(schemeOrganiser.errors(schemeOrganiserFields.addressLine3)) {<span class="error-message">@schemeOrganiser.errors(schemeOrganiserFields.addressLine3).head.message</span>}
+			<span class="visuallyhidden">@messages("ers_scheme_organiser.addressLine3")</span>
+			@if(schemeOrganiser.error(schemeOrganiserFields.addressLine3).isDefined) {<span class="error-message">@schemeOrganiser.errors(schemeOrganiserFields.addressLine3).head.message</span>}
 		</label>
 		<input id="addressLine3" type="text" class="form-control address-line" name="addressLine3" value="@schemeOrganiser(schemeOrganiserFields.addressLine3).value">
 	 </div>
-	 <div class='form-group @if(schemeOrganiser.errors(schemeOrganiserFields.addressLine4)) {error}'>
+	 <div class='form-group @if(schemeOrganiser.error(schemeOrganiserFields.addressLine4).isDefined) {error}'>
 		<label for="addressLine4" class="form-label" id="addressLine4Lbl">
-			<span class="visuallyhidden">@Messages("ers_scheme_organiser.addressLine4")</span>
-			@if(schemeOrganiser.errors(schemeOrganiserFields.addressLine4)) {<span class="error-message">@schemeOrganiser.errors(schemeOrganiserFields.addressLine4).head.message</span>}
+			<span class="visuallyhidden">@messages("ers_scheme_organiser.addressLine4")</span>
+			@if(schemeOrganiser.error(schemeOrganiserFields.addressLine4).isDefined) {<span class="error-message">@schemeOrganiser.errors(schemeOrganiserFields.addressLine4).head.message</span>}
 		</label>
 		<input id="addressLine4" type="text" class="form-control address-line" name="addressLine4" value="@schemeOrganiser(schemeOrganiserFields.addressLine4).value">
 	</div>
-	<div class="form-group postcode-group @if(schemeOrganiser.errors(schemeOrganiserFields.postcode)) {error}">
+	<div class="form-group postcode-group @if(schemeOrganiser.error(schemeOrganiserFields.postcode).isDefined) {error}">
 		<label for="postcode" class="form-label" id="postcodeLbl">
-			<span>@Messages("ers_scheme_organiser.postcode")</span><br/>
-			<span class="form-hint text">@Messages("ers_scheme_organiser.postcode.hint")</span>
+			<span>@messages("ers_scheme_organiser.postcode")</span><br/>
+			<span class="form-hint text">@messages("ers_scheme_organiser.postcode.hint")</span>
 			@if(schemeOrganiser.errors(schemeOrganiserFields.postcode)) {<span class="error-message">@schemeOrganiser.errors(schemeOrganiserFields.postcode).head.message</span>}
 		</label>
 		<input id="postcode" type="text" class="form-control" name="postcode" value="@schemeOrganiser(schemeOrganiserFields.postcode).value">
 	</div>
 	<div class="form-group country-group">
-		<label for="country" id="countryLbl" class="form-label">@Messages("ers_scheme_organiser.country")</label>
+		<label for="country" id="countryLbl" class="form-label">@messages("ers_scheme_organiser.country")</label>
 		@views.html.includes.countries(schemeOrganiser(schemeOrganiserFields.country).value)
 	</div>
-	<div class="form-group company-reg-group @if(schemeOrganiser.errors(schemeOrganiserFields.companyReg)) {error}">
+	<div class="form-group company-reg-group @if(schemeOrganiser.error(schemeOrganiserFields.companyReg).isDefined) {error}">
 		<label for="companyReg" id="companyRegLbl" class="form-label">
-			<span>@Messages("ers_scheme_organiser.company_reg_number")</span>
-			<span class="form-hint text">@Messages("ers_scheme_organiser.company_reg_number.hint")</span>
-			@if(schemeOrganiser.errors(schemeOrganiserFields.companyReg)) {<span class="error-message">@schemeOrganiser.errors(schemeOrganiserFields.companyReg).head.message</span>}
+			<span>@messages("ers_scheme_organiser.company_reg_number")</span>
+			<span class="form-hint text">@messages("ers_scheme_organiser.company_reg_number.hint")</span>
+			@if(schemeOrganiser.error(schemeOrganiserFields.companyReg).isDefined) {<span class="error-message">@schemeOrganiser.errors(schemeOrganiserFields.companyReg).head.message</span>}
 		</label>
 		<input id="companyReg" type="text" class="form-control" name="companyReg" value="@schemeOrganiser(schemeOrganiserFields.companyReg).value">
 	</div>
-	<div class="form-group corporation-ref-group @if(schemeOrganiser.errors(schemeOrganiserFields.corporationRef)) {error}">
+	<div class="form-group corporation-ref-group @if(schemeOrganiser.error(schemeOrganiserFields.corporationRef).isDefined) {error}">
 		<label for="corporationRef" id="corporationRefLbl" class="form-label">
-			<span>@Messages("ers_scheme_organiser.corporation_tax_ref")</span>
-			<span class="form-hint">@Messages("ers_scheme_organiser.corporation_tax_ref.hint")</span>
-			@if(schemeOrganiser.errors(schemeOrganiserFields.corporationRef)) {<span class="error-message">@schemeOrganiser.errors(schemeOrganiserFields.corporationRef).head.message</span>}
+			<span>@messages("ers_scheme_organiser.corporation_tax_ref")</span>
+			<span class="form-hint">@messages("ers_scheme_organiser.corporation_tax_ref.hint")</span>
+			@if(schemeOrganiser.error(schemeOrganiserFields.corporationRef).isDefined) {<span class="error-message">@schemeOrganiser.errors(schemeOrganiserFields.corporationRef).head.message</span>}
 		</label>
 		<input id="corporationRef" type="text" class="form-control" name="corporationRef" value="@schemeOrganiser(schemeOrganiserFields.corporationRef).value">
 	</div>
 
-	<input role="button" id="continue" class="button" type="submit" value="@Html(Messages("ers_scheme_organiser.continue"))" >
+	<input role="button" id="continue" class="button" type="submit" value="@Html(messages("ers_scheme_organiser.continue"))" >
 	}
  }

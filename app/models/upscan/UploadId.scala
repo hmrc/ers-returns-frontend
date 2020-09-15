@@ -24,7 +24,7 @@ import play.api.mvc.QueryStringBindable
 case class UploadId(value: String) extends AnyVal
 
 object UploadId {
-  def generate = UploadId(UUID.randomUUID().toString)
+  def generate: UploadId = UploadId(UUID.randomUUID().toString)
 
   implicit def queryBinder(implicit stringBinder: QueryStringBindable[String]): QueryStringBindable[UploadId] =
     stringBinder.transform(UploadId(_), _.value)

@@ -1,4 +1,4 @@
-import play.routes.compiler.StaticRoutesGenerator
+import play.routes.compiler.{InjectedRoutesGenerator, StaticRoutesGenerator}
 import play.sbt.routes.RoutesKeys.{routesGenerator, routesImport}
 import play.sbt.PlayImport.PlayKeys
 import play.twirl.sbt.Import.TwirlKeys
@@ -50,7 +50,7 @@ trait MicroService {
       fork in Test := false,
       fork in Runtime := true,
       retrieveManaged := true,
-      routesGenerator := StaticRoutesGenerator,
+      routesGenerator := InjectedRoutesGenerator,
       TwirlKeys.templateImports +=
         "models.upscan.{UpscanInitiateResponse, UpscanCsvFilesCallbackList, UpscanCsvFilesCallback}",
       routesImport += "models.upscan.UploadId"

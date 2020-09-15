@@ -18,24 +18,30 @@ package services.pdf
 
 import models.CompanyDetailsList
 import play.api.i18n.Messages
+import utils.DecoratorConstants._
 
-class GroupSummaryDecorator(headingTitle: String, companiesList: Option[CompanyDetailsList], headingFontSize: Float, answerFontSize: Float, lineSpacer: Float, blockSpacer: Float) extends Decorator {
+class GroupSummaryDecorator(headingTitle: String,
+														companiesList: Option[CompanyDetailsList],
+														headingFontSize: Float = headingFontSizeDefault,
+														answerFontSize: Float = answerFontSizeDefault,
+														lineSpacer: Float = lineSpacerDefault,
+														blockSpacer: Float = blockSpacerDefault
+													 ) extends Decorator {
+
   def decorate(streamer: ErsContentsStreamer)(implicit messages: Messages): Unit = {
-    if(!companiesList.isDefined)
-      return
+    if(companiesList.isDefined) {
+			streamer.drawText("", lineSpacer)
+			streamer.drawText(headingTitle, headingFontSize)
+			streamer.drawText("", lineSpacer)
 
-    streamer.drawText("", lineSpacer)
-    streamer.drawText(headingTitle, headingFontSize)
-    streamer.drawText("", lineSpacer)
+			for (company <- companiesList.get.companies) {
+				streamer.drawText(company.companyName, answerFontSize)
+				streamer.drawText("", lineSpacer)
+			}
 
-    for (company <- companiesList.get.companies) {
-      streamer.drawText(company.companyName, answerFontSize)
-      streamer.drawText("", lineSpacer)
-    }
-
-    streamer.drawText("", blockSpacer)
-    streamer.drawLine()
-    streamer.drawText("", blockSpacer)
-
+			streamer.drawText("", blockSpacer)
+			streamer.drawLine()
+			streamer.drawText("", blockSpacer)
+		}
   }
 }
