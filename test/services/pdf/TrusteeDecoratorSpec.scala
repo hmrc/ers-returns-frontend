@@ -21,7 +21,7 @@ import models.{TrusteeDetails, TrusteeDetailsList}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import org.mockito.internal.verification.VerificationModeFactory
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.OneAppPerSuite
 import play.api.Application
 import play.api.Play.current

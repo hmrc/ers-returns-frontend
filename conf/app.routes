@@ -2,7 +2,7 @@
 
 ->          /template                                       template.Routes
 
-GET         /assets/*file                                   controllers.AssetsController.at(path="/public", file)
+GET         /assets/*file                               	controllers.Assets.at(path="/public", file)
 
 GET         /upload-ods-file                                controllers.FileUploadController.uploadFilePage()
 GET         /errors-have-been-found-ods                     controllers.FileUploadController.validationFailure()
@@ -22,12 +22,12 @@ GET 		/start                                          controllers.ReturnServiceC
 GET 		/reportable-events			                    controllers.ReportableEventsController.reportableEventsPage()
 POST 		/reportable-events			                    controllers.ReportableEventsController.reportableEventsSelected()
 
-GET         /unauthorised                                   controllers.ApplicationController.unauthorised
+GET         /unauthorised                                   controllers.ApplicationController.unauthorised()
 GET         /file-validation-results                        controllers.FileUploadController.validationResults()
 GET         /csv-file-validation-results                    controllers.CsvFileUploadController.validationResults()
 
-GET 		/not-authorised                                 controllers.AuthorizationController.notAuthorised()
-GET 		/signed-out                 	                controllers.AuthorizationController.timedOut()
+GET 		/not-authorised                                 controllers.ApplicationController.notAuthorised()
+GET 		/signed-out                 	                controllers.ApplicationController.timedOut()
 
 GET         /choose-csv-files                               controllers.CheckCsvFilesController.checkCsvFilesPage()
 POST        /choose-csv-files                               controllers.CheckCsvFilesController.checkCsvFilesPageSelected()

@@ -17,7 +17,6 @@
 package utils
 
 object SessionKeys {
-
   val BUNDLE_REF = "bundleRef"
   val DATE_TIME_SUBMITTED = "dateTimeSubmitted"
 }

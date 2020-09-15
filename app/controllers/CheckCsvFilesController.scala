@@ -16,29 +16,27 @@
 
 package controllers
 
+import config.ApplicationConfig
+import javax.inject.{Inject, Singleton}
 import models._
-import models.upscan.{NotStarted, UploadId, UpscanCsvFilesCallback, UpscanCsvFilesCallbackList, UpscanCsvFilesList, UpscanIds}
+import models.upscan.{NotStarted, UploadId, UpscanCsvFilesList, UpscanIds}
 import play.api.Logger
-import play.api.Play.current
-import play.api.i18n.Messages
-import play.api.i18n.Messages.Implicits._
+import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc.{Action, AnyContent, Request, Result}
-import uk.gov.hmrc.play.frontend.auth.AuthContext
-import utils.{CacheUtil, PageBuilder}
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
+import uk.gov.hmrc.play.bootstrap.controller.FrontendController
+import utils.ERSUtil
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import uk.gov.hmrc.http.HeaderCarrier
 
-object CheckCsvFilesController extends CheckCsvFilesController {
-  override val cacheUtil: CacheUtil = CacheUtil
-  override val pageBuilder: PageBuilder = PageBuilder
-}
-
-trait CheckCsvFilesController extends ERSReturnBaseController with Authenticator {
-  val cacheUtil: CacheUtil
-  val pageBuilder: PageBuilder
-  private val logger = Logger(this.getClass)
+@Singleton
+class CheckCsvFilesController @Inject()(val messagesApi: MessagesApi,
+																				val authConnector: DefaultAuthConnector,
+																				implicit val ersUtil: ERSUtil,
+																				implicit val appConfig: ApplicationConfig
+																			 ) extends FrontendController with Authenticator with I18nSupport {
 
   def checkCsvFilesPage(): Action[AnyContent] = authorisedForAsync() {
     implicit user =>
@@ -47,12 +45,12 @@ trait CheckCsvFilesController extends ERSReturnBaseController with Authenticator
   }
 
   def showCheckCsvFilesPage()(implicit authContext: ERSAuthData, request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
-    val requestObjectFuture = cacheUtil.fetch[RequestObject](cacheUtil.ersRequestObject)
-    cacheUtil.remove(CacheUtil.CSV_FILES_UPLOAD)
+    val requestObjectFuture = ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
+    ersUtil.remove(ersUtil.CSV_FILES_UPLOAD)
     (for {
       requestObject <- requestObjectFuture
     } yield {
-      val csvFilesList: List[CsvFiles] = PageBuilder.getCsvFilesList(requestObject.getSchemeType)
+      val csvFilesList: List[CsvFiles] = ersUtil.getCsvFilesList(requestObject.getSchemeType)
       Ok(views.html.check_csv_file(requestObject, CsvFilesList(csvFilesList)))
     }) recover {
       case _: Throwable => getGlobalErrorPage
@@ -80,20 +78,20 @@ trait CheckCsvFilesController extends ERSReturnBaseController with Authenticator
       reloadWithError()
     } else {
       (for{
-        requestObject <- cacheUtil.fetch[RequestObject](cacheUtil.ersRequestObject)
-        _             <- cacheUtil.cache(CacheUtil.CSV_FILES_UPLOAD, csvFilesCallbackList, requestObject.getSchemeReference)
+        requestObject <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
+        _             <- ersUtil.cache(ersUtil.CSV_FILES_UPLOAD, csvFilesCallbackList, requestObject.getSchemeReference)
       } yield {
         Redirect(routes.CsvFileUploadController.uploadFilePage())
       }).recover {
         case e: Throwable =>
-          logger.error(s"performCsvFilesPageSelected: Save data to cache failed with exception ${e.getMessage}.", e)
+          Logger.error(s"[CheckCsvFilesController][performCsvFilesPageSelected] Save data to cache failed with exception ${e.getMessage}.", e)
           getGlobalErrorPage
       }
     }
   }
 
   def createCacheData(csvFilesList: List[CsvFiles]): UpscanCsvFilesList = {
-    val ids = for(fileData <- csvFilesList if fileData.isSelected.contains(PageBuilder.OPTION_YES)) yield {
+    val ids = for(fileData <- csvFilesList if fileData.isSelected.contains(ersUtil.OPTION_YES)) yield {
       UpscanIds(UploadId.generate, fileData.fileId, NotStarted)
     }
     UpscanCsvFilesList(ids)
@@ -101,13 +99,16 @@ trait CheckCsvFilesController extends ERSReturnBaseController with Authenticator
 
   def reloadWithError()(implicit messages: Messages): Future[Result] = {
     Future.successful(
-      Redirect(routes.CheckCsvFilesController.checkCsvFilesPage()).flashing("csv-file-not-selected-error" -> messages(PageBuilder.PAGE_CHECK_CSV_FILE + ".err.message"))
+      Redirect(routes.CheckCsvFilesController.checkCsvFilesPage())
+				.flashing("csv-file-not-selected-error" -> messages(ersUtil.PAGE_CHECK_CSV_FILE + ".err.message"))
     )
   }
 
-  def getGlobalErrorPage(implicit request: Request[_], messages: Messages) = Ok(views.html.global_error(
-    messages("ers.global_errors.title"),
-    messages("ers.global_errors.heading"),
-    messages("ers.global_errors.message"))(request, messages))
-
+	def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result = {
+		Ok(views.html.global_error(
+			"ers.global_errors.title",
+			"ers.global_errors.heading",
+			"ers.global_errors.message"
+		)(request, messages, appConfig))
+	}
 }

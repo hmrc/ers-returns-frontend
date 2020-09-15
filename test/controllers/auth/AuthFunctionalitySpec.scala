@@ -16,6 +16,8 @@
 
 package controllers.auth
 
+import config.ApplicationConfig
+import helpers.ErsTestHelper
 import models.ERSAuthData
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
@@ -26,20 +28,17 @@ import play.api.test.{DefaultAwaitTimeout, FakeRequest}
 import uk.gov.hmrc.auth.core.AffinityGroup.Agent
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.domain.EmpRef
-import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.test.UnitSpec
-import utils.AuthHelper
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class AuthFunctionalitySpec extends UnitSpec with GuiceOneAppPerSuite with AuthHelper with DefaultAwaitTimeout {
-
-	implicit val hc: HeaderCarrier = HeaderCarrier()
+class AuthFunctionalitySpec extends UnitSpec with GuiceOneAppPerSuite with ErsTestHelper with DefaultAwaitTimeout {
 
   class Setup(enrolmentSet: Set[Enrolment], affGroup: Option[AffinityGroup] = None, testEmpRef: EmpRef = EmpRef("", "")) {
     val controllerHarness: AuthFunctionality = new AuthFunctionality {
       override val authConnector: AuthConnector = mockAuthConnector
+			override val appConfig: ApplicationConfig = mockAppConfig
     }
 
 		val ersAuthData: ERSAuthData = ERSAuthData(
@@ -56,7 +55,6 @@ class AuthFunctionalitySpec extends UnitSpec with GuiceOneAppPerSuite with AuthH
           .thenReturn(Future.successful(buildRetrieval(ersAuthData)))
 
         val func: ERSAuthData => Future[Result] = (_: ERSAuthData) => Future.successful(Results.Ok("test"))
-        implicit val fq: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
 
         val res: Future[Result] = controllerHarness.authoriseFor(func)
         status(res) shouldBe 200
@@ -68,7 +66,6 @@ class AuthFunctionalitySpec extends UnitSpec with GuiceOneAppPerSuite with AuthH
 				setUnauthorisedMocks()
 
 				val func: ERSAuthData => Future[Result] = (_: ERSAuthData) => Future.successful(Results.Ok("test"))
-				implicit val fq: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
 
 				val res: Future[Result] = controllerHarness.authoriseFor(func)
 				status(res) shouldBe 303
@@ -80,7 +77,6 @@ class AuthFunctionalitySpec extends UnitSpec with GuiceOneAppPerSuite with AuthH
 					.thenReturn(Future.failed(UnsupportedAuthProvider("Not GGW")))
 
 				val func: ERSAuthData => Future[Result] = (_: ERSAuthData) => Future.successful(Results.Ok("test"))
-				implicit val fq: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
 
 				val res: Future[Result] = controllerHarness.authoriseFor(func)
 				status(res) shouldBe 303

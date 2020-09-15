@@ -18,12 +18,14 @@ package controllers
 
 import akka.stream.Materializer
 import connectors.ErsConnector
+import helpers.ErsTestHelper
 import metrics.Metrics
 import models._
+import models.upscan.UpscanCsvFilesCallbackList
 import org.joda.time.DateTime
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.OneAppPerSuite
 import play.api.Application
 import play.api.http.Status
@@ -34,241 +36,142 @@ import play.api.libs.json._
 import play.api.mvc.Request
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import services.SessionService
-import uk.gov.hmrc.auth.core.PlayAuthConnector
-import uk.gov.hmrc.domain.EmpRef
-import uk.gov.hmrc.http.cache.client.{CacheMap, ShortLivedCache}
-import uk.gov.hmrc.play.frontend.auth.AuthContext
+import uk.gov.hmrc.http.cache.client.CacheMap
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.test.UnitSpec
-import utils.{AuthHelper, CacheUtil, ERSFakeApplicationConfig, Fixtures, PageBuilder, UpscanData}
+import utils.Fixtures.ersRequestObject
+import utils.{ERSFakeApplicationConfig, ERSUtil, Fixtures, UpscanData}
 
 import scala.concurrent.{ExecutionContext, Future}
-import uk.gov.hmrc.http.{HeaderCarrier, HttpGet, HttpPost, HttpResponse}
-import utils.Fixtures.ersRequestObject
+import scala.concurrent.ExecutionContext.Implicits.global
 
-class SummaryDeclarationControllerTest extends UnitSpec with ERSFakeApplicationConfig with MockitoSugar with AuthHelper with OneAppPerSuite with UpscanData {
+class SummaryDeclarationControllerTest extends UnitSpec with ERSFakeApplicationConfig with MockitoSugar with ErsTestHelper with OneAppPerSuite with UpscanData {
 
   override lazy val app: Application = new GuiceApplicationBuilder().configure(config).build()
+	val messagesApi: MessagesApi = app.injector.instanceOf[MessagesApi]
   implicit lazy val mat: Materializer = app.materializer
-  implicit lazy val messages: Messages = Messages(Lang("en"), app.injector.instanceOf[MessagesApi])
-  implicit val request: Request[_] = FakeRequest()
+  implicit lazy val messages: Messages = Messages(Lang("en"), messagesApi)
 
-  lazy val mockHttp: HttpPost = mock[HttpPost]
-  lazy val mockHttpGet: HttpGet = mock[HttpGet]
-  lazy val mockSessionCache: SessionService = mock[SessionService]
+	val schemeInfo: SchemeInfo = SchemeInfo("XA1100000000000", DateTime.now, "2", "2016", "EMI", "EMI")
+	val rsc: ErsMetaData = new ErsMetaData(schemeInfo, "ipRef", Some("aoRef"), "empRef", Some("agentRef"), Some("sapNumber"))
 
-  def buildFakeSummaryDeclarationController() = new SummaryDeclarationController {
-		override val authConnector: PlayAuthConnector = mockAuthConnector
-    var fetchAllMapVal = "e"
-    var fetchMapVal = "e"
-    val schemeInfo = SchemeInfo("XA1100000000000", DateTime.now, "2", "2016", "EMI", "EMI")
-    val rsc: ErsMetaData = new ErsMetaData(schemeInfo, "ipRef", Some("aoRef"), "empRef", Some("agentRef"), Some("sapNumber"))
-    override val ersConnector: ErsConnector =
-      new ErsConnector {
-        override lazy val metrics: Metrics = mock[Metrics]
+	val schemeOrganiser: SchemeOrganiserDetails = new SchemeOrganiserDetails(Fixtures.companyName,
+		"Add1", Option("Add2"), Option("Add3"), Option("Add4"),
+		Option("UK"), Option("AA111AA"), Option("AB123456"), Option("1234567890"))
+	val groupSchemeInfo: GroupSchemeInfo = new GroupSchemeInfo(Option("1"), None)
+	val gscomp: CompanyDetails = new CompanyDetails(Fixtures.companyName, "Adress Line 1", None, None, None, None, None, None, None)
+	val gscomps: CompanyDetailsList = new CompanyDetailsList(List(gscomp))
 
-        override def httpPost: HttpPost = mockHttp
+	val reportableEvents: ReportableEvents = new ReportableEvents(Some("1"))
+	val fileTypeCSV: CheckFileType = new CheckFileType(Some("csv"))
+	val fileTypeODS: CheckFileType = new CheckFileType(Some("ods"))
+	val csvFilesCallbackList: UpscanCsvFilesCallbackList = incompleteCsvList
+	val trustees: TrusteeDetails = new TrusteeDetails("T Name", "T Add 1", None, None, None, None, None)
+	val trusteesList: TrusteeDetailsList = new TrusteeDetailsList(List(trustees))
+	val fileNameODS: String = "test.osd"
 
-        override def httpGet: HttpGet = mockHttpGet
+	val commonAllDataMap: Map[String, JsValue] = Map(
+		"scheme-type" -> Json.toJson("1"),
+		"portal-scheme-ref" -> Json.toJson("CSOP - MyScheme - XA1100000000000 - 2014/15"),
+		"alt-activity" -> Json.toJson(new AltAmendsActivity("1")),
+		"scheme-organiser" -> Json.toJson(schemeOrganiser),
+		"group-scheme-controller"-> Json.toJson(groupSchemeInfo),
+		"group-scheme-companies" -> Json.toJson(gscomps),
+		"trustees" -> Json.toJson(trusteesList),
+		"ReportableEvents" -> Json.toJson(reportableEvents),
+		"ErsMetaData"-> Json.toJson(rsc)
+	)
 
-        override def ersUrl = "ers-returns"
+	class TestErsUtil(fetchAllMapVal: String) extends ERSUtil(mockSessionCache, mockShortLivedCache, mockAppConfig){
 
-        override def validatorUrl = "ers-file-validator"
+		override def cache[T](key: String, body: T, cacheId: String)
+												 (implicit hc: HeaderCarrier, formats: json.Format[T], request: Request[AnyRef]): Future[CacheMap] = {
+			Future.successful(CacheMap("fakeId", Map()))
+		}
 
-        override def connectToEtmpSapRequest(schemeRef: String)(implicit authContext: ERSAuthData, hc: HeaderCarrier): Future[String] = Future("1234567890")
+		override def getAllData(bundleRef: String, ersMetaData: ErsMetaData)
+													 (implicit hc: HeaderCarrier, ec: ExecutionContext, request: Request[AnyRef]): Future[ErsSummary] = {
+			Future.successful(new ErsSummary("testbundle", "false", None, DateTime.now, ersMetaData, None, None, None, None, None, None, None, None))
+		}
 
-      }
-    when(mockHttp.POST[ValidatorData, HttpResponse](ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(Future.successful(HttpResponse(OK)))
+		@throws(classOf[NoSuchElementException])
+    override def fetchAll(cacheId: String)(implicit hc: HeaderCarrier, request: Request[AnyRef]): Future[CacheMap] = {
+			fetchAllMapVal match {
+				case "e" => Future(throw new NoSuchElementException)
+				case "withSchemeTypeSchemeRef" =>
+					val data = commonAllDataMap.filterKeys(Seq("scheme-type", "portal-scheme-ref").contains(_))
+					val cm: CacheMap = new CacheMap("id1", data)
+					Future.successful(cm)
+				case "withAll" =>
+					val findList = Seq("scheme-organiser", "group-scheme-controller", "group-scheme-companies", "trustees", "ReportableEvents", "ErsMetaData")
+					val addList = Map("check-file-type" -> Json.toJson(fileTypeCSV), "check-csv-files" -> Json.toJson(csvFilesCallbackList))
+					val data = commonAllDataMap.filterKeys(findList.contains(_)) ++ addList
+					val cm: CacheMap = new CacheMap("id1", data)
+					Future.successful(cm)
+				case "noGroupSchemeInfo" =>
+					val findList = Seq("scheme-organiser", "group-scheme-companies", "trustees", "ReportableEvents", "ErsMetaData")
+					val addList = Map("check-file-type" -> Json.toJson(fileTypeCSV), "check-csv-files" -> Json.toJson(csvFilesCallbackList))
+					val data = commonAllDataMap.filterKeys(findList.contains(_)) ++ addList
+					val cm: CacheMap = new CacheMap("id1", data)
+					Future.successful(cm)
+				case "odsFile" =>
+					val findList = Seq("scheme-type", "portal-scheme-ref", "alt-activity", "scheme-organiser", "group-scheme-companies", "trustees", "ReportableEvents", "ErsMetaData")
+					val addList = Map("check-file-type" -> Json.toJson(fileTypeODS), "file-name" -> Json.toJson(fileNameODS))
+					val data = commonAllDataMap.filterKeys(findList.contains(_)) ++ addList
+					val cm: CacheMap = new CacheMap("id1", data)
+					Future.successful(cm)
+				case "withAllNillReturn" =>
+					val reportableEvents: ReportableEvents = new ReportableEvents(Some(OPTION_NIL_RETURN))
+					val fileType: CheckFileType = new CheckFileType(None)
+					val findList = Seq("scheme-organiser", "group-scheme-controller", "group-scheme-companies", "trustees", "ErsMetaData")
+					val addList = Map("ReportableEvents" -> Json.toJson(reportableEvents), "check-file-type" -> Json.toJson(fileType), "check-csv-files" -> Json.toJson(csvFilesCallbackList))
+					val data = commonAllDataMap.filterKeys(findList.contains(_)) ++ addList
+					val cm: CacheMap = new CacheMap("id1", data)
+					Future.successful(cm)
+				case "withAllCSVFile" =>
+					val reportableEvents: ReportableEvents = new ReportableEvents(Some(OPTION_UPLOAD_SPREEDSHEET))
+					val fileType: CheckFileType = new CheckFileType(Some(OPTION_CSV))
+					val findList = Seq("scheme-organiser", "group-scheme-controller", "group-scheme-companies", "trustees", "ErsMetaData")
+					val addList = Map("ReportableEvents" -> Json.toJson(reportableEvents), "check-file-type" -> Json.toJson(fileType), "check-csv-files" -> Json.toJson(csvFilesCallbackList))
+					val data = commonAllDataMap.filterKeys(findList.contains(_)) ++ addList
+					val cm: CacheMap = new CacheMap("id1", data)
+					Future.successful(cm)
+				case "withAllODSFile" =>
+					val reportableEvents: ReportableEvents = new ReportableEvents(Some(OPTION_UPLOAD_SPREEDSHEET))
+					val fileType: CheckFileType = new CheckFileType(Some(OPTION_ODS))
+					val findList = Seq("scheme-organiser", "group-scheme-controller", "group-scheme-companies", "trustees", "ErsMetaData")
+					val addList = Map("ReportableEvents" -> Json.toJson(reportableEvents), "check-file-type" -> Json.toJson(fileType), "check-csv-files" -> Json.toJson(csvFilesCallbackList), "file-name" -> Json.toJson(fileNameODS))
+					val data = commonAllDataMap.filterKeys(findList.contains(_)) ++ addList
+					val cm: CacheMap = new CacheMap("id1", data)
+					Future.successful(cm)
+			}
+		}
+	}
 
-    override val cacheUtil: CacheUtil = new CacheUtil {
-      override val sessionService: SessionService = mockSessionCache
+	lazy val ersConnector: ErsConnector = new ErsConnector(mockHttp, mockErsUtil, mockAppConfig) {
+		override lazy val metrics: Metrics = mockMetrics
+		override lazy val ersUrl = "ers-returns"
+		override lazy val validatorUrl = "ers-file-validator"
+		override def connectToEtmpSapRequest(schemeRef: String)(implicit authContext: ERSAuthData, hc: HeaderCarrier): Future[String] = Future("1234567890")
+	}
 
-      override def cache[T](key: String, body: T, cacheId: String)(implicit hc: HeaderCarrier, formats: json.Format[T], request: Request[AnyRef]) = {
-        Future.successful(null)
-      }
 
-      override def fetch[T](key: String, cacheId: String)(implicit hc: HeaderCarrier, formats: json.Format[T], request: Request[AnyRef]): Future[T] = {
-        fetchMapVal match {
-          case "e" => Future(throw new NoSuchElementException)
-          case "withSchemeTypeSchemeRef" => {
-            key match {
-              case CacheUtil.ersMetaData => {
-                Future.successful(rsc.asInstanceOf[T])
-              }
-              case CacheUtil.GROUP_SCHEME_CACHE_CONTROLLER => {
-                val gsc: GroupSchemeInfo = new GroupSchemeInfo(Option("1"), None)
-                Future.successful(gsc.asInstanceOf[T])
-              }
-              case CacheUtil.SCHEME_ORGANISER_CACHE => {
-                val soc: SchemeOrganiserDetails = new SchemeOrganiserDetails(Fixtures.companyName,
-                  "Add1", Option("Add2"), Option("Add3"), Option("Add4"), Option("AA111AA"),
-                  Option("United Kingdom"), Option("AB123456"), Option("1234567890"))
-                Future.successful(soc.asInstanceOf[T])
-              }
-              case CacheUtil.ALT_AMENDS_CACHE_CONTROLLER => {
-                val aac: AlterationAmends = new AlterationAmends(Option("1"), Option("1"), Option("1"), Option("1"), Option("1"))
-                Future.successful(aac.asInstanceOf[T])
-              }
-            }
-          }
-        }
-      }
-
-      override def fetchOption[T](key: String, cacheId: String)(implicit hc: HeaderCarrier, formats: json.Format[T], request: Request[AnyRef]): Future[Option[T]] = {
-        fetchMapVal match {
-          case "e" => Future(throw new NoSuchElementException)
-          case "withSchemeTypeSchemeRef" => {
-            key match {
-              case CacheUtil.ersMetaData => {
-                Future.successful(Option(rsc.asInstanceOf[T]))
-              }
-              case CacheUtil.GROUP_SCHEME_CACHE_CONTROLLER => {
-                val gsc: GroupSchemeInfo = new GroupSchemeInfo(Option("1"), None)
-                Future.successful(Option(gsc.asInstanceOf[T]))
-              }
-              case CacheUtil.SCHEME_ORGANISER_CACHE => {
-                val soc: SchemeOrganiserDetails = new SchemeOrganiserDetails(Fixtures.companyName,
-                  "Add1", Option("Add2"), Option("Add3"), Option("Add4"), Option("AA111AA"),
-                  Option("United Kingdom"), Option("AB123456"), Option("1234567890"))
-                Future.successful(Option(soc.asInstanceOf[T]))
-              }
-              case CacheUtil.ALT_AMENDS_CACHE_CONTROLLER => {
-                val aac: AlterationAmends = new AlterationAmends(Option("1"), Option("1"), Option("1"), Option("1"), Option("1"))
-                Future.successful(Option(aac.asInstanceOf[T]))
-              }
-            }
-          }
-        }
-      }
-
-      @throws(classOf[NoSuchElementException])
-      override def fetchAll(cacheId: String)(implicit hc: HeaderCarrier, request: Request[AnyRef]): Future[CacheMap] = {
-
-        val schemeOrganiser: SchemeOrganiserDetails = new SchemeOrganiserDetails(Fixtures.companyName,
-          "Add1", Option("Add2"), Option("Add3"), Option("Add4"),
-          Option("UK"), Option("AA111AA"), Option("AB123456"), Option("1234567890"))
-        val groupSchemeInfo: GroupSchemeInfo = new GroupSchemeInfo(Option("1"), None)
-        val gscomp: CompanyDetails = new CompanyDetails(Fixtures.companyName, "Adress Line 1", None, None, None, None, None, None, None)
-        val gscomps: CompanyDetailsList = new CompanyDetailsList(List(gscomp))
-
-        val reportableEvents: ReportableEvents = new ReportableEvents(Some(PageBuilder.OPTION_YES))
-        val fileTypeCSV: CheckFileType = new CheckFileType(Some(PageBuilder.OPTION_CSV))
-        val fileTypeODS: CheckFileType = new CheckFileType(Some(PageBuilder.OPTION_ODS))
-        val csvFilesCallbackList = incompleteCsvList
-        val trustees: TrusteeDetails = new TrusteeDetails("T Name", "T Add 1", None, None, None, None, None)
-        val trusteesList: TrusteeDetailsList = new TrusteeDetailsList(List(trustees))
-        val fileNameODS: String = "test.osd"
-
-        fetchAllMapVal match {
-          case "e" => Future(throw new NoSuchElementException)
-          case "withSchemeTypeSchemeRef" => {
-            val data: scala.Predef.Map[scala.Predef.String, play.api.libs.json.JsValue] = Map((CacheUtil.SCHEME_CACHE -> Json.toJson("1")),
-              (CacheUtil.PORTAL_SCHEME_REF -> Json.toJson("CSOP - MyScheme - XA1100000000000 - 2014/15")))
-            val cm: CacheMap = new CacheMap("id1", data)
-            Future.successful(cm)
-          }
-          case "withAll" => {
-            val data: scala.Predef.Map[scala.Predef.String, play.api.libs.json.JsValue] = Map(
-              CacheUtil.SCHEME_ORGANISER_CACHE -> Json.toJson(schemeOrganiser),
-              CacheUtil.GROUP_SCHEME_CACHE_CONTROLLER -> Json.toJson(groupSchemeInfo),
-              CacheUtil.GROUP_SCHEME_COMPANIES -> Json.toJson(gscomps),
-              CacheUtil.TRUSTEES_CACHE -> Json.toJson(trusteesList),
-              CacheUtil.reportableEvents -> Json.toJson(reportableEvents),
-              CacheUtil.FILE_TYPE_CACHE -> Json.toJson(fileTypeCSV),
-              CacheUtil.CHECK_CSV_FILES -> Json.toJson(csvFilesCallbackList),
-              CacheUtil.ersMetaData -> Json.toJson(rsc))
-            val cm: CacheMap = new CacheMap("id1", data)
-            Future.successful(cm)
-          }
-          case "noGroupSchemeInfo" => {
-            val data: scala.Predef.Map[scala.Predef.String, play.api.libs.json.JsValue] = Map(
-              CacheUtil.SCHEME_ORGANISER_CACHE -> Json.toJson(schemeOrganiser),
-              CacheUtil.GROUP_SCHEME_COMPANIES -> Json.toJson(gscomps),
-              CacheUtil.TRUSTEES_CACHE -> Json.toJson(trusteesList),
-              CacheUtil.reportableEvents -> Json.toJson(reportableEvents),
-              CacheUtil.FILE_TYPE_CACHE -> Json.toJson(fileTypeCSV),
-              CacheUtil.CHECK_CSV_FILES -> Json.toJson(csvFilesCallbackList),
-              CacheUtil.ersMetaData -> Json.toJson(rsc))
-            val cm: CacheMap = new CacheMap("id1", data)
-            Future.successful(cm)
-          }
-          case "odsFile" => {
-            val data: scala.Predef.Map[scala.Predef.String, play.api.libs.json.JsValue] = Map(
-              CacheUtil.SCHEME_CACHE -> Json.toJson("1"),
-              CacheUtil.PORTAL_SCHEME_REF -> Json.toJson("CSOP - MyScheme - XA1100000000000 - 2014/15"),
-              CacheUtil.altAmendsActivity -> Json.toJson(new AltAmendsActivity("1")),
-              CacheUtil.SCHEME_ORGANISER_CACHE -> Json.toJson(schemeOrganiser),
-              CacheUtil.GROUP_SCHEME_COMPANIES -> Json.toJson(gscomps),
-              CacheUtil.TRUSTEES_CACHE -> Json.toJson(trusteesList),
-              CacheUtil.reportableEvents -> Json.toJson(reportableEvents),
-              CacheUtil.FILE_TYPE_CACHE -> Json.toJson(fileTypeODS),
-              CacheUtil.FILE_NAME_CACHE -> Json.toJson(fileNameODS),
-              CacheUtil.ersMetaData -> Json.toJson(rsc))
-            val cm: CacheMap = new CacheMap("id1", data)
-            Future.successful(cm)
-          }
-          case "withAllNillReturn" => {
-            val reportableEvents: ReportableEvents = new ReportableEvents(Some(PageBuilder.OPTION_NIL_RETURN))
-            val fileType: CheckFileType = new CheckFileType(None)
-            val data: scala.Predef.Map[scala.Predef.String, play.api.libs.json.JsValue] = Map(
-              CacheUtil.SCHEME_ORGANISER_CACHE -> Json.toJson(schemeOrganiser),
-              CacheUtil.GROUP_SCHEME_CACHE_CONTROLLER -> Json.toJson(groupSchemeInfo),
-              CacheUtil.GROUP_SCHEME_COMPANIES -> Json.toJson(gscomps),
-              CacheUtil.TRUSTEES_CACHE -> Json.toJson(trusteesList),
-              CacheUtil.reportableEvents -> Json.toJson(reportableEvents),
-              CacheUtil.FILE_TYPE_CACHE -> Json.toJson(fileType),
-              CacheUtil.CHECK_CSV_FILES -> Json.toJson(csvFilesCallbackList),
-              CacheUtil.ersMetaData -> Json.toJson(rsc))
-            val cm: CacheMap = new CacheMap("id1", data)
-            Future.successful(cm)
-          }
-          case "withAllCSVFile" => {
-            val reportableEvents: ReportableEvents = new ReportableEvents(Some(PageBuilder.OPTION_UPLOAD_SPREEDSHEET))
-            val fileType: CheckFileType = new CheckFileType(Some(PageBuilder.OPTION_CSV))
-            val data: scala.Predef.Map[scala.Predef.String, play.api.libs.json.JsValue] = Map(
-              CacheUtil.SCHEME_ORGANISER_CACHE -> Json.toJson(schemeOrganiser),
-              CacheUtil.GROUP_SCHEME_CACHE_CONTROLLER -> Json.toJson(groupSchemeInfo),
-              CacheUtil.GROUP_SCHEME_COMPANIES -> Json.toJson(gscomps),
-              CacheUtil.TRUSTEES_CACHE -> Json.toJson(trusteesList),
-              CacheUtil.reportableEvents -> Json.toJson(reportableEvents),
-              CacheUtil.FILE_TYPE_CACHE -> Json.toJson(fileType),
-              CacheUtil.CHECK_CSV_FILES -> Json.toJson(csvFilesCallbackList),
-              CacheUtil.ersMetaData -> Json.toJson(rsc))
-            val cm: CacheMap = new CacheMap("id1", data)
-            Future.successful(cm)
-          }
-          case "withAllODSFile" => {
-            val reportableEvents: ReportableEvents = new ReportableEvents(Some(PageBuilder.OPTION_UPLOAD_SPREEDSHEET))
-            val fileType: CheckFileType = new CheckFileType(Some(PageBuilder.OPTION_ODS))
-            val data: scala.Predef.Map[scala.Predef.String, play.api.libs.json.JsValue] = Map(
-              CacheUtil.SCHEME_ORGANISER_CACHE -> Json.toJson(schemeOrganiser),
-              CacheUtil.GROUP_SCHEME_CACHE_CONTROLLER -> Json.toJson(groupSchemeInfo),
-              CacheUtil.GROUP_SCHEME_COMPANIES -> Json.toJson(gscomps),
-              CacheUtil.TRUSTEES_CACHE -> Json.toJson(trusteesList),
-              CacheUtil.reportableEvents -> Json.toJson(reportableEvents),
-              CacheUtil.FILE_TYPE_CACHE -> Json.toJson(fileType),
-              CacheUtil.CHECK_CSV_FILES -> Json.toJson(csvFilesCallbackList),
-              CacheUtil.FILE_NAME_CACHE -> Json.toJson(fileNameODS),
-              CacheUtil.ersMetaData -> Json.toJson(rsc))
-            val cm: CacheMap = new CacheMap("id1", data)
-            Future.successful(cm)
-          }
-        }
-      }
-
-      override def getAllData(bundleRef: String, ersMetaData: ErsMetaData)(implicit hc: HeaderCarrier, ec: ExecutionContext, request: Request[AnyRef]): Future[ErsSummary] = {
-        Future.successful(new ErsSummary("testbundle", "false", None, DateTime.now, ersMetaData, None, None, None, None, None, None, None, None))
-      }
-
-      override def shortLivedCache: ShortLivedCache = ???
-    }
-
+	def buildFakeSummaryDeclarationController(fetchMapVal: String = "e"): SummaryDeclarationController =
+		new SummaryDeclarationController(messagesApi,
+																		 mockAuthConnector,
+																		 ersConnector,
+																		 mockCountryCodes,
+																		 new TestErsUtil(fetchMapVal),
+																		 mockAppConfig
+		) {
+			when(mockHttp.POST[ValidatorData, HttpResponse](ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())
+			(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(Future.successful(HttpResponse(OK)))
   }
 
   "Calling SummaryDeclarationController.summaryDeclarationPage (GET) without authentication" should {
     "give a redirect status (to company authentication frontend)" in {
 			setUnauthorisedMocks()
-      val controllerUnderTest = buildFakeSummaryDeclarationController
+      val controllerUnderTest = buildFakeSummaryDeclarationController()
       val result = controllerUnderTest.summaryDeclarationPage().apply(FakeRequest("GET", ""))
       status(result) shouldBe Status.SEE_OTHER
     }
@@ -276,15 +179,14 @@ class SummaryDeclarationControllerTest extends UnitSpec with ERSFakeApplicationC
 
   "Calling SummaryDeclarationController.showSummaryDeclarationPage (GET) with authentication missing elements in the cache" should {
     "direct to ers errors page" in {
-      val controllerUnderTest = buildFakeSummaryDeclarationController
+      val controllerUnderTest = buildFakeSummaryDeclarationController()
       contentAsString(await(controllerUnderTest.showSummaryDeclarationPage(ersRequestObject)(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc))) shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage)
     }
   }
 
   "Calling SummaryDeclarationController.showSummaryDeclarationPage (GET) with authentication and required elements (Nil Return) in the cache" should {
     "show the scheme organiser page" in {
-      val controllerUnderTest = buildFakeSummaryDeclarationController
-      controllerUnderTest.fetchAllMapVal = "withAllNillReturn"
+      val controllerUnderTest = buildFakeSummaryDeclarationController("withAllNillReturn")
       val result = controllerUnderTest.showSummaryDeclarationPage(ersRequestObject)(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc)
       status(result) shouldBe Status.OK
     }
@@ -292,8 +194,7 @@ class SummaryDeclarationControllerTest extends UnitSpec with ERSFakeApplicationC
 
   "Calling SummaryDeclarationController.showSummaryDeclarationPage (GET) with authentication and required elements (CSV File Upload) in the cache" should {
     "show the scheme organiser page" in {
-      val controllerUnderTest = buildFakeSummaryDeclarationController
-      controllerUnderTest.fetchAllMapVal = "withAllCSVFile"
+      val controllerUnderTest = buildFakeSummaryDeclarationController("withAllCSVFile")
       val result = controllerUnderTest.showSummaryDeclarationPage(ersRequestObject)(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc)
       status(result) shouldBe Status.OK
     }
@@ -301,8 +202,7 @@ class SummaryDeclarationControllerTest extends UnitSpec with ERSFakeApplicationC
 
   "Calling SummaryDeclarationController.showSummaryDeclarationPage (GET) with authentication and required elements (ODS File Upload) in the cache" should {
     "show the scheme organiser page" in {
-      val controllerUnderTest = buildFakeSummaryDeclarationController
-      controllerUnderTest.fetchAllMapVal = "withAllODSFile"
+      val controllerUnderTest = buildFakeSummaryDeclarationController("withAllODSFile")
       val result = controllerUnderTest.showSummaryDeclarationPage(ersRequestObject)(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc)
       status(result) shouldBe Status.OK
     }
@@ -310,8 +210,7 @@ class SummaryDeclarationControllerTest extends UnitSpec with ERSFakeApplicationC
 
   "Calling SummaryDeclarationController.showSummaryDeclarationPage (GET) with authentication and required elements in the cache (ODS)" should {
     "show the scheme organiser page" in {
-      val controllerUnderTest = buildFakeSummaryDeclarationController
-      controllerUnderTest.fetchAllMapVal = "odsFile"
+      val controllerUnderTest = buildFakeSummaryDeclarationController("odsFile")
       val result = controllerUnderTest.showSummaryDeclarationPage(ersRequestObject)(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc)
       status(result) shouldBe Status.OK
     }
@@ -319,8 +218,7 @@ class SummaryDeclarationControllerTest extends UnitSpec with ERSFakeApplicationC
 
   "Calling SummaryDeclarationController.showSummaryDeclarationPage (GET) with authentication and required elements (no group scheme info) in the cache" should {
     "show the scheme organiser page" in {
-      val controllerUnderTest = buildFakeSummaryDeclarationController
-      controllerUnderTest.fetchAllMapVal = "noGroupSchemeInfo"
+      val controllerUnderTest = buildFakeSummaryDeclarationController("noGroupSchemeInfo")
       val result = controllerUnderTest.showSummaryDeclarationPage(ersRequestObject)(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc)
       status(result) shouldBe Status.OK
     }

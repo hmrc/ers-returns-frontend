@@ -14,20 +14,21 @@
  * limitations under the License.
  *@
 
-@import utils.PageBuilder._
 @import views.html.templates._
 @import views.html.includes.upscan_file_upload_form
 
-@(requestObject: RequestObject, upscanInitiateResponse: UpscanInitiateResponse, fileId: String)(implicit request: Request[AnyRef], context: config.ErsContext, messages: Messages)
+@import utils.ERSUtil
+@import config.ApplicationConfig
+@(requestObject: RequestObject, upscanInitiateResponse: UpscanInitiateResponse, fileId: String)(implicit request: Request[AnyRef], messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 @schemeId = @{requestObject.getSchemeId}
 
 @scripts = {
-    <script src='@routes.AssetsController.at("javascripts/ers_csv_scripts.js")'> </script>
+    <script src='@routes.Assets.at("javascripts/ers_csv_scripts.js")'> </script>
 }
 
 @uploadFileHeader = @{
   messages("csv_file_upload.upload_your_file_header",
-    messages(getPageElement(schemeId,PAGE_CHECK_CSV_FILE,fileId+".description"))
+    messages(ersUtil.getPageElement(schemeId, ersUtil.PAGE_CHECK_CSV_FILE,fileId+".description"))
   )
 }
 
@@ -53,8 +54,8 @@
 
 
 
-    <label class="form-label" id="fileName" for="fileToUpload" data-file-name="@messages(getPageElement(schemeId,PAGE_CHECK_CSV_FILE,fileId+".file_name"))">
-      @messages("csv_file_upload.upload_your_file", messages(getPageElement(schemeId,PAGE_CHECK_CSV_FILE,fileId+".file_name")))
+    <label class="form-label" id="fileName" for="fileToUpload" data-file-name="@messages(ersUtil.getPageElement(schemeId, ersUtil.PAGE_CHECK_CSV_FILE,fileId+".file_name"))">
+      @messages("csv_file_upload.upload_your_file", messages(ersUtil.getPageElement(schemeId, ersUtil.PAGE_CHECK_CSV_FILE,fileId+".file_name")))
     </label>
     @upscan_file_upload_form(".csv", upscanInitiateResponse.formFields, upscanInitiateResponse.postTarget)
     <div class="panel-indent">

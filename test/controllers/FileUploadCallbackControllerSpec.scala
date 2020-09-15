@@ -21,7 +21,7 @@ import models.upscan._
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{eq => meq, _}
 import org.mockito.Mockito._
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.{OneAppPerSuite, PlaySpec}
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
@@ -39,12 +39,9 @@ class FileUploadCallbackControllerSpec extends PlaySpec with MockitoSugar with E
 
   override implicit lazy val app: Application = new GuiceApplicationBuilder().configure(config).build()
   implicit lazy val mat: Materializer = app.materializer
-
   val mockSessionService: SessionService = mock[SessionService]
 
-  object TestFileUploadCallbackController extends FileUploadCallbackController {
-    lazy val sessionService: SessionService = mockSessionService
-  }
+  object TestFileUploadCallbackController extends FileUploadCallbackController(mockSessionService)
 
   "callback" must {
     val sessionId = "sessionId"

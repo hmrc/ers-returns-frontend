@@ -35,21 +35,16 @@ trait ContentUtil {
 
   def getSchemeAbbreviation(schemeType: String)(implicit messages: Messages): String = {
     schemeType.toLowerCase match {
-      case "1" => Messages("ers.csop")
-      case "2" => Messages("ers.emi")
-      case "4" => Messages("ers.saye")
-      case "5" => Messages("ers.sip")
-      case "3" => Messages("ers.other")
-      case "csop" => Messages("ers.csop")
-      case "emi" => Messages("ers.emi")
-      case "saye" => Messages("ers.saye")
-      case "sip" => Messages("ers.sip")
-      case "other" => Messages("ers.other")
+      case "1"|"csop" => Messages("ers.csop")
+      case "2"|"emi" => Messages("ers.emi")
+      case "4"|"saye" => Messages("ers.saye")
+      case "5"|"sip" => Messages("ers.sip")
+      case "3"|"other" => Messages("ers.other")
       case _ => ""
     }
   }
 
-  def geAcknowledgementRef(schemeRef: String): String = {
+  def getAcknowledgementRef: String = {
     System.currentTimeMillis().toString
   }
 }

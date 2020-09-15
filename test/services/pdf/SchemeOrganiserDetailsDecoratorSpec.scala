@@ -20,13 +20,15 @@ import models.SchemeOrganiserDetails
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import org.mockito.internal.verification.VerificationModeFactory
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import uk.gov.hmrc.play.test.UnitSpec
 import play.api.i18n.Messages
+import utils.CountryCodes
 
 class SchemeOrganiserDetailsDecoratorSpec extends UnitSpec with MockitoSugar {
 
-  implicit val messages = mock[Messages]
+  implicit val messages: Messages = mock[Messages]
+	val mockCountryCodes: CountryCodes = mock[CountryCodes]
 
   "Company details title decorator" should {
 
@@ -44,7 +46,7 @@ class SchemeOrganiserDetailsDecoratorSpec extends UnitSpec with MockitoSugar {
         Some("corporationRef")
       )
 
-      val decorator = new SchemeOrganiserDetailseDecorator("title", schemeOrganiser, 1.0F, 2.0F, 3.0F, 4.0F)
+      val decorator = new SchemeOrganiserDetailsDecorator("title", schemeOrganiser, mockCountryCodes, 1.0F, 2.0F, 3.0F, 4.0F)
 
       decorator.decorate(streamer)
 
@@ -75,7 +77,7 @@ class SchemeOrganiserDetailsDecoratorSpec extends UnitSpec with MockitoSugar {
         None
       )
 
-      val decorator = new SchemeOrganiserDetailseDecorator("title", schemeOrganiser, 1.0F, 2.0F, 3.0F, 4.0F)
+      val decorator = new SchemeOrganiserDetailsDecorator("title", schemeOrganiser, mockCountryCodes, 1.0F, 2.0F, 3.0F, 4.0F)
 
       decorator.decorate(streamer)
 

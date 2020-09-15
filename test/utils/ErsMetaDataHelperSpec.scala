@@ -19,7 +19,7 @@ package utils
 import models.{ErsMetaData, SchemeInfo}
 import org.joda.time.DateTime
 import org.scalatest.Matchers
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
 import play.api.i18n.{Lang, Messages, MessagesApi}

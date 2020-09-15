@@ -14,39 +14,41 @@
  * limitations under the License.
  *@
 
-@(requestObject: RequestObject, checkFileType: Option[String], checkFileTypeForm: Form[models.CheckFileType])(implicit request: Request[AnyRef], flash: Flash, context: config.ErsContext, messages: Messages)
+@import utils.PageBuilder
+@import utils.ERSUtil
+@import config.ApplicationConfig
+@(requestObject: RequestObject, checkFileType: Option[String], checkFileTypeForm: Form[models.CheckFileType])(implicit request: Request[AnyRef], flash: Flash, messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 @* type of activity template *@
 @schemeId = @{requestObject.getSchemeId}
 
-@import utils.PageBuilder._
 @import views.html.helpers.error_overview
 @import views.html.templates._
 
-@ers_main(title = Messages("ers.choose_file_type.page_title")) {
+@ers_main(title = messages("ers.choose_file_type.page_title")) {
 
 	@reference(requestObject.getPageTitle)
-	<p class="font-xsmall"><a href="@routes.ReportableEventsController.reportableEventsPage()" class="link-back">@Html(Messages("ers.back"))</a></p>
+	<p class="font-xsmall"><a href="@routes.ReportableEventsController.reportableEventsPage()" class="link-back">@Html(messages("ers.back"))</a></p>
 	@uk.gov.hmrc.play.views.html.helpers.form(action = routes.CheckFileTypeController.checkFileTypeSelected()) {
-		@header(Messages("ers_check_file_type.title"))
+		@header(messages("ers_check_file_type.title"))
 		@error_overview(checkFileTypeForm)
 		<div class="form-group @if(checkFileTypeForm.hasErrors) {error}">
 			<fieldset>
 				<legend id="checkFileTypeLbl">
-					@if(checkFileTypeForm.hasErrors){<span class="error-message">@Html(Messages("ers_check_file_type.err.message"))</span>}
+					@if(checkFileTypeForm.hasErrors){<span class="error-message">@Html(messages("ers_check_file_type.err.message"))</span>}
 				</legend>
 				<div class="form-field">
-					<label for="csv" class="block-label @(if(checkFileType == OPTION_CSV) "selected")">
-						<input id="csv" type="radio" name="checkFileType" value=@OPTION_CSV @(if(checkFileType.get == OPTION_CSV) "checked" else "")>
-						@Html(Messages("ers_check_file_type.option_1"))<br>
+					<label for="csv" class="block-label @(if(checkFileType contains ersUtil.OPTION_CSV) "selected")">
+						<input id="csv" type="radio" name="checkFileType" value=@ersUtil.OPTION_CSV @(if(checkFileType.get == ersUtil.OPTION_CSV) "checked" else "")>
+						@Html(messages("ers_check_file_type.option_1"))<br>
 					</label>
-					<label for="ods" class="block-label @(if(checkFileType == OPTION_ODS) "selected")">
-						<input id="ods" type="radio" name="checkFileType" value=@OPTION_ODS @(if(checkFileType.get == OPTION_ODS) "checked" else "")>
-						@Html(Messages("ers_check_file_type.option_2"))<br>
+					<label for="ods" class="block-label @(if(checkFileType contains ersUtil.OPTION_ODS) "selected")">
+						<input id="ods" type="radio" name="checkFileType" value=@ersUtil.OPTION_ODS @(if(checkFileType.get == ersUtil.OPTION_ODS) "checked" else "")>
+						@Html(messages("ers_check_file_type.option_2"))<br>
 					</label>
 				</div>
 			</fieldset>
 		</div>
-		<input role="button" id="continue" class="button" type="submit" value="@Html(Messages("ers.continue"))">
+		<input role="button" id="continue" class="button" type="submit" value="@Html(messages("ers.continue"))">
 	}
 
 }

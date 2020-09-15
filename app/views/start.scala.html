@@ -14,12 +14,11 @@
  * limitations under the License.
  *@
 
-@(requestObject: RequestObject)(implicit request: Request[AnyRef], context: config.ErsContext, messages: Messages)
+@import utils.ERSUtil
+@import config.ApplicationConfig
+@(requestObject: RequestObject)(implicit request: Request[AnyRef], messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 @schemeId = @{requestObject.getSchemeId}
 @import views.html.templates._
-@import utils.PageBuilder._
-@import utils.ContentUtil._
-
 
 @ers_main(title = messages("ers.start.page_title")) {
 
@@ -27,7 +26,7 @@
 
 	@header(messages("ers_start.page_title", requestObject.getSchemeNameForDisplay))
 
-	<p class="font-medium">@Html(getPageElement(schemeId, PAGE_START, "intro_para"))</p>
+	<p class="font-medium">@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_START, "intro_para"))</p>
 
 	<div class="form-group">
 		<a role="button" href="@routes.ReportableEventsController.reportableEventsPage" class="button button-get-started" id="start-button">@Html(messages("ers_start.start_now_button"))</a>
@@ -43,13 +42,13 @@
 	<p>@Html(messages("ers_start.you_need"))</p>
 
 	<ul class='list-bullet space'>
-		<li>@Html(getPageElement(schemeId, PAGE_START, "bullet_1"))</li>
-		<li>@Html(getPageElement(schemeId, PAGE_START, "bullet_2"))</li>
-		@if(schemeId == SCHEME_CSOP || schemeId == SCHEME_SAYE || schemeId == SCHEME_SIP || schemeId == SCHEME_OTHER) {
-		<li>@Html(getPageElement(schemeId, PAGE_START, "bullet_3"))</li>
+		<li>@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_START, "bullet_1"))</li>
+		<li>@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_START, "bullet_2"))</li>
+		@if(schemeId == ersUtil.SCHEME_CSOP || schemeId == ersUtil.SCHEME_SAYE || schemeId == ersUtil.SCHEME_SIP || schemeId == ersUtil.SCHEME_OTHER) {
+		<li>@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_START, "bullet_3"))</li>
 		}
-		@if(schemeId == SCHEME_SIP) {
-		<li>@Html(getPageElement(schemeId, PAGE_START, "bullet_4"))</li>
+		@if(schemeId == ersUtil.SCHEME_SIP) {
+		<li>@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_START, "bullet_4"))</li>
 		}
 	</ul>
 

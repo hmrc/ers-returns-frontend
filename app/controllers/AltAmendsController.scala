@@ -17,26 +17,24 @@
 package controllers
 
 import _root_.models._
-import connectors.ErsConnector
+import config.ApplicationConfig
+import javax.inject.{Inject, Singleton}
 import play.api.Logger
-import play.api.Play.current
-import play.api.i18n.Messages
-import play.api.i18n.Messages.Implicits._
+import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.mvc._
-import uk.gov.hmrc.play.frontend.auth.AuthContext
-import utils.{CacheUtil, PageBuilder}
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
+import uk.gov.hmrc.play.bootstrap.controller.FrontendController
+import utils.ERSUtil
 
 import scala.concurrent._
-import uk.gov.hmrc.http.HeaderCarrier
 
-object AltAmendsController extends AltAmendsController {
-  override val cacheUtil: CacheUtil = CacheUtil
-  override val ersConnector: ErsConnector = ErsConnector
-}
-
-trait AltAmendsController extends ERSReturnBaseController with Authenticator with ErsConstants {
-  val cacheUtil: CacheUtil
-  val ersConnector: ErsConnector
+@Singleton
+class AltAmendsController @Inject()(val messagesApi: MessagesApi,
+																		val authConnector: DefaultAuthConnector,
+																		implicit val ersUtil: ERSUtil,
+																		implicit val appConfig: ApplicationConfig
+																	 ) extends FrontendController with Authenticator with I18nSupport {
 
   def altActivityPage(): Action[AnyContent] = authorisedForAsync() {
     implicit user =>
@@ -45,21 +43,20 @@ trait AltAmendsController extends ERSReturnBaseController with Authenticator wit
   }
 
   def showAltActivityPage()(implicit authContext: ERSAuthData, request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
-
     (for {
-      requestObject     <- cacheUtil.fetch[RequestObject](cacheUtil.ersRequestObject)
-      groupSchemeInfo   <- cacheUtil.fetch[GroupSchemeInfo](CacheUtil.GROUP_SCHEME_CACHE_CONTROLLER, requestObject.getSchemeReference)
-      altAmendsActivity <- cacheUtil.fetch[AltAmendsActivity](CacheUtil.altAmendsActivity, requestObject.getSchemeReference).recover {
+      requestObject     <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
+      groupSchemeInfo   <- ersUtil.fetch[GroupSchemeInfo](ersUtil.GROUP_SCHEME_CACHE_CONTROLLER, requestObject.getSchemeReference)
+      altAmendsActivity <- ersUtil.fetch[AltAmendsActivity](ersUtil.altAmendsActivity, requestObject.getSchemeReference).recover {
         case _: NoSuchElementException => AltAmendsActivity("")
       }
     } yield {
 
       Ok(views.html.alterations_activity(requestObject, altAmendsActivity.altActivity,
-        groupSchemeInfo.groupScheme.getOrElse(PageBuilder.DEFAULT),
+        groupSchemeInfo.groupScheme.getOrElse(ersUtil.DEFAULT),
         RsFormMappings.altActivityForm.fill(altAmendsActivity)))
       }).recover {
         case e: Exception =>
-          Logger.error(s"Rendering AltAmends view failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
+          Logger.error(s"[AltAmendsController][showAltActivityPage] Rendering AltAmends view failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
           getGlobalErrorPage
       }
   }
@@ -74,16 +71,16 @@ trait AltAmendsController extends ERSReturnBaseController with Authenticator wit
 
   def showAltActivitySelected()(implicit authContext: ERSAuthData, request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
 
-    cacheUtil.fetch[RequestObject](cacheUtil.ersRequestObject).flatMap { requestObject =>
+    ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
       RsFormMappings.altActivityForm.bindFromRequest.fold(
         errors => {
           Future.successful(Ok(views.html.alterations_activity(requestObject, "", "", errors)))
         },
         formData => {
-          cacheUtil.cache(CacheUtil.altAmendsActivity, formData, requestObject.getSchemeReference).map { _ =>
+          ersUtil.cache(ersUtil.altAmendsActivity, formData, requestObject.getSchemeReference).map { _ =>
             formData.altActivity match {
-              case PageBuilder.OPTION_NO => Redirect(routes.SummaryDeclarationController.summaryDeclarationPage())
-              case PageBuilder.OPTION_YES => Redirect(routes.AltAmendsController.altAmendsPage())
+              case ersUtil.OPTION_NO => Redirect(routes.SummaryDeclarationController.summaryDeclarationPage())
+              case ersUtil.OPTION_YES => Redirect(routes.AltAmendsController.altAmendsPage())
             }
           }.recover {
             case e: Throwable =>
@@ -104,8 +101,8 @@ trait AltAmendsController extends ERSReturnBaseController with Authenticator wit
   def showAltAmendsPage()(implicit authContext: ERSAuthData, request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
 
     for {
-      requestObject <- cacheUtil.fetch[RequestObject](cacheUtil.ersRequestObject)
-      altAmends     <- cacheUtil.fetchOption[AltAmends](CacheUtil.ALT_AMENDS_CACHE_CONTROLLER, requestObject.getSchemeReference).recover {
+      requestObject <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
+      altAmends     <- ersUtil.fetchOption[AltAmends](ersUtil.ALT_AMENDS_CACHE_CONTROLLER, requestObject.getSchemeReference).recover {
         case _: Throwable => None
       }
     } yield {
@@ -121,36 +118,40 @@ trait AltAmendsController extends ERSReturnBaseController with Authenticator wit
 
   def showAltAmendsSelected()(implicit authContext: ERSAuthData, request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
 
-    cacheUtil.fetch[RequestObject](cacheUtil.ersRequestObject).flatMap { requestObject =>
+    ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
       RsFormMappings.altAmendsForm.bindFromRequest.fold(
-        formWithErrors => {
-          Future.successful(Redirect(routes.AltAmendsController.altAmendsPage()).flashing("alt-amends-not-selected-error" -> PageBuilder.getPageElement(requestObject.getSchemeId, PageBuilder.PAGE_ALT_AMENDS, "err.message")))
+        _ => {
+          Future.successful(Redirect(routes.AltAmendsController.altAmendsPage())
+						.flashing("alt-amends-not-selected-error" -> ersUtil.getPageElement(requestObject.getSchemeId, ersUtil.PAGE_ALT_AMENDS, "err.message")))
         },
         formData => {
-          cacheUtil.cache(CacheUtil.ALT_AMENDS_CACHE_CONTROLLER, formData, requestObject.getSchemeReference).flatMap { all =>
+          ersUtil.cache(ersUtil.ALT_AMENDS_CACHE_CONTROLLER, formData, requestObject.getSchemeReference).flatMap { _ =>
             if (formData.altAmendsTerms.isEmpty
               && formData.altAmendsEligibility.isEmpty
               && formData.altAmendsExchange.isEmpty
               && formData.altAmendsVariations.isEmpty
               && formData.altAmendsOther.isEmpty) {
-              Future.successful(Redirect(routes.AltAmendsController.altAmendsPage()).flashing("alt-amends-not-selected-error" -> PageBuilder.getPageElement(requestObject.getSchemeId, PageBuilder.PAGE_ALT_AMENDS, "err.message")))
+              Future.successful(Redirect(routes.AltAmendsController.altAmendsPage())
+								.flashing("alt-amends-not-selected-error" -> ersUtil.getPageElement(requestObject.getSchemeId, ersUtil.PAGE_ALT_AMENDS, "err.message")))
             } else {
               Future.successful(Redirect(routes.SummaryDeclarationController.summaryDeclarationPage()))
             }
           } recover {
-            case e: Throwable => {
-              Logger.error(s"showAltAmendsSelected: Save data to cache failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
-              getGlobalErrorPage
-            }
-          }
+            case e: Throwable =>
+							Logger.error(s"[AltAmendsController][showAltAmendsSelected] Save data to cache failed with exception ${e.getMessage}, " +
+								s"timestamp: ${System.currentTimeMillis()}.")
+							getGlobalErrorPage
+					}
         }
       )
     }
   }
 
-  def getGlobalErrorPage(implicit request: Request[_], messages: Messages) = Ok(views.html.global_error(
-    messages("ers.global_errors.title"),
-    messages("ers.global_errors.heading"),
-    messages("ers.global_errors.message"))(request, messages))
-
+  def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result = {
+		Ok(views.html.global_error(
+			"ers.global_errors.title",
+			"ers.global_errors.heading",
+			"ers.global_errors.message"
+		)(request, messages, appConfig))
+	}
 }

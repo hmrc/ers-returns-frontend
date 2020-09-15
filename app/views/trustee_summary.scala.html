@@ -14,42 +14,43 @@
  * limitations under the License.
  *@
 
-@(requestObject: RequestObject, trustees: TrusteeDetailsList)(implicit request: Request[AnyRef], flash: Flash, context: config.ErsContext, messages: Messages)
+@import utils.CountryCodes
+@import utils.ERSUtil
+@import config.ApplicationConfig
+@(requestObject: RequestObject, trustees: TrusteeDetailsList)(implicit request: Request[AnyRef], flash: Flash, messages: Messages, countryCodes: CountryCodes, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 
 @import views.html.templates._
-@import utils.PageBuilder._
 @schemeId = @{requestObject.getSchemeId}
-@import utils.CountryCodes._
 
 
-@ers_main(title = Messages("ers.trustees.page_title")) {
+@ers_main(title = messages("ers.trustees.page_title")) {
 
     @reference(requestObject.getPageTitle)
-    <p class="font-xsmall"><a href="@routes.TrusteeController.trusteeDetailsPage()" class="link-back">@Html(Messages("ers.back"))</a></p>
-    @header(Messages("ers_trustee_summary.title"))
+    <p class="font-xsmall"><a href="@routes.TrusteeController.trusteeDetailsPage()" class="link-back">@Html(messages("ers.back"))</a></p>
+    @header(messages("ers_trustee_summary.title"))
     @uk.gov.hmrc.play.views.html.helpers.form(action = routes.TrusteeController.trusteeSummaryContinue()) {
     <div class="panel-indent">
-        <a href="@routes.TrusteeController.trusteeDetailsPage()">@Html(Messages("ers_trustee_summary.add_trustee"))</a>
+        <a href="@routes.TrusteeController.trusteeDetailsPage()">@Html(messages("ers_trustee_summary.add_trustee"))</a>
     </div>
     @for((trustee, index) <- trustees.trustees.zipWithIndex) {
     <table>
         <thead>
         <tr>
             <th scope="col" id="trustee-summary-name">@trustee.name</th>
-            <th scope="col" class="trustee-summary-action-text-align"><a href="@routes.TrusteeController.editTrustee(index)">@Html(Messages("ers.change_this"))</a>&nbsp;&nbsp;&nbsp;<a href="@routes.TrusteeController.deleteTrustee(index)">@Html(Messages("ers.delete"))</a></th>
+            <th scope="col" class="trustee-summary-action-text-align"><a href="@routes.TrusteeController.editTrustee(index)">@Html(messages("ers.change_this"))</a>&nbsp;&nbsp;&nbsp;<a href="@routes.TrusteeController.deleteTrustee(index)">@Html(messages("ers.delete"))</a></th>
         </tr>
         </thead>
         <tbody>
         <tr>
             <td colspan="2" class="trustee-summary-text-align">
-                @trustee.addressLine1@if(trustee.addressLine2.getOrElse("") != ""){, @trustee.addressLine2}@if(trustee.addressLine3.getOrElse("") != ""){, @trustee.addressLine3}@if(trustee.addressLine4.getOrElse("") != ""){, @trustee.addressLine4}@if(trustee.postcode.getOrElse("") != ""){, @trustee.postcode}@if(trustee.country.getOrElse("") != ""){, @getCountry(trustee.country.get)}
+                @trustee.addressLine1@if(trustee.addressLine2.getOrElse("") != ""){, @trustee.addressLine2}@if(trustee.addressLine3.getOrElse("") != ""){, @trustee.addressLine3}@if(trustee.addressLine4.getOrElse("") != ""){, @trustee.addressLine4}@if(trustee.postcode.getOrElse("") != ""){, @trustee.postcode}@if(trustee.country.getOrElse("") != ""){, @countryCodes.getCountry(trustee.country.get)}
             </td>
         </tr>
         </tbody>
     </table>
     }
     <div class="trustee-summary-margin">
-        <button role="button" id="continue" class="button" type="submit" @if(trustees.trustees.length == 0) {disabled="disabled"}>@Html(Messages("ers.continue"))</button>
+        <button role="button" id="continue" class="button" type="submit" @if(trustees.trustees.isEmpty) {disabled="disabled"}>@Html(messages("ers.continue"))</button>
     </div>
     }
 

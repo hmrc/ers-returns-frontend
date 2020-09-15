@@ -16,7 +16,8 @@
 
 package services
 
-import config.SessionCacheWiring
+import config.ERSFileValidatorSessionCache
+import javax.inject.Inject
 import models.upscan.{NotStarted, UploadStatus, UploadedSuccessfully}
 import play.api.mvc.Request
 import uk.gov.hmrc.http.HeaderCarrier
@@ -24,13 +25,11 @@ import uk.gov.hmrc.http.HeaderCarrier
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-object SessionService extends SessionService
 
-trait SessionService extends SessionCacheWiring {
+class SessionService @Inject()(sessionCache: ERSFileValidatorSessionCache) {
 
   val CALCULATION_RESULTS_KEY: String = "calculation_results_key"
   val CALLBACK_DATA_KEY = "callback_data_key"
-
   val SCENARIO_KEY = "scenario"
 
   def createCallbackRecord(implicit request: Request[_], hc: HeaderCarrier): Future[Any] = {

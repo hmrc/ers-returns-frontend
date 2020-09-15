@@ -17,11 +17,10 @@
 package utils
 
 import akka.actor.ActorSystem
-import config.{ApplicationConfig, ApplicationConfigImpl}
+import config.ApplicationConfig
 import org.mockito.Mockito.{times, verify, when}
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.{Environment, Logger}
 import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.Future
@@ -29,16 +28,16 @@ import scala.concurrent.Future
 class RetryableSpec extends UnitSpec with MockitoSugar with GuiceOneAppPerSuite {
 
   class RetryTest extends Retryable {
-    implicit lazy val actorSystem: ActorSystem = app.actorSystem
-    override val appConfig: ApplicationConfig = new ApplicationConfigImpl(app.configuration, app.injector.instanceOf[Environment]) {
-      import scala.concurrent.duration._
-      override val retryDelay: FiniteDuration = 1 millisecond
-    }
+		import scala.concurrent.duration._
+		val mockAppConfig: ApplicationConfig = mock[ApplicationConfig]
+		when(mockAppConfig.retryDelay).thenReturn(1 millisecond)
+
+		implicit lazy val actorSystem: ActorSystem = app.actorSystem
+    override val appConfig: ApplicationConfig = mockAppConfig
     trait RetryTestUtil {
       def f: Future[Boolean]
     }
     val retryMock: RetryTestUtil = mock[RetryTestUtil]
-    override val logger: Logger = Logger("testLogger")
   }
 
   "withRetry" should {

@@ -16,9 +16,44 @@
 
 package services.pdf
 
-trait DecoratorController{
-  def addDecorator(decorator : Decorator) : DecoratorController
-  def decorate(ersContentsStreamer: ErsContentsStreamer) : Unit
-  def getNumberOfDecorator : Int
-  def getDecorators : Array[Decorator]
+import models.{ErsSummary, TrusteeDetailsList}
+import play.api.i18n.Messages
+import utils.CountryCodes
+
+import scala.collection.mutable.ListBuffer
+
+class DecoratorController(val decorators: Array[Decorator]) {
+
+	def addDecorator(decorator: Decorator): DecoratorController = new DecoratorController(decorators :+ decorator)
+
+	def decorate(streamer: ErsContentsStreamer)(implicit messages: Messages): Unit = {
+		decorators.foreach(decorator => decorator.decorate(streamer))
+	}
+
+	def addFileNamesDecorator(filesUploaded: Option[ListBuffer[String]], ersSummary: ErsSummary): DecoratorController = {
+		addDecorator(new FileNamesDecorator(ersSummary.isNilReturn, filesUploaded))
+	}
+
+	def addTrusteesDecorator(trusteesList: Option[TrusteeDetailsList]): DecoratorController = {
+		addDecorator(new TrusteesDecorator(trusteesList))
+	}
+
+	def addAlterationsAmendsDecorator(altAmendsMap: Map[String, String]): DecoratorController = {
+		addDecorator(new AlterationsAmendsDecorator(altAmendsMap))
+	}
+
+	def addYesNoDecorator(msgKey: String, ersSummaryValue: String)(implicit messages: Messages): DecoratorController = {
+		addDecorator(new YesNoDecorator(Messages(msgKey), ersSummaryValue))
+	}
+
+
+	def addGroupSummaryDecorator(key: String, ersSummary: ErsSummary)(implicit messages: Messages): DecoratorController = {
+		addDecorator(new GroupSummaryDecorator(Messages(s"ers_group_summary.$key.title"), ersSummary.companies))
+	}
+
+	def addSchemeOrganiserDetailsDecorator(key: String, ersSummary: ErsSummary, countryCodes: CountryCodes)
+																				(implicit messages: Messages): DecoratorController = {
+		addDecorator(new SchemeOrganiserDetailsDecorator(Messages(s"ers_summary_declaration.$key.organiser"), ersSummary.schemeOrganiser.get, countryCodes))
+	}
+
 }

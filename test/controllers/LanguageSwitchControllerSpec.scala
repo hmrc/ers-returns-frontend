@@ -15,28 +15,36 @@
  */
 
 package controllers
-import config.ApplicationConfig
-import org.scalatestplus.play.{OneAppPerSuite, OneAppPerTest}
-import play.api.test.Helpers._
+import helpers.ErsTestHelper
+import org.mockito.Mockito.when
+import org.scalatestplus.play.OneAppPerSuite
+import play.api.i18n.{Lang, MessagesApi}
 import play.api.test.FakeRequest
-import play.api.i18n.MessagesApi
+import play.api.test.Helpers._
 import uk.gov.hmrc.play.test.UnitSpec
 
-import scala.concurrent.Future
+class LanguageSwitchControllerSpec extends UnitSpec with OneAppPerSuite with ErsTestHelper {
+  val messagesApi: MessagesApi = app.injector.instanceOf(classOf[MessagesApi])
 
-class LanguageSwitchControllerSpec extends UnitSpec with OneAppPerSuite {
-  val messagesApi = app.injector.instanceOf(classOf[MessagesApi])
+	lazy val langMap: Map[String, Lang] = Map(
+		"english" -> Lang("en"),
+		"cymraeg" -> Lang("cy")
+	)
+
+	when(mockAppConfig.languageTranslationEnabled).thenReturn(true)
+	when(mockAppConfig.languageMap).thenReturn(langMap)
+
   "Hitting language selection endpoint" must {
     "redirect to Welsh translated start page if Welsh language is selected" in {
       val request = FakeRequest()
-      val result = new LanguageSwitchController(appConfig = ApplicationConfig, messagesApi = messagesApi).switchToLanguage("cymraeg")(request)
-      header("Set-Cookie",result) shouldBe Some("PLAY_LANG=cy; Path=/;;PLAY_FLASH=switching-language=true; Path=/; HTTPOnly")
+      val result = new LanguageSwitchController(appConfig = mockAppConfig, messagesApi = messagesApi).switchToLanguage("cymraeg")(request)
+      header("Set-Cookie",result) shouldBe Some("PLAY_LANG=cy; Path=/")
     }
 
     "redirect to English translated start page if English language is selected" in {
       val request = FakeRequest()
-      val result = new LanguageSwitchController(appConfig = ApplicationConfig, messagesApi = messagesApi).switchToLanguage("english")(request)
-      header("Set-Cookie",result) shouldBe Some("PLAY_LANG=en; Path=/;;PLAY_FLASH=switching-language=true; Path=/; HTTPOnly")
+      val result = new LanguageSwitchController(appConfig = mockAppConfig, messagesApi = messagesApi).switchToLanguage("english")(request)
+      header("Set-Cookie",result) shouldBe Some("PLAY_LANG=en; Path=/")
     }
   }
 }

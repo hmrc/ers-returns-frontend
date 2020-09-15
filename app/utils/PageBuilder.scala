@@ -18,13 +18,9 @@ package utils
 
 import controllers.routes
 import models.CsvFiles
-import play.api.Play.current
 import play.api.i18n.Messages
-import play.api.mvc.LegacyI18nSupport
 
-object PageBuilder extends PageBuilder
-
-trait PageBuilder extends LegacyI18nSupport {
+trait PageBuilder {
 
   val DEFAULT = ""
   val DEFAULT_COUNTRY = "UK"
@@ -71,7 +67,7 @@ trait PageBuilder extends LegacyI18nSupport {
   val FILE_OTHER_ENCHANCEMENT: String = "file7"
   val FILE_OTHER_SOLD: String = "file8"
 
-  // pageId's  
+  // pageId's
   val PAGE_START = "ers_start"
   val PAGE_CHOOSE = "ers_choose"
   val PAGE_CHECK_FILE = "ers_check_file"
@@ -122,41 +118,41 @@ trait PageBuilder extends LegacyI18nSupport {
 
   val CSVFilesList = Map(
     (
-      PageBuilder.EMI, List(
-      CsvFiles(PageBuilder.FILE_EMI_ADJUSTMENTS, None),
-      CsvFiles(PageBuilder.FILE_EMI_REPLACED, None),
-      CsvFiles(PageBuilder.FILE_EMI_RCL, None),
-      CsvFiles(PageBuilder.FILE_EMI_NONTAXABLE, None),
-      CsvFiles(PageBuilder.FILE_EMI_TAXABLE, None)
+      EMI, List(
+      CsvFiles(FILE_EMI_ADJUSTMENTS, None),
+      CsvFiles(FILE_EMI_REPLACED, None),
+      CsvFiles(FILE_EMI_RCL, None),
+      CsvFiles(FILE_EMI_NONTAXABLE, None),
+      CsvFiles(FILE_EMI_TAXABLE, None)
     )),
     (
-      PageBuilder.CSOP, List(
-      CsvFiles(PageBuilder.FILE_CSOP_GRANTED, None),
-      CsvFiles(PageBuilder.FILE_CSOP_RCL, None),
-      CsvFiles(PageBuilder.FILE_CSOP_Exercised, None)
+      CSOP, List(
+      CsvFiles(FILE_CSOP_GRANTED, None),
+      CsvFiles(FILE_CSOP_RCL, None),
+      CsvFiles(FILE_CSOP_Exercised, None)
     )),
     (
-      PageBuilder.OTHER, List(
-      CsvFiles(PageBuilder.FILE_OTHER_GRANTS, None),
-      CsvFiles(PageBuilder.FILE_OTHER_OPTIONS, None),
-      CsvFiles(PageBuilder.FILE_OTHER_ACQUISITION, None),
-      CsvFiles(PageBuilder.FILE_OTHER_RESTRICTED, None),
-      CsvFiles(PageBuilder.FILE_OTHER_BENEFITS, None),
-      CsvFiles(PageBuilder.FILE_OTHER_CONVERTABLE, None),
-      CsvFiles(PageBuilder.FILE_OTHER_NOTIONAL, None),
-      CsvFiles(PageBuilder.FILE_OTHER_ENCHANCEMENT, None),
-      CsvFiles(PageBuilder.FILE_OTHER_SOLD, None)
+      OTHER, List(
+      CsvFiles(FILE_OTHER_GRANTS, None),
+      CsvFiles(FILE_OTHER_OPTIONS, None),
+      CsvFiles(FILE_OTHER_ACQUISITION, None),
+      CsvFiles(FILE_OTHER_RESTRICTED, None),
+      CsvFiles(FILE_OTHER_BENEFITS, None),
+      CsvFiles(FILE_OTHER_CONVERTABLE, None),
+      CsvFiles(FILE_OTHER_NOTIONAL, None),
+      CsvFiles(FILE_OTHER_ENCHANCEMENT, None),
+      CsvFiles(FILE_OTHER_SOLD, None)
     )),
     (
-      PageBuilder.SAYE, List(
-      CsvFiles(PageBuilder.FILE_SAYE_GRANTED, None),
-      CsvFiles(PageBuilder.FILE_SAYE_RCL, None),
-      CsvFiles(PageBuilder.FILE_SAYE_EXERCISED, None)
+      SAYE, List(
+      CsvFiles(FILE_SAYE_GRANTED, None),
+      CsvFiles(FILE_SAYE_RCL, None),
+      CsvFiles(FILE_SAYE_EXERCISED, None)
     )),
     (
-      PageBuilder.SIP, List(
-      CsvFiles(PageBuilder.FILE_SIP_AWARDS, None),
-      CsvFiles(PageBuilder.FILE_SIP_OUT, None)
+      SIP, List(
+      CsvFiles(FILE_SIP_AWARDS, None),
+      CsvFiles(FILE_SIP_OUT, None)
     ))
   )
 
@@ -177,171 +173,143 @@ trait PageBuilder extends LegacyI18nSupport {
 
   def getPageBackLink(schemeId: String, pageId: String, condition: String = "", reportableEvents: String = "2"): String = {
     val backLink: String = schemeId match {
-      case SCHEME_CSOP => {
-        pageId match {
-          case PAGE_SCHEME_ORGANISER => {
-            reportableEvents match {
-              case OPTION_UPLOAD_SPREEDSHEET => {
-                condition match {
-                  case OPTION_ODS => routes.FileUploadController.uploadFilePage.toString()
-                  case OPTION_CSV => routes.CheckCsvFilesController.checkCsvFilesPage.toString()
-                }
-              }
-              case OPTION_NIL_RETURN => routes.ReportableEventsController.reportableEventsPage.toString()
-            }
-          }
-          case PAGE_ALT_ACTIVITY => {
-            condition match {
-              case OPTION_YES => routes.GroupSchemeController.groupPlanSummaryPage.toString()
-              case OPTION_NO => routes.GroupSchemeController.groupSchemePage.toString()
-              case _ => DEFAULT
-            }
-          }
-          case PAGE_ALT_AMENDS => routes.AltAmendsController.altActivityPage.toString()
-          case PAGE_GROUP_SUMMARY => {
-            routes.GroupSchemeController.manualCompanyDetailsPage.toString()
-          }
-          case PAGE_SUMMARY_DECLARATION => {
-            condition match {
-              case OPTION_YES => routes.AltAmendsController.altAmendsPage.toString()
-              case OPTION_NO => routes.AltAmendsController.altActivityPage.toString()
-              case _ => DEFAULT
-            }
-          }
-          case _ => DEFAULT
-        }
-      }
-      case SCHEME_EMI => {
-        pageId match {
-          case PAGE_SCHEME_ORGANISER => {
-            reportableEvents match {
-              case OPTION_UPLOAD_SPREEDSHEET => {
-                condition match {
-                  case OPTION_ODS => routes.FileUploadController.uploadFilePage.toString()
-                  case OPTION_CSV => routes.CheckCsvFilesController.checkCsvFilesPage.toString()
-                }
-              }
-              case OPTION_NIL_RETURN => routes.ReportableEventsController.reportableEventsPage.toString()
-            }
-          }
-          case PAGE_GROUP_SUMMARY => {
-            condition match {
-              case OPTION_MANUAL => routes.GroupSchemeController.manualCompanyDetailsPage.toString()
-              case _ => DEFAULT
-            }
-          }
-          case PAGE_SUMMARY_DECLARATION => {
-            condition match {
-              case OPTION_YES => routes.GroupSchemeController.groupPlanSummaryPage.toString()
-              case OPTION_NO => routes.GroupSchemeController.groupSchemePage.toString()
-              case _ => DEFAULT
-            }
-          }
-          case _ => DEFAULT
-        }
-      }
-      case SCHEME_SAYE => {
-        pageId match {
-          case PAGE_SCHEME_ORGANISER => {
-            reportableEvents match {
-              case OPTION_UPLOAD_SPREEDSHEET => {
-                condition match {
-                  case OPTION_ODS => routes.FileUploadController.uploadFilePage.toString()
-                  case OPTION_CSV => routes.CheckCsvFilesController.checkCsvFilesPage.toString()
-                }
-              }
-              case OPTION_NIL_RETURN => routes.ReportableEventsController.reportableEventsPage.toString()
-            }
-          }
-          case PAGE_ALT_ACTIVITY => {
-            condition match {
-              case OPTION_YES => routes.GroupSchemeController.groupPlanSummaryPage().toString()
-              case OPTION_NO => routes.GroupSchemeController.groupSchemePage().toString()
-              case _ => DEFAULT
-            }
-          }
-          case PAGE_ALT_AMENDS => routes.AltAmendsController.altActivityPage().toString()
-          case PAGE_GROUP_SUMMARY => {
-            condition match {
-              case OPTION_MANUAL => routes.GroupSchemeController.manualCompanyDetailsPage().toString()
-              case _ => DEFAULT
-            }
-          }
-          case PAGE_SUMMARY_DECLARATION => {
-            condition match {
-              case OPTION_YES => routes.AltAmendsController.altAmendsPage().toString()
-              case OPTION_NO => routes.GroupSchemeController.groupSchemePage().toString()
-              case _ => DEFAULT
-            }
-          }
-          case _ => DEFAULT
-        }
-      }
-      case SCHEME_SIP => {
-        pageId match {
-          case PAGE_SCHEME_ORGANISER => {
-            reportableEvents match {
-              case OPTION_UPLOAD_SPREEDSHEET => {
-                condition match {
-                  case OPTION_ODS => routes.FileUploadController.uploadFilePage.toString()
-                  case OPTION_CSV => routes.CheckCsvFilesController.checkCsvFilesPage.toString()
-                }
-              }
-              case OPTION_NIL_RETURN => routes.ReportableEventsController.reportableEventsPage.toString()
-            }
-          }
-          case PAGE_ALT_ACTIVITY => routes.TrusteeController.trusteeSummaryPage.toString()
-          case PAGE_ALT_AMENDS => routes.AltAmendsController.altActivityPage.toString()
-          case PAGE_GROUP_SUMMARY => {
-            routes.GroupSchemeController.manualCompanyDetailsPage.toString()
-          }
-          case PAGE_SUMMARY_DECLARATION => {
-            condition match {
-              case OPTION_YES => routes.AltAmendsController.altAmendsPage.toString()
-              case OPTION_NO => routes.AltAmendsController.altActivityPage.toString()
-              case _ => DEFAULT
-            }
-          }
-          case PAGE_TRUSTEE_DETAILS => {
-            condition match {
-              case OPTION_YES => routes.GroupSchemeController.groupPlanSummaryPage.toString()
-              case OPTION_NO => routes.GroupSchemeController.groupSchemePage.toString()
-              case _ => DEFAULT
-            }
-          }
-          case _ => DEFAULT
-        }
-      }
-      case SCHEME_OTHER => {
-        pageId match {
-          case PAGE_SCHEME_ORGANISER => {
-            reportableEvents match {
-              case OPTION_UPLOAD_SPREEDSHEET => {
-                condition match {
-                  case OPTION_ODS => routes.FileUploadController.uploadFilePage.toString()
-                  case OPTION_CSV => routes.CheckCsvFilesController.checkCsvFilesPage.toString()
-                }
-              }
-              case OPTION_NIL_RETURN => routes.ReportableEventsController.reportableEventsPage.toString()
-            }
-          }
-          case PAGE_GROUP_SUMMARY => {
-            condition match {
-              case OPTION_MANUAL => routes.GroupSchemeController.manualCompanyDetailsPage.toString()
-              case _ => DEFAULT
-            }
-          }
-          case PAGE_SUMMARY_DECLARATION => {
-            condition match {
-              case OPTION_YES => routes.GroupSchemeController.groupPlanSummaryPage.toString()
-              case OPTION_NO => routes.GroupSchemeController.groupSchemePage.toString()
-              case _ => DEFAULT
-            }
-          }
-          case _ => DEFAULT
-        }
-      }
-      case _ => DEFAULT
+      case SCHEME_CSOP =>
+				pageId match {
+					case PAGE_SCHEME_ORGANISER =>
+						reportableEvents match {
+							case OPTION_UPLOAD_SPREEDSHEET =>
+								condition match {
+									case OPTION_ODS => routes.FileUploadController.uploadFilePage().toString
+									case OPTION_CSV => routes.CheckCsvFilesController.checkCsvFilesPage().toString
+								}
+							case OPTION_NIL_RETURN => routes.ReportableEventsController.reportableEventsPage().toString
+						}
+					case PAGE_ALT_ACTIVITY =>
+						condition match {
+							case OPTION_YES => routes.GroupSchemeController.groupPlanSummaryPage().toString
+							case OPTION_NO => routes.GroupSchemeController.groupSchemePage().toString
+							case _ => DEFAULT
+						}
+					case PAGE_ALT_AMENDS => routes.AltAmendsController.altActivityPage().toString
+					case PAGE_GROUP_SUMMARY =>
+						routes.GroupSchemeController.manualCompanyDetailsPage().toString
+					case PAGE_SUMMARY_DECLARATION =>
+						condition match {
+							case OPTION_YES => routes.AltAmendsController.altAmendsPage().toString
+							case OPTION_NO => routes.AltAmendsController.altActivityPage().toString
+							case _ => DEFAULT
+						}
+					case _ => DEFAULT
+				}
+			case SCHEME_EMI =>
+				pageId match {
+					case PAGE_SCHEME_ORGANISER =>
+						reportableEvents match {
+							case OPTION_UPLOAD_SPREEDSHEET =>
+								condition match {
+									case OPTION_ODS => routes.FileUploadController.uploadFilePage().toString
+									case OPTION_CSV => routes.CheckCsvFilesController.checkCsvFilesPage().toString
+								}
+							case OPTION_NIL_RETURN => routes.ReportableEventsController.reportableEventsPage().toString
+						}
+					case PAGE_GROUP_SUMMARY =>
+						condition match {
+							case OPTION_MANUAL => routes.GroupSchemeController.manualCompanyDetailsPage().toString
+							case _ => DEFAULT
+						}
+					case PAGE_SUMMARY_DECLARATION =>
+						condition match {
+							case OPTION_YES => routes.GroupSchemeController.groupPlanSummaryPage().toString
+							case OPTION_NO => routes.GroupSchemeController.groupSchemePage().toString
+							case _ => DEFAULT
+						}
+					case _ => DEFAULT
+				}
+			case SCHEME_SAYE =>
+				pageId match {
+					case PAGE_SCHEME_ORGANISER =>
+						reportableEvents match {
+							case OPTION_UPLOAD_SPREEDSHEET =>
+								condition match {
+									case OPTION_ODS => routes.FileUploadController.uploadFilePage().toString
+									case OPTION_CSV => routes.CheckCsvFilesController.checkCsvFilesPage().toString
+								}
+							case OPTION_NIL_RETURN => routes.ReportableEventsController.reportableEventsPage().toString
+						}
+					case PAGE_ALT_ACTIVITY =>
+						condition match {
+							case OPTION_YES => routes.GroupSchemeController.groupPlanSummaryPage().toString
+							case OPTION_NO => routes.GroupSchemeController.groupSchemePage().toString
+							case _ => DEFAULT
+						}
+					case PAGE_ALT_AMENDS => routes.AltAmendsController.altActivityPage().toString
+					case PAGE_GROUP_SUMMARY =>
+						condition match {
+							case OPTION_MANUAL => routes.GroupSchemeController.manualCompanyDetailsPage().toString
+							case _ => DEFAULT
+						}
+					case PAGE_SUMMARY_DECLARATION =>
+						condition match {
+							case OPTION_YES => routes.AltAmendsController.altAmendsPage().toString
+							case OPTION_NO => routes.GroupSchemeController.groupSchemePage().toString
+							case _ => DEFAULT
+						}
+					case _ => DEFAULT
+				}
+			case SCHEME_SIP =>
+				pageId match {
+					case PAGE_SCHEME_ORGANISER =>
+						reportableEvents match {
+							case OPTION_UPLOAD_SPREEDSHEET =>
+								condition match {
+									case OPTION_ODS => routes.FileUploadController.uploadFilePage().toString
+									case OPTION_CSV => routes.CheckCsvFilesController.checkCsvFilesPage().toString
+								}
+							case OPTION_NIL_RETURN => routes.ReportableEventsController.reportableEventsPage().toString
+						}
+					case PAGE_ALT_ACTIVITY => routes.TrusteeController.trusteeSummaryPage().toString
+					case PAGE_ALT_AMENDS => routes.AltAmendsController.altActivityPage().toString
+					case PAGE_GROUP_SUMMARY =>
+						routes.GroupSchemeController.manualCompanyDetailsPage().toString
+					case PAGE_SUMMARY_DECLARATION =>
+						condition match {
+							case OPTION_YES => routes.AltAmendsController.altAmendsPage().toString
+							case OPTION_NO => routes.AltAmendsController.altActivityPage().toString
+							case _ => DEFAULT
+						}
+					case PAGE_TRUSTEE_DETAILS =>
+						condition match {
+							case OPTION_YES => routes.GroupSchemeController.groupPlanSummaryPage().toString
+							case OPTION_NO => routes.GroupSchemeController.groupSchemePage().toString
+							case _ => DEFAULT
+						}
+					case _ => DEFAULT
+				}
+			case SCHEME_OTHER =>
+				pageId match {
+					case PAGE_SCHEME_ORGANISER =>
+						reportableEvents match {
+							case OPTION_UPLOAD_SPREEDSHEET =>
+								condition match {
+									case OPTION_ODS => routes.FileUploadController.uploadFilePage().toString
+									case OPTION_CSV => routes.CheckCsvFilesController.checkCsvFilesPage().toString
+								}
+							case OPTION_NIL_RETURN => routes.ReportableEventsController.reportableEventsPage().toString
+						}
+					case PAGE_GROUP_SUMMARY =>
+						condition match {
+							case OPTION_MANUAL => routes.GroupSchemeController.manualCompanyDetailsPage().toString
+							case _ => DEFAULT
+						}
+					case PAGE_SUMMARY_DECLARATION =>
+						condition match {
+							case OPTION_YES => routes.GroupSchemeController.groupPlanSummaryPage().toString
+							case OPTION_NO => routes.GroupSchemeController.groupSchemePage().toString
+							case _ => DEFAULT
+						}
+					case _ => DEFAULT
+				}
+			case _ => DEFAULT
     }
     backLink
   }

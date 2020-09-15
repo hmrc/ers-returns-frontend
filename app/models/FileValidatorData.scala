@@ -16,8 +16,7 @@
 
 package models
 
-import models.upscan.{UploadStatus, UploadedSuccessfully}
-import UploadStatus.uploadedSuccessfullyFormat
+import models.upscan.UploadedSuccessfully
 import play.api.libs.json.{Json, Writes}
 
 case class ValidatorData(callbackData: UploadedSuccessfully, schemeInfo: SchemeInfo)

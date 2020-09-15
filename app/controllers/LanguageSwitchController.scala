@@ -17,17 +17,13 @@
 package controllers
 
 import com.google.inject.Inject
-import play.api.i18n.{I18nSupport, Lang, MessagesApi}
-import play.api.mvc.{Action, AnyContent, Call, Controller, Session}
 import config.ApplicationConfig
-import uk.gov.hmrc.play.language.LanguageUtils
+import play.api.i18n.{I18nSupport, Lang, MessagesApi}
+import play.api.mvc.{Action, AnyContent, Controller}
 
-class LanguageSwitchController @Inject() (
-                                           appConfig: ApplicationConfig,
-                                           implicit val messagesApi: MessagesApi
-                                         ) extends Controller with I18nSupport with ErsConstants {
-
-  private def langToCall(lang: String): (String) => Call = appConfig.routeToSwitchLanguage
+class LanguageSwitchController @Inject() (appConfig: ApplicationConfig,
+																					implicit val messagesApi: MessagesApi
+                                         ) extends Controller with I18nSupport {
 
   private def fallbackURL: String = routes.ReturnServiceController.hmacCheck().url
 
@@ -37,12 +33,12 @@ class LanguageSwitchController @Inject() (
     implicit request =>
       val enabled = appConfig.languageTranslationEnabled
       val lang = if (enabled) {
-        languageMap.getOrElse(language, LanguageUtils.getCurrentLang)
+        languageMap.getOrElse(language, Lang.defaultLang)
       } else {
         Lang("en")
       }
       val redirectURL = request.headers.get(REFERER).getOrElse(fallbackURL)
-      Redirect(redirectURL).withLang(Lang.apply(lang.code)).flashing(LanguageUtils.FlashWithSwitchIndicator)
+      Redirect(redirectURL).withLang(Lang.apply(lang.code))
   }
 
 }

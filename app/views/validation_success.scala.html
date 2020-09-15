@@ -14,18 +14,19 @@
  * limitations under the License.
  *@
 
-@(implicit request: Request[AnyRef], context: config.ErsContext, messages: Messages)
+@import config.ApplicationConfig
+@(implicit request: Request[AnyRef], messages: Messages, appConfig: ApplicationConfig)
 
 @import views.html.templates._
 
 
-@ers_main(title = Messages("ers.app_title")) {	
-	@header(Messages("ers_file_format_successful.page_title"))	
-	<div class="success-banner"  id="success-message"><p class="heading-medium">@Html(Messages("ers_file_format_successful.banner"))</p></div>
-	<div class="bottom-grey"></div>  
-	<div class="text">  	    
-		<h2 class="heading-medium">@Html(Messages("ers_file_format_successful.sub_heading"))</h2>	
-		<p>@Html(Messages("ers_file_format_successful.instructions"))</p>
-		<a class="button" role="button" href="https://www.gov.uk/done/employment-related-securities-files" id="finished">@Html(Messages("ers.finish"))</a>
+@ers_main(title = messages("ers.app_title")) {
+	@header(messages("ers_file_format_successful.page_title"))
+	<div class="success-banner"  id="success-message"><p class="heading-medium">@Html(messages("ers_file_format_successful.banner"))</p></div>
+	<div class="bottom-grey"></div>
+	<div class="text">
+		<h2 class="heading-medium">@Html(messages("ers_file_format_successful.sub_heading"))</h2>
+		<p>@Html(messages("ers_file_format_successful.instructions"))</p>
+		<a class="button" role="button" href="https://www.gov.uk/done/employment-related-securities-files" id="finished">@Html(messages("ers.finish"))</a>
 	</div>
 }

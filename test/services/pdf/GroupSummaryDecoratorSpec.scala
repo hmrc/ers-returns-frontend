@@ -17,7 +17,7 @@
 package services.pdf
 
 import org.mockito.{ArgumentMatchers, Mock}
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import uk.gov.hmrc.play.test.UnitSpec
 import org.mockito.Mockito._
 import org.mockito.internal.verification.VerificationModeFactory

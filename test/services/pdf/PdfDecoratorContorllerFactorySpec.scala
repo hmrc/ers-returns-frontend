@@ -18,37 +18,42 @@ package services.pdf
 
 import akka.stream.Materializer
 import org.scalatest.matchers.{BePropertyMatchResult, BePropertyMatcher}
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.OneAppPerSuite
 import play.api.Application
+import play.api.Play.current
+import play.api.i18n.Messages.Implicits._
 import play.api.inject.guice.GuiceApplicationBuilder
 import uk.gov.hmrc.play.test.UnitSpec
-import utils.{ERSFakeApplicationConfig, Fixtures}
-import play.api.Play.current
-import play.api.i18n.Messages
-import play.api.i18n.Messages.Implicits._
+import utils.{CountryCodes, ERSFakeApplicationConfig, Fixtures}
 
-class PdfDecoratorContorllerFactorySpec extends UnitSpec with OneAppPerSuite with ERSFakeApplicationConfig {
+class PdfDecoratorContorllerFactorySpec extends UnitSpec with OneAppPerSuite with ERSFakeApplicationConfig with MockitoSugar {
   override lazy val app: Application = new GuiceApplicationBuilder().configure(config).build()
   implicit lazy val mat: Materializer = app.materializer
 
+	class TestPdfDecoratorControllerFactory extends PdfDecoratorControllerFactory {
+		val mockCountryCodes: CountryCodes = mock[CountryCodes]
+		override val countryCodes: CountryCodes = mockCountryCodes
+	}
+
   // a function to get matching an instance to be of certain type
-  def anInstanceOf[T](implicit manifest: Manifest[T]) = {
+  def anInstanceOf[T](implicit manifest: Manifest[T]): BePropertyMatcher[AnyRef] = {
     val clazz = manifest.runtimeClass.asInstanceOf[Class[T]]
     new BePropertyMatcher[AnyRef] {
-      def apply(left: AnyRef) =
+      def apply(left: AnyRef): BePropertyMatchResult =
         BePropertyMatchResult(clazz.isAssignableFrom(left.getClass), "an instance of " + clazz.getName)
     }
   }
 
   "extended pdf scheme decortator factory" should {
-    "create new emi scheme decorator when scheme is EMI" in {
-      val decorator = PdfDecoratorControllerFactory.createPdfDecoratorControllerForScheme("emi", Fixtures.ersSummary, None)
+    "create new emi scheme decorator when scheme is EMI" in new TestPdfDecoratorControllerFactory {
+      val decorator: DecoratorController = createPdfDecoratorControllerForScheme("emi", Fixtures.ersSummary, None)
       decorator should be(anInstanceOf[DecoratorController])
     }
 
-    "throw invalid argument exception if scheme is not supported" in {
+    "throw invalid argument exception if scheme is not supported" in new TestPdfDecoratorControllerFactory {
       intercept[IllegalArgumentException] {
-        PdfDecoratorControllerFactory.createPdfDecoratorControllerForScheme("blah", Fixtures.ersSummary, None)
+        createPdfDecoratorControllerForScheme("blah", Fixtures.ersSummary, None)
       }
     }
   }

@@ -14,20 +14,22 @@
  * limitations under the License.
  *@
 
-@()(implicit request: Request[AnyRef], context: config.ErsContext, messages: Messages)
+@import utils.ERSUtil
+@import config.ApplicationConfig
+@()(implicit request: Request[AnyRef], messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 
-@ers_main(title = Messages("ers.app_title")) {
+@ers_main(title = messages("ers.app_title")) {
 
 <div class="grid">
     <div class="grid-2-3">
-        <h1>@Messages("ers.app_title")</h1>
+        <h1>@messages("ers.app_title")</h1>
     </div>
 </div>
 
 <div class="grid">
   <div class="grid-2-3">
 
-      <h2 class="bottom-blue-border">@Messages("ers.emi")</h2>
+      <h2 class="bottom-blue-border">@messages("ers.emi")</h2>
 
   </div>
 

@@ -16,41 +16,46 @@
 
 package controllers
 
+import config.ApplicationConfig
+import connectors.ErsConnector
+import javax.inject.{Inject, Singleton}
 import models._
 import play.api.Logger
 import play.api.Play.current
 import play.api.data.Form
-import play.api.i18n.Messages
+import play.api.i18n.{Messages, MessagesApi}
 import play.api.i18n.Messages.Implicits._
 import play.api.mvc.{Action, AnyContent, Request, Result}
-import uk.gov.hmrc.play.frontend.auth.AuthContext
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
+import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import utils._
 
 import scala.concurrent.Future
-import uk.gov.hmrc.http.HeaderCarrier
 
-object TrusteeController extends TrusteeController {
-  override val cacheUtil: CacheUtil = CacheUtil
-}
-
-trait TrusteeController extends ERSReturnBaseController with Authenticator {
-  val cacheUtil: CacheUtil
+@Singleton
+class TrusteeController @Inject()(val messagesApi: MessagesApi,
+																	val authConnector: DefaultAuthConnector,
+																	val ersConnector: ErsConnector,
+																	implicit val countryCodes: CountryCodes,
+																	implicit val ersUtil: ERSUtil,
+																	implicit val appConfig: ApplicationConfig) extends FrontendController with Authenticator {
 
   def trusteeDetailsPage(index: Int): Action[AnyContent] = authorisedForAsync() {
     implicit user: ERSAuthData =>
       implicit request =>
-        cacheUtil.fetch[RequestObject](cacheUtil.ersRequestObject).flatMap { requestObject =>
+        ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
           showTrusteeDetailsPage(requestObject, index)(user, request, hc)
         }
   }
 
   def showTrusteeDetailsPage(requestObject: RequestObject, index: Int)
 														(implicit authContext: ERSAuthData, request: Request[AnyContent], hc: HeaderCarrier): Future[Result] = {
-    cacheUtil.fetch[GroupSchemeInfo](CacheUtil.GROUP_SCHEME_CACHE_CONTROLLER, requestObject.getSchemeReference).map { groupSchemeActivity =>
-      Ok(views.html.trustee_details(requestObject, groupSchemeActivity.groupScheme.getOrElse(PageBuilder.DEFAULT), index, RsFormMappings.trusteeDetailsForm))
+    ersUtil.fetch[GroupSchemeInfo](ersUtil.GROUP_SCHEME_CACHE_CONTROLLER, requestObject.getSchemeReference).map { groupSchemeActivity =>
+      Ok(views.html.trustee_details(requestObject, groupSchemeActivity.groupScheme.getOrElse(ersUtil.DEFAULT), index, RsFormMappings.trusteeDetailsForm))
     } recover {
       case e: Exception =>
-				Logger.error(s"showTrusteeDetailsPage: Get data from cache failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
+				Logger.error(s"[TrusteeController][showTrusteeDetailsPage] Get data from cache failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
 				getGlobalErrorPage
 		}
   }
@@ -58,7 +63,7 @@ trait TrusteeController extends ERSReturnBaseController with Authenticator {
   def trusteeDetailsSubmit(index: Int): Action[AnyContent] = authorisedForAsync() {
     implicit user =>
       implicit request =>
-        cacheUtil.fetch[RequestObject](cacheUtil.ersRequestObject).flatMap { requestObject =>
+        ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
           showTrusteeDetailsSubmit(requestObject, index)(user, request, hc)
         }
   }
@@ -67,32 +72,32 @@ trait TrusteeController extends ERSReturnBaseController with Authenticator {
 															(implicit authContext: ERSAuthData, request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
     RsFormMappings.trusteeDetailsForm.bindFromRequest.fold(
       errors => {
-        cacheUtil.fetch[GroupSchemeInfo](CacheUtil.GROUP_SCHEME_CACHE_CONTROLLER, requestObject.getSchemeReference).map { groupSchemeActivity =>
+        ersUtil.fetch[GroupSchemeInfo](ersUtil.GROUP_SCHEME_CACHE_CONTROLLER, requestObject.getSchemeReference).map { groupSchemeActivity =>
           val correctOrder = errors.errors.map(_.key).distinct
           val incorrectOrderGrouped = errors.errors.groupBy(_.key).map(_._2.head).toSeq
           val correctOrderGrouped = correctOrder.flatMap(x => incorrectOrderGrouped.find(_.key == x))
           val firstErrors: Form[models.TrusteeDetails] = new Form[TrusteeDetails](errors.mapping, errors.data, correctOrderGrouped, errors.value)
-          Ok(views.html.trustee_details(requestObject, groupSchemeActivity.groupScheme.getOrElse(PageBuilder.DEFAULT), index, firstErrors))
+          Ok(views.html.trustee_details(requestObject, groupSchemeActivity.groupScheme.getOrElse(ersUtil.DEFAULT), index, firstErrors))
         } recover {
-          case e: Exception => {
-            Logger.error(s"showTrusteeDetailsSubmit: Get data from cache failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
-            getGlobalErrorPage
-          }
-        }
+          case e: Exception =>
+						Logger.error(s"[TrusteeController][showTrusteeDetailsSubmit] Get data from cache failed with exception ${e.getMessage}, " +
+							s"timestamp: ${System.currentTimeMillis()}.")
+						getGlobalErrorPage
+				}
       },
       formData => {
-        cacheUtil.fetch[TrusteeDetailsList](CacheUtil.TRUSTEES_CACHE, requestObject.getSchemeReference).flatMap { cachedTrusteeList =>
+        ersUtil.fetch[TrusteeDetailsList](ersUtil.TRUSTEES_CACHE, requestObject.getSchemeReference).flatMap { cachedTrusteeList =>
 
           val processedFormData = TrusteeDetailsList(replaceTrustee(cachedTrusteeList.trustees, index, formData))
 
-          cacheUtil.cache(CacheUtil.TRUSTEES_CACHE, processedFormData, requestObject.getSchemeReference).map { all =>
+          ersUtil.cache(ersUtil.TRUSTEES_CACHE, processedFormData, requestObject.getSchemeReference).map { _ =>
             Redirect(routes.TrusteeController.trusteeSummaryPage())
           }
 
         } recoverWith {
           case _: Exception =>
             val trusteeList = TrusteeDetailsList(List(formData))
-            cacheUtil.cache(CacheUtil.TRUSTEES_CACHE, trusteeList, requestObject.getSchemeReference).map {
+            ersUtil.cache(ersUtil.TRUSTEES_CACHE, trusteeList, requestObject.getSchemeReference).map {
               _ => Redirect(routes.TrusteeController.trusteeSummaryPage())
             }
         }
@@ -119,10 +124,10 @@ trait TrusteeController extends ERSReturnBaseController with Authenticator {
   def showDeleteTrustee(id: Int)(implicit authContext: ERSAuthData, request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
 
     (for {
-      requestObject      <- cacheUtil.fetch[RequestObject](cacheUtil.ersRequestObject)
-      cachedTrusteeList  <- cacheUtil.fetch[TrusteeDetailsList](CacheUtil.TRUSTEES_CACHE, requestObject.getSchemeReference)
+      requestObject      <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
+      cachedTrusteeList  <- ersUtil.fetch[TrusteeDetailsList](ersUtil.TRUSTEES_CACHE, requestObject.getSchemeReference)
       trusteeDetailsList = TrusteeDetailsList(filterDeletedTrustee(cachedTrusteeList, id))
-      _                  <- cacheUtil.cache(CacheUtil.TRUSTEES_CACHE, trusteeDetailsList, requestObject.getSchemeReference)
+      _                  <- ersUtil.cache(ersUtil.TRUSTEES_CACHE, trusteeDetailsList, requestObject.getSchemeReference)
     } yield {
       Redirect(routes.TrusteeController.trusteeSummaryPage())
 
@@ -142,9 +147,9 @@ trait TrusteeController extends ERSReturnBaseController with Authenticator {
 
   def showEditTrustee(id: Int)(implicit authContext: ERSAuthData, request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
     (for {
-      requestObject       <- cacheUtil.fetch[RequestObject](cacheUtil.ersRequestObject)
-      groupSchemeActivity <- cacheUtil.fetch[GroupSchemeInfo](CacheUtil.GROUP_SCHEME_CACHE_CONTROLLER, requestObject.getSchemeReference)
-      trusteeDetailsList  <- cacheUtil.fetch[TrusteeDetailsList](CacheUtil.TRUSTEES_CACHE, requestObject.getSchemeReference)
+      requestObject       <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
+      groupSchemeActivity <- ersUtil.fetch[GroupSchemeInfo](ersUtil.GROUP_SCHEME_CACHE_CONTROLLER, requestObject.getSchemeReference)
+      trusteeDetailsList  <- ersUtil.fetch[TrusteeDetailsList](ersUtil.TRUSTEES_CACHE, requestObject.getSchemeReference)
       formDetails         = trusteeDetailsList.trustees(id)
     } yield {
 
@@ -152,7 +157,7 @@ trait TrusteeController extends ERSReturnBaseController with Authenticator {
 
     }) recover {
       case e: Exception =>
-        Logger.error(s"showEditTrustee: Get data from cache failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
+        Logger.error(s"[TrusteeController][showEditTrustee] Get data from cache failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
         getGlobalErrorPage
     }
   }
@@ -166,14 +171,14 @@ trait TrusteeController extends ERSReturnBaseController with Authenticator {
   def showTrusteeSummaryPage()(implicit authContext: ERSAuthData, request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
 
     (for {
-      requestObject      <- cacheUtil.fetch[RequestObject](cacheUtil.ersRequestObject)
-      trusteeDetailsList <- cacheUtil.fetch[TrusteeDetailsList](CacheUtil.TRUSTEES_CACHE, requestObject.getSchemeReference)
+      requestObject      <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
+      trusteeDetailsList <- ersUtil.fetch[TrusteeDetailsList](ersUtil.TRUSTEES_CACHE, requestObject.getSchemeReference)
     } yield {
 
       Ok(views.html.trustee_summary(requestObject, trusteeDetailsList))
     }) recover {
       case e: Exception =>
-        Logger.error(s"showTrusteeSummaryPage: Get data from cache failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
+        Logger.error(s"[TrusteeController][showTrusteeSummaryPage] Get data from cache failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
         getGlobalErrorPage
     }
   }
@@ -188,9 +193,12 @@ trait TrusteeController extends ERSReturnBaseController with Authenticator {
     Future(Redirect(routes.AltAmendsController.altActivityPage()))
   }
 
-  def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result = Ok(views.html.global_error(
-    messages("ers.global_errors.title"),
-    messages("ers.global_errors.heading"),
-    messages("ers.global_errors.message"))(request, messages))
+	def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result = {
+		Ok(views.html.global_error(
+			"ers.global_errors.title",
+			"ers.global_errors.heading",
+			"ers.global_errors.message"
+		)(request, messages, appConfig))
+	}
 
 }

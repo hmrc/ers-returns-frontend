@@ -18,20 +18,18 @@ package controllers
 
 import controllers.auth.AuthFunctionality
 import models.{ERSAuthData, ErsMetaData, RequestObject}
-import play.api.Logger
 import play.api.libs.json.{Json, OFormat}
 import play.api.mvc._
 import uk.gov.hmrc.domain.EmpRef
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.HeaderCarrierConverter
-import utils.CacheUtil
+import utils.ERSUtil
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-
-trait Authenticator extends AuthFunctionality with ErsConstants {
-	val cacheUtil: CacheUtil
+trait Authenticator extends AuthFunctionality {
+	val ersUtil: ERSUtil
 	private type AsyncUserRequest = ERSAuthData => Request[AnyContent] => Future[Result]
 	private type UserRequest = ERSAuthData => Request[AnyContent] => Result
 
@@ -56,8 +54,8 @@ trait Authenticator extends AuthFunctionality with ErsConstants {
 		implicit val formatRSParams: OFormat[ErsMetaData] = Json.format[ErsMetaData]
 		if (authContext.isAgent) {
 			for {
-				requestObject <- cacheUtil.fetch[RequestObject](cacheUtil.ersRequestObject)
-				all <- cacheUtil.fetch[ErsMetaData](cacheUtil.ersMetaData, requestObject.getSchemeReference)
+				requestObject <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
+				all <- ersUtil.fetch[ErsMetaData](ersUtil.ersMetaData, requestObject.getSchemeReference)
 				result <- body(delegationModelUser(all, authContext: ERSAuthData))(request)
 			} yield {
 				result
@@ -71,9 +69,9 @@ trait Authenticator extends AuthFunctionality with ErsConstants {
 		}
 	}
 
-		def delegationModelUser(metaData: ErsMetaData, authContext: ERSAuthData): ERSAuthData = {
-			val twoPartKey = metaData.empRef.split('/')
-			authContext.copy(empRef = EmpRef(twoPartKey(0), twoPartKey(1)))
-		}
+	def delegationModelUser(metaData: ErsMetaData, authContext: ERSAuthData): ERSAuthData = {
+		val twoPartKey = metaData.empRef.split('/')
+		authContext.copy(empRef = EmpRef(twoPartKey(0), twoPartKey(1)))
+	}
 }
 

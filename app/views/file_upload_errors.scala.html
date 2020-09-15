@@ -14,33 +14,34 @@
  * limitations under the License.
  *@
 
-@(requestObject: RequestObject, fileType: String)(implicit request: Request[AnyRef], context: config.ErsContext, messages: Messages)
-@import utils.PageBuilder._
+@import utils.ERSUtil
+@import config.ApplicationConfig
+@(requestObject: RequestObject, fileType: String)(implicit request: Request[AnyRef], messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 @import views.html.templates._
 
-@ers_main(title = Messages("file_upload_errors.title") + " " + Messages("ers.title.postfix")) {
+@ers_main(title = messages("file_upload_errors.title") + " " + messages("ers.title.postfix")) {
 
 	@reference(requestObject.getPageTitle)
 
-	@if(fileType == OPTION_ODS){
-		<p class="font-xsmall"><a href="@routes.FileUploadController.uploadFilePage" class="link-back">@Html(Messages("ers.back"))</a></p>
+	@if(fileType == ersUtil.OPTION_ODS){
+		<p class="font-xsmall"><a href="@routes.FileUploadController.uploadFilePage" class="link-back">@Html(messages("ers.back"))</a></p>
 	} else {
-		<p class="font-xsmall"><a href="@routes.CsvFileUploadController.uploadFilePage" class="link-back">@Html(Messages("ers.back"))</a></p>
+		<p class="font-xsmall"><a href="@routes.CsvFileUploadController.uploadFilePage" class="link-back">@Html(messages("ers.back"))</a></p>
 	}
 
-	@header(Messages("file_upload_errors.title"))
+	@header(messages("file_upload_errors.title"))
 
 	<div class="panel-indent">
-		@if(fileType == OPTION_ODS) {
-			<p>@Html(Messages("file_upload_errors.para1")) <a href="@routes.FileUploadController.uploadFilePage()">@Html(Messages("file_upload_errors.upload_link"))</a>.</p>
+		@if(fileType == ersUtil.OPTION_ODS) {
+			<p>@Html(messages("file_upload_errors.para1")) <a href="@routes.FileUploadController.uploadFilePage()">@Html(messages("file_upload_errors.upload_link"))</a>.</p>
 		} else {
-			<p>@Html(Messages("file_upload_errors.para1")) <a href="@routes.CheckCsvFilesController.checkCsvFilesPage()">@Html(Messages("file_upload_errors.upload_link"))</a>.</p>
+			<p>@Html(messages("file_upload_errors.para1")) <a href="@routes.CheckCsvFilesController.checkCsvFilesPage()">@Html(messages("file_upload_errors.upload_link"))</a>.</p>
 		}
 	</div>
 
-	<h2>@Html(Messages("file_upload_errors.go_fix"))</h2>
+	<h2>@Html(messages("file_upload_errors.go_fix"))</h2>
 
-	<p><a href="/check-your-ers-files">@Html(Messages("file_upload_errors.check_file"))</a> @Html(Messages("file_upload_errors.info"))</p>
+	<p><a href="/check-your-ers-files">@Html(messages("file_upload_errors.check_file"))</a> @Html(messages("file_upload_errors.info"))</p>
 
 
 }

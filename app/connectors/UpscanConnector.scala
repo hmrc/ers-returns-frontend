@@ -17,25 +17,25 @@
 package connectors
 
 import config.ApplicationConfig
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 import models.upscan.{PreparedUpload, UpscanInitiateRequest, UpscanInitiateResponse}
-import play.api.Configuration
 import play.api.http.HeaderNames
-import uk.gov.hmrc.http.{HeaderCarrier, HttpPost}
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class UpscanConnector @Inject()(
-                                 configuration: ApplicationConfig,
-                                 httpClient: HttpPost
+@Singleton
+class UpscanConnector @Inject()(appConfig: ApplicationConfig,
+																httpClient: DefaultHttpClient
                                )(implicit ec: ExecutionContext) {
 
   private val headers = Map(
-    HeaderNames.USER_AGENT   -> configuration.appName,
+    HeaderNames.USER_AGENT   -> appConfig.appName,
     HeaderNames.CONTENT_TYPE -> "application/json"
   )
 
-  private val upscanInitiateHost: String = configuration.upscanInitiateHost
+  private val upscanInitiateHost: String = appConfig.upscanInitiateHost
   private[connectors] val upscanInitiatePath: String = "/upscan/v2/initiate"
   private val upscanInitiateUrl: String = upscanInitiateHost + upscanInitiatePath
 

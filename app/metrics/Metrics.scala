@@ -17,48 +17,26 @@
 package metrics
 
 import java.util.concurrent.TimeUnit
-
 import com.codahale.metrics.MetricRegistry
-import uk.gov.hmrc.play.graphite.MicroserviceMetrics
 
 trait Metrics {
-  def csvValidationTimer(diff: Long, unit: TimeUnit): Unit
+	val registry = new MetricRegistry
 
-  def odsValidationTimer(diff: Long, unit: TimeUnit): Unit
+	def csvValidationTimer(diff: Long, unit: TimeUnit): Unit = registry.timer("csv-validation-timer").update(diff, unit)
 
-  def fileUploadSize(n: Long): Unit
+	def odsValidationTimer(diff: Long, unit: TimeUnit): Unit = registry.timer("ods-validation-timer").update(diff, unit)
 
-  def cacheTimeStore(diff: Long, unit: TimeUnit): Unit
+	def fileUploadSize(n: Long): Unit = registry.histogram("file-upload-size").update(n)
 
-  def cacheTimeFetch(diff: Long, unit: TimeUnit): Unit
+	def cacheTimeStore(diff: Long, unit: TimeUnit): Unit = registry.timer("store-cache-timer").update(diff, unit)
 
-  def accessThresholdGranted(): Unit
+	def cacheTimeFetch(diff: Long, unit: TimeUnit): Unit = registry.timer("fetch-cache-timer").update(diff, unit)
 
-  def accessThresholdDenied(): Unit
+	def accessThresholdGranted(): Unit = registry.counter("access-threshold-granted").inc()
 
-  def ersConnector(diff: Long, unit: TimeUnit): Unit
+	def accessThresholdDenied(): Unit = registry.counter("access-threshold-denied").inc()
 
-  def submitReturnToBackend(diff: Long, unit: TimeUnit): Unit
-}
+	def ersConnector(diff: Long, unit: TimeUnit): Unit = registry.timer("validator-connector").update(diff, unit)
 
-object Metrics extends Metrics with MicroserviceMetrics {
-  val registry: MetricRegistry = metrics.defaultRegistry
-
-  override def csvValidationTimer(diff: Long, unit: TimeUnit): Unit = registry.timer("csv-validation-timer").update(diff, unit)
-
-  override def odsValidationTimer(diff: Long, unit: TimeUnit): Unit = registry.timer("ods-validation-timer").update(diff, unit)
-
-  override def fileUploadSize(n: Long): Unit = registry.histogram("file-upload-size").update(n)
-
-  override def cacheTimeStore(diff: Long, unit: TimeUnit): Unit = registry.timer("store-cache-timer").update(diff, unit)
-
-  override def cacheTimeFetch(diff: Long, unit: TimeUnit): Unit = registry.timer("fetch-cache-timer").update(diff, unit)
-
-  override def accessThresholdGranted(): Unit = registry.counter("access-threshold-granted").inc()
-
-  override def accessThresholdDenied(): Unit = registry.counter("access-threshold-denied").inc()
-
-  override def ersConnector(diff: Long, unit: TimeUnit): Unit = registry.timer("validator-connector").update(diff, unit)
-
-  override def submitReturnToBackend(diff: Long, unit: TimeUnit): Unit = registry.timer("submit-to-returns-connector").update(diff, unit)
+	def submitReturnToBackend(diff: Long, unit: TimeUnit): Unit = registry.timer("submit-to-returns-connector").update(diff, unit)
 }

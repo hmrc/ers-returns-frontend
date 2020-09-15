@@ -14,13 +14,11 @@
  * limitations under the License.
  *@
 
-@()(implicit request: Request[AnyRef], context: config.ErsContext)
+@import config.ApplicationConfig
+@()(implicit request: Request[_], messages: Messages, appConfig: ApplicationConfig)
 
-@import play.api.Play.current
-@import play.api.i18n.Messages.Implicits._
+@ers_main(title = messages("ers.error.title")) {
 
-@ers_main(title = Messages("ers.error.title")) {
-
-<h1>@Messages("ers.error.unauthorise")</h1>
+<h1>@messages("ers.error.unauthorise")</h1>
 
 }

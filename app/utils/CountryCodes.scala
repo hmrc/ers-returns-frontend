@@ -16,32 +16,35 @@
 
 package utils
 
-import play.api.{Logger, Play}
-import play.api.Play.current
-import play.api.libs.json.{JsValue, Json}
+import java.io.InputStream
+
+import javax.inject.Inject
+import play.api.libs.json.{JsValue, Json, OFormat}
+import play.api.{Environment, Logger}
+
 import scala.io.Source
 
+case class Country(country: String, countryCode: String)
 
-object CountryCodes extends CountryCodes
+object Country {
+	implicit val formats: OFormat[Country] = Json.format[Country]
+}
+
+class CountryCodesImpl @Inject()(val environment: Environment) extends CountryCodes
 
 trait CountryCodes {
 
-  case class Country(country: String, countryCode: String)
+	def environment: Environment
 
-  object Country {
-    implicit val formats = Json.format[Country]
-  }
-
-  val jsonInputStream = Play.application.resourceAsStream("country-codes.json")
+  val jsonInputStream: Option[InputStream] = environment.resourceAsStream("country-codes.json")
 
   private val json: JsValue = {
     jsonInputStream match {
       case Some(inputStream) => Json.parse(Source.fromInputStream(inputStream, "UTF-8").mkString)
-      case _ => {
-        Logger.error(s"Country codes file not found, timestamp: ${System.currentTimeMillis()}.")
-        throw new Exception
-      }
-    }
+      case _ =>
+				Logger.error(s"Country codes file not found, timestamp: ${System.currentTimeMillis()}.")
+				throw new Exception
+		}
   }
 
   val countries: String = {
@@ -61,5 +64,4 @@ trait CountryCodes {
   def getCountry(countryCode: String): Option[String] = {
     countryCodesMap.get(countryCode)
   }
-
 }

@@ -19,71 +19,60 @@ package controllers
 import java.util.NoSuchElementException
 
 import akka.stream.Materializer
-import connectors.ErsConnector
+import helpers.ErsTestHelper
 import models._
-import org.joda.time.DateTime
 import org.jsoup.Jsoup
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
-import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status
 import play.api.i18n.{Lang, Messages, MessagesApi}
 import play.api.mvc.Request
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.auth.core.PlayAuthConnector
 import uk.gov.hmrc.play.test.UnitSpec
 import utils.Fixtures.ersRequestObject
-import utils.{AuthHelper, CacheUtil, ERSFakeApplicationConfig, Fixtures, PageBuilder}
+import utils.{ERSFakeApplicationConfig, Fixtures}
 
 import scala.concurrent.Future
 
-class SchemeOrganiserControllerTest extends UnitSpec with GuiceOneAppPerSuite with ERSFakeApplicationConfig with AuthHelper {
+class SchemeOrganiserControllerTest extends UnitSpec with GuiceOneAppPerSuite with ERSFakeApplicationConfig with ErsTestHelper {
 
-  val messagesApi: MessagesApi = app.injector.instanceOf[MessagesApi]
+  lazy val messagesApi: MessagesApi = app.injector.instanceOf[MessagesApi]
   implicit val messages: Messages = messagesApi.preferred(Seq(Lang.get("en").get))
   implicit val requests: Request[_] = FakeRequest()
   implicit val mat: Materializer = app.materializer
 
   "calling Scheme Organiser Page" should {
 
-    def buildFakeSchemeOrganiserController(groupSchemeActivityRes: Boolean = true,
-																					 schemeOrganiserDetailsRes: Boolean = true,
+    def buildFakeSchemeOrganiserController(schemeOrganiserDetailsRes: Boolean = true,
 																					 schemeOrganiserDataCached: Boolean = false,
 																					 reportableEventsRes: Boolean = true,
-																					 fileTypeRes: Boolean = true,
-																					 altAmendsActivityRes: Boolean = true,
-																					 cacheRes: Boolean = true
-																					): SchemeOrganiserController = new SchemeOrganiserController {
+																					 fileTypeRes: Boolean = true
+																					): SchemeOrganiserController = new SchemeOrganiserController(messagesApi, mockAuthConnector, mockCountryCodes, mockErsUtil, mockAppConfig) {
 
-      val mockErsConnector: ErsConnector = mock[ErsConnector]
-      val mockCacheUtil: CacheUtil = mock[CacheUtil]
-      override val cacheUtil: CacheUtil = mockCacheUtil
-			override val authConnector: PlayAuthConnector = mockAuthConnector
-
-			when(mockCacheUtil.fetch[RequestObject](any())(any(), any(), any(), any())).thenReturn(Future.successful(ersRequestObject))
+			when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any(), any())).thenReturn(Future.successful(ersRequestObject))
 
 			when(
-        mockCacheUtil.fetch[ReportableEvents](refEq(CacheUtil.reportableEvents), any())(any(), any(), any())
+        mockErsUtil.fetch[ReportableEvents](refEq(REPORTABLE_EVENTS), any())(any(), any(), any())
       ).thenReturn(
         if (reportableEventsRes) {
-          Future.successful(ReportableEvents(Some(PageBuilder.OPTION_NO)))
+          Future.successful(ReportableEvents(Some(OPTION_NO)))
         } else {
           Future.failed(new Exception)
         }
       )
       when(
-        mockCacheUtil.fetchOption[CheckFileType](refEq(CacheUtil.FILE_TYPE_CACHE), any())(any(), any(), any())
+        mockErsUtil.fetchOption[CheckFileType](refEq(FILE_TYPE_CACHE), any())(any(), any(), any())
       ).thenReturn(
         if (fileTypeRes) {
-          Future.successful(Some(CheckFileType(Some(PageBuilder.OPTION_CSV))))
+          Future.successful(Some(CheckFileType(Some(OPTION_CSV))))
         } else {
           Future.failed(new NoSuchElementException)
         }
       )
       when(
-        mockCacheUtil.fetch[SchemeOrganiserDetails](refEq(CacheUtil.SCHEME_ORGANISER_CACHE), any())(any(), any(), any())
+        mockErsUtil.fetch[SchemeOrganiserDetails](refEq(SCHEME_ORGANISER_CACHE), any())(any(), any(), any())
       ).thenReturn(
         if (schemeOrganiserDetailsRes) {
           if (schemeOrganiserDataCached) {
@@ -113,9 +102,10 @@ class SchemeOrganiserControllerTest extends UnitSpec with GuiceOneAppPerSuite wi
 
     "direct to ers errors page if fetching reportableEvents throws exception" in {
       val controllerUnderTest = buildFakeSchemeOrganiserController(reportableEventsRes = false)
-      val result = await(controllerUnderTest.showSchemeOrganiserPage(ersRequestObject)(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionIdCSOP("GET"), hc))
+			val req = Fixtures.buildFakeRequestWithSessionIdCSOP("GET")
+      val result = await(controllerUnderTest.showSchemeOrganiserPage(ersRequestObject)(Fixtures.buildFakeUser, req, hc))
       contentAsString(result) should include(messages("ers.global_errors.message"))
-      contentAsString(result) shouldBe contentAsString(buildFakeSchemeOrganiserController().getGlobalErrorPage)
+      contentAsString(result) shouldBe contentAsString(buildFakeSchemeOrganiserController().getGlobalErrorPage(req, messages))
     }
 
     "show blank scheme organiser page if fetching file type from cache fails" in {
@@ -154,35 +144,26 @@ class SchemeOrganiserControllerTest extends UnitSpec with GuiceOneAppPerSuite wi
 																					 schemeOrganiserDataCached: Boolean = false,
 																					 reportableEventsRes: Boolean = true,
 																					 fileTypeRes: Boolean = true,
-																					 altAmendsActivityRes: Boolean = true,
 																					 schemeOrganiserDataCachedOk: Boolean = true
-																					): SchemeOrganiserController = new SchemeOrganiserController {
+																					): SchemeOrganiserController = new SchemeOrganiserController(messagesApi, mockAuthConnector, mockCountryCodes, mockErsUtil, mockAppConfig) {
 
-      val schemeInfo = SchemeInfo("XA1100000000000", DateTime.now, "1", "2016", "CSOP 2015/16", "CSOP")
-      val rsc = ErsMetaData(schemeInfo, "ipRef", Some("aoRef"), "empRef", Some("agentRef"), Some("sapNumber"))
-      val ersSummary = ErsSummary("testbundle", "1", None, DateTime.now, rsc, None, None, None, None, None, None, None, None)
-      val mockErsConnector: ErsConnector = mock[ErsConnector]
-      val mockCacheUtil: CacheUtil = mock[CacheUtil]
-      override val cacheUtil: CacheUtil = mockCacheUtil
-			override val authConnector: PlayAuthConnector = mockAuthConnector
+			when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any(), any())).thenReturn(Future.successful(ersRequestObject))
 
-			when(mockCacheUtil.fetch[RequestObject](any())(any(), any(), any(), any())).thenReturn(Future.successful(ersRequestObject))
-
-			when(mockCacheUtil.fetch[ReportableEvents](refEq(CacheUtil.reportableEvents), any())(any(), any(), any())).thenReturn(
+			when(mockErsUtil.fetch[ReportableEvents](refEq(REPORTABLE_EVENTS), any())(any(), any(), any())).thenReturn(
         if (reportableEventsRes) {
-          Future.successful(ReportableEvents(Some(PageBuilder.OPTION_NO)))
+          Future.successful(ReportableEvents(Some(OPTION_NO)))
         } else {
           Future.failed(new Exception)
         }
       )
-      when(mockCacheUtil.fetchOption[CheckFileType](refEq(CacheUtil.FILE_TYPE_CACHE), any())(any(), any(), any())).thenReturn(
+      when(mockErsUtil.fetchOption[CheckFileType](refEq(FILE_TYPE_CACHE), any())(any(), any(), any())).thenReturn(
         if (fileTypeRes) {
-          Future.successful(Some(CheckFileType(Some(PageBuilder.OPTION_CSV))))
+          Future.successful(Some(CheckFileType(Some(OPTION_CSV))))
         } else {
           Future.failed(new NoSuchElementException)
         }
       )
-      when(mockCacheUtil.fetch[SchemeOrganiserDetails](refEq(CacheUtil.SCHEME_ORGANISER_CACHE), any())(any(), any(), any())).thenReturn(
+      when(mockErsUtil.fetch[SchemeOrganiserDetails](refEq(SCHEME_ORGANISER_CACHE), any())(any(), any(), any())).thenReturn(
         if (schemeOrganiserDetailsRes) {
           if (schemeOrganiserDataCached) {
             Future.successful(SchemeOrganiserDetails("Name", Fixtures.companyName, None, None, None, None, None, None, None))
@@ -193,7 +174,7 @@ class SchemeOrganiserControllerTest extends UnitSpec with GuiceOneAppPerSuite wi
           Future.failed(new NoSuchElementException)
         }
       )
-      when(mockCacheUtil.cache(refEq(CacheUtil.SCHEME_ORGANISER_CACHE), any(), any())(any(), any(), any())).thenReturn(
+      when(mockErsUtil.cache(refEq(SCHEME_ORGANISER_CACHE), any(), any())(any(), any(), any())).thenReturn(
         if (schemeOrganiserDataCachedOk) {
           Future.successful(null)
         } else {

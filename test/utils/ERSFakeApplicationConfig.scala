@@ -16,10 +16,7 @@
 
 package utils
 
-import uk.gov.hmrc.http.HeaderCarrier
-
 trait ERSFakeApplicationConfig {
-  implicit val hc = HeaderCarrier()
   val config: Map[String, Any] = Map("play.crypto.secret" -> "test",
     "govuk-tax.Test.login-callback.url" -> "test",
     "govuk-tax.Test.assets.url" -> "test",

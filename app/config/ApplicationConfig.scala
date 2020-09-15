@@ -16,96 +16,77 @@
 
 package config
 
-import com.google.inject.{ImplementedBy, Inject}
 import controllers.routes
+import com.google.inject.Inject
 import javax.inject.Singleton
-import play.Logger
 import play.api.Mode.Mode
 import play.api.i18n.Lang
 import play.api.mvc.Call
-import play.api.{Configuration, Environment, Play}
-import uk.gov.hmrc.play.config.{AppName, ServicesConfig}
+import play.api.{Configuration, Environment}
+import uk.gov.hmrc.play.config.ServicesConfig
 
 import scala.concurrent.duration._
-import scala.util.Try
-
-@ImplementedBy(classOf[ApplicationConfigImpl])
-trait ApplicationConfig extends AppName {
-
-  val assetsPrefix: String
-  val analyticsToken: Option[String]
-  val analyticsHost: String
-  val validatorUrl: String
-
-  val upscanProtocol: String
-  val upscanInitiateHost: String
-  val upscanRedirectBase: String
-
-  val enableRetrieveSubmissionData: Boolean
-  val sentViaSchedulerNoOfRowsLimit: Int
-  val languageTranslationEnabled: Boolean
-  val urBannerToggle:Boolean
-  val urBannerLink: String
-
-  val ggSignInUrl: String
-  def languageMap: Map[String, Lang]
-  def routeToSwitchLanguage: String => Call
-
-  def reportAProblemPartialUrl: String
-
-  val odsSuccessRetryAmount: Int
-  val odsValidationRetryAmount: Int
-  val allCsvFilesCacheRetryAmount: Int
-  val retryDelay: FiniteDuration
-}
 
 @Singleton
-class ApplicationConfigImpl @Inject()(configuration: Configuration, environment: Environment) extends ApplicationConfig with ServicesConfig {
+class ApplicationConfig @Inject()(val runModeConfiguration: Configuration, environment: Environment) extends ServicesConfig {
 
-  val contactHost = baseUrl("contact-frontend")
-  private lazy val _reportAProblemPartialUrl = s"$contactHost/contact/problem_reports?secure=false"
+	lazy val languageMap: Map[String, Lang] = Map(
+		"english" -> Lang("en"),
+		"cymraeg" -> Lang("cy")
+	)
 
-  override def reportAProblemPartialUrl: String = _reportAProblemPartialUrl
+	def routeToSwitchLanguage: String => Call = (lang: String) => routes.LanguageSwitchController.switchToLanguage(lang)
 
-  override protected def mode: Mode = environment.mode
-  override protected def runModeConfiguration: Configuration = configuration
-  override def appNameConfiguration: Configuration = configuration
+	override protected def mode: Mode = environment.mode
 
-  private def loadConfig(key: String) = configuration.getString(key).getOrElse(throw new Exception(s"Missing key: $key"))
+	lazy val appName: String = getString("appName")
+	lazy val authBaseUrl: String = baseUrl("auth")
 
-  override lazy val assetsPrefix: String = loadConfig("assets.url") + loadConfig("assets.version")
-  override lazy val analyticsToken: Option[String] = configuration.getString("govuk-tax.google-analytics.token")
-  override lazy val analyticsHost: String = configuration.getString("govuk-tax.google-analytics.host").getOrElse("service.gov.uk")
+	lazy val contactFormServiceIdentifier = "ers-returns"
+  lazy val contactHost: String = baseUrl("contact-frontend")
 
-  override lazy val validatorUrl: String = baseUrl("ers-file-validator") + "/ers/:empRef/" + loadConfig("microservice.services.ers-file-validator.url")
+	lazy val reportAProblemPartialUrl: String = s"$contactHost/contact/problem_reports_ajax?service=$contactFormServiceIdentifier"
+	lazy val reportAProblemNonJSUrl: String = s"$contactHost/contact/problem_reports_nonjs?service=$contactFormServiceIdentifier"
+	lazy val gaToken: String = getString(s"govuk-tax.google-analytics.token")
 
-  override val upscanProtocol: String = configuration.getString("microservice.services.upscan.protocol").getOrElse("http").toLowerCase()
-  override val upscanInitiateHost: String = baseUrl("upscan")
-  override val upscanRedirectBase: String = configuration.getString("microservice.services.upscan.redirect-base").get
+	lazy val assetsPrefix: String = getString("assets.url") + getString("assets.version")
+	lazy val analyticsToken: String = getString("govuk-tax.google-analytics.token")
+	lazy val analyticsHost: String = getString("govuk-tax.google-analytics.host")
+	lazy val ersUrl: String = baseUrl("ers-returns")
+	lazy val validatorUrl: String = baseUrl("ers-file-validator")
 
-  override lazy val urBannerToggle:Boolean = loadConfig("urBanner.toggle").toBoolean
-  override lazy val urBannerLink: String = loadConfig("urBanner.link")
+	lazy val upscanProtocol: String = getConfString("upscan.protocol","http").toLowerCase()
+	lazy val upscanInitiateHost: String = baseUrl("upscan")
+	lazy val upscanRedirectBase: String = getString("microservice.services.upscan.redirect-base")
 
-  override val ggSignInUrl: String = configuration.getString("government-gateway-sign-in.host").getOrElse("")
+	lazy val urBannerToggle: Boolean = getBoolean("urBanner.toggle")
+	lazy val urBannerLink: String = getString("urBanner.link")
+	lazy val ggSignInUrl: String = getString("government-gateway-sign-in.host")
 
-  override lazy val enableRetrieveSubmissionData: Boolean = Try(loadConfig("settings.enable-retrieve-submission-data").toBoolean).getOrElse(false)
-  override lazy val sentViaSchedulerNoOfRowsLimit: Int = {
-    Logger.info("sent-via-scheduler-noofrows vakue is " + Try(loadConfig("sent-via-scheduler-noofrows").toInt).getOrElse(10000))
-    Try(loadConfig("sent-via-scheduler-noofrows").toInt).getOrElse(10000)
-  }
+	lazy val enableRetrieveSubmissionData: Boolean = getBoolean("settings.enable-retrieve-submission-data")
+	lazy val languageTranslationEnabled: Boolean = getConfBool("features.welsh-translation", defBool = true)
 
-  override lazy val languageTranslationEnabled = runModeConfiguration.getBoolean("microservice.services.features.welsh-translation").getOrElse(true)
+	lazy val odsSuccessRetryAmount: Int = getInt("retry.ods-success-cache.complete-upload.amount")
+	lazy val odsValidationRetryAmount: Int = getInt("retry.ods-success-cache.validation.amount")
+	lazy val allCsvFilesCacheRetryAmount: Int = getInt("retry.csv-success-cache.all-files-complete.amount")
+	lazy val retryDelay: FiniteDuration = runModeConfiguration.getMilliseconds("retry.delay").get milliseconds
+	lazy val accessThreshold: Int = getInt("accessThreshold")
 
-  def languageMap: Map[String, Lang] = Map(
-    "english" -> Lang("en"),
-    "cymraeg" -> Lang("cy"))
-  def routeToSwitchLanguage = (lang: String) => routes.LanguageSwitchController.switchToLanguage(lang)
+	lazy val sentViaSchedulerNoOfRowsLimit: Int = 10000
 
-  override val odsSuccessRetryAmount: Int = runModeConfiguration.getInt("retry.ods-success-cache.complete-upload.amount").getOrElse(1)
-  override val odsValidationRetryAmount: Int = runModeConfiguration.getInt("retry.ods-success-cache.validation.amount").getOrElse(1)
-  override val allCsvFilesCacheRetryAmount: Int = runModeConfiguration.getInt("retry.csv-success-cache.all-files-complete.amount").getOrElse(1)
-  override val retryDelay: FiniteDuration = runModeConfiguration.getMilliseconds("retry.delay").get milliseconds
+	//Previous ExternalUrls Object
+	lazy val companyAuthHost: String = getString(s"$rootServices.auth.company-auth.host")
+	lazy val signOutCallback: String = getString(s"$rootServices.feedback-survey-frontend.url")
+	lazy val signOut = s"$companyAuthHost/gg/sign-out?continue=$signOutCallback"
+	lazy val loginCallback: String = getString(s"$rootServices.auth.login-callback.url")
+	lazy val portalDomain: String = getString(s"portal.domain")
+	lazy val hmacToken: String = getString(s"hmac.hmac_token")
+	lazy val hmacOnSwitch: Boolean = getBoolean("hmac.hmac_switch")
+
+	//SessionCacheWiring
+	lazy val shortLivedCacheBaseUri: String = baseUrl("cachable.short-lived-cache")
+	lazy val shortLivedCacheDomain: String = getString(s"$rootServices.cachable.short-lived-cache.domain")
+	lazy val sessionCacheBaseUri: String = baseUrl("cachable.session-cache")
+	lazy val sessionCacheDomain: String = getString(s"$rootServices.cachable.session-cache.domain")
+
 }
-
-object ApplicationConfig extends ApplicationConfigImpl(Play.current.configuration, Environment.simple(mode = Play.current.mode))
-

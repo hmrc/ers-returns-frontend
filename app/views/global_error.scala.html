@@ -14,76 +14,20 @@
  * limitations under the License.
  *@
 
-@(pageTitle: String, heading: String, message: String, applicationConfig: config.ApplicationConfig = config.ApplicationConfig)(implicit request: Request[_], messages: Messages)
+@import config.ApplicationConfig
 
-@import layouts.{govuk_template => hmrcGovUkTemplate}
-@import play.api.Play.current
-@import uk.gov.hmrc.play.views.html.{layouts => uiLayouts}
-@import controllers.auth.ExternalUrls
+@(pageTitle: String, heading: String, message: String)(implicit request: Request[_], messages: Messages, appConfig: ApplicationConfig)
 
-@commonLinkElement = {
-    @includes.commonLinkElements()
+
+@contentHeaderHtml = {
+	<h1>@messages(heading)</h1>
 }
 
-@commonScriptElement = {
-    @includes.commonScriptElements()
+@mainContentHtml = {
+	<p>@messages(message)</p>
 }
 
-@contentHeader = {
-    @if(applicationConfig.languageTranslationEnabled) {
-        @views.html.language_selection(
-            applicationConfig.languageMap,
-            applicationConfig.routeToSwitchLanguage,
-            Some("langToggle"))
-    }
+@signoutLink = {<a href="@appConfig.signOut" id="sign-out">@messages("ers.signout")</a>}
 
-}
-
-@mainContent = {
-    <h1>@message</h1>
-
-    <p>@Messages("ers.global.errors.try.later")</p>
-}
-
-@head = {
-    @uiLayouts.head(
-        linkElem = Some(commonLinkElement),
-        headScripts = None)
-    <meta name="format-detection" content="telephone=no" />
-}
-
-@getHelpForm = {
-    @get_help_form(true, false)
-}
-
-@content = {
-    @uiLayouts.main_content(
-        article = uiLayouts.article(mainContent),
-        mainContentHeader = contentHeader,
-        getHelpForm = getHelpForm)
-}
-
-@bodyEnd = {
-    @uiLayouts.footer(
-        analyticsToken = applicationConfig.analyticsToken,
-        analyticsHost = applicationConfig.analyticsHost,
-        ssoUrl = None,
-        scriptElem = Some(commonScriptElement),
-        gaCalls = None)
-}
-
-@footerTop = {}
-
-@signoutLink = {<a href="@ExternalUrls.signOut" id="sign-out">@Messages("ers.signout")</a>}
-
-@insideHeader = @{
-    uiLayouts.header_nav(
-        navTitle = Some(Messages("ers.header")),
-        None,
-        None,
-        navLinks = Some(signoutLink))
-}
-@afterHeader = {}
-
-
-@hmrcGovUkTemplate(Some(pageTitle), None)(head, bodyEnd, insideHeader, afterHeader, footerTop, Some(uiLayouts.footer_links()), true)(content)
+@main(title = messages(pageTitle), contentHeader = Some(contentHeaderHtml),
+	headerNav = Some(views.helpers.HeaderNav(title = Some(messages("ers.header")), showBetaLink = false, links = Some(signoutLink))))(mainContent = mainContentHtml)

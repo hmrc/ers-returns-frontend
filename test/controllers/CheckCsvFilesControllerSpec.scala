@@ -17,52 +17,41 @@
 package controllers
 
 import akka.stream.Materializer
-import connectors.AuditServiceConnector
+import helpers.ErsTestHelper
 import models._
 import models.upscan._
-import org.mockito.Matchers._
-import org.mockito.Mockito._
-import org.mockito.{ArgumentMatchers, Matchers, Mockito}
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
-import org.scalatest.mockito.MockitoSugar
+import org.mockito.{ArgumentMatchers, Mockito}
 import org.scalatestplus.play.OneAppPerSuite
-import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
 import play.api.i18n.{Lang, Messages, MessagesApi}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.{Request, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import services.audit.AuditServiceConnector
-import uk.gov.hmrc.auth.core.PlayAuthConnector
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
-import uk.gov.hmrc.play.frontend.auth.AuthContext
 import uk.gov.hmrc.play.test.UnitSpec
 import utils.Fixtures.ersRequestObject
-import utils.{CacheUtil, ERSFakeApplicationConfig, Fixtures, PageBuilder}
-import utils.{AuthHelper, CacheUtil, ERSFakeApplicationConfig, Fixtures, PageBuilder}
+import utils.{ERSFakeApplicationConfig, Fixtures}
 
 import scala.concurrent.Future
 
-class CheckCsvFilesControllerSpec extends UnitSpec with ERSFakeApplicationConfig with OneAppPerSuite with AuthHelper {
+class CheckCsvFilesControllerSpec extends UnitSpec with ERSFakeApplicationConfig with OneAppPerSuite with ErsTestHelper {
 
 	override lazy val app: Application = new GuiceApplicationBuilder().configure(config).build()
 	implicit lazy val mat: Materializer = app.materializer
 
 	lazy val messagesApi: MessagesApi = app.injector.instanceOf[MessagesApi]
 	implicit lazy val messages: Messages = messagesApi.preferred(Seq(Lang.get("en").get))
-  implicit val request: Request[_] = FakeRequest()
 
   "calling checkCsvFilesPage" should {
 
-    val checkCsvFilesController: CheckCsvFilesController = new CheckCsvFilesController {
-      override val cacheUtil: CacheUtil = mock[CacheUtil]
-      override val pageBuilder: PageBuilder = mock[PageBuilder]
-			override val authConnector: PlayAuthConnector = mockAuthConnector
-
-      override def showCheckCsvFilesPage()(implicit authContext: ERSAuthData, request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = Future.successful(Ok)
+    val checkCsvFilesController: CheckCsvFilesController = new CheckCsvFilesController(messagesApi, mockAuthConnector, mockErsUtil, mockAppConfig) {
+      override def showCheckCsvFilesPage()(implicit authContext: ERSAuthData,
+																					 request: Request[AnyRef],
+																					 hc: HeaderCarrier): Future[Result] = Future.successful(Ok)
     }
 
     "redirect to company authentication frontend if user is not authenticated" in {
@@ -75,19 +64,16 @@ class CheckCsvFilesControllerSpec extends UnitSpec with ERSFakeApplicationConfig
 
   "calling showCheckCsvFilesPage" should {
 
-    val mockCacheUtil: CacheUtil = mock[CacheUtil]
+		val checkCsvFilesController: CheckCsvFilesController = new CheckCsvFilesController(messagesApi, mockAuthConnector, mockErsUtil, mockAppConfig) {
 
-    val checkCsvFilesController: CheckCsvFilesController = new CheckCsvFilesController {
-      override val cacheUtil: CacheUtil = mockCacheUtil
-      override val pageBuilder: PageBuilder = mock[PageBuilder]
-      when(mockCacheUtil.remove(ArgumentMatchers.eq(CacheUtil.CHECK_CSV_FILES))(any(), any()))
+      when(mockErsUtil.remove(ArgumentMatchers.eq("check-csv-files"))(any(), any()))
         .thenReturn(Future.successful(HttpResponse(OK)))
     }
 
     "show CheckCsvFilesPage" in {
-      reset(mockCacheUtil)
+      reset(mockErsUtil)
       when(
-        mockCacheUtil.fetch[RequestObject](any())(any(), any(), any(), any())
+        mockErsUtil.fetch[RequestObject](any())(any(), any(), any(), any())
       ).thenReturn(ersRequestObject)
 
       val result = await(checkCsvFilesController.showCheckCsvFilesPage()(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionIdCSOP("GET"), hc))
@@ -97,12 +83,10 @@ class CheckCsvFilesControllerSpec extends UnitSpec with ERSFakeApplicationConfig
 
   "calling checkCsvFilesPage" should {
 
-    val checkCsvFilesController: CheckCsvFilesController = new CheckCsvFilesController {
-      override val cacheUtil: CacheUtil = mock[CacheUtil]
-      override val pageBuilder: PageBuilder = mock[PageBuilder]
-			override val authConnector: PlayAuthConnector = mockAuthConnector
-
-      override def validateCsvFilesPageSelected()(implicit authContext: ERSAuthData, request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = Future.successful(Ok)
+		val checkCsvFilesController: CheckCsvFilesController = new CheckCsvFilesController(messagesApi, mockAuthConnector, mockErsUtil, mockAppConfig) {
+      override def validateCsvFilesPageSelected()(implicit authContext: ERSAuthData,
+																									request: Request[AnyRef],
+																									hc: HeaderCarrier): Future[Result] = Future.successful(Ok)
     }
 
     "redirect to company authentication frontend if user is not authenticated to access checkCsvFilesPage" in {
@@ -115,10 +99,10 @@ class CheckCsvFilesControllerSpec extends UnitSpec with ERSFakeApplicationConfig
 
   "calling validateCsvFilesPageSelected" should {
 
-    val checkCsvFilesController: CheckCsvFilesController = new CheckCsvFilesController {
-      override val cacheUtil: CacheUtil = mock[CacheUtil]
-      override val pageBuilder: PageBuilder = mock[PageBuilder]
-      override def performCsvFilesPageSelected(formData: CsvFilesList)(implicit request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = Future.successful(Ok)
+		val checkCsvFilesController: CheckCsvFilesController = new CheckCsvFilesController(messagesApi, mockAuthConnector, mockErsUtil, mockAppConfig) {
+      override def performCsvFilesPageSelected(formData: CsvFilesList)
+																							(implicit request: Request[AnyRef],
+																							 hc: HeaderCarrier): Future[Result] = Future.successful(Ok)
     }
 
     "return the result of performCsvFilesPageSelected if data is valid" in {
@@ -157,13 +141,8 @@ class CheckCsvFilesControllerSpec extends UnitSpec with ERSFakeApplicationConfig
   "calling performCsvFilesPageSelected" should {
 
     val mockListCsvFilesCallback: UpscanCsvFilesList = mock[UpscanCsvFilesList](Mockito.RETURNS_DEEP_STUBS)
-    val mockCacheUtil: CacheUtil = mock[CacheUtil]
 
-    lazy val checkCsvFilesController: CheckCsvFilesController = new CheckCsvFilesController {
-      override val cacheUtil: CacheUtil = mockCacheUtil
-      override val pageBuilder: PageBuilder = mock[PageBuilder]
-			override val authConnector: PlayAuthConnector = mockAuthConnector
-
+		val checkCsvFilesController: CheckCsvFilesController = new CheckCsvFilesController(messagesApi, mockAuthConnector, mockErsUtil, mockAppConfig) {
       override def createCacheData(csvFilesList: List[CsvFiles]): UpscanCsvFilesList = mockListCsvFilesCallback
     }
 
@@ -179,9 +158,9 @@ class CheckCsvFilesControllerSpec extends UnitSpec with ERSFakeApplicationConfig
 
     "return the result of reloadWithError if createCacheData returns empty list" in {
       reset(mockListCsvFilesCallback)
-      reset(mockCacheUtil)
+      reset(mockErsUtil)
       when(
-        mockCacheUtil.fetch[RequestObject](refEq(mockCacheUtil.ersRequestObject))(any(), any(), any(), any())
+        mockErsUtil.fetch[RequestObject](refEq("ErsRequestObject"))(any(), any(), any(), any())
       ) thenReturn Future.successful(ersRequestObject)
       when(
         mockListCsvFilesCallback.ids.isEmpty
@@ -194,49 +173,55 @@ class CheckCsvFilesControllerSpec extends UnitSpec with ERSFakeApplicationConfig
 
     "redirect to next page if createCacheData returns list with data and caching is successful" in {
       reset(mockListCsvFilesCallback)
-      reset(mockCacheUtil)
+      reset(mockErsUtil)
       when(
-        mockCacheUtil.fetch[RequestObject](refEq(mockCacheUtil.ersRequestObject))(any(), any(), any(), any())
+        mockErsUtil.fetch[RequestObject](refEq("ErsRequestObject"))(any(), any(), any(), any())
       ) thenReturn Future.successful(ersRequestObject)
 
       when(
-        mockCacheUtil.cache(anyString(), any[UpscanCsvFilesCallbackList](), anyString())(any(), any(), any())
+        mockErsUtil.cache(anyString(), any[UpscanCsvFilesCallbackList](), anyString())(any(), any(), any())
       ) thenReturn Future.successful(mock[CacheMap])
 
-      val result = await(checkCsvFilesController.performCsvFilesPageSelected(formData)(Fixtures.buildFakeRequestWithSessionIdCSOP("POST"), hc))
+			when(mockErsUtil.ersRequestObject).thenReturn("ErsRequestObject")
+			when(mockErsUtil.CSV_FILES_UPLOAD).thenReturn("csv-files-upload")
+
+			val result = await(checkCsvFilesController.performCsvFilesPageSelected(formData)(Fixtures.buildFakeRequestWithSessionIdCSOP("POST"), hc))
       status(result) shouldBe SEE_OTHER
       result.header.headers("Location") should include ("/upload-")
     }
 
     "direct to ers errors page if createCacheData returns list with data and caching fails" in {
       reset(mockListCsvFilesCallback)
-      reset(mockCacheUtil)
+      reset(mockErsUtil)
       when(
-        mockCacheUtil.fetch[RequestObject](refEq(mockCacheUtil.ersRequestObject))(any(), any(), any(), any())
+        mockErsUtil.fetch[RequestObject](refEq("ErsRequestObject"))(any(), any(), any(), any())
       ) thenReturn Future.successful(ersRequestObject)
 
       when(
-        mockCacheUtil.cache(anyString(), any[UpscanCsvFilesCallbackList](), anyString())(any(), any(), any())
+        mockErsUtil.cache(anyString(), any[UpscanCsvFilesCallbackList](), anyString())(any(), any(), any())
       ) thenReturn Future.failed(new RuntimeException)
 
+			when(mockErsUtil.ersRequestObject).thenReturn("ErsRequestObject")
 
-      val result = await(checkCsvFilesController.performCsvFilesPageSelected(formData)(Fixtures.buildFakeRequestWithSessionIdCSOP("POST"), hc))
+			val result = await(checkCsvFilesController.performCsvFilesPageSelected(formData)(Fixtures.buildFakeRequestWithSessionIdCSOP("POST"), hc))
       contentAsString(result) shouldBe contentAsString(checkCsvFilesController.getGlobalErrorPage)
       contentAsString(result) should include(messages("ers.global_errors.message"))
     }
 
     "direct to ers errors page if fetching request object fails fails" in {
       reset(mockListCsvFilesCallback)
-      reset(mockCacheUtil)
+      reset(mockErsUtil)
       when(
-        mockCacheUtil.fetch[RequestObject](refEq(mockCacheUtil.ersRequestObject))(any(), any(), any(), any())
+        mockErsUtil.fetch[RequestObject](refEq("ErsRequestObject"))(any(), any(), any(), any())
       ) thenReturn Future.failed(new Exception)
 
       when(
-        mockCacheUtil.cache(anyString(), any[UpscanCsvFilesCallbackList](), anyString())(any(), any(), any())
+        mockErsUtil.cache(anyString(), any[UpscanCsvFilesCallbackList](), anyString())(any(), any(), any())
       ) thenReturn Future.successful(mock[CacheMap])
 
-      val result = await(checkCsvFilesController.performCsvFilesPageSelected(formData)(Fixtures.buildFakeRequestWithSessionIdCSOP("POST"), hc))
+			when(mockErsUtil.ersRequestObject).thenReturn("ErsRequestObject")
+
+			val result = await(checkCsvFilesController.performCsvFilesPageSelected(formData)(Fixtures.buildFakeRequestWithSessionIdCSOP("POST"), hc))
       contentAsString(result) shouldBe contentAsString(checkCsvFilesController.getGlobalErrorPage)
       contentAsString(result) should include(messages("ers.global_errors.message"))
     }
@@ -245,12 +230,7 @@ class CheckCsvFilesControllerSpec extends UnitSpec with ERSFakeApplicationConfig
 
   "calling createCacheData" should {
 
-    lazy val checkCsvFilesController: CheckCsvFilesController = new CheckCsvFilesController {
-      override val cacheUtil: CacheUtil = mock[CacheUtil]
-      override val pageBuilder: PageBuilder = mock[PageBuilder]
-			override val authConnector: PlayAuthConnector = mockAuthConnector
-
-		}
+		val checkCsvFilesController: CheckCsvFilesController = new CheckCsvFilesController(messagesApi, mockAuthConnector, mockErsUtil, mockAppConfig)
 
     val formData: List[CsvFiles] = List(
       CsvFiles("file0", None),
@@ -261,7 +241,8 @@ class CheckCsvFilesControllerSpec extends UnitSpec with ERSFakeApplicationConfig
     )
 
     "return only selected files" in {
-      val result = checkCsvFilesController.createCacheData(formData)
+			when(mockErsUtil.OPTION_YES).thenReturn("1")
+			val result = checkCsvFilesController.createCacheData(formData)
       result.ids.size shouldBe 2
       result.ids.foreach {
         _ should matchPattern {
@@ -277,13 +258,9 @@ class CheckCsvFilesControllerSpec extends UnitSpec with ERSFakeApplicationConfig
 
   "calling reloadWithError" should {
 
-    lazy val checkCsvFilesController: CheckCsvFilesController = new CheckCsvFilesController {
-			override val authConnector: PlayAuthConnector = mockAuthConnector
-      override val cacheUtil: CacheUtil = mock[CacheUtil]
-      override val pageBuilder: PageBuilder = mock[PageBuilder]
-    }
+		val checkCsvFilesController: CheckCsvFilesController = new CheckCsvFilesController(messagesApi, mockAuthConnector, mockErsUtil, mockAppConfig)
 
-    "reload same page, showing error" in {
+		"reload same page, showing error" in {
       val result = await(checkCsvFilesController.reloadWithError())
       status(result) shouldBe SEE_OTHER
       result.header.headers("Location") shouldBe routes.CheckCsvFilesController.checkCsvFilesPage().toString

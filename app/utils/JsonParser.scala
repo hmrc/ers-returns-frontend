@@ -18,22 +18,16 @@ package utils
 
 import play.api.libs.json.{JsValue, Json}
 
-object JsonParser extends JsonParser
-
 trait JsonParser {
-
   def getSubmissionJson(schemeRef: String, schemeType: String, taxYear: String, submissionType: String): JsValue = {
-
     val jsonString: String = "{\"ERSSubmission\" : {" +
-      "\"acknowledgementReference\": \"" + ContentUtil.geAcknowledgementRef(schemeRef) + "\", " +
+      "\"acknowledgementReference\": \"" + ContentUtil.getAcknowledgementRef + "\", " +
       "\"submissionTimestamp\" : \"" + DateUtils.getCurrentDateTime + "\", " +
       "\"schemeReference\" : \"" + schemeRef + "\", " +
       "\"taxYear\" : \"" + taxYear + "\", " +
       "\"schemeType\" : \"" + schemeType + "\", " +
       "\"submissionType\" : \"" + submissionType + "\"" +
       "}}"
-
     Json.parse(jsonString)
   }
-
 }
