@@ -36,14 +36,13 @@ class ApplicationConfig @Inject()(val runModeConfiguration: Configuration, envir
 	)
 
 	def routeToSwitchLanguage: String => Call = (lang: String) => routes.LanguageSwitchController.switchToLanguage(lang)
-
 	override protected def mode: Mode = environment.mode
 
 	lazy val appName: String = getString("appName")
 	lazy val authBaseUrl: String = baseUrl("auth")
 
 	lazy val contactFormServiceIdentifier = "ers-returns"
-  lazy val contactHost: String = baseUrl("contact-frontend")
+	lazy val contactHost: String = getString("contact-frontend.host")
 
 	lazy val reportAProblemPartialUrl: String = s"$contactHost/contact/problem_reports_ajax?service=$contactFormServiceIdentifier"
 	lazy val reportAProblemNonJSUrl: String = s"$contactHost/contact/problem_reports_nonjs?service=$contactFormServiceIdentifier"
@@ -79,8 +78,8 @@ class ApplicationConfig @Inject()(val runModeConfiguration: Configuration, envir
 	lazy val signOutCallback: String = getString(s"$rootServices.feedback-survey-frontend.url")
 	lazy val signOut = s"$companyAuthHost/gg/sign-out?continue=$signOutCallback"
 	lazy val loginCallback: String = getString(s"$rootServices.auth.login-callback.url")
-	lazy val portalDomain: String = getString(s"portal.domain")
-	lazy val hmacToken: String = getString(s"hmac.hmac_token")
+	lazy val portalDomain: String = getString("portal.domain")
+	lazy val hmacToken: String = getString("hmac.hmac_token")
 	lazy val hmacOnSwitch: Boolean = getBoolean("hmac.hmac_switch")
 
 	//SessionCacheWiring
