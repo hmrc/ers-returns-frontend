@@ -383,6 +383,7 @@ ers_check_csv_file.file_type_error = Nid yw hwn yn ffeil .csv.
 ers_check_csv_file.no_file_error = Dim ffeiliau wedi eu dewis. Dewiswch eich ffeiliau.
 ers_check_csv_file.clear_all_link = Clirio pob un
 ers_check_csv_file.err.message = Dewiswch y ffeiliau .csv y mae angen i chi eu huwchlwytho fel rhan o’ch Datganiad Blynyddol
+ers_check_csv_options.hint = Dewiswch bob un sy’n berthnasol
 ers_check_csv_file.csop.file0.description = Opsiynau wedi eu caniatáu
 ers_check_csv_file.csop.file0.file_name = CSOP_OptionsGranted_V3.csv
 ers_check_csv_file.csop.file1.description = Opsiynau sydd, yn ystod y flwyddyn, wedi eu rhyddhau (gan gynnwys cyfnewidiadau), wedi eu dileu neu wedi dod i ben

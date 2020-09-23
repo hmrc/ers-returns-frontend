@@ -498,6 +498,7 @@ ers_check_csv_file.file_type_error = This isn’t a .csv file.
 ers_check_csv_file.no_file_error = No files selected. Please choose your files.
 ers_check_csv_file.clear_all_link = Clear all
 ers_check_csv_file.err.message = Select the .csv files you need to upload as part of your annual return
+ers_check_csv_options.hint = Select all that apply
 
 ers_check_csv_file.csop.file0.description = Options granted
 ers_check_csv_file.csop.file0.file_name = CSOP_OptionsGranted_V3.csv

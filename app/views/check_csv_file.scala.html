@@ -24,6 +24,7 @@
     @reference(requestObject.getPageTitle)
     <p class="font-xsmall"><a href="@routes.CheckFileTypeController.checkFileTypePage" class="link-back">@Html(messages("ers.back"))</a></p>
     @header(messages("ers_check_csv_file.title"))
+    <span class="form-hint">@messages("ers_check_csv_options.hint")</span>
 
     @if(flash.get("csv-file-not-selected-error").isDefined) {
     <div id="errors" class="validation-summary" role="group" aria-labelledby="error-summary-heading" tabindex="-1">
