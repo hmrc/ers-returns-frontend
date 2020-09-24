@@ -108,7 +108,7 @@ class ERSUtil @Inject()(val sessionService: SessionService,
 			res.get.as[T]
 		}recover{
 			case e: NoSuchElementException =>
-				Logger.error(s"[ERSUtil][fetch] fetch failed to get key $key with exception $e, timestamp: ${System.currentTimeMillis()}.")
+				Logger.warn(s"[ERSUtil][fetch] fetch failed to get key $key with exception $e, timestamp: ${System.currentTimeMillis()}.")
 				throw new NoSuchElementException
 			case _ : Throwable =>
 				Logger.error(s"[ERSUtil][fetch] fetch failed to get key $key for $getCacheId with exception, timestamp: ${System.currentTimeMillis()}.")
@@ -123,7 +123,7 @@ class ERSUtil @Inject()(val sessionService: SessionService,
 			res.get.as[T]
 		} recover {
 			case e: NoSuchElementException =>
-				Logger.error(s"[ERSUtil][fetch] fetch(with 2 params) failed to get key [$key] for cacheId: [$cacheId] with exception $e, timestamp: ${System.currentTimeMillis()}.")
+				Logger.warn(s"[ERSUtil][fetch] fetch(with 2 params) failed to get key [$key] for cacheId: [$cacheId] with exception $e, timestamp: ${System.currentTimeMillis()}.")
 				throw new NoSuchElementException
 			case er : Throwable =>
 				Logger.error(s"[ERSUtil][fetch] fetch(with 2 params) failed to get key [$key] for cacheId: [$cacheId] with exception ${er.getMessage}, " +
@@ -139,7 +139,7 @@ class ERSUtil @Inject()(val sessionService: SessionService,
 			res
 		} recover {
 			case e: NoSuchElementException =>
-				Logger.error(s"[ERSUtil][fetchOption] fetch with 2 params failed to get key $key for $cacheId with exception \n $e \n timestamp: ${System.currentTimeMillis()}.")
+				Logger.warn(s"[ERSUtil][fetchOption] fetch with 2 params failed to get key $key for $cacheId with exception \n $e \n timestamp: ${System.currentTimeMillis()}.")
 				throw e
 			case e: Throwable =>
 				Logger.error(s"[ERSUtil][fetchOption] fetch with 2 params failed to get key $key for $cacheId, timestamp: ${System.currentTimeMillis()}.", e)
@@ -154,7 +154,7 @@ class ERSUtil @Inject()(val sessionService: SessionService,
 			res.get
 		} recover {
 			case e: NoSuchElementException =>
-				Logger.error(s"[ERSUtil][fetchAll] failed to get all keys with a NoSuchElementException \n $e \n Method: ${request.method} " +
+				Logger.warn(s"[ERSUtil][fetchAll] failed to get all keys with a NoSuchElementException \n $e \n Method: ${request.method} " +
 					s"req: ${request.path}, param: ${request.rawQueryString}")
 				throw new NoSuchElementException
 			case e: Throwable =>
