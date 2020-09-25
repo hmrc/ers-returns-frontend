@@ -22,8 +22,6 @@
 .clear {clear:both;}
 
 
-
-
 .ers-service-info {
     border-top: 10px solid #005ea5;
 }
@@ -37,14 +35,6 @@
 div.grid-layout {
     margin: 0;
 }
-
-
-.validation-message {font-weight:bold; border-left: 4px solid #df3034; padding-left:14px; font-size:19px; margin-top:1em; margin-left: -1em;}
-.validation-summary-message {font-weight:bold; font-size:19px; margin-top:1em;}
-.validation-summary-message a, .validation-message a, p.field-error {color: #b10e1e; font-weight: 700;}
-.validation-summary-message p {font-size:19px;}
-.validation-summary-message ul, .validation-summary-message ol {list-style-type: none;}
-.heading-medium {margin-top:0;}
 
 article .help-notice {
    background: url('../images/icon-important.png') no-repeat scroll 0px 0.5em transparent;
@@ -78,96 +68,11 @@ article .help-notice {
     margin-left: -15px;
     padding-left: 65px;
 }
-
-
-.button {
-    background-color: #00823B;
-    position: relative;
-    display: inline-block;
-    border: medium none;
-    border-radius: 0px;
-    box-shadow: 0px 2px 0px #003518;
-    font-size: 1em;
-    line-height: 1.25;
-    text-decoration: none;
-    cursor: pointer;
-    color: #FFF;
-    margin: 0px 15px 15px 0px;
-    padding: 0.52632em 0.78947em 0.26316em;
-    vertical-align: top;
-}
-
-.button-get-started {
-    font-family: "nta",Arial,sans-serif;
-    font-size: 24px;
-    line-height: 1.25;
-    text-transform: none;
-    font-weight: 700;
-    background-image: url('../images/icon-pointer.png');
-    background-repeat: no-repeat;
-    background-position: 100% 50%;
-    padding: 0.36842em 2.15789em 0.21053em 0.84211em;
-}
-
-.button:link, .button:hover, .button:focus, .button:visited {
-    color: #FFF;
-}
-
-.button:before {
-    content: "";
-    height: 110%;
-    width: 100%;
-    display: block;
-    background: none repeat scroll 0% 0% transparent;
-    position: absolute;
-    top: 0px;
-    left: 0px;
-}
-
-.summary-button {margin-top:0.5em;}
-
 .help-notice p.nodeco {font-weight:400; font-size:19px;}
 
 .related {border-top:10px solid #005ea5; margin:3em 0 0; right:1.75em; }
 
-#error-summary {margin-bottom:1em;}
-
-
-.error-summary .error-summary-heading {
-    margin-top: 0;
-}
-
 .visibility {display:none;}
-
-.validation-summary, .error-summary {
-    border: 5px solid #b10e1e;
-    margin-bottom: 30px;
-    margin-top: 30px;
-    padding: 20px 15px 15px;
-}
-
-.error  {margin:0 0 30px 0; border-left: 5px solid #b10e1e; padding-top:0; padding-bottom:0;}
-
-.error .error-message {
-    color: #b10e1e;
-    font-weight: bold;
-}
-.error-message {
-    font-size: 19px;
-    line-height: 1.31579;
-}
-
-.error-message {
-    clear: both;
-    display: block;
-    font-family: "nta",Arial,sans-serif;
-    font-size: 19px;
-    font-weight: 400;
-    line-height: 1.31579;
-    margin: 0;
-    padding: 5px 0 0;
-    text-transform: none;
-}
 
 #uploadForm.error {overflow:auto;}
 
@@ -188,40 +93,7 @@ article .help-notice {
 
 .inline .form-field label {margin-bottom:0;}
 
-.panel-indent {margin-bottom: 20px; border-left: 10px solid #bfc1c3;}
 
-.list-bullet {margin-bottom: 20px;}
-
-
-.link-back::before {
-    border-bottom: 5px solid transparent;
-    border-right: 6px solid #0b0c0c;
-    border-top: 5px solid transparent;
-    content: "";
-    display: block;
-    height: 0;
-    left: 0;
-    margin-top: -6px;
-    position: absolute;
-    top: 50%;
-    width: 0;
-}
-
-.link-back:link, .link-back:visited, .link-back:hover, .link-back:active {
-    color: #0b0c0c;
-}
-
-.link-back {
-    border-bottom: 1px solid #0b0c0c;
-	display: inline-block;
-	font-family: "nta",Arial,sans-serif;
-	font-weight: 400;
-	margin-top: 15px;
-	padding-left: 14px;
-	position: relative;
-	text-decoration: none;
-	text-transform: none;
-}
 
 /*****************************/
 /* Check file styles         */
@@ -304,20 +176,16 @@ color: #6F777B;}
 border-bottom: 1px solid #BFC1C3;
 padding-bottom:20px;}
 
-.form-field.error {background-color:#fff; border-left: 4px solid #df3034;}
-
-.error .form-control {border: 4px solid #b10e1e;}
-
 #postcode {width:120px}
 
 /*****************************/
 /* HTML Error Styles  */
 /*****************************/
 
-article #html-error-report table td, article #html-error-report table th {background:none; padding:10px 20px 10px 0} 
-article #html-error-report table td, article #html-error-report table th {border:none;} 
-article #html-error-report table td, article #html-error-report table th {border-bottom: 1px solid #BFC1C3;} 
-#html-error-report .column, #html-error-report .row {width:10%} 
+article #html-error-report table td, article #html-error-report table th {background:none; padding:10px 20px 10px 0}
+article #html-error-report table td, article #html-error-report table th {border:none;}
+article #html-error-report table td, article #html-error-report table th {border-bottom: 1px solid #BFC1C3;}
+#html-error-report .column, #html-error-report .row {width:10%}
 #html-error-report .report-title {text-align:right; margin-top:0; margin-bottom:0;}
 #html-error-report #errors-by-sheet {margin-top:2em; margin-bottom:0;}
 #html-error-report .sheet-title {margin-top:1em; margin-bottom:0.25em;}
@@ -392,16 +260,32 @@ table th, table td {
 #continue {float:left;}
 
 #progress-spinner {
-  display:none; 
+  display:none;
   margin: 0 0 0 1em;
   float:left;
   vertical-align:middle;
   line-height:64px;
 }
 
-#errors:focus, #fileToUpload:focus {outline: 3px solid #ffbf47;}
-
 .langToggle {
     text-align: right;
     margin-top: 1em;
+}
+
+/*****************************/
+/* error                     */
+/*****************************/
+
+.form-field--error {
+    border-left: 5px solid #df3034;
+}
+
+.error-notification {
+    font-size: 19px !important;
+    line-height: 1.31579;
+    font-weight: 700 !important;
+}
+
+.error-summary a {
+    font-weight: bold;
 }

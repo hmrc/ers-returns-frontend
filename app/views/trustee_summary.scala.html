@@ -29,7 +29,7 @@
     <p class="font-xsmall"><a href="@routes.TrusteeController.trusteeDetailsPage()" class="link-back">@Html(messages("ers.back"))</a></p>
     @header(messages("ers_trustee_summary.title"))
     @uk.gov.hmrc.play.views.html.helpers.form(action = routes.TrusteeController.trusteeSummaryContinue()) {
-    <div class="panel-indent">
+    <div class="panel panel-border-wide">
         <a href="@routes.TrusteeController.trusteeDetailsPage()">@Html(messages("ers_trustee_summary.add_trustee"))</a>
     </div>
     @for((trustee, index) <- trustees.trustees.zipWithIndex) {

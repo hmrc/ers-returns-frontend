@@ -40,24 +40,20 @@
 
     @reference(requestObject.getPageTitle)
     <p class="font-xsmall"><a href="@routes.CheckCsvFilesController.checkCsvFilesPage" class="link-back">@messages("ers.back")</a></p>
-    @header(uploadFileHeader)
 
-    <div id="errors" class="validation-summary visibility" role="group" aria-labelledby="error-summary-heading" tabindex="-1">
-      <h1 class="heading-medium error-summary-heading" id="error-summary-heading">
+    <div id="errors" class="flash error-summary error-summary--show validation-summary visibility" role="group" aria-labelledby="error-summary-heading" tabindex="-1">
+        <h2 class="heading-medium error-summary-heading" id="error-summary-heading">
         @messages("validation.summary.heading")
-      </h1>
-      <ul class="error-summary-list">
-        <li class="validation-summary-message"><a href="#file-uploader" data-focuses="file-uploader">@messages("csv_file_upload.summary_error")</a></li>
-      </ul>
+        </h2>
+        <ul class="js-error-summary-messages">
+            <li><a href="#file-uploader" data-focuses="file-uploader">@messages("csv_file_upload.summary_error")</a></li>
+        </ul>
     </div>
-
-
-
 
     <label class="form-label" id="fileName" for="fileToUpload" data-file-name="@messages(ersUtil.getPageElement(schemeId, ersUtil.PAGE_CHECK_CSV_FILE,fileId+".file_name"))">
       @messages("csv_file_upload.upload_your_file", messages(ersUtil.getPageElement(schemeId, ersUtil.PAGE_CHECK_CSV_FILE,fileId+".file_name")))
     </label>
-    @upscan_file_upload_form(".csv", upscanInitiateResponse.formFields, upscanInitiateResponse.postTarget)
+    @upscan_file_upload_form(".csv", upscanInitiateResponse.formFields, upscanInitiateResponse.postTarget, uploadFileHeader)
     <div class="panel-indent">
         <p>@messages("file_upload.delay.csv")</p>
     </div>
