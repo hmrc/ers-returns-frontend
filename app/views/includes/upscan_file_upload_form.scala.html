@@ -14,12 +14,13 @@
  * limitations under the License.
  *@
 
-@import views.html.templates.spinner
+@import views.html.templates.{spinner, header}
+@(fileType: String, formFields: Map[String, String], postTarget: String, headerMsg: String)(implicit messages: Messages)
 
-@(fileType: String, formFields: Map[String, String], postTarget: String)(implicit messages: Messages)
-
-<div id="uploadForm">
+<div id="uploadForm" class="form-group">
   <form action="@postTarget" method="post" enctype="multipart/form-data">
+
+    @header(headerMsg)
 
     @for(field <- formFields) {
       <input type="hidden" name="@field._1" value="@field._2"/>

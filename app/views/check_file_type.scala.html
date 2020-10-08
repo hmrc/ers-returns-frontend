@@ -21,7 +21,7 @@
 @* type of activity template *@
 @schemeId = @{requestObject.getSchemeId}
 
-@import views.html.helpers.error_overview
+@import uk.gov.hmrc.play.views.html.helpers
 @import views.html.templates._
 
 @ers_main(title = messages("ers.choose_file_type.page_title")) {
@@ -29,22 +29,24 @@
 	@reference(requestObject.getPageTitle)
 	<p class="font-xsmall"><a href="@routes.ReportableEventsController.reportableEventsPage()" class="link-back">@Html(messages("ers.back"))</a></p>
 	@uk.gov.hmrc.play.views.html.helpers.form(action = routes.CheckFileTypeController.checkFileTypeSelected()) {
-		@header(messages("ers_check_file_type.title"))
-		@error_overview(checkFileTypeForm)
-		<div class="form-group @if(checkFileTypeForm.hasErrors) {error}">
+		@if(checkFileTypeForm.hasErrors) {
+			@helpers.errorSummary(messages("validation.summary.heading"), checkFileTypeForm)
+		}
+		<div class="form-group @if(checkFileTypeForm.hasErrors) {form-field--error}">
 			<fieldset>
-				<legend id="checkFileTypeLbl">
-					@if(checkFileTypeForm.hasErrors){<span class="error-message">@Html(messages("ers_check_file_type.err.message"))</span>}
+				<legend id="checkFileType">
+					@header(messages("ers_check_file_type.title"))
 				</legend>
-				<div class="form-field">
-					<label for="csv" class="block-label @(if(checkFileType contains ersUtil.OPTION_CSV) "selected")">
+				@if(checkFileTypeForm.hasErrors){<span class="error-notification">@Html(messages("ers_check_file_type.err.message"))</span>}
+				<div>
+					<div class="multiple-choice">
 						<input id="csv" type="radio" name="checkFileType" value=@ersUtil.OPTION_CSV @(if(checkFileType.get == ersUtil.OPTION_CSV) "checked" else "")>
-						@Html(messages("ers_check_file_type.option_1"))<br>
-					</label>
-					<label for="ods" class="block-label @(if(checkFileType contains ersUtil.OPTION_ODS) "selected")">
+						<label for="csv" class="block-label @(if(checkFileType contains ersUtil.OPTION_CSV) "selected")">@Html(messages("ers_check_file_type.option_1"))</label>
+					</div>
+					<div class="multiple-choice">
 						<input id="ods" type="radio" name="checkFileType" value=@ersUtil.OPTION_ODS @(if(checkFileType.get == ersUtil.OPTION_ODS) "checked" else "")>
-						@Html(messages("ers_check_file_type.option_2"))<br>
-					</label>
+						<label for="ods" class="block-label @(if(checkFileType contains ersUtil.OPTION_ODS) "selected")">@Html(messages("ers_check_file_type.option_2"))</label>
+					</div>
 				</div>
 			</fieldset>
 		</div>

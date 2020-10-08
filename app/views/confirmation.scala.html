@@ -27,9 +27,7 @@
 
 	@reference(requestObject.getPageTitle)
 	<div class="success-banner"  id="confirmation-text-box">
-		<p>
-			<span class="heading-xlarge"><img src="assets/images/tick.png" alt="tick.">&nbsp;@Html(messages("ers_confirmation.submitted",ContentUtil.getSchemeName(schemeId)))<br></span>
-		</p>
+		<h1 class="heading-xlarge"><img src="assets/images/tick.png" alt="tick.">&nbsp;@Html(messages("ers_confirmation.submitted",ContentUtil.getSchemeName(schemeId)))<br></h1>
 		<p class="font-medium">@Html(messages("ers_confirmation.submission_ref"))<br>@bundle<br>@{utils.DateUtils.convertDate(dateSubmitted)}</p>
 	</div>
 	<p>@Html(messages("ers_confirmation.pdf_info"))</p>

@@ -54,22 +54,20 @@
 	}
 
 	function removeFileAlert () {
-		$(".input-csv-file-name").each(function(index){
-			$(this).parent("Div").removeClass("fileAlert")
-		});
+		$("#fileToUpload").parent("Div").removeClass("fileAlert");
 	}
 
 	function showCSVErrorMsg(e, msg) {
     	if ($("#error-summary").length) {
     		$("#error-summary").remove();
     		$(".validation-summary").hide()
-	    	$("#uploadForm").removeClass("error");
+	    	$("#uploadForm").removeClass("form-field--error");
     	}
     	$("#file-uploader button").attr("disabled",true);
     	$(".validation-summary").show()
-	    $("#fileToUpload").parent("Div").before("<p id='error-summary' class='field-error clear' tabindex='-1' role='alert'>"+msg+"</p>")
+	    $("#fileToUpload").parent("Div").before("<p id='error-summary' class='field-error error-notification' tabindex='-1' role='alert'>"+msg+"</p>")
 	    $(".validation-summary-message a").html(msg)
-	    $("#uploadForm").addClass("error");
+	    $("#uploadForm").addClass("form-field--error");
 	    $("#errors").focus();
 	}
 

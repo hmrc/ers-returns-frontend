@@ -16,35 +16,32 @@
 
 @import utils.ERSUtil
 @import config.ApplicationConfig
+@import views.html.helpers.error_overview
 @(requestObject: RequestObject, altActivity: String, groupSchemeActivity: String, altActivityForm: Form[models.AltAmendsActivity])(implicit request: Request[AnyRef], flash: Flash, messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 @schemeId = @{requestObject.getSchemeId}
-@import views.html.helpers.error_overview
 @import views.html.templates._
-@import uk.gov.hmrc.play.views.html.helpers.form
+@import uk.gov.hmrc.play.views.html.helpers
 
 @ers_main(title = ersUtil.getPageElement(schemeId, "ers", "is_alterations.page_title")) {
 
     @reference(requestObject.getPageTitle)
     <p class="font-xsmall"><a href="@ersUtil.getPageBackLink(schemeId, ersUtil.PAGE_ALT_ACTIVITY, groupSchemeActivity)" class="link-back">@Html(Messages("ers.back"))</a></p>
-    @form(action = routes.AltAmendsController.altActivitySelected()) {
-        @header(ersUtil.getPageElement(schemeId, ersUtil.PAGE_ALT_ACTIVITY, "question"))
-        @error_overview(altActivityForm, Some(ersUtil.getPageElement(schemeId, ersUtil.PAGE_ALT_ACTIVITY, "err.message")))
-        <p class="form-hint">@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_ALT_ACTIVITY, "intro_para"))</p>
-        <div class="form-group @if(altActivityForm.hasErrors) {error}">
+    @error_overview(altActivityForm, Some(ersUtil.getPageElement(schemeId, ersUtil.PAGE_ALT_ACTIVITY, "err.message")))
+    @helpers.form(action = routes.AltAmendsController.altActivitySelected()) {
+        <div class="form-group @if(altActivityForm.hasErrors) {form-field--error}">
             <fieldset class="inline">
-                <legend id="altActivityLbl">
-                    <span class="visuallyhidden">@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_ALT_ACTIVITY, "question"))</span>
-                    @if(altActivityForm.hasErrors){<span class="error-message">@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_ALT_ACTIVITY, "err.message"))</span>}
+                <legend id="altActivity">
+                    @header(ersUtil.getPageElement(schemeId, ersUtil.PAGE_ALT_ACTIVITY, "question"))
                 </legend>
-                <div class="form-field">
-                    <label for="yes" class="block-label @(if(altActivity == ersUtil.OPTION_YES) "selected")">
-                        <input id="yes" type="radio" name="altActivity" value=@ersUtil.OPTION_YES @(if(altActivity == ersUtil.OPTION_YES) "checked" else "")>
-                        @Html(Messages("ers.yes"))<br>
-                    </label>
-                    <label for="no" class="block-label @(if(altActivity == ersUtil.OPTION_NO) "selected")">
-                        <input id="no" type="radio" name="altActivity" value=@ersUtil.OPTION_NO @(if(altActivity == ersUtil.OPTION_NO) "checked" else "")>
-                        @Html(Messages("ers.no"))<br>
-                    </label>
+                <p id="hint" class="form-hint">@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_ALT_ACTIVITY, "intro_para"))</p>
+                @if(altActivityForm.hasErrors){<span class="error-notification">@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_ALT_ACTIVITY, "err.message"))</span>}
+                <div class="multiple-choice">
+                    <input id="yes" type="radio" name="altActivity" value=@ersUtil.OPTION_YES aria-describedby="hint" @(if(altActivity == ersUtil.OPTION_YES) "checked" else "")>
+                    <label for="yes" class="block-label @(if(altActivity == ersUtil.OPTION_YES) "selected")">@Html(Messages("ers.yes"))</label>
+                </div>
+                <div class="multiple-choice">
+                    <input id="no" type="radio" name="altActivity" value=@ersUtil.OPTION_NO aria-describedby="hint" @(if(altActivity == ersUtil.OPTION_NO) "checked" else "")>
+                    <label for="no" class="block-label @(if(altActivity == ersUtil.OPTION_NO) "selected")">@Html(Messages("ers.no"))</label>
                 </div>
             </fieldset>
         </div>

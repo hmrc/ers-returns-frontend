@@ -16,41 +16,40 @@
 
 @import utils.ERSUtil
 @import config.ApplicationConfig
+@import views.html.helpers.error_overview
 @(requestObject: RequestObject, groupScheme: Option[String], groupSchemeForm: Form[models.RS_groupScheme])(implicit request: Request[AnyRef], flash: Flash, messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 @* Is a group scheme template *@
 @schemeId = @{requestObject.getSchemeId}
 @import views.html.templates._
-@import views.html.helpers.error_overview
-
+@import uk.gov.hmrc.play.views.html.helpers
 
 @ers_main(title = ersUtil.getPageElement(schemeId, "ers", "is_group_scheme.page_title") + " " + Messages("ers.title.postfix")) {
 
 	@reference(requestObject.getPageTitle)
 	<p class="font-xsmall"><a href="@routes.SchemeOrganiserController.schemeOrganiserPage()" class="link-back">@Html(Messages("ers.back"))</a></p>
-	@header(ersUtil.getPageElement(schemeId, ersUtil.PAGE_GROUP_ACTIVITY, "question"))
-	@uk.gov.hmrc.play.views.html.helpers.form(action = routes.GroupSchemeController.groupSchemeSelected(schemeId)) {
+	@if(groupSchemeForm.hasErrors) {
 		@error_overview(groupSchemeForm, Some(ersUtil.getPageElement(schemeId, ersUtil.PAGE_GROUP_ACTIVITY, "err.message")))
-		<fieldset class="inline">
-			<div class="form-group @if(groupSchemeForm.hasErrors) {error}">
+	}
+	@uk.gov.hmrc.play.views.html.helpers.form(action = routes.GroupSchemeController.groupSchemeSelected(schemeId)) {
+		<div class="form-group @if(groupSchemeForm.hasErrors) {form-field--error}">
+			<fieldset class="inline">
 				<legend id="groupSchemeLbl">
-					<span class="visuallyhidden">@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_GROUP_ACTIVITY, "question"))</span>
-					@if(groupSchemeForm.hasErrors){<span class="error-message">@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_GROUP_ACTIVITY, "err.message"))</span>}
+					@header(ersUtil.getPageElement(schemeId, ersUtil.PAGE_GROUP_ACTIVITY, "question"))
 				</legend>
 				<div class="form-hint">
-					<p>@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_GROUP_ACTIVITY, "intro_para"))</p>
+					<span>@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_GROUP_ACTIVITY, "intro_para"))</span>
 				</div>
-				<div class="form-field">
-					<label for="yes" class="block-label @(if(groupScheme contains ersUtil.OPTION_YES) "selected")">
-						<input id="yes" type="radio" name="groupScheme" value="1" @(if(groupScheme.get == ersUtil.OPTION_YES) "checked" else "")>
-						@Html(Messages("ers_group_scheme.yes"))<br>
-					</label>
-					<label for="no" class="block-label @(if(groupScheme contains ersUtil.OPTION_NO) "selected")">
-						<input id="no" type="radio" name="groupScheme" value="2" @(if(groupScheme.get == ersUtil.OPTION_NO) "checked" else "")>
-						@Html(Messages("ers_group_scheme.no"))<br>
-					</label>
+				@if(groupSchemeForm.hasErrors){<span class="error-notification">@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_GROUP_ACTIVITY, "err.message"))</span>}
+				<div class="multiple-choice">
+					<input id="yes" type="radio" name="groupScheme" value="1" @(if(groupScheme.get == ersUtil.OPTION_YES) "checked" else "")>
+					<label for="yes" class="@(if(groupScheme contains ersUtil.OPTION_YES) "selected")">@Html(Messages("ers_group_scheme.yes"))</label>
 				</div>
-			</div>
-		</fieldset>
+				<div class="multiple-choice">
+					<input id="no" type="radio" name="groupScheme" value="2" @(if(groupScheme.get == ersUtil.OPTION_NO) "checked" else "")>
+					<label for="no" class="@(if(groupScheme contains ersUtil.OPTION_NO) "selected")">@Html(Messages("ers_group_scheme.no"))</label>
+				</div>
+			</fieldset>
+		</div>
 		<input role="button" id="continue" class="button" type="submit" value="@Html(Messages("ers.continue"))">
 	}
 }

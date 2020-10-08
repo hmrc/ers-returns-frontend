@@ -16,11 +16,11 @@
 
 @import utils.ERSUtil
 @import config.ApplicationConfig
+@import views.html.helpers.error_overview
 @(requestObject: RequestObject, activity: Option[String], reportableEvents: Form[models.ReportableEvents])(implicit request: Request[AnyRef], flash: Flash, messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 @* type of activity template *@
 @schemeId = @{requestObject.getSchemeId}
 @import uk.gov.hmrc.play.views.html.helpers
-@import views.html.helpers.error_overview
 @import views.html.templates._
 
 @scripts = {<script src='@routes.Assets.at("javascripts/ers_scripts.js")'> </script>}
@@ -29,24 +29,23 @@
 
 	@reference(requestObject.getPageTitle)
 	<p class="font-xsmall"><a href="@routes.ReturnServiceController.startPage" class="link-back">@Html(messages("ers.back"))</a></p>
-	@header(ersUtil.getPageElement(schemeId, ersUtil.PAGE_CHOOSE, "question"))
+	@if(reportableEvents.hasErrors) {
+		@helpers.errorSummary(messages("validation.summary.heading"), reportableEvents)
+	}
 	@helpers.form(action = routes.ReportableEventsController.reportableEventsSelected) {
-		@error_overview(reportableEvents)
-		<div class="form-group @if(reportableEvents.hasErrors) {error}">
+		<div class="form-group @if(reportableEvents.hasErrors) { form-field--error }">
 			<fieldset class="inline">
-				<legend id="isNilReturnLbl">
-					<span class="visuallyhidden">@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_CHOOSE, "question"))</span>
-					@if(reportableEvents.hasErrors){<span class="error-message">@Html(messages("ers_choose.err.message"))</span>}
+				<legend id="isNilReturn">
+					@header(ersUtil.getPageElement(schemeId, ersUtil.PAGE_CHOOSE, "question"))
 				</legend>
-				<div class="form-field">
-					<label id="upload-spreadsheet-radio-buttonLbl" for="upload-spreadsheet-radio-button" class="block-label @(if(activity contains ersUtil.OPTION_UPLOAD_SPREEDSHEET) "selected")">
-						<input id="upload-spreadsheet-radio-button" type="radio" name="isNilReturn" value=@ersUtil.OPTION_UPLOAD_SPREEDSHEET @(if(activity.get == ersUtil.OPTION_UPLOAD_SPREEDSHEET) "checked" else "")>
-						@Html(messages("ers_choose.option_1"))<br>
-					</label>
-					<label id="nil-return-radio-buttonLbl" for="nil-return-radio-button" class="block-label @(if(activity contains ersUtil.OPTION_NIL_RETURN) "selected")">
-						<input id="nil-return-radio-button" type="radio" name="isNilReturn" value=@ersUtil.OPTION_NIL_RETURN @(if(activity.get == ersUtil.OPTION_NIL_RETURN) "checked" else "")>
-						@Html(messages("ers_choose.option_2"))<br>
-					</label>
+				@if(reportableEvents.hasErrors){<span class="error-notification">@Html(messages("ers_choose.err.message"))</span>}
+				<div class="multiple-choice">
+					<input id="upload-spreadsheet-radio-button" type="radio" name="isNilReturn" value=@ersUtil.OPTION_UPLOAD_SPREEDSHEET @(if(activity.get == ersUtil.OPTION_UPLOAD_SPREEDSHEET) "checked" else "")>
+					<label id="upload-spreadsheet-radio-buttonLbl" for="upload-spreadsheet-radio-button" class="block-label @(if(activity contains ersUtil.OPTION_UPLOAD_SPREEDSHEET) "selected")">@Html(messages("ers_choose.option_1"))</label>
+				</div>
+				<div class="multiple-choice">
+					<input id="nil-return-radio-button" type="radio" name="isNilReturn" value=@ersUtil.OPTION_NIL_RETURN @(if(activity.get == ersUtil.OPTION_NIL_RETURN) "checked" else "")>
+					<label id="nil-return-radio-buttonLbl" for="nil-return-radio-button" class="block-label @(if(activity contains ersUtil.OPTION_NIL_RETURN) "selected")">@Html(messages("ers_choose.option_2"))</label>
 				</div>
 			</fieldset>
 		</div>

@@ -33,7 +33,7 @@
 	<div class="clear">
 		@uk.gov.hmrc.play.views.html.helpers.form(action = routes.GroupSchemeController.groupPlanSummaryContinue(schemeId)) {
 			@if(groupSchemeType == ersUtil.OPTION_MANUAL) {
-			<div class="panel-indent">
+			<div class="panel panel-border-wide">
 				<a href="@routes.GroupSchemeController.manualCompanyDetailsPage()">@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_GROUP_SUMMARY, "add_company"))</a>
 			</div>
 			}
@@ -53,14 +53,14 @@
 					  @company.addressLine1@if(company.addressLine2.getOrElse("") != ""){, @company.addressLine2}@if(company.addressLine3.getOrElse("") != ""){, @company.addressLine3}@if(company.addressLine4.getOrElse("") != ""){, @company.addressLine4}@if(company.postcode.getOrElse("") != ""){, @company.postcode}@if(company.country.getOrElse("") != ""){, @countryCodes.getCountry(company.country.get)}
 				  </td>
 				</tr>
-				@if(company.country != None){@if(company.country.get == ersUtil.DEFAULT_COUNTRY) {
-					@if(company.companyReg != None) {
+				@if(company.country.isDefined){@if(company.country.get == ersUtil.DEFAULT_COUNTRY) {
+					@if(company.companyReg.isDefined) {
 						<tr>
 							<td class="group-plan-name-summary-text-align">@Html(messages("ers_group_summary.crn"))</td>
 							<td class="group-plan-summary-text-align">@company.companyReg</td>
 						</tr>
 					}
-					@if(company.corporationRef != None) {
+					@if(company.corporationRef.isDefined) {
 						<tr>
 							<td class="group-plan-name-summary-text-align">@Html(messages("ers_group_summary.ctr"))</td>
 							<td class="group-plan-summary-text-align">@company.corporationRef</td>
@@ -72,7 +72,7 @@
 			}
 			@if(groupSchemeType == ersUtil.OPTION_CSV) {
 			<h2>@Html(messages("ers_group_summary.notice"))</h2>
-			<p class="text">@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_GROUP_SUMMARY, "notice_info"))&nbsp;<a href="routes.GroupSchemeController.groupCheckCSVFilePage()" id="check-another-return-file-link">@Html(messages("ers_group_summary.notice_info2"))</a>.<p/>
+			<p>@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_GROUP_SUMMARY, "notice_info"))&nbsp;<a href="routes.GroupSchemeController.groupCheckCSVFilePage()" id="check-another-return-file-link">@Html(messages("ers_group_summary.notice_info2"))</a>.<p/>
 			}
 			<div @if(groupSchemeType == ersUtil.OPTION_MANUAL) {class="group-plan-summary-margin"}>
 			<button role="button" id="continue" class="button" type="submit" @if(companies.companies.isEmpty) {disabled="disabled"}>@Html(messages("ers.continue"))</button>

@@ -71,7 +71,7 @@
     	$("#error-summary").remove();
     	$(".validation-summary").hide()
     	$("#file-uploader button").attr("disabled",false).focus();
-	    $("#uploadForm").removeClass("error");
+	    $("#uploadForm").removeClass("form-field--error");
 	}
 
 	function showErrorMsg(msg) {
@@ -79,7 +79,7 @@
     		$("#error-summary").remove();
     	}
     	$("#file-uploader button").attr("disabled",true);
-	    $("#file-wrapper").before("<div id='error-summary' class='validation-message' tabindex'-1' role='alert' aria-labelledby='error-heading'>"+msg+"</div>")					
+	    $("#file-wrapper").before("<div id='error-summary' class='error-notification' tabindex'-1' role='alert' aria-labelledby='error-heading'>"+msg+"</div>")
 	}	
 
 
