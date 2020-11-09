@@ -40,6 +40,7 @@ class ApplicationConfig @Inject()(val runModeConfiguration: Configuration, envir
 
 	lazy val appName: String = getString("appName")
 	lazy val authBaseUrl: String = baseUrl("auth")
+	lazy val googleTagManagerId: String = getString("google-tag-manager.id")
 
 	lazy val contactFormServiceIdentifier = "ers-returns"
 	lazy val contactHost: String = getString("contact-frontend.host")
