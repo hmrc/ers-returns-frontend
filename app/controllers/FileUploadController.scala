@@ -23,29 +23,31 @@ import connectors.ErsConnector
 import javax.inject.{Inject, Singleton}
 import models.upscan.{Failed, UploadStatus, UploadedSuccessfully}
 import play.api.Logger
-import play.api.Play.current
-import play.api.i18n.{I18nSupport, Messages, MessagesApi}
+import play.api.i18n.{I18nSupport, Messages}
 import play.api.mvc._
 import services.{SessionService, UpscanService}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import utils._
-import views.html.upscan_ods_file_upload
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class FileUploadController @Inject()(val messagesApi: MessagesApi,
+class FileUploadController @Inject()(val mcc: MessagesControllerComponents,
 																		 val ersConnector: ErsConnector,
 																		 val authConnector: DefaultAuthConnector,
 																		 val sessionService: SessionService,
 																		 val upscanService: UpscanService,
 																		 implicit val ersUtil: ERSUtil,
-																		 implicit val appConfig: ApplicationConfig
-																		) extends FrontendController with Authenticator with I18nSupport with Retryable {
+																		 implicit val appConfig: ApplicationConfig,
+                                     implicit val actorSystem: ActorSystem,
+                                     globalErrorView: views.html.global_error,
+                                     fileUploadErrorsView: views.html.file_upload_errors,
+                                     upscanOdsFileUploadView: views.html.upscan_ods_file_upload
+																		) extends FrontendController(mcc) with Authenticator with I18nSupport with Retryable {
 
-	implicit lazy val actorSystem: ActorSystem = current.actorSystem
+  implicit val ec: ExecutionContext = mcc.executionContext
 
   def uploadFilePage(): Action[AnyContent] = authorisedForAsync() {
     implicit user =>
@@ -57,7 +59,7 @@ class FileUploadController @Inject()(val messagesApi: MessagesApi,
           response <- upscanFormFuture
           _ <- sessionService.createCallbackRecord
         } yield {
-          Ok(upscan_ods_file_upload(requestObject, response))
+          Ok(upscanOdsFileUploadView(requestObject, response))
         }) recover{
           case e: Throwable =>
             Logger.error(s"[FileUploadController][uploadFilePage] failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.", e)
@@ -159,7 +161,7 @@ class FileUploadController @Inject()(val messagesApi: MessagesApi,
           requestObject <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
           fileType      <- ersUtil.fetch[CheckFileType](ersUtil.FILE_TYPE_CACHE, requestObject.getSchemeReference)
         } yield {
-          Ok(views.html.file_upload_errors(requestObject, fileType.checkFileType.getOrElse("")))
+          Ok(fileUploadErrorsView(requestObject, fileType.checkFileType.getOrElse("")))
         }) recover {
           case e: Throwable =>
             Logger.error(s"[FileUploadController][validationFailure] failed with Exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.", e)
@@ -178,7 +180,7 @@ class FileUploadController @Inject()(val messagesApi: MessagesApi,
   }
 
 	def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result = {
-		Ok(views.html.global_error(
+		Ok(globalErrorView(
 			"ers.global_errors.title",
 			"ers.global_errors.heading",
 			"ers.global_errors.message"

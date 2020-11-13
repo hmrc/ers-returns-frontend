@@ -18,7 +18,6 @@ package controllers
 
 import akka.stream.Materializer
 import connectors.ErsConnector
-import helpers.ErsTestHelper
 import metrics.Metrics
 import models._
 import models.upscan.UpscanCsvFilesCallbackList
@@ -27,30 +26,43 @@ import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.OneAppPerSuite
-import play.api.Application
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import play.api.{Application, i18n}
 import play.api.http.Status
-import play.api.i18n.{Lang, Messages, MessagesApi}
+import play.api.i18n.{Lang, Messages, MessagesApi, MessagesImpl}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json
 import play.api.libs.json._
-import play.api.mvc.Request
+import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents, Request}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.test.UnitSpec
 import utils.Fixtures.ersRequestObject
-import utils.{ERSFakeApplicationConfig, ERSUtil, Fixtures, UpscanData}
+import utils.{ERSFakeApplicationConfig, ERSUtil, ErsTestHelper, Fixtures, UpscanData}
+import views.html.{global_error, summary}
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class SummaryDeclarationControllerTest extends UnitSpec with ERSFakeApplicationConfig with MockitoSugar with ErsTestHelper with OneAppPerSuite with UpscanData {
+class SummaryDeclarationControllerSpec extends UnitSpec with ERSFakeApplicationConfig with MockitoSugar with ErsTestHelper with UpscanData with GuiceOneAppPerSuite {
 
-  override lazy val app: Application = new GuiceApplicationBuilder().configure(config).build()
-	val messagesApi: MessagesApi = app.injector.instanceOf[MessagesApi]
+	val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
+		messagesActionBuilder,
+		DefaultActionBuilder(stubBodyParser[AnyContent]()),
+		cc.parsers,
+		fakeApplication.injector.instanceOf[MessagesApi],
+		cc.langs,
+		cc.fileMimeTypes,
+		ExecutionContext.global
+	)
+
+	implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
+
   implicit lazy val mat: Materializer = app.materializer
-  implicit lazy val messages: Messages = Messages(Lang("en"), messagesApi)
+	val globalErrorView: global_error = app.injector.instanceOf[global_error]
+	val summaryView: summary = app.injector.instanceOf[summary]
 
 	val schemeInfo: SchemeInfo = SchemeInfo("XA1100000000000", DateTime.now, "2", "2016", "EMI", "EMI")
 	val rsc: ErsMetaData = new ErsMetaData(schemeInfo, "ipRef", Some("aoRef"), "empRef", Some("agentRef"), Some("sapNumber"))
@@ -157,15 +169,17 @@ class SummaryDeclarationControllerTest extends UnitSpec with ERSFakeApplicationC
 
 
 	def buildFakeSummaryDeclarationController(fetchMapVal: String = "e"): SummaryDeclarationController =
-		new SummaryDeclarationController(messagesApi,
+		new SummaryDeclarationController(mockMCC,
 																		 mockAuthConnector,
 																		 ersConnector,
 																		 mockCountryCodes,
 																		 new TestErsUtil(fetchMapVal),
-																		 mockAppConfig
+																		 mockAppConfig,
+																		 globalErrorView,
+																		 summaryView
 		) {
 			when(mockHttp.POST[ValidatorData, HttpResponse](ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())
-			(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(Future.successful(HttpResponse(OK)))
+			(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(Future.successful(HttpResponse(OK, "")))
   }
 
   "Calling SummaryDeclarationController.summaryDeclarationPage (GET) without authentication" should {

@@ -21,23 +21,24 @@ import connectors.ErsConnector
 import javax.inject.{Inject, Singleton}
 import models.upscan._
 import play.api.Logger
-import play.api.i18n.MessagesApi
 import play.api.libs.json.JsValue
-import play.api.mvc.Action
+import play.api.mvc.{Action, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import utils.ERSUtil
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
 
 @Singleton
-class CsvFileUploadCallbackController @Inject()(val messagesApi: MessagesApi,
+class CsvFileUploadCallbackController @Inject()(val mcc: MessagesControllerComponents,
 																								val ersConnector: ErsConnector,
 																								val authConnector: DefaultAuthConnector,
 																								implicit val ersUtil: ERSUtil,
 																								implicit val appConfig: ApplicationConfig
-																							 ) extends FrontendController {
+																							 ) extends FrontendController(mcc) {
+
+  implicit val ec: ExecutionContext = mcc.executionContext
 
   def callback(uploadId: UploadId, scRef: String): Action[JsValue] = Action.async(parse.json) {
     implicit request =>

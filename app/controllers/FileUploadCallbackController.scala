@@ -20,17 +20,19 @@ import javax.inject.{Inject, Singleton}
 import models.upscan._
 import play.api.Logger
 import play.api.libs.json.JsValue
-import play.api.mvc.Action
+import play.api.mvc.{Action, MessagesControllerComponents}
 import services.SessionService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.logging.SessionId
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class FileUploadCallbackController @Inject()(val sessionService: SessionService) extends FrontendController {
+class FileUploadCallbackController @Inject()(val mcc: MessagesControllerComponents, val sessionService: SessionService)
+                                              extends FrontendController(mcc) {
+
+  implicit val ec: ExecutionContext = mcc.executionContext
 
   def callback(sessionId: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
     implicit val headerCarrier: HeaderCarrier = hc.copy(sessionId = Some(SessionId(sessionId)))

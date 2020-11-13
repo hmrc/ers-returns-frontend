@@ -15,17 +15,33 @@
  */
 
 package controllers
-import helpers.ErsTestHelper
+
 import org.mockito.Mockito.when
 import org.scalatestplus.play.OneAppPerSuite
-import play.api.i18n.{Lang, MessagesApi}
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import play.api.i18n
+import play.api.i18n.{Lang, MessagesApi, MessagesImpl}
+import play.api.mvc.{AnyContent, Cookie, Cookies, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.play.test.UnitSpec
+import utils.ErsTestHelper
 
-class LanguageSwitchControllerSpec extends UnitSpec with OneAppPerSuite with ErsTestHelper {
-  val messagesApi: MessagesApi = app.injector.instanceOf(classOf[MessagesApi])
+import scala.concurrent.ExecutionContext
 
+class LanguageSwitchControllerSpec extends UnitSpec with ErsTestHelper with GuiceOneAppPerSuite {
+
+  val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
+    messagesActionBuilder,
+    DefaultActionBuilder(stubBodyParser[AnyContent]()),
+    cc.parsers,
+    fakeApplication.injector.instanceOf[MessagesApi],
+    cc.langs,
+    cc.fileMimeTypes,
+    ExecutionContext.global
+  )
+
+  override implicit val ec: ExecutionContext = mockMCC.executionContext
 	lazy val langMap: Map[String, Lang] = Map(
 		"english" -> Lang("en"),
 		"cymraeg" -> Lang("cy")
@@ -37,14 +53,22 @@ class LanguageSwitchControllerSpec extends UnitSpec with OneAppPerSuite with Ers
   "Hitting language selection endpoint" must {
     "redirect to Welsh translated start page if Welsh language is selected" in {
       val request = FakeRequest()
-      val result = new LanguageSwitchController(appConfig = mockAppConfig, messagesApi = messagesApi).switchToLanguage("cymraeg")(request)
-      header("Set-Cookie",result) shouldBe Some("PLAY_LANG=cy; Path=/")
+      val result = new LanguageSwitchController(appConfig = mockAppConfig, mockMCC).switchToLanguage("cymraeg")(request)
+      val resultCookies: Cookies = cookies(result)
+      resultCookies.size shouldBe 1
+      val cookie: Cookie = resultCookies.head
+      cookie.name shouldBe "PLAY_LANG"
+      cookie.value shouldBe "cy"
     }
 
     "redirect to English translated start page if English language is selected" in {
       val request = FakeRequest()
-      val result = new LanguageSwitchController(appConfig = mockAppConfig, messagesApi = messagesApi).switchToLanguage("english")(request)
-      header("Set-Cookie",result) shouldBe Some("PLAY_LANG=en; Path=/")
+      val result = new LanguageSwitchController(appConfig = mockAppConfig, mockMCC).switchToLanguage("english")(request)
+      val resultCookies: Cookies = cookies(result)
+      resultCookies.size shouldBe 1
+      val cookie: Cookie = resultCookies.head
+      cookie.name shouldBe "PLAY_LANG"
+      cookie.value shouldBe "en"
     }
   }
 }

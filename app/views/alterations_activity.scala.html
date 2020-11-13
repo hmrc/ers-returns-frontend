@@ -17,17 +17,20 @@
 @import utils.ERSUtil
 @import config.ApplicationConfig
 @import views.html.helpers.error_overview
+@import uk.gov.hmrc.play.views.html.helpers.FormWithCSRF
+
+@this(form: FormWithCSRF)
+
 @(requestObject: RequestObject, altActivity: String, groupSchemeActivity: String, altActivityForm: Form[models.AltAmendsActivity])(implicit request: Request[AnyRef], flash: Flash, messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 @schemeId = @{requestObject.getSchemeId}
 @import views.html.templates._
-@import uk.gov.hmrc.play.views.html.helpers
 
 @ers_main(title = ersUtil.getPageElement(schemeId, "ers", "is_alterations.page_title")) {
 
     @reference(requestObject.getPageTitle)
     <p class="font-xsmall"><a href="@ersUtil.getPageBackLink(schemeId, ersUtil.PAGE_ALT_ACTIVITY, groupSchemeActivity)" class="link-back">@Html(Messages("ers.back"))</a></p>
     @error_overview(altActivityForm, Some(ersUtil.getPageElement(schemeId, ersUtil.PAGE_ALT_ACTIVITY, "err.message")))
-    @helpers.form(action = routes.AltAmendsController.altActivitySelected()) {
+    @form(action = routes.AltAmendsController.altActivitySelected()) {
         <div class="form-group @if(altActivityForm.hasErrors) {form-field--error}">
             <fieldset class="inline">
                 <legend id="altActivity">

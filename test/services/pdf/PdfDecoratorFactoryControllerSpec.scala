@@ -22,17 +22,34 @@ import org.joda.time.DateTime
 import org.scalatest.matchers.{BePropertyMatchResult, BePropertyMatcher}
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.OneAppPerSuite
-import play.api.Application
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import play.api.{Application, i18n}
 import play.api.Play.current
-import play.api.i18n.Messages
+import play.api.i18n.{Messages, MessagesApi, MessagesImpl}
 import play.api.i18n.Messages.Implicits._
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents}
+import play.api.test.Helpers.stubBodyParser
 import uk.gov.hmrc.play.test.UnitSpec
-import utils.{CountryCodes, ERSFakeApplicationConfig, Fixtures}
+import utils.{CountryCodes, ERSFakeApplicationConfig, ErsTestHelper, Fixtures}
 
-class PdfDecoratorFactoryControllerSpec extends UnitSpec with MockitoSugar with ERSFakeApplicationConfig with OneAppPerSuite {
+import scala.concurrent.ExecutionContext
 
-  override lazy val app: Application = new GuiceApplicationBuilder().configure(config).build()
+class PdfDecoratorFactoryControllerSpec extends UnitSpec with MockitoSugar with ERSFakeApplicationConfig with ErsTestHelper with GuiceOneAppPerSuite {
+
+  val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
+    messagesActionBuilder,
+    DefaultActionBuilder(stubBodyParser[AnyContent]()),
+    cc.parsers,
+    fakeApplication.injector.instanceOf[MessagesApi],
+    cc.langs,
+    cc.fileMimeTypes,
+    ExecutionContext.global
+  )
+
+  implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
+  implicit lazy val messages: Messages = testMessages.messages
+
   implicit lazy val materializer: Materializer = app.materializer
 
   lazy val altAmends: AlterationAmends = AlterationAmends(altAmendsTerms = Some("1"),

@@ -17,7 +17,7 @@
 package config
 
 import javax.inject.Inject
-import play.api.Play
+import play.api.Configuration
 import uk.gov.hmrc.crypto.{ApplicationCrypto, CryptoWithKeysFromConfig}
 import uk.gov.hmrc.http.cache.client.{SessionCache, ShortLivedCache, ShortLivedHttpCaching}
 import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
@@ -39,8 +39,9 @@ class ERSShortLivedHttpCache @Inject()(val http: DefaultHttpClient,
 }
 
 class ERSShortLivedCache @Inject()(val http: DefaultHttpClient,
-																	appConfig: ApplicationConfig
+																	appConfig: ApplicationConfig,
+																	 val configuration: Configuration
 																 ) extends ShortLivedCache {
 	def shortLiveCache: ShortLivedHttpCaching = new ERSShortLivedHttpCache(http, appConfig)
-	override implicit lazy val crypto: CryptoWithKeysFromConfig = new ApplicationCrypto(Play.current.configuration.underlying).JsonCrypto
+	override implicit lazy val crypto: CryptoWithKeysFromConfig = new ApplicationCrypto(configuration.underlying).JsonCrypto
 }

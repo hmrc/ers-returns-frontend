@@ -21,22 +21,26 @@ import config.ApplicationConfig
 import connectors.ErsConnector
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
-import play.api.i18n.{I18nSupport, Messages, MessagesApi}
-import play.api.mvc.{Action, AnyContent, Request, Result}
+import play.api.i18n.{I18nSupport, Messages}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request, Result}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import utils._
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class ReportableEventsController @Inject()(val messagesApi: MessagesApi,
+class ReportableEventsController @Inject()(val mcc: MessagesControllerComponents,
 																					 val authConnector: DefaultAuthConnector,
 																					 val ersConnector: ErsConnector,
 																					 implicit val ersUtil: ERSUtil,
-																					 implicit val appConfig: ApplicationConfig
-																					) extends FrontendController with Authenticator with I18nSupport {
+																					 implicit val appConfig: ApplicationConfig,
+                                           globalErrorView: views.html.global_error,
+                                           reportableEventsView: views.html.reportable_events
+																					) extends FrontendController(mcc) with Authenticator with I18nSupport {
+
+  implicit val ec: ExecutionContext = mcc.executionContext
 
   def reportableEventsPage(): Action[AnyContent] = authorisedForAsync() {
     implicit user =>
@@ -67,11 +71,11 @@ class ReportableEventsController @Inject()(val messagesApi: MessagesApi,
 
   def showReportableEventsPage(requestObject: RequestObject)(implicit authContext: ERSAuthData, request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
     ersUtil.fetch[ReportableEvents](ersUtil.reportableEvents, requestObject.getSchemeReference).map { activity =>
-      Ok(views.html.reportable_events(requestObject, activity.isNilReturn, RsFormMappings.chooseForm.fill(activity)))
+      Ok(reportableEventsView(requestObject, activity.isNilReturn, RsFormMappings.chooseForm.fill(activity)))
     } recover {
       case _: NoSuchElementException =>
         val form = ReportableEvents(Some(""))
-        Ok(views.html.reportable_events(requestObject, Some(""), RsFormMappings.chooseForm.fill(form)))
+        Ok(reportableEventsView(requestObject, Some(""), RsFormMappings.chooseForm.fill(form)))
     }
   }
 
@@ -90,7 +94,7 @@ class ReportableEventsController @Inject()(val messagesApi: MessagesApi,
   def showReportableEventsSelected(requestObject: RequestObject)(implicit authContext: ERSAuthData, request: Request[AnyRef]): Future[Result] = {
     RsFormMappings.chooseForm.bindFromRequest.fold(
       errors => {
-        Future.successful(Ok(views.html.reportable_events(requestObject, Some(""), errors)))
+        Future.successful(Ok(reportableEventsView(requestObject, Some(""), errors)))
       },
       formData => {
         ersUtil.cache(ersUtil.reportableEvents, formData, requestObject.getSchemeReference).map { _ =>
@@ -111,7 +115,7 @@ class ReportableEventsController @Inject()(val messagesApi: MessagesApi,
   }
 
 	def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result = {
-		Ok(views.html.global_error(
+		Ok(globalErrorView(
 			"ers.global_errors.title",
 			"ers.global_errors.heading",
 			"ers.global_errors.message"

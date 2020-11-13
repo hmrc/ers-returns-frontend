@@ -20,9 +20,7 @@ import _root_.models._
 import config._
 import javax.inject.{Inject, Singleton}
 import play.Logger
-import play.api.Play.current
-import play.api.i18n.Messages.Implicits._
-import play.api.i18n.{Messages, MessagesApi}
+import play.api.i18n.{I18nSupport, Messages}
 import play.api.libs.json.{Json, OFormat}
 import play.api.mvc._
 import uk.gov.hmrc.http.HeaderCarrier
@@ -31,14 +29,19 @@ import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import utils.SessionKeys.{BUNDLE_REF, DATE_TIME_SUBMITTED}
 import utils._
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class ReturnServiceController @Inject()(val messagesApi: MessagesApi,
+class ReturnServiceController @Inject()(val mcc: MessagesControllerComponents,
 																				val authConnector: DefaultAuthConnector,
 																				implicit val ersUtil: ERSUtil,
-																				implicit val appConfig: ApplicationConfig
-																			 ) extends FrontendController with Authenticator {
+																				implicit val appConfig: ApplicationConfig,
+                                        globalErrorView: views.html.global_error,
+                                        unauthorisedView: views.html.unauthorised,
+                                        startView: views.html.start
+																			 ) extends FrontendController(mcc) with Authenticator with I18nSupport {
+
+  implicit val ec: ExecutionContext = mcc.executionContext
 
 	lazy val accessThreshold: Int = appConfig.accessThreshold
 	val accessDeniedUrl = "/outage-ers-frontend/index.html"
@@ -104,7 +107,7 @@ class ReturnServiceController @Inject()(val messagesApi: MessagesApi,
   def showInitialStartPage(requestObject: RequestObject)
 													(implicit request: Request[AnyRef], hc: HeaderCarrier): Result = {
     val sessionData = s"${requestObject.getSchemeId} - ${requestObject.getPageTitle}"
-    Ok(views.html.start(requestObject)).
+    Ok(startView(requestObject)).
       withSession(request.session + ("screenSchemeInfo" -> sessionData) - BUNDLE_REF - DATE_TIME_SUBMITTED)
   }
 
@@ -113,16 +116,16 @@ class ReturnServiceController @Inject()(val messagesApi: MessagesApi,
       implicit request =>
         ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).map{
           result =>
-            Ok(views.html.start(result)).withSession(request.session - BUNDLE_REF - DATE_TIME_SUBMITTED)
+            Ok(startView(result)).withSession(request.session - BUNDLE_REF - DATE_TIME_SUBMITTED)
         }
   }
 
   def showUnauthorisedPage(implicit request: Request[AnyRef]): Future[Result] = {
-    Future.successful(Ok(views.html.unauthorised()))
+    Future.successful(Unauthorized(unauthorisedView()))
   }
 
 	def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result = {
-		Ok(views.html.global_error(
+		Ok(globalErrorView(
 			"ers.global_errors.title",
 			"ers.global_errors.heading",
 			"ers.global_errors.message"

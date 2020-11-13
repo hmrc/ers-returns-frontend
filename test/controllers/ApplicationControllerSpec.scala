@@ -17,36 +17,52 @@
 package controllers
 
 import akka.stream.Materializer
-import helpers.ErsTestHelper
-import org.scalatestplus.play.{OneServerPerSuite, PlaySpec}
-import play.api.Application
-import play.api.i18n.MessagesApi
-import play.api.inject.guice.GuiceApplicationBuilder
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import org.scalatestplus.play.PlaySpec
+import play.api.i18n
+import play.api.i18n.{MessagesApi, MessagesImpl}
+import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import utils.ERSFakeApplicationConfig
+import utils.ErsTestHelper
+import views.html.{not_authorised, signedOut, unauthorised}
 
-class ApplicationControllerSpec extends PlaySpec with OneServerPerSuite with ERSFakeApplicationConfig with ErsTestHelper {
+import scala.concurrent.ExecutionContext
 
-  override lazy val app: Application = new GuiceApplicationBuilder().configure(config).build()
-	val messagesApi: MessagesApi = app.injector.instanceOf[MessagesApi]
+class ApplicationControllerSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPerSuite{
+
+  val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
+    messagesActionBuilder,
+    DefaultActionBuilder(stubBodyParser[AnyContent]()),
+    cc.parsers,
+    fakeApplication.injector.instanceOf[MessagesApi],
+    cc.langs,
+    cc.fileMimeTypes,
+    ExecutionContext.global
+  )
+
+  implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
+
   implicit lazy val materializer: Materializer = app.materializer
+  val unauthorisedView: unauthorised = app.injector.instanceOf[unauthorised]
+  val signedOutView: signedOut = app.injector.instanceOf[signedOut]
+  val notAuthorisedView: views.html.not_authorised = app.injector.instanceOf[not_authorised]
 
-	val testController = new ApplicationController(messagesApi, mockAuthConnector, mockErsUtil, mockAppConfig)
+	val testController = new ApplicationController(mockMCC, mockAuthConnector, mockErsUtil, mockAppConfig, unauthorisedView, signedOutView, notAuthorisedView)
 
   "ApplicationController" must {
 
     "respond to /unauthorised" in {
-      val result = route(FakeRequest(GET, "/submit-your-ers-annual-return/unauthorised"))
+      val result = route(app, FakeRequest(GET, "/submit-your-ers-annual-return/unauthorised"))
       status(result.get) must not equal NOT_FOUND
     }
   }
 
   "get /unauthorised" must {
 
-    "have a status of OK" in {
+    "have a status of Unauthorised" in {
       val result = testController.unauthorised().apply(FakeRequest())
-      status(result) must be(OK)
+      status(result) must be(UNAUTHORIZED)
     }
 
     "have a title of Unauthorised" in {

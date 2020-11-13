@@ -15,6 +15,9 @@
  *@
 
 @import config.ApplicationConfig
+@import play.twirl.api.HtmlFormat
+@import uk.gov.hmrc.play.views.html.{helpers => uiHelpers, layouts => uiLayouts}
+
 @(title: String,
     headerNav: Option[views.helpers.HeaderNav] = None,
     contentHeader: Option[Html] = None,
@@ -27,7 +30,6 @@
 )(mainContent: Html = HtmlFormat.empty)(implicit request: Request[_], messages: Messages, applicationConfig: ApplicationConfig)
 
 @import layouts._
-@import uk.gov.hmrc.play.views.html.{helpers => uiHelpers, layouts => uiLayouts}
 
 @head = {
     @if(applicationConfig.googleTagManagerId != "N/A") {

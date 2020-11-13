@@ -17,6 +17,9 @@
 @import config.ApplicationConfig
 @import utils.ERSUtil
 @import utils.CountryCodes
+
+@this(config: ApplicationConfig)
+
 @(requestObject: RequestObject, reportableEvents: String, fileType: String, filename: String, fileCount: Int = 0, groupScheme: String, schemeOrganiser: SchemeOrganiserDetails, companies: CompanyDetailsList, altAmendsActivity: String, altAmends: AlterationAmends, trustees: TrusteeDetailsList)(implicit request: Request[AnyRef], flash: Flash, messages: Messages, countryCodes: CountryCodes, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 @schemeId = @{requestObject.getSchemeId}
 

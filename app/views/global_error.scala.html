@@ -16,6 +16,8 @@
 
 @import config.ApplicationConfig
 
+@this(config: ApplicationConfig)
+
 @(pageTitle: String, heading: String, message: String)(implicit request: Request[_], messages: Messages, appConfig: ApplicationConfig)
 
 

@@ -16,6 +16,9 @@
 
 @import utils.ERSUtil
 @import config.ApplicationConfig
+
+@this(config: ApplicationConfig)
+
 @(requestObject: RequestObject)(implicit request: Request[AnyRef], messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 @schemeId = @{requestObject.getSchemeId}
 @import views.html.templates._

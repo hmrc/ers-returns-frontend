@@ -22,24 +22,28 @@ import connectors.ErsConnector
 import javax.inject.{Inject, Singleton}
 import models.upscan.{UploadedSuccessfully, UpscanCsvFilesCallback, UpscanCsvFilesCallbackList}
 import play.api.Logger
-import play.api.i18n.{I18nSupport, Messages, MessagesApi}
-import play.api.mvc.{Action, AnyContent, Request, Result}
+import play.api.i18n.{I18nSupport, Messages}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request, Result}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import utils._
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class SummaryDeclarationController @Inject()(val messagesApi: MessagesApi,
+class SummaryDeclarationController @Inject()(val mcc: MessagesControllerComponents,
 																						 val authConnector: DefaultAuthConnector,
 																						 val ersConnector: ErsConnector,
 																						 implicit val countryCodes: CountryCodes,
 																						 implicit val ersUtil: ERSUtil,
-																						 implicit val appConfig: ApplicationConfig
-																						) extends FrontendController with Authenticator with I18nSupport {
+																						 implicit val appConfig: ApplicationConfig,
+                                             globalErrorView: views.html.global_error,
+                                             summaryView: views.html.summary
+																						) extends FrontendController(mcc) with Authenticator with I18nSupport {
+
+  implicit val ec: ExecutionContext = mcc.executionContext
 
   def summaryDeclarationPage(): Action[AnyContent] = authorisedForAsync() {
     implicit user =>
@@ -91,7 +95,7 @@ class SummaryDeclarationController @Inject()(val messagesApi: MessagesApi,
         case ersUtil.SCHEME_CSOP | ersUtil.SCHEME_SIP | ersUtil.SCHEME_SAYE => altAmendsActivity.altActivity
         case _ => ""
       }
-      Future(Ok(views.html.summary(requestObject, reportableEvents, fileType, fileNames, fileCount, groupScheme, schemeOrganiser,
+      Future(Ok(summaryView(requestObject, reportableEvents, fileType, fileNames, fileCount, groupScheme, schemeOrganiser,
         getCompDetails(all), altActivity, getAltAmends(all), getTrustees(all))))
     } recover {
       case e: Throwable =>
@@ -110,7 +114,7 @@ class SummaryDeclarationController @Inject()(val messagesApi: MessagesApi,
     cacheMap.getEntry[CompanyDetailsList](ersUtil.GROUP_SCHEME_COMPANIES).getOrElse(CompanyDetailsList(List[CompanyDetails]()))
 
 	def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result = {
-		Ok(views.html.global_error(
+		Ok(globalErrorView(
 			"ers.global_errors.title",
 			"ers.global_errors.heading",
 			"ers.global_errors.message"

@@ -16,10 +16,8 @@
 
 package controllers
 
+import akka.actor.ActorSystem
 import akka.stream.Materializer
-import config.ApplicationConfig
-import connectors.ErsConnector
-import helpers.ErsTestHelper
 import models._
 import models.upscan._
 import org.joda.time.DateTime
@@ -29,46 +27,57 @@ import org.mockito.Mockito._
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatestplus.mockito.MockitoSugar
-import org.scalatestplus.play.OneAppPerSuite
-import play.api.Application
-import play.api.i18n.{Lang, Messages, MessagesApi}
-import play.api.inject.guice.GuiceApplicationBuilder
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import play.api.i18n
+import play.api.i18n.{MessagesApi, MessagesImpl}
 import play.api.libs.json.{Json, Writes}
-import play.api.mvc.{Request, Result}
+import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents, Request, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import services.{SessionService, UpscanService}
-import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.test.UnitSpec
 import utils.Fixtures.ersRequestObject
-import utils._
+import utils.{ErsTestHelper, _}
+import views.html.{file_upload_errors, global_error, upscan_csv_file_upload}
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Success
 
 class CsvFileUploadControllerSpec extends UnitSpec
-	with OneAppPerSuite
 	with ERSFakeApplicationConfig
 	with MockitoSugar
 	with BeforeAndAfterEach
 	with UpscanData
 	with ScalaFutures
-	with ErsTestHelper {
+	with ErsTestHelper
+  with GuiceOneAppPerSuite {
 
-	override def fakeApplication(): Application = new GuiceApplicationBuilder().configure(config).build()
+  val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
+    messagesActionBuilder,
+    DefaultActionBuilder(stubBodyParser[AnyContent]()),
+    cc.parsers,
+    fakeApplication.injector.instanceOf[MessagesApi],
+    cc.langs,
+    cc.fileMimeTypes,
+    ExecutionContext.global
+  )
 
+  implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
 	implicit lazy val mat: Materializer = app.materializer
-	implicit lazy val messages: Messages = Messages(Lang("en"), app.injector.instanceOf[MessagesApi])
-	lazy val messagesApi: MessagesApi = app.injector.instanceOf[MessagesApi]
+  val mockActorSystem: ActorSystem = app.injector.instanceOf[ActorSystem]
+  val globalErrorView: global_error = app.injector.instanceOf[global_error]
+  val upscanCsvFileUploadView: upscan_csv_file_upload = app.injector.instanceOf[upscan_csv_file_upload]
+  val fileUploadErrorsView: file_upload_errors = app.injector.instanceOf[file_upload_errors]
 
-	val mockSessionService: SessionService = mock[SessionService]
+
+  val mockSessionService: SessionService = mock[SessionService]
 	val mockUpscanService: UpscanService = mock[UpscanService]
 
 	lazy val csvFileUploadController: CsvFileUploadController =
-		new CsvFileUploadController(messagesApi, mockErsConnector, mockAuthConnector, mockUpscanService, mockErsUtil, mockAppConfig) {
+		new CsvFileUploadController(mockMCC, mockErsConnector, mockAuthConnector, mockUpscanService, mockErsUtil, mockAppConfig, mockActorSystem, globalErrorView, upscanCsvFileUploadView, fileUploadErrorsView) {
 		override lazy val allCsvFilesCacheRetryAmount: Int = 1
 	}
 
@@ -100,7 +109,7 @@ class CsvFileUploadControllerSpec extends UnitSpec
 
         val result = csvFileUploadController.uploadFilePage()(request)
         status(result) shouldBe OK
-        contentAsString(result) should include(messages("csv_file_upload.upload_your_file", ""))
+        contentAsString(result) should include(testMessages("csv_file_upload.upload_your_file", ""))
       }
     }
 
@@ -119,7 +128,7 @@ class CsvFileUploadControllerSpec extends UnitSpec
 
         val result = csvFileUploadController.uploadFilePage()(request)
         status(result) shouldBe OK
-        contentAsString(result) should include(messages("ers.global_errors.title"))
+        contentAsString(result) should include(testMessages("ers.global_errors.title"))
       }
 
       "fetching cache data throws an exception" in {
@@ -128,7 +137,7 @@ class CsvFileUploadControllerSpec extends UnitSpec
 
         val result = csvFileUploadController.uploadFilePage()(request)
         status(result) shouldBe OK
-        contentAsString(result) should include(messages("ers.global_errors.title"))
+        contentAsString(result) should include(testMessages("ers.global_errors.title"))
       }
 
       "there is no files to upload" in {
@@ -143,7 +152,7 @@ class CsvFileUploadControllerSpec extends UnitSpec
         val result = csvFileUploadController.uploadFilePage()(request)
 
         status(result) shouldBe OK
-        contentAsString(result) should include(messages("ers.global_errors.title"))
+        contentAsString(result) should include(testMessages("ers.global_errors.title"))
       }
     }
   }
@@ -194,7 +203,7 @@ class CsvFileUploadControllerSpec extends UnitSpec
 
       val result = csvFileUploadController.success(testUploadId)(request)
       status(result) shouldBe OK
-      contentAsString(result) should include(messages("ers.global_errors.title"))
+      contentAsString(result) should include(testMessages("ers.global_errors.title"))
     }
 
     "saving the cache fails" in {
@@ -205,7 +214,7 @@ class CsvFileUploadControllerSpec extends UnitSpec
 
       val result = csvFileUploadController.success(testUploadId)(request)
       status(result) shouldBe OK
-      contentAsString(result) should include(messages("ers.global_errors.title"))
+      contentAsString(result) should include(testMessages("ers.global_errors.title"))
     }
   }
 
@@ -234,12 +243,13 @@ class CsvFileUploadControllerSpec extends UnitSpec
     }
 
   }
-
+  
   "calling processValidationFailure" should {
 
 
     lazy val csvFileUploadController: CsvFileUploadController =
-			new CsvFileUploadController(messagesApi, mockErsConnector, mockAuthConnector, mockUpscanService, mockErsUtil, mockAppConfig) {
+			new   CsvFileUploadController(mockMCC, mockErsConnector, mockAuthConnector, mockUpscanService, mockErsUtil, mockAppConfig, mockActorSystem, globalErrorView, upscanCsvFileUploadView, fileUploadErrorsView)
+ {
       override lazy val allCsvFilesCacheRetryAmount: Int = 1
     }
 
@@ -299,7 +309,8 @@ class CsvFileUploadControllerSpec extends UnitSpec
   "calling validationResults" should {
 
     lazy val csvFileUploadController: CsvFileUploadController =
-			new CsvFileUploadController(messagesApi, mockErsConnector, mockAuthConnector, mockUpscanService, mockErsUtil, mockAppConfig) {
+			new   CsvFileUploadController(mockMCC, mockErsConnector, mockAuthConnector, mockUpscanService, mockErsUtil, mockAppConfig, mockActorSystem, globalErrorView, upscanCsvFileUploadView, fileUploadErrorsView)
+ {
       override def processValidationResults()(implicit authContext: ERSAuthData, request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = Future(Ok)
       override lazy val allCsvFilesCacheRetryAmount: Int = 1
     }
@@ -322,7 +333,8 @@ class CsvFileUploadControllerSpec extends UnitSpec
   "calling processValidationResults" should {
 
     lazy val csvFileUploadController: CsvFileUploadController =
-			new CsvFileUploadController(messagesApi, mockErsConnector, mockAuthConnector, mockUpscanService, mockErsUtil, mockAppConfig) {
+			new   CsvFileUploadController(mockMCC, mockErsConnector, mockAuthConnector, mockUpscanService, mockErsUtil, mockAppConfig, mockActorSystem, globalErrorView, upscanCsvFileUploadView, fileUploadErrorsView)
+ {
       override def removePresubmissionData(schemeInfo: SchemeInfo)
 																					(implicit authContext: ERSAuthData,
 																					 request: Request[AnyRef],
@@ -385,7 +397,8 @@ class CsvFileUploadControllerSpec extends UnitSpec
 
   "calling removePresubmissionData" should {
     lazy val csvFileUploadController: CsvFileUploadController =
-			new CsvFileUploadController(messagesApi, mockErsConnector, mockAuthConnector, mockUpscanService, mockErsUtil, mockAppConfig) {
+			new   CsvFileUploadController(mockMCC, mockErsConnector, mockAuthConnector, mockUpscanService, mockErsUtil, mockAppConfig, mockActorSystem, globalErrorView, upscanCsvFileUploadView, fileUploadErrorsView)
+ {
       override def extractCsvCallbackData(schemeInfo: SchemeInfo)(implicit authContext: ERSAuthData,
 																																	request: Request[AnyRef],
 																																	hc: HeaderCarrier): Future[Result] = Future(Redirect(""))
@@ -397,7 +410,7 @@ class CsvFileUploadControllerSpec extends UnitSpec
       when(
         mockErsConnector.removePresubmissionData(any[SchemeInfo]())(any(), any())
       ).thenReturn(
-        Future.successful(HttpResponse(OK))
+        Future.successful(HttpResponse(OK, ""))
       )
 
       val result = await(csvFileUploadController.removePresubmissionData(mock[SchemeInfo])(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionIdCSOP("GET"), hc))
@@ -410,7 +423,7 @@ class CsvFileUploadControllerSpec extends UnitSpec
       when(
         mockErsConnector.removePresubmissionData(any[SchemeInfo]())(any(), any())
       ).thenReturn(
-        Future.successful(HttpResponse(INTERNAL_SERVER_ERROR))
+        Future.successful(HttpResponse(INTERNAL_SERVER_ERROR, ""))
       )
 
       val result = await(csvFileUploadController.removePresubmissionData(mock[SchemeInfo])(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionIdCSOP("GET"), hc))
@@ -433,7 +446,8 @@ class CsvFileUploadControllerSpec extends UnitSpec
 
   "calling extractCsvCallbackData" should {
     def csvFileUploadControllerWithRetry(retryTimes: Int): CsvFileUploadController =
-			new CsvFileUploadController(messagesApi, mockErsConnector, mockAuthConnector, mockUpscanService, mockErsUtil, mockAppConfig) {
+			new   CsvFileUploadController(mockMCC, mockErsConnector, mockAuthConnector, mockUpscanService, mockErsUtil, mockAppConfig, mockActorSystem, globalErrorView, upscanCsvFileUploadView, fileUploadErrorsView)
+ {
       override lazy val allCsvFilesCacheRetryAmount: Int = retryTimes
 
       override def validateCsv(csvCallbackData: List[UploadedSuccessfully], schemeInfo: SchemeInfo)
@@ -566,7 +580,8 @@ class CsvFileUploadControllerSpec extends UnitSpec
   "calling validateCsv" should {
 
     lazy val csvFileUploadController: CsvFileUploadController =
-			new CsvFileUploadController(messagesApi, mockErsConnector, mockAuthConnector, mockUpscanService, mockErsUtil, mockAppConfig) {
+			new   CsvFileUploadController(mockMCC, mockErsConnector, mockAuthConnector, mockUpscanService, mockErsUtil, mockAppConfig, mockActorSystem, globalErrorView, upscanCsvFileUploadView, fileUploadErrorsView)
+ {
       override lazy val allCsvFilesCacheRetryAmount: Int = 1
     }
 
@@ -575,7 +590,7 @@ class CsvFileUploadControllerSpec extends UnitSpec
       when(
         mockErsConnector.validateCsvFileData(any[List[UploadedSuccessfully]](), any[SchemeInfo]())(any(), any(), any())
       ).thenReturn(
-        Future.successful(HttpResponse(OK))
+        Future.successful(HttpResponse(OK, ""))
       )
 
       val result = await(csvFileUploadController.validateCsv(mock[List[UploadedSuccessfully]], mock[SchemeInfo])(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionIdCSOP("GET"), hc))
@@ -588,7 +603,7 @@ class CsvFileUploadControllerSpec extends UnitSpec
       when(
         mockErsConnector.validateCsvFileData(any[List[UploadedSuccessfully]](), any[SchemeInfo]())(any(), any(), any())
       ).thenReturn(
-        Future.successful(HttpResponse(ACCEPTED))
+        Future.successful(HttpResponse(ACCEPTED, ""))
       )
 
       val result = await(csvFileUploadController.validateCsv(mock[List[UploadedSuccessfully]], mock[SchemeInfo])(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionIdCSOP("GET"), hc))
@@ -601,7 +616,7 @@ class CsvFileUploadControllerSpec extends UnitSpec
       when(
         mockErsConnector.validateCsvFileData(any[List[UploadedSuccessfully]](), any[SchemeInfo]())(any(), any(), any())
       ).thenReturn(
-        Future.successful(HttpResponse(INTERNAL_SERVER_ERROR))
+        Future.successful(HttpResponse(INTERNAL_SERVER_ERROR, ""))
       )
 
       val result = await(csvFileUploadController.validateCsv(mock[List[UploadedSuccessfully]], mock[SchemeInfo])(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionIdCSOP("GET"), hc))

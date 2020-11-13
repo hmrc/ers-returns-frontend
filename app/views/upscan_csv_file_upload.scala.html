@@ -19,6 +19,9 @@
 
 @import utils.ERSUtil
 @import config.ApplicationConfig
+
+@this(config: ApplicationConfig)
+
 @(requestObject: RequestObject, upscanInitiateResponse: UpscanInitiateResponse, fileId: String)(implicit request: Request[AnyRef], messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 @schemeId = @{requestObject.getSchemeId}
 

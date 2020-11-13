@@ -24,7 +24,7 @@ import play.api.Application
 import play.api.http.Status._
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
-import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, Upstream5xxResponse}
+import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, Upstream4xxResponse, Upstream5xxResponse}
 import uk.gov.hmrc.play.test.UnitSpec
 import utils.WireMockHelper
 
@@ -65,7 +65,7 @@ class UpscanConnectorSpec extends UnitSpec with OneAppPerSuite with MockitoSugar
                 .withStatus(BAD_REQUEST)
             )
         )
-        a[BadRequestException] should be thrownBy await(connector.getUpscanFormData(request))
+        a[Upstream4xxResponse] should be thrownBy await(connector.getUpscanFormData(request))
       }
 
       "upscan returns 5xx response" in {

@@ -17,6 +17,10 @@
 @import utils.CountryCodes
 @import utils.ERSUtil
 @import config.ApplicationConfig
+@import uk.gov.hmrc.play.views.html.helpers.{FormWithCSRF}
+
+@this(form: FormWithCSRF)
+
 @(requestObject: RequestObject, trustees: TrusteeDetailsList)(implicit request: Request[AnyRef], flash: Flash, messages: Messages, countryCodes: CountryCodes, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 
 @import views.html.templates._
@@ -28,7 +32,7 @@
     @reference(requestObject.getPageTitle)
     <p class="font-xsmall"><a href="@routes.TrusteeController.trusteeDetailsPage()" class="link-back">@Html(messages("ers.back"))</a></p>
     @header(messages("ers_trustee_summary.title"))
-    @uk.gov.hmrc.play.views.html.helpers.form(action = routes.TrusteeController.trusteeSummaryContinue()) {
+    @form(action = routes.TrusteeController.trusteeSummaryContinue()) {
     <div class="panel panel-border-wide">
         <a href="@routes.TrusteeController.trusteeDetailsPage()">@Html(messages("ers_trustee_summary.add_trustee"))</a>
     </div>

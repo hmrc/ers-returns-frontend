@@ -17,10 +17,13 @@
 @import utils.ERSUtil
 @import config.ApplicationConfig
 @import utils.CountryCodes
+@import uk.gov.hmrc.play.views.html.helpers.{FormWithCSRF, Input, ErrorSummary}
+
+@this(form: FormWithCSRF, input: Input, errorSummary: ErrorSummary)
+
 @(requestObject: RequestObject, index: Int, companyDetails: Form[models.CompanyDetails])(implicit request: Request[AnyRef], flash: Flash, messages: Messages, ersUtil: ERSUtil, countryCodes: CountryCodes, appConfig: ApplicationConfig)
 @* manual company details Template *@
 @schemeId = @{requestObject.getSchemeId}
-@import uk.gov.hmrc.play.views.html.helpers
 @import views.html.helpers.error_overview
 @import views.html.templates._
 @scripts = {
@@ -32,10 +35,10 @@
 	@reference(requestObject.getPageTitle)
 	<p class="font-xsmall"><a href="@routes.GroupSchemeController.groupSchemePage" class="link-back">@Html(messages("ers.back"))</a></p>
 	@if(companyDetails.hasErrors) {
-		@helpers.errorSummary(messages("validation.summary.heading"), companyDetails)
+		@errorSummary(messages("validation.summary.heading"), companyDetails)
 	}
 	@header(ersUtil.getPageElement(schemeId, ersUtil.PAGE_MANUAL_COMPANY_DETAILS, "title"))
-	@helpers.form(action = routes.GroupSchemeController.manualCompanyDetailsSubmit(index)) {
+	@form(action = routes.GroupSchemeController.manualCompanyDetailsSubmit(index)) {
 		<div class="form-group">
 			<fieldset class="inline">
 				<legend class="form-label">@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_MANUAL_COMPANY_DETAILS, "question"))</legend>
@@ -50,7 +53,7 @@
 			</fieldset>
 		</div>
 		<div class="form-group">
-			@helpers.input(companyDetails(companyDetailsFields.companyName), '_label -> messages("ers_manual_company_details.company_name"), '_inputClass -> "form-control form-control--block")
+			@input(companyDetails(companyDetailsFields.companyName), '_label -> messages("ers_manual_company_details.company_name"), '_inputClass -> "form-control form-control--block")
 		</div>
 		<div class="form-group @if(companyDetails.error(trusteeDetailsFields.addressLine1).isDefined) {form-field--error}">
 			<label for="addressLine1" class="form-label">
@@ -61,13 +64,13 @@
 			</label>
 		</div>
 		<div class="form-group">
-			@helpers.input(companyDetails(companyDetailsFields.addressLine2), '_label -> messages("ers_manual_company_details.addressLine2"), '_labelTextClass -> "visuallyhidden", '_inputClass -> "form-control form-control--block")
+			@input(companyDetails(companyDetailsFields.addressLine2), '_label -> messages("ers_manual_company_details.addressLine2"), '_labelTextClass -> "visuallyhidden", '_inputClass -> "form-control form-control--block")
 		</div>
 		<div class="form-group">
-			@helpers.input(companyDetails(companyDetailsFields.addressLine3), '_label -> messages("ers_manual_company_details.addressLine2"), '_labelTextClass -> "visuallyhidden", '_inputClass -> "form-control form-control--block")
+			@input(companyDetails(companyDetailsFields.addressLine3), '_label -> messages("ers_manual_company_details.addressLine2"), '_labelTextClass -> "visuallyhidden", '_inputClass -> "form-control form-control--block")
 		</div>
 		<div class="form-group">
-			@helpers.input(companyDetails(companyDetailsFields.addressLine4), '_label -> messages("ers_manual_company_details.addressLine2"), '_labelTextClass -> "visuallyhidden", '_inputClass -> "form-control form-control--block")
+			@input(companyDetails(companyDetailsFields.addressLine4), '_label -> messages("ers_manual_company_details.addressLine2"), '_labelTextClass -> "visuallyhidden", '_inputClass -> "form-control form-control--block")
 		</div>
 		<div class="form-group country-group">
 			<label for="country" class="form-label" id="countryLbl">
@@ -76,15 +79,15 @@
 			@views.html.includes.countries(companyDetails(companyDetailsFields.country).value)
 		</div>
 		<div class="form-group postcode-group">
-			@helpers.input(companyDetails(companyDetailsFields.postcode), '_label -> messages("ers_manual_company_details.postcode"), '_inputClass -> "form-control form-control--block")
+			@input(companyDetails(companyDetailsFields.postcode), '_label -> messages("ers_manual_company_details.postcode"), '_inputClass -> "form-control form-control--block")
 		</div>
 		<div class="form-group company-reg-group">
-			@helpers.input(companyDetails(companyDetailsFields.companyReg), '_label -> messages("ers_manual_company_details.company_reg_number"), '_inputHint -> messages("ers_manual_company_details.company_reg_number.hint"),'_inputClass -> "form-control form-control--block")
+			@input(companyDetails(companyDetailsFields.companyReg), '_label -> messages("ers_manual_company_details.company_reg_number"), '_inputHint -> messages("ers_manual_company_details.company_reg_number.hint"),'_inputClass -> "form-control form-control--block")
 		</div>
 		<div class="form-group corporation-ref-group">
-			@helpers.input(companyDetails(companyDetailsFields.corporationRef), '_label -> messages("ers_manual_company_details.corporation_tax_ref"), '_inputHint -> messages("ers_manual_company_details.corporation_tax_ref.hint"),'_inputClass -> "form-control form-control--block")
+			@input(companyDetails(companyDetailsFields.corporationRef), '_label -> messages("ers_manual_company_details.corporation_tax_ref"), '_inputHint -> messages("ers_manual_company_details.corporation_tax_ref.hint"),'_inputClass -> "form-control form-control--block")
 		</div>
-		<input role="button" id="continue" class="button" type="submit" value="@Html(messages("ers_manual_company_details.continue"))" >
+		<input role="button" id="continue" class="button" type="submit" value='@Html(messages("ers_manual_company_details.continue"))' >
 	}
 
 }

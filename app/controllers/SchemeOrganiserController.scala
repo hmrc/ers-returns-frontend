@@ -21,22 +21,26 @@ import javax.inject.{Inject, Singleton}
 import models._
 import play.api.Logger
 import play.api.data.Form
-import play.api.i18n.{I18nSupport, Messages, MessagesApi}
-import play.api.mvc.{Action, AnyContent, Request, Result}
+import play.api.i18n.{I18nSupport, Messages}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request, Result}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import utils._
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class SchemeOrganiserController @Inject()(val messagesApi: MessagesApi,
+class SchemeOrganiserController @Inject()(val mcc: MessagesControllerComponents,
 																					val authConnector: DefaultAuthConnector,
 																					implicit val countryCodes: CountryCodes,
 																					implicit val ersUtil: ERSUtil,
-																					implicit val appConfig: ApplicationConfig
-																				 ) extends FrontendController with Authenticator with I18nSupport {
+																					implicit val appConfig: ApplicationConfig,
+                                          globalErrorView: views.html.global_error,
+                                          schemeOrganiserView: views.html.scheme_organiser
+																				 ) extends FrontendController(mcc) with Authenticator with I18nSupport {
+
+  implicit val ec: ExecutionContext = mcc.executionContext
 
   def schemeOrganiserPage(): Action[AnyContent] = authorisedForAsync() {
     implicit user =>
@@ -59,10 +63,10 @@ class SchemeOrganiserController @Inject()(val messagesApi: MessagesApi,
           } else {
             ""
           }
-          Ok(views.html.scheme_organiser(requestObject, FileType, RsFormMappings.schemeOrganiserForm.fill(res), reportableEvent.isNilReturn.get))
+          Ok(schemeOrganiserView(requestObject, FileType, RsFormMappings.schemeOrganiserForm.fill(res), reportableEvent.isNilReturn.get))
         } recover {
           case _: NoSuchElementException =>
-            Ok(views.html.scheme_organiser(
+            Ok(schemeOrganiserView(
 							requestObject,
 							fileType.get.checkFileType.get,
 							RsFormMappings.schemeOrganiserForm.fill(form),
@@ -71,7 +75,7 @@ class SchemeOrganiserController @Inject()(val messagesApi: MessagesApi,
         }
       } recover {
         case _: NoSuchElementException =>
-          Ok(views.html.scheme_organiser(requestObject, "", RsFormMappings.schemeOrganiserForm.fill(form), reportableEvent.isNilReturn.get))
+          Ok(schemeOrganiserView(requestObject, "", RsFormMappings.schemeOrganiserForm.fill(form), reportableEvent.isNilReturn.get))
       }
     } recover {
       case e: Exception =>
@@ -96,7 +100,7 @@ class SchemeOrganiserController @Inject()(val messagesApi: MessagesApi,
         val incorrectOrderGrouped = errors.errors.groupBy(_.key).map(_._2.head).toSeq
         val correctOrderGrouped = correctOrder.flatMap(x => incorrectOrderGrouped.find(_.key == x))
         val firstErrors: Form[models.SchemeOrganiserDetails] = new Form[SchemeOrganiserDetails](errors.mapping, errors.data, correctOrderGrouped, errors.value)
-        Future.successful(Ok(views.html.scheme_organiser(requestObject, "", firstErrors)))
+        Future.successful(Ok(schemeOrganiserView(requestObject, "", firstErrors)))
       },
       successful => {
 
@@ -114,7 +118,7 @@ class SchemeOrganiserController @Inject()(val messagesApi: MessagesApi,
   }
 
 	def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result = {
-		Ok(views.html.global_error(
+		Ok(globalErrorView(
 			"ers.global_errors.title",
 			"ers.global_errors.heading",
 			"ers.global_errors.message"

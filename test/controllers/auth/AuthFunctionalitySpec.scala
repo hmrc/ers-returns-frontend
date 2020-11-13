@@ -17,7 +17,6 @@
 package controllers.auth
 
 import config.ApplicationConfig
-import helpers.ErsTestHelper
 import models.ERSAuthData
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
@@ -29,11 +28,12 @@ import uk.gov.hmrc.auth.core.AffinityGroup.Agent
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.domain.EmpRef
 import uk.gov.hmrc.play.test.UnitSpec
+import utils.ErsTestHelper
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class AuthFunctionalitySpec extends UnitSpec with GuiceOneAppPerSuite with ErsTestHelper with DefaultAwaitTimeout {
+class AuthFunctionalitySpec extends UnitSpec with ErsTestHelper with DefaultAwaitTimeout {
 
   class Setup(enrolmentSet: Set[Enrolment], affGroup: Option[AffinityGroup] = None, testEmpRef: EmpRef = EmpRef("", "")) {
     val controllerHarness: AuthFunctionality = new AuthFunctionality {

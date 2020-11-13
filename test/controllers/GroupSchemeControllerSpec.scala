@@ -17,34 +17,48 @@
 package controllers
 
 import akka.stream.Materializer
-import helpers.ErsTestHelper
 import models._
 import org.jsoup.Jsoup
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.play.OneAppPerSuite
-import play.api.Application
-import play.api.Play.current
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import play.api.{Application, i18n}
 import play.api.i18n.Messages.Implicits._
-import play.api.i18n.{Messages, MessagesApi}
+import play.api.i18n.{Messages, MessagesApi, MessagesImpl}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
-import play.api.mvc.{AnyContentAsEmpty, Result}
+import play.api.mvc.{AnyContent, AnyContentAsEmpty, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.test.UnitSpec
 import utils.Fixtures.ersRequestObject
-import utils.{ERSFakeApplicationConfig, Fixtures}
+import utils.{ERSFakeApplicationConfig, ErsTestHelper, Fixtures}
+import views.html.{global_error, group, group_plan_summary, manual_company_details}
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
-class GroupSchemeControllerTest extends UnitSpec with ErsTestHelper with ERSFakeApplicationConfig with BeforeAndAfterEach with OneAppPerSuite {
+class GroupSchemeControllerSpec extends UnitSpec with ErsTestHelper with ERSFakeApplicationConfig with BeforeAndAfterEach with GuiceOneAppPerSuite {
 
-  override lazy val app: Application = new GuiceApplicationBuilder().configure(config).build()
+  val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
+    messagesActionBuilder,
+    DefaultActionBuilder(stubBodyParser[AnyContent]()),
+    cc.parsers,
+    fakeApplication.injector.instanceOf[MessagesApi],
+    cc.langs,
+    cc.fileMimeTypes,
+    ExecutionContext.global
+  )
+
+  implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
+
   implicit lazy val materializer: Materializer = app.materializer
-	lazy val messagesApi: MessagesApi = app.injector.instanceOf[MessagesApi]
+  val globalErrorView: global_error = app.injector.instanceOf[global_error]
+  val groupView: group = app.injector.instanceOf[group]
+  val manualCompanyDetailsView: manual_company_details = app.injector.instanceOf[manual_company_details]
+  val groupPlanSummaryView: group_plan_summary = app.injector.instanceOf[group_plan_summary]
 
   val company: CompanyDetails = CompanyDetails(Fixtures.companyName, "Address Line 1", None, None, None, None, None, None, None)
   lazy val companyDetailsList: CompanyDetailsList = CompanyDetailsList(List(company, company))
@@ -66,7 +80,9 @@ class GroupSchemeControllerTest extends UnitSpec with ErsTestHelper with ERSFake
 		when(mockErsUtil.OPTION_NO).thenReturn("2")
 	}
 
-  lazy val testGroupSchemeController: GroupSchemeController = new GroupSchemeController(messagesApi, mockAuthConnector, mockCountryCodes, mockErsUtil, mockAppConfig)
+  lazy val testGroupSchemeController: GroupSchemeController = new GroupSchemeController(
+    mockMCC, mockAuthConnector, mockCountryCodes, mockErsUtil, mockAppConfig, globalErrorView, groupView, manualCompanyDetailsView, groupPlanSummaryView
+  )
 
   "manualCompanyDetailsPage" should {
 
@@ -204,7 +220,9 @@ class GroupSchemeControllerTest extends UnitSpec with ErsTestHelper with ERSFake
 
   "calling replace company" should {
 
-		lazy val controllerUnderTest: GroupSchemeController = new GroupSchemeController(messagesApi, mockAuthConnector, mockCountryCodes, mockErsUtil, mockAppConfig)
+		lazy val controllerUnderTest: GroupSchemeController = new GroupSchemeController(
+    mockMCC, mockAuthConnector, mockCountryCodes, mockErsUtil, mockAppConfig, globalErrorView, groupView, manualCompanyDetailsView, groupPlanSummaryView
+  )
 
     "replace a companies and keep the other companies" when {
 

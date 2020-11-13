@@ -16,28 +16,43 @@
 
 package controllers
 
-import helpers.ErsTestHelper
 import models._
 import org.mockito.ArgumentMatchers.{eq => meq, _}
 import org.mockito.Mockito._
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status
-import play.api.i18n.{Lang, Messages, MessagesApi}
+import play.api.i18n
+import play.api.i18n.{Lang, Messages, MessagesApi, MessagesImpl}
 import play.api.libs.json.Json
+import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.test.UnitSpec
 import utils.Fixtures.ersRequestObject
-import utils._
+import utils.{ErsTestHelper, _}
+import views.html.{global_error, trustee_details, trustee_summary}
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
-class TrusteeControllerTest extends UnitSpec with ERSFakeApplicationConfig with GuiceOneAppPerSuite with ErsTestHelper {
+class TrusteeControllerSpec extends UnitSpec with ERSFakeApplicationConfig with ErsTestHelper with GuiceOneAppPerSuite {
+
+  val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
+    messagesActionBuilder,
+    DefaultActionBuilder(stubBodyParser[AnyContent]()),
+    cc.parsers,
+    fakeApplication.injector.instanceOf[MessagesApi],
+    cc.langs,
+    cc.fileMimeTypes,
+    ExecutionContext.global
+  )
+
+  implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
 
 	val tenThousand: Int = 10000
-  val messagesApi: MessagesApi = app.injector.instanceOf[MessagesApi]
-  implicit val messages: Messages = messagesApi.preferred(Seq(Lang.get("en").get))
+  val globalErrorView: global_error = app.injector.instanceOf[global_error]
+  val trusteeDetailsView: trustee_details = app.injector.instanceOf[trustee_details]
+  val trusteeSummaryView: trustee_summary = app.injector.instanceOf[trustee_summary]
 
   "calling Trustee Details Page" should {
 
@@ -48,7 +63,7 @@ class TrusteeControllerTest extends UnitSpec with ERSFakeApplicationConfig with 
     def buildFakeTrusteePageController(groupSchemeActivityRes: Future[GroupSchemeInfo] = Future.successful(groupScheme),
                                        trusteeDetailsRes: Future[TrusteeDetailsList] = Future.successful(TrusteeDetailsList(trusteeList)),
                                        cacheRes: Future[CacheMap] = Future.successful(mock[CacheMap])
-																			): TrusteeController = new TrusteeController(messagesApi, mockAuthConnector, mockErsConnector, mockCountryCodes, mockErsUtil, mockAppConfig) {
+																			): TrusteeController = new TrusteeController(mockMCC, mockAuthConnector, mockErsConnector, mockCountryCodes, mockErsUtil, mockAppConfig, globalErrorView, trusteeDetailsView, trusteeSummaryView) {
 
 			when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any(), any())).thenReturn(Future.successful(ersRequestObject))
 
@@ -115,7 +130,7 @@ class TrusteeControllerTest extends UnitSpec with ERSFakeApplicationConfig with 
       val trusteeData = Map("" -> "")
       val form = RsFormMappings.trusteeDetailsForm.bind(trusteeData)
       val req = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-      contentAsString(await(controllerUnderTest.showTrusteeDetailsSubmit(ersRequestObject, tenThousand)(Fixtures.buildFakeUser, req, hc))) shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage(req, messages))
+      contentAsString(await(controllerUnderTest.showTrusteeDetailsSubmit(ersRequestObject, tenThousand)(Fixtures.buildFakeUser, req, hc))) shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage(req, testMessages))
     }
 
     "if no form errors with new trustee (index tenThousand) and fetch trustee details success" in {
@@ -205,7 +220,7 @@ class TrusteeControllerTest extends UnitSpec with ERSFakeApplicationConfig with 
     def buildFakeTrusteeController(trusteeDetailsRes: Future[TrusteeDetailsList] = Future.successful(TrusteeDetailsList(trusteeList)),
 																	 cacheRes: Future[CacheMap] = Future.successful(mock[CacheMap]),
 																	 requestObjectRes: Future[RequestObject] = Future.successful(ersRequestObject)
-																	): TrusteeController = new TrusteeController(messagesApi, mockAuthConnector, mockErsConnector, mockCountryCodes, mockErsUtil, mockAppConfig) {
+																	): TrusteeController = new TrusteeController(mockMCC, mockAuthConnector, mockErsConnector, mockCountryCodes, mockErsUtil, mockAppConfig, globalErrorView, trusteeDetailsView, trusteeSummaryView) {
 			when(
         mockErsUtil.fetch[TrusteeDetailsList](refEq(mockErsUtil.TRUSTEES_CACHE), any())(any(), any(), any())
       ) thenReturn trusteeDetailsRes
@@ -273,7 +288,7 @@ class TrusteeControllerTest extends UnitSpec with ERSFakeApplicationConfig with 
 																	 trusteeDetailsRes: Future[TrusteeDetailsList] = Future.successful(TrusteeDetailsList(trusteeList)),
 																	 cacheRes: Future[CacheMap] = Future.successful(mock[CacheMap]),
 																	 requestObjectRes: Future[RequestObject] = Future.successful(ersRequestObject)
-                                  ): TrusteeController = new TrusteeController(messagesApi, mockAuthConnector, mockErsConnector, mockCountryCodes, mockErsUtil, mockAppConfig) {
+                                  ): TrusteeController = new TrusteeController(mockMCC, mockAuthConnector, mockErsConnector, mockCountryCodes, mockErsUtil, mockAppConfig, globalErrorView, trusteeDetailsView, trusteeSummaryView) {
 
 			when(
         mockErsUtil.fetch[GroupSchemeInfo](refEq(mockErsUtil.GROUP_SCHEME_CACHE_CONTROLLER), anyString())(any(), any(), any())
@@ -334,7 +349,7 @@ class TrusteeControllerTest extends UnitSpec with ERSFakeApplicationConfig with 
   }
 
   "calling replace trustee" should {
-    def controllerUnderTest: TrusteeController = new TrusteeController(messagesApi, mockAuthConnector, mockErsConnector, mockCountryCodes, mockErsUtil, mockAppConfig)
+    def controllerUnderTest: TrusteeController = new TrusteeController(mockMCC, mockAuthConnector, mockErsConnector, mockCountryCodes, mockErsUtil, mockAppConfig, globalErrorView, trusteeDetailsView, trusteeSummaryView)
 
     "replace a trustee and keep the other trustees" when {
 
@@ -416,7 +431,7 @@ class TrusteeControllerTest extends UnitSpec with ERSFakeApplicationConfig with 
     def buildFakeTrusteeController(trusteeDetailsRes: Future[TrusteeDetailsList] = Future.successful(TrusteeDetailsList(trusteeList)),
 																	 cacheRes: Future[CacheMap] = Future.successful(mock[CacheMap]),
 																	 requestObjectRes: Future[RequestObject] = Future.successful(ersRequestObject)
-                                  ): TrusteeController = new TrusteeController(messagesApi, mockAuthConnector, mockErsConnector, mockCountryCodes, mockErsUtil, mockAppConfig) {
+                                  ): TrusteeController = new TrusteeController(mockMCC, mockAuthConnector, mockErsConnector, mockCountryCodes, mockErsUtil, mockAppConfig, globalErrorView, trusteeDetailsView, trusteeSummaryView) {
 
 			when(
         mockErsUtil.fetch[TrusteeDetailsList](refEq(mockErsUtil.TRUSTEES_CACHE), anyString())(any(), any(), any())

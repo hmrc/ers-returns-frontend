@@ -22,30 +22,34 @@ import connectors.ErsConnector
 import javax.inject.{Inject, Singleton}
 import models._
 import models.upscan._
-import play.api.Play.current
 import play.api.Logger
-import play.api.i18n.{I18nSupport, Messages, MessagesApi}
-import play.api.mvc.{Action, AnyContent, Request, Result}
+import play.api.i18n.{I18nSupport, Messages}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request, Result}
 import services.UpscanService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import utils._
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
 
 @Singleton
-class CsvFileUploadController @Inject()(val messagesApi: MessagesApi,
+class CsvFileUploadController @Inject()(val mcc: MessagesControllerComponents,
 																				val ersConnector: ErsConnector,
 																				val authConnector: DefaultAuthConnector,
 																				val upscanService: UpscanService,
 																				implicit val ersUtil: ERSUtil,
-																				implicit val appConfig: ApplicationConfig
-																			 ) extends FrontendController with Authenticator with Retryable with I18nSupport{
+																				implicit val appConfig: ApplicationConfig,
+                                        implicit val actorSystem: ActorSystem,
+                                        globalErrorView: views.html.global_error,
+                                        upscanCsvFileUploadView: views.html.upscan_csv_file_upload,
+                                        fileUploadErrorsView: views.html.file_upload_errors
+																			 ) extends FrontendController(mcc) with Authenticator with Retryable with I18nSupport{
+
+  implicit val ec: ExecutionContext = mcc.executionContext
 
 	lazy val allCsvFilesCacheRetryAmount: Int = appConfig.allCsvFilesCacheRetryAmount
-	implicit lazy val actorSystem: ActorSystem = current.actorSystem
 
   def uploadFilePage(): Action[AnyContent] = authorisedForAsync() {
     implicit user =>
@@ -57,7 +61,7 @@ class CsvFileUploadController @Inject()(val messagesApi: MessagesApi,
           if currentCsvFile.isDefined
           upscanFormData  <- upscanService.getUpscanFormDataCsv(currentCsvFile.get.uploadId, requestObject.getSchemeReference)
         } yield {
-          Ok(views.html.upscan_csv_file_upload(requestObject, upscanFormData, currentCsvFile.get.fileId))
+          Ok(upscanCsvFileUploadView(requestObject, upscanFormData, currentCsvFile.get.fileId))
         }) recover {
           case _: NoSuchElementException =>
             Logger.warn(s"[CsvFileUploadController][uploadFilePage] Attempting to load upload page when no files are ready to upload")
@@ -209,7 +213,7 @@ class CsvFileUploadController @Inject()(val messagesApi: MessagesApi,
       requestObject <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
       fileType      <- ersUtil.fetch[CheckFileType](ersUtil.FILE_TYPE_CACHE, requestObject.getSchemeReference)
     } yield {
-      Ok(views.html.file_upload_errors(requestObject, fileType.checkFileType.get))
+      Ok(fileUploadErrorsView(requestObject, fileType.checkFileType.get))
     }).recover {
       case e: Exception =>
 				Logger.error(s"[CsvFileUploadController][processValidationFailure] failed to save callback data list with exception ${e.getMessage}, " +
@@ -229,7 +233,7 @@ class CsvFileUploadController @Inject()(val messagesApi: MessagesApi,
   }
 
 	def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result = {
-		Ok(views.html.global_error(
+		Ok(globalErrorView(
 			"ers.global_errors.title",
 			"ers.global_errors.heading",
 			"ers.global_errors.message"

@@ -19,7 +19,7 @@ package models.upscan
 import java.net.URL
 import java.time.Instant
 
-import play.api.data.validation.ValidationError
+import play.api.libs.json.JsonValidationError
 import play.api.libs.json._
 
 import scala.util.Try
@@ -40,13 +40,14 @@ case class UpscanFailedCallback(
                              ) extends UpscanCallback
 
 object UpscanCallback {
+
   implicit val uploadDetailsFormat: Format[UploadDetails] = Json.format[UploadDetails]
   implicit val errorDetailsFormat: Format[ErrorDetails] = Json.format[ErrorDetails]
   implicit val formatURL: Format[URL] = new Format[URL] {
     override def reads(json: JsValue): JsResult[URL] = json match {
       case JsString(s) =>
-        parseUrl(s).map(JsSuccess(_)).getOrElse(JsError(Seq(JsPath() -> Seq(ValidationError("error.expected.url")))))
-      case _ => JsError(Seq(JsPath() -> Seq(ValidationError("error.expected.url"))))
+        parseUrl(s).map(JsSuccess(_)).getOrElse(JsError(Seq(JsPath() -> Seq(JsonValidationError("error.expected.url")))))
+      case _ => JsError(Seq(JsPath() -> Seq(JsonValidationError("error.expected.url"))))
     }
 
     private def parseUrl(s: String): Option[URL] = Try(new URL(s)).toOption

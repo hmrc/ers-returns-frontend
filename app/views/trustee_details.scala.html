@@ -17,9 +17,12 @@
 @import utils.ERSUtil
 @import config.ApplicationConfig
 @import utils.CountryCodes
+@import uk.gov.hmrc.play.views.html.helpers.{FormWithCSRF, Input, ErrorSummary}
+
+@this(form: FormWithCSRF, input: Input, errorSummary: ErrorSummary)
+
 @(requestObject: RequestObject, groupSchemeActivity: String, index: Int, trusteeDetails: Form[models.TrusteeDetails])(implicit request: Request[AnyRef], flash: Flash, messages: Messages, countryCodes: CountryCodes, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 
-@import uk.gov.hmrc.play.views.html.helpers
 @import views.html.helpers.error_overview
 @import views.html.templates._
 
@@ -34,10 +37,10 @@
     @reference(requestObject.getPageTitle)
     <p class="font-xsmall"><a href="@ersUtil.getPageBackLink(schemeId, ersUtil.PAGE_TRUSTEE_DETAILS, groupSchemeActivity)" class="link-back">@Html(messages("ers.back"))</a></p>
     @if(trusteeDetails.hasErrors) {
-        @helpers.errorSummary(messages("validation.summary.heading"), trusteeDetails)
+        @errorSummary(messages("validation.summary.heading"), trusteeDetails)
     }
     @header(messages("ers_trustee_details.title"))
-    @helpers.form(action = routes.TrusteeController.trusteeDetailsSubmit(index)) {
+    @form(action = routes.TrusteeController.trusteeDetailsSubmit(index)) {
         <div class="form-group">
             <fieldset class="inline">
                 <legend>
@@ -56,7 +59,7 @@
             </fieldset>
         </div>
         <div class='form-group'>
-            @helpers.input(trusteeDetails(trusteeDetailsFields.name), '_label -> messages("ers_trustee_details.name"), '_inputClass -> "form-control form-control--block" )
+            @input(trusteeDetails(trusteeDetailsFields.name), '_label -> messages("ers_trustee_details.name"), '_inputClass -> "form-control form-control--block" )
         </div>
         <div class="form-group @if(trusteeDetails.error(trusteeDetailsFields.addressLine1).isDefined) {form-field--error}">
             <label for="addressLine1" class="form-label">
@@ -67,13 +70,13 @@
             </label>
         </div>
         <div class="form-group">
-            @helpers.input(trusteeDetails(trusteeDetailsFields.addressLine2), '_label -> messages("ers_trustee_details.addressLine2"), '_labelTextClass -> "visuallyhidden", '_inputClass -> "form-control form-control--block" )
+            @input(trusteeDetails(trusteeDetailsFields.addressLine2), '_label -> messages("ers_trustee_details.addressLine2"), '_labelTextClass -> "visuallyhidden", '_inputClass -> "form-control form-control--block" )
         </div>
         <div class="form-group">
-            @helpers.input(trusteeDetails(trusteeDetailsFields.addressLine3), '_label -> messages("ers_trustee_details.addressLine3"), '_labelTextClass -> "visuallyhidden", '_inputClass -> "form-control form-control--block" )
+            @input(trusteeDetails(trusteeDetailsFields.addressLine3), '_label -> messages("ers_trustee_details.addressLine3"), '_labelTextClass -> "visuallyhidden", '_inputClass -> "form-control form-control--block" )
         </div>
         <div class="form-group">
-            @helpers.input(trusteeDetails(trusteeDetailsFields.addressLine4), '_label -> messages("ers_trustee_details.addressLine4"), '_labelTextClass -> "visuallyhidden", '_inputClass -> "form-control form-control--block" )
+            @input(trusteeDetails(trusteeDetailsFields.addressLine4), '_label -> messages("ers_trustee_details.addressLine4"), '_labelTextClass -> "visuallyhidden", '_inputClass -> "form-control form-control--block" )
         </div>
         <div class="form-group postcode-group @if(trusteeDetails.error(trusteeDetailsFields.postcode).isDefined) {form-field--error}">
             <label for="postcode" class="form-label" id="postcodeLbl">
@@ -86,6 +89,6 @@
             <label for="country" class="form-label" id="countryLbl">@messages("ers_trustee_details.country")</label>
             @views.html.includes.countries(trusteeDetails(trusteeDetailsFields.country).value)
         </div>
-        <input role="button" id="continue" class="button" type="submit" value="@Html(messages("ers.continue"))" >
+        <input role="button" id="continue" class="button" type="submit" value='@Html(messages("ers.continue"))' >
     }
 }

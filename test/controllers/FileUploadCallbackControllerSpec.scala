@@ -22,26 +22,38 @@ import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{eq => meq, _}
 import org.mockito.Mockito._
 import org.scalatestplus.mockito.MockitoSugar
-import org.scalatestplus.play.{OneAppPerSuite, PlaySpec}
-import play.api.Application
-import play.api.inject.guice.GuiceApplicationBuilder
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import org.scalatestplus.play.PlaySpec
+import play.api.i18n
+import play.api.i18n.{MessagesApi, MessagesImpl}
 import play.api.libs.json._
-import play.api.mvc.Request
+import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents, Request}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import services.SessionService
 import uk.gov.hmrc.http.HeaderCarrier
-import utils.{ERSFakeApplicationConfig, UpscanData}
+import utils.{ERSFakeApplicationConfig, ErsTestHelper, UpscanData}
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
-class FileUploadCallbackControllerSpec extends PlaySpec with MockitoSugar with ERSFakeApplicationConfig with OneAppPerSuite with UpscanData {
+class FileUploadCallbackControllerSpec extends PlaySpec with MockitoSugar with ERSFakeApplicationConfig with UpscanData with ErsTestHelper with GuiceOneAppPerSuite {
 
-  override implicit lazy val app: Application = new GuiceApplicationBuilder().configure(config).build()
+  val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
+    messagesActionBuilder,
+    DefaultActionBuilder(stubBodyParser[AnyContent]()),
+    cc.parsers,
+    fakeApplication.injector.instanceOf[MessagesApi],
+    cc.langs,
+    cc.fileMimeTypes,
+    ExecutionContext.global
+  )
+
+  implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
+
   implicit lazy val mat: Materializer = app.materializer
   val mockSessionService: SessionService = mock[SessionService]
 
-  object TestFileUploadCallbackController extends FileUploadCallbackController(mockSessionService)
+  object TestFileUploadCallbackController extends FileUploadCallbackController(mockMCC, mockSessionService)
 
   "callback" must {
     val sessionId = "sessionId"

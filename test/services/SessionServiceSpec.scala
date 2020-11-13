@@ -22,7 +22,8 @@ import org.mockito.ArgumentMatchers.{eq => meq, _}
 import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatestplus.mockito.MockitoSugar
-import org.scalatestplus.play.{OneServerPerSuite, PlaySpec}
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import org.scalatestplus.play.PlaySpec
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
@@ -30,13 +31,13 @@ import uk.gov.hmrc.http.logging.SessionId
 
 import scala.concurrent.Future
 
-class SessionServiceSpec extends PlaySpec with OneServerPerSuite with ScalaFutures with MockitoSugar {
+class SessionServiceSpec extends PlaySpec with GuiceOneAppPerSuite with ScalaFutures with MockitoSugar {
 
   val mockSessionCache: ERSFileValidatorSessionCache = mock[ERSFileValidatorSessionCache]
 	val testSessionService = new SessionService(mockSessionCache)
 
-  implicit val request = FakeRequest()
   val sessionId = "sessionId"
+  implicit val request = FakeRequest()
   implicit val hc: HeaderCarrier = HeaderCarrier().copy(sessionId = Some(SessionId(sessionId)))
 
   "createCallbackRecord" must {

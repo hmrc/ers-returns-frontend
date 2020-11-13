@@ -17,9 +17,12 @@
 @import utils.ERSUtil
 @import config.ApplicationConfig
 @import utils.CountryCodes
+@import uk.gov.hmrc.play.views.html.helpers.{FormWithCSRF, Input, ErrorSummary}
+
+@this(form: FormWithCSRF, input: Input, errorSummary: ErrorSummary)
+
 @(requestObject: RequestObject, checkFileType: String, schemeOrganiser: Form[models.SchemeOrganiserDetails], reportableEvents: String = "2")(implicit request: Request[AnyRef], flash: Flash, messages: Messages, countryCodes: CountryCodes, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 @schemeId = @{requestObject.getSchemeId}
-@import uk.gov.hmrc.play.views.html.helpers
 @import views.html.helpers.error_overview
 @import views.html.templates._
 
@@ -34,10 +37,10 @@
 	<p class="font-xsmall"><a href="@ersUtil.getPageBackLink(schemeId, ersUtil.PAGE_SCHEME_ORGANISER, checkFileType, reportableEvents)" class="link-back">@Html(messages("ers.back"))</a></p>
 
 	@if(schemeOrganiser.hasErrors) {
-		@helpers.errorSummary(messages("validation.summary.heading"), schemeOrganiser)
+		@errorSummary(messages("validation.summary.heading"), schemeOrganiser)
 	}
 	@header(ersUtil.getPageElement(schemeId, ersUtil.PAGE_SCHEME_ORGANISER, "title"))
-	@helpers.form(action = routes.SchemeOrganiserController.schemeOrganiserSubmit) {
+	@form(action = routes.SchemeOrganiserController.schemeOrganiserSubmit) {
 
 	<div class="form-field-group">
 		<fieldset class="inline">
@@ -53,7 +56,7 @@
 		</fieldset>
 	</div>
 	<div class="form-group">
-		@helpers.input(schemeOrganiser(schemeOrganiserFields.companyName), '_label -> messages("ers_scheme_organiser.company_name"), '_inputClass -> "form-control form-control--block")
+		@input(schemeOrganiser(schemeOrganiserFields.companyName), '_label -> messages("ers_scheme_organiser.company_name"), '_inputClass -> "form-control form-control--block")
 	</div>
 	<div class="form-group @if(schemeOrganiser.error(schemeOrganiserFields.addressLine1).isDefined) {form-field--error}">
 		<label for="addressLine1" class="form-label">
@@ -64,26 +67,26 @@
 		</label>
 	</div>
 	<div class='form-group'>
-		@helpers.input(schemeOrganiser(schemeOrganiserFields.addressLine2), '_label -> messages("ers_scheme_organiser.addressLine2"), '_labelTextClass -> "visuallyhidden", '_inputClass -> "form-control form-control--block")
+		@input(schemeOrganiser(schemeOrganiserFields.addressLine2), '_label -> messages("ers_scheme_organiser.addressLine2"), '_labelTextClass -> "visuallyhidden", '_inputClass -> "form-control form-control--block")
 	</div>
 	<div class='form-group'>
-		@helpers.input(schemeOrganiser(schemeOrganiserFields.addressLine3), '_label -> messages("ers_scheme_organiser.addressLine3"), '_labelTextClass -> "visuallyhidden", '_inputClass -> "form-control form-control--block")
+		@input(schemeOrganiser(schemeOrganiserFields.addressLine3), '_label -> messages("ers_scheme_organiser.addressLine3"), '_labelTextClass -> "visuallyhidden", '_inputClass -> "form-control form-control--block")
 	</div>
 	<div class='form-group'>
-		@helpers.input(schemeOrganiser(schemeOrganiserFields.addressLine4), '_label -> messages("ers_scheme_organiser.addressLine4"), '_labelTextClass -> "visuallyhidden", '_inputClass -> "form-control form-control--block")
+		@input(schemeOrganiser(schemeOrganiserFields.addressLine4), '_label -> messages("ers_scheme_organiser.addressLine4"), '_labelTextClass -> "visuallyhidden", '_inputClass -> "form-control form-control--block")
 	</div>
 	<div class='form-group'>
-		@helpers.input(schemeOrganiser(schemeOrganiserFields.postcode), '_label -> messages("ers_scheme_organiser.postcode"), '_inputHint -> messages("ers_scheme_organiser.postcode.hint"), '_inputClass -> "form-control form-control--block" )
+		@input(schemeOrganiser(schemeOrganiserFields.postcode), '_label -> messages("ers_scheme_organiser.postcode"), '_inputHint -> messages("ers_scheme_organiser.postcode.hint"), '_inputClass -> "form-control form-control--block" )
 	</div>
 	<div class="form-group country-group">
 		<label for="country" id="countryLbl" class="form-label">@messages("ers_scheme_organiser.country")</label>
 		@views.html.includes.countries(schemeOrganiser(schemeOrganiserFields.country).value)
 	</div>
 	<div class="form-group company-reg-group">
-		@helpers.input(schemeOrganiser(schemeOrganiserFields.companyReg), '_label -> messages("ers_scheme_organiser.company_reg_number"), '_inputHint -> messages("ers_scheme_organiser.company_reg_number.hint"), '_inputClass -> "form-control form-control--block" )
+		@input(schemeOrganiser(schemeOrganiserFields.companyReg), '_label -> messages("ers_scheme_organiser.company_reg_number"), '_inputHint -> messages("ers_scheme_organiser.company_reg_number.hint"), '_inputClass -> "form-control form-control--block" )
 	</div>
 	<div class="form-group corporation-ref-group">
-		@helpers.input(schemeOrganiser(schemeOrganiserFields.corporationRef), '_label -> messages("ers_scheme_organiser.corporation_tax_ref"), '_inputHint -> messages("ers_scheme_organiser.corporation_tax_ref.hint"), '_inputClass -> "form-control form-control--block" )
+		@input(schemeOrganiser(schemeOrganiserFields.corporationRef), '_label -> messages("ers_scheme_organiser.corporation_tax_ref"), '_inputHint -> messages("ers_scheme_organiser.corporation_tax_ref.hint"), '_inputClass -> "form-control form-control--block" )
 	</div>
 	<input role="button" id="continue" class="button" type="submit" value="@Html(messages("ers_scheme_organiser.continue"))" >
 	}

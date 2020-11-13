@@ -17,16 +17,32 @@
 package models
 
 import models.RsFormMappings._
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import org.scalatestplus.play.{OneAppPerSuite, PlaySpec}
-import play.api.i18n.Messages
+import play.api.i18n
+import play.api.i18n.{Messages, MessagesApi, MessagesImpl}
 import play.api.i18n.Messages.Implicits._
 import play.api.libs.json.Json
-import utils.Fixtures
+import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents}
+import play.api.test.Helpers.stubBodyParser
+import utils.{ErsTestHelper, Fixtures}
 
-class RsFormMappingsSpec extends PlaySpec with OneAppPerSuite /*with ERSFakeApplicationConfig*/ {
+import scala.concurrent.ExecutionContext
 
-  //override lazy val app: Application = new GuiceApplicationBuilder().configure(config).build()
-  //implicit lazy val mat: Materializer = app.materializer
+class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPerSuite {
+
+  val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
+    messagesActionBuilder,
+    DefaultActionBuilder(stubBodyParser[AnyContent]()),
+    cc.parsers,
+    fakeApplication.injector.instanceOf[MessagesApi],
+    cc.langs,
+    cc.fileMimeTypes,
+    ExecutionContext.global
+  )
+
+  implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
+  implicit lazy val messages: Messages = testMessages.messages
 
   "companyDetailsForm" must {
     "return no errors with valid data" in {

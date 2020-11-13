@@ -17,36 +17,50 @@
 package controllers
 
 import akka.stream.Materializer
-import helpers.ErsTestHelper
 import models.{ErsMetaData, _}
 import org.joda.time.DateTime
 import org.jsoup.Jsoup
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito._
 import org.scalatestplus.play.OneAppPerSuite
-import play.api.Application
-import play.api.Play.current
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import play.api.{Application, i18n}
 import play.api.http.Status
 import play.api.i18n.Messages.Implicits._
-import play.api.i18n.{Messages, MessagesApi}
+import play.api.i18n.{Messages, MessagesApi, MessagesImpl}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.JsString
+import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents}
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.test.UnitSpec
 import utils.Fixtures.ersRequestObject
-import utils.{ERSFakeApplicationConfig, Fixtures}
+import utils.{ERSFakeApplicationConfig, ErsTestHelper, Fixtures}
+import views.html.{global_error, start, unauthorised}
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 
-class ReturnServiceControllerTest extends UnitSpec with ERSFakeApplicationConfig with ErsTestHelper with OneAppPerSuite {
+class ReturnServiceControllerSpec extends UnitSpec with ERSFakeApplicationConfig with ErsTestHelper with GuiceOneAppPerSuite {
 
-  override lazy val app: Application = new GuiceApplicationBuilder().configure(config).build()
-	lazy val messagesApi: MessagesApi = app.injector.instanceOf[MessagesApi]
+  val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
+    messagesActionBuilder,
+    DefaultActionBuilder(stubBodyParser[AnyContent]()),
+    cc.parsers,
+    fakeApplication.injector.instanceOf[MessagesApi],
+    cc.langs,
+    cc.fileMimeTypes,
+    ExecutionContext.global
+  )
+
+  implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
+
 	implicit lazy val mat: Materializer = app.materializer
+  val globalErrorView: global_error = app.injector.instanceOf[global_error]
+  val unauthorisedView: unauthorised = app.injector.instanceOf[unauthorised]
+  val startView: start = app.injector.instanceOf[start]
 	val hundred = 100
 
   lazy val ExpectedRedirectionUrlIfNotSignedIn = "/gg/sign-in?continue=/submit-your-ers-return"
@@ -56,14 +70,14 @@ class ReturnServiceControllerTest extends UnitSpec with ERSFakeApplicationConfig
 			Some("CSOP"), Some("agentRef"), Some("empRef"), Some("ts"), Some("hmac"))
 
   def buildFakeReturnServiceController(accessThresholdValue: Int = hundred): ReturnServiceController =
-		new ReturnServiceController(messagesApi, mockAuthConnector, mockErsUtil, mockAppConfig) {
+		new ReturnServiceController(mockMCC, mockAuthConnector, mockErsUtil, mockAppConfig, globalErrorView, unauthorisedView, startView) {
 
 		override lazy val accessThreshold: Int = accessThresholdValue
     override val accessDeniedUrl: String = "/denied.html"
 		val cacheResponse: Future[CacheMap] = Future.successful(CacheMap("1", Map("key" -> JsString("result"))))
 
     when(mockHttp.POST[ValidatorData, HttpResponse](any(), any(), any())(any(), any(), any(), any()))
-			.thenReturn(Future.successful(HttpResponse(OK)))
+			.thenReturn(Future.successful(HttpResponse(OK, "")))
 		when(mockErsUtil.cache(any(), any())(any(), any(), any(), any())).thenReturn(cacheResponse)
 		when(mockErsUtil.cache(any(), any(),any())(any(), any(), any())).thenReturn(cacheResponse)
 		when(mockErsUtil.fetch[RequestObject](any(), any())(any(), any(), any())).thenReturn(Future.successful(rscAsRequestObject))

@@ -19,29 +19,41 @@ package controllers
 import java.util.NoSuchElementException
 
 import akka.stream.Materializer
-import helpers.ErsTestHelper
 import models._
 import org.jsoup.Jsoup
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status
-import play.api.i18n.{Lang, Messages, MessagesApi}
-import play.api.mvc.Request
+import play.api.i18n
+import play.api.i18n.{Lang, Messages, MessagesApi, MessagesImpl}
+import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents, Request}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.play.test.UnitSpec
 import utils.Fixtures.ersRequestObject
-import utils.{ERSFakeApplicationConfig, Fixtures}
+import utils.{ERSFakeApplicationConfig, ErsTestHelper, Fixtures}
+import views.html.{global_error, scheme_organiser}
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext.Implicits.global
 
-class SchemeOrganiserControllerTest extends UnitSpec with GuiceOneAppPerSuite with ERSFakeApplicationConfig with ErsTestHelper {
+class SchemeOrganiserControllerSpec extends UnitSpec with ERSFakeApplicationConfig with ErsTestHelper with GuiceOneAppPerSuite {
 
-  lazy val messagesApi: MessagesApi = app.injector.instanceOf[MessagesApi]
-  implicit val messages: Messages = messagesApi.preferred(Seq(Lang.get("en").get))
-  implicit val requests: Request[_] = FakeRequest()
-  implicit val mat: Materializer = app.materializer
+  val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
+    messagesActionBuilder,
+    DefaultActionBuilder(stubBodyParser[AnyContent]()),
+    cc.parsers,
+    fakeApplication.injector.instanceOf[MessagesApi],
+    cc.langs,
+    cc.fileMimeTypes,
+    ExecutionContext.global
+  )
+
+  implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
+  implicit lazy val messages: Messages = testMessages.messages
+  val globalErrorView: global_error = app.injector.instanceOf[global_error]
+  val schemeOrganiserView: scheme_organiser = app.injector.instanceOf[scheme_organiser]
 
   "calling Scheme Organiser Page" should {
 
@@ -49,7 +61,7 @@ class SchemeOrganiserControllerTest extends UnitSpec with GuiceOneAppPerSuite wi
 																					 schemeOrganiserDataCached: Boolean = false,
 																					 reportableEventsRes: Boolean = true,
 																					 fileTypeRes: Boolean = true
-																					): SchemeOrganiserController = new SchemeOrganiserController(messagesApi, mockAuthConnector, mockCountryCodes, mockErsUtil, mockAppConfig) {
+																					): SchemeOrganiserController = new SchemeOrganiserController(mockMCC, mockAuthConnector, mockCountryCodes, mockErsUtil, mockAppConfig, globalErrorView, schemeOrganiserView) {
 
 			when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any(), any())).thenReturn(Future.successful(ersRequestObject))
 
@@ -104,8 +116,8 @@ class SchemeOrganiserControllerTest extends UnitSpec with GuiceOneAppPerSuite wi
       val controllerUnderTest = buildFakeSchemeOrganiserController(reportableEventsRes = false)
 			val req = Fixtures.buildFakeRequestWithSessionIdCSOP("GET")
       val result = await(controllerUnderTest.showSchemeOrganiserPage(ersRequestObject)(Fixtures.buildFakeUser, req, hc))
-      contentAsString(result) should include(messages("ers.global_errors.message"))
-      contentAsString(result) shouldBe contentAsString(buildFakeSchemeOrganiserController().getGlobalErrorPage(req, messages))
+      contentAsString(result) should include(testMessages("ers.global_errors.message"))
+      contentAsString(result) shouldBe contentAsString(buildFakeSchemeOrganiserController().getGlobalErrorPage(req, testMessages))
     }
 
     "show blank scheme organiser page if fetching file type from cache fails" in {
@@ -145,7 +157,7 @@ class SchemeOrganiserControllerTest extends UnitSpec with GuiceOneAppPerSuite wi
 																					 reportableEventsRes: Boolean = true,
 																					 fileTypeRes: Boolean = true,
 																					 schemeOrganiserDataCachedOk: Boolean = true
-																					): SchemeOrganiserController = new SchemeOrganiserController(messagesApi, mockAuthConnector, mockCountryCodes, mockErsUtil, mockAppConfig) {
+																					): SchemeOrganiserController = new SchemeOrganiserController(mockMCC, mockAuthConnector, mockCountryCodes, mockErsUtil, mockAppConfig, globalErrorView, schemeOrganiserView) {
 
 			when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any(), any())).thenReturn(Future.successful(ersRequestObject))
 
@@ -241,8 +253,8 @@ class SchemeOrganiserControllerTest extends UnitSpec with GuiceOneAppPerSuite wi
       val form = _root_.models.RsFormMappings.schemeOrganiserForm.bind(schemeOrganiserData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(Fixtures.buildFakeUser, request, hc)
-      contentAsString(result) should include(messages("ers.global_errors.message"))
-      contentAsString(result) shouldBe contentAsString(buildFakeSchemeOrganiserController().getGlobalErrorPage)
+      contentAsString(result) should include(testMessages("ers.global_errors.message"))
+      contentAsString(result) shouldBe contentAsString(buildFakeSchemeOrganiserController().getGlobalErrorPage(request, messages))
     }
 
     "check error for empty company name" in {
@@ -260,7 +272,7 @@ class SchemeOrganiserControllerTest extends UnitSpec with GuiceOneAppPerSuite wi
       val form = _root_.models.RsFormMappings.schemeOrganiserForm.bind(schemeOrganiserData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(Fixtures.buildFakeUser, request, hc)
-      contentAsString(result) should include(messages("ers_scheme_organiser.err.summary.company_name_required"))
+      contentAsString(result) should include(testMessages("ers_scheme_organiser.err.summary.company_name_required"))
     }
     "check error for company name more than 36 characters" in {
       val controllerUnderTest = buildFakeSchemeOrganiserController(schemeOrganiserDataCachedOk = false)
@@ -277,7 +289,7 @@ class SchemeOrganiserControllerTest extends UnitSpec with GuiceOneAppPerSuite wi
       val form = _root_.models.RsFormMappings.schemeOrganiserForm.bind(schemeOrganiserData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(Fixtures.buildFakeUser, request, hc)
-      contentAsString(result) should include(messages("ers_scheme_organiser.err.company_name"))
+      contentAsString(result) should include(testMessages("ers_scheme_organiser.err.company_name"))
     }
 
     "check error for invalid company name" in {
@@ -295,7 +307,7 @@ class SchemeOrganiserControllerTest extends UnitSpec with GuiceOneAppPerSuite wi
       val form = _root_.models.RsFormMappings.schemeOrganiserForm.bind(schemeOrganiserData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(Fixtures.buildFakeUser, request, hc)
-      contentAsString(result) should include(messages("ers_scheme_organiser.err.invalidChars.company_name"))
+      contentAsString(result) should include(testMessages("ers_scheme_organiser.err.invalidChars.company_name"))
     }
 
     "check error for empty Address" in {
@@ -313,7 +325,7 @@ class SchemeOrganiserControllerTest extends UnitSpec with GuiceOneAppPerSuite wi
       val form = _root_.models.RsFormMappings.schemeOrganiserForm.bind(schemeOrganiserData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(Fixtures.buildFakeUser, request, hc)
-      contentAsString(result) should include(messages("ers_scheme_organiser.err.summary.address_line1_required"))
+      contentAsString(result) should include(testMessages("ers_scheme_organiser.err.summary.address_line1_required"))
     }
 
     "check error for address more than 28 characters" in {
@@ -331,7 +343,7 @@ class SchemeOrganiserControllerTest extends UnitSpec with GuiceOneAppPerSuite wi
       val form = _root_.models.RsFormMappings.schemeOrganiserForm.bind(schemeOrganiserData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(Fixtures.buildFakeUser, request, hc)
-      contentAsString(result) should include(messages("ers_scheme_organiser.err.address_line1"))
+      contentAsString(result) should include(testMessages("ers_scheme_organiser.err.address_line1"))
     }
 
     "check error for invalid address" in {
@@ -349,7 +361,7 @@ class SchemeOrganiserControllerTest extends UnitSpec with GuiceOneAppPerSuite wi
       val form = _root_.models.RsFormMappings.schemeOrganiserForm.bind(schemeOrganiserData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(Fixtures.buildFakeUser, request, hc)
-      contentAsString(result) should include(messages("ers_scheme_organiser.err.invalidChars.address_line1"))
+      contentAsString(result) should include(testMessages("ers_scheme_organiser.err.invalidChars.address_line1"))
     }
 
     "check error for postcode more than 8 characters" in {
@@ -367,7 +379,7 @@ class SchemeOrganiserControllerTest extends UnitSpec with GuiceOneAppPerSuite wi
       val form = _root_.models.RsFormMappings.schemeOrganiserForm.bind(schemeOrganiserData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(Fixtures.buildFakeUser, request, hc)
-      contentAsString(result) should include(messages("ers_scheme_organiser.err.postcode"))
+      contentAsString(result) should include(testMessages("ers_scheme_organiser.err.postcode"))
     }
 
     "check error for invalid postcode" in {
@@ -385,7 +397,7 @@ class SchemeOrganiserControllerTest extends UnitSpec with GuiceOneAppPerSuite wi
       val form = _root_.models.RsFormMappings.schemeOrganiserForm.bind(schemeOrganiserData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(Fixtures.buildFakeUser, request, hc)
-      contentAsString(result) should include(messages("ers_scheme_organiser.err.invalidChars.postcode"))
+      contentAsString(result) should include(testMessages("ers_scheme_organiser.err.invalidChars.postcode"))
     }
 
     "check error for CRN more than 8 characters" in {
@@ -403,7 +415,7 @@ class SchemeOrganiserControllerTest extends UnitSpec with GuiceOneAppPerSuite wi
       val form = _root_.models.RsFormMappings.schemeOrganiserForm.bind(schemeOrganiserData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(Fixtures.buildFakeUser, request, hc)
-      contentAsString(result) should include(messages("ers_scheme_organiser.err.summary.company_reg"))
+      contentAsString(result) should include(testMessages("ers_scheme_organiser.err.summary.company_reg"))
     }
 
     "check error for invalid CRN" in {
@@ -421,7 +433,7 @@ class SchemeOrganiserControllerTest extends UnitSpec with GuiceOneAppPerSuite wi
       val form = _root_.models.RsFormMappings.schemeOrganiserForm.bind(schemeOrganiserData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(Fixtures.buildFakeUser, request, hc)
-      contentAsString(result) should include(messages("ers_scheme_organiser.err.summary.invalidChars.company_reg_pattern"))
+      contentAsString(result) should include(testMessages("ers_scheme_organiser.err.summary.invalidChars.company_reg_pattern"))
     }
 
     "check error for corporation number more than 10 digits" in {
@@ -439,7 +451,7 @@ class SchemeOrganiserControllerTest extends UnitSpec with GuiceOneAppPerSuite wi
       val form = _root_.models.RsFormMappings.schemeOrganiserForm.bind(schemeOrganiserData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(Fixtures.buildFakeUser, request, hc)
-      contentAsString(result) should include(messages("ers_scheme_organiser.err.summary.corporation_ref"))
+      contentAsString(result) should include(testMessages("ers_scheme_organiser.err.summary.corporation_ref"))
     }
 
     "check error for invalid corporation number" in {
@@ -457,7 +469,7 @@ class SchemeOrganiserControllerTest extends UnitSpec with GuiceOneAppPerSuite wi
       val form = _root_.models.RsFormMappings.schemeOrganiserForm.bind(schemeOrganiserData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(Fixtures.buildFakeUser, request, hc)
-      contentAsString(result) should include(messages("ers_scheme_organiser.err.summary.invalidChars.corporation_ref_pattern"))
+      contentAsString(result) should include(testMessages("ers_scheme_organiser.err.summary.invalidChars.corporation_ref_pattern"))
     }
 
     "check error for invalid format of postcode" in {
@@ -475,7 +487,7 @@ class SchemeOrganiserControllerTest extends UnitSpec with GuiceOneAppPerSuite wi
       val form = _root_.models.RsFormMappings.schemeOrganiserForm.bind(schemeOrganiserData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(Fixtures.buildFakeUser, request, hc)
-      contentAsString(result) should include(messages("ers_scheme_organiser.err.invalidFormat.postcode"))
+      contentAsString(result) should include(testMessages("ers_scheme_organiser.err.invalidFormat.postcode"))
     }
 
   }

@@ -17,10 +17,14 @@
 @import utils.ERSUtil
 @import config.ApplicationConfig
 @import views.html.helpers.error_overview
+@import uk.gov.hmrc.play.views.html.helpers.{FormWithCSRF, ErrorSummary}
+
+
+@this(form: FormWithCSRF, errorSummary: ErrorSummary)
+
 @(requestObject: RequestObject, activity: Option[String], reportableEvents: Form[models.ReportableEvents])(implicit request: Request[AnyRef], flash: Flash, messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 @* type of activity template *@
 @schemeId = @{requestObject.getSchemeId}
-@import uk.gov.hmrc.play.views.html.helpers
 @import views.html.templates._
 
 @scripts = {<script src='@routes.Assets.at("javascripts/ers_scripts.js")'> </script>}
@@ -30,9 +34,9 @@
 	@reference(requestObject.getPageTitle)
 	<p class="font-xsmall"><a href="@routes.ReturnServiceController.startPage" class="link-back">@Html(messages("ers.back"))</a></p>
 	@if(reportableEvents.hasErrors) {
-		@helpers.errorSummary(messages("validation.summary.heading"), reportableEvents)
+		@errorSummary(messages("validation.summary.heading"), reportableEvents)
 	}
-	@helpers.form(action = routes.ReportableEventsController.reportableEventsSelected) {
+	@form(action = routes.ReportableEventsController.reportableEventsSelected) {
 		<div class="form-group @if(reportableEvents.hasErrors) { form-field--error }">
 			<fieldset class="inline">
 				<legend id="isNilReturn">

@@ -17,37 +17,50 @@
 package controllers
 
 import akka.stream.Materializer
-import helpers.ErsTestHelper
 import models.{CheckFileType, RequestObject, RsFormMappings}
 import org.jsoup.Jsoup
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status
-import play.api.i18n.{Lang, Messages, MessagesApi}
-import play.api.mvc.Request
+import play.api.i18n
+import play.api.i18n.{Lang, Messages, MessagesApi, MessagesImpl}
+import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents, Request}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.test.UnitSpec
 import utils.Fixtures.ersRequestObject
-import utils.{ERSFakeApplicationConfig, Fixtures}
+import utils.{ERSFakeApplicationConfig, ErsTestHelper, Fixtures}
+import views.html.{check_file_type, global_error}
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
-class CheckFileTypeControllerTest extends UnitSpec with GuiceOneAppPerSuite with ERSFakeApplicationConfig with ErsTestHelper {
+class CheckFileTypeControllerSpec extends UnitSpec with ERSFakeApplicationConfig with ErsTestHelper with GuiceOneAppPerSuite {
 
-  val messagesApi: MessagesApi = app.injector.instanceOf[MessagesApi]
-  implicit val messages: Messages = messagesApi.preferred(Seq(Lang.get("en").get))
-  implicit val requests: Request[_] = FakeRequest()
+  val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
+    messagesActionBuilder,
+    DefaultActionBuilder(stubBodyParser[AnyContent]()),
+    cc.parsers,
+    fakeApplication.injector.instanceOf[MessagesApi],
+    cc.langs,
+    cc.fileMimeTypes,
+    ExecutionContext.global
+  )
+
+  implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
+  implicit lazy val messages: Messages = testMessages.messages
+
   implicit lazy val mat: Materializer = app.materializer
+  val globalErrorView: global_error = app.injector.instanceOf[global_error]
+  val checkFileTypeView: check_file_type = app.injector.instanceOf[check_file_type]
 
   "Check File Type Page GET" should {
 
     def buildFakeCheckingServiceController(
                                             fileType: Future[CheckFileType] = Future.successful(CheckFileType(Some("csv"))),
                                             requestObject: Future[RequestObject] = Future.successful(ersRequestObject)
-                                          ): CheckFileTypeController = new CheckFileTypeController(messagesApi, mockAuthConnector, mockErsUtil, mockAppConfig) {
+                                          ): CheckFileTypeController = new CheckFileTypeController(mockMCC, mockAuthConnector, mockErsUtil, mockAppConfig, globalErrorView, checkFileTypeView) {
       when(mockErsUtil.fetch[CheckFileType](refEq("check-file-type"), any())(any(), any(), any())).thenReturn(fileType)
       when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any(), any())).thenReturn(requestObject)
     }
@@ -89,8 +102,8 @@ class CheckFileTypeControllerTest extends UnitSpec with GuiceOneAppPerSuite with
 			val req = Fixtures.buildFakeRequestWithSessionId("GET")
       val result = controllerUnderTest.showCheckFileTypePage()(Fixtures.buildFakeUser, req, hc)
 
-      contentAsString(result) should include(messages("ers.global_errors.message"))
-      contentAsString(result) shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage(req, messages))
+      contentAsString(result) should include(testMessages("ers.global_errors.message"))
+      contentAsString(result) shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage(req, testMessages))
     }
 
   }
@@ -100,7 +113,7 @@ class CheckFileTypeControllerTest extends UnitSpec with GuiceOneAppPerSuite with
     def buildFakeCheckingServiceController(
                                             cache: Future[CacheMap] = Future.successful(mock[CacheMap]),
                                            requestObject: Future[RequestObject] = Future.successful(ersRequestObject)): CheckFileTypeController =
-			new CheckFileTypeController(messagesApi, mockAuthConnector, mockErsUtil, mockAppConfig){
+			new CheckFileTypeController(mockMCC, mockAuthConnector, mockErsUtil, mockAppConfig, globalErrorView, checkFileTypeView){
       when(mockErsUtil.cache(matches("check-file-type"), any(), any())(any(), any(), any())).thenReturn(cache)
       when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any(), any())).thenReturn(requestObject)
     }
@@ -154,8 +167,8 @@ class CheckFileTypeControllerTest extends UnitSpec with GuiceOneAppPerSuite with
       val form = RsFormMappings.schemeTypeForm.bind(schemeTypeData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val result = await(controllerUnderTest.showCheckFileTypeSelected()(request, hc))
-      contentAsString(result) shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage)
-      contentAsString(result) should include(messages("ers.global_errors.message"))
+      contentAsString(result) shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage(request,messages))
+      contentAsString(result) should include(testMessages("ers.global_errors.message"))
     }
 
   }

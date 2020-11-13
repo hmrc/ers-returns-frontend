@@ -20,40 +20,49 @@ import java.net.URL
 import java.time.Instant
 
 import akka.stream.Materializer
-import helpers.ErsTestHelper
 import models.upscan._
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{eq => meq, _}
 import org.mockito.Mockito._
 import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.mockito.MockitoSugar
-import org.scalatestplus.play.OneAppPerSuite
-import play.api.i18n.MessagesApi
-import play.api.inject.guice.GuiceApplicationBuilder
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import play.api.i18n.{MessagesApi, MessagesImpl}
 import play.api.libs.json._
+import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import play.api.{Application, Environment}
+import play.api.{Environment, i18n}
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.test.UnitSpec
-import utils.{ERSFakeApplicationConfig, UpscanData}
+import utils.{ERSFakeApplicationConfig, ErsTestHelper, UpscanData}
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class CsvFileUploadCallbackControllerSpec extends UnitSpec
-	with ERSFakeApplicationConfig with MockitoSugar with OneAppPerSuite with BeforeAndAfterEach with UpscanData with ErsTestHelper {
+	with ERSFakeApplicationConfig with MockitoSugar with BeforeAndAfterEach with UpscanData with ErsTestHelper with GuiceOneAppPerSuite {
 
-  override lazy val app: Application = new GuiceApplicationBuilder().configure(config).build()
+  val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
+    messagesActionBuilder,
+    DefaultActionBuilder(stubBodyParser[AnyContent]()),
+    cc.parsers,
+    fakeApplication.injector.instanceOf[MessagesApi],
+    cc.langs,
+    cc.fileMimeTypes,
+    ExecutionContext.global
+  )
+
+  implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
+
   implicit lazy val materializer: Materializer = app.materializer
   lazy val environment: Environment = app.injector.instanceOf[Environment]
-	lazy val messagesApi: MessagesApi = app.injector.instanceOf[MessagesApi]
 
   def request(body: JsValue): FakeRequest[JsValue] = FakeRequest().withBody(body)
   val scRef = "scRef"
   val url: URL = new URL("http://localhost:9000/myUrl")
 
   lazy val csvFileUploadCallbackController: CsvFileUploadCallbackController =
-		new CsvFileUploadCallbackController(messagesApi, mockErsConnector, mockAuthConnector, mockErsUtil, mockAppConfig) {
+		new CsvFileUploadCallbackController(mockMCC, mockErsConnector, mockAuthConnector, mockErsUtil, mockAppConfig) {
 		import scala.concurrent.duration._
     when(mockAppConfig.retryDelay).thenReturn(1 millisecond)
   }

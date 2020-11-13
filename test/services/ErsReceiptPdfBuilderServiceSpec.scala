@@ -26,19 +26,35 @@ import org.mockito.internal.verification.VerificationModeFactory
 import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.OneAppPerSuite
-import play.api.Application
-import play.api.i18n.{Lang, Messages, MessagesApi}
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import play.api.{Application, i18n}
+import play.api.i18n.{Lang, Messages, MessagesApi, MessagesImpl}
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents}
+import play.api.test.Helpers.stubBodyParser
 import services.pdf.{DecoratorController, ErsContentsStreamer, ErsReceiptPdfBuilderService}
 import uk.gov.hmrc.play.test.UnitSpec
-import utils.{ContentUtil, CountryCodes, ERSFakeApplicationConfig, Fixtures}
+import utils.{ContentUtil, CountryCodes, ERSFakeApplicationConfig, ErsTestHelper, Fixtures}
 
-class ErsReceiptPdfBuilderServiceSpec extends UnitSpec with MockitoSugar with BeforeAndAfterEach with ERSFakeApplicationConfig with OneAppPerSuite {
+import scala.concurrent.ExecutionContext
 
-  override lazy val app: Application = new GuiceApplicationBuilder().configure(config).build()
+class ErsReceiptPdfBuilderServiceSpec extends UnitSpec with MockitoSugar with BeforeAndAfterEach
+  with ERSFakeApplicationConfig with ErsTestHelper with GuiceOneAppPerSuite {
+
+  val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
+    messagesActionBuilder,
+    DefaultActionBuilder(stubBodyParser[AnyContent]()),
+    cc.parsers,
+    fakeApplication.injector.instanceOf[MessagesApi],
+    cc.langs,
+    cc.fileMimeTypes,
+    ExecutionContext.global
+  )
+
+  implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
+  implicit lazy val messages: Messages = testMessages.messages
+
   implicit lazy val mat: Materializer = app.materializer
-  implicit lazy val messages: Messages = Messages(Lang("en"), app.injector.instanceOf[MessagesApi])
-	val mockCountryCodes: CountryCodes = mock[CountryCodes]
 	val testErsReceiptPdfBuilderService = new ErsReceiptPdfBuilderService(mockCountryCodes)
 
   def verifyBlankBlock(streamer: ErsContentsStreamer) {
