@@ -16,11 +16,14 @@
 
 @import utils.ERSUtil
 @import config.ApplicationConfig
+@import uk.gov.hmrc.play.views.html.helpers.FormWithCSRF
+
+@this(form: FormWithCSRF)
+
 @(requestObject: RequestObject, altAmends: AltAmends)(implicit request: Request[AnyRef], flash: Flash, messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 
 
 @import views.html.templates._
-@import uk.gov.hmrc.play.views.html.helpers
 
 @schemeId = @{requestObject.getSchemeId}
 
@@ -40,7 +43,7 @@
         </div>
     }
 
-    @helpers.form(action = routes.AltAmendsController.altAmendsSelected()) {
+    @form(action = routes.AltAmendsController.altAmendsSelected()) {
         <div class="form-group @if(flash.get("alt-amends-not-selected-error").isDefined) {form-field--error}">
             <fieldset>
                 <legend>

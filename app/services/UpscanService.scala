@@ -20,8 +20,6 @@ import com.google.inject.Inject
 import config.ApplicationConfig
 import connectors.UpscanConnector
 import models.upscan.{UploadId, UpscanInitiateRequest, UpscanInitiateResponse}
-import play.api.{Environment, Mode}
-import play.api.Mode.Mode
 import play.api.mvc.{Call, Request}
 import uk.gov.hmrc.http.HeaderCarrier
 

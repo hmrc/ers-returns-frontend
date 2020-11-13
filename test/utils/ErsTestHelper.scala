@@ -14,22 +14,37 @@
  * limitations under the License.
  */
 
-package helpers
+package utils
 
+import akka.actor.ActorSystem
 import config.{ApplicationConfig, ERSShortLivedCache}
 import connectors.ErsConnector
 import metrics.Metrics
+import org.jsoup.Jsoup
+import org.jsoup.nodes.Document
 import org.mockito.Mockito._
+import org.scalatestplus.mockito.MockitoSugar
 import play.api.test.FakeRequest
+import play.api.mvc._
+import play.api.test.Helpers.{contentAsString, defaultAwaitTimeout, stubBodyParser, stubControllerComponents, stubMessagesApi}
+import play.twirl.api.Html
 import services.SessionService
 import services.audit.AuditEvents
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
-import utils.{AuthHelper, Country, CountryCodes, ERSUtil}
 
-trait ErsTestHelper extends AuthHelper {
+import scala.concurrent.ExecutionContext
+
+trait ErsTestHelper extends MockitoSugar with AuthHelper with ERSFakeApplicationConfig {
+
+	def doc(result: Html): Document = Jsoup.parse(contentAsString(result))
+
+	val messagesActionBuilder: MessagesActionBuilder = new DefaultMessagesActionBuilderImpl(stubBodyParser[AnyContent](), stubMessagesApi())
+	val cc: ControllerComponents = stubControllerComponents()
 	implicit val request = FakeRequest()
+
 	implicit val hc: HeaderCarrier = HeaderCarrier()
+	implicit val ec: ExecutionContext = ExecutionContext.Implicits.global
 
 	val OPTION_YES = "1"
 	val OPTION_NO = "2"

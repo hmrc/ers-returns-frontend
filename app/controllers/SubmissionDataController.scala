@@ -23,21 +23,24 @@ import models.ERSAuthData
 import play.api.Logger
 import play.api.i18n.{I18nSupport, Messages, MessagesApi}
 import play.api.libs.json.{JsObject, Json}
-import play.api.mvc.{Action, AnyContent, Request, Result}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request, Result}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import utils.ERSUtil
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class SubmissionDataController @Inject()(val messagesApi: MessagesApi,
+class SubmissionDataController @Inject()(val mcc: MessagesControllerComponents,
 																				 val authConnector: DefaultAuthConnector,
 																				 val ersConnector: ErsConnector,
 																				 implicit val ersUtil: ERSUtil,
-																				 implicit val appConfig: ApplicationConfig
-																				) extends FrontendController with Authenticator with I18nSupport {
+																				 implicit val appConfig: ApplicationConfig,
+                                         globalErrorView: views.html.global_error
+																				) extends FrontendController(mcc) with Authenticator with I18nSupport {
+
+  implicit val ec: ExecutionContext = mcc.executionContext
 
   def createSchemeInfoFromURL(request: Request[Any]): Option[JsObject] = {
 
@@ -90,7 +93,7 @@ class SubmissionDataController @Inject()(val messagesApi: MessagesApi,
 
       }
       else {
-        Future.successful(NotFound(views.html.global_error(
+        Future.successful(NotFound(globalErrorView(
 					"ers_not_found.title",
 					"ers_not_found.heading",
 					"ers_not_found.message"
@@ -99,7 +102,7 @@ class SubmissionDataController @Inject()(val messagesApi: MessagesApi,
     }
     else {
       Logger.debug("Retrieve SubmissionData Disabled")
-      Future.successful(NotFound(views.html.global_error(
+      Future.successful(NotFound(globalErrorView(
 				"ers_not_found.title",
 				"ers_not_found.heading",
 				"ers_not_found.message"
@@ -108,7 +111,7 @@ class SubmissionDataController @Inject()(val messagesApi: MessagesApi,
   }
 
 	def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result = {
-		Ok(views.html.global_error(
+		Ok(globalErrorView(
 			"ers.global_errors.title",
 			"ers.global_errors.heading",
 			"ers.global_errors.message"

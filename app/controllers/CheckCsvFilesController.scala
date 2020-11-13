@@ -21,22 +21,25 @@ import javax.inject.{Inject, Singleton}
 import models._
 import models.upscan.{NotStarted, UploadId, UpscanCsvFilesList, UpscanIds}
 import play.api.Logger
-import play.api.i18n.{I18nSupport, Messages, MessagesApi}
-import play.api.mvc.{Action, AnyContent, Request, Result}
+import play.api.i18n.{I18nSupport, Messages}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request, Result}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import utils.ERSUtil
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class CheckCsvFilesController @Inject()(val messagesApi: MessagesApi,
+class CheckCsvFilesController @Inject()(val mcc: MessagesControllerComponents,
 																				val authConnector: DefaultAuthConnector,
 																				implicit val ersUtil: ERSUtil,
-																				implicit val appConfig: ApplicationConfig
-																			 ) extends FrontendController with Authenticator with I18nSupport {
+																				implicit val appConfig: ApplicationConfig,
+                                        globalErrorView: views.html.global_error,
+                                        checkCsvFileView: views.html.check_csv_file
+                                       ) extends FrontendController(mcc) with Authenticator with I18nSupport {
+
+  implicit val ec: ExecutionContext = mcc.executionContext
 
   def checkCsvFilesPage(): Action[AnyContent] = authorisedForAsync() {
     implicit user =>
@@ -51,7 +54,7 @@ class CheckCsvFilesController @Inject()(val messagesApi: MessagesApi,
       requestObject <- requestObjectFuture
     } yield {
       val csvFilesList: List[CsvFiles] = ersUtil.getCsvFilesList(requestObject.getSchemeType)
-      Ok(views.html.check_csv_file(requestObject, CsvFilesList(csvFilesList)))
+      Ok(checkCsvFileView(requestObject, CsvFilesList(csvFilesList)))
     }) recover {
       case _: Throwable => getGlobalErrorPage
     }
@@ -105,7 +108,7 @@ class CheckCsvFilesController @Inject()(val messagesApi: MessagesApi,
   }
 
 	def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result = {
-		Ok(views.html.global_error(
+		Ok(globalErrorView(
 			"ers.global_errors.title",
 			"ers.global_errors.heading",
 			"ers.global_errors.message"

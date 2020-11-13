@@ -73,7 +73,7 @@ class UploadStatusSpec extends UnitSpec {
         val expectedUrl = "downloadUrl"
         val noOfRows = 2
         val expectedJson =
-          s"""{"name":"$expectedName","downloadUrl":"$expectedUrl","noOfRows":$noOfRows,"_type":"UploadedSuccessfully"}"""
+          s"""{"name":"$expectedName","downloadUrl":"$expectedUrl","_type":"UploadedSuccessfully","noOfRows":$noOfRows}"""
         val uploadStatus: UploadStatus = UploadedSuccessfully(expectedName, expectedUrl, Some(noOfRows))
         Json.toJson(uploadStatus).toString() shouldBe expectedJson
       }

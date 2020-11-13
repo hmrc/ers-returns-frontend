@@ -18,7 +18,6 @@ package connectors
 
 import akka.stream.Materializer
 import com.github.tomakehurst.wiremock.client.WireMock._
-import helpers.ErsTestHelper
 import metrics.Metrics
 import models.{ERSAuthData, SchemeInfo, ValidatorData}
 import org.joda.time.DateTime
@@ -26,30 +25,43 @@ import org.mockito.Mockito.{reset => mreset, _}
 import org.mockito.{ArgumentCaptor, ArgumentMatchers}
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.OneAppPerSuite
-import play.api.Application
-import play.api.i18n.MessagesApi
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import play.api.{Application, i18n}
+import play.api.i18n.{Messages, MessagesApi, MessagesImpl}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsObject, Json}
+import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents, Request, Results}
+import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.http.HttpResponse
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
 import uk.gov.hmrc.play.test.UnitSpec
-import utils.{ERSFakeApplicationConfig, UpscanData, WireMockHelper}
+import utils.{ERSFakeApplicationConfig, ErsTestHelper, UpscanData, WireMockHelper}
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class ERSConnectorSpec extends UnitSpec
 												with MockitoSugar
-												with OneAppPerSuite
 												with ERSFakeApplicationConfig
 												with ErsTestHelper
 												with WireMockHelper
-												with UpscanData {
+												with UpscanData
+                        with GuiceOneAppPerSuite {
 
   lazy val newConfig: Map[String, Any] = config + ("microservice.services.ers-file-validator.port" -> server.port())
-  override lazy val app: Application = new GuiceApplicationBuilder().configure(newConfig).build()
-  implicit lazy val mat: Materializer = app.materializer
+  val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
+    messagesActionBuilder,
+    DefaultActionBuilder(stubBodyParser[AnyContent]()),
+    cc.parsers,
+    fakeApplication.injector.instanceOf[MessagesApi],
+    cc.langs,
+    cc.fileMimeTypes,
+    ExecutionContext.global
+  )
 
+  implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
+  implicit lazy val mat: Materializer = app.materializer
+  override implicit val ec: ExecutionContext = mockMCC.executionContext
   implicit lazy val authContext: ERSAuthData = defaultErsAuthData
 	lazy val testHttp: DefaultHttpClient = app.injector.instanceOf[DefaultHttpClient]
 
@@ -74,11 +86,13 @@ class ERSConnectorSpec extends UnitSpec
 
   "validateFileData" should {
     "call file validator using empref from auth context" in {
+
       mreset(mockHttp)
       val stringCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
       when(mockHttp.POST[ValidatorData, HttpResponse](stringCaptor.capture(), ArgumentMatchers.any(), ArgumentMatchers.any())
 				(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Future.successful(HttpResponse(OK)))
+        .thenReturn(Future.successful(HttpResponse(OK, "")))
+
       val result = await(ersConnectorMockHttp.validateFileData(uploadedSuccessfully, schemeInfo))
       result.status shouldBe OK
       stringCaptor.getValue should include("123%2FABCDE")
@@ -152,7 +166,7 @@ class ERSConnectorSpec extends UnitSpec
       val stringCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
       when(mockHttp.POST[ValidatorData, HttpResponse](stringCaptor.capture(), ArgumentMatchers.any(), ArgumentMatchers.any())
 				(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Future.successful(HttpResponse(OK)))
+        .thenReturn(Future.successful(HttpResponse(OK, "")))
       val result = await(ersConnectorMockHttp.validateFileData(uploadedSuccessfully, schemeInfo))
       result.status shouldBe OK
       stringCaptor.getValue should include("123%2FABCDE")
@@ -229,7 +243,7 @@ class ERSConnectorSpec extends UnitSpec
         mockHttp.POST[SchemeInfo, HttpResponse](ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())
 					(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())
       ).thenReturn(
-        Future.successful(HttpResponse(OK))
+        Future.successful(HttpResponse(OK, ""))
       )
 
       val result = await(ersConnectorMockHttp.retrieveSubmissionData(data))
@@ -242,7 +256,7 @@ class ERSConnectorSpec extends UnitSpec
         mockHttp.POST[SchemeInfo, HttpResponse](ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())
 					(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())
       ).thenReturn(
-        Future.successful(HttpResponse(INTERNAL_SERVER_ERROR))
+        Future.successful(HttpResponse(INTERNAL_SERVER_ERROR, ""))
       )
 
       val result = await(ersConnectorMockHttp.retrieveSubmissionData(data))

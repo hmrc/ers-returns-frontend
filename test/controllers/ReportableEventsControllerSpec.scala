@@ -19,7 +19,6 @@ package controllers
 import java.util.NoSuchElementException
 
 import akka.stream.Materializer
-import helpers.ErsTestHelper
 import models._
 import org.joda.time.DateTime
 import org.jsoup.Jsoup
@@ -27,20 +26,34 @@ import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status
-import play.api.i18n.{Lang, Messages, MessagesApi}
+import play.api.i18n
+import play.api.i18n.{Lang, Messages, MessagesApi, MessagesImpl}
+import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.play.test.UnitSpec
 import utils.Fixtures.ersRequestObject
-import utils.{ERSFakeApplicationConfig, Fixtures}
+import utils.{ERSFakeApplicationConfig, ErsTestHelper, Fixtures}
+import views.html.{global_error, reportable_events}
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
-class ReportableEventsControllerTest extends UnitSpec with ERSFakeApplicationConfig with GuiceOneAppPerSuite with ErsTestHelper {
+class ReportableEventsControllerSpec extends UnitSpec with ERSFakeApplicationConfig with ErsTestHelper with GuiceOneAppPerSuite {
 
-  val messagesApi: MessagesApi = app.injector.instanceOf[MessagesApi]
-  implicit val messages: Messages = messagesApi.preferred(Seq(Lang.get("en").get))
+  val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
+    messagesActionBuilder,
+    DefaultActionBuilder(stubBodyParser[AnyContent]()),
+    cc.parsers,
+    fakeApplication.injector.instanceOf[MessagesApi],
+    cc.langs,
+    cc.fileMimeTypes,
+    ExecutionContext.global
+  )
+
+  implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
   implicit lazy val mat: Materializer = app.materializer
+  val globalErrorView: global_error = app.injector.instanceOf[global_error]
+  val reportableEventsView: reportable_events = app.injector.instanceOf[reportable_events]
 	val TEST_OPTION_NIL_RETURN = "2"
 	val TEST_REPORTABLE_EVENTS = "ReportableEvents"
 
@@ -52,7 +65,7 @@ class ReportableEventsControllerTest extends UnitSpec with ERSFakeApplicationCon
 																						schemeOrganiserDetailsRes: Boolean = true,
 																						schemeOrganiserDataCached: Boolean = false,
 																						reportableEventsRes: Boolean = true
-																					 ): ReportableEventsController = new ReportableEventsController(messagesApi, mockAuthConnector, mockErsConnector, mockErsUtil, mockAppConfig) {
+																					 ): ReportableEventsController = new ReportableEventsController(mockMCC, mockAuthConnector, mockErsConnector, mockErsUtil, mockAppConfig, globalErrorView, reportableEventsView) {
       val schemeInfo: SchemeInfo = SchemeInfo("XA1100000000000", DateTime.now, "1", "2016", "CSOP 2015/16", "CSOP")
       val ersMetaData: ErsMetaData = ErsMetaData(schemeInfo, "300.300.300.300", None, "", None, None)
 
@@ -137,7 +150,7 @@ class ReportableEventsControllerTest extends UnitSpec with ERSFakeApplicationCon
 																						schemeOrganiserDetailsRes: Boolean = true,
 																						schemeOrganiserDataCached: Boolean = false,
 																						reportableEventsRes: Boolean = true
-																					 ): ReportableEventsController = new ReportableEventsController(messagesApi, mockAuthConnector, mockErsConnector, mockErsUtil, mockAppConfig) {
+																					 ): ReportableEventsController = new ReportableEventsController(mockMCC, mockAuthConnector, mockErsConnector, mockErsUtil, mockAppConfig, globalErrorView, reportableEventsView) {
       val schemeInfo: SchemeInfo = SchemeInfo("XA1100000000000", DateTime.now, "1", "2016", "CSOP 2015/16", "CSOP")
       val ersMetaData: ErsMetaData = ErsMetaData(schemeInfo, "300.300.300.300", None, "", None, None)
 
@@ -216,8 +229,8 @@ class ReportableEventsControllerTest extends UnitSpec with ERSFakeApplicationCon
       val req = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form)
       val result = controllerUnderTest.showReportableEventsSelected(ersRequestObject)(Fixtures.buildFakeUser, req)
       status(result) shouldBe Status.OK
-      contentAsString(result) should include(messages("ers.global_errors.message"))
-      contentAsString(result) shouldBe contentAsString(buildFakeReportableEventsController().getGlobalErrorPage(req, messages))
+      contentAsString(result) should include(testMessages("ers.global_errors.message"))
+      contentAsString(result) shouldBe contentAsString(buildFakeReportableEventsController().getGlobalErrorPage(req, testMessages))
     }
 
   }

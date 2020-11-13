@@ -15,7 +15,10 @@
  *@
 
 @import config.ApplicationConfig
-@(loginScreenUrl: String)(implicit request: Request[AnyContent], messages: Messages, appConfig: ApplicationConfig)
+
+@this(implicit val config: ApplicationConfig)
+
+@(loginScreenUrl: String)(implicit request: Request[AnyContent], messages: Messages)
 
 @ers_main(title = messages("ers.app_title"), scripts=Html(""), showSignOutLink = false){
 	<p>@Html(messages("ers_signed_out.info"))</p>

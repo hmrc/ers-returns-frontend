@@ -21,25 +21,29 @@ import connectors.ErsConnector
 import javax.inject.{Inject, Singleton}
 import models._
 import play.api.Logger
-import play.api.Play.current
-import play.api.data.Form
-import play.api.i18n.{Messages, MessagesApi}
-import play.api.i18n.Messages.Implicits._
-import play.api.mvc.{Action, AnyContent, Request, Result}
+import play.api.i18n.{I18nSupport, Messages}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request, Result}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
+import play.api.data.Form
 import utils._
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class TrusteeController @Inject()(val messagesApi: MessagesApi,
+class TrusteeController @Inject()(val mcc: MessagesControllerComponents,
 																	val authConnector: DefaultAuthConnector,
 																	val ersConnector: ErsConnector,
 																	implicit val countryCodes: CountryCodes,
 																	implicit val ersUtil: ERSUtil,
-																	implicit val appConfig: ApplicationConfig) extends FrontendController with Authenticator {
+																	implicit val appConfig: ApplicationConfig,
+                                  globalErrorView: views.html.global_error,
+                                  trusteeDetailsView: views.html.trustee_details,
+                                  trusteeSummaryView: views.html.trustee_summary
+                                 ) extends FrontendController(mcc) with Authenticator with I18nSupport {
+
+  implicit val ec: ExecutionContext = mcc.executionContext
 
   def trusteeDetailsPage(index: Int): Action[AnyContent] = authorisedForAsync() {
     implicit user: ERSAuthData =>
@@ -52,7 +56,7 @@ class TrusteeController @Inject()(val messagesApi: MessagesApi,
   def showTrusteeDetailsPage(requestObject: RequestObject, index: Int)
 														(implicit authContext: ERSAuthData, request: Request[AnyContent], hc: HeaderCarrier): Future[Result] = {
     ersUtil.fetch[GroupSchemeInfo](ersUtil.GROUP_SCHEME_CACHE_CONTROLLER, requestObject.getSchemeReference).map { groupSchemeActivity =>
-      Ok(views.html.trustee_details(requestObject, groupSchemeActivity.groupScheme.getOrElse(ersUtil.DEFAULT), index, RsFormMappings.trusteeDetailsForm))
+      Ok(trusteeDetailsView(requestObject, groupSchemeActivity.groupScheme.getOrElse(ersUtil.DEFAULT), index, RsFormMappings.trusteeDetailsForm))
     } recover {
       case e: Exception =>
 				Logger.error(s"[TrusteeController][showTrusteeDetailsPage] Get data from cache failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
@@ -77,7 +81,7 @@ class TrusteeController @Inject()(val messagesApi: MessagesApi,
           val incorrectOrderGrouped = errors.errors.groupBy(_.key).map(_._2.head).toSeq
           val correctOrderGrouped = correctOrder.flatMap(x => incorrectOrderGrouped.find(_.key == x))
           val firstErrors: Form[models.TrusteeDetails] = new Form[TrusteeDetails](errors.mapping, errors.data, correctOrderGrouped, errors.value)
-          Ok(views.html.trustee_details(requestObject, groupSchemeActivity.groupScheme.getOrElse(ersUtil.DEFAULT), index, firstErrors))
+          Ok(trusteeDetailsView(requestObject, groupSchemeActivity.groupScheme.getOrElse(ersUtil.DEFAULT), index, firstErrors))
         } recover {
           case e: Exception =>
 						Logger.error(s"[TrusteeController][showTrusteeDetailsSubmit] Get data from cache failed with exception ${e.getMessage}, " +
@@ -153,7 +157,7 @@ class TrusteeController @Inject()(val messagesApi: MessagesApi,
       formDetails         = trusteeDetailsList.trustees(id)
     } yield {
 
-        Ok(views.html.trustee_details(requestObject, groupSchemeActivity.groupScheme.get, id, RsFormMappings.trusteeDetailsForm.fill(formDetails)))
+        Ok(trusteeDetailsView(requestObject, groupSchemeActivity.groupScheme.get, id, RsFormMappings.trusteeDetailsForm.fill(formDetails)))
 
     }) recover {
       case e: Exception =>
@@ -175,7 +179,7 @@ class TrusteeController @Inject()(val messagesApi: MessagesApi,
       trusteeDetailsList <- ersUtil.fetch[TrusteeDetailsList](ersUtil.TRUSTEES_CACHE, requestObject.getSchemeReference)
     } yield {
 
-      Ok(views.html.trustee_summary(requestObject, trusteeDetailsList))
+      Ok(trusteeSummaryView(requestObject, trusteeDetailsList))
     }) recover {
       case e: Exception =>
         Logger.error(s"[TrusteeController][showTrusteeSummaryPage] Get data from cache failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
@@ -194,7 +198,7 @@ class TrusteeController @Inject()(val messagesApi: MessagesApi,
   }
 
 	def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result = {
-		Ok(views.html.global_error(
+		Ok(globalErrorView(
 			"ers.global_errors.title",
 			"ers.global_errors.heading",
 			"ers.global_errors.message"

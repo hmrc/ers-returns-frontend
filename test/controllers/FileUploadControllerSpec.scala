@@ -16,8 +16,8 @@
 
 package controllers
 
+import akka.actor.ActorSystem
 import akka.stream.Materializer
-import helpers.ErsTestHelper
 import models._
 import models.upscan.Failed
 import org.joda.time.DateTime
@@ -25,24 +25,36 @@ import org.mockito.ArgumentMatchers.{eq => meq, _}
 import org.mockito.Mockito._
 import org.scalatest.Assertion
 import org.scalatestplus.mockito.MockitoSugar
-import org.scalatestplus.play.{OneAppPerSuite, PlaySpec}
-import play.api.Application
-import play.api.i18n.{Lang, Messages, MessagesApi}
-import play.api.inject.guice.GuiceApplicationBuilder
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import org.scalatestplus.play.PlaySpec
+import play.api.i18n
+import play.api.i18n.{MessagesApi, MessagesImpl}
 import play.api.mvc._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import services.{SessionService, UpscanService}
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
-import utils.{ERSFakeApplicationConfig, UpscanData}
+import utils.{ERSFakeApplicationConfig, ErsTestHelper, UpscanData}
+import views.html.{file_upload_errors, global_error, upscan_ods_file_upload}
 
-import scala.concurrent.Future
-import scala.concurrent.duration.Duration
+import scala.concurrent.{ExecutionContext, Future}
 
-class FileUploadControllerSpec extends PlaySpec with OneAppPerSuite
+class FileUploadControllerSpec extends PlaySpec
   with MockitoSugar with LegacyI18nSupport
-  with ERSFakeApplicationConfig with UpscanData with ErsTestHelper {
+  with ERSFakeApplicationConfig with UpscanData with ErsTestHelper with GuiceOneAppPerSuite {
+
+  val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
+    messagesActionBuilder,
+    DefaultActionBuilder(stubBodyParser[AnyContent]()),
+    cc.parsers,
+    fakeApplication.injector.instanceOf[MessagesApi],
+    cc.langs,
+    cc.fileMimeTypes,
+    ExecutionContext.global
+  )
+
+  implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
 
 	val testOptString: Option[String] = Some("test")
 	val schemeInfo: SchemeInfo = SchemeInfo(testOptString.get, DateTime.now, testOptString.get, testOptString.get, testOptString.get, testOptString.get)
@@ -52,15 +64,16 @@ class FileUploadControllerSpec extends PlaySpec with OneAppPerSuite
 
 	lazy val mockSessionService: SessionService = mock[SessionService]
 	lazy val mockUpscanService: UpscanService = mock[UpscanService]
+  val mockActorSystem: ActorSystem = app.injector.instanceOf[ActorSystem]
+  val globalErrorView: global_error = app.injector.instanceOf[global_error]
+  val fileUploadErrorsView: file_upload_errors = app.injector.instanceOf[file_upload_errors]
+  val upscanOdsFileUploadView: upscan_ods_file_upload = app.injector.instanceOf[upscan_ods_file_upload]
 
-	override lazy val app: Application = new GuiceApplicationBuilder().configure(config).build()
-	implicit lazy val materializer: Materializer = app.materializer
-	def messagesApi: MessagesApi = app.injector.instanceOf[MessagesApi]
-	implicit val messages: Messages = messagesApi.preferred(Seq(Lang.get("en").get))
 
+  implicit lazy val materializer: Materializer = app.materializer
 
 	object TestFileUploadController extends FileUploadController(
-		messagesApi, mockErsConnector, mockAuthConnector, mockSessionService, mockUpscanService, mockErsUtil, mockAppConfig
+		mockMCC, mockErsConnector, mockAuthConnector, mockSessionService, mockUpscanService, mockErsUtil, mockAppConfig, mockActorSystem, globalErrorView, fileUploadErrorsView, upscanOdsFileUploadView
 	)
 
 	when(mockErsUtil.fetch[CheckFileType](refEq("check-file-type"), any[String]())(any(),
@@ -77,7 +90,7 @@ class FileUploadControllerSpec extends PlaySpec with OneAppPerSuite
 
 	def checkGlobalErrorPage(result: Future[Result]): Assertion = {
 		status(result) mustBe OK
-		contentAsString(result) must include (messages("ers.global_errors.title"))
+		contentAsString(result) must include (testMessages("ers.global_errors.title"))
 	}
 
   "uploadFilePage" must {
@@ -160,14 +173,14 @@ class FileUploadControllerSpec extends PlaySpec with OneAppPerSuite
     when(mockSessionService.getCallbackRecord(any[Request[_]], any[HeaderCarrier]))
       .thenReturn(Future.successful(Some(uploadedSuccessfully)))
     when(mockErsConnector.removePresubmissionData(any())(any[ERSAuthData], any[HeaderCarrier]))
-      .thenReturn(Future.successful(HttpResponse(OK)))
+      .thenReturn(Future.successful(HttpResponse(OK, "")))
 
     "redirect the user" when {
       "Ers Meta Data is returned, callback record is uploaded successfully, remove presubmission data returns OK and validate file data returns OK" in {
         when(mockErsUtil.fetch[ErsMetaData](any(), any())(any(), any(), any()))
           .thenReturn(Future.successful(validErsMetaData))
         when(mockErsConnector.validateFileData(meq(uploadedSuccessfully), any[SchemeInfo])(any[ERSAuthData], any[Request[AnyRef]], any[HeaderCarrier]))
-          .thenReturn(Future.successful(HttpResponse(OK)))
+          .thenReturn(Future.successful(HttpResponse(OK, "")))
 
         setAuthMocks()
         val result = TestFileUploadController.validationResults()(request)
@@ -179,7 +192,7 @@ class FileUploadControllerSpec extends PlaySpec with OneAppPerSuite
         when(mockErsUtil.fetch[ErsMetaData](any(), any())(any(), any(), any()))
           .thenReturn(Future.successful(validErsMetaData))
         when(mockErsConnector.validateFileData(meq(uploadedSuccessfully), any[SchemeInfo])(any[ERSAuthData], any[Request[AnyRef]], any[HeaderCarrier]))
-          .thenReturn(Future.successful(HttpResponse(ACCEPTED)))
+          .thenReturn(Future.successful(HttpResponse(ACCEPTED, "")))
 
         setAuthMocks()
         val result = TestFileUploadController.validationResults()(request)
@@ -190,7 +203,7 @@ class FileUploadControllerSpec extends PlaySpec with OneAppPerSuite
     "return global error page" when {
       "validate file returns status code other than 200 OR 202" in {
         when(mockErsConnector.validateFileData(meq(uploadedSuccessfully), any[SchemeInfo])(any[ERSAuthData], any[Request[AnyRef]], any[HeaderCarrier]))
-          .thenReturn(Future.successful(HttpResponse(NO_CONTENT)))
+          .thenReturn(Future.successful(HttpResponse(NO_CONTENT, "")))
 
         setAuthMocks()
         val result = TestFileUploadController.validationResults()(request)
@@ -199,7 +212,7 @@ class FileUploadControllerSpec extends PlaySpec with OneAppPerSuite
 
       "remove presubmission data returns status code other than 200" in {
         when(mockErsConnector.removePresubmissionData(meq(validErsMetaData.schemeInfo))(any[ERSAuthData], any[HeaderCarrier]))
-          .thenReturn(Future.successful(HttpResponse(SERVICE_UNAVAILABLE)))
+          .thenReturn(Future.successful(HttpResponse(SERVICE_UNAVAILABLE, "")))
         setAuthMocks()
         val result = TestFileUploadController.validationResults()(request)
           checkGlobalErrorPage(result)
@@ -245,7 +258,7 @@ class FileUploadControllerSpec extends PlaySpec with OneAppPerSuite
 				setAuthMocks()
           failure() { result =>
             status(result) must equal(OK)
-            contentAsString(result) must include(messages("ers.global_errors.message"))
+            contentAsString(result) must include(testMessages("ers.global_errors.message"))
           }
       }
     }
@@ -272,7 +285,7 @@ class FileUploadControllerSpec extends PlaySpec with OneAppPerSuite
 				setAuthMocks()
         validationFailure() { result =>
           status(result) must be(OK)
-          contentAsString(result) must include(messages("file_upload_errors.title"))
+          contentAsString(result) must include(testMessages("file_upload_errors.title"))
         }
       }
     }

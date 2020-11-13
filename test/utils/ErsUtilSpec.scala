@@ -18,7 +18,6 @@ package utils
 
 import java.util.NoSuchElementException
 
-import helpers.ErsTestHelper
 import models._
 import models.upscan.UploadedSuccessfully
 import org.joda.time.DateTime
@@ -41,7 +40,7 @@ import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 import scala.language.postfixOps
 
-class ErsUtilSpec extends UnitSpec with MockitoSugar with BeforeAndAfterEach with OneAppPerSuite with ERSFakeApplicationConfig with ErsTestHelper {
+class ErsUtilSpec extends UnitSpec with MockitoSugar with BeforeAndAfterEach with ERSFakeApplicationConfig with ErsTestHelper {
 
   override implicit val hc: HeaderCarrier =  HeaderCarrier(sessionId = Some(SessionId("sessionId")))
 

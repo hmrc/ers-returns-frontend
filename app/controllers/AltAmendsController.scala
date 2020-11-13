@@ -20,7 +20,7 @@ import _root_.models._
 import config.ApplicationConfig
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
-import play.api.i18n.{I18nSupport, Messages, MessagesApi}
+import play.api.i18n.{I18nSupport, Messages}
 import play.api.mvc._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
@@ -30,11 +30,16 @@ import utils.ERSUtil
 import scala.concurrent._
 
 @Singleton
-class AltAmendsController @Inject()(val messagesApi: MessagesApi,
+class AltAmendsController @Inject()(val mcc: MessagesControllerComponents,
 																		val authConnector: DefaultAuthConnector,
 																		implicit val ersUtil: ERSUtil,
-																		implicit val appConfig: ApplicationConfig
-																	 ) extends FrontendController with Authenticator with I18nSupport {
+																		implicit val appConfig: ApplicationConfig,
+                                    alterationsActivityView: views.html.alterations_activity,
+                                    alterationsAmendsView: views.html.alterations_amends,
+                                    globalErrorView: views.html.global_error
+																	  ) extends FrontendController(mcc) with Authenticator with I18nSupport {
+
+  implicit val ec: ExecutionContext = mcc.executionContext
 
   def altActivityPage(): Action[AnyContent] = authorisedForAsync() {
     implicit user =>
@@ -51,7 +56,7 @@ class AltAmendsController @Inject()(val messagesApi: MessagesApi,
       }
     } yield {
 
-      Ok(views.html.alterations_activity(requestObject, altAmendsActivity.altActivity,
+      Ok(alterationsActivityView(requestObject, altAmendsActivity.altActivity,
         groupSchemeInfo.groupScheme.getOrElse(ersUtil.DEFAULT),
         RsFormMappings.altActivityForm.fill(altAmendsActivity)))
       }).recover {
@@ -74,7 +79,7 @@ class AltAmendsController @Inject()(val messagesApi: MessagesApi,
     ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
       RsFormMappings.altActivityForm.bindFromRequest.fold(
         errors => {
-          Future.successful(Ok(views.html.alterations_activity(requestObject, "", "", errors)))
+          Future.successful(Ok(alterationsActivityView(requestObject, "", "", errors)))
         },
         formData => {
           ersUtil.cache(ersUtil.altAmendsActivity, formData, requestObject.getSchemeReference).map { _ =>
@@ -106,7 +111,7 @@ class AltAmendsController @Inject()(val messagesApi: MessagesApi,
         case _: Throwable => None
       }
     } yield {
-      Ok(views.html.alterations_amends(requestObject, altAmends.getOrElse(AltAmends(None, None, None, None, None))))
+      Ok(alterationsAmendsView(requestObject, altAmends.getOrElse(AltAmends(None, None, None, None, None))))
     }
   }
 
@@ -148,7 +153,7 @@ class AltAmendsController @Inject()(val messagesApi: MessagesApi,
   }
 
   def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result = {
-		Ok(views.html.global_error(
+		Ok(globalErrorView(
 			"ers.global_errors.title",
 			"ers.global_errors.heading",
 			"ers.global_errors.message"

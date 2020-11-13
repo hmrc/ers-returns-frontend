@@ -16,6 +16,10 @@
 
 @import utils.ERSUtil
 @import config.ApplicationConfig
+@import uk.gov.hmrc.play.views.html.helpers.FormWithCSRF
+
+@this(form: FormWithCSRF)
+
 @(requestObject: RequestObject, csvFilesList: CsvFilesList)(implicit request: Request[AnyRef], flash: Flash, messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 @import views.html.templates._
 @schemeId = @{requestObject.getSchemeId}
@@ -35,8 +39,8 @@
         </div>
     }
 
-    @uk.gov.hmrc.play.views.html.helpers.form(action = routes.CheckCsvFilesController.checkCsvFilesPageSelected()) {
-        <div class="form-group @if(flash.get("csv-file-not-selected-error").isDefined){ form-field--error }">
+    @form(action = routes.CheckCsvFilesController.checkCsvFilesPageSelected()) {
+        <div class='form-group @if(flash.get("csv-file-not-selected-error").isDefined){ form-field--error }'>
             <fieldset>
                 <legend>
                     @header(messages("ers_check_csv_file.title"))
@@ -56,6 +60,6 @@
                 </div>
             </fieldset>
         </div>
-        <input role="button" id="continue" class="button" type="submit" value="@Html(messages("ers_check_csv_file.continue"))">
+        <input role="button" id="continue" class="button" type="submit" value='@Html(messages("ers_check_csv_file.continue"))'>
     }
 }

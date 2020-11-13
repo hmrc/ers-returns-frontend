@@ -14,9 +14,11 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.play.views.html.layouts
-
+@import uk.gov.hmrc.play.views.html.layouts.Article
 @import config.ApplicationConfig
+
+@this(article: Article)
+
 @()(implicit request: Request[_], messages: Messages, appConfig: ApplicationConfig)
 
 @anchor(text: String, url: String) = {<a href="@url">@text</a>}
@@ -35,5 +37,5 @@
     headerNav = Some(views.helpers.HeaderNav(title = Some(messages("ers.header")),
     showBetaLink = false,
     links = Some(signoutLink)))) {
-  @layouts.article(mainContent)
+  @article(mainContent)
 }

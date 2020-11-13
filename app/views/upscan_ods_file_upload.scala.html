@@ -16,9 +16,12 @@
 
 @import views.html.templates._
 @import views.html.includes.upscan_file_upload_form
-@import models.upscan.UpscanInitiateResponse
 
+@import models.upscan.UpscanInitiateResponse
 @import config.ApplicationConfig
+
+@this(config: ApplicationConfig)
+
 @(requestObject: RequestObject, upscanInitiateResponse: UpscanInitiateResponse)(implicit request: Request[AnyRef], messages: Messages, appConfig: ApplicationConfig)
 
 

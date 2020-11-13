@@ -17,38 +17,47 @@
 package controllers
 
 import akka.stream.Materializer
-import helpers.ErsTestHelper
 import models._
 import models.upscan._
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.mockito.{ArgumentMatchers, Mockito}
-import org.scalatestplus.play.OneAppPerSuite
-import play.api.Application
-import play.api.i18n.{Lang, Messages, MessagesApi}
-import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.mvc.{Request, Result}
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import play.api.{Application, i18n}
+import play.api.i18n.{Lang, MessagesApi, MessagesImpl}
+import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents, Request, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.test.UnitSpec
 import utils.Fixtures.ersRequestObject
-import utils.{ERSFakeApplicationConfig, Fixtures}
+import utils.{ERSFakeApplicationConfig, ErsTestHelper, Fixtures}
+import views.html.{check_csv_file, global_error}
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
-class CheckCsvFilesControllerSpec extends UnitSpec with ERSFakeApplicationConfig with OneAppPerSuite with ErsTestHelper {
+class CheckCsvFilesControllerSpec extends UnitSpec with ERSFakeApplicationConfig with ErsTestHelper with GuiceOneAppPerSuite{
 
-	override lazy val app: Application = new GuiceApplicationBuilder().configure(config).build()
+  val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
+    messagesActionBuilder,
+    DefaultActionBuilder(stubBodyParser[AnyContent]()),
+    cc.parsers,
+    fakeApplication.injector.instanceOf[MessagesApi],
+    cc.langs,
+    cc.fileMimeTypes,
+    ExecutionContext.global
+  )
+
+  implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
+
 	implicit lazy val mat: Materializer = app.materializer
-
-	lazy val messagesApi: MessagesApi = app.injector.instanceOf[MessagesApi]
-	implicit lazy val messages: Messages = messagesApi.preferred(Seq(Lang.get("en").get))
+  val globalErrorView: global_error = app.injector.instanceOf[global_error]
+  val checkCsvFileView: check_csv_file = app.injector.instanceOf[check_csv_file]
 
   "calling checkCsvFilesPage" should {
 
-    val checkCsvFilesController: CheckCsvFilesController = new CheckCsvFilesController(messagesApi, mockAuthConnector, mockErsUtil, mockAppConfig) {
+    val checkCsvFilesController: CheckCsvFilesController = new CheckCsvFilesController(mockMCC, mockAuthConnector, mockErsUtil, mockAppConfig, globalErrorView, checkCsvFileView) {
       override def showCheckCsvFilesPage()(implicit authContext: ERSAuthData,
 																					 request: Request[AnyRef],
 																					 hc: HeaderCarrier): Future[Result] = Future.successful(Ok)
@@ -64,10 +73,10 @@ class CheckCsvFilesControllerSpec extends UnitSpec with ERSFakeApplicationConfig
 
   "calling showCheckCsvFilesPage" should {
 
-		val checkCsvFilesController: CheckCsvFilesController = new CheckCsvFilesController(messagesApi, mockAuthConnector, mockErsUtil, mockAppConfig) {
+		val checkCsvFilesController: CheckCsvFilesController = new CheckCsvFilesController(mockMCC, mockAuthConnector, mockErsUtil, mockAppConfig, globalErrorView, checkCsvFileView) {
 
       when(mockErsUtil.remove(ArgumentMatchers.eq("check-csv-files"))(any(), any()))
-        .thenReturn(Future.successful(HttpResponse(OK)))
+        .thenReturn(Future.successful(HttpResponse(OK, "")))
     }
 
     "show CheckCsvFilesPage" in {
@@ -83,7 +92,7 @@ class CheckCsvFilesControllerSpec extends UnitSpec with ERSFakeApplicationConfig
 
   "calling checkCsvFilesPage" should {
 
-		val checkCsvFilesController: CheckCsvFilesController = new CheckCsvFilesController(messagesApi, mockAuthConnector, mockErsUtil, mockAppConfig) {
+		val checkCsvFilesController: CheckCsvFilesController = new CheckCsvFilesController(mockMCC, mockAuthConnector, mockErsUtil, mockAppConfig, globalErrorView, checkCsvFileView) {
       override def validateCsvFilesPageSelected()(implicit authContext: ERSAuthData,
 																									request: Request[AnyRef],
 																									hc: HeaderCarrier): Future[Result] = Future.successful(Ok)
@@ -99,7 +108,7 @@ class CheckCsvFilesControllerSpec extends UnitSpec with ERSFakeApplicationConfig
 
   "calling validateCsvFilesPageSelected" should {
 
-		val checkCsvFilesController: CheckCsvFilesController = new CheckCsvFilesController(messagesApi, mockAuthConnector, mockErsUtil, mockAppConfig) {
+		val checkCsvFilesController: CheckCsvFilesController = new CheckCsvFilesController(mockMCC, mockAuthConnector, mockErsUtil, mockAppConfig, globalErrorView, checkCsvFileView) {
       override def performCsvFilesPageSelected(formData: CsvFilesList)
 																							(implicit request: Request[AnyRef],
 																							 hc: HeaderCarrier): Future[Result] = Future.successful(Ok)
@@ -142,7 +151,7 @@ class CheckCsvFilesControllerSpec extends UnitSpec with ERSFakeApplicationConfig
 
     val mockListCsvFilesCallback: UpscanCsvFilesList = mock[UpscanCsvFilesList](Mockito.RETURNS_DEEP_STUBS)
 
-		val checkCsvFilesController: CheckCsvFilesController = new CheckCsvFilesController(messagesApi, mockAuthConnector, mockErsUtil, mockAppConfig) {
+		val checkCsvFilesController: CheckCsvFilesController = new CheckCsvFilesController(mockMCC, mockAuthConnector, mockErsUtil, mockAppConfig, globalErrorView, checkCsvFileView) {
       override def createCacheData(csvFilesList: List[CsvFiles]): UpscanCsvFilesList = mockListCsvFilesCallback
     }
 
@@ -205,7 +214,7 @@ class CheckCsvFilesControllerSpec extends UnitSpec with ERSFakeApplicationConfig
 
 			val result = await(checkCsvFilesController.performCsvFilesPageSelected(formData)(Fixtures.buildFakeRequestWithSessionIdCSOP("POST"), hc))
       contentAsString(result) shouldBe contentAsString(checkCsvFilesController.getGlobalErrorPage)
-      contentAsString(result) should include(messages("ers.global_errors.message"))
+      contentAsString(result) should include(testMessages("ers.global_errors.message"))
     }
 
     "direct to ers errors page if fetching request object fails fails" in {
@@ -223,14 +232,14 @@ class CheckCsvFilesControllerSpec extends UnitSpec with ERSFakeApplicationConfig
 
 			val result = await(checkCsvFilesController.performCsvFilesPageSelected(formData)(Fixtures.buildFakeRequestWithSessionIdCSOP("POST"), hc))
       contentAsString(result) shouldBe contentAsString(checkCsvFilesController.getGlobalErrorPage)
-      contentAsString(result) should include(messages("ers.global_errors.message"))
+      contentAsString(result) should include(testMessages("ers.global_errors.message"))
     }
 
   }
 
   "calling createCacheData" should {
 
-		val checkCsvFilesController: CheckCsvFilesController = new CheckCsvFilesController(messagesApi, mockAuthConnector, mockErsUtil, mockAppConfig)
+		val checkCsvFilesController: CheckCsvFilesController = new CheckCsvFilesController(mockMCC, mockAuthConnector, mockErsUtil, mockAppConfig, globalErrorView, checkCsvFileView)
 
     val formData: List[CsvFiles] = List(
       CsvFiles("file0", None),
@@ -258,7 +267,7 @@ class CheckCsvFilesControllerSpec extends UnitSpec with ERSFakeApplicationConfig
 
   "calling reloadWithError" should {
 
-		val checkCsvFilesController: CheckCsvFilesController = new CheckCsvFilesController(messagesApi, mockAuthConnector, mockErsUtil, mockAppConfig)
+		val checkCsvFilesController: CheckCsvFilesController = new CheckCsvFilesController(mockMCC, mockAuthConnector, mockErsUtil, mockAppConfig, globalErrorView, checkCsvFileView)
 
 		"reload same page, showing error" in {
       val result = await(checkCsvFilesController.reloadWithError())

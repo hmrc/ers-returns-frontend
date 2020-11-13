@@ -16,6 +16,9 @@
 
 @import utils.ERSUtil
 @import config.ApplicationConfig
+
+@this(config: ApplicationConfig)
+
 @(requestObject: RequestObject, dateSubmitted: String, bundle: String, taxYear: String, url: String)(implicit request: Request[AnyRef], messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 @schemeId = @{requestObject.getSchemeId}
 @schemeRef = @{requestObject.getSchemeReference}

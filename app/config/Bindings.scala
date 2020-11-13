@@ -21,7 +21,7 @@ import play.api.{Configuration, Environment}
 import uk.gov.hmrc.play.bootstrap.http.{DefaultHttpClient, HttpClient}
 import utils.{CountryCodes, CountryCodesImpl}
 
-class Bindings extends Module{
+class Bindings extends Module {
   override def bindings(environment: Environment, configuration: Configuration): Seq[Binding[_]] = {
     bindDeps()
   }

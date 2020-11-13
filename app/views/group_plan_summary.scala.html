@@ -17,6 +17,10 @@
 @import utils.ERSUtil
 @import config.ApplicationConfig
 @import utils.CountryCodes
+@import uk.gov.hmrc.play.views.html.helpers.FormWithCSRF
+
+@this(form: FormWithCSRF)
+
 @(requestObject: RequestObject, groupSchemeType: String, companies: CompanyDetailsList)(implicit request: Request[AnyRef], flash: Flash, messages: Messages, countryCodes: CountryCodes, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 @* Is a group scheme template *@
 @schemeId = @{requestObject.getSchemeId}
@@ -31,7 +35,7 @@
 	@header(ersUtil.getPageElement(schemeId, ersUtil.PAGE_GROUP_SUMMARY, "title"))
 
 	<div class="clear">
-		@uk.gov.hmrc.play.views.html.helpers.form(action = routes.GroupSchemeController.groupPlanSummaryContinue(schemeId)) {
+		@form(action = routes.GroupSchemeController.groupPlanSummaryContinue(schemeId)) {
 			@if(groupSchemeType == ersUtil.OPTION_MANUAL) {
 			<div class="panel panel-border-wide">
 				<a href="@routes.GroupSchemeController.manualCompanyDetailsPage()">@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_GROUP_SUMMARY, "add_company"))</a>

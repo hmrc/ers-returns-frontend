@@ -21,7 +21,7 @@ import javax.inject.{Inject, Singleton}
 import models._
 import models.upscan.{UploadedSuccessfully, UpscanCsvFilesCallback, UpscanCsvFilesCallbackList}
 import play.api.Logger
-import play.api.i18n.{I18nSupport, Messages, MessagesApi}
+import play.api.i18n.{I18nSupport, Messages}
 import play.api.mvc._
 import services.pdf.{ApachePdfContentsStreamer, ErsReceiptPdfBuilderService}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -30,15 +30,18 @@ import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import utils.ERSUtil
 
 import scala.collection.mutable.ListBuffer
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class PdfGenerationController @Inject()(val messagesApi: MessagesApi,
+class PdfGenerationController @Inject()(val mcc: MessagesControllerComponents,
 																				val authConnector: DefaultAuthConnector,
 																				val pdfBuilderService: ErsReceiptPdfBuilderService,
 																				implicit val ersUtil: ERSUtil,
-																				implicit val appConfig: ApplicationConfig
-																			 ) extends FrontendController with Authenticator with I18nSupport {
+																				implicit val appConfig: ApplicationConfig,
+                                        globalErrorView: views.html.global_error
+																			 ) extends FrontendController(mcc) with Authenticator with I18nSupport {
+
+  implicit val ec: ExecutionContext = mcc.executionContext
 
   def buildPdfForBundle(bundle: String, dateSubmitted: String): Action[AnyContent] = authorisedForAsync() {
     implicit user =>
@@ -99,7 +102,7 @@ class PdfGenerationController @Inject()(val messagesApi: MessagesApi,
   }
 
 	def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result = {
-		Ok(views.html.global_error(
+		Ok(globalErrorView(
 			"ers.global_errors.title",
 			"ers.global_errors.heading",
 			"ers.global_errors.message"

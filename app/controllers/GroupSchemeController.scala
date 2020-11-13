@@ -28,15 +28,21 @@ import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import utils._
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class GroupSchemeController @Inject()(val messagesApi: MessagesApi,
+class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
 																			val authConnector: DefaultAuthConnector,
 																			implicit val countryCodes: CountryCodes,
 																			implicit val ersUtil: ERSUtil,
-																			implicit val appConfig: ApplicationConfig
-																		 ) extends FrontendController with Authenticator with I18nSupport {
+																			implicit val appConfig: ApplicationConfig,
+                                      globalErrorView: views.html.global_error,
+                                      groupView: views.html.group,
+                                      manualCompanyDetailsView: views.html.manual_company_details,
+                                      groupPlanSummaryView: views.html.group_plan_summary
+																		 ) extends FrontendController(mcc) with Authenticator with I18nSupport {
+
+  implicit val ec: ExecutionContext = mcc.executionContext
 
   def manualCompanyDetailsPage(index: Int): Action[AnyContent] = authorisedForAsync() {
     implicit user =>
@@ -46,7 +52,7 @@ class GroupSchemeController @Inject()(val messagesApi: MessagesApi,
 
   def showManualCompanyDetailsPage(index: Int)(implicit authContext: ERSAuthData, request: Request[AnyContent]): Future[Result] = {
     ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).map { requestObject =>
-      Ok(views.html.manual_company_details(requestObject, index, RsFormMappings.companyDetailsForm))
+      Ok(manualCompanyDetailsView(requestObject, index, RsFormMappings.companyDetailsForm))
     }
   }
 
@@ -61,7 +67,7 @@ class GroupSchemeController @Inject()(val messagesApi: MessagesApi,
   def showManualCompanyDetailsSubmit(requestObject: RequestObject, index: Int)(implicit authContext: ERSAuthData, request: Request[AnyRef]): Future[Result] = {
     RsFormMappings.companyDetailsForm.bindFromRequest.fold(
       errors => {
-        Future(Ok(views.html.manual_company_details(requestObject, index, errors)))
+        Future(Ok(manualCompanyDetailsView(requestObject, index, errors)))
       },
       successful => {
         ersUtil.fetch[CompanyDetailsList](ersUtil.GROUP_SCHEME_COMPANIES, requestObject.getSchemeReference).flatMap { cachedCompaniesList =>
@@ -139,7 +145,7 @@ class GroupSchemeController @Inject()(val messagesApi: MessagesApi,
 
     } yield {
 
-      Ok(views.html.manual_company_details(requestObject, id, RsFormMappings.companyDetailsForm.fill(companyDetails)))
+      Ok(manualCompanyDetailsView(requestObject, id, RsFormMappings.companyDetailsForm.fill(companyDetails)))
 
     }) recover {
       case e: Exception =>
@@ -158,12 +164,12 @@ class GroupSchemeController @Inject()(val messagesApi: MessagesApi,
 
   def showGroupSchemePage(requestObject: RequestObject)(implicit authContext: ERSAuthData, request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
     ersUtil.fetch[GroupSchemeInfo](ersUtil.GROUP_SCHEME_CACHE_CONTROLLER, requestObject.getSchemeReference).map { groupSchemeInfo =>
-      Ok(views.html.group(requestObject, groupSchemeInfo.groupScheme, RsFormMappings.groupForm.fill(RS_groupScheme(groupSchemeInfo.groupScheme))))
+      Ok(groupView(requestObject, groupSchemeInfo.groupScheme, RsFormMappings.groupForm.fill(RS_groupScheme(groupSchemeInfo.groupScheme))))
     } recover {
       case e: Exception =>
         Logger.warn(s"[GroupSchemeController][showGroupSchemePage] Fetching GroupSchemeInfo from the cache failed: $e")
         val form = RS_groupScheme(Some(""))
-        Ok(views.html.group(requestObject, Some(ersUtil.DEFAULT), RsFormMappings.groupForm.fill(form)))
+        Ok(groupView(requestObject, Some(ersUtil.DEFAULT), RsFormMappings.groupForm.fill(form)))
     }
   }
 
@@ -176,14 +182,13 @@ class GroupSchemeController @Inject()(val messagesApi: MessagesApi,
   }
 
   def showGroupSchemeSelected(requestObject: RequestObject, scheme: String)(implicit authContext: ERSAuthData, request: Request[AnyRef]): Future[Result] = {
-    Logger.info(request.session.get("screenSchemeInfo").get.split(" - ").head)
     RsFormMappings.groupForm.bindFromRequest.fold(
       errors => {
         val correctOrder = errors.errors.map(_.key).distinct
         val incorrectOrderGrouped = errors.errors.groupBy(_.key).map(_._2.head).toSeq
         val correctOrderGrouped = correctOrder.flatMap(x => incorrectOrderGrouped.find(_.key == x))
         val firstErrors: Form[models.RS_groupScheme] = new Form[RS_groupScheme](errors.mapping, errors.data, correctOrderGrouped, errors.value)
-        Future.successful(Ok(views.html.group(requestObject, Some(""), firstErrors)))
+        Future.successful(Ok(groupView(requestObject, Some(""), firstErrors)))
       },
       formData => {
         val gsc: GroupSchemeInfo =
@@ -224,7 +229,7 @@ class GroupSchemeController @Inject()(val messagesApi: MessagesApi,
       requestObject <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
       compDetails   <- ersUtil.fetch[CompanyDetailsList](ersUtil.GROUP_SCHEME_COMPANIES, requestObject.getSchemeReference)
     } yield {
-      Ok(views.html.group_plan_summary(requestObject, ersUtil.OPTION_MANUAL, compDetails))
+      Ok(groupPlanSummaryView(requestObject, ersUtil.OPTION_MANUAL, compDetails))
     }) recover {
       case e: Exception =>
         Logger.error(s"[GroupSchemeController][showGroupPlanSummaryPage]Fetch group scheme companies before call to group plan summary page failed with exception ${e.getMessage}, " +
@@ -254,7 +259,7 @@ class GroupSchemeController @Inject()(val messagesApi: MessagesApi,
   }
 
 	def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result = {
-		Ok(views.html.global_error(
+		Ok(globalErrorView(
 			"ers.global_errors.title",
 			"ers.global_errors.heading",
 			"ers.global_errors.message"

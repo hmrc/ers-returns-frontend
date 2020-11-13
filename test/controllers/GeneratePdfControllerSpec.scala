@@ -19,33 +19,46 @@ package controllers
 import java.io.ByteArrayOutputStream
 
 import akka.stream.Materializer
-import helpers.ErsTestHelper
 import models._
 import models.upscan.{UploadId, UploadedSuccessfully, UpscanCsvFilesCallback, UpscanCsvFilesCallbackList}
 import org.joda.time.DateTime
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatestplus.play.OneAppPerSuite
-import play.api.Application
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import play.api.{Application, i18n}
 import play.api.http.Status
-import play.api.i18n.{Lang, Messages, MessagesApi}
+import play.api.i18n.{Lang, Messages, MessagesApi, MessagesImpl}
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import services.pdf.{ErsContentsStreamer, ErsReceiptPdfBuilderService}
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.test.UnitSpec
-import utils.ERSFakeApplicationConfig
+import utils.{ERSFakeApplicationConfig, ErsTestHelper}
 import utils.Fixtures._
+import views.html.global_error
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
-class GeneratePdfControllerSpec extends UnitSpec with ERSFakeApplicationConfig with ErsTestHelper with OneAppPerSuite {
+class GeneratePdfControllerSpec extends UnitSpec with ERSFakeApplicationConfig with ErsTestHelper with GuiceOneAppPerSuite {
 
-  override lazy val app: Application = new GuiceApplicationBuilder().configure(config).build()
+  val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
+    messagesActionBuilder,
+    DefaultActionBuilder(stubBodyParser[AnyContent]()),
+    cc.parsers,
+    fakeApplication.injector.instanceOf[MessagesApi],
+    cc.langs,
+    cc.fileMimeTypes,
+    ExecutionContext.global
+  )
+
+  implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
+
   implicit lazy val mat: Materializer = app.materializer
-  implicit lazy val messages: Messages = Messages(Lang("en"), app.injector.instanceOf[MessagesApi])
-	lazy val messagesApi: MessagesApi = app.injector.instanceOf[MessagesApi]
+  val globalErrorView: global_error = app.injector.instanceOf[global_error]
+
 
   lazy val pdfBuilderMock: ErsReceiptPdfBuilderService = mock[ErsReceiptPdfBuilderService]
   lazy val schemeInfo: SchemeInfo = SchemeInfo("XA1100000000000", DateTime.now, "1", "2016", "EMI", "EMI")
@@ -72,14 +85,14 @@ class GeneratePdfControllerSpec extends UnitSpec with ERSFakeApplicationConfig w
     "direct to errors page if fetch all res pdf throws exception" in {
       val controller = createController(fetchAllRes = false)
       val result = await(controller.generatePdf(ersRequestObject, "", "")(buildFakeUser, buildFakeRequestWithSessionIdCSOP("GET"), hc))
-      contentAsString(result) should include(messages("ers.global_errors.message"))
+      contentAsString(result) should include(testMessages("ers.global_errors.message"))
       contentAsString(result) shouldBe contentAsString(createController().getGlobalErrorPage)
     }
 
     "direct to errors page if get all data res pdf throws exception" in {
       val controller = createController(getAllDataRes = false)
       val result = await(controller.generatePdf(ersRequestObject, "", "")(buildFakeUser, buildFakeRequestWithSessionIdCSOP("GET"), hc))
-      contentAsString(result) should include(messages("ers.global_errors.message"))
+      contentAsString(result) should include(testMessages("ers.global_errors.message"))
       contentAsString(result) shouldBe contentAsString(createController().getGlobalErrorPage)
     }
 
@@ -104,7 +117,7 @@ class GeneratePdfControllerSpec extends UnitSpec with ERSFakeApplicationConfig w
   }
 
   def createController(fetchAllRes: Boolean = true, getAllDataRes: Boolean = true, isNilReturn: Boolean = true, fileTypeCSV: Boolean = true
-											): PdfGenerationController = new PdfGenerationController(messagesApi, mockAuthConnector, pdfBuilderMock, mockErsUtil, mockAppConfig) {
+											): PdfGenerationController = new PdfGenerationController(mockMCC, mockAuthConnector, pdfBuilderMock, mockErsUtil, mockAppConfig, globalErrorView) {
     val byteArrayOutputStream: ByteArrayOutputStream = mock[ByteArrayOutputStream]
     val csvFilesCallBack: UpscanCsvFilesCallback = UpscanCsvFilesCallback(UploadId("uploadId"), "file0", UploadedSuccessfully("name", "downloadUrl"))
     val csvFilesCallbackList: UpscanCsvFilesCallbackList = UpscanCsvFilesCallbackList(List(csvFilesCallBack))

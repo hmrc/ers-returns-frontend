@@ -18,35 +18,40 @@ package controllers
 
 import config.ApplicationConfig
 import javax.inject.{Inject, Singleton}
-import play.api.i18n.{I18nSupport, Messages, MessagesApi}
-import play.api.mvc.{Action, AnyContent}
+import play.api.i18n.{I18nSupport}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import utils.ERSUtil
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class ApplicationController @Inject()(val messagesApi: MessagesApi,
+class ApplicationController @Inject()(val mcc: MessagesControllerComponents,
 																			val authConnector: DefaultAuthConnector,
 																			implicit val ersUtil: ERSUtil,
-																			implicit val appConfig: ApplicationConfig
-																		 ) extends FrontendController with Authenticator with I18nSupport {
+																			implicit val appConfig: ApplicationConfig,
+																		  unauthorisedView: views.html.unauthorised,
+																			signedOutView: views.html.signedOut,
+																			notAuthorisedView: views.html.not_authorised
+																		 ) extends FrontendController(mcc) with Authenticator with I18nSupport {
+
+	implicit val ec: ExecutionContext = mcc.executionContext
 
   def unauthorised(): Action[AnyContent] = Action {
     implicit request =>
-      Ok(views.html.unauthorised())
+      Unauthorized(unauthorisedView())
   }
 
 	def notAuthorised(): Action[AnyContent] = authorisedForAsync() {
 		implicit user =>
 			implicit request =>
-				Future.successful(Ok(views.html.not_authorised.render(request, request2Messages, appConfig)))
+				Future.successful(Unauthorized(notAuthorisedView.render(request, request2Messages, appConfig)))
 	}
 
 	def timedOut(): Action[AnyContent] = Action {
 		implicit request =>
 			val loginScreenUrl = appConfig.portalDomain
-			Ok(views.html.signedOut(loginScreenUrl))
+			Ok(signedOutView(loginScreenUrl))
 	}
 }

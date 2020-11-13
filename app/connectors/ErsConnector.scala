@@ -26,7 +26,8 @@ import models.upscan.UploadedSuccessfully
 import play.api.Logger
 import play.api.libs.json.{JsObject, JsValue}
 import play.api.mvc.Request
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpReads, HttpResponse}
+import uk.gov.hmrc.http.HttpReads.Implicits
 import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
 import play.api.http.Status._
 import utils.ERSUtil
@@ -43,6 +44,7 @@ class ErsConnector @Inject()(val http: DefaultHttpClient,
   lazy val metrics: Metrics = ersUtil
 	lazy val ersUrl: String = appConfig.ersUrl
 	lazy val validatorUrl: String = appConfig.validatorUrl
+  implicit val rds: HttpReads[HttpResponse] = Implicits.readRaw
 
   def connectToEtmpSapRequest(schemeRef: String)(implicit authContext: ERSAuthData, hc: HeaderCarrier): Future[String] = {
     val empRef: String = authContext.empRef.encodedValue
@@ -94,12 +96,17 @@ class ErsConnector @Inject()(val http: DefaultHttpClient,
     Logger.debug("validateFileData: Call to Validator: " + (System.currentTimeMillis() / 1000))
     http.POST(url, ValidatorData(callbackData, schemeInfo)).map { res =>
       metrics.ersConnector(System.currentTimeMillis() - startTime, TimeUnit.MILLISECONDS)
-      res
+      res.status match {
+        case OK         => res
+        case ACCEPTED   => res
+        case NO_CONTENT => res
+        case _ => throw new Exception(s"Received status code ${res.status} from file validator")
+      }
     }.recover {
       case e: Exception =>
         Logger.error(s"validateFileData: Validate file data failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
         metrics.ersConnector(System.currentTimeMillis() - startTime, TimeUnit.MILLISECONDS)
-        HttpResponse(BAD_REQUEST)
+        HttpResponse(BAD_REQUEST, "")
     }
   }
 
@@ -107,10 +114,17 @@ class ErsConnector @Inject()(val http: DefaultHttpClient,
                          (implicit authContext: ERSAuthData, request: Request[AnyRef], hc: HeaderCarrier): Future[HttpResponse] = {
     val empRef: String = authContext.empRef.encodedValue
     val url: String = s"$validatorUrl/ers/$empRef/process-csv-file"
-    http.POST(url, CsvValidatorData(callbackData, schemeInfo)) recover {
+    http.POST(url, CsvValidatorData(callbackData, schemeInfo)).map { res =>
+      res.status match {
+        case OK         => res
+        case ACCEPTED   => res
+        case NO_CONTENT => res
+        case _ => throw new Exception(s"Received status code ${res.status} from file validator")
+      }
+    } recover {
       case e: Exception =>
 				Logger.error(s"validateCsvFileData: Validate file data failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
-				HttpResponse(BAD_REQUEST)
+				HttpResponse(BAD_REQUEST, "")
 		}
   }
 

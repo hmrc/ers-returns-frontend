@@ -20,20 +20,37 @@ import java.io.InputStream
 
 import akka.stream.Materializer
 import org.scalatestplus.play.OneServerPerSuite
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Play.current
+import play.api.i18n.{Messages, MessagesApi, MessagesImpl}
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.{Application, Environment, Play}
+import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents}
+import play.api.test.Helpers.stubBodyParser
+import play.api.{Application, Environment, Play, i18n}
 import uk.gov.hmrc.play.test.UnitSpec
 
-class CountryCodesSpec extends UnitSpec with OneServerPerSuite with ERSFakeApplicationConfig {
+import scala.concurrent.ExecutionContext
 
-  override lazy val app: Application = new GuiceApplicationBuilder().configure(config).build()
-	lazy val appEnvironment: Environment = app.injector.instanceOf[Environment]
+class CountryCodesSpec extends UnitSpec with ERSFakeApplicationConfig with ErsTestHelper with GuiceOneAppPerSuite {
+
+  val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
+    messagesActionBuilder,
+    DefaultActionBuilder(stubBodyParser[AnyContent]()),
+    cc.parsers,
+    fakeApplication.injector.instanceOf[MessagesApi],
+    cc.langs,
+    cc.fileMimeTypes,
+    ExecutionContext.global
+  )
+
+  implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
+  implicit lazy val messages: Messages = testMessages.messages
+  lazy val appEnvironment: Environment = app.injector.instanceOf[Environment]
 	implicit lazy val mat: Materializer = app.materializer
 
   object TestCountryCodes extends CountryCodes {
 		override def environment: Environment = appEnvironment
-    override val jsonInputStream: Option[InputStream] = Play.application.resourceAsStream("country-code-test.json")
+    override val jsonInputStream: Option[InputStream] = app.resourceAsStream("country-code-test.json")
   }
 
 	trait Setup {

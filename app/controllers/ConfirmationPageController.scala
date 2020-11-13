@@ -24,8 +24,8 @@ import config.ApplicationConfig
 import connectors.ErsConnector
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
-import play.api.i18n.{I18nSupport, Messages, MessagesApi}
-import play.api.mvc.{Action, AnyContent, Request, Result}
+import play.api.i18n.{I18nSupport, Messages}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request, Result}
 import services.audit.AuditEvents
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
@@ -33,16 +33,20 @@ import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import utils.SessionKeys.{BUNDLE_REF, DATE_TIME_SUBMITTED}
 import utils._
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class ConfirmationPageController @Inject()(val messagesApi: MessagesApi,
+class ConfirmationPageController @Inject()(val mcc: MessagesControllerComponents,
 																					 val ersConnector: ErsConnector,
 																					 val authConnector: DefaultAuthConnector,
 																					 val auditEvents: AuditEvents,
 																					 implicit val ersUtil: ERSUtil,
-																					 implicit val appConfig: ApplicationConfig
-																					) extends FrontendController with Authenticator with I18nSupport {
+																					 implicit val appConfig: ApplicationConfig,
+                                           globalErrorView: views.html.global_error,
+                                           confirmationView: views.html.confirmation
+                                          ) extends FrontendController(mcc) with Authenticator with I18nSupport {
+
+  implicit val ec: ExecutionContext = mcc.executionContext
 
   def confirmationPage(): Action[AnyContent] = authorisedForAsync() {
     implicit authContext: ERSAuthData =>
@@ -85,7 +89,7 @@ class ConfirmationPageController @Inject()(val messagesApi: MessagesApi,
         ersUtil.fetch[ErsMetaData](ersUtil.ersMetaData, schemeRef).flatMap { all =>
           Logger.info(s"[ConfirmationPageController][showConfirmationPage] Preventing resubmission of confirmation page, timestamp: ${System.currentTimeMillis()}.")
 
-          Future(Ok(views.html.confirmation(requestObject, sessionDateTimeSubmitted, sessionBundleRef, all.schemeInfo.taxYear, url)))
+          Future(Ok(confirmationView(requestObject, sessionDateTimeSubmitted, sessionBundleRef, all.schemeInfo.taxYear, url)))
         }
       }
     } recoverWith {
@@ -131,7 +135,7 @@ class ConfirmationPageController @Inject()(val messagesApi: MessagesApi,
           val url: String = appConfig.portalDomain
 
           ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).map { requestObject =>
-            Ok(views.html.confirmation(requestObject, dateTimeSubmitted, bundle, all.schemeInfo.taxYear, url))
+            Ok(confirmationView(requestObject, dateTimeSubmitted, bundle, all.schemeInfo.taxYear, url))
 							.withSession(request.session + (BUNDLE_REF -> bundle) + (DATE_TIME_SUBMITTED -> dateTimeSubmitted))
           }
         case _ =>
@@ -146,7 +150,7 @@ class ConfirmationPageController @Inject()(val messagesApi: MessagesApi,
   }
 
 	def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result = {
-		Ok(views.html.global_error(
+		Ok(globalErrorView(
 			"ers.global_errors.title",
 			"ers.global_errors.heading",
 			"ers.global_errors.message"

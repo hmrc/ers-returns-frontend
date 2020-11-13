@@ -21,6 +21,7 @@ import javax.inject.{Inject, Singleton}
 import models.upscan.{PreparedUpload, UpscanInitiateRequest, UpscanInitiateResponse}
 import play.api.http.HeaderNames
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
 
 import scala.concurrent.{ExecutionContext, Future}

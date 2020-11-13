@@ -19,11 +19,16 @@ package controllers
 import com.google.inject.Inject
 import config.ApplicationConfig
 import play.api.i18n.{I18nSupport, Lang, MessagesApi}
-import play.api.mvc.{Action, AnyContent, Controller}
+import play.api.mvc.{Action, AnyContent, Controller, MessagesControllerComponents}
+import uk.gov.hmrc.play.bootstrap.controller.FrontendController
+
+import scala.concurrent.ExecutionContext
 
 class LanguageSwitchController @Inject() (appConfig: ApplicationConfig,
-																					implicit val messagesApi: MessagesApi
-                                         ) extends Controller with I18nSupport {
+                                          val mcc: MessagesControllerComponents
+                                         ) extends FrontendController(mcc) with I18nSupport {
+
+  implicit val ec: ExecutionContext = mcc.executionContext
 
   private def fallbackURL: String = routes.ReturnServiceController.hmacCheck().url
 
