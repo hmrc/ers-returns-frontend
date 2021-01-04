@@ -14,7 +14,6 @@ lazy val appDependencies: Seq[ModuleID] = ???
 lazy val plugins: Seq[Plugins] = Seq(play.sbt.PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin, SbtArtifactory)
 lazy val playSettings: Seq[Setting[_]] = Seq.empty
 lazy val testPhases = TestPhases
-lazy val repositories = Repositories
 
 lazy val scoverageSettings = {
   Seq(
@@ -34,7 +33,7 @@ lazy val microservice = Project(appName, file("."))
     scalaSettings,
     defaultSettings(),
     targetJvm := "jvm-1.8",
-    scalaVersion := "2.11.12",
+    scalaVersion := "2.12.12",
     libraryDependencies ++= AppDependencies.apply(),
     parallelExecution in Test := false,
     fork in Test := false,
@@ -44,7 +43,6 @@ lazy val microservice = Project(appName, file("."))
     TwirlKeys.templateImports +=
       "models.upscan.{UpscanInitiateResponse, UpscanCsvFilesCallbackList, UpscanCsvFilesCallback}",
     routesImport += "models.upscan.UploadId",
-    Repositories.playPublishingSettings,
     inConfig(TemplateTest)(Defaults.testSettings),
     inConfig(TemplateItTest)(Defaults.itSettings),
     PlayKeys.playDefaultPort := 9290,

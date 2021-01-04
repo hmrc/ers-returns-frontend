@@ -8,7 +8,7 @@ object AppDependencies {
     guice,
     ws,
     "uk.gov.hmrc" %% "play-partials" % "6.11.0-play-26",
-    "uk.gov.hmrc" %% "bootstrap-play-26" % "2.1.0",
+    "uk.gov.hmrc" %% "bootstrap-play-26" % "2.3.0",
     "uk.gov.hmrc" %% "govuk-template" % "5.56.0-play-26",
     "uk.gov.hmrc" %% "play-ui" % "8.15.0-play-26",
     "uk.gov.hmrc" %% "domain" % "5.10.0-play-26",
@@ -30,9 +30,9 @@ object AppDependencies {
   object Test {
     def apply(): Seq[ModuleID] = new TestDependencies {
       override lazy val test = Seq(
-        "uk.gov.hmrc" %% "hmrctest" % "3.9.0-play-26" % scope,
+        "uk.gov.hmrc" %% "hmrctest" % "3.10.0-play-26" % scope,
         "org.scalatest" %% "scalatest" % "3.0.9" % scope,
-        "org.scalatestplus.play" %% "scalatestplus-play" % "2.0.1" % scope,
+        "org.scalatestplus.play" %% "scalatestplus-play" % "5.1.0" % scope,
         "org.pegdown" % "pegdown" % "1.6.0" % scope,
         "org.jsoup" % "jsoup" % "1.9.2" % scope,
         "com.typesafe.play" %% "play-test" % PlayVersion.current % scope,
