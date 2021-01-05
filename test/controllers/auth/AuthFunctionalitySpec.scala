@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,6 @@ import uk.gov.hmrc.domain.EmpRef
 import uk.gov.hmrc.play.test.UnitSpec
 import utils.ErsTestHelper
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class AuthFunctionalitySpec extends UnitSpec with ErsTestHelper with DefaultAwaitTimeout {
