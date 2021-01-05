@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,13 +33,12 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.http.cache.client.CacheMap
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.concurrent.ExecutionContext.Implicits.global
 
 @Singleton
 class ERSUtil @Inject()(val sessionService: SessionService,
 												val shortLivedCache: ERSShortLivedCache,
 											  val appConfig: ApplicationConfig
-											 ) extends PageBuilder with JsonParser with Metrics with HMACUtil {
+											 )(implicit val ec: ExecutionContext) extends PageBuilder with JsonParser with Metrics with HMACUtil {
 
 	val largeFileStatus = "largefiles"
 	val savedStatus = "saved"
@@ -100,10 +99,10 @@ class ERSUtil @Inject()(val sessionService: SessionService,
 		shortLivedCache.cache[T](cacheId, key, body)
 	}
 
-	def remove(cacheId: String)(implicit hc: HeaderCarrier, executionContext: ExecutionContext): Future[HttpResponse] =
+	def remove(cacheId: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] =
 		shortLivedCache.remove(cacheId)
 
-	def fetch[T](key:String)(implicit hc:HeaderCarrier, ec:ExecutionContext, formats: json.Format[T], request: Request[AnyRef]): Future[T] = {
+	def fetch[T](key:String)(implicit hc:HeaderCarrier, ec: ExecutionContext, formats: json.Format[T], request: Request[AnyRef]): Future[T] = {
 		shortLivedCache.fetchAndGetEntry[JsValue](getCacheId, key).map{ res =>
 			res.get.as[T]
 		}recover{
@@ -116,7 +115,7 @@ class ERSUtil @Inject()(val sessionService: SessionService,
 		}
 	}
 
-	def fetch[T](key: String, cacheId: String)(implicit hc: HeaderCarrier,  formats: json.Format[T], request: Request[AnyRef]): Future[T] = {
+	def fetch[T](key: String, cacheId: String)(implicit hc: HeaderCarrier, formats: json.Format[T], request: Request[AnyRef]): Future[T] = {
 		val startTime = System.currentTimeMillis()
 		shortLivedCache.fetchAndGetEntry[JsValue](cacheId, key).map { res =>
 			cacheTimeFetch(System.currentTimeMillis() - startTime, TimeUnit.MILLISECONDS)

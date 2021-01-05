@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,11 +22,10 @@ import models.upscan.{NotStarted, UploadStatus, UploadedSuccessfully}
 import play.api.mvc.Request
 import uk.gov.hmrc.http.HeaderCarrier
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 
-class SessionService @Inject()(sessionCache: ERSFileValidatorSessionCache) {
+class SessionService @Inject()(sessionCache: ERSFileValidatorSessionCache)(implicit ec: ExecutionContext) {
 
   val CALCULATION_RESULTS_KEY: String = "calculation_results_key"
   val CALLBACK_DATA_KEY = "callback_data_key"

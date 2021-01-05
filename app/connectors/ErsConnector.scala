@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,14 +32,13 @@ import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
 import play.api.http.Status._
 import utils.ERSUtil
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class ErsConnector @Inject()(val http: DefaultHttpClient,
 														 ersUtil: ERSUtil,
 														 appConfig: ApplicationConfig
-														) {
+														)(implicit ec: ExecutionContext) {
 
   lazy val metrics: Metrics = ersUtil
 	lazy val ersUrl: String = appConfig.ersUrl
