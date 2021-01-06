@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,6 @@ import utils.{ERSFakeApplicationConfig, ERSUtil, ErsTestHelper, Fixtures, Upscan
 import views.html.{global_error, summary}
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.concurrent.ExecutionContext.Implicits.global
 
 class SummaryDeclarationControllerSpec extends UnitSpec with ERSFakeApplicationConfig with MockitoSugar with ErsTestHelper with UpscanData with GuiceOneAppPerSuite {
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,20 +24,23 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import org.scalatestplus.play.PlaySpec
+import play.api.mvc.{Request, AnyContent}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.http.logging.SessionId
+import utils.ErsTestHelper
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext.Implicits.global
 
-class SessionServiceSpec extends PlaySpec with GuiceOneAppPerSuite with ScalaFutures with MockitoSugar {
+class SessionServiceSpec extends PlaySpec with GuiceOneAppPerSuite with ScalaFutures with MockitoSugar  {
 
   val mockSessionCache: ERSFileValidatorSessionCache = mock[ERSFileValidatorSessionCache]
 	val testSessionService = new SessionService(mockSessionCache)
 
   val sessionId = "sessionId"
-  implicit val request = FakeRequest()
+  implicit val request: Request[AnyContent] = FakeRequest()
   implicit val hc: HeaderCarrier = HeaderCarrier().copy(sessionId = Some(SessionId(sessionId)))
 
   "createCallbackRecord" must {

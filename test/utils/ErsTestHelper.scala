@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,10 +41,10 @@ trait ErsTestHelper extends MockitoSugar with AuthHelper with ERSFakeApplication
 
 	val messagesActionBuilder: MessagesActionBuilder = new DefaultMessagesActionBuilderImpl(stubBodyParser[AnyContent](), stubMessagesApi())
 	val cc: ControllerComponents = stubControllerComponents()
-	implicit val request = FakeRequest()
+	implicit val request: FakeRequest[AnyContent] = FakeRequest()
 
 	implicit val hc: HeaderCarrier = HeaderCarrier()
-	implicit val ec: ExecutionContext = ExecutionContext.Implicits.global
+	implicit val ec: ExecutionContext = cc.executionContext
 
 	val OPTION_YES = "1"
 	val OPTION_NO = "2"
