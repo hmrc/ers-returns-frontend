@@ -9,13 +9,13 @@ object AppDependencies {
     ws,
     "uk.gov.hmrc" %% "play-partials" % "6.11.0-play-26",
     "uk.gov.hmrc" %% "bootstrap-play-26" % "2.3.0",
-    "uk.gov.hmrc" %% "govuk-template" % "5.56.0-play-26",
-    "uk.gov.hmrc" %% "play-ui" % "8.19.0-play-26",
+    "uk.gov.hmrc" %% "govuk-template" % "5.61.0-play-26",
+    "uk.gov.hmrc" %% "play-ui" % "8.21.0-play-26",
     "uk.gov.hmrc" %% "domain" % "5.10.0-play-26",
     "uk.gov.hmrc" %% "http-caching-client" % "9.2.0-play-26",
-    "uk.gov.hmrc" %% "play-language" % "4.5.0-play-26",
+    "uk.gov.hmrc" %% "play-language" % "4.7.0-play-26",
     "uk.gov.hmrc" %% "auth-client" % "3.2.0-play-26",
-    "uk.gov.hmrc" %% "time" % "3.9.0",
+    "uk.gov.hmrc" %% "time" % "3.19.0",
     "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.7",
     "org.apache.pdfbox" % "pdfbox" % "1.8.16",
     "org.apache.pdfbox" % "xmpbox" % "1.8.16",
@@ -30,7 +30,7 @@ object AppDependencies {
   object Test {
     def apply(): Seq[ModuleID] = new TestDependencies {
       override lazy val test = Seq(
-        "uk.gov.hmrc" %% "hmrctest" % "3.9.0-play-26" % scope,
+        "uk.gov.hmrc" %% "hmrctest" % "3.10.0-play-26" % scope,
         "org.scalatest" %% "scalatest" % "3.0.9" % scope,
         "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.3" % scope,
         "org.pegdown" % "pegdown" % "1.6.0" % scope,
