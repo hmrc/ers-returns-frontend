@@ -101,6 +101,16 @@ article .help-notice {
 
 #choose-file-button, #file-name {float:left; display:none;}
 
+#start-button {
+    color: white;
+    font-weight: bolder;
+    font-size: 1.2em;
+}
+
+#icon-pointer {
+    padding-left: 10px;
+}
+
 .button.choose-file-button {background-color:#DEE0E2; box-shadow: 0 2px 0 #6F777B; color:black;}
 .button.choose-file-button:hover, .button.choose-file-button:focus {background-color:#B2B4B7;}
 .button.choose-file-button:focus {outline:3px solid #FFBF47;}
