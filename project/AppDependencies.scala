@@ -7,14 +7,14 @@ object AppDependencies {
   val compile: Seq[ModuleID] = Seq(
     guice,
     ws,
-    "uk.gov.hmrc" %% "play-partials" % "6.11.0-play-26",
+    "uk.gov.hmrc" %% "play-partials" % "7.1.0-play-26",
     "uk.gov.hmrc" %% "bootstrap-play-26" % "2.3.0",
     "uk.gov.hmrc" %% "govuk-template" % "5.61.0-play-26",
     "uk.gov.hmrc" %% "play-ui" % "8.21.0-play-26",
     "uk.gov.hmrc" %% "domain" % "5.10.0-play-26",
     "uk.gov.hmrc" %% "http-caching-client" % "9.2.0-play-26",
-    "uk.gov.hmrc" %% "play-language" % "4.7.0-play-26",
-    "uk.gov.hmrc" %% "auth-client" % "3.2.0-play-26",
+    "uk.gov.hmrc" %% "play-language" % "4.10.0-play-26",
+    "uk.gov.hmrc" %% "auth-client" % "3.3.0-play-26",
     "uk.gov.hmrc" %% "time" % "3.19.0",
     "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.7",
     "org.apache.pdfbox" % "pdfbox" % "1.8.16",
@@ -36,7 +36,7 @@ object AppDependencies {
         "org.pegdown" % "pegdown" % "1.6.0" % scope,
         "org.jsoup" % "jsoup" % "1.9.2" % scope,
         "com.typesafe.play" %% "play-test" % PlayVersion.current % scope,
-        "org.mockito" % "mockito-core" % "3.4.6" % scope,
+        "org.mockito" % "mockito-core" % "3.7.7" % scope,
         "com.github.tomakehurst" % "wiremock-standalone" % "2.27.2" % scope
       )
     }.test
