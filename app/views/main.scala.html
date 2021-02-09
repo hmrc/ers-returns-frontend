@@ -32,16 +32,7 @@
 @import layouts._
 
 @head = {
-    @if(applicationConfig.googleTagManagerId != "N/A") {
-        <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-                    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-                j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-                'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-        })(window,document,'script','dataLayer','@applicationConfig.googleTagManagerId');
-        </script>
-    }
-
-    @uiLayouts.head(linkElem = linkElement, headScripts = None)
+    @uiLayouts.headWithTrackingConsent(linkElem = linkElement, headScripts = None)
     <meta name="format-detection" content="telephone=no"/>
 }
 
@@ -50,12 +41,6 @@
 }
 
 @insideHeader = {
-    @if(applicationConfig.googleTagManagerId != "N/A") {
-        <noscript>
-            <iframe src="https://www.googletagmanager.com/ns.html?id=@applicationConfig.googleTagManagerId" height="0" width="0" style="display: none;
-                visibility: hidden"></iframe>
-        </noscript>
-    }
 
 	@if(headerNav.isDefined) {
 	    @uiLayouts.header_nav(
@@ -82,8 +67,8 @@
 
 @bodyEnd = {
     @uiLayouts.footer(
-        analyticsToken = Option(applicationConfig.analyticsToken),
-        analyticsHost = applicationConfig.analyticsHost,
+        analyticsToken = None,
+        analyticsHost = "",
         ssoUrl = None,
         scriptElem = scriptElement,
         gaCalls = None
