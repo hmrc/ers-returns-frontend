@@ -1,18 +1,18 @@
 @*
- * Copyright 2021 HM Revenue & Customs
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *@
+* Copyright 2021 HM Revenue & Customs
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*     http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*@
 
 @import config.ApplicationConfig
 @import utils.ERSUtil
@@ -22,6 +22,7 @@
 
 @(requestObject: RequestObject, reportableEvents: String, fileType: String, filename: String, fileCount: Int = 0, groupScheme: String, schemeOrganiser: SchemeOrganiserDetails, companies: CompanyDetailsList, altAmendsActivity: String, altAmends: AlterationAmends, trustees: TrusteeDetailsList)(implicit request: Request[AnyRef], flash: Flash, messages: Messages, countryCodes: CountryCodes, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 @schemeId = @{requestObject.getSchemeId}
+@fileNameMsg = @{if (fileCount == 1) {messages("ers_summary_declaration.file_name")} else {messages("ers_summary_declaration.file_names")}}
 
 @import views.html.templates._
 
@@ -29,128 +30,162 @@
 
 @ers_main(title = messages("ers.summary.page_title"), scripts) {
 
-	@reference(requestObject.getPageTitle)
+    @reference(requestObject.getPageTitle)
 
-	@if(schemeId == ersUtil.SCHEME_EMI || schemeId == ersUtil.SCHEME_OTHER) {
-	<p class="font-xsmall"><a href="@ersUtil.getPageBackLink(schemeId, ersUtil.PAGE_SUMMARY_DECLARATION, groupScheme)" class="link-back">@Html(messages("ers.back"))</a></p>
-	} else {
-	<p class="font-xsmall"><a href="@ersUtil.getPageBackLink(schemeId, ersUtil.PAGE_SUMMARY_DECLARATION, altAmendsActivity)" class="link-back">@Html(messages("ers.back"))</a></p>
-	}
+    @if(schemeId == ersUtil.SCHEME_EMI || schemeId == ersUtil.SCHEME_OTHER) {
+        <p class="font-xsmall"><a href="@ersUtil.getPageBackLink(schemeId, ersUtil.PAGE_SUMMARY_DECLARATION, groupScheme)" class="link-back">@Html(messages("ers.back"))</a></p>
+    } else {
+        <p class="font-xsmall"><a href="@ersUtil.getPageBackLink(schemeId, ersUtil.PAGE_SUMMARY_DECLARATION, altAmendsActivity)" class="link-back">@Html(messages("ers.back"))</a></p>
+    }
 
-	@header(messages("ers_summary_declaration.title"))
+    @header(messages("ers_summary_declaration.title"))
 
-	<table>
-	  <thead>
-		<tr>
-		  <th scope="col" id="summary-declaration-col-section">@Html(messages("ers_summary_declaration.section"))</th>
-		  <th scope="col" id="summary-declaration-col-answer">@Html(messages("ers_summary_declaration.your_answers"))</th>
-		  <th scope="col" id="summary-declaration-col-action"></th>
-		</tr>
-	  </thead>
-	  <tbody>
-		<tr>
-		  <td class="summary-declaration-section-text-align">@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_CHOOSE, "question"))</td>
-		  <td class="summary-declaration-text-align">
-			@Html(reportableEvents match {
-				case ersUtil.OPTION_YES => messages("ers.yes")
-				case ersUtil.OPTION_NO => messages("ers.no")
-			})
-		  </td>
-		  <td class="summary-declaration-text-align"><a href="@routes.ReportableEventsController.reportableEventsPage()">@Html(messages("ers_summary_declaration.change_this"))</a></td>
-		</tr>
-		@if(reportableEvents == ersUtil.OPTION_YES) {
-			<tr>
-			  <td class="summary-declaration-section-text-align">
-				@Html(if (fileCount == 1) {messages("ers_summary_declaration.file_name")} else {messages("ers_summary_declaration.file_names")})
-			  </td>
-			  <td class="summary-declaration-text-align">@Html(filename)</td>
-			  @if(fileType == ersUtil.OPTION_ODS) {<td class="summary-declaration-text-align"><a href="@routes.FileUploadController.uploadFilePage()">@Html(messages("ers_summary_declaration.change_this"))</a></td>}
-			  @if(fileType == ersUtil.OPTION_CSV) {<td class="summary-declaration-text-align"><a href="@routes.CheckCsvFilesController.checkCsvFilesPage()">@Html(messages("ers_summary_declaration.change_this"))</a></td>}
-			</tr>
-		}
-		<tr>
-		  <td class="summary-declaration-section-text-align">@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_SUMMARY_DECLARATION, "organiser"))</td>
-		  <td class="summary-declaration-text-align">
-		  @Html(schemeOrganiser.companyName)<br>
-		  @Html(schemeOrganiser.addressLine1)<br>
-		  @if(schemeOrganiser.addressLine2.isDefined){@Html(schemeOrganiser.addressLine2.get)<br>}
-		  @if(schemeOrganiser.addressLine3.isDefined){@Html(schemeOrganiser.addressLine3.get)<br>}
-		  @if(schemeOrganiser.addressLine4.isDefined){@Html(schemeOrganiser.addressLine4.get)<br>}
-		  @if(schemeOrganiser.country.isDefined){@Html(countryCodes.getCountry(schemeOrganiser.country.get).get)<br>}
-		  @if(schemeOrganiser.postcode.isDefined){@Html(schemeOrganiser.postcode.get)<br>}
-		  @if(schemeOrganiser.companyReg.isDefined){@Html(schemeOrganiser.companyReg.get)<br>}
-		  @if(schemeOrganiser.corporationRef.isDefined){@Html(schemeOrganiser.corporationRef.get)}
-		  </td>
-		  <td class="summary-declaration-text-align"><a href="@routes.SchemeOrganiserController.schemeOrganiserPage()">@Html(messages("ers_summary_declaration.change_this"))</a></td>
-		</tr>
-		<tr>
-		  <td class="summary-declaration-section-text-align">@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_GROUP_ACTIVITY, "question"))</td>
-		  <td class="summary-declaration-text-align">
-			@Html(groupScheme match {
-				case ersUtil.OPTION_YES => messages("ers.yes")
-				case ersUtil.OPTION_NO => messages("ers.no")
-			})
-		  </td>
-		  <td class="summary-declaration-text-align"><a href="@routes.GroupSchemeController.groupSchemePage()">@Html(messages("ers_summary_declaration.change_this"))</a></td>
-		</tr>
-		@if(groupScheme == ersUtil.OPTION_YES) {
-		<tr>
-		  <td class="summary-declaration-section-text-align">@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_GROUP_SUMMARY, "title"))</td>
-		  <td class="summary-declaration-text-align">
-		  @for(company <- companies.companies) {
-		  @company.companyName<br>
-		  }
-		  </td>
-		  <td class="summary-declaration-text-align"><a href="@routes.GroupSchemeController.groupPlanSummaryPage()">@Html(messages("ers_summary_declaration.change_this"))</a></td>
-		</tr>
-		}
-		@if(schemeId == ersUtil.SCHEME_SIP) {
-		<tr>
-		  <td class="summary-declaration-section-text-align">@Html(messages("ers_trustee_summary.title"))</td>
-		  <td class="summary-declaration-text-align">
-		  @for(trustee <- trustees.trustees) {
-		  @trustee.name<br>
-		  }
-		  </td>
-		  <td class="summary-declaration-text-align"><a href="@routes.TrusteeController.trusteeSummaryPage()">@Html(messages("ers_summary_declaration.change_this"))</a></td>
-		</tr>
-		}
-		@if(altAmendsActivity != "") {
-		<tr>
-		  <td class="summary-declaration-section-text-align">@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_ALT_ACTIVITY, "question"))</td>
-		  <td class="summary-declaration-text-align">
-			@Html(altAmendsActivity match {
-				case ersUtil.OPTION_YES => messages("ers.yes")
-				case ersUtil.OPTION_NO => messages("ers.no")
-			})
-		  </td>
-		  <td class="summary-declaration-text-align"><a href="@routes.AltAmendsController.altActivityPage()">@Html(messages("ers_summary_declaration.change_this"))</a></td>
-		</tr>
-		}
-		@if(altAmendsActivity == ersUtil.OPTION_YES) {
-		<tr>
-		  <td class="summary-declaration-section-text-align">@Html(messages("ers_trustee_summary.altamends.section"))</td>
-		  <td class="summary-declaration-text-align">
-		  @if(altAmends.altAmendsTerms.contains("1")) {@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_ALT_AMENDS, "option_1")).<br>}
-		  @if(altAmends.altAmendsEligibility.contains("1")) {@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_ALT_AMENDS, "option_2")).<br>}
-		  @if(altAmends.altAmendsExchange.contains("1")) {@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_ALT_AMENDS, "option_3")).<br>}
-		  @if(altAmends.altAmendsVariations.contains("1")) {@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_ALT_AMENDS, "option_4")).<br>}
-		  @if(altAmends.altAmendsOther.contains("1")) {@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_ALT_AMENDS, "option_5")).}
-		  </td>
-		  <td class="summary-declaration-text-align"><a href="@routes.AltAmendsController.altAmendsPage()">@Html(messages("ers_summary_declaration.change_this"))</a></td>
-		</tr>
-		}
-	  </tbody>
-	</table>
-	<div class="subsection">
-		<div class="notice">
-			<i class="icon icon-important"></i>
-			<strong class="bold-small">
-				@Html(messages("ers_summary_declaration.alert"))
-			</strong>
-		</div>
-	</div>
+    <table>
+        <thead>
+            <tr>
+                <th scope="col" id="summary-declaration-col-section">@Html(messages("ers_summary_declaration.section"))</th>
+                <th scope="col" id="summary-declaration-col-answer">@Html(messages("ers_summary_declaration.your_answers"))</th>
+                <th scope="col" id="summary-declaration-col-action"></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td class="summary-declaration-section-text-align">@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_CHOOSE, "question"))</td>
+                <td class="summary-declaration-text-align">
+                @Html(reportableEvents match {
+                    case ersUtil.OPTION_YES => messages("ers.yes")
+                    case ersUtil.OPTION_NO => messages("ers.no")
+                })
+                </td>
+                <td class="summary-declaration-text-align">
+                    <a href="@routes.ReportableEventsController.reportableEventsPage()">@Html(messages("ers_summary_declaration.change_this"))
+                        <span class="visually-hidden">@ersUtil.getPageElement(schemeId, ersUtil.PAGE_CHOOSE, "question")</span>
+                    </a>
+                </td>
+            </tr>
+            @if(reportableEvents == ersUtil.OPTION_YES) {
+                <tr>
+                    <td class="summary-declaration-section-text-align">
+                    @Html(fileNameMsg)
+                    </td>
+                    <td class="summary-declaration-text-align">@Html(filename)</td>
+                    @if(fileType == ersUtil.OPTION_ODS) {<td class="summary-declaration-text-align">
+                        <a href="@routes.FileUploadController.uploadFilePage()">@Html(messages("ers_summary_declaration.change_this"))
+                            <span class="visually-hidden">@fileNameMsg</span>
+                        </a></td>}
+                    @if(fileType == ersUtil.OPTION_CSV) {<td class="summary-declaration-text-align">
+                        <a href="@routes.CheckCsvFilesController.checkCsvFilesPage()">@Html(messages("ers_summary_declaration.change_this"))
+                            <span class="visually-hidden">@fileNameMsg</span>
+                        </a></td>}
+                </tr>
+            }
+            <tr>
+                <td class="summary-declaration-section-text-align">@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_SUMMARY_DECLARATION, "organiser"))</td>
+                <td class="summary-declaration-text-align">
+                    @Html(schemeOrganiser.companyName)<br>
+                    @Html(schemeOrganiser.addressLine1)<br>
+                    @if(schemeOrganiser.addressLine2.isDefined){@Html(schemeOrganiser.addressLine2.get)<br>}
+                    @if(schemeOrganiser.addressLine3.isDefined){@Html(schemeOrganiser.addressLine3.get)<br>}
+                    @if(schemeOrganiser.addressLine4.isDefined){@Html(schemeOrganiser.addressLine4.get)<br>}
+                    @if(schemeOrganiser.country.isDefined){@Html(countryCodes.getCountry(schemeOrganiser.country.get).get)<br>}
+                    @if(schemeOrganiser.postcode.isDefined){@Html(schemeOrganiser.postcode.get)<br>}
+                    @if(schemeOrganiser.companyReg.isDefined){@Html(schemeOrganiser.companyReg.get)<br>}
+                    @if(schemeOrganiser.corporationRef.isDefined){@Html(schemeOrganiser.corporationRef.get)}
+                </td>
+                <td class="summary-declaration-text-align">
+                    <a href="@routes.SchemeOrganiserController.schemeOrganiserPage()">@Html(messages("ers_summary_declaration.change_this"))
+                        <span class="visually-hidden">@ersUtil.getPageElement(schemeId, ersUtil.PAGE_SUMMARY_DECLARATION, "organiser")</span>
+                    </a>
+                </td>
+            </tr>
+            <tr>
+                <td class="summary-declaration-section-text-align">@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_GROUP_ACTIVITY, "question"))</td>
+                <td class="summary-declaration-text-align">
+                @Html(groupScheme match {
+                    case ersUtil.OPTION_YES => messages("ers.yes")
+                    case ersUtil.OPTION_NO => messages("ers.no")
+                })
+                </td>
+                <td class="summary-declaration-text-align">
+                    <a href="@routes.GroupSchemeController.groupSchemePage()">@Html(messages("ers_summary_declaration.change_this"))
+                        <span class="visually-hidden">@ersUtil.getPageElement(schemeId, ersUtil.PAGE_GROUP_ACTIVITY, "question")</span>
+                    </a>
+                </td>
+            </tr>
+            @if(groupScheme == ersUtil.OPTION_YES) {
+                <tr>
+                    <td class="summary-declaration-section-text-align">@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_GROUP_SUMMARY, "title"))</td>
+                    <td class="summary-declaration-text-align">
+                    @for(company <- companies.companies) {
+                        @company.companyName<br>
+                        }
+                    </td>
+                    <td class="summary-declaration-text-align">
+                        <a href="@routes.GroupSchemeController.groupPlanSummaryPage()">@Html(messages("ers_summary_declaration.change_this"))
+                            <span class="visually-hidden">@ersUtil.getPageElement(schemeId, ersUtil.PAGE_GROUP_SUMMARY, "title")</span>
+                        </a>
+                    </td>
+                </tr>
+            }
+            @if(schemeId == ersUtil.SCHEME_SIP) {
+                <tr>
+                    <td class="summary-declaration-section-text-align">@Html(messages("ers_trustee_summary.title"))</td>
+                    <td class="summary-declaration-text-align">
+                    @for(trustee <- trustees.trustees) {
+                        @trustee.name<br>
+                        }
+                    </td>
+                    <td class="summary-declaration-text-align">
+                        <a href="@routes.TrusteeController.trusteeSummaryPage()">@Html(messages("ers_summary_declaration.change_this"))
+                            <span class="visually-hidden">@messages("ers_trustee_summary.title")</span>
+                        </a>
+                    </td>
+                </tr>
+            }
+            @if(altAmendsActivity != "") {
+                <tr>
+                    <td class="summary-declaration-section-text-align">@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_ALT_ACTIVITY, "question"))</td>
+                    <td class="summary-declaration-text-align">
+                    @Html(altAmendsActivity match {
+                        case ersUtil.OPTION_YES => messages("ers.yes")
+                        case ersUtil.OPTION_NO => messages("ers.no")
+                    })
+                    </td>
+                    <td class="summary-declaration-text-align">
+                        <a href="@routes.AltAmendsController.altActivityPage()">@Html(messages("ers_summary_declaration.change_this"))
+                            <span class="visually-hidden">@ersUtil.getPageElement(schemeId, ersUtil.PAGE_ALT_ACTIVITY, "question")</span>
+                        </a>
+                    </td>
+                </tr>
+            }
+            @if(altAmendsActivity == ersUtil.OPTION_YES) {
+                <tr>
+                    <td class="summary-declaration-section-text-align">@Html(messages("ers_trustee_summary.altamends.section"))</td>
+                    <td class="summary-declaration-text-align">
+                        @if(altAmends.altAmendsTerms.contains("1")) {@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_ALT_AMENDS, "option_1")).<br>}
+                        @if(altAmends.altAmendsEligibility.contains("1")) {@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_ALT_AMENDS, "option_2")).<br>}
+                        @if(altAmends.altAmendsExchange.contains("1")) {@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_ALT_AMENDS, "option_3")).<br>}
+                        @if(altAmends.altAmendsVariations.contains("1")) {@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_ALT_AMENDS, "option_4")).<br>}
+                        @if(altAmends.altAmendsOther.contains("1")) {@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_ALT_AMENDS, "option_5")).}
+                    </td>
+                    <td class="summary-declaration-text-align">
+                        <a href="@routes.AltAmendsController.altAmendsPage()">@Html(messages("ers_summary_declaration.change_this"))
+                            <span class="visually-hidden">@messages("ers_trustee_summary.altamends.section")</span>
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <div class="subsection">
+        <div class="notice">
+            <i class="icon icon-important"></i>
+            <strong class="bold-small">
+            @Html(messages("ers_summary_declaration.alert"))
+            </strong>
+        </div>
+    </div>
 
-	<a role="button" id="continue" class="button summary-button" href="@routes.ConfirmationPageController.confirmationPage()">@Html(messages("ers_summary_declaration.button"))</a>
-	@spinner()
+    <a role="button" id="continue" class="button summary-button" href="@routes.ConfirmationPageController.confirmationPage()">@Html(messages("ers_summary_declaration.button"))</a>
+    @spinner()
 }
