@@ -56,7 +56,7 @@
 				case ersUtil.OPTION_NO => messages("ers.no")
 			})
 		  </td>
-		  <td class="summary-declaration-text-align"><a href="@routes.ReportableEventsController.reportableEventsPage()">@Html(messages("ers_summary_declaration.change_this"))</a></td>
+		  <td class="summary-declaration-text-align"><a href="@routes.ReportableEventsController.reportableEventsPage()">@Html(messages("ers_summary_declaration.change_this"))  <span class="visually-hidden"> change-@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_CHOOSE, "question"))</span> </a></td>
 		</tr>
 		@if(reportableEvents == ersUtil.OPTION_YES) {
 			<tr>
@@ -64,8 +64,8 @@
 				@Html(if (fileCount == 1) {messages("ers_summary_declaration.file_name")} else {messages("ers_summary_declaration.file_names")})
 			  </td>
 			  <td class="summary-declaration-text-align">@Html(filename)</td>
-			  @if(fileType == ersUtil.OPTION_ODS) {<td class="summary-declaration-text-align"><a href="@routes.FileUploadController.uploadFilePage()">@Html(messages("ers_summary_declaration.change_this"))</a></td>}
-			  @if(fileType == ersUtil.OPTION_CSV) {<td class="summary-declaration-text-align"><a href="@routes.CheckCsvFilesController.checkCsvFilesPage()">@Html(messages("ers_summary_declaration.change_this"))</a></td>}
+			  @if(fileType == ersUtil.OPTION_ODS) {<td class="summary-declaration-text-align"><a href="@routes.FileUploadController.uploadFilePage()">@Html(messages("ers_summary_declaration.change_this"))  <span class="visually-hidden"> change-</span> </a></td>}
+			  @if(fileType == ersUtil.OPTION_CSV) {<td class="summary-declaration-text-align"><a href="@routes.CheckCsvFilesController.checkCsvFilesPage()">@Html(messages("ers_summary_declaration.change_this"))  <span class="visually-hidden"> change-</span> </a></td>}
 			</tr>
 		}
 		<tr>
@@ -81,7 +81,7 @@
 		  @if(schemeOrganiser.companyReg.isDefined){@Html(schemeOrganiser.companyReg.get)<br>}
 		  @if(schemeOrganiser.corporationRef.isDefined){@Html(schemeOrganiser.corporationRef.get)}
 		  </td>
-		  <td class="summary-declaration-text-align"><a href="@routes.SchemeOrganiserController.schemeOrganiserPage()">@Html(messages("ers_summary_declaration.change_this"))</a></td>
+		  <td class="summary-declaration-text-align"><a href="@routes.SchemeOrganiserController.schemeOrganiserPage()">@Html(messages("ers_summary_declaration.change_this"))  <span class="visually-hidden"> change-@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_SUMMARY_DECLARATION, "organiser"))</span> </a></td>
 		</tr>
 		<tr>
 		  <td class="summary-declaration-section-text-align">@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_GROUP_ACTIVITY, "question"))</td>
@@ -91,7 +91,7 @@
 				case ersUtil.OPTION_NO => messages("ers.no")
 			})
 		  </td>
-		  <td class="summary-declaration-text-align"><a href="@routes.GroupSchemeController.groupSchemePage()">@Html(messages("ers_summary_declaration.change_this"))</a></td>
+		  <td class="summary-declaration-text-align"><a href="@routes.GroupSchemeController.groupSchemePage()">@Html(messages("ers_summary_declaration.change_this"))  <span class="visually-hidden"> change-@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_GROUP_ACTIVITY, "question"))</span> </a></td>
 		</tr>
 		@if(groupScheme == ersUtil.OPTION_YES) {
 		<tr>
@@ -101,7 +101,7 @@
 		  @company.companyName<br>
 		  }
 		  </td>
-		  <td class="summary-declaration-text-align"><a href="@routes.GroupSchemeController.groupPlanSummaryPage()">@Html(messages("ers_summary_declaration.change_this"))</a></td>
+		  <td class="summary-declaration-text-align"><a href="@routes.GroupSchemeController.groupPlanSummaryPage()">@Html(messages("ers_summary_declaration.change_this"))  <span class="visually-hidden"> change-@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_GROUP_SUMMARY, "title"))</span> </a></td>
 		</tr>
 		}
 		@if(schemeId == ersUtil.SCHEME_SIP) {
@@ -112,7 +112,7 @@
 		  @trustee.name<br>
 		  }
 		  </td>
-		  <td class="summary-declaration-text-align"><a href="@routes.TrusteeController.trusteeSummaryPage()">@Html(messages("ers_summary_declaration.change_this"))</a></td>
+		  <td class="summary-declaration-text-align"><a href="@routes.TrusteeController.trusteeSummaryPage()">@Html(messages("ers_summary_declaration.change_this"))  <span class="visually-hidden"> change-@Html(messages("ers_trustee_summary.title"))</span> </a></td>
 		</tr>
 		}
 		@if(altAmendsActivity != "") {
@@ -124,7 +124,7 @@
 				case ersUtil.OPTION_NO => messages("ers.no")
 			})
 		  </td>
-		  <td class="summary-declaration-text-align"><a href="@routes.AltAmendsController.altActivityPage()">@Html(messages("ers_summary_declaration.change_this"))</a></td>
+		  <td class="summary-declaration-text-align"><a href="@routes.AltAmendsController.altActivityPage()">@Html(messages("ers_summary_declaration.change_this"))  <span class="visually-hidden"> change-@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_ALT_ACTIVITY, "question"))</span> </a></td>
 		</tr>
 		}
 		@if(altAmendsActivity == ersUtil.OPTION_YES) {
@@ -137,7 +137,7 @@
 		  @if(altAmends.altAmendsVariations.contains("1")) {@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_ALT_AMENDS, "option_4")).<br>}
 		  @if(altAmends.altAmendsOther.contains("1")) {@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_ALT_AMENDS, "option_5")).}
 		  </td>
-		  <td class="summary-declaration-text-align"><a href="@routes.AltAmendsController.altAmendsPage()">@Html(messages("ers_summary_declaration.change_this"))</a></td>
+		  <td class="summary-declaration-text-align"><a href="@routes.AltAmendsController.altAmendsPage()">@Html(messages("ers_summary_declaration.change_this")) <span class="visually-hidden"> change-@Html(messages("ers_trustee_summary.altamends.section"))</span> </a></td>
 		</tr>
 		}
 	  </tbody>

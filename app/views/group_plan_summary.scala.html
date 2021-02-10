@@ -46,7 +46,8 @@
 			  <thead>
 				<tr>
 					<th scope="col" id="group-plan-summary-name">@company.companyName</th>
-					<th id="group-plan-summary-address" class="group-plan-summary-action-text-align"><a href="@routes.GroupSchemeController.editCompany(index)">@Html(messages("ers.change_this"))</a>&nbsp;&nbsp;&nbsp;<a href="@routes.GroupSchemeController.deleteCompany(index)">@Html(messages("ers.delete"))</a></th>
+					<th id="group-plan-summary-address" class="group-plan-summary-action-text-align"><a href="@routes.GroupSchemeController.editCompany(index)"> @Html(messages("ers.change_this")) <span class="visually-hidden"> change-@company.companyName</span> </a>
+						<a href="@routes.GroupSchemeController.deleteCompany(index)">@Html(messages("ers.delete"))<span class="visually-hidden"> delete-@company.companyName</span></a></th>
 				</tr>
 			  </thead>
 			  <tbody>

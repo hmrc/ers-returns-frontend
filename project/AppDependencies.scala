@@ -16,7 +16,7 @@ object AppDependencies {
     "uk.gov.hmrc" %% "play-language" % "4.7.0-play-26",
     "uk.gov.hmrc" %% "auth-client" % "3.2.0-play-26",
     "uk.gov.hmrc" %% "time" % "3.19.0",
-    "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.7",
+    "org.scala-lang.modules" %% "scala-parser-combinators" % "1.1.2",
     "org.apache.pdfbox" % "pdfbox" % "1.8.16",
     "org.apache.pdfbox" % "xmpbox" % "1.8.16",
     "com.typesafe.play" %% "play-json-joda" % "2.6.14"
@@ -34,7 +34,7 @@ object AppDependencies {
         "org.scalatest" %% "scalatest" % "3.0.9" % scope,
         "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.3" % scope,
         "org.pegdown" % "pegdown" % "1.6.0" % scope,
-        "org.jsoup" % "jsoup" % "1.9.2" % scope,
+        "org.jsoup" % "jsoup" % "1.13.1" % scope,
         "com.typesafe.play" %% "play-test" % PlayVersion.current % scope,
         "org.mockito" % "mockito-core" % "3.4.6" % scope,
         "com.github.tomakehurst" % "wiremock-standalone" % "2.27.2" % scope
