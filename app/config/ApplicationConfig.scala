@@ -44,11 +44,8 @@ class ApplicationConfig @Inject()(config: ServicesConfig) {
 
 	lazy val reportAProblemPartialUrl: String = s"$contactHost/contact/problem_reports_ajax?service=$contactFormServiceIdentifier"
 	lazy val reportAProblemNonJSUrl: String = s"$contactHost/contact/problem_reports_nonjs?service=$contactFormServiceIdentifier"
-	lazy val gaToken: String = config.getString(s"govuk-tax.google-analytics.token")
 
 	lazy val assetsPrefix: String = config.getString("assets.url") + config.getString("assets.version")
-	lazy val analyticsToken: String = config.getString("govuk-tax.google-analytics.token")
-	lazy val analyticsHost: String = config.getString("govuk-tax.google-analytics.host")
 	lazy val ersUrl: String = config.baseUrl("ers-returns")
 	lazy val validatorUrl: String = config.baseUrl("ers-file-validator")
 
