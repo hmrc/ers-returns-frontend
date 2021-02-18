@@ -184,12 +184,12 @@ class CsvFileUploadController @Inject()(val mcc: MessagesControllerComponents,
       res.status match {
         case OK =>
           Logger.warn(s"[CsvFileUploadController][validateCsv] Validation is successful for schemeRef: ${schemeInfo.schemeRef}, " +
-						s"callback: ${csvCallbackData.toString}, timestamp: ${System.currentTimeMillis()}.")
+						s"timestamp: ${System.currentTimeMillis()}.")
           ersUtil.cache(ersUtil.VALIDATED_SHEEETS, res.body, schemeInfo.schemeRef)
           Redirect(routes.SchemeOrganiserController.schemeOrganiserPage())
         case ACCEPTED =>
           Logger.warn(s"[CsvFileUploadController][validateCsv] Validation is not successful for schemeRef: ${schemeInfo.schemeRef}, " +
-						s"callback: ${csvCallbackData.toString}, timestamp: ${System.currentTimeMillis()}.")
+						s"timestamp: ${System.currentTimeMillis()}.")
           Redirect(routes.CsvFileUploadController.validationFailure())
         case _ => Logger.error(s"[CsvFileUploadController][validateCsv] Validate file data failed with Status ${res.status}, timestamp: ${System.currentTimeMillis()}.")
           getGlobalErrorPage
