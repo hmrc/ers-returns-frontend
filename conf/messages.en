@@ -420,8 +420,8 @@ ers_confirmation.other.finished = http://www.gov.uk/done/other-employment-relate
 ers_confirmation.feedback = What did you think of this service?
 ers_confirmation.feedback_time = (takes 30 seconds)
 
-ers_signed_out.info = For your security, we signed you out because you didn’t use the service for 15 minutes or more.
-ers_signed_out.link = Sign back in to your HMRC Online services account
+ers_signed_out.info = For your security, we signed you out.
+ers_signed_out.link = Sign in
 
 
 #********************************************************************
