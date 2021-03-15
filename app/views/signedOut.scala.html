@@ -21,6 +21,9 @@
 @(loginScreenUrl: String)(implicit request: Request[AnyContent], messages: Messages)
 
 @ers_main(title = messages("ers.app_title"), scripts=Html(""), showSignOutLink = false){
-	<p>@Html(messages("ers_signed_out.info"))</p>
-	<p><a href="@loginScreenUrl">@Html(messages("ers_signed_out.link"))</a></p>
+ <p class="font-xsmall"><a href="javascript:history.go(-1)" class="link-back">@Html(messages("ers.back"))</a></p>
+
+ <p class="heading-xlarge">@Html(messages("ers_signed_out.info"))</p>
+
+ <p><a class="button" href="@loginScreenUrl">@Html(messages("ers_signed_out.link"))</a></p>
 }
