@@ -83,4 +83,6 @@ class ApplicationConfig @Inject()(config: ServicesConfig) {
 	lazy val sessionCacheBaseUri: String = config.baseUrl("cachable.session-cache")
 	lazy val sessionCacheDomain: String = config.getString(s"microservice.services.cachable.session-cache.domain")
 
+	lazy val useNewValidator: Boolean = config.getBoolean("feature-flag.new-validator")
+
 }
