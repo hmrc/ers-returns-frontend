@@ -14,80 +14,172 @@
  * limitations under the License.
  *@
 
-@import utils.ERSUtil
+@import _root_.utils.ERSUtil
 @import config.ApplicationConfig
-@import utils.CountryCodes
-@import uk.gov.hmrc.play.views.html.helpers.{FormWithCSRF, Input, ErrorSummary}
+@import _root_.utils.CountryCodes
+@import views.html.includes.countries
+@import views.html.govuk_wrapper
+@import views.html.templates.reference
+@import uk.gov.hmrc.play.views.html.helpers.FormWithCSRF
+@import uk.gov.hmrc.govukfrontend.views.html.components.implicits._
 
-@this(form: FormWithCSRF, input: Input, errorSummary: ErrorSummary)
+@this(
+		govuk_wrapper: govuk_wrapper,
+		countriesSelect: countries,
+		formWithCSRF: FormWithCSRF,
+		govukBackLink: GovukBackLink,
+		govukErrorSummary: GovukErrorSummary,
+		govukInput: GovukInput,
+		govukButton: GovukButton,
+		govukRadios: GovukRadios,
+		hmrcPageHeading: HmrcPageHeading
+)
 
 @(requestObject: RequestObject, index: Int, companyDetails: Form[models.CompanyDetails])(implicit request: Request[AnyRef], flash: Flash, messages: Messages, ersUtil: ERSUtil, countryCodes: CountryCodes, appConfig: ApplicationConfig)
-@* manual company details Template *@
+
 @schemeId = @{requestObject.getSchemeId}
-@import views.html.helpers.error_overview
-@import views.html.templates._
+
 @scripts = {
-	<script src='@routes.Assets.versioned("javascripts/ers_company.js")'> </script>
+	<script type="text/javascript" src='@controllers.routes.Assets.versioned("javascripts/uk-or-overseas-form-reveal.js")'></script>
 }
 
-@ers_main(title = ersUtil.getPageElement(schemeId, "ers", "group_add.page_title") + " " + messages("ers.title.postfix"), scripts) {
+@govuk_wrapper(title = ersUtil.getPageElement(schemeId, "ers", "group_add.page_title") + " " + messages("ers.title.postfix"), Some(scripts)) {
 
 	@reference(requestObject.getPageTitle)
-	<p class="font-xsmall"><a href="@routes.GroupSchemeController.groupSchemePage" class="link-back">@Html(messages("ers.back"))</a></p>
+
+	@govukBackLink(BackLink(
+		href = routes.GroupSchemeController.groupSchemePage.url,
+	))
+
 	@if(companyDetails.hasErrors) {
-		@errorSummary(messages("validation.summary.heading"), companyDetails)
-	}
-	@header(ersUtil.getPageElement(schemeId, ersUtil.PAGE_MANUAL_COMPANY_DETAILS, "title"))
-	@form(action = routes.GroupSchemeController.manualCompanyDetailsSubmit(index)) {
-		<div class="form-group">
-			<fieldset class="inline">
-				<legend class="form-label">@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_MANUAL_COMPANY_DETAILS, "question"))</legend>
-				<div class="multiple-choice">
-					<input id="uk-radio-button" name="radio-inline-group" value="1" type="radio" @if(companyDetails(companyDetailsFields.country).value.contains(ersUtil.DEFAULT_COUNTRY) || companyDetails(companyDetailsFields.country).value.isEmpty) {checked="checked"}>@messages("ers_manual_company_details.uk")
-					<label class="@if(companyDetails(companyDetailsFields.country).value.contains(ersUtil.DEFAULT_COUNTRY) || companyDetails(companyDetailsFields.country).value.isEmpty) {selected}" for="uk-radio-button"></label>
-				</div>
-				<div class="multiple-choice">
-					<input id="overseas-radio-button" name="radio-inline-group" value="2" type="radio" @if(!companyDetails(companyDetailsFields.country).value.contains(ersUtil.DEFAULT_COUNTRY) && companyDetails(companyDetailsFields.country).value.isDefined) {checked="checked"}>@messages("ers_manual_company_details.overseas")
-					<label class="@if(!companyDetails(companyDetailsFields.country).value.contains(ersUtil.DEFAULT_COUNTRY) && companyDetails(companyDetailsFields.country).value.isDefined) {selected}" for="overseas-radio-button"></label>
-				</div>
-			</fieldset>
-		</div>
-		<div class="form-group">
-			@input(companyDetails(companyDetailsFields.companyName), '_label -> messages("ers_manual_company_details.company_name"), '_inputClass -> "form-control form-control--block")
-		</div>
-		<div class="form-group @if(companyDetails.error(trusteeDetailsFields.addressLine1).isDefined) {form-field--error}">
-			<label for="addressLine1" class="form-label">
-				<span>@messages("ers_manual_company_details.address")</span>
-				<span class="visuallyhidden">@messages("ers_manual_company_details.addressLine1")</span>
-				@if(companyDetails.error(companyDetailsFields.addressLine1).isDefined) {<span class="error-notification" role="tooltip">@companyDetails.errors(companyDetailsFields.addressLine1).head.message</span>}
-				<input id="addressLine1" type="text" class="form-control form-control--block" name="addressLine1" value="@companyDetails(companyDetailsFields.addressLine1).value">
-			</label>
-		</div>
-		<div class="form-group">
-			@input(companyDetails(companyDetailsFields.addressLine2), '_label -> messages("ers_manual_company_details.addressLine2"), '_labelTextClass -> "visuallyhidden", '_inputClass -> "form-control form-control--block")
-		</div>
-		<div class="form-group">
-			@input(companyDetails(companyDetailsFields.addressLine3), '_label -> messages("ers_manual_company_details.addressLine2"), '_labelTextClass -> "visuallyhidden", '_inputClass -> "form-control form-control--block")
-		</div>
-		<div class="form-group">
-			@input(companyDetails(companyDetailsFields.addressLine4), '_label -> messages("ers_manual_company_details.addressLine2"), '_labelTextClass -> "visuallyhidden", '_inputClass -> "form-control form-control--block")
-		</div>
-		<div class="form-group country-group">
-			<label for="country" class="form-label" id="countryLbl">
-				<span>@messages("ers_manual_company_details.country")</span>
-			</label>
-			@views.html.includes.countries(companyDetails(companyDetailsFields.country).value)
-		</div>
-		<div class="form-group postcode-group">
-			@input(companyDetails(companyDetailsFields.postcode), '_label -> messages("ers_manual_company_details.postcode"), '_inputClass -> "form-control form-control--block")
-		</div>
-		<div class="form-group company-reg-group">
-			@input(companyDetails(companyDetailsFields.companyReg), '_label -> messages("ers_manual_company_details.company_reg_number"), '_inputHint -> messages("ers_manual_company_details.company_reg_number.hint"),'_inputClass -> "form-control form-control--block")
-		</div>
-		<div class="form-group corporation-ref-group">
-			@input(companyDetails(companyDetailsFields.corporationRef), '_label -> messages("ers_manual_company_details.corporation_tax_ref"), '_inputHint -> messages("ers_manual_company_details.corporation_tax_ref.hint"),'_inputClass -> "form-control form-control--block")
-		</div>
-		<input role="button" id="continue" class="button" type="submit" value='@Html(messages("ers_manual_company_details.continue"))' >
+		@govukErrorSummary(ErrorSummary(
+			title = Text(messages("validation.summary.heading")),
+			errorList = companyDetails.errors.asTextErrorLinks
+		))
 	}
 
+	@hmrcPageHeading(PageHeading(
+		text = ersUtil.getPageElement(schemeId, ersUtil.PAGE_MANUAL_COMPANY_DETAILS, "title")
+	))
+
+	@formWithCSRF(action = routes.GroupSchemeController.manualCompanyDetailsSubmit(index)) {
+
+		@govukRadios(Radios(
+			fieldset = Some(Fieldset(
+				legend = Some(Legend(content=Text(ersUtil.getPageElement(schemeId, ersUtil.PAGE_MANUAL_COMPANY_DETAILS, "question"))))
+			)),
+			name = "radio-inline-group",
+			items = Seq(
+				RadioItem(
+					checked = if(companyDetails(companyDetailsFields.country).value.contains(ersUtil.DEFAULT_COUNTRY) || companyDetails(companyDetailsFields.country).value.isEmpty) true else false,
+					id = Some("uk-radio-button"),
+					value = Some("1"),
+					content = Text(messages("ers_manual_company_details.uk"))
+				),
+				RadioItem(
+					checked = if(companyDetails(companyDetailsFields.country).value.contains(ersUtil.DEFAULT_COUNTRY) || companyDetails(companyDetailsFields.country).value.isEmpty) false else true,
+					id = Some("overseas-radio-button"),
+					value = Some("2"),
+					content = Text(messages("ers_manual_company_details.overseas"))
+				)
+			),
+			classes = "govuk-radios--inline"
+		))
+
+		@govukInput(Input(
+			classes = "govuk-!-width-one-half",
+			id = "companyName",
+			name = "companyName",
+			value = companyDetails(companyDetailsFields.companyName).value,
+			errorMessage = if (companyDetails.error(companyDetailsFields.companyName).isDefined) Some(ErrorMessage(content = Text(companyDetails.error(companyDetailsFields.companyName).get.messages.head))) else None,
+			label = Label(
+				content = Text(messages("ers_manual_company_details.company_name"))
+			)
+		))
+
+		@govukInput(Input(
+			classes = "govuk-!-width-one-half",
+			id = "addressLine1",
+			name = "addressLine1",
+			value = companyDetails(companyDetailsFields.addressLine1).value,
+			errorMessage = if (companyDetails.error(companyDetailsFields.addressLine1).isDefined) Some(ErrorMessage(content = Text(companyDetails.error(companyDetailsFields.addressLine1).get.messages.head))) else None,
+			label = Label(
+				content = Text(messages("ers_manual_company_details.address"))
+			)
+		))
+
+		@govukInput(Input(
+			classes = "govuk-!-width-one-half",
+			id = "addressLine2",
+			name = "addressLine2",
+			value = companyDetails(companyDetailsFields.addressLine2).value,
+			label = Label(
+				content = Text(messages("ers_manual_company_details.addressLine2")),
+				classes = "govuk-visually-hidden"
+			)
+		))
+
+		@govukInput(Input(
+			classes = "govuk-!-width-one-half",
+			id = "addressLine3",
+			name = "addressLine3",
+			value = companyDetails(companyDetailsFields.addressLine3).value,
+			label = Label(
+				content = Text(messages("ers_manual_company_details.addressLine3")),
+				classes = "govuk-visually-hidden"
+			)
+		))
+
+		@govukInput(Input(
+			classes = "govuk-!-width-one-half",
+			id = "addressLine4",
+			name = "addressLine4",
+			value = companyDetails(companyDetailsFields.addressLine4).value,
+			label = Label(
+				content = Text(messages("ers_manual_company_details.addressLine4")),
+				classes = "govuk-visually-hidden"
+			)
+		))
+
+		@govukInput(Input(
+			classes = "govuk-input--width-5",
+			id = "postcode",
+			name = "postcode",
+			value = companyDetails(companyDetailsFields.postcode).value,
+			hint = Some(Hint(content=Text(messages("ers_manual_company_details.postcode.hint")))),
+			label = Label(
+				content = Text(messages("ers_manual_company_details.postcode")),
+			)
+		))
+
+		@countriesSelect(companyDetails(companyDetailsFields.country).value)
+
+		@govukInput(Input(
+			classes = "govuk-!-width-one-half",
+			id = "companyReg",
+			name = "companyReg",
+			value = companyDetails(companyDetailsFields.companyReg).value,
+			hint = Some(Hint(content=Text(messages("ers_manual_company_details.company_reg_number.hint")))),
+			label = Label(
+				content = Text(messages("ers_manual_company_details.company_reg_number")),
+			)
+		))
+
+		@govukInput(Input(
+			classes = "govuk-!-width-one-half",
+			id = "corporationRef",
+			name = "corporationRef",
+			value = companyDetails(companyDetailsFields.corporationRef).value,
+			hint = Some(Hint(content=Text(messages("ers_manual_company_details.corporation_tax_ref.hint")))),
+			label = Label(
+				content = Text(messages("ers_manual_company_details.corporation_tax_ref")),
+			)
+		))
+
+		@govukButton(Button(
+			inputType = Some("submit"),
+			content = Text(messages("ers_manual_company_details.continue")),
+			attributes = Map("id" -> "continue"),
+		))
+	}
 }

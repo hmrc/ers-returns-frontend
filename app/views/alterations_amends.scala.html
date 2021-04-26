@@ -14,73 +14,109 @@
  * limitations under the License.
  *@
 
-@import utils.ERSUtil
+@import _root_.utils.ERSUtil
 @import config.ApplicationConfig
 @import uk.gov.hmrc.play.views.html.helpers.FormWithCSRF
+@import views.html.govuk_wrapper
+@import views.html.templates.reference
 
-@this(form: FormWithCSRF)
+@this(
+        govuk_wrapper: govuk_wrapper,
+        formWithCSFR: FormWithCSRF,
+        govukErrorSummary: GovukErrorSummary,
+        govukBackLink: GovukBackLink,
+        govukCheckboxes: GovukCheckboxes,
+        govukButton: GovukButton,
+        govukInsetText: GovukInsetText
+)
 
 @(requestObject: RequestObject, altAmends: AltAmends)(implicit request: Request[AnyRef], flash: Flash, messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 
-
-@import views.html.templates._
-
 @schemeId = @{requestObject.getSchemeId}
 
-@ers_main(title = ersUtil.getPageElement(schemeId, "ers", "what_alterations.page_title")) {
+@govuk_wrapper(title = ersUtil.getPageElement(schemeId, "ers", "what_alterations.page_title")) {
 
     @reference(requestObject.getPageTitle)
-    <p class="font-xsmall"><a href="@ersUtil.getPageBackLink(schemeId, ersUtil.PAGE_ALT_AMENDS)" class="link-back">@Html(messages("ers.back"))</a></p>
+
+    @govukBackLink(BackLink(
+        href = ersUtil.getPageBackLink(schemeId, ersUtil.PAGE_ALT_AMENDS)
+    ))
 
     @if(flash.get("alt-amends-not-selected-error").isDefined) {
-        <div class="flash error-summary error-summary--show " id="error-summary-display" role="alert" aria-labelledby="error-summary-heading" tabindex="-1">
-            <h2 id="error-summary-heading" class="h3-heading">@messages("validation.summary.heading")</h2>
-            <ul class="js-error-summary-messages">
-                <li>
-                    <a href="#error-summary" data-focuses="error-summary">@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_ALT_AMENDS, "err.message"))</a>
-                </li>
-            </ul>
-        </div>
+        @govukErrorSummary(ErrorSummary(
+            title = Text(messages("validation.summary.heading")),
+            errorList = Seq(
+                ErrorLink(
+                    href = Some("ADD ERROR LINK HERE"),
+                    content = Text(ersUtil.getPageElement(schemeId, ersUtil.PAGE_ALT_AMENDS, "err.message"))
+                )
+            )
+        ))
     }
 
-    @form(action = routes.AltAmendsController.altAmendsSelected()) {
-        <div class="form-group @if(flash.get("alt-amends-not-selected-error").isDefined) {form-field--error}">
-            <fieldset>
-                <legend>
-                    @header(ersUtil.getPageElement(schemeId, ersUtil.PAGE_ALT_AMENDS, "question"))
-                    <span>@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_ALT_AMENDS, "instruction"))</span>
-                </legend>
-                @if(flash.get("alt-amends-not-selected-error").isDefined) {
-                    <div class="error-notification" role="alert" id="error-summary" tabindex="-1">
-                        <span id="error-heading">@flash.get("alt-amends-not-selected-error")</span>
-                    </div>
-                }
-                <div class="multiple-choice">
-                    <input id="alt-terms-check-box" type="checkbox" name="altAmendsTerms" value=@ersUtil.OPTION_YES @if(altAmends.altAmendsTerms.isDefined){@(if(altAmends.altAmendsTerms.get == ersUtil.OPTION_YES) "checked" else "")} else {""}>
-                    <label for="alt-terms-check-box" class='@if(altAmends.altAmendsTerms.getOrElse("") == ersUtil.OPTION_YES){"selected"}'>@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_ALT_AMENDS, "option_1"))</label>
-                </div>
-                <div class="multiple-choice">
-                    <input id="alt-eligibility-check-box" type="checkbox" name="altAmendsEligibility" value=@ersUtil.OPTION_YES @if(altAmends.altAmendsEligibility.isDefined){@(if(altAmends.altAmendsEligibility.get == ersUtil.OPTION_YES) "checked" else "")} else {""}>
-                    <label for="alt-eligibility-check-box" class='@if(altAmends.altAmendsEligibility.getOrElse("") == ersUtil.OPTION_YES){"selected"}'>@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_ALT_AMENDS, "option_2"))</label>
-                </div>
-                <div class="multiple-choice">
-                    <input id="alt-exchange-check-box" type="checkbox" name="altAmendsExchange" value=@ersUtil.OPTION_YES @if(altAmends.altAmendsExchange.isDefined){@(if(altAmends.altAmendsExchange.get == ersUtil.OPTION_YES) "checked" else "")} else {""}>
-                    <label for="alt-exchange-check-box" class='@if(altAmends.altAmendsExchange.getOrElse("") == ersUtil.OPTION_YES){"selected"}'>@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_ALT_AMENDS, "option_3"))</label>
-                </div>
-                <div class="multiple-choice">
-                    <input id="variations-check-box" type="checkbox" name="altAmendsVariations" value=@ersUtil.OPTION_YES @if(altAmends.altAmendsVariations.isDefined){@(if(altAmends.altAmendsVariations.get == ersUtil.OPTION_YES) "checked" else "")} else {""}>
-                    <label for="variations-check-box" class='@if(altAmends.altAmendsVariations.getOrElse("") == ersUtil.OPTION_YES){"selected"}'>@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_ALT_AMENDS, "option_4"))</label>
-                </div>
-                <div class="multiple-choice">
-                    <input id="other-check-box" type="checkbox" name="altAmendsOther" value=@ersUtil.OPTION_YES @if(altAmends.altAmendsOther.isDefined){@(if(altAmends.altAmendsOther.get == ersUtil.OPTION_YES) "checked" else "")} else {""}>
-                    <label for="other-check-box" class='@if(altAmends.altAmendsOther.getOrElse("") == ersUtil.OPTION_YES){"selected"}'>@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_ALT_AMENDS, "option_5"))</label>
-                </div>
-            </fieldset>
-        </div>
-        <div class="form-group panel panel-border-wide">
-            <p id="declaration">@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_ALT_AMENDS, "alert"))</p>
-        </div>
-        <input role="button" id="continue" class="button" type="submit" value="@Html(messages("ers_alt_amends.continue"))">
-    }
+    @formWithCSFR(action = routes.AltAmendsController.altAmendsSelected()) {
 
+        @govukCheckboxes(Checkboxes(
+            fieldset = Some(Fieldset(
+                legend = Some(Legend(
+                    content = Text(ersUtil.getPageElement(schemeId, ersUtil.PAGE_ALT_AMENDS, "question")),
+                    classes = "govuk-fieldset__legend--l",
+                    isPageHeading = true
+                ))
+            )),
+            errorMessage = if(flash.get("alt-amends-not-selected-error").isDefined) Some(ErrorMessage(
+                content = Text(flash.get("alt-amends-not-selected-error").getOrElse(""))
+            )) else None,
+            hint = Some(Hint(content = Text(ersUtil.getPageElement(schemeId, ersUtil.PAGE_ALT_AMENDS, "instruction")))),
+            name = "altAmends",
+            items = Seq(
+                CheckboxItem(
+                    content = Text(ersUtil.getPageElement(schemeId, ersUtil.PAGE_ALT_AMENDS, "option_1")),
+                    id = Some("alt-terms-check-box"),
+                    name = Some("altAmendsTerms"),
+                    value = ersUtil.OPTION_YES,
+                    checked = altAmends.altAmendsTerms.getOrElse("") == ersUtil.OPTION_YES
+                ),
+                CheckboxItem(
+                    content = Text(ersUtil.getPageElement(schemeId, ersUtil.PAGE_ALT_AMENDS, "option_2")),
+                    id = Some("alt-eligibility-check-box"),
+                    name = Some("altAmendsEligibility"),
+                    value = ersUtil.OPTION_YES,
+                    checked = altAmends.altAmendsEligibility.getOrElse("") == ersUtil.OPTION_YES
+                ),
+                CheckboxItem(
+                    content = Text(ersUtil.getPageElement(schemeId, ersUtil.PAGE_ALT_AMENDS, "option_3")),
+                    id = Some("alt-exchange-check-box"),
+                    name = Some("altAmendsExchange"),
+                    value = ersUtil.OPTION_YES,
+                    checked = altAmends.altAmendsExchange.getOrElse("") == ersUtil.OPTION_YES
+                ),
+                CheckboxItem(
+                    content = Text(ersUtil.getPageElement(schemeId, ersUtil.PAGE_ALT_AMENDS, "option_4")),
+                    id = Some("variations-check-box"),
+                    name = Some("altAmendsVariations"),
+                    value = ersUtil.OPTION_YES,
+                    checked = altAmends.altAmendsVariations.getOrElse("") == ersUtil.OPTION_YES
+                ),
+                CheckboxItem(
+                    content = Text(ersUtil.getPageElement(schemeId, ersUtil.PAGE_ALT_AMENDS, "option_5")),
+                    id = Some("other-check-box"),
+                    name = Some("altAmendsOther"),
+                    value = ersUtil.OPTION_YES,
+                    checked = altAmends.altAmendsOther.getOrElse("") == ersUtil.OPTION_YES
+                )
+            )
+        ))
+
+        @govukInsetText(InsetText(
+            content = Text(ersUtil.getPageElement(schemeId, ersUtil.PAGE_ALT_AMENDS, "alert")),
+            id = Some("declaration")
+        ))
+
+        @govukButton(Button(
+            inputType = Some("submit"),
+            content = Text(messages("ers_alt_amends.continue")),
+            attributes = Map("id" -> "continue"),
+        ))
+    }
 }

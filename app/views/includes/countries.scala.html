@@ -14,15 +14,25 @@
  * limitations under the License.
  *@
 
-@import utils.CountryCodes
+@import _root_.utils.CountryCodes
 
-@(countryVal: Option[String])(implicit countryCodes: CountryCodes)
+@this(govukSelect: GovukSelect)
 
-<label for="country"></label><select id="country"  class="drop-down" name="country">
-    <option value="">Select...</option>
-    @for(country <- countryCodes.countriesMap.sortBy(_.country)) {
-    <option value = @country.countryCode @if(countryVal.contains(country.countryCode)) {selected}>
-    @country.country
-    </option>
-    }
-</select>
+@(countryVal: Option[String])(implicit countryCodes: CountryCodes, messages: Messages)
+
+@govukSelect(Select(
+    id = "country",
+    name = "country",
+    classes = "govuk-!-width-one-half",
+    items = Seq(SelectItem(value = Some(""), text = "Select...")) ++
+            countryCodes.countriesMap.sortBy(_.country).map { country =>
+                SelectItem(
+                    value = Some(country.countryCode),
+                    text = country.country,
+                    selected = if(countryVal.getOrElse("") == country.country) true else false
+                )
+            },
+    label = Label(
+        content = Text(messages("ers_scheme_organiser.country"))
+    )
+))

@@ -15,15 +15,26 @@
  *@
 
 @import config.ApplicationConfig
+@import views.html.govuk_wrapper
 
-@this(implicit val config: ApplicationConfig)
+@this(
+        govuk_wrapper: govuk_wrapper,
+        govukBackLink: GovukBackLink,
+        hmrcPageHeading: HmrcPageHeading,
+        govukButton: GovukButton
+)
 
-@(loginScreenUrl: String)(implicit request: Request[AnyContent], messages: Messages)
+@(loginScreenUrl: String)(implicit request: Request[AnyContent], messages: Messages, appConfig: ApplicationConfig)
 
-@ers_main(title = messages("ers.app_title"), scripts=Html(""), showSignOutLink = false){
- <p class="font-xsmall"><a href="javascript:history.go(-1)" class="link-back">@Html(messages("ers.back"))</a></p>
+@govuk_wrapper(title = messages("ers.app_title"), disableSignOut = true){
 
- <p class="heading-xlarge">@Html(messages("ers_signed_out.info"))</p>
+ @hmrcPageHeading(PageHeading(
+  text = messages("ers_signed_out.info")
+ ))
 
- <p><a class="button" href="@loginScreenUrl">@Html(messages("ers_signed_out.link"))</a></p>
+ @govukButton(Button(
+  content = Text(messages("ers_signed_out.link")),
+  href = Some(loginScreenUrl),
+  attributes = Map("id" -> "continue")
+ ))
 }

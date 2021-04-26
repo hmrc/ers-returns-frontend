@@ -168,7 +168,7 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
     } recover {
       case e: Exception =>
         Logger.warn(s"[GroupSchemeController][showGroupSchemePage] Fetching GroupSchemeInfo from the cache failed: $e")
-        val form = RS_groupScheme(Some(""))
+        val form = RS_groupScheme(Some(ersUtil.DEFAULT))
         Ok(groupView(requestObject, Some(ersUtil.DEFAULT), RsFormMappings.groupForm.fill(form)))
     }
   }

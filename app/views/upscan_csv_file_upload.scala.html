@@ -14,19 +14,27 @@
  * limitations under the License.
  *@
 
-@import views.html.templates._
-@import views.html.includes.upscan_file_upload_form
-
-@import utils.ERSUtil
+@import _root_.utils.ERSUtil
 @import config.ApplicationConfig
+@import views.html.govuk_wrapper
+@import views.html.includes.upscan_file_upload_form
+@import views.html.templates.reference
 
-@this(config: ApplicationConfig)
+@this(
+        govuk_wrapper: govuk_wrapper,
+        upscan_file_upload_form: upscan_file_upload_form,
+        govukErrorSummary: GovukErrorSummary,
+        govukBackLink: GovukBackLink,
+        govukInsetText: GovukInsetText
+)
 
 @(requestObject: RequestObject, upscanInitiateResponse: UpscanInitiateResponse, fileId: String)(implicit request: Request[AnyRef], messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
+
 @schemeId = @{requestObject.getSchemeId}
 
 @scripts = {
-    <script src='@routes.Assets.versioned("javascripts/ers_csv_scripts.js")'> </script>
+    <script src='@routes.Assets.versioned("/javascripts/fileUploadValidation.js")'></script>
+    <script src='@routes.Assets.versioned("/javascripts/welshTranslation.js")'></script>
 }
 
 @uploadFileHeader = @{
@@ -36,29 +44,36 @@
 }
 
 @pageTitle = @{
-  uploadFileHeader + " " + messages("ers.title.postfix").toString
+  uploadFileHeader + " " + messages("ers.title.postfix")
 }
 
-@ers_main(title = pageTitle.toString, scripts) {
-
+@govuk_wrapper(title = pageTitle, Some(scripts)) {
     @reference(requestObject.getPageTitle)
-    <p class="font-xsmall"><a href="@routes.CheckCsvFilesController.checkCsvFilesPage" class="link-back">@messages("ers.back")</a></p>
 
-    <div id="errors" class="flash error-summary error-summary--show validation-summary visibility" role="group" aria-labelledby="error-summary-heading" tabindex="-1">
-        <h2 class="heading-medium error-summary-heading" id="error-summary-heading">
-        @messages("validation.summary.heading")
+    @govukBackLink(BackLink(
+        href = routes.CheckCsvFilesController.checkCsvFilesPage.url,
+    ))
+
+    <div class="govuk-error-summary govuk-!-display-none" aria-labelledby="error-summary-title" role="alert" tabindex="-1" data-module="govuk-error-summary">
+        <h2 class="govuk-error-summary__title" id="error-summary-title">
+            @messages("validation.summary.heading")
         </h2>
-        <ul class="js-error-summary-messages">
-            <li><a href="#file-uploader" data-focuses="file-uploader">@messages("csv_file_upload.summary_error")</a></li>
-        </ul>
+        <div class="govuk-error-summary__body">
+            <ul class="govuk-list govuk-error-summary__list">
+            </ul>
+        </div>
     </div>
 
-    <label class="form-label" id="fileName" for="fileToUpload" data-file-name="@messages(ersUtil.getPageElement(schemeId, ersUtil.PAGE_CHECK_CSV_FILE,fileId+".file_name"))">
-      @messages("csv_file_upload.upload_your_file", messages(ersUtil.getPageElement(schemeId, ersUtil.PAGE_CHECK_CSV_FILE,fileId+".file_name")))
-    </label>
-    @upscan_file_upload_form(".csv", upscanInitiateResponse.formFields, upscanInitiateResponse.postTarget, uploadFileHeader)
-    <div class="panel-indent">
-        <p>@messages("file_upload.delay.csv")</p>
-    </div>
+    @upscan_file_upload_form(
+        ".csv",
+        upscanInitiateResponse.formFields,
+        upscanInitiateResponse.postTarget,
+        uploadFileHeader,
+        schemeId,
+        fileId
+    )
 
+    @govukInsetText(InsetText(
+        content = Text(messages("file_upload.delay.csv"))
+    ))
 }

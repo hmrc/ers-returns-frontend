@@ -1,3 +1,5 @@
+service.name = Cyflwyno eich Datganiad Blynyddol ar gyfer ERS
+
 ers.csop = Cynllun Opsiwn Prynu Cyfranddaliadau Cwmni
 ers.emi = Cymhellion Rheoli Mentrau
 ers.saye =Cynilo Wrth Ennill
@@ -102,7 +104,7 @@ ers_start.emi.relevant_bullet_3 =gellir nodi manylion is-gwmni cymwys â llaw ne
 ers_start.saye.relevant_bullet_3 = gellir nodi manylion aelodau’r cynllun grŵp â llaw neu drwy eu huwchlwytho mewn ffeil .csv
 ers_start.sip.relevant_bullet_3 = gellir nodi manylion aelodau’r plan grŵp â llaw neu drwy eu huwchlwytho mewn ffeil .csv
 ers_start.other.relevant_bullet_3 = gellir nodi manylion unrhyw gwmnïau eraill a gwmpesir gan y Datganiad hwn â llaw neu drwy eu huwchlwytho mewn ffeil .csv
-ers_start.filesize = E-bostiwch <a href="mailto:shareschemes@hmrc.gsi.gov.uk">shareschemes@hmrc.gsi.gov.uk</a> a byddwn yn eich helpu gyda’ch cyflwyniad.
+ers_start.filesize = E-bostiwch <a class="govuk-link" href="mailto:shareschemes@hmrc.gsi.gov.uk">shareschemes@hmrc.gsi.gov.uk</a> a byddwn yn eich helpu gyda’ch cyflwyniad.
 ers_start.start_now_button = Dechrau nawr
 ers_choose.title = Digwyddiadau i’w nodi
 ers_choose.csop.question = A oes opsiynau wedi eu caniatáu, wedi eu harfer, wedi eu rhyddhau (gan gynnwys cyfnewidfeydd), wedi dod i ben neu wedi eu dileu, yn ystod y flwyddyn dreth?
@@ -264,6 +266,7 @@ ers_manual_company_details.addressLine2 = Ail linell y cyfeiriad
 ers_manual_company_details.addressLine3 =Trydedd linell y cyfeiriad
 ers_manual_company_details.addressLine4 =Pedwaredd linell y cyfeiriad
 ers_manual_company_details.postcode = Cod post (dewisol)
+ers_manual_company_details.postcode.hint = Er enghraifft, AA1 1AA
 ers_manual_company_details.postcode_zipcode = Cod post/Cod ‘ZIP’
 ers_manual_company_details.country =Gwlad (dewisol)
 ers_manual_company_details.company_reg_number = Rhif Cofrestru’r Cwmni (dewisol)
@@ -539,6 +542,7 @@ ers_trustee_details.addressLine3 = Trydedd linell y cyfeiriad
 ers_trustee_details.addressLine4 = Pedwaredd linell y cyfeiriad
 ers_trustee_details.postcode = Cod post (dewisol)
 ers_trustee_details.postcode_zipcode = Cod post/Cod ‘ZIP’
+ers_trustee_details.postcode.hint = Er enghraifft, AA1 1AA
 ers_trustee_details.country = Gwlad (dewisol)
 ers_trustee_details.err.summary.name_required = Nodwch enw’r ymddiriedolwr
 ers_trustee_details.err.summary.name_size = Lleihau nifer y cymeriadau a nodwyd ar gyfer enw’r ymddiriedolwr

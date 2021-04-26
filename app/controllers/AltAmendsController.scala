@@ -48,17 +48,19 @@ class AltAmendsController @Inject()(val mcc: MessagesControllerComponents,
   }
 
   def showAltActivityPage()(implicit authContext: ERSAuthData, request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
-    (for {
+    ( for {
       requestObject     <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
       groupSchemeInfo   <- ersUtil.fetch[GroupSchemeInfo](ersUtil.GROUP_SCHEME_CACHE_CONTROLLER, requestObject.getSchemeReference)
       altAmendsActivity <- ersUtil.fetch[AltAmendsActivity](ersUtil.altAmendsActivity, requestObject.getSchemeReference).recover {
         case _: NoSuchElementException => AltAmendsActivity("")
       }
     } yield {
-
-      Ok(alterationsActivityView(requestObject, altAmendsActivity.altActivity,
+      Ok(alterationsActivityView(
+        requestObject,
+        altAmendsActivity.altActivity,
         groupSchemeInfo.groupScheme.getOrElse(ersUtil.DEFAULT),
-        RsFormMappings.altActivityForm.fill(altAmendsActivity)))
+        RsFormMappings.altActivityForm.fill(altAmendsActivity)
+      ))
       }).recover {
         case e: Exception =>
           Logger.error(s"[AltAmendsController][showAltActivityPage] Rendering AltAmends view failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")

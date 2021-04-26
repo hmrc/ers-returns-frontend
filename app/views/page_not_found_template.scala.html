@@ -14,28 +14,31 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.play.views.html.layouts.Article
 @import config.ApplicationConfig
+@import views.html.govuk_wrapper
 
-@this(article: Article)
+@this(
+        govuk_wrapper: govuk_wrapper,
+        hmrcPageHeading: HmrcPageHeading
+)
 
 @()(implicit request: Request[_], messages: Messages, appConfig: ApplicationConfig)
 
 @anchor(text: String, url: String) = {<a href="@url">@text</a>}
-@signoutLink = {<li><a href="@appConfig.signOut" id="sign-out">@Html(messages("ers.signout"))</a></li>}
-@commonLinkElement = {@includes.commonLinkElements()}
 
-@mainContent = {
-    <h1>@messages("ers.global.page.not.found.error.heading")</h1>
-    <p>@messages("ers.global.page.not.found.error.check.web.address.correct")</p>
-    <p>@messages("ers.global.page.not.found.error.check.web.address.full")</p>
-    <p>@Html(messages("ers.global.page.not.found.error.contact", anchor(messages("ers.global.page.not.found.error.contact.link.text"), messages("ers.global.page.not.found.error.contact.link"))))</p>
-}
+@govuk_wrapper(title = messages("ers.app_title")) {
 
-@main(title = messages("ers.global.page.not.found.error.title"),
-    linkElement = Some(commonLinkElement),
-    headerNav = Some(views.helpers.HeaderNav(title = Some(messages("ers.header")),
-    showBetaLink = false,
-    links = Some(signoutLink)))) {
-  @article(mainContent)
+    @hmrcPageHeading(PageHeading(
+        text = messages("ers.global.page.not.found.error.heading")
+    ))
+
+    <p class="govuk-body">
+        @messages("ers.global.page.not.found.error.check.web.address.correct")
+    </p>
+    <p class="govuk-body">
+        @messages("ers.global.page.not.found.error.check.web.address.full")
+    </p>
+    <p class="govuk-body">
+        @Html(messages("ers.global.page.not.found.error.contact", anchor(messages("ers.global.page.not.found.error.contact.link.text"), messages("ers.global.page.not.found.error.contact.link"))))
+    </p>
 }
