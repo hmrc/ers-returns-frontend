@@ -1,19 +1,15 @@
 
 import uk.gov.hmrc._
 import DefaultBuildSettings._
-import TestPhases._
 import scoverage.ScoverageKeys
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.publishingSettings
-import uk.gov.hmrc.{SbtArtifactory, SbtAutoBuildPlugin}
+import uk.gov.hmrc.SbtAutoBuildPlugin
 import uk.gov.hmrc.versioning.SbtGitVersioning
 import uk.gov.hmrc.versioning.SbtGitVersioning.autoImport.majorVersion
 
 val appName: String = "ers-returns-frontend"
 
-lazy val appDependencies: Seq[ModuleID] = ???
-lazy val plugins: Seq[Plugins] = Seq(play.sbt.PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin, SbtArtifactory)
-lazy val playSettings: Seq[Setting[_]] = Seq.empty
-lazy val testPhases = TestPhases
+lazy val plugins: Seq[Plugins] = Seq(play.sbt.PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin)
 
 lazy val scoverageSettings = {
   Seq(
@@ -27,7 +23,6 @@ lazy val scoverageSettings = {
 lazy val microservice = Project(appName, file("."))
   .enablePlugins(plugins: _*)
   .settings(
-    playSettings,
     scoverageSettings,
     publishingSettings,
     scalaSettings,
@@ -43,17 +38,10 @@ lazy val microservice = Project(appName, file("."))
     TwirlKeys.templateImports +=
       "models.upscan.{UpscanInitiateResponse, UpscanCsvFilesCallbackList, UpscanCsvFilesCallback}",
     routesImport += "models.upscan.UploadId",
-    inConfig(TemplateTest)(Defaults.testSettings),
-    inConfig(TemplateItTest)(Defaults.itSettings),
     PlayKeys.playDefaultPort := 9290,
     majorVersion := 1,
     integrationTestSettings(),
-    resolvers := Seq(
-      Resolver.bintrayRepo("hmrc", "releases"),
-      "hmrc-releases" at "https://artefacts.tax.service.gov.uk/artifactory/hmrc-releases/",
-      Resolver.typesafeRepo("releases"),
-      Resolver.jcenterRepo
-  ))
+  )
   .configs(IntegrationTest)
 
 
