@@ -14,30 +14,54 @@
  * limitations under the License.
  *@
 
-@import views.html.templates.{spinner, header}
-@(fileType: String, formFields: Map[String, String], postTarget: String, headerMsg: String)(implicit messages: Messages)
+@import _root_.utils.ERSUtil
 
-<div id="uploadForm" class="form-group">
-  <form action="@postTarget" method="post" enctype="multipart/form-data">
+@this(
+        govukFileUpload: GovukFileUpload,
+        govukButton: GovukButton,
+        hmrcPageHeading: HmrcPageHeading
+)
 
-    @header(headerMsg)
+@(      fileType: String,
+        formFields: Map[String, String],
+        postTarget: String,
+        headerMsg: String,
+        schemeId: String,
+        fileId: String
+)(implicit request: Request[AnyRef], messages: Messages, ersUtil: ERSUtil)
+
+@expectedFileName = @{ersUtil.getPageElement(schemeId, ersUtil.PAGE_CHECK_CSV_FILE,fileId+".file_name")}
+
+<form method="post" action="@postTarget" enctype="multipart/form-data">
+    @hmrcPageHeading(PageHeading(
+        text = headerMsg
+    ))
 
     @for(field <- formFields) {
-      <input type="hidden" name="@field._1" value="@field._2"/>
+        <input type="hidden" name="@field._1" value="@field._2"/>
     }
 
-    <div class="js-visible mt-3 form-group form-control-wrapper">
-          <input
-            type="file"
-            id="fileToUpload"
-            name="file"
-            accept="@fileType"
-          />
-    </div>
+    @govukFileUpload(FileUpload(
+        name="file",
+        id="fileToUpload",
+        classes = "govuk-!-display-none",
+        attributes = Map("accept" -> s"$fileType"),
+        label = Label(
+            forAttr = Some("fileToUpload"),
+            isPageHeading = false,
+            content = if (fileType == ".csv") Text(messages("csv_file_upload.upload_your_file", messages(expectedFileName))) else Text(""),
+            attributes = if (fileType == ".csv") Map(
+                "data-file-name" -> s"${messages(ersUtil.getPageElement(schemeId, ersUtil.PAGE_CHECK_CSV_FILE,fileId+".file_name"))}")
+                else Map()
+        )
+    ))
 
-    <div class="section" id="file-uploader">
-      <button id="submit" class="button">@messages("ers_group_file_check.check_file_button")</button>
-    </div>
-  </form>
-</div>
-@spinner()
+    @govukButton(Button(
+        inputType = Some("submit"),
+        content = Text(messages("ers_group_file_check.check_file_button")),
+        attributes = Map("id" -> "submit"),
+        disabled = true
+    ))
+
+    <div class="govuk-!-display-none" id="progress-spinner"><img id="progress-spinner-img" src="@routes.Assets.versioned("images/spinner.gif")" alt="Loading ..."/></div>
+</form>

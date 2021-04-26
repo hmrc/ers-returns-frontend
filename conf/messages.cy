@@ -1,3 +1,5 @@
+service.name = Cyflwyno eich Datganiad Blynyddol ar gyfer ERS
+
 ers.csop = Cynllun Opsiwn Prynu Cyfranddaliadau Cwmni
 ers.emi = Cymhellion Rheoli Mentrau
 ers.saye =Cynilo Wrth Ennill
@@ -18,6 +20,7 @@ ers.eoy = blynyddol
 ers.nil = dim
 ers.invalidCharacters = Dileu cymeriadau annilys
 ers.error.title = Heb awdurdod
+ers.warning = Rhybudd
 
 ers.scheme.CSOP = Cynllun Opsiwn Prynu Cyfranddaliadau Cwmni (CSOP)
 ers.scheme.EMI = Cymhellion Rheoli Mentrau (EMI)
@@ -102,7 +105,7 @@ ers_start.emi.relevant_bullet_3 =gellir nodi manylion is-gwmni cymwys â llaw ne
 ers_start.saye.relevant_bullet_3 = gellir nodi manylion aelodau’r cynllun grŵp â llaw neu drwy eu huwchlwytho mewn ffeil .csv
 ers_start.sip.relevant_bullet_3 = gellir nodi manylion aelodau’r plan grŵp â llaw neu drwy eu huwchlwytho mewn ffeil .csv
 ers_start.other.relevant_bullet_3 = gellir nodi manylion unrhyw gwmnïau eraill a gwmpesir gan y Datganiad hwn â llaw neu drwy eu huwchlwytho mewn ffeil .csv
-ers_start.filesize = E-bostiwch <a href="mailto:shareschemes@hmrc.gsi.gov.uk">shareschemes@hmrc.gsi.gov.uk</a> a byddwn yn eich helpu gyda’ch cyflwyniad.
+ers_start.filesize = E-bostiwch <a class="govuk-link" href="mailto:shareschemes@hmrc.gsi.gov.uk">shareschemes@hmrc.gsi.gov.uk</a> a byddwn yn eich helpu gyda’ch cyflwyniad.
 ers_start.start_now_button = Dechrau nawr
 ers_choose.title = Digwyddiadau i’w nodi
 ers_choose.csop.question = A oes opsiynau wedi eu caniatáu, wedi eu harfer, wedi eu rhyddhau (gan gynnwys cyfnewidfeydd), wedi dod i ben neu wedi eu dileu, yn ystod y flwyddyn dreth?
@@ -264,6 +267,7 @@ ers_manual_company_details.addressLine2 = Ail linell y cyfeiriad
 ers_manual_company_details.addressLine3 =Trydedd linell y cyfeiriad
 ers_manual_company_details.addressLine4 =Pedwaredd linell y cyfeiriad
 ers_manual_company_details.postcode = Cod post (dewisol)
+ers_manual_company_details.postcode.hint = Er enghraifft, AA1 1AA
 ers_manual_company_details.postcode_zipcode = Cod post/Cod ‘ZIP’
 ers_manual_company_details.country =Gwlad (dewisol)
 ers_manual_company_details.company_reg_number = Rhif Cofrestru’r Cwmni (dewisol)
@@ -539,6 +543,7 @@ ers_trustee_details.addressLine3 = Trydedd linell y cyfeiriad
 ers_trustee_details.addressLine4 = Pedwaredd linell y cyfeiriad
 ers_trustee_details.postcode = Cod post (dewisol)
 ers_trustee_details.postcode_zipcode = Cod post/Cod ‘ZIP’
+ers_trustee_details.postcode.hint = Er enghraifft, AA1 1AA
 ers_trustee_details.country = Gwlad (dewisol)
 ers_trustee_details.err.summary.name_required = Nodwch enw’r ymddiriedolwr
 ers_trustee_details.err.summary.name_size = Lleihau nifer y cymeriadau a nodwyd ar gyfer enw’r ymddiriedolwr
@@ -565,6 +570,7 @@ ers_trustee_summary.name = Enw
 ers_trustee_summary.address = Cyfeiriad
 ers_trustee_summary.action = Camau i’w cymryd
 ers_trustee_summary.altamends.section =Addasiadau a wnaed i’r cynllun hwn
+ers_trustee_summary.trustee_name = Enw’r ymddiriedolwr
 ers.global_errors.message = Mae’n ddrwg gennym, mae problem gyda’r gwasanaeth
 ers.global_errors.heading = Cyflwyno eich Datganiad Blynyddol ar gyfer ERS
 ers.global_errors.title = Mae’n ddrwg gennym, mae problem gyda’r gwasanaeth - Cyflwyno eich Datganiad Blynyddol ar gyfer ERS – GOV.UK

@@ -14,74 +14,106 @@
  * limitations under the License.
  *@
 
-@import utils.ERSUtil
+@import _root_.utils.ERSUtil
 @import config.ApplicationConfig
-@import utils.CountryCodes
+@import _root_.utils.CountryCodes
 @import uk.gov.hmrc.play.views.html.helpers.FormWithCSRF
+@import views.html.templates.reference
 
-@this(form: FormWithCSRF)
+@this(
+		govuk_wrapper: govuk_wrapper,
+		govukBackLink: GovukBackLink,
+		govukSummaryList: GovukSummaryList,
+		govukButton: GovukButton,
+		hmrcPageHeading: HmrcPageHeading,
+		formWithCSRF: FormWithCSRF
+)
 
 @(requestObject: RequestObject, groupSchemeType: String, companies: CompanyDetailsList)(implicit request: Request[AnyRef], flash: Flash, messages: Messages, countryCodes: CountryCodes, ersUtil: ERSUtil, appConfig: ApplicationConfig)
-@* Is a group scheme template *@
-@schemeId = @{requestObject.getSchemeId}
-@import views.html.templates._
 
-@ers_main(title = ersUtil.getPageElement(schemeId, "ers", "group_summary.page_title") + " " + messages("ers.title.postfix")) {
+@schemeId = @{requestObject.getSchemeId}
+
+@govuk_wrapper(title = ersUtil.getPageElement(schemeId, "ers", "group_summary.page_title") + " " + messages("ers.title.postfix")) {
 
 	@reference(requestObject.getPageTitle)
 
-	<p class="font-xsmall"><a href="@ersUtil.getPageBackLink(schemeId,ersUtil.PAGE_GROUP_SUMMARY,groupSchemeType)" class="link-back">@Html(messages("ers.back"))</a></p>
+	@govukBackLink(BackLink(
+		href = ersUtil.getPageBackLink(schemeId,ersUtil.PAGE_GROUP_SUMMARY,groupSchemeType),
+	))
 
-	@header(ersUtil.getPageElement(schemeId, ersUtil.PAGE_GROUP_SUMMARY, "title"))
+	@hmrcPageHeading(PageHeading(
+		text = ersUtil.getPageElement(schemeId, ersUtil.PAGE_GROUP_SUMMARY, "title")
+	))
 
-	<div class="clear">
-		@form(action = routes.GroupSchemeController.groupPlanSummaryContinue(schemeId)) {
-			@if(groupSchemeType == ersUtil.OPTION_MANUAL) {
-			<div class="panel panel-border-wide">
-				<a href="@routes.GroupSchemeController.manualCompanyDetailsPage()">@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_GROUP_SUMMARY, "add_company"))</a>
-			</div>
-			}
-			@for((company, index) <- companies.companies.zipWithIndex) {
-			<table>
-			  <thead>
-				<tr>
-					<th scope="col" id="group-plan-summary-name">@company.companyName</th>
-					<th id="group-plan-summary-address" class="group-plan-summary-action-text-align"><a href="@routes.GroupSchemeController.editCompany(index)">@Html(messages("ers.change_this"))</a>&nbsp;&nbsp;&nbsp;<a href="@routes.GroupSchemeController.deleteCompany(index)">@Html(messages("ers.delete"))</a></th>
-				</tr>
-			  </thead>
-			  <tbody>
+	@formWithCSRF(action = routes.GroupSchemeController.groupPlanSummaryContinue(schemeId)) {
 
-				<tr>
-				  <td class="group-plan-name-summary-text-align">@Html(messages("ers_group_summary.address"))</td>
-				  <td class="group-plan-name-summary-text-align">
-					  @company.addressLine1@if(company.addressLine2.getOrElse("") != ""){, @company.addressLine2}@if(company.addressLine3.getOrElse("") != ""){, @company.addressLine3}@if(company.addressLine4.getOrElse("") != ""){, @company.addressLine4}@if(company.postcode.getOrElse("") != ""){, @company.postcode}@if(company.country.getOrElse("") != ""){, @countryCodes.getCountry(company.country.get)}
-				  </td>
-				</tr>
-				@if(company.country.isDefined){@if(company.country.get == ersUtil.DEFAULT_COUNTRY) {
-					@if(company.companyReg.isDefined) {
-						<tr>
-							<td class="group-plan-name-summary-text-align">@Html(messages("ers_group_summary.crn"))</td>
-							<td class="group-plan-summary-text-align">@company.companyReg</td>
-						</tr>
-					}
-					@if(company.corporationRef.isDefined) {
-						<tr>
-							<td class="group-plan-name-summary-text-align">@Html(messages("ers_group_summary.ctr"))</td>
-							<td class="group-plan-summary-text-align">@company.corporationRef</td>
-						</tr>
-					}
-				}}
-			  </tbody>
-			</table>
-			}
-			@if(groupSchemeType == ersUtil.OPTION_CSV) {
-			<h2>@Html(messages("ers_group_summary.notice"))</h2>
-			<p>@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_GROUP_SUMMARY, "notice_info"))&nbsp;<a href="routes.GroupSchemeController.groupCheckCSVFilePage()" id="check-another-return-file-link">@Html(messages("ers_group_summary.notice_info2"))</a>.<p/>
-			}
-			<div @if(groupSchemeType == ersUtil.OPTION_MANUAL) {class="group-plan-summary-margin"}>
-			<button role="button" id="continue" class="button" type="submit" @if(companies.companies.isEmpty) {disabled="disabled"}>@Html(messages("ers.continue"))</button>
-			</div>
+		<a class="govuk-link govuk-inset-text govuk-!-display-inline-block govuk-!-margin-top-0 govuk-!-width-full" href="@routes.GroupSchemeController.manualCompanyDetailsPage()">@ersUtil.getPageElement(schemeId, ersUtil.PAGE_GROUP_SUMMARY, "add_company")</a>
+
+		@for((company, index) <- companies.companies.zipWithIndex) {
+			@govukSummaryList(SummaryList(
+				rows = {
+					val companyNameSummary = SummaryListRow(
+						key = Key(
+							classes = "govuk-!-width-one-quarter",
+							content = Text(messages("ers_group_summary.company_name"))
+						),
+						value = Value(
+							classes = "govuk-!-width-one-half govuk-!-font-weight-bold",
+							content = Text(company.companyName)
+						),
+						actions = Some(Actions(
+							classes = "govuk-!-width-one-quarter",
+							items = Seq(
+								ActionItem(
+									href = routes.GroupSchemeController.editCompany(index).url,
+									content = Text(messages("ers.change_this")),
+									visuallyHiddenText = Some(company.companyName)
+								),
+								ActionItem(
+									href = routes.GroupSchemeController.deleteCompany(index).url,
+									content = Text(messages("ers.delete")),
+									visuallyHiddenText = Some(company.companyName)
+								)
+							)
+						))
+					)
+					val addressSummary = SummaryListRow(
+						key = Key(
+							content = Text(messages("ers_group_summary.address"))
+						),
+						value = Value(
+							content = Text(ersUtil.buildAddressSummary(company))
+						)
+					)
+					val crnSummary = SummaryListRow(
+						key = Key(
+							content = Text(messages("ers_group_summary.crn"))
+						),
+						value = Value(
+							content = Text(company.companyReg.getOrElse(""))
+						)
+					)
+					val ctrSummary = SummaryListRow(
+						key = Key(
+							content = Text(messages("ers_group_summary.ctr"))
+						),
+						value = Value(
+							content = Text(company.corporationRef.getOrElse(""))
+						)
+					)
+
+					Seq(companyNameSummary, addressSummary) ++
+					{if(company.country.getOrElse("") == ersUtil.DEFAULT_COUNTRY && company.companyReg.isDefined) Seq(crnSummary) else None} ++
+					{if(company.country.getOrElse("") == ersUtil.DEFAULT_COUNTRY && company.corporationRef.isDefined) Seq(ctrSummary) else None}
+				}
+			))
 		}
-	</div>
 
+		@govukButton(Button(
+			inputType = Some("submit"),
+			content = Text(messages("ers.continue")),
+			attributes = Map("id" -> "continue"),
+			disabled = companies.companies.isEmpty
+		))
+	}
 }

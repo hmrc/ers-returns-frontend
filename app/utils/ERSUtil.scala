@@ -17,12 +17,11 @@
 package utils
 
 import java.util.concurrent.TimeUnit
-
 import config.{ApplicationConfig, ERSShortLivedCache, ERSShortLivedHttpCache}
+
 import javax.inject.{Inject, Singleton}
 import metrics.Metrics
-import models.{ErsMetaData, ErsSummary, GroupSchemeInfo, ReportableEvents, SchemeOrganiserDetails, TrusteeDetailsList}
-import models.{AltAmendsActivity, AlterationAmends, CheckFileType, CompanyDetailsList}
+import models._
 import org.joda.time.DateTime
 import play.api.Logger
 import play.api.libs.json
@@ -38,9 +37,9 @@ import scala.concurrent.{ExecutionContext, Future}
 class ERSUtil @Inject()(val sessionService: SessionService,
 												val shortLivedCache: ERSShortLivedCache,
 											  val appConfig: ApplicationConfig
-											 )(implicit val ec: ExecutionContext) extends PageBuilder with JsonParser with Metrics with HMACUtil {
+											 )(implicit val ec: ExecutionContext, countryCodes: CountryCodes) extends PageBuilder with JsonParser with Metrics with HMACUtil {
 
-	val largeFileStatus = "largefiles"
+  val largeFileStatus = "largefiles"
 	val savedStatus = "saved"
 	val ersMetaData: String = "ErsMetaData"
 	val ersRequestObject: String = "ErsRequestObject"
@@ -246,6 +245,62 @@ class ERSUtil @Inject()(val sessionService: SessionService,
 		} else {
 			sessionService.getSuccessfulCallbackRecord.map(res => res.flatMap(_.noOfRows))
 		}
+	}
+
+	final def concatAddress(optionalAddressLines: List[Option[String]], existingAddressLines: String): String = {
+		val definedStrings = optionalAddressLines.flatten
+		existingAddressLines ++ definedStrings.map(addressLine => ", " + addressLine).mkString("")
+	}
+
+	def buildAddressSummary[A](entity: A): String = {
+		entity match {
+			case companyDetails: CompanyDetails =>
+				val optionalAddressLines = List(
+					companyDetails.addressLine2,
+					companyDetails.addressLine3,
+					companyDetails.addressLine4,
+					companyDetails.postcode,
+					countryCodes.getCountry(companyDetails.country.getOrElse(""))
+				)
+				concatAddress(optionalAddressLines, companyDetails.addressLine1)
+			case trusteeDetails: TrusteeDetails =>
+				val optionalAddressLines = List(trusteeDetails.addressLine2,
+					trusteeDetails.addressLine3,
+					trusteeDetails.addressLine4,
+					trusteeDetails.postcode,
+					countryCodes.getCountry(trusteeDetails.country.getOrElse(""))
+				)
+				concatAddress(optionalAddressLines, trusteeDetails.addressLine1)
+			case _ => ""
+		}
+	}
+
+	final def concatEntity(optionalLines: List[Option[String]], existingEntityLines: String): String = {
+		val definedStrings = optionalLines.flatten
+		existingEntityLines ++ definedStrings.map(addressLine => ", " + addressLine).mkString("")
+	}
+
+	def buildEntitySummary(entity: SchemeOrganiserDetails): String = {
+		val optionalLines = List(
+			entity.addressLine2,
+			entity.addressLine3,
+			entity.addressLine4,
+			entity.country,
+			entity.postcode,
+			entity.companyReg,
+			entity.corporationRef
+		)
+		concatEntity(optionalLines, s"${entity.companyName}, ${entity.addressLine1}")
+	}
+
+	def buildCompanyNameList(companyDetailsList: List[CompanyDetails], n: Int = 0, companyNamesList: String = ""): String = {
+				if (n == companyDetailsList.length) { companyNamesList }
+				else { buildCompanyNameList(companyDetailsList, n + 1, companyNamesList + companyDetailsList(n).companyName + "<br>") }
+	}
+
+	def buildTrusteeNameList(trusteeDetailsList: List[TrusteeDetails], n: Int = 0, trusteeNamesList: String = ""): String = {
+		if (n == trusteeDetailsList.length) { trusteeNamesList }
+		else { buildTrusteeNameList(trusteeDetailsList, n + 1, trusteeNamesList + trusteeDetailsList(n).name + "<br>") }
 	}
 
 	private def getCacheId (implicit hc: HeaderCarrier): String = {

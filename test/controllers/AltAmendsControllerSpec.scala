@@ -66,9 +66,8 @@ class AltAmendsControllerSpec extends UnitSpec with ERSFakeApplicationConfig wit
                                           alterationsActivityView: alterations_activity = app.injector.instanceOf[alterations_activity],
                                           alterationsAmendsView: alterations_amends = app.injector.instanceOf[alterations_amends],
                                           globalErrorView: global_error = app.injector.instanceOf[global_error]
-                                        ): AltAmendsController = new AltAmendsController (mockMCC, mockAuthConnector, mockErsUtil, mockAppConfig, alterationsActivityView,
-      alterationsAmendsView,
-      globalErrorView) {
+                                        ): AltAmendsController =
+      new AltAmendsController (mockMCC, mockAuthConnector, mockErsUtil, mockAppConfig, alterationsActivityView, alterationsAmendsView, globalErrorView) {
       when(mockErsUtil.fetch[GroupSchemeInfo](ArgumentMatchers.eq("group-scheme-controller"), any())(any(), any(), any()))
         .thenReturn(groupSchemeActivity)
 
@@ -80,6 +79,7 @@ class AltAmendsControllerSpec extends UnitSpec with ERSFakeApplicationConfig wit
       when(mockErsUtil.cache(ArgumentMatchers.eq("alt-activity"), any(), any())(any(), any(), any()))
 				.thenReturn(cache)
 
+      when(mockErsUtil.getPageElement(any(), any(), any(), any())(any())).thenCallRealMethod()
     }
 
 

@@ -78,6 +78,7 @@ class GroupSchemeControllerSpec extends UnitSpec with ErsTestHelper with ERSFake
 		when(mockErsUtil.SCHEME_SIP).thenReturn("5")
 		when(mockErsUtil.OPTION_YES).thenReturn("1")
 		when(mockErsUtil.OPTION_NO).thenReturn("2")
+    when(mockErsUtil.getPageElement(any(), any(), any(), any())(any())).thenCallRealMethod()
 	}
 
   lazy val testGroupSchemeController: GroupSchemeController = new GroupSchemeController(
@@ -148,7 +149,7 @@ class GroupSchemeControllerSpec extends UnitSpec with ErsTestHelper with ERSFake
     "display error if showManualCompanyDetailsSubmit is called with authentication and form errors" in {
       val result = testGroupSchemeController.showManualCompanyDetailsSubmit(ersRequestObject, 1000)(Fixtures.buildFakeUser, buildCompanyDetailsRequest(isValid = false))
       status(result) shouldBe OK
-      bodyOf(result).contains(Messages("validation.summary.heading")) shouldBe true
+      bodyOf(await(result)) should (include ("govuk-error-summary"))
     }
 
     "redirect to Group Summary page if showManualCompanyDetailsSubmit is called with authentication and correct form data entered for 1st company" in {
@@ -524,7 +525,7 @@ class GroupSchemeControllerSpec extends UnitSpec with ErsTestHelper with ERSFake
       val request = buildGroupSchemeSelectedRequest(None, "CSOP")
       val result = testGroupSchemeController.showGroupSchemeSelected(ersRequestObject, SCHEME_CSOP)(Fixtures.buildFakeUser, request)
       status(result) shouldBe OK
-      bodyOf(result).contains(Messages("validation.summary.heading")) shouldBe true
+      bodyOf(await(result)).contains(Messages("validation.summary.heading")) shouldBe true
     }
 
     "display errors if no data is set" in {

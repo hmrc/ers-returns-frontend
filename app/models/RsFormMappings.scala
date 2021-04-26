@@ -20,6 +20,7 @@ import play.api.data.Forms._
 import play.api.data._
 import play.api.data.validation.Constraints._
 import play.api.i18n.Messages
+import utils.ERSUtil
 
 object RsFormMappings {
 
@@ -98,9 +99,7 @@ object RsFormMappings {
     "files" -> list(
       mapping(
         "fileId" -> text.verifying("required field", _.nonEmpty)
-					.verifying(Messages("ers.invalidCharacters"), so => validInputCharacters(so, csvFileNameRegx)),
-        "isSelected" -> optional(text.verifying("required field", _.nonEmpty)
-					.verifying(Messages("ers.invalidCharacters"), so => validInputCharacters(so, yesNoRegPattern)))
+					.verifying(Messages("ers.invalidCharacters"), so => validInputCharacters(so, csvFileNameRegx))
       )(CsvFiles.apply)(CsvFiles.unapply)
     )
   )(CsvFilesList.apply)(CsvFilesList.unapply))

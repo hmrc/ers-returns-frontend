@@ -16,20 +16,20 @@
 
 @import config.ApplicationConfig
 
-@this(config: ApplicationConfig)
+@this(
+        govuk_wrapper: govuk_wrapper,
+        hmrcPageHeading: HmrcPageHeading
+)
 
 @(pageTitle: String, heading: String, message: String)(implicit request: Request[_], messages: Messages, appConfig: ApplicationConfig)
 
+@govuk_wrapper(title = messages(pageTitle)) {
 
-@contentHeaderHtml = {
-	<h1>@messages(heading)</h1>
+ @hmrcPageHeading(PageHeading(
+  text = messages(heading)
+ ))
+
+ <p class="govuk-body">
+  @messages(message)
+ </p>
 }
-
-@mainContentHtml = {
-	<p>@messages(message)</p>
-}
-
-@signoutLink = {<a href="@appConfig.signOut" id="sign-out">@messages("ers.signout")</a>}
-
-@main(title = messages(pageTitle), contentHeader = Some(contentHeaderHtml),
-	headerNav = Some(views.helpers.HeaderNav(title = Some(messages("ers.header")), showBetaLink = false, links = Some(signoutLink))))(mainContent = mainContentHtml)

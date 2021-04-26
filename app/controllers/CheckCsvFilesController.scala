@@ -94,7 +94,7 @@ class CheckCsvFilesController @Inject()(val mcc: MessagesControllerComponents,
   }
 
   def createCacheData(csvFilesList: List[CsvFiles]): UpscanCsvFilesList = {
-    val ids = for(fileData <- csvFilesList if fileData.isSelected.contains(ersUtil.OPTION_YES)) yield {
+    val ids = for(fileData <- csvFilesList) yield {
       UpscanIds(UploadId.generate, fileData.fileId, NotStarted)
     }
     UpscanCsvFilesList(ids)

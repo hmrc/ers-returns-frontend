@@ -14,52 +14,72 @@
  * limitations under the License.
  *@
 
-@import utils.ERSUtil
+@import _root_.utils.ERSUtil
 @import config.ApplicationConfig
-@import uk.gov.hmrc.play.views.html.helpers.FormWithCSRF
+@import views.html.templates.reference
 
-@this(form: FormWithCSRF)
+@this(
+        govukErrorSummary: GovukErrorSummary,
+        govuk_wrapper: govuk_wrapper,
+        govukBackLink: GovukBackLink,
+        formWithCSRF: FormWithCSRF,
+        govukCheckboxes: GovukCheckboxes,
+        govukButton: GovukButton
+)
 
 @(requestObject: RequestObject, csvFilesList: CsvFilesList)(implicit request: Request[AnyRef], flash: Flash, messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
-@import views.html.templates._
+
 @schemeId = @{requestObject.getSchemeId}
 
-@ers_main(title = messages("ers.choose_csv_files.page_title")) {
+@govuk_wrapper(title = messages("ers.choose_csv_files.page_title")) {
     @reference(requestObject.getPageTitle)
-    <p class="font-xsmall"><a href="@routes.CheckFileTypeController.checkFileTypePage" class="link-back">@Html(messages("ers.back"))</a></p>
 
-    @if(flash.get("csv-file-not-selected-error").isDefined){
-        <div class="flash error-summary error-summary--show " id="error-summary-display" role="alert" aria-labelledby="error-summary-heading" tabindex="-1">
-            <h2 id="error-summary-heading" class="h3-heading">@Html(messages("validation.summary.heading"))</h2>
-            <ul class="js-error-summary-messages">
-                <li>
-                    <a href="#error-summary" data-focuses="error-summary">@flash.get("csv-file-not-selected-error")</a>
-                </li>
-            </ul>
-        </div>
-    }
+    @govukBackLink(BackLink(
+        href = routes.CheckFileTypeController.checkFileTypePage.url,
+    ))
 
-    @form(action = routes.CheckCsvFilesController.checkCsvFilesPageSelected()) {
-        <div class='form-group @if(flash.get("csv-file-not-selected-error").isDefined){ form-field--error }'>
-            <fieldset>
-                <legend>
-                    @header(messages("ers_check_csv_file.title"))
-                </legend>
-                <span class="form-hint">@messages("ers_check_csv_options.hint")</span>
-                <div aria-labelledby="error-heading" class="error-notification" id="error-summary" role="alert" tabindex="-1">
-                    <span id="error-heading">@flash.get("csv-file-not-selected-error")</span>
-                </div>
-                <div class="form-field">
-                    @for((file, index) <- csvFilesList.files.zipWithIndex) {
-                        <input type="hidden" name="files[@index].fileId" value="@file.fileId" />
-                        <div class="multiple-choice">
-                            <input id="@file.fileId" type="checkbox" name="files[@index].isSelected" value=@ersUtil.OPTION_YES @(if(file.isSelected.getOrElse("") == ersUtil.OPTION_YES) "checked") />
-                            <label for="@file.fileId" class=" @(if(file.isSelected.getOrElse("") == ersUtil.OPTION_YES) "selected")">@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_CHECK_CSV_FILE, file.fileId + ".description"))<br></label>
-                        </div>
-                    }
-                </div>
-            </fieldset>
-        </div>
-        <input role="button" id="continue" class="button" type="submit" value='@Html(messages("ers_check_csv_file.continue"))'>
+    @formWithCSRF(action = routes.CheckCsvFilesController.checkCsvFilesPageSelected()) {
+
+        @if(flash.get("csv-file-not-selected-error").isDefined) {
+            @govukErrorSummary(ErrorSummary(
+                title = Text(messages("validation.summary.heading")),
+                errorList = Seq(ErrorLink(
+                    content = Text(flash.get("csv-file-not-selected-error").getOrElse("")),
+                    href = Some(s"#choose-${requestObject.getSchemeName.toLowerCase}-csv-type-hint")
+                ))
+            ))
+        }
+
+        @govukCheckboxes(Checkboxes(
+            fieldset = Some(Fieldset(
+                legend = Some(Legend(
+                    content = Text(messages("ers_check_csv_file.title")),
+                    classes = "govuk-fieldset__legend--l",
+                    isPageHeading = true
+                ))
+            )),
+            hint = Some(Hint(
+                content = Text(messages("ers_check_csv_options.hint"))
+            )),
+            errorMessage =
+                    if (flash.get("csv-file-not-selected-error").isDefined)
+                        Some(ErrorMessage(content = Text(flash.get("csv-file-not-selected-error").getOrElse(""))))
+                    else None,
+            name = s"choose-${requestObject.getSchemeName.toLowerCase}-csv-type",
+            items = csvFilesList.files.map { file =>
+                CheckboxItem(
+                    content = Text(ersUtil.getPageElement(schemeId, ersUtil.PAGE_CHECK_CSV_FILE, file.fileId + ".description")),
+                    value = file.fileId,
+                    name = Some(s"files[${file.fileId.last}].fileId"),
+                    id = Some(file.fileId)
+                )
+            }
+        ))
+
+        @govukButton(Button(
+            inputType = Some("submit"),
+            content = Text(messages("ers.continue")),
+            attributes = Map("id" -> "continue")
+        ))
     }
 }

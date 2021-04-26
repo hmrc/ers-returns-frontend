@@ -14,46 +14,76 @@
  * limitations under the License.
  *@
 
-@import utils.ERSUtil
+@import _root_.utils.ERSUtil
 @import config.ApplicationConfig
-@import views.html.helpers.error_overview
-@import uk.gov.hmrc.play.views.html.helpers.{FormWithCSRF, ErrorSummary}
+@import views.html.templates.reference
+@import uk.gov.hmrc.govukfrontend.views.html.components.implicits._
 
-
-@this(form: FormWithCSRF, errorSummary: ErrorSummary)
+@this(
+		govukErrorSummary: GovukErrorSummary,
+		govuk_wrapper: govuk_wrapper,
+		govukBackLink: GovukBackLink,
+		formWithCSRF: FormWithCSRF,
+		govukRadios: GovukRadios,
+		govukButton: GovukButton
+)
 
 @(requestObject: RequestObject, activity: Option[String], reportableEvents: Form[models.ReportableEvents])(implicit request: Request[AnyRef], flash: Flash, messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
-@* type of activity template *@
+
 @schemeId = @{requestObject.getSchemeId}
-@import views.html.templates._
 
-@scripts = {<script src='@routes.Assets.versioned("javascripts/ers_scripts.js")'> </script>}
-
-@ers_main(title = messages("ers.reportable_events.page_title"), scripts) {
+@govuk_wrapper(title = messages("ers.reportable_events.page_title")) {
 
 	@reference(requestObject.getPageTitle)
-	<p class="font-xsmall"><a href="@routes.ReturnServiceController.startPage" class="link-back">@Html(messages("ers.back"))</a></p>
-	@if(reportableEvents.hasErrors) {
-		@errorSummary(messages("validation.summary.heading"), reportableEvents)
-	}
-	@form(action = routes.ReportableEventsController.reportableEventsSelected) {
-		<div class="form-group @if(reportableEvents.hasErrors) { form-field--error }">
-			<fieldset class="inline">
-				<legend id="isNilReturn">
-					@header(ersUtil.getPageElement(schemeId, ersUtil.PAGE_CHOOSE, "question"))
-				</legend>
-				@if(reportableEvents.hasErrors){<span class="error-notification">@Html(messages("ers_choose.err.message"))</span>}
-				<div class="multiple-choice">
-					<input id="upload-spreadsheet-radio-button" type="radio" name="isNilReturn" value=@ersUtil.OPTION_UPLOAD_SPREEDSHEET @(if(activity.get == ersUtil.OPTION_UPLOAD_SPREEDSHEET) "checked" else "")>
-					<label id="upload-spreadsheet-radio-buttonLbl" for="upload-spreadsheet-radio-button" class="block-label @(if(activity contains ersUtil.OPTION_UPLOAD_SPREEDSHEET) "selected")">@Html(messages("ers_choose.option_1"))</label>
-				</div>
-				<div class="multiple-choice">
-					<input id="nil-return-radio-button" type="radio" name="isNilReturn" value=@ersUtil.OPTION_NIL_RETURN @(if(activity.get == ersUtil.OPTION_NIL_RETURN) "checked" else "")>
-					<label id="nil-return-radio-buttonLbl" for="nil-return-radio-button" class="block-label @(if(activity contains ersUtil.OPTION_NIL_RETURN) "selected")">@Html(messages("ers_choose.option_2"))</label>
-				</div>
-			</fieldset>
-		</div>
-		<input role="button" id="continue" class="button" type="submit" value="@Html(messages("ers.continue"))">
-		@spinner()
+
+	@govukBackLink(BackLink(
+		href = routes.ReturnServiceController.startPage.url,
+	))
+
+	@formWithCSRF(action = routes.ReportableEventsController.reportableEventsSelected) {
+
+		@if(reportableEvents.hasErrors) {
+			@govukErrorSummary(ErrorSummary(
+				title = Text(messages("validation.summary.heading")),
+				errorList = reportableEvents.errors.asTextErrorLinks
+			))
+		}
+
+		@govukRadios(Radios(
+			fieldset = Some(Fieldset(
+				legend = Some(Legend(
+					content = Text(ersUtil.getPageElement(schemeId, ersUtil.PAGE_CHOOSE, "question")),
+					classes = "govuk-fieldset__legend--l",
+					isPageHeading = true
+				))
+			)),
+			errorMessage =
+				if (reportableEvents.hasErrors)
+				Some(reportableEvents.errors.head).map(err => ErrorMessage(content = Text(messages(err.message, err.args:_*))))
+				else None,
+			name = "isNilReturn",
+			items = Seq(
+				RadioItem(
+					content = Text(messages("ers_choose.option_1")),
+					value = Some(ersUtil.OPTION_UPLOAD_SPREEDSHEET),
+					id = Some("upload-spreadsheet-radio-button"),
+					checked = activity.get == ersUtil.OPTION_UPLOAD_SPREEDSHEET
+				),
+				RadioItem(
+					content = Text(messages("ers_choose.option_2")),
+					value = Some(ersUtil.OPTION_NIL_RETURN),
+					id = Some("nil-return-radio-button"),
+					checked = activity.get == ersUtil.OPTION_NIL_RETURN
+				)
+			),
+			classes = "govuk-radios--inline",
+			attributes = Map("id" -> "isNilReturn")
+		))
+
+		@govukButton(Button(
+			inputType = Some("submit"),
+			content = Text(messages("ers.continue")),
+			attributes = Map("id" -> "continue")
+		))
 	}
 }
