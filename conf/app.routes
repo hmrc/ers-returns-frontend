@@ -1,8 +1,10 @@
 # microservice specific routes
 
 ->          /template                                       template.Routes
+->          /govuk-frontend                                 govuk.Routes
+->          /hmrc-frontend                                  hmrcfrontend.Routes
 
-GET         /assets/*file                               	controllers.Assets.at(path="/public", file)
+GET         /assets/*file                               	controllers.Assets.versioned(path="/public", file)
 
 GET         /upload-ods-file                                controllers.FileUploadController.uploadFilePage()
 GET         /errors-have-been-found-ods                     controllers.FileUploadController.validationFailure()

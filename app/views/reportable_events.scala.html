@@ -27,7 +27,7 @@
 @schemeId = @{requestObject.getSchemeId}
 @import views.html.templates._
 
-@scripts = {<script src='@routes.Assets.at("javascripts/ers_scripts.js")'> </script>}
+@scripts = {<script src='@routes.Assets.versioned("javascripts/ers_scripts.js")'> </script>}
 
 @ers_main(title = messages("ers.reportable_events.page_title"), scripts) {
 
