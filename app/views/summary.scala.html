@@ -15,177 +15,223 @@
  *@
 
 @import config.ApplicationConfig
-@import utils.ERSUtil
-@import utils.CountryCodes
+@import _root_.utils.ERSUtil
+@import _root_.utils.CountryCodes
+@import views.html.templates._
+@import views.html.govuk_wrapper
 
-@this(config: ApplicationConfig)
+@this(
+        govuk_wrapper: govuk_wrapper,
+        govukBackLink: GovukBackLink,
+        govukSummaryList: GovukSummaryList,
+        govukButton: GovukButton,
+        hmrcPageHeading: HmrcPageHeading,
+        govukWarningText: GovukWarningText
+)
 
 @(requestObject: RequestObject, reportableEvents: String, fileType: String, filename: String, fileCount: Int = 0, groupScheme: String, schemeOrganiser: SchemeOrganiserDetails, companies: CompanyDetailsList, altAmendsActivity: String, altAmends: AlterationAmends, trustees: TrusteeDetailsList)(implicit request: Request[AnyRef], flash: Flash, messages: Messages, countryCodes: CountryCodes, ersUtil: ERSUtil, appConfig: ApplicationConfig)
+
 @schemeId = @{requestObject.getSchemeId}
+
 @fileNameMsg = @{if (fileCount == 1) {messages("ers_summary_declaration.file_name")} else {messages("ers_summary_declaration.file_names")}}
 
-@import views.html.templates._
-
-@scripts = {<script src='@routes.Assets.versioned("javascripts/ers_scripts.js")'> </script>}
-
-@ers_main(title = messages("ers.summary.page_title"), scripts) {
+@govuk_wrapper(title = messages("ers.summary.page_title")) {
 
     @reference(requestObject.getPageTitle)
 
-    @if(schemeId == ersUtil.SCHEME_EMI || schemeId == ersUtil.SCHEME_OTHER) {
-        <p class="font-xsmall"><a href="@ersUtil.getPageBackLink(schemeId, ersUtil.PAGE_SUMMARY_DECLARATION, groupScheme)" class="link-back">@Html(messages("ers.back"))</a></p>
-    } else {
-        <p class="font-xsmall"><a href="@ersUtil.getPageBackLink(schemeId, ersUtil.PAGE_SUMMARY_DECLARATION, altAmendsActivity)" class="link-back">@Html(messages("ers.back"))</a></p>
-    }
+    @govukBackLink(BackLink(
+        href = if(schemeId == ersUtil.SCHEME_EMI || schemeId == ersUtil.SCHEME_OTHER)
+                    ersUtil.getPageBackLink(schemeId, ersUtil.PAGE_SUMMARY_DECLARATION, groupScheme)
+                else
+                    ersUtil.getPageBackLink(schemeId, ersUtil.PAGE_SUMMARY_DECLARATION, altAmendsActivity)
+    ))
 
-    @header(messages("ers_summary_declaration.title"))
+    @hmrcPageHeading(PageHeading(
+        text = messages("ers_summary_declaration.title")
+    ))
 
-    <table>
-        <thead>
-            <tr>
-                <th scope="col" id="summary-declaration-col-section">@Html(messages("ers_summary_declaration.section"))</th>
-                <th scope="col" id="summary-declaration-col-answer">@Html(messages("ers_summary_declaration.your_answers"))</th>
-                <th scope="col" id="summary-declaration-col-action"></th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td class="summary-declaration-section-text-align">@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_CHOOSE, "question"))</td>
-                <td class="summary-declaration-text-align">
-                @Html(reportableEvents match {
-                    case ersUtil.OPTION_YES => messages("ers.yes")
-                    case ersUtil.OPTION_NO => messages("ers.no")
-                })
-                </td>
-                <td class="summary-declaration-text-align">
-                    <a href="@routes.ReportableEventsController.reportableEventsPage()">@Html(messages("ers_summary_declaration.change_this"))
-                        <span class="visually-hidden">@ersUtil.getPageElement(schemeId, ersUtil.PAGE_CHOOSE, "question")</span>
-                    </a>
-                </td>
-            </tr>
-            @if(reportableEvents == ersUtil.OPTION_YES) {
-                <tr>
-                    <td class="summary-declaration-section-text-align">
-                    @Html(fileNameMsg)
-                    </td>
-                    <td class="summary-declaration-text-align">@Html(filename)</td>
-                    @if(fileType == ersUtil.OPTION_ODS) {<td class="summary-declaration-text-align">
-                        <a href="@routes.FileUploadController.uploadFilePage()">@Html(messages("ers_summary_declaration.change_this"))
-                            <span class="visually-hidden">@fileNameMsg</span>
-                        </a></td>}
-                    @if(fileType == ersUtil.OPTION_CSV) {<td class="summary-declaration-text-align">
-                        <a href="@routes.CheckCsvFilesController.checkCsvFilesPage()">@Html(messages("ers_summary_declaration.change_this"))
-                            <span class="visually-hidden">@fileNameMsg</span>
-                        </a></td>}
-                </tr>
-            }
-            <tr>
-                <td class="summary-declaration-section-text-align">@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_SUMMARY_DECLARATION, "organiser"))</td>
-                <td class="summary-declaration-text-align">
-                    @Html(schemeOrganiser.companyName)<br>
-                    @Html(schemeOrganiser.addressLine1)<br>
-                    @if(schemeOrganiser.addressLine2.isDefined){@Html(schemeOrganiser.addressLine2.get)<br>}
-                    @if(schemeOrganiser.addressLine3.isDefined){@Html(schemeOrganiser.addressLine3.get)<br>}
-                    @if(schemeOrganiser.addressLine4.isDefined){@Html(schemeOrganiser.addressLine4.get)<br>}
-                    @if(schemeOrganiser.country.isDefined){@Html(countryCodes.getCountry(schemeOrganiser.country.get).get)<br>}
-                    @if(schemeOrganiser.postcode.isDefined){@Html(schemeOrganiser.postcode.get)<br>}
-                    @if(schemeOrganiser.companyReg.isDefined){@Html(schemeOrganiser.companyReg.get)<br>}
-                    @if(schemeOrganiser.corporationRef.isDefined){@Html(schemeOrganiser.corporationRef.get)}
-                </td>
-                <td class="summary-declaration-text-align">
-                    <a href="@routes.SchemeOrganiserController.schemeOrganiserPage()">@Html(messages("ers_summary_declaration.change_this"))
-                        <span class="visually-hidden">@ersUtil.getPageElement(schemeId, ersUtil.PAGE_SUMMARY_DECLARATION, "organiser")</span>
-                    </a>
-                </td>
-            </tr>
-            <tr>
-                <td class="summary-declaration-section-text-align">@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_GROUP_ACTIVITY, "question"))</td>
-                <td class="summary-declaration-text-align">
-                @Html(groupScheme match {
-                    case ersUtil.OPTION_YES => messages("ers.yes")
-                    case ersUtil.OPTION_NO => messages("ers.no")
-                })
-                </td>
-                <td class="summary-declaration-text-align">
-                    <a href="@routes.GroupSchemeController.groupSchemePage()">@Html(messages("ers_summary_declaration.change_this"))
-                        <span class="visually-hidden">@ersUtil.getPageElement(schemeId, ersUtil.PAGE_GROUP_ACTIVITY, "question")</span>
-                    </a>
-                </td>
-            </tr>
-            @if(groupScheme == ersUtil.OPTION_YES) {
-                <tr>
-                    <td class="summary-declaration-section-text-align">@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_GROUP_SUMMARY, "title"))</td>
-                    <td class="summary-declaration-text-align">
-                    @for(company <- companies.companies) {
-                        @company.companyName<br>
+    @govukSummaryList(SummaryList(
+        rows = {
+            val reportableEventsSummary = SummaryListRow(
+                key = Key(
+                    content = Text(ersUtil.getPageElement(schemeId, ersUtil.PAGE_CHOOSE, "question"))
+                ),
+                value = Value(
+                    content = Text(
+                        reportableEvents match {
+                            case ersUtil.OPTION_YES => messages("ers.yes")
+                            case ersUtil.OPTION_NO => messages("ers.no")
                         }
-                    </td>
-                    <td class="summary-declaration-text-align">
-                        <a href="@routes.GroupSchemeController.groupPlanSummaryPage()">@Html(messages("ers_summary_declaration.change_this"))
-                            <span class="visually-hidden">@ersUtil.getPageElement(schemeId, ersUtil.PAGE_GROUP_SUMMARY, "title")</span>
-                        </a>
-                    </td>
-                </tr>
-            }
-            @if(schemeId == ersUtil.SCHEME_SIP) {
-                <tr>
-                    <td class="summary-declaration-section-text-align">@Html(messages("ers_trustee_summary.title"))</td>
-                    <td class="summary-declaration-text-align">
-                    @for(trustee <- trustees.trustees) {
-                        @trustee.name<br>
+                    )
+                ),
+                actions = Some(Actions(
+                    items = Seq(
+                        ActionItem(
+                            href = routes.ReportableEventsController.reportableEventsPage.url,
+                            content = Text(messages("ers_summary_declaration.change_this")),
+                            visuallyHiddenText = Some(ersUtil.getPageElement(schemeId, ersUtil.PAGE_CHOOSE, "question"))
+                        )
+                    )
+                ))
+            )
+            val fileNameSummary = SummaryListRow(
+                key = Key(
+                    content = Text(fileNameMsg)
+                ),
+                value = Value(
+                    content = HtmlContent(value = Html(filename))
+                ),
+                actions = Some(Actions(
+                    items = Seq(
+                        ActionItem(
+                            href = if(fileType == ersUtil.OPTION_ODS)
+                                routes.FileUploadController.uploadFilePage.url
+                            else
+                                routes.CheckCsvFilesController.checkCsvFilesPage.url,
+                            content = Text(messages("ers_summary_declaration.change_this")),
+                            visuallyHiddenText = Some(ersUtil.getPageElement(schemeId, ersUtil.PAGE_CHOOSE, "question"))
+                        )
+                    )
+                ))
+            )
+            val establishingCompanySummary = SummaryListRow(
+                key = Key(
+                    content = Text(ersUtil.getPageElement(schemeId, ersUtil.PAGE_SUMMARY_DECLARATION, "organiser"))
+                ),
+                value = Value(
+                    content = Text(ersUtil.buildEntitySummary(schemeOrganiser))
+                ),
+                actions = Some(Actions(
+                    items = Seq(
+                        ActionItem(
+                            href = routes.SchemeOrganiserController.schemeOrganiserPage.url,
+                            content = Text(messages("ers_summary_declaration.change_this")),
+                            visuallyHiddenText = Some(ersUtil.getPageElement(schemeId, ersUtil.PAGE_SUMMARY_DECLARATION, "organiser"))
+                        )
+                    )
+                ))
+            )
+            val groupSchemeReportableSummary = SummaryListRow(
+                key = Key(
+                    content = Text(ersUtil.getPageElement(schemeId, ersUtil.PAGE_GROUP_ACTIVITY, "question"))
+                ),
+                value = Value(
+                    content = Text(
+                        groupScheme match {
+                            case ersUtil.OPTION_YES => messages("ers.yes")
+                            case ersUtil.OPTION_NO => messages("ers.no")
                         }
-                    </td>
-                    <td class="summary-declaration-text-align">
-                        <a href="@routes.TrusteeController.trusteeSummaryPage()">@Html(messages("ers_summary_declaration.change_this"))
-                            <span class="visually-hidden">@messages("ers_trustee_summary.title")</span>
-                        </a>
-                    </td>
-                </tr>
-            }
-            @if(altAmendsActivity != "") {
-                <tr>
-                    <td class="summary-declaration-section-text-align">@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_ALT_ACTIVITY, "question"))</td>
-                    <td class="summary-declaration-text-align">
-                    @Html(altAmendsActivity match {
-                        case ersUtil.OPTION_YES => messages("ers.yes")
-                        case ersUtil.OPTION_NO => messages("ers.no")
-                    })
-                    </td>
-                    <td class="summary-declaration-text-align">
-                        <a href="@routes.AltAmendsController.altActivityPage()">@Html(messages("ers_summary_declaration.change_this"))
-                            <span class="visually-hidden">@ersUtil.getPageElement(schemeId, ersUtil.PAGE_ALT_ACTIVITY, "question")</span>
-                        </a>
-                    </td>
-                </tr>
-            }
-            @if(altAmendsActivity == ersUtil.OPTION_YES) {
-                <tr>
-                    <td class="summary-declaration-section-text-align">@Html(messages("ers_trustee_summary.altamends.section"))</td>
-                    <td class="summary-declaration-text-align">
-                        @if(altAmends.altAmendsTerms.contains("1")) {@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_ALT_AMENDS, "option_1")).<br>}
-                        @if(altAmends.altAmendsEligibility.contains("1")) {@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_ALT_AMENDS, "option_2")).<br>}
-                        @if(altAmends.altAmendsExchange.contains("1")) {@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_ALT_AMENDS, "option_3")).<br>}
-                        @if(altAmends.altAmendsVariations.contains("1")) {@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_ALT_AMENDS, "option_4")).<br>}
-                        @if(altAmends.altAmendsOther.contains("1")) {@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_ALT_AMENDS, "option_5")).}
-                    </td>
-                    <td class="summary-declaration-text-align">
-                        <a href="@routes.AltAmendsController.altAmendsPage()">@Html(messages("ers_summary_declaration.change_this"))
-                            <span class="visually-hidden">@messages("ers_trustee_summary.altamends.section")</span>
-                        </a>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
-    <div class="subsection">
-        <div class="notice">
-            <i class="icon icon-important"></i>
-            <strong class="bold-small">
-            @Html(messages("ers_summary_declaration.alert"))
-            </strong>
-        </div>
-    </div>
+                    )
+                ),
+                actions = Some(Actions(
+                    items = Seq(
+                        ActionItem(
+                            href = routes.GroupSchemeController.groupSchemePage.url,
+                            content = Text(messages("ers_summary_declaration.change_this")),
+                            visuallyHiddenText = Some(ersUtil.getPageElement(schemeId, ersUtil.PAGE_GROUP_ACTIVITY, "question"))
+                        )
+                    )
+                ))
+            )
+            val companyListSummary = SummaryListRow(
+                key = Key(
+                    content = Text(ersUtil.getPageElement(schemeId, ersUtil.PAGE_GROUP_SUMMARY, "title"))
+                ),
+                value = Value(
+                    content = HtmlContent(value = Html(ersUtil.buildCompanyNameList(companies.companies)))
+                ),
+                actions = Some(Actions(
+                    items = Seq(
+                        ActionItem(
+                            href = routes.GroupSchemeController.groupSchemePage.url,
+                            content = Text(messages("ers_summary_declaration.change_this")),
+                            visuallyHiddenText = Some(ersUtil.getPageElement(schemeId, ersUtil.PAGE_GROUP_ACTIVITY, "question"))
+                        )
+                    )
+                ))
+            )
+            val trusteeListSummary = SummaryListRow(
+                key = Key(
+                    content = Text(messages("ers_trustee_summary.title"))
+                ),
+                value = Value(
+                    content = HtmlContent(value = Html(ersUtil.buildTrusteeNameList(trustees.trustees)))
+                ),
+                actions = Some(Actions(
+                    items = Seq(
+                        ActionItem(
+                            href = routes.GroupSchemeController.groupSchemePage.url,
+                            content = Text(messages("ers_summary_declaration.change_this")),
+                            visuallyHiddenText = Some(ersUtil.getPageElement(schemeId, ersUtil.PAGE_GROUP_ACTIVITY, "question"))
+                        )
+                    )
+                ))
+            )
+            val altActivitySummary = SummaryListRow(
+                key = Key(
+                    content = Text(ersUtil.getPageElement(schemeId, ersUtil.PAGE_ALT_ACTIVITY, "question"))
+                ),
+                value = Value(
+                    content = Text(
+                        altAmendsActivity match {
+                            case ersUtil.OPTION_YES => messages("ers.yes")
+                            case ersUtil.OPTION_NO => messages("ers.no")
+                            case _ => ""
+                        }
+                    )
+                ),
+                actions = Some(Actions(
+                    items = Seq(
+                        ActionItem(
+                            href = routes.AltAmendsController.altActivityPage.url,
+                            content = Text(messages("ers_summary_declaration.change_this")),
+                            visuallyHiddenText = Some(ersUtil.getPageElement(schemeId, ersUtil.PAGE_ALT_ACTIVITY, "question"))
+                        )
+                    )
+                ))
+            )
+            val altAmendsSummary = SummaryListRow(
+                key = Key(
+                    content = Text(messages("ers_trustee_summary.altamends.section"))
+                ),
+                value = Value(
+                    content = HtmlContent(value = Html(
+                        {if(altAmends.altAmendsTerms.contains("1")) ersUtil.getPageElement(schemeId, ersUtil.PAGE_ALT_AMENDS, "option_1") + ".<br>" else ""}
+                        + {if(altAmends.altAmendsEligibility.contains("1")) ersUtil.getPageElement(schemeId, ersUtil.PAGE_ALT_AMENDS, "option_2") + ".<br>" else ""}
+                        + {if(altAmends.altAmendsExchange.contains("1")) ersUtil.getPageElement(schemeId, ersUtil.PAGE_ALT_AMENDS, "option_3") + ".<br>" else ""}
+                        + {if(altAmends.altAmendsVariations.contains("1")) ersUtil.getPageElement(schemeId, ersUtil.PAGE_ALT_AMENDS, "option_4") + ".<br>" else ""}
+                        + {if(altAmends.altAmendsOther.contains("1")) ersUtil.getPageElement(schemeId, ersUtil.PAGE_ALT_AMENDS, "option_5") + ".<br>" else ""}
+                    ))
+                ),
+                actions = Some(Actions(
+                    items = Seq(
+                        ActionItem(
+                            href = routes.AltAmendsController.altAmendsPage.url,
+                            content = Text(messages("ers_summary_declaration.change_this")),
+                            visuallyHiddenText = Some(messages("ers_trustee_summary.altamends.section"))
+                        )
+                    )
+                ))
+            )
 
-    <a role="button" id="continue" class="button summary-button" href="@routes.ConfirmationPageController.confirmationPage()">@Html(messages("ers_summary_declaration.button"))</a>
-    @spinner()
+          Seq(reportableEventsSummary) ++
+          {if(reportableEvents == ersUtil.OPTION_YES) Seq(fileNameSummary) else None} ++
+          Seq(establishingCompanySummary, groupSchemeReportableSummary) ++
+          {if(groupScheme == ersUtil.OPTION_YES) Seq(companyListSummary) else None} ++
+          {if(schemeId == ersUtil.SCHEME_SIP) Seq(trusteeListSummary) else None} ++
+          {if(altAmendsActivity != "") Seq(altActivitySummary) else None} ++
+          {if(altAmendsActivity == ersUtil.OPTION_YES) Seq(altAmendsSummary) else None}
+        }
+    ))
+
+    @govukWarningText(WarningText(
+        iconFallbackText = "Warning",
+        content = Text(messages("ers_summary_declaration.alert"))
+    ))
+
+    @govukButton(Button(
+        content = Text(messages("ers_summary_declaration.button")),
+        attributes = Map("id" -> "continue"),
+        href = Some(routes.ConfirmationPageController.confirmationPage.url)
+    ))
 }

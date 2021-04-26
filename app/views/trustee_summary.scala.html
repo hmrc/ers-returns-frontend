@@ -14,48 +14,93 @@
  * limitations under the License.
  *@
 
-@import utils.CountryCodes
-@import utils.ERSUtil
+@import _root_.utils.CountryCodes
+@import _root_.utils.ERSUtil
 @import config.ApplicationConfig
-@import uk.gov.hmrc.play.views.html.helpers.{FormWithCSRF}
+@import uk.gov.hmrc.play.views.html.helpers.FormWithCSRF
+@import views.html.govuk_wrapper
+@import views.html.templates.reference
 
-@this(form: FormWithCSRF)
+@this(
+        govuk_wrapper: govuk_wrapper,
+        formWithCSRF: FormWithCSRF,
+        govukBackLink: GovukBackLink,
+        govukSummaryList: GovukSummaryList,
+        govukButton: GovukButton,
+        hmrcPageHeading: HmrcPageHeading
+)
 
 @(requestObject: RequestObject, trustees: TrusteeDetailsList)(implicit request: Request[AnyRef], flash: Flash, messages: Messages, countryCodes: CountryCodes, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 
-@import views.html.templates._
 @schemeId = @{requestObject.getSchemeId}
 
+@summaryBuilder(trustee: TrusteeDetails, index: Int) = @{
+    val trusteeNameSummary = Seq(
+        SummaryListRow(
+            key = Key(
+                classes = "govuk-!-width-one-quarter",
+                content = Text("Trustee name")
+            ),
+            value = Value(
+                classes = "govuk-!-width-one-half govuk-!-font-weight-bold",
+                content = Text(trustee.name)
+            ),
+            actions = Some(Actions(
+                classes = "govuk-!-width-one-quarter",
+                items = Seq(
+                    ActionItem(
+                        href = routes.TrusteeController.editTrustee(index).url,
+                        content = Text(messages("ers.change_this")),
+                        visuallyHiddenText = Some(messages("ers.change_this"))
+                    ),
+                    ActionItem(
+                        href = routes.TrusteeController.deleteTrustee(index).url,
+                        content = Text(messages("ers.delete")),
+                    )
+                )
+            ))
+        )
+    )
+    val addressSummary = Seq(
+        SummaryListRow(
+            key = Key(
+                content = Text(messages("ers_group_summary.address"))
+            ),
+            value = Value(
+                content = Text(ersUtil.buildAddressSummary(trustee))
+            )
+        )
+    )
+    trusteeNameSummary ++ addressSummary
+}
 
-@ers_main(title = messages("ers.trustees.page_title")) {
+@govuk_wrapper(title = messages("ers.trustees.page_title")) {
 
     @reference(requestObject.getPageTitle)
-    <p class="font-xsmall"><a href="@routes.TrusteeController.trusteeDetailsPage()" class="link-back">@Html(messages("ers.back"))</a></p>
-    @header(messages("ers_trustee_summary.title"))
-    @form(action = routes.TrusteeController.trusteeSummaryContinue()) {
-    <div class="panel panel-border-wide">
-        <a href="@routes.TrusteeController.trusteeDetailsPage()">@Html(messages("ers_trustee_summary.add_trustee"))</a>
-    </div>
-    @for((trustee, index) <- trustees.trustees.zipWithIndex) {
-    <table>
-        <thead>
-        <tr>
-            <th scope="col" id="trustee-summary-name">@trustee.name</th>
-            <th scope="col" class="trustee-summary-action-text-align"><a href="@routes.TrusteeController.editTrustee(index)">@Html(messages("ers.change_this"))</a>&nbsp;&nbsp;&nbsp;<a href="@routes.TrusteeController.deleteTrustee(index)">@Html(messages("ers.delete"))</a></th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr>
-            <td colspan="2" class="trustee-summary-text-align">
-                @trustee.addressLine1@if(trustee.addressLine2.getOrElse("") != ""){, @trustee.addressLine2}@if(trustee.addressLine3.getOrElse("") != ""){, @trustee.addressLine3}@if(trustee.addressLine4.getOrElse("") != ""){, @trustee.addressLine4}@if(trustee.postcode.getOrElse("") != ""){, @trustee.postcode}@if(trustee.country.getOrElse("") != ""){, @countryCodes.getCountry(trustee.country.get)}
-            </td>
-        </tr>
-        </tbody>
-    </table>
-    }
-    <div class="trustee-summary-margin">
-        <button role="button" id="continue" class="button" type="submit" @if(trustees.trustees.isEmpty) {disabled="disabled"}>@Html(messages("ers.continue"))</button>
-    </div>
-    }
 
+    @govukBackLink(BackLink(
+        href = routes.TrusteeController.trusteeDetailsPage.url,
+    ))
+
+    @hmrcPageHeading(PageHeading(
+        text = messages("ers_trustee_summary.title")
+    ))
+
+    @formWithCSRF(action = routes.TrusteeController.trusteeSummaryContinue()) {
+
+        <a class="govuk-link govuk-inset-text govuk-!-display-inline-block govuk-!-margin-top-0 govuk-!-width-full" href="@routes.TrusteeController.trusteeDetailsPage()">@Html(messages("ers_trustee_summary.add_trustee"))</a>
+
+        @for((trustee, index) <- trustees.trustees.zipWithIndex) {
+            @govukSummaryList(SummaryList(
+                rows = summaryBuilder(trustee, index)
+            ))
+        }
+
+        @govukButton(Button(
+            inputType = Some("submit"),
+            content = Text(messages("ers.continue")),
+            attributes = Map("id" -> "continue"),
+            disabled = trustees.trustees.isEmpty
+        ))
+    }
 }

@@ -14,37 +14,43 @@
  * limitations under the License.
  *@
 
-@import utils.ERSUtil
-@import config.ApplicationConfig
+@import _root_.utils.ERSUtil
+@import _root_.config.ApplicationConfig
+@import views.html.govuk_wrapper
+@import views.html.templates.reference
 
-@this(config: ApplicationConfig)
+@this(
+		govuk_wrapper: govuk_wrapper,
+		govukBackLink: GovukBackLink,
+		govukInsetText: GovukInsetText,
+		hmrcPageHeading: HmrcPageHeading
+)
 
 @(requestObject: RequestObject, fileType: String)(implicit request: Request[AnyRef], messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
-@import views.html.templates._
 
-@ers_main(title = messages("file_upload_errors.title") + " " + messages("ers.title.postfix")) {
+@govuk_wrapper(title = messages("file_upload_errors.title") + " " + messages("ers.title.postfix")) {
 
 	@reference(requestObject.getPageTitle)
 
-	@if(fileType == ersUtil.OPTION_ODS){
-		<p class="font-xsmall"><a href="@routes.FileUploadController.uploadFilePage" class="link-back">@Html(messages("ers.back"))</a></p>
-	} else {
-		<p class="font-xsmall"><a href="@routes.CsvFileUploadController.uploadFilePage" class="link-back">@Html(messages("ers.back"))</a></p>
-	}
+	@hmrcPageHeading(PageHeading(
+		text = messages("file_upload_errors.title")
+	))
 
-	@header(messages("file_upload_errors.title"))
+	@govukInsetText(InsetText(
+		content = HtmlContent(
+			if(fileType == ersUtil.OPTION_ODS) s"""${messages("file_upload_errors.para1")} <a href="${routes.FileUploadController.uploadFilePage.url}">${messages("file_upload_errors.upload_link")}</a>."""
+			else s"""${messages("file_upload_errors.para1")} <a href="${routes.CheckCsvFilesController.checkCsvFilesPage.url}">${messages("file_upload_errors.upload_link")}</a>."""
+		)
+	))
 
-	<div class="panel-indent">
-		@if(fileType == ersUtil.OPTION_ODS) {
-			<p>@Html(messages("file_upload_errors.para1")) <a href="@routes.FileUploadController.uploadFilePage()">@Html(messages("file_upload_errors.upload_link"))</a>.</p>
-		} else {
-			<p>@Html(messages("file_upload_errors.para1")) <a href="@routes.CheckCsvFilesController.checkCsvFilesPage()">@Html(messages("file_upload_errors.upload_link"))</a>.</p>
-		}
-	</div>
+	<h2 class="govuk-heading-m">
+		@Html(messages("file_upload_errors.go_fix"))
+	</h2>
 
-	<h2>@Html(messages("file_upload_errors.go_fix"))</h2>
-
-	<p><a href="/check-your-ers-files">@Html(messages("file_upload_errors.check_file"))</a> @Html(messages("file_upload_errors.info"))</p>
-
-
+	<p class="govuk-body">
+		<a class="govuk-link" href="/check-your-ers-files">
+			@Html(messages("file_upload_errors.check_file"))
+		</a>
+		@Html(messages("file_upload_errors.info"))
+	</p>
 }

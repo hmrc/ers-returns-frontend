@@ -15,12 +15,18 @@
  *@
 
 @import config.ApplicationConfig
-@this(config: ApplicationConfig)
+@import views.html.govuk_wrapper
+
+@this(
+        govuk_wrapper: govuk_wrapper,
+        hmrcPageHeading: HmrcPageHeading
+)
 
 @()(implicit request: Request[_], messages: Messages, appConfig: ApplicationConfig)
 
-@ers_main(title = messages("ers.error.title")) {
+@govuk_wrapper(title = messages("ers.error.title")) {
 
-<h1>@messages("ers.error.unauthorise")</h1>
-
+ @hmrcPageHeading(PageHeading(
+  text = messages("ers.error.unauthorise")
+ ))
 }

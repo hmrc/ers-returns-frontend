@@ -15,17 +15,22 @@
  *@
 
 @import config.ApplicationConfig
+@import views.html.govuk_wrapper
 
-@this(config: ApplicationConfig)
+@this(
+        govuk_wrapper: govuk_wrapper,
+        hmrcPageHeading: HmrcPageHeading
+)
 
 @()(implicit request: Request[_], messages: Messages, appConfig: ApplicationConfig)
 
-@ers_main(title = messages("ers.app_title")) {
-	<header id="page-header">
+@govuk_wrapper(title = messages("ers.app_title")) {
 
-	<h1>@Html(messages("ers_not_authorised.page_title"))</h1>
+    @hmrcPageHeading(PageHeading(
+        text = messages("ers_not_authorised.page_title")
+    ))
 
-	<div class="application-notice help-notice">
-		<p>@Html(messages("ers_not_authorised.para1"))</p>
-	</div>
+    <p class="govuk-body">
+        @messages("ers_not_authorised.para1")
+    </p>
 }

@@ -42,6 +42,7 @@ import scala.language.postfixOps
 class ErsUtilSpec extends UnitSpec with MockitoSugar with BeforeAndAfterEach with ERSFakeApplicationConfig with ErsTestHelper {
 
   override implicit val hc: HeaderCarrier =  HeaderCarrier(sessionId = Some(SessionId("sessionId")))
+  implicit val countryCodes: CountryCodes = mockCountryCodes
 
   override def beforeEach(): Unit = {
     super.beforeEach()

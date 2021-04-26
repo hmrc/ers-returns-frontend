@@ -14,40 +14,76 @@
  * limitations under the License.
  *@
 
-@import utils.ERSUtil
+@import _root_.utils.ERSUtil
 @import config.ApplicationConfig
-@import views.html.helpers.error_overview
 @import uk.gov.hmrc.play.views.html.helpers.FormWithCSRF
+@import views.html.templates.reference
+@import uk.gov.hmrc.govukfrontend.views.html.components.implicits._
+@import views.html.govuk_wrapper
 
-@this(form: FormWithCSRF)
+@this(
+        govuk_wrapper: govuk_wrapper,
+        formWithCSRF: FormWithCSRF,
+        govukBackLink: GovukBackLink,
+        govukErrorSummary: GovukErrorSummary,
+        govukRadios: GovukRadios,
+        govukButton: GovukButton
+)
 
-@(requestObject: RequestObject, altActivity: String, groupSchemeActivity: String, altActivityForm: Form[models.AltAmendsActivity])(implicit request: Request[AnyRef], flash: Flash, messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
+@(requestObject: RequestObject, altActivity: String, groupSchemeActivity: String, altActivityForm: Form[models.AltAmendsActivity])(implicit request: Request[AnyRef], messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
+
 @schemeId = @{requestObject.getSchemeId}
-@import views.html.templates._
 
-@ers_main(title = ersUtil.getPageElement(schemeId, "ers", "is_alterations.page_title")) {
+@govuk_wrapper(title = ersUtil.getPageElement(schemeId, "ers", "is_alterations.page_title")) {
 
     @reference(requestObject.getPageTitle)
-    <p class="font-xsmall"><a href="@ersUtil.getPageBackLink(schemeId, ersUtil.PAGE_ALT_ACTIVITY, groupSchemeActivity)" class="link-back">@Html(Messages("ers.back"))</a></p>
-    @error_overview(altActivityForm, Some(ersUtil.getPageElement(schemeId, ersUtil.PAGE_ALT_ACTIVITY, "err.message")))
-    @form(action = routes.AltAmendsController.altActivitySelected()) {
-        <div class="form-group @if(altActivityForm.hasErrors) {form-field--error}">
-            <fieldset class="inline">
-                <legend id="altActivity">
-                    @header(ersUtil.getPageElement(schemeId, ersUtil.PAGE_ALT_ACTIVITY, "question"))
-                </legend>
-                <p id="hint" class="form-hint">@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_ALT_ACTIVITY, "intro_para"))</p>
-                @if(altActivityForm.hasErrors){<span class="error-notification">@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_ALT_ACTIVITY, "err.message"))</span>}
-                <div class="multiple-choice">
-                    <input id="yes" type="radio" name="altActivity" value=@ersUtil.OPTION_YES aria-describedby="hint" @(if(altActivity == ersUtil.OPTION_YES) "checked" else "")>
-                    <label for="yes" class="block-label @(if(altActivity == ersUtil.OPTION_YES) "selected")">@Html(Messages("ers.yes"))</label>
-                </div>
-                <div class="multiple-choice">
-                    <input id="no" type="radio" name="altActivity" value=@ersUtil.OPTION_NO aria-describedby="hint" @(if(altActivity == ersUtil.OPTION_NO) "checked" else "")>
-                    <label for="no" class="block-label @(if(altActivity == ersUtil.OPTION_NO) "selected")">@Html(Messages("ers.no"))</label>
-                </div>
-            </fieldset>
-        </div>
-        <input role="button" id="continue" class="button" type="submit" value="@Html(Messages("ers.continue"))">
+
+    @govukBackLink(BackLink(
+        href = ersUtil.getPageBackLink(schemeId, ersUtil.PAGE_ALT_ACTIVITY, groupSchemeActivity)
+    ))
+
+    @if(altActivityForm.hasErrors) {
+        @govukErrorSummary(ErrorSummary(
+            title = Text(messages("validation.summary.heading")),
+            errorList = altActivityForm.errors.asTextErrorLinks
+        ))
+    }
+
+    @formWithCSRF(action = routes.AltAmendsController.altActivitySelected()) {
+
+        @govukRadios(Radios(
+            fieldset = Some(Fieldset(
+                legend = Some(Legend(
+                    content = Text(ersUtil.getPageElement(schemeId, ersUtil.PAGE_ALT_ACTIVITY, "question")),
+                    isPageHeading = true,
+                    classes = "govuk-fieldset__legend--l"
+                ))
+            )),
+            hint = Some(Hint(
+                content = Text(ersUtil.getPageElement(schemeId, ersUtil.PAGE_ALT_ACTIVITY, "intro_para"))
+            )),
+            errorMessage = if(altActivityForm.hasErrors) Some(ErrorMessage(content = Text(ersUtil.getPageElement(schemeId, ersUtil.PAGE_ALT_ACTIVITY, "err.message")))) else None,
+            name = "altActivity",
+            items = Seq(
+                RadioItem(
+                    content = Text(messages("ers.yes")),
+                    id = Some("yes"),
+                    value = Some(ersUtil.OPTION_YES),
+                    checked = altActivity == ersUtil.OPTION_YES
+                ),
+                RadioItem(
+                    content = Text(messages("ers.no")),
+                    id = Some("no"),
+                    value = Some(ersUtil.OPTION_NO),
+                    checked = altActivity == ersUtil.OPTION_NO
+                )
+            )
+        ))
+
+        @govukButton(Button(
+            inputType = Some("submit"),
+            content = Text(messages("ers.continue")),
+            attributes = Map("id" -> "continue"),
+        ))
     }
 }

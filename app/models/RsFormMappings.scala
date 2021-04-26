@@ -20,6 +20,7 @@ import play.api.data.Forms._
 import play.api.data._
 import play.api.data.validation.Constraints._
 import play.api.i18n.Messages
+import utils.ERSUtil
 
 object RsFormMappings {
 
@@ -49,6 +50,15 @@ object RsFormMappings {
       optional(text).verifying(Messages("ers_check_file_type.err.message"), _.nonEmpty)
         .verifying(Messages("ers.invalidCharacters"), so => validInputCharacters(so.getOrElse("csv"), csvOdsRegPattern))
   )(CheckFileType.apply)(CheckFileType.unapply))
+
+  /*
+ * check file name Form definition
+ */
+  def checkFileNameForm(expectedFileName: String)(implicit messages: Messages): Form[CheckFileName] = Form(mapping(
+    "file" ->
+      optional(text).verifying(Messages("NEED_NEW_MESSAGE_HERE"), _.nonEmpty)
+                    .verifying(Messages("NEED_NEW_MESSAGE_HERE"), so => validInputCharacters(so.getOrElse(""), expectedFileName))
+  )(CheckFileName.apply)(CheckFileName.unapply))
 
   /*
    * Is a group scheme Form definition
@@ -98,9 +108,7 @@ object RsFormMappings {
     "files" -> list(
       mapping(
         "fileId" -> text.verifying("required field", _.nonEmpty)
-					.verifying(Messages("ers.invalidCharacters"), so => validInputCharacters(so, csvFileNameRegx)),
-        "isSelected" -> optional(text.verifying("required field", _.nonEmpty)
-					.verifying(Messages("ers.invalidCharacters"), so => validInputCharacters(so, yesNoRegPattern)))
+					.verifying(Messages("ers.invalidCharacters"), so => validInputCharacters(so, csvFileNameRegx))
       )(CsvFiles.apply)(CsvFiles.unapply)
     )
   )(CsvFilesList.apply)(CsvFilesList.unapply))

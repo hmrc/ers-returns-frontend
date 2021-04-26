@@ -34,6 +34,11 @@ object CheckFileType {
   implicit val format: OFormat[CheckFileType] = Json.format[CheckFileType]
 }
 
+case class CheckFileName(CheckFileName: Option[String])
+object CheckFileName {
+  implicit val format: OFormat[CheckFileName] = Json.format[CheckFileName]
+}
+
 case class RS_schemeType (schemeType: String)
 
 case class RS_groupSchemeType(groupSchemeType: String)
@@ -93,7 +98,7 @@ object TrusteeDetailsList {
   implicit val format: OFormat[TrusteeDetailsList] = Json.format[TrusteeDetailsList]
 }
 
-case class CsvFiles(fileId: String, isSelected: Option[String])
+case class CsvFiles(fileId: String)
 object CsvFiles {
   implicit val format: OFormat[CsvFiles] = Json.format[CsvFiles]
 }

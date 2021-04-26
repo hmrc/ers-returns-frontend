@@ -40,7 +40,7 @@ import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.test.UnitSpec
 import utils.Fixtures.ersRequestObject
-import utils.{ERSFakeApplicationConfig, ERSUtil, ErsTestHelper, Fixtures, UpscanData}
+import utils.{CountryCodes, ERSFakeApplicationConfig, ERSUtil, ErsTestHelper, Fixtures, UpscanData}
 import views.html.{global_error, summary}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -58,6 +58,7 @@ class SummaryDeclarationControllerSpec extends UnitSpec with ERSFakeApplicationC
 	)
 
 	implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
+	implicit val countryCodes: CountryCodes = mockCountryCodes
 
   implicit lazy val mat: Materializer = app.materializer
 	val globalErrorView: global_error = app.injector.instanceOf[global_error]

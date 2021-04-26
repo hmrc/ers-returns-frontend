@@ -19,6 +19,7 @@ package controllers
 import akka.stream.Materializer
 import models._
 import org.joda.time.DateTime
+import org.jsoup.Jsoup
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatest.BeforeAndAfterEach
@@ -118,11 +119,10 @@ class ConfirmationPageControllerSpec extends UnitSpec with ERSFakeApplicationCon
 
     }
 
-    "show user panel for confirmation page" in {
+    "show user research banner for confirmation page" in {
       val result = confirmationView(ersRequestObject, "8 April 2016, 4:50pm", "", "", "")(Fixtures.buildFakeRequestWithSessionId("GET"), testMessages, mockErsUtil, mockAppConfig)
-      contentAsString(result)  should include("Help improve digital services by joining the HMRC user panel (opens in new window)")
-      contentAsString(result)  should include("No thanks")
-
+      val document = Jsoup.parse(contentAsString(result))
+      document.getElementsByClass("hmrc-user-research-banner").isEmpty shouldBe false
     }
 
     "direct to ers errors page if bundle request throws exception" in {

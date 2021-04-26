@@ -29,19 +29,27 @@
         hmrcTimeoutDialogHelper: HmrcTimeoutDialogHelper
 )
 
-@(title: String, scriptElement: Option[Html] = None, isUserResearchBannerVisible: Boolean = false
-)(contentBlock: Html)(implicit request: Request[_], messages: Messages, applicationConfig: ApplicationConfig)
+@(title: String, scriptElement: Option[Html] = None, isUserResearchBannerVisible: Boolean = false, disableSignOut: Boolean = false)(contentBlock: Html)(implicit request: Request[_], messages: Messages, applicationConfig: ApplicationConfig)
 
-@head = { <meta name="format-detection" content="telephone=no"/> }
-
+@head = {
+    <meta name="format-detection" content="telephone=no"/>
+    @if(!disableSignOut) {
+        @hmrcTimeoutDialogHelper(
+            signOutUrl = applicationConfig.signOut,
+            timeoutUrl = Some(applicationConfig.timeOut),
+            timeout = Some(applicationConfig.timeOutSeconds),
+            countdown = Some(applicationConfig.timeOutCountDownSeconds)
+        )
+    }
+}
 
 @content = {
     <div id="content">
         <article class="content__body">
-        @contentBlock
+            @contentBlock
         </article>
         <div class="govuk-!-margin-top-5" id="report-technical-issue">
-        @hmrcReportTechnicalIssueHelper()
+            @hmrcReportTechnicalIssueHelper()
         </div>
     </div>
 }
@@ -52,7 +60,7 @@
     headerBlock = Some(hmrcStandardHeader(
         serviceName = Some(messages("service.name")),
         serviceUrl = Some(controllers.routes.ReturnServiceController.startPage.url),
-        signOutUrl = Some(applicationConfig.signOut),
+        signOutUrl = if(!disableSignOut) Some(applicationConfig.signOut) else None,
         userResearchBanner = if(isUserResearchBannerVisible) Some(UserResearchBanner(url = applicationConfig.urBannerLink)) else None
     )),
     beforeContentBlock = if(applicationConfig.languageTranslationEnabled) Some(hmrcLanguageSelectHelper()) else None,
