@@ -51,7 +51,7 @@ class UpscanServiceSpec extends UnitSpec with OneAppPerSuite with MockitoSugar {
       val success = controllers.routes.FileUploadController.success().absoluteURL()
       val failure = controllers.routes.FileUploadController.failure().absoluteURL()
       val minimumFileSize = Some(1)
-      val maximumFileSize = Some(100000000)
+      val maximumFileSize = Some(10000000)
       val expectedContentType = Some("application/vnd.oasis.opendocument.spreadsheet")
       val expectedInitiateRequest = UpscanInitiateRequest(callback, success, failure, minimumFileSize, maximumFileSize, expectedContentType)
 
