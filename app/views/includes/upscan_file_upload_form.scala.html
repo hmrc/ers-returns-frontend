@@ -14,16 +14,13 @@
  * limitations under the License.
  *@
 
-@import views.html.templates.{spinner, header}
 @import _root_.utils.ERSUtil
 
 @this(
-        formWithCSRF: FormWithCSRF,
         govukFileUpload: GovukFileUpload,
         govukButton: GovukButton,
         hmrcPageHeading: HmrcPageHeading
 )
-
 @(      fileType: String,
         formFields: Map[String, String],
         postTarget: String,
@@ -34,9 +31,7 @@
 
 @expectedFileName = @{ersUtil.getPageElement(schemeId, ersUtil.PAGE_CHECK_CSV_FILE,fileId+".file_name")}
 
-@formWithCSRF(Call(method="post", url = postTarget),
-    Symbol("enctype") -> "multipart/form-data") {
-
+<form action="@postTarget" method="post" enctype="multipart/form-data">
     @hmrcPageHeading(PageHeading(
         text = headerMsg
     ))
@@ -65,4 +60,4 @@
         attributes = Map("id" -> "submit"),
         disabled = false
     ))
-}
+</form>
