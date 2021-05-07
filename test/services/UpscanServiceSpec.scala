@@ -50,7 +50,10 @@ class UpscanServiceSpec extends UnitSpec with OneAppPerSuite with MockitoSugar {
       val callback = controllers.routes.FileUploadCallbackController.callback(hc.sessionId.get.value).absoluteURL()
       val success = controllers.routes.FileUploadController.success().absoluteURL()
       val failure = controllers.routes.FileUploadController.failure().absoluteURL()
-      val expectedInitiateRequest = UpscanInitiateRequest(callback, success, failure, Some(1), Some(10000000), Some("application/vnd.oasis.opendocument.spreadsheet"))
+      val minimumFileSize = Some(1)
+      val maximumFileSize = Some(100000000)
+      val expectedContentType = Some("application/vnd.oasis.opendocument.spreadsheet")
+      val expectedInitiateRequest = UpscanInitiateRequest(callback, success, failure, minimumFileSize, maximumFileSize, expectedContentType)
 
       val upscanInitiateResponse = UpscanInitiateResponse(Reference("reference"), "postTarget", formFields = Map.empty[String, String])
       val initiateRequestCaptor = ArgumentCaptor.forClass(classOf[UpscanInitiateRequest])
@@ -73,7 +76,10 @@ class UpscanServiceSpec extends UnitSpec with OneAppPerSuite with MockitoSugar {
       val callback = controllers.routes.CsvFileUploadCallbackController.callback(uploadId, scRef).absoluteURL()
       val success = controllers.routes.CsvFileUploadController.success(uploadId).absoluteURL()
       val failure = controllers.routes.CsvFileUploadController.failure().absoluteURL()
-      val expectedInitiateRequest = UpscanInitiateRequest(callback, success, failure, Some(1), Some(100000000), Some("text/csv"))
+      val minimumFileSize = Some(1)
+      val maximumFileSize = Some(100000000)
+      val expectedContentType = Some("text/csv")
+      val expectedInitiateRequest = UpscanInitiateRequest(callback, success, failure, minimumFileSize, maximumFileSize, expectedContentType)
 
       val upscanInitiateResponse = UpscanInitiateResponse(Reference("reference"), "postTarget", formFields = Map.empty[String, String])
       val initiateRequestCaptor = ArgumentCaptor.forClass(classOf[UpscanInitiateRequest])
