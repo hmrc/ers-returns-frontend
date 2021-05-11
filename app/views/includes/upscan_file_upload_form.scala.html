@@ -17,10 +17,9 @@
 @import _root_.utils.ERSUtil
 
 @this(
-formWithCSRF: FormWithCSRF,
-govukFileUpload: GovukFileUpload,
-govukButton: GovukButton,
-hmrcPageHeading: HmrcPageHeading
+        govukFileUpload: GovukFileUpload,
+        govukButton: GovukButton,
+        hmrcPageHeading: HmrcPageHeading
 )
 
 @(      fileType: String,
@@ -33,9 +32,7 @@ hmrcPageHeading: HmrcPageHeading
 
 @expectedFileName = @{ersUtil.getPageElement(schemeId, ersUtil.PAGE_CHECK_CSV_FILE,fileId+".file_name")}
 
-@formWithCSRF(Call(method="post", url = postTarget),
-    Symbol("enctype") -> "multipart/form-data") {
-
+<form method="post" action="@postTarget" enctype="multipart/form-data">
     @hmrcPageHeading(PageHeading(
         text = headerMsg
     ))
@@ -67,4 +64,4 @@ hmrcPageHeading: HmrcPageHeading
     ))
 
     <div class="govuk-!-display-none" id="progress-spinner"><img id="progress-spinner-img" src="@routes.Assets.versioned("images/spinner.gif")" alt="Loading ..."/></div>
-}
+</form>
