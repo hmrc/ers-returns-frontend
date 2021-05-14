@@ -14,33 +14,56 @@
  * limitations under the License.
  *@
 
-@import utils.ERSUtil
+@import _root_.utils.ERSUtil
 @import config.ApplicationConfig
+@import _root_.utils.{ContentUtil, DateUtils}
+@import views.html.templates.reference
 
-@this(config: ApplicationConfig)
+@this(
+		govuk_wrapper: govuk_wrapper,
+		govukPanel: GovukPanel,
+		govukButton: GovukButton
+)
 
 @(requestObject: RequestObject, dateSubmitted: String, bundle: String, taxYear: String, url: String)(implicit request: Request[AnyRef], messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
+
 @schemeId = @{requestObject.getSchemeId}
 @schemeRef = @{requestObject.getSchemeReference}
 
-@import utils.ContentUtil
-@import views.html.templates._
-
-@ers_main(title = messages("ers.confirmation.page_title"), showUserResearchBanner = true) {
+@govuk_wrapper(title = messages("ers.confirmation.page_title"), isUserResearchBannerVisible = true) {
 
 	@reference(requestObject.getPageTitle)
-	<div class="success-banner"  id="confirmation-text-box">
-		<h1 class="heading-xlarge"><img src="assets/images/tick.png" alt="tick.">&nbsp;@Html(messages("ers_confirmation.submitted",ContentUtil.getSchemeName(schemeId)))<br></h1>
-		<p class="font-medium">@Html(messages("ers_confirmation.submission_ref"))<br>@bundle<br>@{utils.DateUtils.convertDate(dateSubmitted)}</p>
-	</div>
-	<p>@Html(messages("ers_confirmation.pdf_info"))</p>
-	<div>
-		<a class="button" role="button" href="@routes.PdfGenerationController.buildPdfForBundle(bundle, dateSubmitted)" target="_blank" id="download-confirmation-button">@Html(messages("ers_confirmation.download_confirmation", 15))</a>
-	</div>
-	<div>
-		<h2 class="heading-medium">@Html(messages("ers_confirmation.sub_heading"))</h2>
-		<p>@Html(messages("ers_confirmation.instructions"))</p>
-		<p><a href="@url">@Html(messages("ers_confirmation.return"))</a></p>
-		<a href='@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_CONFIRMATION, "finished"))' id="finished">@Html(messages("ers_confirmation.feedback"))</a>&nbsp;@Html(messages("ers_confirmation.feedback_time"))
-	</div>
+
+	@govukPanel(Panel(
+		title = Text(messages("ers_confirmation.submitted",ContentUtil.getSchemeName(schemeId))),
+		content = HtmlContent(s"""${messages("ers_confirmation.submission_ref")}<br>$bundle<br>${DateUtils.convertDate(dateSubmitted)}""")
+	))
+
+	<p class="govuk-body">
+		@Html(messages("ers_confirmation.pdf_info"))
+	</p>
+
+	@govukButton(Button(
+		content = Text(messages("ers_confirmation.download_confirmation", 15)),
+		href = Some(routes.PdfGenerationController.buildPdfForBundle(bundle, dateSubmitted).url),
+		attributes = Map("id" -> "download-confirmation-button"),
+	))
+
+	<h2 class="govuk-heading-m">
+		@Html(messages("ers_confirmation.sub_heading"))
+	</h2>
+	<p class="govuk-body">
+		@Html(messages("ers_confirmation.instructions"))
+	</p>
+	<p class="govuk-body">
+		<a class="govuk-link" href="@url">
+			@Html(messages("ers_confirmation.return"))
+		</a>
+	</p>
+	<p class="govuk-body">
+		<a class="govuk-link" href='@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_CONFIRMATION, "finished"))' id="finished">
+			@Html(messages("ers_confirmation.feedback"))
+		</a>&nbsp;
+		@Html(messages("ers_confirmation.feedback_time"))
+	</p>
 }

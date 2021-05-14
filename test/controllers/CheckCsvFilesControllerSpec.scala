@@ -157,11 +157,11 @@ class CheckCsvFilesControllerSpec extends UnitSpec with ERSFakeApplicationConfig
 
     val formData: CsvFilesList = CsvFilesList(
       List(
-        CsvFiles("file0", None),
-        CsvFiles("file1", Some("1")),
-        CsvFiles("file2", None),
-        CsvFiles("file3", None),
-        CsvFiles("file4", Some("1"))
+        CsvFiles("file0"),
+        CsvFiles("file1"),
+        CsvFiles("file2"),
+        CsvFiles("file3"),
+        CsvFiles("file4")
       )
     )
 
@@ -242,17 +242,17 @@ class CheckCsvFilesControllerSpec extends UnitSpec with ERSFakeApplicationConfig
 		val checkCsvFilesController: CheckCsvFilesController = new CheckCsvFilesController(mockMCC, mockAuthConnector, mockErsUtil, mockAppConfig, globalErrorView, checkCsvFileView)
 
     val formData: List[CsvFiles] = List(
-      CsvFiles("file0", None),
-      CsvFiles("file1", Some("1")),
-      CsvFiles("file2", None),
-      CsvFiles("file3", None),
-      CsvFiles("file4", Some("1"))
+      CsvFiles("file0"),
+      CsvFiles("file1"),
+      CsvFiles("file2"),
+      CsvFiles("file3"),
+      CsvFiles("file4")
     )
 
     "return only selected files" in {
 			when(mockErsUtil.OPTION_YES).thenReturn("1")
 			val result = checkCsvFilesController.createCacheData(formData)
-      result.ids.size shouldBe 2
+      result.ids.size shouldBe 5
       result.ids.foreach {
         _ should matchPattern {
           case UpscanIds(UploadId(_), _: String, NotStarted) =>
@@ -260,7 +260,7 @@ class CheckCsvFilesControllerSpec extends UnitSpec with ERSFakeApplicationConfig
       }
 
       result.noOfUploads shouldBe 0
-      result.noOfFilesToUpload shouldBe 2
+      result.noOfFilesToUpload shouldBe 5
     }
 
   }

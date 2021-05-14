@@ -14,47 +14,76 @@
  * limitations under the License.
  *@
 
-@import utils.ERSUtil
+@import _root_.utils.ERSUtil
 @import config.ApplicationConfig
-@import views.html.helpers.error_overview
 @import uk.gov.hmrc.play.views.html.helpers.FormWithCSRF
+@import views.html.templates.reference
 
 
-@this(form: FormWithCSRF)
+@this(
+		govuk_wrapper: govuk_wrapper,
+		formWithCSRF: FormWithCSRF,
+		govukBackLink: GovukBackLink,
+		govukErrorSummary: GovukErrorSummary,
+		govukRadios: GovukRadios,
+		govukButton: GovukButton
+)
 
 @(requestObject: RequestObject, groupScheme: Option[String], groupSchemeForm: Form[models.RS_groupScheme])(implicit request: Request[AnyRef], flash: Flash, messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
-@* Is a group scheme template *@
-@schemeId = @{requestObject.getSchemeId}
-@import views.html.templates._
-@import uk.gov.hmrc.play.views.html.helpers
 
-@ers_main(title = ersUtil.getPageElement(schemeId, "ers", "is_group_scheme.page_title") + " " + Messages("ers.title.postfix")) {
+@schemeId = @{requestObject.getSchemeId}
+
+@govuk_wrapper(title = ersUtil.getPageElement(schemeId, "ers", "is_group_scheme.page_title") + " " + Messages("ers.title.postfix")) {
 
 	@reference(requestObject.getPageTitle)
-	<p class="font-xsmall"><a href="@routes.SchemeOrganiserController.schemeOrganiserPage()" class="link-back">@Html(Messages("ers.back"))</a></p>
+
+	@govukBackLink(BackLink(
+		href = routes.SchemeOrganiserController.schemeOrganiserPage.url,
+	))
+
 	@if(groupSchemeForm.hasErrors) {
-		@error_overview(groupSchemeForm, Some(ersUtil.getPageElement(schemeId, ersUtil.PAGE_GROUP_ACTIVITY, "err.message")))
+		@govukErrorSummary(ErrorSummary(
+			title = Text(messages("validation.summary.heading")),
+			errorList = Seq(ErrorLink(
+				href = Some("#govuk-radios"),
+				content = Text(ersUtil.getPageElement(schemeId, ersUtil.PAGE_GROUP_ACTIVITY, "err.message"))
+			))
+		))
 	}
-	@form(action = routes.GroupSchemeController.groupSchemeSelected(schemeId)) {
-		<div class="form-group @if(groupSchemeForm.hasErrors) {form-field--error}">
-			<fieldset class="inline">
-				<legend id="groupSchemeLbl">
-					@header(ersUtil.getPageElement(schemeId, ersUtil.PAGE_GROUP_ACTIVITY, "question"))
-				</legend>
-				<div class="form-hint">
-					<span>@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_GROUP_ACTIVITY, "intro_para"))</span>
-				</div>
-				@if(groupSchemeForm.hasErrors){<span class="error-notification">@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_GROUP_ACTIVITY, "err.message"))</span>}
-				<div class="multiple-choice">
-					<input id="yes" type="radio" name="groupScheme" value="1" @(if(groupScheme.get == ersUtil.OPTION_YES) "checked" else "")>
-					<label for="yes" class="@(if(groupScheme contains ersUtil.OPTION_YES) "selected")">@Html(Messages("ers_group_scheme.yes"))</label>
-				</div>
-				<div class="multiple-choice">
-					<input id="no" type="radio" name="groupScheme" value="2" @(if(groupScheme.get == ersUtil.OPTION_NO) "checked" else "")>
-					<label for="no" class="@(if(groupScheme contains ersUtil.OPTION_NO) "selected")">@Html(Messages("ers_group_scheme.no"))</label>
-				</div>
-			</fieldset>
-		</div>
-		<input role="button" id="continue" class="button" type="submit" value="@Html(Messages("ers.continue"))">
+
+	@formWithCSRF(action = routes.GroupSchemeController.groupSchemeSelected(schemeId)) {
+
+		@govukRadios(Radios(
+			fieldset = Some(Fieldset(
+				legend = Some(Legend(
+					content = Text(ersUtil.getPageElement(schemeId, ersUtil.PAGE_GROUP_ACTIVITY, "question")),
+					isPageHeading = true,
+					classes = "govuk-fieldset__legend--l"))
+			)),
+			name = "groupScheme",
+			hint = Some(Hint(content = Text(ersUtil.getPageElement(schemeId, ersUtil.PAGE_GROUP_ACTIVITY, "intro_para")))),
+			errorMessage = if(groupSchemeForm.hasErrors) Some(ErrorMessage(content = Text(ersUtil.getPageElement(schemeId, ersUtil.PAGE_GROUP_ACTIVITY, "err.message")))) else None,
+			items = Seq(
+				RadioItem(
+					checked = groupScheme.get == ersUtil.OPTION_YES,
+					id = Some("yes"),
+					value = Some("1"),
+					content = Text(messages("ers_group_scheme.yes"))
+				),
+				RadioItem(
+					checked = groupScheme.get == ersUtil.OPTION_NO,
+					id = Some("no"),
+					value = Some("2"),
+					content = Text(messages("ers_group_scheme.no"))
+				)
+			),
+			classes = "govuk-radios--inline"
+		))
+
+		@govukButton(Button(
+			inputType = Some("submit"),
+			content = Text(messages("ers.continue")),
+			attributes = Map("id" -> "continue"),
+		))
 	}
 }

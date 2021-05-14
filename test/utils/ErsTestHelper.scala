@@ -77,13 +77,16 @@ trait ErsTestHelper extends MockitoSugar with AuthHelper with ERSFakeApplication
 	when(mockAppConfig.ggSignInUrl).thenReturn("http://localhost:9949/gg/sign-in")
 	when(mockAppConfig.appName).thenReturn("ers-returns-frontend")
 	when(mockAppConfig.loginCallback).thenReturn("http://localhost:9290/submit-your-ers-annual-return")
+	when(mockAppConfig.signOut).thenReturn("http://localhost:9025/gg/sign-out?continue=http://localhost:9514/feedback/ERS")
 	when(mockAppConfig.sentViaSchedulerNoOfRowsLimit).thenReturn(10000)
 	when(mockAppConfig.odsSuccessRetryAmount).thenReturn(5)
 	when(mockAppConfig.odsValidationRetryAmount).thenReturn(1)
+	when(mockAppConfig.urBannerLink).thenReturn("http://")
 
 	import scala.concurrent.duration._
 	when(mockAppConfig.retryDelay).thenReturn(3 milliseconds)
 
+	when(mockErsUtil.PAGE_ALT_ACTIVITY).thenReturn("ers_alt_activity")
 	when(mockErsUtil.CSV_FILES_UPLOAD).thenReturn("csv-files-upload")
 	when(mockErsUtil.ersRequestObject).thenReturn("ErsRequestObject")
 	when(mockErsUtil.GROUP_SCHEME_COMPANIES).thenReturn("group-scheme-companies")

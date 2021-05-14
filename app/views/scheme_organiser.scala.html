@@ -14,80 +14,180 @@
  * limitations under the License.
  *@
 
-@import utils.ERSUtil
+@import _root_.utils.ERSUtil
 @import config.ApplicationConfig
-@import utils.CountryCodes
-@import uk.gov.hmrc.play.views.html.helpers.{FormWithCSRF, Input, ErrorSummary}
+@import _root_.utils.CountryCodes
+@import views.html.templates.reference
+@import views.html.includes.countries
+@import uk.gov.hmrc.play.views.html.helpers.FormWithCSRF
+@import uk.gov.hmrc.govukfrontend.views.html.components.implicits._
 
-@this(form: FormWithCSRF, input: Input, errorSummary: ErrorSummary)
+@this(
+		govuk_wrapper: govuk_wrapper,
+		countriesSelect: countries,
+		formWithCSRF: FormWithCSRF,
+		govukBackLink: GovukBackLink,
+		govukErrorSummary: GovukErrorSummary,
+		govukRadios: GovukRadios,
+		govukInput: GovukInput,
+		govukButton: GovukButton,
+		hmrcPageHeading: HmrcPageHeading
+)
 
 @(requestObject: RequestObject, checkFileType: String, schemeOrganiser: Form[models.SchemeOrganiserDetails], reportableEvents: String = "2")(implicit request: Request[AnyRef], flash: Flash, messages: Messages, countryCodes: CountryCodes, ersUtil: ERSUtil, appConfig: ApplicationConfig)
+
 @schemeId = @{requestObject.getSchemeId}
-@import views.html.helpers.error_overview
-@import views.html.templates._
 
 @scripts = {
-	<script src='@routes.Assets.at("javascripts/ers_scripts.js")'> </script>
-	<script src='@routes.Assets.at("javascripts/ers_company.js")'> </script>
+	<script type="text/javascript" src='@controllers.routes.Assets.versioned("javascripts/uk-or-overseas-form-reveal.js")'></script>
 }
 
-@ers_main(title = ersUtil.getPageElement(schemeId, ersUtil.PAGE_SCHEME_ORGANISER, "title") + " " + messages("ers.title.postfix"), scripts) {
+@govuk_wrapper(title = ersUtil.getPageElement(schemeId, ersUtil.PAGE_SCHEME_ORGANISER, "title") + " " + messages("ers.title.postfix"), Some(scripts)) {
 
 	@reference(requestObject.getPageTitle)
-	<p class="font-xsmall"><a href="@ersUtil.getPageBackLink(schemeId, ersUtil.PAGE_SCHEME_ORGANISER, checkFileType, reportableEvents)" class="link-back">@Html(messages("ers.back"))</a></p>
+
+	@govukBackLink(BackLink(
+		href = ersUtil.getPageBackLink(schemeId, ersUtil.PAGE_SCHEME_ORGANISER, checkFileType, reportableEvents),
+	))
 
 	@if(schemeOrganiser.hasErrors) {
-		@errorSummary(messages("validation.summary.heading"), schemeOrganiser)
+		@govukErrorSummary(ErrorSummary(
+			title = Text(messages("validation.summary.heading")),
+			errorList = schemeOrganiser.errors.asTextErrorLinks
+		))
 	}
-	@header(ersUtil.getPageElement(schemeId, ersUtil.PAGE_SCHEME_ORGANISER, "title"))
-	@form(action = routes.SchemeOrganiserController.schemeOrganiserSubmit) {
 
-	<div class="form-field-group">
-		<fieldset class="inline">
-			<legend class="form-label">@messages("ers_scheme_organiser.question")</legend>
-			<div class="multiple-choice">
-				<input id="uk-radio-button" name="radio-inline-group" value="1" type="radio" @if(schemeOrganiser(schemeOrganiserFields.country).value.contains(ersUtil.DEFAULT_COUNTRY) || schemeOrganiser(schemeOrganiserFields.country).value.isEmpty) {checked="checked"}>
-				<label class="block-label @if(schemeOrganiser(schemeOrganiserFields.country).value.contains(ersUtil.DEFAULT_COUNTRY) || schemeOrganiser(schemeOrganiserFields.country).value.isEmpty) {selected}" for="uk-radio-button">@messages("ers_scheme_organiser.uk")</label>
-			</div>
-			<div class="multiple-choice">
-				<input id="overseas-radio-button" name="radio-inline-group" value="2" type="radio" @if(!schemeOrganiser(schemeOrganiserFields.country).value.contains(ersUtil.DEFAULT_COUNTRY) && schemeOrganiser(schemeOrganiserFields.country).value.isDefined) {checked="checked"}>
-				<label class="block-label @if(!schemeOrganiser(schemeOrganiserFields.country).value.contains(ersUtil.DEFAULT_COUNTRY) && schemeOrganiser(schemeOrganiserFields.country).value.isDefined) {selected}" for="overseas-radio-button">@messages("ers_scheme_organiser.overseas")</label>
-			</div>
-		</fieldset>
-	</div>
-	<div class="form-group">
-		@input(schemeOrganiser(schemeOrganiserFields.companyName), '_label -> messages("ers_scheme_organiser.company_name"), '_inputClass -> "form-control form-control--block")
-	</div>
-	<div class="form-group @if(schemeOrganiser.error(schemeOrganiserFields.addressLine1).isDefined) {form-field--error}">
-		<label for="addressLine1" class="form-label">
-			<span>@messages("ers_scheme_organiser.address")</span>
-			<span class="visuallyhidden">@messages("ers_scheme_organiser.addressLine1")</span>
-			@if(schemeOrganiser.error(companyDetailsFields.addressLine1).isDefined) {<span class="error-notification" role="tooltip">@schemeOrganiser.errors(schemeOrganiserFields.addressLine1).head.message</span>}
-			<input id="addressLine1" type="text" class="form-control form-control--block" name="addressLine1" value="@schemeOrganiser(schemeOrganiserFields.addressLine1).value">
-		</label>
-	</div>
-	<div class='form-group'>
-		@input(schemeOrganiser(schemeOrganiserFields.addressLine2), '_label -> messages("ers_scheme_organiser.addressLine2"), '_labelTextClass -> "visuallyhidden", '_inputClass -> "form-control form-control--block")
-	</div>
-	<div class='form-group'>
-		@input(schemeOrganiser(schemeOrganiserFields.addressLine3), '_label -> messages("ers_scheme_organiser.addressLine3"), '_labelTextClass -> "visuallyhidden", '_inputClass -> "form-control form-control--block")
-	</div>
-	<div class='form-group'>
-		@input(schemeOrganiser(schemeOrganiserFields.addressLine4), '_label -> messages("ers_scheme_organiser.addressLine4"), '_labelTextClass -> "visuallyhidden", '_inputClass -> "form-control form-control--block")
-	</div>
-	<div class='form-group'>
-		@input(schemeOrganiser(schemeOrganiserFields.postcode), '_label -> messages("ers_scheme_organiser.postcode"), '_inputHint -> messages("ers_scheme_organiser.postcode.hint"), '_inputClass -> "form-control form-control--block" )
-	</div>
-	<div class="form-group country-group">
-		<label for="country" id="countryLbl" class="form-label">@messages("ers_scheme_organiser.country")</label>
-		@views.html.includes.countries(schemeOrganiser(schemeOrganiserFields.country).value)
-	</div>
-	<div class="form-group company-reg-group">
-		@input(schemeOrganiser(schemeOrganiserFields.companyReg), '_label -> messages("ers_scheme_organiser.company_reg_number"), '_inputHint -> messages("ers_scheme_organiser.company_reg_number.hint"), '_inputClass -> "form-control form-control--block" )
-	</div>
-	<div class="form-group corporation-ref-group">
-		@input(schemeOrganiser(schemeOrganiserFields.corporationRef), '_label -> messages("ers_scheme_organiser.corporation_tax_ref"), '_inputHint -> messages("ers_scheme_organiser.corporation_tax_ref.hint"), '_inputClass -> "form-control form-control--block" )
-	</div>
-	<input role="button" id="continue" class="button" type="submit" value="@Html(messages("ers_scheme_organiser.continue"))" >
+	@hmrcPageHeading(PageHeading(
+		text = ersUtil.getPageElement(schemeId, ersUtil.PAGE_SCHEME_ORGANISER, "title")
+	))
+
+	@formWithCSRF(action = routes.SchemeOrganiserController.schemeOrganiserSubmit) {
+
+		@govukRadios(Radios(
+			fieldset = Some(Fieldset(
+				legend = Some(Legend(content=Text(messages("ers_scheme_organiser.question"))))
+			)),
+			name = "radio-inline-group",
+			items = Seq(
+				RadioItem(
+					checked = schemeOrganiser(schemeOrganiserFields.country).value.contains(ersUtil.DEFAULT_COUNTRY) || schemeOrganiser(schemeOrganiserFields.country).value.isEmpty,
+					id = Some("uk-radio-button"),
+					value = Some("1"),
+					content = Text(messages("ers_scheme_organiser.uk"))
+				),
+				RadioItem(
+					checked = !schemeOrganiser(schemeOrganiserFields.country).value.contains(ersUtil.DEFAULT_COUNTRY) && schemeOrganiser(schemeOrganiserFields.country).value.isDefined,
+					id = Some("overseas-radio-button"),
+					value = Some("2"),
+					content = Text(messages("ers_scheme_organiser.overseas"))
+				)
+			),
+			classes = "govuk-radios--inline"
+		))
+
+		@govukInput(Input(
+			classes = "govuk-!-width-one-half",
+			id = "companyName",
+			name = "companyName",
+			value = schemeOrganiser(schemeOrganiserFields.companyName).value,
+			errorMessage = schemeOrganiser.error(companyDetailsFields.companyName).map { name =>
+				ErrorMessage(content = Text(name.messages.head))
+			},
+			label = Label(
+				content = Text(messages("ers_scheme_organiser.company_name"))
+			)
+		))
+
+		@govukInput(Input(
+			classes = "govuk-!-width-one-half",
+			id = "addressLine1",
+			name = "addressLine1",
+			autocomplete = Some("address-line1"),
+			value = schemeOrganiser(schemeOrganiserFields.addressLine1).value,
+			errorMessage = schemeOrganiser.error(companyDetailsFields.addressLine1).map { addressLine1 =>
+			  ErrorMessage(content = Text(addressLine1.messages.head))
+			},
+			label = Label(
+				content = Text(messages("ers_scheme_organiser.address"))
+			)
+		))
+
+		@govukInput(Input(
+			classes = "govuk-!-width-one-half",
+			id = "addressLine2",
+			name = "addressLine2",
+			autocomplete = Some("address-line2"),
+			value = schemeOrganiser(schemeOrganiserFields.addressLine2).value,
+			label = Label(
+				content = Text(messages("ers_scheme_organiser.addressLine2")),
+				classes = "govuk-visually-hidden"
+			)
+		))
+
+		@govukInput(Input(
+			classes = "govuk-!-width-one-half",
+			id = "addressLine3",
+			name = "addressLine3",
+			autocomplete = Some("address-line3"),
+			value = schemeOrganiser(schemeOrganiserFields.addressLine3).value,
+			label = Label(
+				content = Text(messages("ers_scheme_organiser.addressLine3")),
+				classes = "govuk-visually-hidden"
+			)
+		))
+
+		@govukInput(Input(
+			classes = "govuk-!-width-one-half",
+			id = "addressLine4",
+			name = "addressLine4",
+			autocomplete = Some("address-line4"),
+			value = schemeOrganiser(schemeOrganiserFields.addressLine4).value,
+			label = Label(
+				content = Text(messages("ers_scheme_organiser.addressLine4")),
+				classes = "govuk-visually-hidden"
+			)
+		))
+
+		@govukInput(Input(
+			classes = "govuk-input--width-5",
+			id = "postcode",
+			name = "postcode",
+			autocomplete = Some("postal-code"),
+			value = schemeOrganiser(schemeOrganiserFields.postcode).value,
+			hint = Some(Hint(content=Text(messages("ers_scheme_organiser.postcode.hint")))),
+			label = Label(
+				content = Text(messages("ers_scheme_organiser.postcode")),
+			)
+		))
+
+		@countriesSelect(schemeOrganiser(schemeOrganiserFields.country).value)
+
+		@govukInput(Input(
+			classes = "govuk-!-width-one-half",
+			id = "companyReg",
+			name = "companyReg",
+			value = schemeOrganiser(schemeOrganiserFields.companyReg).value,
+			hint = Some(Hint(content=Text(messages("ers_scheme_organiser.company_reg_number.hint")))),
+			label = Label(
+				content = Text(messages("ers_scheme_organiser.company_reg_number")),
+			)
+		))
+
+		@govukInput(Input(
+			classes = "govuk-!-width-one-half",
+			id = "corporationRef",
+			name = "corporationRef",
+			value = schemeOrganiser(schemeOrganiserFields.corporationRef).value,
+			hint = Some(Hint(content=Text(messages("ers_scheme_organiser.corporation_tax_ref.hint")))),
+			label = Label(
+				content = Text(messages("ers_scheme_organiser.corporation_tax_ref")),
+			)
+		))
+
+		@govukButton(Button(
+			inputType = Some("submit"),
+			content = Text(messages("ers_scheme_organiser.continue")),
+			attributes = Map("id" -> "continue"),
+		))
 	}
  }

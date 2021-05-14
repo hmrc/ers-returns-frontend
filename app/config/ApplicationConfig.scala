@@ -65,6 +65,9 @@ class ApplicationConfig @Inject()(config: ServicesConfig) {
 	lazy val allCsvFilesCacheRetryAmount: Int = config.getInt("retry.csv-success-cache.all-files-complete.amount")
 	lazy val retryDelay: FiniteDuration = FiniteDuration(config.getString("retry.delay").toInt, "ms")
 	lazy val accessThreshold: Int = config.getInt("accessThreshold")
+	lazy val timeOutSeconds : Int = config.getInt("sessionTimeout.timeoutSeconds")
+	lazy val timeOutCountDownSeconds: Int = config.getInt("sessionTimeout.time-out-countdown-seconds")
+	lazy val timeOut = s"$loginCallback/signed-out"
 
 	lazy val sentViaSchedulerNoOfRowsLimit: Int = 10000
 

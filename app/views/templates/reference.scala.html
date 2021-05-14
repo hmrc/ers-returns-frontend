@@ -15,9 +15,6 @@
  *@
 
 @(screenSchemeInfo: String)(implicit request: Request[AnyRef], messages: Messages)
-<div class="reference">
-    <p class="font-xsmall">
-        <span class="visuallyhidden">@messages("ers.reference.info")</span>
-            @screenSchemeInfo
-    </p>
-</div>
+
+<p id="scheme-reference" class="govuk-body">@screenSchemeInfo</p>
+

@@ -16,8 +16,6 @@
 
 package controllers
 
-import java.util.NoSuchElementException
-
 import akka.stream.Materializer
 import models._
 import org.joda.time.DateTime
@@ -27,7 +25,7 @@ import org.mockito.Mockito._
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status
 import play.api.i18n
-import play.api.i18n.{Lang, Messages, MessagesApi, MessagesImpl}
+import play.api.i18n.{MessagesApi, MessagesImpl}
 import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -36,6 +34,7 @@ import utils.Fixtures.ersRequestObject
 import utils.{ERSFakeApplicationConfig, ErsTestHelper, Fixtures}
 import views.html.{global_error, reportable_events}
 
+import java.util.NoSuchElementException
 import scala.concurrent.{ExecutionContext, Future}
 
 class ReportableEventsControllerSpec extends UnitSpec with ERSFakeApplicationConfig with ErsTestHelper with GuiceOneAppPerSuite {

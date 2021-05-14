@@ -15,18 +15,39 @@
  *@
 
 @import config.ApplicationConfig
+
+@this(
+        govuk_wrapper: govuk_wrapper,
+        govukButton: GovukButton,
+        hmrcPageHeading: HmrcPageHeading
+)
+
 @(implicit request: Request[AnyRef], messages: Messages, appConfig: ApplicationConfig)
 
-@import views.html.templates._
+@govuk_wrapper(title = messages("ers.app_title")) {
 
+    @hmrcPageHeading(PageHeading(
+        text = messages("ers_file_format_successful.page_title")
+    ))
 
-@ers_main(title = messages("ers.app_title")) {
-	@header(messages("ers_file_format_successful.page_title"))
-	<div class="success-banner"  id="success-message"><p class="heading-medium">@Html(messages("ers_file_format_successful.banner"))</p></div>
+	<div class="success-banner"  id="success-message">
+        <h2 class="govuk-heading-m">
+            @Html(messages("ers_file_format_successful.banner"))
+        </h2>
+    </div>
 	<div class="bottom-grey"></div>
 	<div class="text">
-		<h2 class="heading-medium">@Html(messages("ers_file_format_successful.sub_heading"))</h2>
-		<p>@Html(messages("ers_file_format_successful.instructions"))</p>
-		<a class="button" role="button" href="https://www.gov.uk/done/employment-related-securities-files" id="finished">@Html(messages("ers.finish"))</a>
-	</div>
+		<h2 class="govuk-heading-m">
+            @Html(messages("ers_file_format_successful.sub_heading"))
+        </h2>
+		<p class="govuk-body">
+            @Html(messages("ers_file_format_successful.instructions"))
+        </p>
+
+        @govukButton(Button(
+            content = Text(messages("ers.finish")),
+            href = Some("https://www.gov.uk/done/employment-related-securities-files"),
+            attributes = Map("id" -> "finished"),
+        ))
+    </div>
 }

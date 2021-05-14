@@ -119,40 +119,40 @@ trait PageBuilder {
   val CSVFilesList = Map(
     (
       EMI, List(
-      CsvFiles(FILE_EMI_ADJUSTMENTS, None),
-      CsvFiles(FILE_EMI_REPLACED, None),
-      CsvFiles(FILE_EMI_RCL, None),
-      CsvFiles(FILE_EMI_NONTAXABLE, None),
-      CsvFiles(FILE_EMI_TAXABLE, None)
+      CsvFiles(FILE_EMI_ADJUSTMENTS),
+      CsvFiles(FILE_EMI_REPLACED),
+      CsvFiles(FILE_EMI_RCL),
+      CsvFiles(FILE_EMI_NONTAXABLE),
+      CsvFiles(FILE_EMI_TAXABLE)
     )),
     (
       CSOP, List(
-      CsvFiles(FILE_CSOP_GRANTED, None),
-      CsvFiles(FILE_CSOP_RCL, None),
-      CsvFiles(FILE_CSOP_Exercised, None)
+      CsvFiles(FILE_CSOP_GRANTED),
+      CsvFiles(FILE_CSOP_RCL),
+      CsvFiles(FILE_CSOP_Exercised)
     )),
     (
       OTHER, List(
-      CsvFiles(FILE_OTHER_GRANTS, None),
-      CsvFiles(FILE_OTHER_OPTIONS, None),
-      CsvFiles(FILE_OTHER_ACQUISITION, None),
-      CsvFiles(FILE_OTHER_RESTRICTED, None),
-      CsvFiles(FILE_OTHER_BENEFITS, None),
-      CsvFiles(FILE_OTHER_CONVERTABLE, None),
-      CsvFiles(FILE_OTHER_NOTIONAL, None),
-      CsvFiles(FILE_OTHER_ENCHANCEMENT, None),
-      CsvFiles(FILE_OTHER_SOLD, None)
+      CsvFiles(FILE_OTHER_GRANTS),
+      CsvFiles(FILE_OTHER_OPTIONS),
+      CsvFiles(FILE_OTHER_ACQUISITION),
+      CsvFiles(FILE_OTHER_RESTRICTED),
+      CsvFiles(FILE_OTHER_BENEFITS),
+      CsvFiles(FILE_OTHER_CONVERTABLE),
+      CsvFiles(FILE_OTHER_NOTIONAL),
+      CsvFiles(FILE_OTHER_ENCHANCEMENT),
+      CsvFiles(FILE_OTHER_SOLD)
     )),
     (
       SAYE, List(
-      CsvFiles(FILE_SAYE_GRANTED, None),
-      CsvFiles(FILE_SAYE_RCL, None),
-      CsvFiles(FILE_SAYE_EXERCISED, None)
+      CsvFiles(FILE_SAYE_GRANTED),
+      CsvFiles(FILE_SAYE_RCL),
+      CsvFiles(FILE_SAYE_EXERCISED)
     )),
     (
       SIP, List(
-      CsvFiles(FILE_SIP_AWARDS, None),
-      CsvFiles(FILE_SIP_OUT, None)
+      CsvFiles(FILE_SIP_AWARDS),
+      CsvFiles(FILE_SIP_OUT)
     ))
   )
 

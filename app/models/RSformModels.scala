@@ -93,7 +93,7 @@ object TrusteeDetailsList {
   implicit val format: OFormat[TrusteeDetailsList] = Json.format[TrusteeDetailsList]
 }
 
-case class CsvFiles(fileId: String, isSelected: Option[String])
+case class CsvFiles(fileId: String)
 object CsvFiles {
   implicit val format: OFormat[CsvFiles] = Json.format[CsvFiles]
 }

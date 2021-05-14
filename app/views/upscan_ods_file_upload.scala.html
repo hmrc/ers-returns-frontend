@@ -16,38 +16,51 @@
 
 @import views.html.templates._
 @import views.html.includes.upscan_file_upload_form
-
 @import models.upscan.UpscanInitiateResponse
 @import config.ApplicationConfig
+@import _root_.utils.ERSUtil
 
-@this(config: ApplicationConfig)
+@this(
+		govuk_wrapper: govuk_wrapper,
+		upscan_file_upload_form: upscan_file_upload_form,
+		govukErrorSummary: GovukErrorSummary,
+		govukBackLink: GovukBackLink,
+		govukInsetText: GovukInsetText
+)
 
-@(requestObject: RequestObject, upscanInitiateResponse: UpscanInitiateResponse)(implicit request: Request[AnyRef], messages: Messages, appConfig: ApplicationConfig)
+@(requestObject: RequestObject, upscanInitiateResponse: UpscanInitiateResponse)(implicit request: Request[AnyRef], messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 
+@schemeId = @{requestObject.getSchemeId}
 
 @scripts = {
-	<script src='@routes.Assets.at("javascripts/ers_ods_scripts.js")'> </script>
+	<script src='@routes.Assets.versioned("/javascripts/file-upload.js")'></script>
+	<script src='@routes.Assets.versioned("/javascripts/welsh-translation.js")'></script>
 }
 
-@ers_main(title = messages("ers.upload_ods_file.page_title"), scripts) {
+@govuk_wrapper(title = messages("ers.upload_ods_file.page_title"), Some(scripts)) {
 
 	@reference(requestObject.getPageTitle)
-	<p class="font-xsmall"><a href="@routes.CheckFileTypeController.checkFileTypePage" class="link-back">@messages("ers.back")</a></p>
 
-	<div id="errors" class="flash error-summary error-summary--show validation-summary visibility" role="group" aria-labelledby="error-summary-heading" tabindex="-1">
-		<h2 class="heading-medium error-summary-heading" id="error-summary-heading">
-		@messages("validation.summary.heading")
-		</h2>
-		<ul class="js-error-summary-messages">
-			<li><a href="#fileToUpload" data-focuses="fileToUpload">@messages("csv_file_upload.summary_error")</a></li>
-		</ul>
-	</div>
-	
-	<label for="fileToUpload" class="visuallyhidden">
-		<span>@messages("file_upload.title")</span>
-	</label>
-  @upscan_file_upload_form(".ods", upscanInitiateResponse.formFields, upscanInitiateResponse.postTarget, messages("file_upload.title"))
-	<div class="panel-indent">
-		<p>@messages("file_upload.delay.ods")</p>
-	</div>
+	@govukBackLink(BackLink(
+		href = routes.CheckFileTypeController.checkFileTypePage.url,
+	))
+
+	@govukErrorSummary(ErrorSummary(
+		title = Text(messages("validation.summary.heading")),
+		errorList = Seq(ErrorLink()),
+		classes = "govuk-!-display-none"
+	))
+
+  	@upscan_file_upload_form(
+		".ods",
+		upscanInitiateResponse.formFields,
+		upscanInitiateResponse.postTarget,
+		messages("file_upload.title"),
+		schemeId,
+		fileId = ""
+	)
+
+	@govukInsetText(InsetText(
+		content = Text(messages("file_upload.delay.ods"))
+	))
 }
