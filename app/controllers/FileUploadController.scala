@@ -44,7 +44,8 @@ class FileUploadController @Inject()(val mcc: MessagesControllerComponents,
                                      implicit val actorSystem: ActorSystem,
                                      globalErrorView: views.html.global_error,
                                      fileUploadErrorsView: views.html.file_upload_errors,
-                                     upscanOdsFileUploadView: views.html.upscan_ods_file_upload
+                                     upscanOdsFileUploadView: views.html.upscan_ods_file_upload,
+                                     fileUploadProblemView: views.html.file_upload_problem
 																		) extends FrontendController(mcc) with Authenticator with I18nSupport with Retryable {
 
   implicit val ec: ExecutionContext = mcc.executionContext
@@ -84,8 +85,16 @@ class FileUploadController @Inject()(val mcc: MessagesControllerComponents,
         } yield {
           file match {
             case Some(file: UploadedSuccessfully) =>
-              ersUtil.cache[String](ersUtil.FILE_NAME_CACHE, file.name, requestObject.getSchemeReference).map { _ =>
-                Redirect(routes.FileUploadController.validationResults())
+              if(file.name.contains(".csv")) {
+                Logger.info("[FileUploadController][success] User uploaded a csv file instead of an ods file")
+                Future(getFileUploadProblemPage)
+              } else if (!file.name.contains(".ods")) {
+                Logger.info("[FileUploadController][success] User uploaded a non ods file")
+                Future(getFileUploadProblemPage)
+              } else {
+                ersUtil.cache[String](ersUtil.FILE_NAME_CACHE, file.name, requestObject.getSchemeReference).map { _ =>
+                  Redirect(routes.FileUploadController.validationResults())
+                }
               }
             case Some(Failed) =>
               Logger.warn("[FileUploadController][success] Upload status is failed")
@@ -176,11 +185,17 @@ class FileUploadController @Inject()(val mcc: MessagesControllerComponents,
         val errorMessage = request.getQueryString("errorMessage").getOrElse("Unknown")
         val errorRequestId = request.getQueryString("errorRequestId").getOrElse("Unknown")
         Logger.error(s"Upscan Failure. errorCode: $errorCode, errorMessage: $errorMessage, errorRequestId: $errorRequestId")
-        Future.successful(getGlobalErrorPage)
+        Future.successful(getFileUploadProblemPage)
+  }
+
+  def getFileUploadProblemPage()(implicit request: Request[_], messages: Messages): Result = {
+    BadRequest(fileUploadProblemView(
+      "ers.file_problem.title"
+    )(request, messages, appConfig))
   }
 
 	def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result = {
-		Ok(globalErrorView(
+		InternalServerError(globalErrorView(
 			"ers.global_errors.title",
 			"ers.global_errors.heading",
 			"ers.global_errors.message"

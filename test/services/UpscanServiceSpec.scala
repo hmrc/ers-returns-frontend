@@ -50,7 +50,7 @@ class UpscanServiceSpec extends UnitSpec with OneAppPerSuite with MockitoSugar {
       val callback = controllers.routes.FileUploadCallbackController.callback(hc.sessionId.get.value).absoluteURL()
       val success = controllers.routes.FileUploadController.success().absoluteURL()
       val failure = controllers.routes.FileUploadController.failure().absoluteURL()
-      val expectedInitiateRequest = UpscanInitiateRequest(callback, success, failure)
+      val expectedInitiateRequest = UpscanInitiateRequest(callback, success, failure, 1, 10485760)
 
       val upscanInitiateResponse = UpscanInitiateResponse(Reference("reference"), "postTarget", formFields = Map.empty[String, String])
       val initiateRequestCaptor = ArgumentCaptor.forClass(classOf[UpscanInitiateRequest])
@@ -73,7 +73,7 @@ class UpscanServiceSpec extends UnitSpec with OneAppPerSuite with MockitoSugar {
       val callback = controllers.routes.CsvFileUploadCallbackController.callback(uploadId, scRef).absoluteURL()
       val success = controllers.routes.CsvFileUploadController.success(uploadId).absoluteURL()
       val failure = controllers.routes.CsvFileUploadController.failure().absoluteURL()
-      val expectedInitiateRequest = UpscanInitiateRequest(callback, success, failure)
+      val expectedInitiateRequest = UpscanInitiateRequest(callback, success, failure, 1, 104857600)
 
       val upscanInitiateResponse = UpscanInitiateResponse(Reference("reference"), "postTarget", formFields = Map.empty[String, String])
       val initiateRequestCaptor = ArgumentCaptor.forClass(classOf[UpscanInitiateRequest])

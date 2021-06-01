@@ -735,6 +735,18 @@ ers.global_errors.heading = Submit your ERS annual return
 ers.global_errors.title = Sorry, there is a problem with the service - Submit your ERS annual return – GOV.UK
 ers.global.errors.try.later=Try again later.
 
+#********************************************************************
+# File problem messages
+#********************************************************************
+ers.file_problem.title = There is a problem with the file upload - Submit your ERS annual return – GOV.UK
+ers.file_problem.heading = There is a problem with the file upload
+ers.file_problem.paragraph = This may be because the file:
+ers.file_problem.invalidFileName = has the wrong name or the name is more than 240 characters
+ers.file_problem.fileTooLarge = is too large - there is a 100MB limit for CSV files and a 10MB limit for ODS files
+ers.file_problem.fileTooSmall = is empty
+ers.file_problem.invalidFileType = is the wrong type - it should be a CSV or an ODS depending on what you have already selected
+ers.file_problem.invalidFileNameCharacters = contains invalid characters
+ers.file_problem.tryAgain = Try again
 
 #********************************************************************
 # ur banner text
