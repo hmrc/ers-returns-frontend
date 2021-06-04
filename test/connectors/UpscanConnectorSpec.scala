@@ -32,7 +32,7 @@ class UpscanConnectorSpec extends UnitSpec with OneAppPerSuite with MockitoSugar
 
 	lazy val connector: UpscanConnector = app.injector.instanceOf[UpscanConnector]
 	implicit val hc: HeaderCarrier = HeaderCarrier()
-	val request: UpscanInitiateRequest = UpscanInitiateRequest("callbackUrl", "successRedirectUrl", "errorRedirectUrl")
+	val request: UpscanInitiateRequest = UpscanInitiateRequest("callbackUrl", "successRedirectUrl", "errorRedirectUrl", 1, 104857600)
 	override def fakeApplication(): Application = new GuiceApplicationBuilder()
 		.configure(
 			"microservice.services.upscan.port" -> server.port()

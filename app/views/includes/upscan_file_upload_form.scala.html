@@ -44,7 +44,6 @@
     @govukFileUpload(FileUpload(
         name="file",
         id="fileToUpload",
-        classes = "govuk-!-display-none",
         attributes = Map("accept" -> s"$fileType"),
         label = Label(
             forAttr = Some("fileToUpload"),
@@ -59,8 +58,7 @@
     @govukButton(Button(
         inputType = Some("submit"),
         content = Text(messages("ers_group_file_check.check_file_button")),
-        attributes = Map("id" -> "submit"),
-        disabled = true
+        attributes = Map("id" -> "submit")
     ))
 
     <div class="govuk-!-display-none" id="progress-spinner"><img id="progress-spinner-img" src="@routes.Assets.versioned("images/spinner.gif")" alt="Loading ..."/></div>

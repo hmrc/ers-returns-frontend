@@ -36,7 +36,7 @@ import services.{SessionService, UpscanService}
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import utils.{ERSFakeApplicationConfig, ErsTestHelper, UpscanData}
-import views.html.{file_upload_errors, global_error, upscan_ods_file_upload}
+import views.html.{file_upload_errors, file_upload_problem, global_error, upscan_ods_file_upload}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -68,12 +68,13 @@ class FileUploadControllerSpec extends PlaySpec
   val globalErrorView: global_error = app.injector.instanceOf[global_error]
   val fileUploadErrorsView: file_upload_errors = app.injector.instanceOf[file_upload_errors]
   val upscanOdsFileUploadView: upscan_ods_file_upload = app.injector.instanceOf[upscan_ods_file_upload]
+  val fileUploadProblemView: file_upload_problem = app.injector.instanceOf[file_upload_problem]
 
 
   implicit lazy val materializer: Materializer = app.materializer
 
 	object TestFileUploadController extends FileUploadController(
-		mockMCC, mockErsConnector, mockAuthConnector, mockSessionService, mockUpscanService, mockErsUtil, mockAppConfig, mockActorSystem, globalErrorView, fileUploadErrorsView, upscanOdsFileUploadView
+		mockMCC, mockErsConnector, mockAuthConnector, mockSessionService, mockUpscanService, mockErsUtil, mockAppConfig, mockActorSystem, globalErrorView, fileUploadErrorsView, upscanOdsFileUploadView, fileUploadProblemView
 	)
 
 	when(mockErsUtil.fetch[CheckFileType](refEq("check-file-type"), any[String]())(any(),
@@ -89,9 +90,14 @@ class FileUploadControllerSpec extends PlaySpec
 	}
 
 	def checkGlobalErrorPage(result: Future[Result]): Assertion = {
-		status(result) mustBe OK
+		status(result) mustBe INTERNAL_SERVER_ERROR
 		contentAsString(result) must include (testMessages("ers.global_errors.title"))
 	}
+
+  def checkFileUploadProblemPage(result: Future[Result]): Assertion = {
+    status(result) mustBe BAD_REQUEST
+    contentAsString(result) must include (testMessages("ers.file_problem.heading"))
+  }
 
   "uploadFilePage" must {
     when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any(), any()))
@@ -165,18 +171,32 @@ class FileUploadControllerSpec extends PlaySpec
         checkGlobalErrorPage(result)
       }
     }
+
+    "return file upload problem page" when {
+      "file name includes .csv" in {
+        when(mockErsUtil.fetch[RequestObject](anyString())(any(), any(), any(), any()))
+          .thenReturn(Future.successful(ersRequestObject))
+        when(mockSessionService.getCallbackRecord(any[Request[_]], any[HeaderCarrier]))
+          .thenReturn(Future.successful(Some(uploadedSuccessfullyCsv)))
+        when(mockErsUtil.cache(meq("file-name"), meq(uploadedSuccessfullyCsv.name), any())(any[HeaderCarrier], any(), any[Request[AnyRef]]))
+          .thenReturn(Future.successful(mock[CacheMap]))
+
+        setAuthMocks()
+        val result = TestFileUploadController.success()(request)
+        checkFileUploadProblemPage(result)
+      }
+    }
   }
 
   "validationResults" must {
-    when(mockErsUtil.fetch[RequestObject](anyString())(any(), any(), any(), any()))
-      .thenReturn(Future.successful(ersRequestObject))
-    when(mockSessionService.getCallbackRecord(any[Request[_]], any[HeaderCarrier]))
-      .thenReturn(Future.successful(Some(uploadedSuccessfully)))
-    when(mockErsConnector.removePresubmissionData(any())(any[ERSAuthData], any[HeaderCarrier]))
-      .thenReturn(Future.successful(HttpResponse(OK, "")))
-
     "redirect the user" when {
       "Ers Meta Data is returned, callback record is uploaded successfully, remove presubmission data returns OK and validate file data returns OK" in {
+        when(mockErsUtil.fetch[RequestObject](anyString())(any(), any(), any(), any()))
+          .thenReturn(Future.successful(ersRequestObject))
+        when(mockSessionService.getCallbackRecord(any[Request[_]], any[HeaderCarrier]))
+          .thenReturn(Future.successful(Some(uploadedSuccessfully)))
+        when(mockErsConnector.removePresubmissionData(any())(any[ERSAuthData], any[HeaderCarrier]))
+          .thenReturn(Future.successful(HttpResponse(OK, "")))
         when(mockErsUtil.fetch[ErsMetaData](any(), any())(any(), any(), any()))
           .thenReturn(Future.successful(validErsMetaData))
         when(mockErsConnector.validateFileData(meq(uploadedSuccessfully), any[SchemeInfo])(any[ERSAuthData], any[Request[AnyRef]], any[HeaderCarrier]))
@@ -189,6 +209,12 @@ class FileUploadControllerSpec extends PlaySpec
       }
 
       "Ers Meta Data is returned, callback record is uploaded successfully, remove presubmission data returns OK and validate file data returns Accepted" in {
+        when(mockErsUtil.fetch[RequestObject](anyString())(any(), any(), any(), any()))
+          .thenReturn(Future.successful(ersRequestObject))
+        when(mockSessionService.getCallbackRecord(any[Request[_]], any[HeaderCarrier]))
+          .thenReturn(Future.successful(Some(uploadedSuccessfully)))
+        when(mockErsConnector.removePresubmissionData(any())(any[ERSAuthData], any[HeaderCarrier]))
+          .thenReturn(Future.successful(HttpResponse(OK, "")))
         when(mockErsUtil.fetch[ErsMetaData](any(), any())(any(), any(), any()))
           .thenReturn(Future.successful(validErsMetaData))
         when(mockErsConnector.validateFileData(meq(uploadedSuccessfully), any[SchemeInfo])(any[ERSAuthData], any[Request[AnyRef]], any[HeaderCarrier]))
@@ -254,11 +280,11 @@ class FileUploadControllerSpec extends PlaySpec
     }
 
     "authorised users" must {
-      "throw an Exception" in {
+      "redirect to the file upload problem page" in {
 				setAuthMocks()
           failure() { result =>
-            status(result) must equal(OK)
-            contentAsString(result) must include(testMessages("ers.global_errors.message"))
+            status(result) must equal(BAD_REQUEST)
+            contentAsString(result) must include(testMessages("ers.file_problem.heading"))
           }
       }
     }

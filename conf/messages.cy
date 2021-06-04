@@ -596,3 +596,16 @@ ers.global.page.not.found.error.check.web.address.full=Os gwnaethoch ludo’r cy
 ers.global.page.not.found.error.contact=Os yw’r cyfeiriad gwe yn gywir neu os ydych wedi dewis cysylltiad neu fotwm, {0} os oes angen i chi siarad â rhywun am eich datganiad blynyddol.
 ers.global.page.not.found.error.contact.link.text=cysylltwch â Gwasanaeth Cwsmeriaid Cymraeg CThEM
 ers.global.page.not.found.error.contact.link=https://www.gov.uk/government/organisations/hm-revenue-customs/contact/welsh-language-helplines
+
+#********************************************************************
+# File problem messages
+#********************************************************************
+ers.file_problem.title = Bu problem wrth uwchlwytho’r ffeil - Gwarantau ar Sail Cyflogaeth – GOV.UK
+ers.file_problem.heading = Bu problem wrth uwchlwytho’r ffeil
+ers.file_problem.paragraph = Gall hyn fod oherwydd y canlynol:
+ers.file_problem.invalidFileName = mae gan y ffeil yr enw anghywir neu mae’r enw yn fwy na 240 o gymeriadau
+ers.file_problem.fileTooLarge = mae’r ffeil yn rhy fawr – mae terfyn o 100MB ar gyfer ffeiliau CSV a therfyn o 10MB ar gyfer ffeiliau ODS
+ers.file_problem.fileTooSmall = yn wag
+ers.file_problem.invalidFileType = mae’r ffeil wedi’i chadw ar ffurf anghywir – dylai fod ar ffurf CSV neu ODS yn dibynnu ar yr hyn rydych eisoes wedi’i ddewis
+ers.file_problem.invalidFileNameCharacters = mae’r ffeil yn cynnwys cymeriadau annilys
+ers.file_problem.tryAgain = Rhowch gynnig arall arni

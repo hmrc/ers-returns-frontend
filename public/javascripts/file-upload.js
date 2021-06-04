@@ -13,9 +13,6 @@ const fileType = (function() {
     }
 })();
 
-// Only show file-upload input if JavaScript is enabled.
-fileUploadInput.classList.remove("govuk-!-display-none");
-
 function ensureUploadButtonIs(status) {
     if(status === "disabled") {
         if(uploadFileButton.attributes.getNamedItem("disabled") === null) {

@@ -19,6 +19,7 @@ package controllers
 import akka.actor.ActorSystem
 import config.ApplicationConfig
 import connectors.ErsConnector
+
 import javax.inject.{Inject, Singleton}
 import models._
 import models.upscan._
@@ -31,7 +32,8 @@ import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import utils._
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.util.control.NonFatal
 
 @Singleton
@@ -44,7 +46,8 @@ class CsvFileUploadController @Inject()(val mcc: MessagesControllerComponents,
                                         implicit val actorSystem: ActorSystem,
                                         globalErrorView: views.html.global_error,
                                         upscanCsvFileUploadView: views.html.upscan_csv_file_upload,
-                                        fileUploadErrorsView: views.html.file_upload_errors
+                                        fileUploadErrorsView: views.html.file_upload_errors,
+                                        fileUploadProblemView: views.html.file_upload_problem
 																			 ) extends FrontendController(mcc) with Authenticator with Retryable with I18nSupport{
 
   implicit val ec: ExecutionContext = mcc.executionContext
@@ -153,7 +156,7 @@ class CsvFileUploadController @Inject()(val mcc: MessagesControllerComponents,
                 if(csvFilesCallbackList.areAllFilesSuccessful()) {
                   val callbackDataList: List[UploadedSuccessfully] =
                     csvFilesCallbackList.files.map(_.uploadStatus.asInstanceOf[UploadedSuccessfully])
-                  validateCsv(callbackDataList, schemeInfo)
+                  checkFileNames(callbackDataList, schemeInfo)
                 } else {
                   val failedFiles: String = csvFilesCallbackList.files.filter(_.uploadStatus == Failed).map(_.uploadId.value).mkString(", ")
                   Logger.error(s"[CsvFileUploadController][extractCsvCallbackData] Validation failed as one or more csv files failed to upload via Upscan. Failure IDs: $failedFiles")
@@ -172,6 +175,32 @@ class CsvFileUploadController @Inject()(val mcc: MessagesControllerComponents,
     } recover {
       case e: Exception =>
         Logger.error(s"[CsvFileUploadController][extractCsvCallbackData] Failed to fetch CsvFilesCallbackList with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.", e)
+        getGlobalErrorPage
+    }
+  }
+
+  def checkFileNames(csvCallbackData: List[UploadedSuccessfully], schemeInfo: SchemeInfo)(implicit authContext: ERSAuthData,
+                                                                                          request: Request[AnyRef],
+                                                                                          hc: HeaderCarrier): Future[Result] = {
+    ersUtil.fetch[UpscanCsvFilesList](ersUtil.CSV_FILES_UPLOAD, schemeInfo.schemeRef).flatMap { list =>
+      val uploadedWithCorrectName: Boolean = list.ids
+        .map(expectedFile => expectedFile.fileId)
+        .zip(csvCallbackData.reverse
+          .map(uploadedFile => uploadedFile.name))
+        .map { names =>
+          val expectedName = ersUtil.getPageElement(schemeInfo.schemeId, ersUtil.PAGE_CHECK_CSV_FILE, names._1 + ".file_name")
+          val uploadedName = names._2
+          (expectedName, uploadedName)
+        }.forall(names => names._1 == names._2)
+      if (uploadedWithCorrectName) {
+        validateCsv(csvCallbackData, schemeInfo)
+      } else {
+        Logger.info(s"[CsvFileUploadController][checkFileNames] User uploaded the wrong file")
+        Future(getFileUploadProblemPage)
+      }
+    } recover {
+      case e: Exception =>
+        Logger.error(s"[CsvFileUploadController][checkFileNames] Failed to fetch CsvFilesCallbackList with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.", e)
         getGlobalErrorPage
     }
   }
@@ -213,7 +242,7 @@ class CsvFileUploadController @Inject()(val mcc: MessagesControllerComponents,
       requestObject <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
       fileType      <- ersUtil.fetch[CheckFileType](ersUtil.FILE_TYPE_CACHE, requestObject.getSchemeReference)
     } yield {
-      Ok(fileUploadErrorsView(requestObject, fileType.checkFileType.get))
+      Ok(fileUploadErrorsView(requestObject, fileType.checkFileType.getOrElse("")))
     }).recover {
       case e: Exception =>
 				Logger.error(s"[CsvFileUploadController][processValidationFailure] failed to save callback data list with exception ${e.getMessage}, " +
@@ -229,11 +258,17 @@ class CsvFileUploadController @Inject()(val mcc: MessagesControllerComponents,
         val errorMessage = request.getQueryString("errorMessage").getOrElse("Unknown")
         val errorRequestId = request.getQueryString("errorRequestId").getOrElse("Unknown")
         Logger.error(s"Upscan Failure. errorCode: $errorCode, errorMessage: $errorMessage, errorRequestId: $errorRequestId")
-        Future.successful(getGlobalErrorPage)
+        Future.successful(getFileUploadProblemPage)
+  }
+
+  def getFileUploadProblemPage()(implicit request: Request[_], messages: Messages): Result = {
+    BadRequest(fileUploadProblemView(
+      "ers.file_problem.title"
+    )(request, messages, appConfig))
   }
 
 	def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result = {
-		Ok(globalErrorView(
+		InternalServerError(globalErrorView(
 			"ers.global_errors.title",
 			"ers.global_errors.heading",
 			"ers.global_errors.message"

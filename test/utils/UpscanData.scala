@@ -26,7 +26,8 @@ trait UpscanData {
 
   val testUploadId: UploadId = UploadId("TestUploadId")
   val notStartedCallback: UpscanCsvFilesCallback = UpscanCsvFilesCallback(testUploadId, "file4", NotStarted)
-  val uploadedSuccessfully = UploadedSuccessfully("fileName", "https://downloadUrl.com")
+  val uploadedSuccessfully = UploadedSuccessfully("fileName.ods", "https://downloadUrl.com")
+  val uploadedSuccessfullyCsv = UploadedSuccessfully("fileName.csv", "https://downloadUrl.com")
 
   val incompleteCsvList = UpscanCsvFilesCallbackList(
     List(
