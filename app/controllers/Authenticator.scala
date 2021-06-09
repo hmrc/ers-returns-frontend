@@ -22,7 +22,7 @@ import play.api.libs.json.{Json, OFormat}
 import play.api.mvc._
 import uk.gov.hmrc.domain.EmpRef
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.HeaderCarrierConverter
+import uk.gov.hmrc.play.http.HeaderCarrierConverter
 import utils.ERSUtil
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -35,7 +35,7 @@ trait Authenticator extends AuthFunctionality {
 
 	def authorisedForAsync()(body: AsyncUserRequest): Action[AnyContent] = Action.async {
 		implicit request =>
-			implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
+			implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
 			authoriseFor { implicit user =>
 				filterAgentsWrapperAsync(user, body)
 			}
@@ -43,7 +43,7 @@ trait Authenticator extends AuthFunctionality {
 
 	def authorisedByGG(body: AsyncUserRequest): Action[AnyContent] = Action.async {
 		implicit request =>
-			implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
+			implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
 			authorisedByGovGateway { implicit user =>
 				filterAgentsWrapperAsync(user, body)
 			}

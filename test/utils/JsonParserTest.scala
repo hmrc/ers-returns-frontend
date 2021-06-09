@@ -17,10 +17,10 @@
 package utils
 
 import org.scalatestplus.mockito.MockitoSugar
-import uk.gov.hmrc.play.test.UnitSpec
+import org.scalatest.{Matchers, OptionValues, WordSpecLike}
 import controllers._
 
-class JsonParserTest extends UnitSpec with ERSFakeApplicationConfig with MockitoSugar {
+class JsonParserTest extends WordSpecLike with Matchers with OptionValues with ERSFakeApplicationConfig with MockitoSugar {
 	class TestJsonParser extends JsonParser
 	val testJsonParser = new TestJsonParser
 

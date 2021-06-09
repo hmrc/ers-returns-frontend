@@ -23,24 +23,21 @@ import models.{ERSAuthData, SchemeInfo, ValidatorData}
 import org.joda.time.DateTime
 import org.mockito.Mockito.{reset => mreset, _}
 import org.mockito.{ArgumentCaptor, ArgumentMatchers}
+import org.scalatest.{Matchers, OptionValues, WordSpecLike}
 import org.scalatestplus.mockito.MockitoSugar
-import org.scalatestplus.play.OneAppPerSuite
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.{Application, i18n}
-import play.api.i18n.{Messages, MessagesApi, MessagesImpl}
-import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.i18n
+import play.api.i18n.{MessagesApi, MessagesImpl}
 import play.api.libs.json.{JsObject, Json}
-import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents, Request, Results}
-import play.api.test.FakeRequest
+import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents}
 import play.api.test.Helpers._
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
-import uk.gov.hmrc.play.test.UnitSpec
 import utils.{ERSFakeApplicationConfig, ErsTestHelper, UpscanData, WireMockHelper}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class ERSConnectorSpec extends UnitSpec
+class ERSConnectorSpec extends WordSpecLike with Matchers with OptionValues
 												with MockitoSugar
 												with ERSFakeApplicationConfig
 												with ErsTestHelper

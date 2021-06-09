@@ -16,10 +16,10 @@
 
 package services.pdf
 
+import org.scalatest.{Matchers, OptionValues, WordSpecLike}
 import org.scalatestplus.mockito.MockitoSugar
-import uk.gov.hmrc.play.test.UnitSpec
 
-class CursorPositionerSpec extends UnitSpec with MockitoSugar{
+class CursorPositionerSpec extends WordSpecLike with Matchers with OptionValues with MockitoSugar{
   var cursorPositioner = new CursorPositioner
   cursorPositioner.fontSize = 1
 

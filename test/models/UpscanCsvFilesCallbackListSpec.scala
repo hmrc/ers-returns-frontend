@@ -16,11 +16,10 @@
 
 package models
 
-import models.upscan.UploadId
-import uk.gov.hmrc.play.test.UnitSpec
+import org.scalatest.{Matchers, OptionValues, WordSpecLike}
 import utils.UpscanData
 
-class UpscanCsvFilesCallbackListSpec extends UnitSpec with UpscanData {
+class UpscanCsvFilesCallbackListSpec extends WordSpecLike with Matchers with OptionValues with UpscanData {
   "areAllFilesComplete" should {
     "return true for failed or successful uploads" in {
       failedCsvList.areAllFilesComplete() shouldBe true

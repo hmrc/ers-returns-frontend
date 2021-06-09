@@ -16,12 +16,11 @@
 
 package models
 
-import models.upscan.{Failed, InProgress, NotStarted, UploadStatus, UpscanCsvFilesCallback}
-import org.scalatestplus.play.OneAppPerSuite
-import uk.gov.hmrc.play.test.UnitSpec
+import models.upscan._
+import org.scalatest.{Matchers, OptionValues, WordSpecLike}
 import utils.UpscanData
 
-class UpscanCsvFilesCallbackSpec extends UnitSpec with UpscanData {
+class UpscanCsvFilesCallbackSpec extends WordSpecLike with Matchers with OptionValues with UpscanData {
 
   "isStarted" should {
     "return true" when {

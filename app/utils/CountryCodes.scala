@@ -16,12 +16,11 @@
 
 package utils
 
-import java.io.InputStream
-
-import javax.inject.Inject
 import play.api.libs.json.{JsValue, Json, OFormat}
-import play.api.{Environment, Logger}
+import play.api.{Environment, Logging}
 
+import java.io.InputStream
+import javax.inject.Inject
 import scala.io.Source
 
 case class Country(country: String, countryCode: String)
@@ -32,7 +31,7 @@ object Country {
 
 class CountryCodesImpl @Inject()(val environment: Environment) extends CountryCodes
 
-trait CountryCodes {
+trait CountryCodes extends Logging {
 
 	def environment: Environment
 
@@ -42,7 +41,7 @@ trait CountryCodes {
     jsonInputStream match {
       case Some(inputStream) => Json.parse(Source.fromInputStream(inputStream, "UTF-8").mkString)
       case _ =>
-				Logger.error(s"Country codes file not found, timestamp: ${System.currentTimeMillis()}.")
+				logger.error(s"Country codes file not found, timestamp: ${System.currentTimeMillis()}.")
 				throw new Exception
 		}
   }

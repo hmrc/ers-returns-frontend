@@ -18,17 +18,17 @@ package controllers
 
 import config.ApplicationConfig
 import connectors.ErsConnector
-import javax.inject.{Inject, Singleton}
 import models._
-import play.api.Logger
+import play.api.Logging
+import play.api.data.Form
 import play.api.i18n.{I18nSupport, Messages}
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request, Result}
+import play.api.mvc._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
-import uk.gov.hmrc.play.bootstrap.controller.FrontendController
-import play.api.data.Form
+import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils._
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -41,7 +41,7 @@ class TrusteeController @Inject()(val mcc: MessagesControllerComponents,
                                   globalErrorView: views.html.global_error,
                                   trusteeDetailsView: views.html.trustee_details,
                                   trusteeSummaryView: views.html.trustee_summary
-                                 ) extends FrontendController(mcc) with Authenticator with I18nSupport {
+                                 ) extends FrontendController(mcc) with Authenticator with I18nSupport with Logging {
 
   implicit val ec: ExecutionContext = mcc.executionContext
 
@@ -59,7 +59,7 @@ class TrusteeController @Inject()(val mcc: MessagesControllerComponents,
       Ok(trusteeDetailsView(requestObject, groupSchemeActivity.groupScheme.getOrElse(ersUtil.DEFAULT), index, RsFormMappings.trusteeDetailsForm))
     } recover {
       case e: Exception =>
-				Logger.error(s"[TrusteeController][showTrusteeDetailsPage] Get data from cache failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
+				logger.error(s"[TrusteeController][showTrusteeDetailsPage] Get data from cache failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
 				getGlobalErrorPage
 		}
   }
@@ -84,7 +84,7 @@ class TrusteeController @Inject()(val mcc: MessagesControllerComponents,
           Ok(trusteeDetailsView(requestObject, groupSchemeActivity.groupScheme.getOrElse(ersUtil.DEFAULT), index, firstErrors))
         } recover {
           case e: Exception =>
-						Logger.error(s"[TrusteeController][showTrusteeDetailsSubmit] Get data from cache failed with exception ${e.getMessage}, " +
+						logger.error(s"[TrusteeController][showTrusteeDetailsSubmit] Get data from cache failed with exception ${e.getMessage}, " +
 							s"timestamp: ${System.currentTimeMillis()}.")
 						getGlobalErrorPage
 				}
@@ -161,7 +161,7 @@ class TrusteeController @Inject()(val mcc: MessagesControllerComponents,
 
     }) recover {
       case e: Exception =>
-        Logger.error(s"[TrusteeController][showEditTrustee] Get data from cache failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
+        logger.error(s"[TrusteeController][showEditTrustee] Get data from cache failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
         getGlobalErrorPage
     }
   }
@@ -182,7 +182,7 @@ class TrusteeController @Inject()(val mcc: MessagesControllerComponents,
       Ok(trusteeSummaryView(requestObject, trusteeDetailsList))
     }) recover {
       case e: Exception =>
-        Logger.error(s"[TrusteeController][showTrusteeSummaryPage] Get data from cache failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
+        logger.error(s"[TrusteeController][showTrusteeSummaryPage] Get data from cache failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
         getGlobalErrorPage
     }
   }

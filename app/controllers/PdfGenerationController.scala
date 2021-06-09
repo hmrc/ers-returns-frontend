@@ -17,18 +17,18 @@
 package controllers
 
 import config.ApplicationConfig
-import javax.inject.{Inject, Singleton}
 import models._
 import models.upscan.{UploadedSuccessfully, UpscanCsvFilesCallback, UpscanCsvFilesCallbackList}
-import play.api.Logger
+import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.mvc._
 import services.pdf.{ApachePdfContentsStreamer, ErsReceiptPdfBuilderService}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
-import uk.gov.hmrc.play.bootstrap.controller.FrontendController
+import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.ERSUtil
 
+import javax.inject.{Inject, Singleton}
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -39,7 +39,7 @@ class PdfGenerationController @Inject()(val mcc: MessagesControllerComponents,
 																				implicit val ersUtil: ERSUtil,
 																				implicit val appConfig: ApplicationConfig,
                                         globalErrorView: views.html.global_error
-																			 ) extends FrontendController(mcc) with Authenticator with I18nSupport {
+																			 ) extends FrontendController(mcc) with Authenticator with I18nSupport with Logging {
 
   implicit val ec: ExecutionContext = mcc.executionContext
 
@@ -54,12 +54,12 @@ class PdfGenerationController @Inject()(val mcc: MessagesControllerComponents,
   def generatePdf(requestObject: RequestObject, bundle: String, dateSubmitted: String)
 								 (implicit authContext: ERSAuthData, request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
 
-    Logger.debug("ers returns frontend getting into the controller to generate the pdf")
+    logger.debug("ers returns frontend getting into the controller to generate the pdf")
     val cache: Future[ErsMetaData] = ersUtil.fetch[ErsMetaData](ersUtil.ersMetaData, requestObject.getSchemeReference)
     cache.flatMap { all =>
-      Logger.debug("ers returns frontend pdf generation: got the metadata")
+      logger.debug("ers returns frontend pdf generation: got the metadata")
       ersUtil.getAllData(bundle, all).flatMap { alldata =>
-        Logger.debug("ers returns frontend generation: got the cache map")
+        logger.debug("ers returns frontend generation: got the cache map")
 
         ersUtil.fetchAll(requestObject.getSchemeReference).map { all =>
           val filesUploaded: ListBuffer[String] = ListBuffer()
@@ -90,12 +90,12 @@ class PdfGenerationController @Inject()(val mcc: MessagesControllerComponents,
             .withHeaders(CONTENT_DISPOSITION -> s"inline; filename=$bundle-confirmation.pdf")
         } recover {
           case e: Throwable =>
-            Logger.error(s"[PdfGenerationController][generatePdf] Problem fetching file list from cache ${e.getMessage}.", e)
+            logger.error(s"[PdfGenerationController][generatePdf] Problem fetching file list from cache ${e.getMessage}.", e)
             getGlobalErrorPage
         }
       }.recover {
         case e: Throwable =>
-          Logger.error(s"[PdfGenerationController][generatePdf] Problem saving Pdf Receipt ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
+          logger.error(s"[PdfGenerationController][generatePdf] Problem saving Pdf Receipt ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
           getGlobalErrorPage
       }
     }

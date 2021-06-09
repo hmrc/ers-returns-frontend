@@ -17,10 +17,10 @@
 package models
 
 import models.upscan._
+import org.scalatest.{Matchers, OptionValues, WordSpecLike}
 import play.api.libs.json.{JsError, Json}
-import uk.gov.hmrc.play.test.UnitSpec
 
-class UploadStatusSpec extends UnitSpec {
+class UploadStatusSpec extends WordSpecLike with Matchers with OptionValues {
 
   val statuses = List(NotStarted, Failed, InProgress)
   "UploadStats json Reads" should {

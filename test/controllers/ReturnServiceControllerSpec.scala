@@ -17,26 +17,22 @@
 package controllers
 
 import akka.stream.Materializer
-import config.ApplicationConfig
 import models.{ErsMetaData, _}
 import org.joda.time.DateTime
 import org.jsoup.Jsoup
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito._
-import org.scalatestplus.play.OneAppPerSuite
+import org.scalatest.{Matchers, OptionValues, WordSpecLike}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.{Application, i18n}
 import play.api.http.Status
-import play.api.i18n.Messages.Implicits._
+import play.api.i18n
 import play.api.i18n.{Messages, MessagesApi, MessagesImpl}
-import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.JsString
 import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents}
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.http.cache.client.CacheMap
-import uk.gov.hmrc.play.test.UnitSpec
 import utils.Fixtures.ersRequestObject
 import utils.{ERSFakeApplicationConfig, ErsTestHelper, Fixtures}
 import views.html.{global_error, start, unauthorised}
@@ -44,7 +40,7 @@ import views.html.{global_error, start, unauthorised}
 import scala.concurrent.{ExecutionContext, Future}
 
 
-class ReturnServiceControllerSpec extends UnitSpec with ERSFakeApplicationConfig with ErsTestHelper with GuiceOneAppPerSuite {
+class ReturnServiceControllerSpec extends WordSpecLike with Matchers with OptionValues with ERSFakeApplicationConfig with ErsTestHelper with GuiceOneAppPerSuite {
 
   val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
     messagesActionBuilder,
@@ -118,7 +114,7 @@ class ReturnServiceControllerSpec extends UnitSpec with ERSFakeApplicationConfig
 			setUnauthorisedMocks()
       implicit val fakeRequest = Fixtures.buildFakeRequestWithSessionId("?")
       val controllerUnderTest = buildFakeReturnServiceController(accessThresholdValue = 0)
-      val result = await(controllerUnderTest.hmacCheck()(fakeRequest))
+      val result = controllerUnderTest.hmacCheck()(fakeRequest)
       Helpers.redirectLocation(result).get.startsWith(mockAppConfig.ggSignInUrl) shouldBe true
     }
   }
@@ -128,7 +124,7 @@ class ReturnServiceControllerSpec extends UnitSpec with ERSFakeApplicationConfig
 			setUnauthorisedMocks()
       implicit val fakeRequest = Fixtures.buildFakeRequestWithSessionId("?")
       val controllerUnderTest = buildFakeReturnServiceController(accessThresholdValue = 0)
-      val result = await(controllerUnderTest.startPage()(fakeRequest))
+      val result = controllerUnderTest.startPage()(fakeRequest)
       Helpers.redirectLocation(result).get.startsWith(mockAppConfig.ggSignInUrl) shouldBe true
     }
   }

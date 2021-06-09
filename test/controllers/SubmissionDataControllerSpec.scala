@@ -20,22 +20,21 @@ import akka.stream.Materializer
 import connectors.ErsConnector
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
-
+import org.scalatest.{Matchers, OptionValues, WordSpecLike}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.i18n
 import play.api.i18n.{MessagesApi, MessagesImpl}
 import play.api.libs.json.{JsObject, Json}
-import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents, Request}
+import play.api.mvc._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.play.test.UnitSpec
-import utils.{ERSFakeApplicationConfig, ErsTestHelper, Fixtures}
-
-import scala.concurrent.{ExecutionContext, Future}
 import uk.gov.hmrc.http.HttpResponse
+import utils.{ERSFakeApplicationConfig, ErsTestHelper, Fixtures}
 import views.html.global_error
 
-class SubmissionDataControllerSpec extends UnitSpec with ERSFakeApplicationConfig with ErsTestHelper with GuiceOneAppPerSuite {
+import scala.concurrent.{ExecutionContext, Future}
+
+class SubmissionDataControllerSpec extends WordSpecLike with Matchers with OptionValues with ERSFakeApplicationConfig with ErsTestHelper with GuiceOneAppPerSuite {
 
   val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
     messagesActionBuilder,
@@ -113,11 +112,11 @@ class SubmissionDataControllerSpec extends UnitSpec with ERSFakeApplicationConfi
 			lazy val submissionDataController: SubmissionDataController = new Setup(Some(mock[JsObject]))
 
       when(mockErsConnector.retrieveSubmissionData(any[JsObject]())(any(), any()))
-				.thenReturn(Future.successful(HttpResponse(OK, Some(Json.obj()))))
+				.thenReturn(Future.successful(HttpResponse(OK, "")))
 
       val result = submissionDataController.getRetrieveSubmissionData()(Fixtures.buildFakeUser, FakeRequest(), hc)
       status(result) shouldBe OK
-      bodyOf(result).contains("Retrieve Failure") shouldBe false
+      contentAsString(result).contains("Retrieve Failure") shouldBe false
     }
 
     "shows error page if all parameters are given but retrieveSubmissionData fails" in {
@@ -129,7 +128,7 @@ class SubmissionDataControllerSpec extends UnitSpec with ERSFakeApplicationConfi
 
       val result = submissionDataController.getRetrieveSubmissionData()(Fixtures.buildFakeUser, FakeRequest(), hc)
       status(result) shouldBe OK
-      bodyOf(result).contains(testMessages("ers.global_errors.message")) shouldBe true
+      contentAsString(result).contains(testMessages("ers.global_errors.message")) shouldBe true
     }
 
     "shows error page if all parameters are given but retrieveSubmissionData throws exception" in {
@@ -141,7 +140,7 @@ class SubmissionDataControllerSpec extends UnitSpec with ERSFakeApplicationConfi
 
       val result = submissionDataController.getRetrieveSubmissionData()(Fixtures.buildFakeUser, FakeRequest(), hc)
       status(result) shouldBe OK
-      bodyOf(result).contains(testMessages("ers.global_errors.message")) shouldBe true
+      contentAsString(result).contains(testMessages("ers.global_errors.message")) shouldBe true
     }
   }
 }

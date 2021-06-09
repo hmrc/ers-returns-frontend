@@ -43,6 +43,6 @@ trait AuditService {
 	}
 
 	private[audit] def generateTags(hc: HeaderCarrier): Map[String, String] = {
-      hc.headers.toMap ++ Map("dateTime" ->  new DateTime().toString)
+      hc.otherHeaders.toMap ++ Map("dateTime" ->  new DateTime().toString)
 	}
 }

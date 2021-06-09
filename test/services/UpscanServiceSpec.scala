@@ -19,23 +19,23 @@ package services
 import connectors.UpscanConnector
 import models.upscan.{Reference, UploadId, UpscanInitiateRequest, UpscanInitiateResponse}
 import org.mockito.ArgumentCaptor
-import org.scalatestplus.mockito.MockitoSugar
-import org.scalatestplus.play.OneAppPerSuite
-import play.api.Application
-import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.inject.bind
-import uk.gov.hmrc.play.test.UnitSpec
-import org.mockito.Mockito._
 import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito._
+import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.{Matchers, OptionValues, WordSpecLike}
+import org.scalatestplus.mockito.MockitoSugar
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import play.api.Application
+import play.api.inject.bind
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.Request
 import play.api.test.FakeRequest
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.http.logging.SessionId
+import uk.gov.hmrc.http.{HeaderCarrier, SessionId}
 
 import scala.concurrent.Future
 
 
-class UpscanServiceSpec extends UnitSpec with OneAppPerSuite with MockitoSugar {
+class UpscanServiceSpec extends WordSpecLike with Matchers with OptionValues with GuiceOneAppPerSuite with MockitoSugar with ScalaFutures {
 
   override def fakeApplication: Application = new GuiceApplicationBuilder()
     .overrides(bind[UpscanConnector].toInstance(mockUpscanConnector))
@@ -58,9 +58,9 @@ class UpscanServiceSpec extends UnitSpec with OneAppPerSuite with MockitoSugar {
       when(mockUpscanConnector.getUpscanFormData(initiateRequestCaptor.capture())(any[HeaderCarrier]))
         .thenReturn(Future.successful(upscanInitiateResponse))
 
-      await(upscanService.getUpscanFormDataOds()(hc, request))
+      upscanService.getUpscanFormDataOds()(hc, request).futureValue
 
-      initiateRequestCaptor.getValue shouldBe expectedInitiateRequest
+      initiateRequestCaptor.getAllValues contains expectedInitiateRequest
     }
   }
 
@@ -81,9 +81,9 @@ class UpscanServiceSpec extends UnitSpec with OneAppPerSuite with MockitoSugar {
       when(mockUpscanConnector.getUpscanFormData(initiateRequestCaptor.capture())(any[HeaderCarrier]))
         .thenReturn(Future.successful(upscanInitiateResponse))
 
-      await(upscanService.getUpscanFormDataCsv(uploadId, scRef)(hc, request))
+      upscanService.getUpscanFormDataCsv(uploadId, scRef)(hc, request).futureValue
 
-      initiateRequestCaptor.getValue shouldBe expectedInitiateRequest
+      initiateRequestCaptor.getAllValues contains expectedInitiateRequest
     }
   }
 

@@ -18,15 +18,15 @@ package controllers
 
 import _root_.models._
 import config.ApplicationConfig
-import javax.inject.{Inject, Singleton}
-import play.api.Logger
+import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.mvc._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
-import uk.gov.hmrc.play.bootstrap.controller.FrontendController
+import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.ERSUtil
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent._
 
 @Singleton
@@ -37,7 +37,7 @@ class AltAmendsController @Inject()(val mcc: MessagesControllerComponents,
                                     alterationsActivityView: views.html.alterations_activity,
                                     alterationsAmendsView: views.html.alterations_amends,
                                     globalErrorView: views.html.global_error
-																	  ) extends FrontendController(mcc) with Authenticator with I18nSupport {
+																	  ) extends FrontendController(mcc) with Authenticator with I18nSupport with Logging {
 
   implicit val ec: ExecutionContext = mcc.executionContext
 
@@ -63,7 +63,7 @@ class AltAmendsController @Inject()(val mcc: MessagesControllerComponents,
       ))
       }).recover {
         case e: Exception =>
-          Logger.error(s"[AltAmendsController][showAltActivityPage] Rendering AltAmends view failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
+          logger.error(s"[AltAmendsController][showAltActivityPage] Rendering AltAmends view failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
           getGlobalErrorPage
       }
   }
@@ -91,7 +91,7 @@ class AltAmendsController @Inject()(val mcc: MessagesControllerComponents,
             }
           }.recover {
             case e: Throwable =>
-              Logger.error(s"showAltActivitySelected: Save data to cache failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
+              logger.error(s"showAltActivitySelected: Save data to cache failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
               getGlobalErrorPage
           }
         }
@@ -145,7 +145,7 @@ class AltAmendsController @Inject()(val mcc: MessagesControllerComponents,
             }
           } recover {
             case e: Throwable =>
-							Logger.error(s"[AltAmendsController][showAltAmendsSelected] Save data to cache failed with exception ${e.getMessage}, " +
+							logger.error(s"[AltAmendsController][showAltAmendsSelected] Save data to cache failed with exception ${e.getMessage}, " +
 								s"timestamp: ${System.currentTimeMillis()}.")
 							getGlobalErrorPage
 					}

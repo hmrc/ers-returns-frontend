@@ -16,11 +16,12 @@
 
 package config
 
-import javax.inject.Inject
 import play.api.Configuration
 import uk.gov.hmrc.crypto.{ApplicationCrypto, CryptoWithKeysFromConfig}
 import uk.gov.hmrc.http.cache.client.{SessionCache, ShortLivedCache, ShortLivedHttpCaching}
 import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
+
+import javax.inject.Inject
 
 class ERSFileValidatorSessionCache @Inject()(val http: DefaultHttpClient,
 																						 appConfig: ApplicationConfig

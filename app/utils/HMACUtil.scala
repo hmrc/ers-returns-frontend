@@ -18,12 +18,12 @@ package utils
 
 
 import config.ApplicationConfig
-import javax.crypto.Mac
-import javax.crypto.SecretKey
-import javax.crypto.spec.SecretKeySpec
 import models.RequestObject
 import org.apache.commons.codec.binary.Base64
 import org.joda.time.{DateTime, Seconds}
+
+import javax.crypto.spec.SecretKeySpec
+import javax.crypto.{Mac, SecretKey}
 
 trait HMACUtil {
 

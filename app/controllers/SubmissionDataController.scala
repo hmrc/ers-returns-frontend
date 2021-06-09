@@ -18,17 +18,17 @@ package controllers
 
 import config.ApplicationConfig
 import connectors.ErsConnector
-import javax.inject.{Inject, Singleton}
 import models.ERSAuthData
-import play.api.Logger
-import play.api.i18n.{I18nSupport, Messages, MessagesApi}
+import play.api.Logging
+import play.api.i18n.{I18nSupport, Messages}
 import play.api.libs.json.{JsObject, Json}
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request, Result}
+import play.api.mvc._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
-import uk.gov.hmrc.play.bootstrap.controller.FrontendController
+import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.ERSUtil
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -38,7 +38,7 @@ class SubmissionDataController @Inject()(val mcc: MessagesControllerComponents,
 																				 implicit val ersUtil: ERSUtil,
 																				 implicit val appConfig: ApplicationConfig,
                                          globalErrorView: views.html.global_error
-																				) extends FrontendController(mcc) with Authenticator with I18nSupport {
+																				) extends FrontendController(mcc) with Authenticator with I18nSupport with Logging {
 
   implicit val ec: ExecutionContext = mcc.executionContext
 
@@ -69,11 +69,11 @@ class SubmissionDataController @Inject()(val mcc: MessagesControllerComponents,
 
   def getRetrieveSubmissionData()(implicit authContext: ERSAuthData, request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
 
-    Logger.debug("Retrieve Submission Data Request")
+    logger.debug("Retrieve Submission Data Request")
 
     if (appConfig.enableRetrieveSubmissionData) {
 
-      Logger.debug("Retrieve SubmissionData Enabled")
+      logger.debug("Retrieve SubmissionData Enabled")
 
       val data: Option[JsObject] = createSchemeInfoFromURL(request)
       if (data.isDefined) {
@@ -82,12 +82,12 @@ class SubmissionDataController @Inject()(val mcc: MessagesControllerComponents,
           res.status match {
             case OK => Ok(res.body)
             case _ =>
-							Logger.error(s"[SubmissionDataController][getRetrieveSubmissionData] retrieve status: ${res.status}")
+							logger.error(s"[SubmissionDataController][getRetrieveSubmissionData] retrieve status: ${res.status}")
 							getGlobalErrorPage
 					}
         }.recover {
           case ex: Exception =>
-						Logger.error(s"[SubmissionDataController][getRetrieveSubmissionData] retrieve Exception: ${ex.getMessage}")
+						logger.error(s"[SubmissionDataController][getRetrieveSubmissionData] retrieve Exception: ${ex.getMessage}")
 						getGlobalErrorPage
 				}
 
@@ -101,7 +101,7 @@ class SubmissionDataController @Inject()(val mcc: MessagesControllerComponents,
       }
     }
     else {
-      Logger.debug("Retrieve SubmissionData Disabled")
+      logger.debug("Retrieve SubmissionData Disabled")
       Future.successful(NotFound(globalErrorView(
 				"ers_not_found.title",
 				"ers_not_found.heading",

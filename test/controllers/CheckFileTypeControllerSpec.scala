@@ -21,22 +21,23 @@ import models.{CheckFileType, RequestObject, RsFormMappings}
 import org.jsoup.Jsoup
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
+import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.{Matchers, OptionValues, WordSpecLike}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status
 import play.api.i18n
-import play.api.i18n.{Lang, Messages, MessagesApi, MessagesImpl}
-import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents, Request}
+import play.api.i18n.{Messages, MessagesApi, MessagesImpl}
+import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.cache.client.CacheMap
-import uk.gov.hmrc.play.test.UnitSpec
 import utils.Fixtures.ersRequestObject
 import utils.{ERSFakeApplicationConfig, ErsTestHelper, Fixtures}
 import views.html.{check_file_type, global_error}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class CheckFileTypeControllerSpec extends UnitSpec with ERSFakeApplicationConfig with ErsTestHelper with GuiceOneAppPerSuite {
+class CheckFileTypeControllerSpec extends WordSpecLike with Matchers with OptionValues with ERSFakeApplicationConfig with ErsTestHelper with GuiceOneAppPerSuite with ScalaFutures {
 
   val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
     messagesActionBuilder,
@@ -103,7 +104,7 @@ class CheckFileTypeControllerSpec extends UnitSpec with ERSFakeApplicationConfig
       val result = controllerUnderTest.showCheckFileTypePage()(Fixtures.buildFakeUser, req, hc)
 
       contentAsString(result) should include(testMessages("ers.global_errors.message"))
-      contentAsString(result) shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage(req, testMessages))
+      contentAsString(result) shouldBe contentAsString(Future(controllerUnderTest.getGlobalErrorPage(req, testMessages)))
     }
 
   }
@@ -148,7 +149,7 @@ class CheckFileTypeControllerSpec extends UnitSpec with ERSFakeApplicationConfig
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val result = controllerUnderTest.showCheckFileTypeSelected()(request, hc)
       status(result) shouldBe Status.SEE_OTHER
-      result.header.headers("Location") shouldBe routes.CheckCsvFilesController.checkCsvFilesPage().toString
+      result.futureValue.header.headers("Location") shouldBe routes.CheckCsvFilesController.checkCsvFilesPage().toString
     }
 
     "if no form errors with file type = ods and save success" in {
@@ -158,7 +159,7 @@ class CheckFileTypeControllerSpec extends UnitSpec with ERSFakeApplicationConfig
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val result = controllerUnderTest.showCheckFileTypeSelected()(request, hc)
       status(result) shouldBe Status.SEE_OTHER
-      result.header.headers("Location") shouldBe routes.FileUploadController.uploadFilePage().toString
+      result.futureValue.header.headers("Location") shouldBe routes.FileUploadController.uploadFilePage().toString
     }
 
     "if no form errors with scheme type and save fails" in {
@@ -166,8 +167,8 @@ class CheckFileTypeControllerSpec extends UnitSpec with ERSFakeApplicationConfig
       val schemeTypeData = Map("checkFileType" -> "csv")
       val form = RsFormMappings.schemeTypeForm.bind(schemeTypeData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-      val result = await(controllerUnderTest.showCheckFileTypeSelected()(request, hc))
-      contentAsString(result) shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage(request,messages))
+      val result = controllerUnderTest.showCheckFileTypeSelected()(request, hc)
+      contentAsString(result) shouldBe contentAsString(Future(controllerUnderTest.getGlobalErrorPage(request,messages)))
       contentAsString(result) should include(testMessages("ers.global_errors.message"))
     }
 

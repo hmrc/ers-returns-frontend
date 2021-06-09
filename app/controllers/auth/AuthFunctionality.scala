@@ -18,7 +18,7 @@ package controllers.auth
 
 import config.ApplicationConfig
 import models.ERSAuthData
-import play.api.Logger
+import play.api.Logging
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{AnyContent, Request, Result}
 import uk.gov.hmrc.auth.core.AffinityGroup._
@@ -30,7 +30,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait AuthFunctionality extends AuthorisedFunctions {
+trait AuthFunctionality extends AuthorisedFunctions with Logging {
 
 	val appConfig: ApplicationConfig
 
@@ -45,7 +45,7 @@ trait AuthFunctionality extends AuthorisedFunctions {
 	private def handleException(implicit request: Request[AnyContent]): PartialFunction[Throwable, Result] = {
 		case _: NoActiveSession => Redirect(signInUrl, loginParams)
 		case er: AuthorisationException =>
-			Logger.error(s"[AuthFunctionality][handleException] Auth exception: $er")
+			logger.error(s"[AuthFunctionality][handleException] Auth exception: $er")
 			Redirect(controllers.routes.ApplicationController.unauthorised().url)
 	}
 

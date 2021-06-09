@@ -19,17 +19,17 @@ package controllers
 import _root_.models._
 import config.ApplicationConfig
 import connectors.ErsConnector
-import javax.inject.{Inject, Singleton}
 import models.upscan.{UploadedSuccessfully, UpscanCsvFilesCallback, UpscanCsvFilesCallbackList}
-import play.api.Logger
+import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages}
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request, Result}
+import play.api.mvc._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
-import uk.gov.hmrc.play.bootstrap.controller.FrontendController
+import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils._
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -41,7 +41,7 @@ class SummaryDeclarationController @Inject()(val mcc: MessagesControllerComponen
 																						 implicit val appConfig: ApplicationConfig,
                                              globalErrorView: views.html.global_error,
                                              summaryView: views.html.summary
-																						) extends FrontendController(mcc) with Authenticator with I18nSupport {
+																						) extends FrontendController(mcc) with Authenticator with I18nSupport with Logging {
 
   implicit val ec: ExecutionContext = mcc.executionContext
 
@@ -99,7 +99,7 @@ class SummaryDeclarationController @Inject()(val mcc: MessagesControllerComponen
         getCompDetails(all), altActivity, getAltAmends(all), getTrustees(all))))
     } recover {
       case e: Throwable =>
-        Logger.error(s"[SummaryDeclarationController][showSummaryDeclarationPage] failed to load page with exception ${e.getMessage}.", e)
+        logger.error(s"[SummaryDeclarationController][showSummaryDeclarationPage] failed to load page with exception ${e.getMessage}.", e)
         getGlobalErrorPage
     }
   }

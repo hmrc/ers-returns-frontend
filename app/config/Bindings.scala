@@ -18,7 +18,6 @@ package config
 
 import play.api.inject.{Binding, Module}
 import play.api.{Configuration, Environment}
-import uk.gov.hmrc.play.bootstrap.http.{DefaultHttpClient, HttpClient}
 import utils.{CountryCodes, CountryCodesImpl}
 
 class Bindings extends Module {

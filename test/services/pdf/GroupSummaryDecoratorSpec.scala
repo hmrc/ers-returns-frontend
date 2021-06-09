@@ -16,19 +16,16 @@
 
 package services.pdf
 
-import org.mockito.{ArgumentMatchers, Mock}
-import org.scalatestplus.mockito.MockitoSugar
-import uk.gov.hmrc.play.test.UnitSpec
+import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import org.mockito.internal.verification.VerificationModeFactory
-import org.scalatestplus.play.OneAppPerSuite
-import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.i18n.{Lang, Messages, MessagesApi}
-import play.api.inject.Injector
+import org.scalatest.{Matchers, OptionValues, WordSpecLike}
+import org.scalatestplus.mockito.MockitoSugar
+import play.api.i18n.Messages
 import utils.Fixtures
 
 
-class GroupSummaryDecoratorSpec extends UnitSpec with MockitoSugar  {
+class GroupSummaryDecoratorSpec extends WordSpecLike with Matchers with OptionValues with MockitoSugar  {
 
   implicit val messages: Messages = mock[Messages]
 

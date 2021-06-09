@@ -16,28 +16,27 @@
 
 package utils
 
-import java.util.concurrent.TimeUnit
-import config.{ApplicationConfig, ERSShortLivedCache, ERSShortLivedHttpCache}
-
-import javax.inject.{Inject, Singleton}
+import config.{ApplicationConfig, ERSShortLivedCache}
 import metrics.Metrics
 import models._
 import org.joda.time.DateTime
-import play.api.Logger
+import play.api.Logging
 import play.api.libs.json
 import play.api.libs.json.JsValue
 import play.api.mvc.Request
 import services.SessionService
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.http.cache.client.CacheMap
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
+import java.util.concurrent.TimeUnit
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class ERSUtil @Inject()(val sessionService: SessionService,
 												val shortLivedCache: ERSShortLivedCache,
 											  val appConfig: ApplicationConfig
-											 )(implicit val ec: ExecutionContext, countryCodes: CountryCodes) extends PageBuilder with JsonParser with Metrics with HMACUtil {
+											 )(implicit val ec: ExecutionContext, countryCodes: CountryCodes) extends PageBuilder with JsonParser with Metrics with HMACUtil with Logging {
 
   val largeFileStatus = "largefiles"
 	val savedStatus = "saved"
@@ -94,7 +93,7 @@ class ERSUtil @Inject()(val sessionService: SessionService,
 		shortLivedCache.cache[T](getCacheId, key, body)
 
 	def cache[T](key: String, body: T, cacheId: String)(implicit hc: HeaderCarrier, formats: json.Format[T], request: Request[AnyRef]): Future[CacheMap] = {
-		Logger.info(s"[ERSUtil][cache]cache saving key:$key, cacheId:$cacheId")
+		logger.info(s"[ERSUtil][cache]cache saving key:$key, cacheId:$cacheId")
 		shortLivedCache.cache[T](cacheId, key, body)
 	}
 
@@ -106,10 +105,10 @@ class ERSUtil @Inject()(val sessionService: SessionService,
 			res.get.as[T]
 		}recover{
 			case e: NoSuchElementException =>
-				Logger.warn(s"[ERSUtil][fetch] fetch failed to get key $key with exception $e, timestamp: ${System.currentTimeMillis()}.")
+				logger.warn(s"[ERSUtil][fetch] fetch failed to get key $key with exception $e, timestamp: ${System.currentTimeMillis()}.")
 				throw new NoSuchElementException
 			case _ : Throwable =>
-				Logger.error(s"[ERSUtil][fetch] fetch failed to get key $key for $getCacheId with exception, timestamp: ${System.currentTimeMillis()}.")
+				logger.error(s"[ERSUtil][fetch] fetch failed to get key $key for $getCacheId with exception, timestamp: ${System.currentTimeMillis()}.")
 				throw new Exception
 		}
 	}
@@ -121,10 +120,10 @@ class ERSUtil @Inject()(val sessionService: SessionService,
 			res.get.as[T]
 		} recover {
 			case e: NoSuchElementException =>
-				Logger.warn(s"[ERSUtil][fetch] fetch(with 2 params) failed to get key [$key] for cacheId: [$cacheId] with exception $e, timestamp: ${System.currentTimeMillis()}.")
+				logger.warn(s"[ERSUtil][fetch] fetch(with 2 params) failed to get key [$key] for cacheId: [$cacheId] with exception $e, timestamp: ${System.currentTimeMillis()}.")
 				throw new NoSuchElementException
 			case er : Throwable =>
-				Logger.error(s"[ERSUtil][fetch] fetch(with 2 params) failed to get key [$key] for cacheId: [$cacheId] with exception ${er.getMessage}, " +
+				logger.error(s"[ERSUtil][fetch] fetch(with 2 params) failed to get key [$key] for cacheId: [$cacheId] with exception ${er.getMessage}, " +
 					s"timestamp: ${System.currentTimeMillis()}.")
 				throw new Exception
 		}
@@ -137,10 +136,10 @@ class ERSUtil @Inject()(val sessionService: SessionService,
 			res
 		} recover {
 			case e: NoSuchElementException =>
-				Logger.warn(s"[ERSUtil][fetchOption] fetch with 2 params failed to get key $key for $cacheId with exception \n $e \n timestamp: ${System.currentTimeMillis()}.")
+				logger.warn(s"[ERSUtil][fetchOption] fetch with 2 params failed to get key $key for $cacheId with exception \n $e \n timestamp: ${System.currentTimeMillis()}.")
 				throw e
 			case e: Throwable =>
-				Logger.error(s"[ERSUtil][fetchOption] fetch with 2 params failed to get key $key for $cacheId, timestamp: ${System.currentTimeMillis()}.", e)
+				logger.error(s"[ERSUtil][fetchOption] fetch with 2 params failed to get key $key for $cacheId, timestamp: ${System.currentTimeMillis()}.", e)
 				throw new Exception
 		}
 	}
@@ -152,11 +151,11 @@ class ERSUtil @Inject()(val sessionService: SessionService,
 			res.get
 		} recover {
 			case e: NoSuchElementException =>
-				Logger.warn(s"[ERSUtil][fetchAll] failed to get all keys with a NoSuchElementException \n $e \n Method: ${request.method} " +
+				logger.warn(s"[ERSUtil][fetchAll] failed to get all keys with a NoSuchElementException \n $e \n Method: ${request.method} " +
 					s"req: ${request.path}, param: ${request.rawQueryString}")
 				throw new NoSuchElementException
 			case e: Throwable =>
-				Logger.error(s"[ERSUtil][fetchAll] failed to get all keys with exception \n $e \n Method: ${request.method} " +
+				logger.error(s"[ERSUtil][fetchAll] failed to get all keys with exception \n $e \n Method: ${request.method} " +
 					s"req: ${request.path}, param: ${request.rawQueryString}")
 				throw new Exception
 		}
@@ -227,7 +226,7 @@ class ERSUtil @Inject()(val sessionService: SessionService,
 			}
 		}.recover {
 			case e: NoSuchElementException =>
-				Logger.error(s"CacheUtil: Get all data from cache failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.", e)
+				logger.error(s"CacheUtil: Get all data from cache failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.", e)
 				throw new Exception
 		}
 	}

@@ -20,22 +20,19 @@ import akka.stream.Materializer
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.mockito.internal.verification.VerificationModeFactory
+import org.scalatest.{Matchers, OptionValues, WordSpecLike}
 import org.scalatestplus.mockito.MockitoSugar
-import org.scalatestplus.play.OneAppPerSuite
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.{Application, i18n}
+import play.api.i18n
 import play.api.i18n.{Messages, MessagesApi, MessagesImpl}
-import play.api.i18n.Messages.Implicits._
-import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents}
 import play.api.test.Helpers.stubBodyParser
-import uk.gov.hmrc.play.test.UnitSpec
 import utils.{ERSFakeApplicationConfig, ErsTestHelper}
 
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.ExecutionContext
 
-class FileNamesDecoratorSpec extends UnitSpec with MockitoSugar with ERSFakeApplicationConfig with ErsTestHelper with GuiceOneAppPerSuite {
+class FileNamesDecoratorSpec extends WordSpecLike with Matchers with OptionValues with MockitoSugar with ERSFakeApplicationConfig with ErsTestHelper with GuiceOneAppPerSuite {
 
   val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
     messagesActionBuilder,

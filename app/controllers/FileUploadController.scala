@@ -20,17 +20,17 @@ import _root_.models._
 import akka.actor.ActorSystem
 import config.ApplicationConfig
 import connectors.ErsConnector
-import javax.inject.{Inject, Singleton}
 import models.upscan.{Failed, UploadStatus, UploadedSuccessfully}
-import play.api.Logger
+import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.mvc._
 import services.{SessionService, UpscanService}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
-import uk.gov.hmrc.play.bootstrap.controller.FrontendController
+import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils._
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -46,7 +46,7 @@ class FileUploadController @Inject()(val mcc: MessagesControllerComponents,
                                      fileUploadErrorsView: views.html.file_upload_errors,
                                      upscanOdsFileUploadView: views.html.upscan_ods_file_upload,
                                      fileUploadProblemView: views.html.file_upload_problem
-																		) extends FrontendController(mcc) with Authenticator with I18nSupport with Retryable {
+																		) extends FrontendController(mcc) with Authenticator with I18nSupport with Retryable with Logging {
 
   implicit val ec: ExecutionContext = mcc.executionContext
 
@@ -63,7 +63,7 @@ class FileUploadController @Inject()(val mcc: MessagesControllerComponents,
           Ok(upscanOdsFileUploadView(requestObject, response))
         }) recover{
           case e: Throwable =>
-            Logger.error(s"[FileUploadController][uploadFilePage] failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.", e)
+            logger.error(s"[FileUploadController][uploadFilePage] failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.", e)
             getGlobalErrorPage
         }
   }
@@ -86,10 +86,10 @@ class FileUploadController @Inject()(val mcc: MessagesControllerComponents,
           file match {
             case Some(file: UploadedSuccessfully) =>
               if(file.name.contains(".csv")) {
-                Logger.info("[FileUploadController][success] User uploaded a csv file instead of an ods file")
+                logger.info("[FileUploadController][success] User uploaded a csv file instead of an ods file")
                 Future(getFileUploadProblemPage)
               } else if (!file.name.contains(".ods")) {
-                Logger.info("[FileUploadController][success] User uploaded a non ods file")
+                logger.info("[FileUploadController][success] User uploaded a non ods file")
                 Future(getFileUploadProblemPage)
               } else {
                 ersUtil.cache[String](ersUtil.FILE_NAME_CACHE, file.name, requestObject.getSchemeReference).map { _ =>
@@ -97,18 +97,18 @@ class FileUploadController @Inject()(val mcc: MessagesControllerComponents,
                 }
               }
             case Some(Failed) =>
-              Logger.warn("[FileUploadController][success] Upload status is failed")
+              logger.warn("[FileUploadController][success] Upload status is failed")
               Future.successful(getGlobalErrorPage)
             case None =>
-              Logger.warn(s"[FileUploadController][success] Failed to verify upload. No data found in cache")
+              logger.warn(s"[FileUploadController][success] Failed to verify upload. No data found in cache")
               throw new Exception("Upload data missing in cache for ODS file.")
           }
         }).flatMap(identity) recover {
          case e: LoopException[Option[UploadStatus]] =>
-           Logger.error(s"[FileUploadController][success] Failed to verify upload. Upload status: ${e.finalFutureData.flatten}", e)
+           logger.error(s"[FileUploadController][success] Failed to verify upload. Upload status: ${e.finalFutureData.flatten}", e)
            getGlobalErrorPage
          case e: Exception =>
-           Logger.error(s"[FileUploadController][success] failed to save ods file with exception ${e.getMessage}.", e)
+           logger.error(s"[FileUploadController][success] failed to save ods file with exception ${e.getMessage}.", e)
            getGlobalErrorPage
        }
   }
@@ -127,7 +127,7 @@ class FileUploadController @Inject()(val mcc: MessagesControllerComponents,
             if (connectorResponse.status == OK) {
               handleValidationResponse(callbackData.get.asInstanceOf[UploadedSuccessfully], all.schemeInfo)
             } else {
-              Logger.error(s"[FileUploadController][validationResults] removePresubmissionData failed with status ${connectorResponse.status}, " +
+              logger.error(s"[FileUploadController][validationResults] removePresubmissionData failed with status ${connectorResponse.status}, " +
 								s"timestamp: ${System.currentTimeMillis()}.")
               Future.successful(getGlobalErrorPage)
             }
@@ -135,10 +135,10 @@ class FileUploadController @Inject()(val mcc: MessagesControllerComponents,
           validationResponse
         }) recover {
           case e: LoopException[Option[UploadStatus]] =>
-            Logger.error(s"[FileUploadController][validationResults] Failed to validate as file is not yet successfully uploaded. Current cache data: ${e.finalFutureData.flatten}", e)
+            logger.error(s"[FileUploadController][validationResults] Failed to validate as file is not yet successfully uploaded. Current cache data: ${e.finalFutureData.flatten}", e)
             getGlobalErrorPage
           case e: Throwable =>
-            Logger.error(s"[FileUploadController][validationResults] validationResults failed with Exception ${e.getMessage}", e)
+            logger.error(s"[FileUploadController][validationResults] validationResults failed with Exception ${e.getMessage}", e)
             getGlobalErrorPage
         }
   }
@@ -147,16 +147,16 @@ class FileUploadController @Inject()(val mcc: MessagesControllerComponents,
                               (implicit authContext: ERSAuthData, request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
     val schemeRef = schemeInfo.schemeRef
     ersConnector.validateFileData(callbackData, schemeInfo).map { res =>
-      Logger.info(s"[FileUploadController][handleValidationResponse] Response from validator: ${res.status}, timestamp: ${System.currentTimeMillis()}.")
+      logger.info(s"[FileUploadController][handleValidationResponse] Response from validator: ${res.status}, timestamp: ${System.currentTimeMillis()}.")
       res.status match {
         case OK =>
-          Logger.warn(s"[FileUploadController][handleValidationResponse] Validation is successful for schemeRef: $schemeRef, timestamp: ${System.currentTimeMillis()}.")
+          logger.warn(s"[FileUploadController][handleValidationResponse] Validation is successful for schemeRef: $schemeRef, timestamp: ${System.currentTimeMillis()}.")
           ersUtil.cache(ersUtil.VALIDATED_SHEEETS, res.body, schemeRef)
           Redirect(routes.SchemeOrganiserController.schemeOrganiserPage())
         case ACCEPTED =>
-          Logger.warn(s"[FileUploadController][handleValidationResponse] Validation is not successful for schemeRef: $schemeRef, timestamp: ${System.currentTimeMillis()}.")
+          logger.warn(s"[FileUploadController][handleValidationResponse] Validation is not successful for schemeRef: $schemeRef, timestamp: ${System.currentTimeMillis()}.")
           Redirect(routes.FileUploadController.validationFailure())
-        case _ => Logger.error(s"[FileUploadController][handleValidationResponse] Validate file data failed with Status ${res.status}, timestamp: ${System.currentTimeMillis()}.")
+        case _ => logger.error(s"[FileUploadController][handleValidationResponse] Validate file data failed with Status ${res.status}, timestamp: ${System.currentTimeMillis()}.")
           getGlobalErrorPage
       }
     }
@@ -165,7 +165,7 @@ class FileUploadController @Inject()(val mcc: MessagesControllerComponents,
   def validationFailure(): Action[AnyContent] = authorisedForAsync() {
     implicit user =>
       implicit request =>
-        Logger.info("[FileUploadController][validationFailure] Validation Failure: " + (System.currentTimeMillis() / 1000))
+        logger.info("[FileUploadController][validationFailure] Validation Failure: " + (System.currentTimeMillis() / 1000))
         (for {
           requestObject <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
           fileType      <- ersUtil.fetch[CheckFileType](ersUtil.FILE_TYPE_CACHE, requestObject.getSchemeReference)
@@ -173,7 +173,7 @@ class FileUploadController @Inject()(val mcc: MessagesControllerComponents,
           Ok(fileUploadErrorsView(requestObject, fileType.checkFileType.getOrElse("")))
         }) recover {
           case e: Throwable =>
-            Logger.error(s"[FileUploadController][validationFailure] failed with Exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.", e)
+            logger.error(s"[FileUploadController][validationFailure] failed with Exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.", e)
             getGlobalErrorPage
         }
   }
@@ -184,7 +184,7 @@ class FileUploadController @Inject()(val mcc: MessagesControllerComponents,
         val errorCode = request.getQueryString("errorCode").getOrElse("Unknown")
         val errorMessage = request.getQueryString("errorMessage").getOrElse("Unknown")
         val errorRequestId = request.getQueryString("errorRequestId").getOrElse("Unknown")
-        Logger.error(s"Upscan Failure. errorCode: $errorCode, errorMessage: $errorMessage, errorRequestId: $errorRequestId")
+        logger.error(s"Upscan Failure. errorCode: $errorCode, errorMessage: $errorMessage, errorRequestId: $errorRequestId")
         Future.successful(getFileUploadProblemPage)
   }
 

@@ -17,29 +17,27 @@
 package utils
 
 import java.util.NoSuchElementException
-
 import models._
 import models.upscan.UploadedSuccessfully
 import org.joda.time.DateTime
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatest.BeforeAndAfterEach
+import org.scalatest.concurrent.ScalaFutures
 import org.scalatestplus.mockito.MockitoSugar
-import org.scalatestplus.play.OneAppPerSuite
 import play.api.libs.json
 import play.api.libs.json.{Format, JsValue, Json}
 import play.api.mvc.Request
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.{HeaderCarrier, SessionId}
 import uk.gov.hmrc.http.cache.client.CacheMap
-import uk.gov.hmrc.http.logging.SessionId
-import uk.gov.hmrc.play.test.UnitSpec
+import org.scalatest.{Matchers, OptionValues, WordSpecLike}
+import play.api.test.Helpers.await
 import utils.SessionKeys.BUNDLE_REF
-
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 import scala.language.postfixOps
 
-class ErsUtilSpec extends UnitSpec with MockitoSugar with BeforeAndAfterEach with ERSFakeApplicationConfig with ErsTestHelper {
+class ErsUtilSpec extends WordSpecLike with Matchers with OptionValues with MockitoSugar with BeforeAndAfterEach with ERSFakeApplicationConfig with ErsTestHelper with ScalaFutures {
 
   override implicit val hc: HeaderCarrier =  HeaderCarrier(sessionId = Some(SessionId("sessionId")))
   implicit val countryCodes: CountryCodes = mockCountryCodes
@@ -59,7 +57,7 @@ class ErsUtilSpec extends UnitSpec with MockitoSugar with BeforeAndAfterEach wit
       ).thenReturn(
         Future.successful(mock[CacheMap])
       )
-      val result = await(ersUtil.cache[AltAmends]("alt-amends-cache-controller", altAmends, "123"))
+      val result = ersUtil.cache[AltAmends]("alt-amends-cache-controller", altAmends, "123").futureValue
       result.isInstanceOf[CacheMap] shouldBe true
     }
 
@@ -70,7 +68,7 @@ class ErsUtilSpec extends UnitSpec with MockitoSugar with BeforeAndAfterEach wit
       ).thenReturn(
         Future.successful(mock[CacheMap])
       )
-      val result = await(ersUtil.cache[AltAmends]("alt-amends-cache-controller", altAmends))
+      val result = ersUtil.cache[AltAmends]("alt-amends-cache-controller", altAmends).futureValue
       result.isInstanceOf[CacheMap] shouldBe true
     }
 
@@ -88,8 +86,8 @@ class ErsUtilSpec extends UnitSpec with MockitoSugar with BeforeAndAfterEach wit
           Some(Json.toJson(altAmends))
         )
       )
-      val result = await(ersUtil.fetch[AltAmends]("key"))
-      result shouldBe altAmends
+      val result = ersUtil.fetch[AltAmends]("key")
+      result.futureValue shouldBe altAmends
     }
 
 		"throw NoSuchElementException if value is not found in cache" in {
@@ -97,7 +95,7 @@ class ErsUtilSpec extends UnitSpec with MockitoSugar with BeforeAndAfterEach wit
 				.thenReturn(Future.successful(None))
 
 			intercept[NoSuchElementException] {
-				await(ersUtil.fetch[AltAmends]("key"))
+        await(ersUtil.fetch[AltAmends]("key"), 1, SECONDS)
 			}
 		}
 
@@ -108,21 +106,21 @@ class ErsUtilSpec extends UnitSpec with MockitoSugar with BeforeAndAfterEach wit
         Future.failed(new RuntimeException)
       )
       intercept[Exception] {
-        await(ersUtil.fetch[AltAmends]("key"))
+        await(ersUtil.fetch[AltAmends]("key"), 1, SECONDS)
       }
     }
 
     "return Future[Something] if given value from cache" in {
       val anyVal = "abc"
-      when(mockShortLivedCache.fetchAndGetEntry[JsValue](anyVal, anyVal)).thenReturn(Option(Json.toJson[String](anyVal)))
-      await(ersUtil.fetch[String](anyVal, anyVal)) shouldBe anyVal
+      when(mockShortLivedCache.fetchAndGetEntry[JsValue](anyVal, anyVal)) thenReturn Future(Option(Json.toJson[String](anyVal)))
+      ersUtil.fetch[String](anyVal, anyVal).futureValue shouldBe anyVal
     }
 
     "throw an NoSuchElementException if nothing is found in the cache" in {
       val anyVal = "abc"
       when(mockShortLivedCache.fetchAndGetEntry[JsValue](anyVal, anyVal)).thenReturn(Future.failed(new NoSuchElementException))
       intercept[NoSuchElementException] {
-        await(ersUtil.fetch[String](anyVal, anyVal))
+        await(ersUtil.fetch[String](anyVal, anyVal), 1, SECONDS)
       }
     }
 
@@ -130,7 +128,7 @@ class ErsUtilSpec extends UnitSpec with MockitoSugar with BeforeAndAfterEach wit
       val anyVal = "abc"
       when(mockShortLivedCache.fetchAndGetEntry[JsValue](anyVal, anyVal)).thenReturn(Future.failed(new RuntimeException))
       intercept[Exception] {
-        await(ersUtil.fetch[String](anyVal, anyVal))
+        await(ersUtil.fetch[String](anyVal, anyVal), 1, SECONDS)
       }
     }
   }
@@ -144,7 +142,7 @@ class ErsUtilSpec extends UnitSpec with MockitoSugar with BeforeAndAfterEach wit
       ).thenReturn(
         Future.successful(Some(""))
       )
-      val result = await(ersUtil.fetchOption[String]("key", "cacheId"))
+      val result = ersUtil.fetchOption[String]("key", "cacheId").futureValue
       result shouldBe Some("")
     }
 
@@ -155,7 +153,7 @@ class ErsUtilSpec extends UnitSpec with MockitoSugar with BeforeAndAfterEach wit
         Future.failed(new NoSuchElementException)
       )
       intercept[NoSuchElementException] {
-        await(ersUtil.fetchOption[String]("key", "cacheId"))
+        await(ersUtil.fetchOption[String]("key", "cacheId"), 1, SECONDS)
       }
     }
 
@@ -166,7 +164,7 @@ class ErsUtilSpec extends UnitSpec with MockitoSugar with BeforeAndAfterEach wit
         Future.failed(new RuntimeException)
       )
       intercept[Exception] {
-        await(ersUtil.fetchOption[String]("key", "cacheId"))
+        await(ersUtil.fetchOption[String]("key", "cacheId"), 1, SECONDS)
       }
     }
   }
@@ -178,14 +176,14 @@ class ErsUtilSpec extends UnitSpec with MockitoSugar with BeforeAndAfterEach wit
       val anyVal = "abc"
       val cMap = CacheMap(anyVal, Map((anyVal, Json.toJson(anyVal))))
       when(mockShortLivedCache.fetch(anyVal)).thenReturn(Future(Option(cMap)))
-      await(ersUtil.fetchAll(anyVal)) shouldBe cMap
+      await(ersUtil.fetchAll(anyVal), 1, SECONDS) shouldBe cMap
     }
 
     "throw a NoSuchElementException if nothing is found in the cache" in {
       val anyVal = "abc"
       when(mockShortLivedCache.fetch(anyVal)).thenReturn(Future.failed(new NoSuchElementException))
       intercept[NoSuchElementException] {
-        await(ersUtil.fetchAll(anyVal))
+        await(ersUtil.fetchAll(anyVal), 1, SECONDS)
       }
     }
 
@@ -193,7 +191,7 @@ class ErsUtilSpec extends UnitSpec with MockitoSugar with BeforeAndAfterEach wit
       val anyVal = "abc"
       when(mockShortLivedCache.fetch(anyVal)).thenReturn(Future.failed(new RuntimeException))
       intercept[Exception] {
-        await(ersUtil.fetchAll(anyVal))
+        await(ersUtil.fetchAll(anyVal), 1, SECONDS)
       }
     }
   }
@@ -212,16 +210,16 @@ class ErsUtilSpec extends UnitSpec with MockitoSugar with BeforeAndAfterEach wit
 																	 ): Future[Option[T]] = {
           key match {
             case "ReportableEvents" => Future(Some(ReportableEvents(Some(OPTION_NIL_RETURN)).asInstanceOf[T]))
-            case "check-file-type" => None
-            case "scheme-organiser" => None
-            case "trustees" => None
-            case "group-scheme-controller" => None
-            case "alt-activity" => None
-            case "alt-amends-cache-controller" => Some(AlterationAmends(Some("1"), Some("1"), Some("1"), Some("1"), Some("1")).asInstanceOf[T])
+            case "check-file-type" => Future(None)
+            case "scheme-organiser" => Future(None)
+            case "trustees" => Future(None)
+            case "group-scheme-controller" => Future(None)
+            case "alt-activity" => Future(None)
+            case "alt-amends-cache-controller" => Future(Some(AlterationAmends(Some("1"), Some("1"), Some("1"), Some("1"), Some("1")).asInstanceOf[T]))
           }
         }
       }
-      val result = await(ersUtil.getAllData(BUNDLE_REF, rsc))
+      val result = ersUtil.getAllData(BUNDLE_REF, rsc).futureValue
       result.isNilReturn shouldBe "2"
     }
 
@@ -235,15 +233,15 @@ class ErsUtilSpec extends UnitSpec with MockitoSugar with BeforeAndAfterEach wit
 					key match {
 						case "ReportableEvents" => Future(Some(ReportableEvents(Some(OPTION_NIL_RETURN)).asInstanceOf[T]))
 						case "check-file-type" => Future(Some(CheckFileType(Some("ods")).asInstanceOf[T]))
-						case "scheme-organiser" => None
-						case "trustees" => None
-						case "group-scheme-controller" => None
-						case "alt-activity" => None
-						case "alt-amends-cache-controller" => Some(AlterationAmends(Some("1"), Some("1"), Some("1"), Some("1"), Some("1")).asInstanceOf[T])
+						case "scheme-organiser" => Future(None)
+						case "trustees" => Future(None)
+						case "group-scheme-controller" => Future(None)
+						case "alt-activity" => Future(None)
+						case "alt-amends-cache-controller" => Future(Some(AlterationAmends(Some("1"), Some("1"), Some("1"), Some("1"), Some("1")).asInstanceOf[T]))
 					}
         }
       }
-      val result = await(ersUtil.getAllData(BUNDLE_REF, rsc))
+      val result = ersUtil.getAllData(BUNDLE_REF, rsc).futureValue
       result.isNilReturn shouldBe "2"
       result.fileType shouldBe Option("ods")
     }
@@ -258,16 +256,16 @@ class ErsUtilSpec extends UnitSpec with MockitoSugar with BeforeAndAfterEach wit
 					key match {
 						case "ReportableEvents" => Future.failed(new NoSuchElementException)
 						case "check-file-type" =>  Future[Option[T]](Option("ods".asInstanceOf[T]))
-						case "scheme-organiser" => None
-						case "trustees" => None
-						case "group-scheme-controller" => None
-						case "alt-activity" => None
-						case "alt-amends-cache-controller" => Some(AlterationAmends(Some("1"), Some("1"), Some("1"), Some("1"), Some("1")).asInstanceOf[T])
+						case "scheme-organiser" => Future(None)
+						case "trustees" => Future(None)
+						case "group-scheme-controller" => Future(None)
+						case "alt-activity" => Future(None)
+						case "alt-amends-cache-controller" => Future(Some(AlterationAmends(Some("1"), Some("1"), Some("1"), Some("1"), Some("1")).asInstanceOf[T]))
 					}
         }
       }
       intercept[Exception] {
-        await(ersUtil.getAllData(BUNDLE_REF, rsc))
+        await(ersUtil.getAllData(BUNDLE_REF, rsc), 1, SECONDS)
       }
     }
   }
@@ -284,13 +282,13 @@ class ErsUtilSpec extends UnitSpec with MockitoSugar with BeforeAndAfterEach wit
 																		request: Request[AnyRef]
 																	 ): Future[Option[T]] = {
           key match {
-            case "alt-activity" => None
-            case "alt-amends-cache-controller" => Some(AlterationAmends(Some("1"), Some("1"), Some("1"), Some("1"), Some("1")).asInstanceOf[T])
+            case "alt-activity" => Future(None)
+            case "alt-amends-cache-controller" => Future(Some(AlterationAmends(Some("1"), Some("1"), Some("1"), Some("1"), Some("1")).asInstanceOf[T]))
           }
         }
       }
 
-      val result = await(ersUtil.getAltAmmendsData(""))
+      val result = ersUtil.getAltAmmendsData("").futureValue
       result._1 shouldBe None
       result._2 shouldBe None
 
@@ -305,13 +303,13 @@ class ErsUtilSpec extends UnitSpec with MockitoSugar with BeforeAndAfterEach wit
 																		request: Request[AnyRef]
 																	 ): Future[Option[T]] = {
           key match {
-						case "alt-activity" => Some(AltAmendsActivity(OPTION_NO).asInstanceOf[T])
-						case "alt-amends-cache-controller" => Some(AlterationAmends(Some("1"), Some("1"), Some("1"), Some("1"), Some("1")).asInstanceOf[T])
+						case "alt-activity" => Future(Some(AltAmendsActivity(OPTION_NO).asInstanceOf[T]))
+						case "alt-amends-cache-controller" => Future(Some(AlterationAmends(Some("1"), Some("1"), Some("1"), Some("1"), Some("1")).asInstanceOf[T]))
           }
         }
       }
 
-      val result = await(ersUtil.getAltAmmendsData(""))
+      val result = ersUtil.getAltAmmendsData("").futureValue
       result._1 shouldBe Some(AltAmendsActivity("2"))
       result._2 shouldBe None
 
@@ -326,13 +324,13 @@ class ErsUtilSpec extends UnitSpec with MockitoSugar with BeforeAndAfterEach wit
 																		request: Request[AnyRef]
 																	 ): Future[Option[T]] = {
           key match {
-            case "alt-activity" => Some(AltAmendsActivity(OPTION_YES).asInstanceOf[T])
-            case "alt-amends-cache-controller" => Some(AlterationAmends(Some("1"), Some("1"), Some("1"), Some("1"), Some("1")).asInstanceOf[T])
+            case "alt-activity" => Future(Some(AltAmendsActivity(OPTION_YES).asInstanceOf[T]))
+            case "alt-amends-cache-controller" => Future(Some(AlterationAmends(Some("1"), Some("1"), Some("1"), Some("1"), Some("1")).asInstanceOf[T]))
           }
         }
       }
 
-      val result = await(ersUtil.getAltAmmendsData(""))
+      val result = ersUtil.getAltAmmendsData("").futureValue
       result._1 shouldBe Some(AltAmendsActivity("1"))
       result._2 shouldBe Some(AlterationAmends(Some("1"), Some("1"), Some("1"), Some("1"), Some("1")))
 
@@ -347,13 +345,13 @@ class ErsUtilSpec extends UnitSpec with MockitoSugar with BeforeAndAfterEach wit
 																		request: Request[AnyRef]
 																	 ): Future[Option[T]] = {
           key match {
-            case "alt-activity" => Some(AltAmendsActivity(OPTION_YES).asInstanceOf[T])
-            case "alt-amends-cache-controller" => None
+            case "alt-activity" => Future(Some(AltAmendsActivity(OPTION_YES).asInstanceOf[T]))
+            case "alt-amends-cache-controller" => Future(None)
           }
         }
       }
 
-      val result = await(ersUtil.getAltAmmendsData(""))
+      val result = ersUtil.getAltAmmendsData("").futureValue
       result._1 shouldBe Some(AltAmendsActivity("1"))
       result._2 shouldBe None
 
@@ -377,13 +375,13 @@ class ErsUtilSpec extends UnitSpec with MockitoSugar with BeforeAndAfterEach wit
 																		request: Request[AnyRef]
 																	 ): Future[Option[T]] = {
           key match {
-            case "group-scheme-controller" => None
-            case "group-scheme-companies" => Some(schemeCompanies.asInstanceOf[T])
+            case "group-scheme-controller" => Future(None)
+            case "group-scheme-companies" => Future(Some(schemeCompanies.asInstanceOf[T]))
           }
         }
       }
 
-      val result = await(ersUtil.getGroupSchemeData(""))
+      val result = ersUtil.getGroupSchemeData("").futureValue
       result._1 shouldBe None
       result._2 shouldBe None
 
@@ -397,13 +395,13 @@ class ErsUtilSpec extends UnitSpec with MockitoSugar with BeforeAndAfterEach wit
 																		request: Request[AnyRef]
 																	 ): Future[Option[T]] = {
           key match {
-						case "group-scheme-controller" => Some(GroupSchemeInfo(None, Some("")).asInstanceOf[T])
-            case "group-scheme-companies" => Some(schemeCompanies.asInstanceOf[T])
+						case "group-scheme-controller" => Future(Some(GroupSchemeInfo(None, Some("")).asInstanceOf[T]))
+            case "group-scheme-companies" => Future(Some(schemeCompanies.asInstanceOf[T]))
           }
         }
       }
 
-      val result = await(ersUtil.getGroupSchemeData(""))
+      val result = ersUtil.getGroupSchemeData("").futureValue
       result._1 shouldBe Some(GroupSchemeInfo(None, Some("")))
       result._2 shouldBe None
 
@@ -417,13 +415,13 @@ class ErsUtilSpec extends UnitSpec with MockitoSugar with BeforeAndAfterEach wit
 																		request: Request[AnyRef]
 																	 ): Future[Option[T]] = {
           key match {
-						case "group-scheme-controller" => Some(GroupSchemeInfo(Some("1"), Some("")).asInstanceOf[T])
-            case "group-scheme-companies" => Some(schemeCompanies.asInstanceOf[T])
+						case "group-scheme-controller" => Future(Some(GroupSchemeInfo(Some("1"), Some("")).asInstanceOf[T]))
+            case "group-scheme-companies" => Future(Some(schemeCompanies.asInstanceOf[T]))
           }
         }
       }
 
-      val result = await(ersUtil.getGroupSchemeData(""))
+      val result = ersUtil.getGroupSchemeData("").futureValue
       result._1 shouldBe Some(GroupSchemeInfo(Some("1"), Some("")))
       result._2 shouldBe Some(schemeCompanies)
 
@@ -437,13 +435,13 @@ class ErsUtilSpec extends UnitSpec with MockitoSugar with BeforeAndAfterEach wit
 																		request: Request[AnyRef]
 																	 ): Future[Option[T]] = {
           key match {
-						case "group-scheme-controller" => Some(GroupSchemeInfo(Some("1"), Some("")).asInstanceOf[T])
-            case "group-scheme-companies" => None
+						case "group-scheme-controller" => Future(Some(GroupSchemeInfo(Some("1"), Some("")).asInstanceOf[T]))
+            case "group-scheme-companies" => Future(None)
           }
         }
       }
 
-      val result = await(ersUtil.getGroupSchemeData(""))
+      val result = ersUtil.getGroupSchemeData("").futureValue
       result._1 shouldBe Some(GroupSchemeInfo(Some("1"), Some("")))
       result._2 shouldBe None
 
@@ -457,13 +455,13 @@ class ErsUtilSpec extends UnitSpec with MockitoSugar with BeforeAndAfterEach wit
 																		request: Request[AnyRef]
 																	 ): Future[Option[T]] = {
           key match {
-						case "group-scheme-controller" => Some(GroupSchemeInfo(Some("2"), Some("")).asInstanceOf[T])
-            case "group-scheme-companies" => Some(schemeCompanies.asInstanceOf[T])
+						case "group-scheme-controller" => Future(Some(GroupSchemeInfo(Some("2"), Some("")).asInstanceOf[T]))
+            case "group-scheme-companies" => Future(Some(schemeCompanies.asInstanceOf[T]))
           }
         }
       }
 
-      val result = await(ersUtil.getGroupSchemeData(""))
+      val result = ersUtil.getGroupSchemeData("").futureValue
       result._1 shouldBe Some(GroupSchemeInfo(Some("2"), Some("")))
       result._2 shouldBe None
 
@@ -473,8 +471,7 @@ class ErsUtilSpec extends UnitSpec with MockitoSugar with BeforeAndAfterEach wit
   "cacheUtil" should {
 		val THOUSAND = 1000
 		val ersUtil: ERSUtil = new ERSUtil(mockSessionCache, mockShortLivedCache, mockAppConfig){
-      when(sessionService.getSuccessfulCallbackRecord(any(), any()))
-        .thenReturn(Some(UploadedSuccessfully("name", "downloadUrl", Some(THOUSAND))))
+      when(sessionService.getSuccessfulCallbackRecord(any(), any())) thenReturn Future(Some(UploadedSuccessfully("name", "downloadUrl", Some(THOUSAND))))
     }
     "check Nil Return " in {
       ersUtil.isNilReturn("2") shouldBe true

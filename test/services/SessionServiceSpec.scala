@@ -22,17 +22,15 @@ import org.mockito.ArgumentMatchers.{eq => meq, _}
 import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatestplus.mockito.MockitoSugar
-import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import org.scalatestplus.play.PlaySpec
-import play.api.mvc.{Request, AnyContent}
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import play.api.mvc.{AnyContent, Request}
 import play.api.test.FakeRequest
-import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
-import uk.gov.hmrc.http.logging.SessionId
-import utils.ErsTestHelper
+import uk.gov.hmrc.http.{HeaderCarrier, SessionId}
 
-import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class SessionServiceSpec extends PlaySpec with GuiceOneAppPerSuite with ScalaFutures with MockitoSugar  {
 

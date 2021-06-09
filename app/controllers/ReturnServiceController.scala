@@ -18,17 +18,17 @@ package controllers
 
 import _root_.models._
 import config._
-import javax.inject.{Inject, Singleton}
-import play.Logger
+import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.libs.json.{Json, OFormat}
 import play.api.mvc._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
-import uk.gov.hmrc.play.bootstrap.controller.FrontendController
+import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.SessionKeys.{BUNDLE_REF, DATE_TIME_SUBMITTED}
 import utils._
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -39,7 +39,7 @@ class ReturnServiceController @Inject()(val mcc: MessagesControllerComponents,
                                         globalErrorView: views.html.global_error,
                                         unauthorisedView: views.html.unauthorised,
                                         startView: views.html.start
-																			 ) extends FrontendController(mcc) with Authenticator with I18nSupport {
+																			 ) extends FrontendController(mcc) with Authenticator with I18nSupport with Logging {
 
   implicit val ec: ExecutionContext = mcc.executionContext
 
@@ -49,17 +49,17 @@ class ReturnServiceController @Inject()(val mcc: MessagesControllerComponents,
   def cacheParams(ersRequestObject: RequestObject)(implicit request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
     implicit val formatRSParams: OFormat[RequestObject] = Json.format[RequestObject]
 
-    Logger.debug("Request Object created --> " + ersRequestObject)
+    logger.debug("Request Object created --> " + ersRequestObject)
     ersUtil.cache(ersUtil.ersMetaData, ersRequestObject.toErsMetaData, ersRequestObject.getSchemeReference).flatMap { _ =>
-      Logger.info(s"[ReturnServiceController][cacheParams]Meta Data Cached --> ${ersRequestObject.toErsMetaData}")
+      logger.info(s"[ReturnServiceController][cacheParams]Meta Data Cached --> ${ersRequestObject.toErsMetaData}")
       ersUtil.cache(ersUtil.ersRequestObject, ersRequestObject) flatMap {
         _ => {
-          Logger.info(s"[ReturnServiceController][cacheParams] Request Object Cached -->  $ersRequestObject")
+          logger.info(s"[ReturnServiceController][cacheParams] Request Object Cached -->  $ersRequestObject")
 					Future.successful(showInitialStartPage(ersRequestObject)(request, hc))
         }
     }
     } recover { case e: Exception =>
-      Logger.warn(s"[ReturnServiceController][cacheParams] Caught exception ${e.getMessage}", e)
+      logger.warn(s"[ReturnServiceController][cacheParams] Caught exception ${e.getMessage}", e)
       getGlobalErrorPage
     }
   }
@@ -75,7 +75,7 @@ class ReturnServiceController @Inject()(val mcc: MessagesControllerComponents,
     val ts: Option[String] = request.getQueryString("ts")
     val hmac: Option[String] = request.getQueryString("hmac")
     val reqObj = RequestObject(aoRef, taxYear, ersSchemeRef, schemeName, schemeType, agentRef, empRef, ts, hmac)
-    Logger.info(s"Request Parameters:  ${reqObj.toString}")
+    logger.info(s"Request Parameters:  ${reqObj.toString}")
     reqObj
   }
 
@@ -83,21 +83,21 @@ class ReturnServiceController @Inject()(val mcc: MessagesControllerComponents,
       implicit request =>
 				authorisedByGovGateway {
 					implicit user =>
-					Logger.info("[ReturnServiceController][hmacCheck] HMAC Check Authenticated")
+					logger.info("[ReturnServiceController][hmacCheck] HMAC Check Authenticated")
 					if (request.getQueryString("ersSchemeRef").getOrElse("") == "") {
-						Logger.warn("[ReturnServiceController][hmacCheck] Missing SchemeRef in URL")
+						logger.warn("[ReturnServiceController][hmacCheck] Missing SchemeRef in URL")
 						Future(getGlobalErrorPage)
 					} else {
 						if (ersUtil.isHmacAndTimestampValid(getRequestParameters(request))) {
-							Logger.info("[ReturnServiceController][hmacCheck] HMAC Check Valid")
+							logger.info("[ReturnServiceController][hmacCheck] HMAC Check Valid")
 							try {
 								cacheParams(getRequestParameters(request))
 							} catch {
-								case e: Throwable => Logger.warn(s"[ReturnServiceController][hmacCheck] Caught exception ${e.getMessage}", e)
+								case e: Throwable => logger.warn(s"[ReturnServiceController][hmacCheck] Caught exception ${e.getMessage}", e)
 									Future(getGlobalErrorPage)
 							}
 						} else {
-							Logger.warn("[ReturnServiceController][hmacCheck] HMAC Check Invalid")
+							logger.warn("[ReturnServiceController][hmacCheck] HMAC Check Invalid")
 							showUnauthorisedPage(request)
 						}
 					}

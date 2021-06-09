@@ -20,18 +20,18 @@ import models.{ErsMetaData, SchemeInfo}
 import org.joda.time.DateTime
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
-import org.scalatest.Matchers
+import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.{Matchers, OptionValues, WordSpecLike}
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
 import uk.gov.hmrc.play.audit.model.DataEvent
 import uk.gov.hmrc.play.bootstrap.audit.DefaultAuditConnector
-import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.Future
 
-class AuditEventsTest extends UnitSpec with Matchers with MockitoSugar {
+class AuditEventsTest extends WordSpecLike with Matchers with OptionValues with MockitoSugar with ScalaFutures {
 
 	val mockAuditConnector: DefaultAuditConnector = mock[DefaultAuditConnector]
 	implicit val hc: HeaderCarrier = HeaderCarrier()
@@ -63,8 +63,8 @@ class AuditEventsTest extends UnitSpec with Matchers with MockitoSugar {
 		"do something" in {
 			when(mockAuditConnector.sendEvent(any())(any(), any())).thenReturn(Future.successful(Success))
 
-			val result = testAuditEvent.ersSubmissionAuditEvent(rsc, "bundle")
-			await(result) shouldBe Success
+			val result = testAuditEvent.ersSubmissionAuditEvent(rsc, "bundle").futureValue
+			result shouldBe Success
 		}
 	}
 

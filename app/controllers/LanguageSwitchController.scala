@@ -16,16 +16,14 @@
 
 package controllers
 
-import java.net.URI
-
 import com.google.inject.Inject
 import config.ApplicationConfig
-import play.api.i18n.{I18nSupport, Lang, MessagesApi}
-import play.api.mvc.{Action, AnyContent, Controller, MessagesControllerComponents}
-import uk.gov.hmrc.play.bootstrap.controller.FrontendController
+import play.api.i18n.{I18nSupport, Lang}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
+import java.net.URI
 import scala.concurrent.ExecutionContext
-import scala.reflect.runtime.universe.Try
 
 class LanguageSwitchController @Inject() (appConfig: ApplicationConfig,
                                           val mcc: MessagesControllerComponents

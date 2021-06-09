@@ -17,8 +17,8 @@
 package services.pdf
 
 import play.api.i18n.Messages
-import utils.{DecoratorConstants, PageBuilder}
-import DecoratorConstants._
+import utils.DecoratorConstants._
+import utils.PageBuilder
 
 class YesNoDecorator(headingTitle: String,
 										 isNilReturn: String,
