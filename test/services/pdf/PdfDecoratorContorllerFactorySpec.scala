@@ -18,22 +18,18 @@ package services.pdf
 
 import akka.stream.Materializer
 import org.scalatest.matchers.{BePropertyMatchResult, BePropertyMatcher}
+import org.scalatest.{Matchers, OptionValues, WordSpecLike}
 import org.scalatestplus.mockito.MockitoSugar
-import org.scalatestplus.play.OneAppPerSuite
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.{Application, i18n}
-import play.api.Play.current
-import play.api.i18n.Messages.Implicits._
+import play.api.i18n
 import play.api.i18n.{Messages, MessagesApi, MessagesImpl}
-import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents}
 import play.api.test.Helpers.stubBodyParser
-import uk.gov.hmrc.play.test.UnitSpec
 import utils.{CountryCodes, ERSFakeApplicationConfig, ErsTestHelper, Fixtures}
 
 import scala.concurrent.ExecutionContext
 
-class PdfDecoratorContorllerFactorySpec extends UnitSpec with ERSFakeApplicationConfig with MockitoSugar with ErsTestHelper with GuiceOneAppPerSuite {
+class PdfDecoratorContorllerFactorySpec extends WordSpecLike with Matchers with OptionValues with ERSFakeApplicationConfig with MockitoSugar with ErsTestHelper with GuiceOneAppPerSuite {
 
   val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
     messagesActionBuilder,

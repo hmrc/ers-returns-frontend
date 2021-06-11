@@ -21,8 +21,8 @@ import org.scalatest.{MustMatchers, PrivateMethodTester, WordSpec}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.i18n.{Lang, Messages, MessagesApi}
 import play.api.test.FakeRequest
-import utils.Fixtures.ersRequestObject
 import utils.DateUtils
+import utils.Fixtures.ersRequestObject
 
 class RequestObjectSpec extends WordSpec with MustMatchers with GuiceOneAppPerSuite with PrivateMethodTester {
 

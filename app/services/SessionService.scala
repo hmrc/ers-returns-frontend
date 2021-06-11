@@ -17,11 +17,11 @@
 package services
 
 import config.ERSFileValidatorSessionCache
-import javax.inject.Inject
 import models.upscan.{NotStarted, UploadStatus, UploadedSuccessfully}
 import play.api.mvc.Request
 import uk.gov.hmrc.http.HeaderCarrier
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 

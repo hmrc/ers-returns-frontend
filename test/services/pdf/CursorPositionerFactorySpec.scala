@@ -17,9 +17,9 @@
 package services.pdf
 
 import org.scalatest.matchers.{BePropertyMatchResult, BePropertyMatcher}
-import uk.gov.hmrc.play.test.UnitSpec
+import org.scalatest.{Matchers, OptionValues, WordSpecLike}
 
-class CursorPositionerFactorySpec extends UnitSpec {
+class CursorPositionerFactorySpec extends WordSpecLike with Matchers with OptionValues {
   // a function to get matching an instance to be of certain type
   def anInstanceOf[T](implicit manifest: Manifest[T]) = {
     val clazz = manifest.runtimeClass.asInstanceOf[Class[T]]

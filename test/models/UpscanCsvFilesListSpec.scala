@@ -17,10 +17,10 @@
 package models
 
 import models.upscan.UploadId
-import uk.gov.hmrc.play.test.UnitSpec
+import org.scalatest.{Matchers, OptionValues, WordSpecLike}
 import utils.UpscanData
 
-class UpscanCsvFilesListSpec extends UnitSpec with UpscanData {
+class UpscanCsvFilesListSpec extends WordSpecLike with Matchers with OptionValues with UpscanData {
 
   "updateToInProgress" should {
     "update a NotStarted upload with matching ID to InProgress" in {

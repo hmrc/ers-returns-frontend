@@ -16,13 +16,13 @@
 
 package config
 
-import controllers.routes
 import com.google.inject.Inject
-import javax.inject.Singleton
+import controllers.routes
 import play.api.i18n.Lang
 import play.api.mvc.Call
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
+import javax.inject.Singleton
 import scala.concurrent.duration._
 
 @Singleton

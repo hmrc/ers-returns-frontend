@@ -17,17 +17,17 @@
 package controllers
 
 import config.ApplicationConfig
-import javax.inject.{Inject, Singleton}
 import models._
-import play.api.Logger
+import play.api.Logging
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, Messages}
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request, Result}
+import play.api.mvc._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
-import uk.gov.hmrc.play.bootstrap.controller.FrontendController
+import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils._
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -38,7 +38,7 @@ class SchemeOrganiserController @Inject()(val mcc: MessagesControllerComponents,
 																					implicit val appConfig: ApplicationConfig,
                                           globalErrorView: views.html.global_error,
                                           schemeOrganiserView: views.html.scheme_organiser
-																				 ) extends FrontendController(mcc) with Authenticator with I18nSupport {
+																				 ) extends FrontendController(mcc) with Authenticator with I18nSupport with Logging {
 
   implicit val ec: ExecutionContext = mcc.executionContext
 
@@ -52,7 +52,7 @@ class SchemeOrganiserController @Inject()(val mcc: MessagesControllerComponents,
 
   def showSchemeOrganiserPage(requestObject: RequestObject)
 														 (implicit authContext: ERSAuthData, req: Request[AnyContent], hc: HeaderCarrier): Future[Result] = {
-    Logger.info(s"[SchemeOrganiserController][showSchemeOrganiserPage] schemeRef: ${requestObject.getSchemeReference}.")
+    logger.info(s"[SchemeOrganiserController][showSchemeOrganiserPage] schemeRef: ${requestObject.getSchemeReference}.")
 		lazy val form = SchemeOrganiserDetails("", "", Some(""), Some(""), Some(""), Some(ersUtil.DEFAULT_COUNTRY), Some(""), Some(""), Some(""))
 
 		ersUtil.fetch[ReportableEvents](ersUtil.reportableEvents, requestObject.getSchemeReference).flatMap { reportableEvent =>
@@ -79,7 +79,7 @@ class SchemeOrganiserController @Inject()(val mcc: MessagesControllerComponents,
       }
     } recover {
       case e: Exception =>
-				Logger.error(s"[SchemeOrganiserController][showSchemeOrganiserPage] Get reportableEvent.isNilReturn failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
+				logger.error(s"[SchemeOrganiserController][showSchemeOrganiserPage] Get reportableEvent.isNilReturn failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
 				getGlobalErrorPage
 		}
   }
@@ -104,13 +104,13 @@ class SchemeOrganiserController @Inject()(val mcc: MessagesControllerComponents,
       },
       successful => {
 
-        Logger.warn(s"[SchemeOrganiserController][showSchemeOrganiserSubmit] schemeRef: ${requestObject.getSchemeReference}.")
+        logger.warn(s"[SchemeOrganiserController][showSchemeOrganiserSubmit] schemeRef: ${requestObject.getSchemeReference}.")
 
         ersUtil.cache(ersUtil.SCHEME_ORGANISER_CACHE, successful, requestObject.getSchemeReference).map {
           _ => Redirect(routes.GroupSchemeController.groupSchemePage())
         } recover {
           case e: Exception =>
-            Logger.error(s"[SchemeOrganiserController][showSchemeOrganiserSubmit] Save scheme organiser details failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
+            logger.error(s"[SchemeOrganiserController][showSchemeOrganiserSubmit] Save scheme organiser details failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
             getGlobalErrorPage
         }
       }

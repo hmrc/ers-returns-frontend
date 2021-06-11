@@ -16,9 +16,6 @@
 
 package services.pdf
 
-import java.io.ByteArrayOutputStream
-
-import javax.imageio.ImageIO
 import models.ErsSummary
 import org.apache.pdfbox.pdmodel.common.PDMetadata
 import org.apache.pdfbox.pdmodel.edit.PDPageContentStream
@@ -28,9 +25,12 @@ import org.apache.pdfbox.pdmodel.graphics.xobject.PDJpeg
 import org.apache.pdfbox.pdmodel.{PDDocument, PDPage}
 import org.apache.xmpbox.XMPMetadata
 import org.apache.xmpbox.xml.{XmpSerializationException, XmpSerializer}
-import play.api.Logger
+import play.api.Logging
 import play.api.i18n.Messages
 import utils.DateUtils
+
+import java.io.ByteArrayOutputStream
+import javax.imageio.ImageIO
 
 trait ErsContentsStreamer {
   def saveErsSummary() : ByteArrayOutputStream
@@ -40,8 +40,8 @@ trait ErsContentsStreamer {
   def drawLine() : Boolean
 }
 
-class ApachePdfContentsStreamer(ersSummary : ErsSummary) extends ErsContentsStreamer {
-  Logger.debug("ers-returns-frontend using the apache pdf contents streamer")
+class ApachePdfContentsStreamer(ersSummary : ErsSummary) extends ErsContentsStreamer with Logging {
+  logger.debug("ers-returns-frontend using the apache pdf contents streamer")
 
   val LEFT_MRGIN = 40
   val RIGHT_MARGIN = 520
@@ -49,18 +49,18 @@ class ApachePdfContentsStreamer(ersSummary : ErsSummary) extends ErsContentsStre
   lazy val document: Option[PDDocument] = Some(new PDDocument()) : Option[PDDocument]
 
   lazy val font: Option[PDFont] = try{
-    Logger.debug("ers-returns-frontend about to load arialMt.ttf font")
+    logger.debug("ers-returns-frontend about to load arialMt.ttf font")
     Some(PDTrueTypeFont.loadTTF(document.get, getClass.getResourceAsStream("/org/apache/pdfbox/resources/ttf/ArialMT.ttf")))
   }catch {
     case e: Exception =>
-			Logger.error("can not load the font for the pdf")
+			logger.error("can not load the font for the pdf")
 			throw e
 	}
   var contentStream : Option[PDPageContentStream] = None
   var cursorPositioner : Option[CursorPositioner] = None
 
   def saveErsSummary() : ByteArrayOutputStream = {
-    Logger.debug("ers-returns-frontend: saving the pdf")
+    logger.debug("ers-returns-frontend: saving the pdf")
     val catalog = document.get.getDocumentCatalog
     val metadata = new PDMetadata(document.get)
     catalog.setMetadata(metadata)
@@ -77,8 +77,8 @@ class ApachePdfContentsStreamer(ersSummary : ErsSummary) extends ErsContentsStre
       metadata.importXMPMetadata(byteArrayOutputStream.toByteArray)
     } catch {
       case xmpException: XmpSerializationException =>
-        Logger.debug("ers-returns-frontend can not create metadata")
-        Logger.error(xmpException.getMessage)
+        logger.debug("ers-returns-frontend can not create metadata")
+        logger.error(xmpException.getMessage)
     }
 
     val colourProfile = getClass.getResourceAsStream("/resources/sRGB-Color-Space-Profile.icm")
@@ -93,13 +93,13 @@ class ApachePdfContentsStreamer(ersSummary : ErsSummary) extends ErsContentsStre
     document.get.save(output)
     document.get.close()
 
-     Logger.debug("ers-returns-frontend meta data is saved")
+     logger.debug("ers-returns-frontend meta data is saved")
      output
   }
 
   def savePageContent() : Boolean = {
     if(contentStream.isDefined) {
-     Logger.debug("ers-returns-frontend saving page content")
+     logger.debug("ers-returns-frontend saving page content")
 			contentStream.get.saveGraphicsState()
       contentStream.get.close()
       contentStream = None
@@ -109,7 +109,7 @@ class ApachePdfContentsStreamer(ersSummary : ErsSummary) extends ErsContentsStre
   }
 
   def createNewPage()(implicit messages: Messages) : Boolean = {
-     Logger.debug("ers-returns-frontend creating new pdf page")
+     logger.debug("ers-returns-frontend creating new pdf page")
      savePageContent()
 
     val page = new PDPage()
@@ -173,7 +173,7 @@ class ApachePdfContentsStreamer(ersSummary : ErsSummary) extends ErsContentsStre
 
     for(word <- words) {
 
-      if(!myLine.isEmpty) {
+      if(myLine.nonEmpty) {
         myLine += " "
       }
 
@@ -194,7 +194,7 @@ class ApachePdfContentsStreamer(ersSummary : ErsSummary) extends ErsContentsStre
 
   private def addHMlogo(cursorPositioner: CursorPositioner)(implicit messages: Messages) : Boolean = {
 
-     Logger.debug("ers-returns-frontend adding hm logo")
+     logger.debug("ers-returns-frontend adding hm logo")
      cursorPositioner.beginHeader()
 
     try {
@@ -206,13 +206,13 @@ class ApachePdfContentsStreamer(ersSummary : ErsSummary) extends ErsContentsStre
         imagePos._1,
         imagePos._2)
     } catch {
-      case e:Throwable => Logger.error(s"Cannot draw logo with message ${e.getMessage}")
+      case e:Throwable => logger.error(s"Cannot draw logo with message ${e.getMessage}")
     }
 
     addPageHeaderText(cursorPositioner)
 
     cursorPositioner.endHeader()
-    Logger.debug("ers-returns-frontend added the hm logo")
+    logger.debug("ers-returns-frontend added the hm logo")
 
     true
   }

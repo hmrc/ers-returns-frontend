@@ -24,28 +24,26 @@ import models.upscan.UpscanCsvFilesCallbackList
 import org.joda.time.DateTime
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
+import org.scalatest.{Matchers, OptionValues, WordSpecLike}
 import org.scalatestplus.mockito.MockitoSugar
-import org.scalatestplus.play.OneAppPerSuite
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.{Application, i18n}
 import play.api.http.Status
-import play.api.i18n.{Lang, Messages, MessagesApi, MessagesImpl}
-import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.i18n
+import play.api.i18n.{MessagesApi, MessagesImpl}
 import play.api.libs.json
 import play.api.libs.json._
-import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents, Request}
+import play.api.mvc._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
-import uk.gov.hmrc.play.test.UnitSpec
 import utils.Fixtures.ersRequestObject
-import utils.{CountryCodes, ERSFakeApplicationConfig, ERSUtil, ErsTestHelper, Fixtures, UpscanData}
+import utils._
 import views.html.{global_error, summary}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class SummaryDeclarationControllerSpec extends UnitSpec with ERSFakeApplicationConfig with MockitoSugar with ErsTestHelper with UpscanData with GuiceOneAppPerSuite {
+class SummaryDeclarationControllerSpec extends WordSpecLike with Matchers with OptionValues with ERSFakeApplicationConfig with MockitoSugar with ErsTestHelper with UpscanData with GuiceOneAppPerSuite {
 
 	val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
 		messagesActionBuilder,
@@ -194,7 +192,7 @@ class SummaryDeclarationControllerSpec extends UnitSpec with ERSFakeApplicationC
   "Calling SummaryDeclarationController.showSummaryDeclarationPage (GET) with authentication missing elements in the cache" should {
     "direct to ers errors page" in {
       val controllerUnderTest = buildFakeSummaryDeclarationController()
-      contentAsString(await(controllerUnderTest.showSummaryDeclarationPage(ersRequestObject)(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc))) shouldBe contentAsString(controllerUnderTest.getGlobalErrorPage)
+      contentAsString(controllerUnderTest.showSummaryDeclarationPage(ersRequestObject)(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc)) shouldBe contentAsString(Future(controllerUnderTest.getGlobalErrorPage))
     }
   }
 

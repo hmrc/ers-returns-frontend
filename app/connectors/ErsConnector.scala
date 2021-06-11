@@ -16,29 +16,28 @@
 
 package connectors
 
-import java.util.concurrent.TimeUnit
-
 import config.ApplicationConfig
-import javax.inject.{Inject, Singleton}
 import metrics.Metrics
 import models._
 import models.upscan.UploadedSuccessfully
-import play.api.Logger
+import play.api.Logging
+import play.api.http.Status._
 import play.api.libs.json.{JsObject, JsValue}
 import play.api.mvc.Request
-import uk.gov.hmrc.http.{HeaderCarrier, HttpReads, HttpResponse}
 import uk.gov.hmrc.http.HttpReads.Implicits
+import uk.gov.hmrc.http.{HeaderCarrier, HttpReads, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
-import play.api.http.Status._
 import utils.ERSUtil
 
+import java.util.concurrent.TimeUnit
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class ErsConnector @Inject()(val http: DefaultHttpClient,
 														 ersUtil: ERSUtil,
 														 appConfig: ApplicationConfig
-														)(implicit ec: ExecutionContext) {
+														)(implicit ec: ExecutionContext) extends Logging {
 
   lazy val metrics: Metrics = ersUtil
 	lazy val ersUrl: String = appConfig.ersUrl
@@ -55,12 +54,12 @@ class ErsConnector @Inject()(val http: DefaultHttpClient,
           val sapNumber: String = (response.json \ "SAP Number").as[String]
           sapNumber
         case _ =>
-          Logger.error(s"SAP request failed with status ${response.status}, timestamp: ${System.currentTimeMillis()}.")
+          logger.error(s"SAP request failed with status ${response.status}, timestamp: ${System.currentTimeMillis()}.")
           throw new Exception
       }
     }.recover {
       case e: Exception =>
-        Logger.error(s"connectToEtmpSapRequest failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
+        logger.error(s"connectToEtmpSapRequest failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
         metrics.ersConnector(System.currentTimeMillis() - startTime, TimeUnit.MILLISECONDS)
         throw new Exception
     }
@@ -75,7 +74,7 @@ class ErsConnector @Inject()(val http: DefaultHttpClient,
           val bundleRef: String = (res.json \ "Form Bundle Number").as[String]
           bundleRef
         case _ =>
-          Logger.error(s"Summary submit request failed with status ${res.status}, timestamp: ${System.currentTimeMillis()}.")
+          logger.error(s"Summary submit request failed with status ${res.status}, timestamp: ${System.currentTimeMillis()}.")
           throw new Exception
       }
     }
@@ -92,7 +91,7 @@ class ErsConnector @Inject()(val http: DefaultHttpClient,
     val empRef: String = authContext.empRef.encodedValue
     val url: String = s"$validatorUrl/ers/$empRef/process-file"
     val startTime = System.currentTimeMillis()
-    Logger.debug("validateFileData: Call to Validator: " + (System.currentTimeMillis() / 1000))
+    logger.debug("validateFileData: Call to Validator: " + (System.currentTimeMillis() / 1000))
     http.POST(url, ValidatorData(callbackData, schemeInfo)).map { res =>
       metrics.ersConnector(System.currentTimeMillis() - startTime, TimeUnit.MILLISECONDS)
       res.status match {
@@ -103,7 +102,7 @@ class ErsConnector @Inject()(val http: DefaultHttpClient,
       }
     }.recover {
       case e: Exception =>
-        Logger.error(s"validateFileData: Validate file data failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
+        logger.error(s"validateFileData: Validate file data failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
         metrics.ersConnector(System.currentTimeMillis() - startTime, TimeUnit.MILLISECONDS)
         HttpResponse(BAD_REQUEST, "")
     }
@@ -128,7 +127,7 @@ class ErsConnector @Inject()(val http: DefaultHttpClient,
       }
     } recover {
       case e: Exception =>
-				Logger.error(s"validateCsvFileData: Validate file data failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
+				logger.error(s"validateCsvFileData: Validate file data failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
 				HttpResponse(BAD_REQUEST, "")
 		}
   }

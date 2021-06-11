@@ -20,19 +20,18 @@ import config.ApplicationConfig
 import models.ERSAuthData
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
-import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.mvc.{AnyContentAsEmpty, Result, Results}
-import play.api.test.Helpers.redirectLocation
-import play.api.test.{DefaultAwaitTimeout, FakeRequest}
+import org.scalatest.{Matchers, OptionValues, WordSpecLike}
+import play.api.mvc.{Result, Results}
+import play.api.test.DefaultAwaitTimeout
+import play.api.test.Helpers.{redirectLocation, status}
 import uk.gov.hmrc.auth.core.AffinityGroup.Agent
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.domain.EmpRef
-import uk.gov.hmrc.play.test.UnitSpec
 import utils.ErsTestHelper
 
 import scala.concurrent.Future
 
-class AuthFunctionalitySpec extends UnitSpec with ErsTestHelper with DefaultAwaitTimeout {
+class AuthFunctionalitySpec extends WordSpecLike with Matchers with OptionValues with ErsTestHelper with DefaultAwaitTimeout {
 
   class Setup(enrolmentSet: Set[Enrolment], affGroup: Option[AffinityGroup] = None, testEmpRef: EmpRef = EmpRef("", "")) {
     val controllerHarness: AuthFunctionality = new AuthFunctionality {

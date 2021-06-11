@@ -16,10 +16,10 @@
 
 package models.upscan
 
-import java.util.UUID
-
 import play.api.libs.json.{JsString, Reads, Writes}
 import play.api.mvc.QueryStringBindable
+
+import java.util.UUID
 
 case class UploadId(value: String) extends AnyVal
 

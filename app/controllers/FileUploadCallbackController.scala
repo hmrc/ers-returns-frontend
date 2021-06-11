@@ -16,21 +16,20 @@
 
 package controllers
 
-import javax.inject.{Inject, Singleton}
 import models.upscan._
-import play.api.Logger
+import play.api.Logging
 import play.api.libs.json.JsValue
 import play.api.mvc.{Action, MessagesControllerComponents}
 import services.SessionService
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.http.logging.SessionId
-import uk.gov.hmrc.play.bootstrap.controller.FrontendController
+import uk.gov.hmrc.http.{HeaderCarrier, SessionId}
+import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class FileUploadCallbackController @Inject()(val mcc: MessagesControllerComponents, val sessionService: SessionService)
-                                              extends FrontendController(mcc) {
+                                              extends FrontendController(mcc) with Logging {
 
   implicit val ec: ExecutionContext = mcc.executionContext
 
@@ -38,7 +37,7 @@ class FileUploadCallbackController @Inject()(val mcc: MessagesControllerComponen
     implicit val headerCarrier: HeaderCarrier = hc.copy(sessionId = Some(SessionId(sessionId)))
     request.body.validate[UpscanCallback].fold (
       invalid = errors => {
-        Logger.error(s"[FileUploadCallbackController][callback] Failed to validate UpscanCallback json with errors: $errors")
+        logger.error(s"[FileUploadCallbackController][callback] Failed to validate UpscanCallback json with errors: $errors")
         Future.successful(BadRequest)
       },
       valid = callback => {
@@ -46,13 +45,13 @@ class FileUploadCallbackController @Inject()(val mcc: MessagesControllerComponen
           case callback: UpscanReadyCallback =>
             UploadedSuccessfully(callback.uploadDetails.fileName, callback.downloadUrl.toExternalForm)
           case UpscanFailedCallback(_, details) =>
-            Logger.warn(s"[FileUploadCallbackController][callback] Callback for session id: $sessionId failed. Reason: ${details.failureReason}. Message: ${details.message}")
+            logger.warn(s"[FileUploadCallbackController][callback] Callback for session id: $sessionId failed. Reason: ${details.failureReason}. Message: ${details.message}")
             Failed
         }
-        Logger.info(s"Updating callback for session: $sessionId to ${uploadStatus.getClass.getSimpleName}")
+        logger.info(s"Updating callback for session: $sessionId to ${uploadStatus.getClass.getSimpleName}")
         sessionService.updateCallbackRecord(sessionId, uploadStatus)(request, headerCarrier).map(_ => Ok) recover {
           case e: Throwable =>
-            Logger.error(s"[FileUploadCallbackController][callback] Failed to update callback record for session: $sessionId, timestamp: ${System.currentTimeMillis()}.", e)
+            logger.error(s"[FileUploadCallbackController][callback] Failed to update callback record for session: $sessionId, timestamp: ${System.currentTimeMillis()}.", e)
             InternalServerError("Exception occurred when attempting to update callback data")
         }
       }

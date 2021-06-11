@@ -22,14 +22,15 @@ import org.joda.time.DateTime
 import org.jsoup.Jsoup
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
+import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.{Matchers, OptionValues, WordSpecLike}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status
 import play.api.i18n
 import play.api.i18n.{MessagesApi, MessagesImpl}
-import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents}
+import play.api.mvc._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.play.test.UnitSpec
 import utils.Fixtures.ersRequestObject
 import utils.{ERSFakeApplicationConfig, ErsTestHelper, Fixtures}
 import views.html.{global_error, reportable_events}
@@ -37,7 +38,7 @@ import views.html.{global_error, reportable_events}
 import java.util.NoSuchElementException
 import scala.concurrent.{ExecutionContext, Future}
 
-class ReportableEventsControllerSpec extends UnitSpec with ERSFakeApplicationConfig with ErsTestHelper with GuiceOneAppPerSuite {
+class ReportableEventsControllerSpec extends WordSpecLike with Matchers with OptionValues with ERSFakeApplicationConfig with ErsTestHelper with GuiceOneAppPerSuite with ScalaFutures {
 
   val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
     messagesActionBuilder,
@@ -79,7 +80,7 @@ class ReportableEventsControllerSpec extends UnitSpec with ERSFakeApplicationCon
 			when(mockErsUtil.fetch[ErsMetaData](refEq(mockErsUtil.ersMetaData), anyString())(any(), any(), any()))
 				.thenReturn(if (ersMetaDataRes) Future.successful(ersMetaData) else Future.failed(new NoSuchElementException))
 
-			when(mockErsUtil.cache(refEq(mockErsUtil.ersMetaData), anyString(), anyString())(any(), any(), any()))
+			when(mockErsUtil.cache(refEq(mockErsUtil.ersMetaData), any(), any())(any(), any(), any()))
 				.thenReturn(if (ersMetaDataCachedOk) Future.successful(null) else Future.failed(new Exception))
 
 			when(mockErsUtil.fetch[SchemeOrganiserDetails](refEq(mockErsUtil.SCHEME_ORGANISER_CACHE), anyString())(any(), any(), any()))
@@ -113,16 +114,20 @@ class ReportableEventsControllerSpec extends UnitSpec with ERSFakeApplicationCon
     "direct to ers errors page if fetching ersMetaData throws exception" in {
       val controllerUnderTest = buildFakeReportableEventsController(ersMetaDataRes = false)
       val result = controllerUnderTest.updateErsMetaData(ersRequestObject)(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionIdCSOP("GET"), hc)
+      status(result.asInstanceOf[Future[Result]]) shouldBe 500
+      contentAsString(result.asInstanceOf[Future[Result]]) shouldBe contentAsString(Future.successful(controllerUnderTest.getGlobalErrorPage))
     }
 
     "direct to ers errors page if saving ersMetaData throws exception" in {
       val controllerUnderTest = buildFakeReportableEventsController(ersMetaDataCachedOk = false)
-      val result = controllerUnderTest.updateErsMetaData(ersRequestObject)(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionIdCSOP("GET"), hc)
+      val result = controllerUnderTest.updateErsMetaData(ersRequestObject)(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionIdCSOP("GET"), hc).futureValue
+      status(result.asInstanceOf[Future[Result]]) shouldBe 500
+      contentAsString(result.asInstanceOf[Future[Result]]) shouldBe contentAsString(Future.successful(controllerUnderTest.getGlobalErrorPage))
     }
 
     "show blank reportable events page if fetching reportableEvents throws exception" in {
       val controllerUnderTest = buildFakeReportableEventsController(reportableEventsRes = false)
-      val result = await(controllerUnderTest.showReportableEventsPage(ersRequestObject)(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionIdCSOP("GET"), hc))
+      val result = controllerUnderTest.showReportableEventsPage(ersRequestObject)(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionIdCSOP("GET"), hc)
       status(result) shouldBe Status.OK
       val document = Jsoup.parse(contentAsString(result))
       document.select("input[id=upload-spreadsheet-radio-button]").hasAttr("checked") shouldEqual false
@@ -131,7 +136,7 @@ class ReportableEventsControllerSpec extends UnitSpec with ERSFakeApplicationCon
 
     "show reportable events page with NO selected" in {
       val controllerUnderTest = buildFakeReportableEventsController()
-      val result = await(controllerUnderTest.showReportableEventsPage(ersRequestObject)(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionIdCSOP("GET"), hc))
+      val result = controllerUnderTest.showReportableEventsPage(ersRequestObject)(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionIdCSOP("GET"), hc)
       status(result) shouldBe Status.OK
       val document = Jsoup.parse(contentAsString(result))
       document.select("input[id=upload-spreadsheet-radio-button]").hasAttr("checked") shouldEqual false
@@ -210,7 +215,7 @@ class ReportableEventsControllerSpec extends UnitSpec with ERSFakeApplicationCon
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form)
       val result = controllerUnderTest.showReportableEventsSelected(ersRequestObject)(Fixtures.buildFakeUser, request)
       status(result) shouldBe Status.SEE_OTHER
-      result.header.headers("Location") shouldBe routes.CheckFileTypeController.checkFileTypePage().toString
+      result.futureValue.header.headers("Location") shouldBe routes.CheckFileTypeController.checkFileTypePage().toString
     }
 
     "give a redirect status to the Scheme Organiser Page if NO selected for Reportable events" in {
@@ -219,7 +224,7 @@ class ReportableEventsControllerSpec extends UnitSpec with ERSFakeApplicationCon
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form)
       val result = controllerUnderTest.showReportableEventsSelected(ersRequestObject)(Fixtures.buildFakeUser, request)
       status(result) shouldBe Status.SEE_OTHER
-      result.header.headers("Location") shouldBe routes.SchemeOrganiserController.schemeOrganiserPage().toString
+      result.futureValue.header.headers("Location") shouldBe routes.SchemeOrganiserController.schemeOrganiserPage().toString
     }
 
     "direct to ers errors page if fetching reportableEvents throws exception" in {
@@ -227,9 +232,9 @@ class ReportableEventsControllerSpec extends UnitSpec with ERSFakeApplicationCon
       val form = "isNilReturn" -> mockErsUtil.OPTION_NIL_RETURN
       val req = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form)
       val result = controllerUnderTest.showReportableEventsSelected(ersRequestObject)(Fixtures.buildFakeUser, req)
-      status(result) shouldBe Status.OK
+      status(result) shouldBe Status.INTERNAL_SERVER_ERROR
       contentAsString(result) should include(testMessages("ers.global_errors.message"))
-      contentAsString(result) shouldBe contentAsString(buildFakeReportableEventsController().getGlobalErrorPage(req, testMessages))
+      contentAsString(result) shouldBe contentAsString(Future(buildFakeReportableEventsController().getGlobalErrorPage(req, testMessages)))
     }
 
   }

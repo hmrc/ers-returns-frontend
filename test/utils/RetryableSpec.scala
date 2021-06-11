@@ -21,11 +21,12 @@ import config.ApplicationConfig
 import org.mockito.Mockito.{times, verify, when}
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import uk.gov.hmrc.play.test.UnitSpec
-
+import org.scalatest.{Matchers, OptionValues, WordSpecLike}
+import play.api.test.Helpers.await
 import scala.concurrent.Future
+import scala.concurrent.duration.SECONDS
 
-class RetryableSpec extends UnitSpec with MockitoSugar with GuiceOneAppPerSuite {
+class RetryableSpec extends WordSpecLike with Matchers with OptionValues with MockitoSugar with GuiceOneAppPerSuite {
 
   class RetryTest extends Retryable {
 		import scala.concurrent.duration._
@@ -43,7 +44,7 @@ class RetryableSpec extends UnitSpec with MockitoSugar with GuiceOneAppPerSuite 
   "withRetry" should {
     "return the future data once the predicate has been fulfilled" in new RetryTest {
       when(retryMock.f).thenReturn(Future.successful(true))
-      val result: Boolean = await(retryMock.f.withRetry(5)(b => b))
+      val result: Boolean = await(retryMock.f.withRetry(5)(b => b), 1, SECONDS)
       result shouldBe true
       verify(retryMock, times(1)).f
     }
@@ -54,7 +55,7 @@ class RetryableSpec extends UnitSpec with MockitoSugar with GuiceOneAppPerSuite 
         Future.successful(false),
         Future.successful(true)
       )
-      val result: Boolean = await(retryMock.f.withRetry(5)(b => b))
+      val result: Boolean = await(retryMock.f.withRetry(5)(b => b), 1, SECONDS)
       result shouldBe true
       verify(retryMock, times(3)).f
     }
@@ -67,14 +68,14 @@ class RetryableSpec extends UnitSpec with MockitoSugar with GuiceOneAppPerSuite 
         Future.successful(false),
         Future.successful(true)
       )
-      intercept[Throwable](await(retryMock.f.withRetry(3)(b => b)))
+      intercept[Throwable](await(retryMock.f.withRetry(3)(b => b), 1, SECONDS))
       verify(retryMock, times(3)).f
     }
 
     "return a LoopException if the predicate is never fulfilled" in new RetryTest {
       when(retryMock.f).thenReturn(Future.successful(false))
-      val exception: LoopException[Boolean] = intercept[LoopException[Boolean]]{
-        await(retryMock.f.withRetry(1)(b => b))
+      val exception: LoopException[Boolean] = intercept[LoopException[Boolean]] {
+        await(retryMock.f.withRetry(1)(b => b), 1, SECONDS)
       }
       exception.finalFutureData shouldBe Some(false)
       exception.retryNumber shouldBe 1
@@ -82,5 +83,4 @@ class RetryableSpec extends UnitSpec with MockitoSugar with GuiceOneAppPerSuite 
       verify(retryMock, times(1)).f
     }
   }
-
 }

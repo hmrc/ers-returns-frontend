@@ -16,33 +16,30 @@
 
 package controllers
 
-import java.io.ByteArrayOutputStream
-
 import akka.stream.Materializer
 import models._
 import models.upscan.{UploadId, UploadedSuccessfully, UpscanCsvFilesCallback, UpscanCsvFilesCallbackList}
 import org.joda.time.DateTime
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
-import org.scalatestplus.play.OneAppPerSuite
+import org.scalatest.{Matchers, OptionValues, WordSpecLike}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.{Application, i18n}
 import play.api.http.Status
-import play.api.i18n.{Lang, Messages, MessagesApi, MessagesImpl}
-import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.i18n
+import play.api.i18n.{MessagesApi, MessagesImpl}
 import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import services.pdf.{ErsContentsStreamer, ErsReceiptPdfBuilderService}
 import uk.gov.hmrc.http.cache.client.CacheMap
-import uk.gov.hmrc.play.test.UnitSpec
-import utils.{ERSFakeApplicationConfig, ErsTestHelper}
 import utils.Fixtures._
+import utils.{ERSFakeApplicationConfig, ErsTestHelper}
 import views.html.global_error
 
+import java.io.ByteArrayOutputStream
 import scala.concurrent.{ExecutionContext, Future}
 
-class GeneratePdfControllerSpec extends UnitSpec with ERSFakeApplicationConfig with ErsTestHelper with GuiceOneAppPerSuite {
+class GeneratePdfControllerSpec extends WordSpecLike with Matchers with OptionValues with ERSFakeApplicationConfig with ErsTestHelper with GuiceOneAppPerSuite {
 
   val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
     messagesActionBuilder,
@@ -66,7 +63,7 @@ class GeneratePdfControllerSpec extends UnitSpec with ERSFakeApplicationConfig w
   lazy val ersSummary: ErsSummary = ErsSummary("testbundle", "2", None, DateTime.now, rsc, None, None, None, None, None, None, None, None)
   lazy val cacheMap: CacheMap = mock[CacheMap]
 
-  "pdf generation conroller" should {
+  "pdf generation controller" should {
 
     "give a redirect status (to company authentication frontend) on GET if user is not authenticated" in {
 			setUnauthorisedMocks()
@@ -84,16 +81,16 @@ class GeneratePdfControllerSpec extends UnitSpec with ERSFakeApplicationConfig w
 
     "direct to errors page if fetch all res pdf throws exception" in {
       val controller = createController(fetchAllRes = false)
-      val result = await(controller.generatePdf(ersRequestObject, "", "")(buildFakeUser, buildFakeRequestWithSessionIdCSOP("GET"), hc))
+      val result = controller.generatePdf(ersRequestObject, "", "")(buildFakeUser, buildFakeRequestWithSessionIdCSOP("GET"), hc)
       contentAsString(result) should include(testMessages("ers.global_errors.message"))
-      contentAsString(result) shouldBe contentAsString(createController().getGlobalErrorPage)
+      contentAsString(result) shouldBe contentAsString(Future(createController().getGlobalErrorPage))
     }
 
     "direct to errors page if get all data res pdf throws exception" in {
       val controller = createController(getAllDataRes = false)
-      val result = await(controller.generatePdf(ersRequestObject, "", "")(buildFakeUser, buildFakeRequestWithSessionIdCSOP("GET"), hc))
+      val result = controller.generatePdf(ersRequestObject, "", "")(buildFakeUser, buildFakeRequestWithSessionIdCSOP("GET"), hc)
       contentAsString(result) should include(testMessages("ers.global_errors.message"))
-      contentAsString(result) shouldBe contentAsString(createController().getGlobalErrorPage)
+      contentAsString(result) shouldBe contentAsString(Future(createController().getGlobalErrorPage))
     }
 
     "use bundle ref to generate the confirmation pdf filename (NilReturn)" in {
@@ -125,27 +122,22 @@ class GeneratePdfControllerSpec extends UnitSpec with ERSFakeApplicationConfig w
     when(pdfBuilderMock.createPdf(any[ErsContentsStreamer], any[ErsSummary], any(), any())(any())).thenReturn(byteArrayOutputStream)
     when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any(), any())).thenReturn(Future.successful(ersRequestObject))
     when(mockErsUtil.fetch[ErsMetaData](refEq(ersMetaData), anyString())(any(), any(), any())).thenReturn(Future.successful(rsc))
-    when(cacheMap.getEntry[UpscanCsvFilesCallbackList](refEq(CHECK_CSV_FILES))(any()))
-      .thenReturn(Future.successful(Some(csvFilesCallbackList)))
-    when(cacheMap.getEntry[String](refEq(FILE_NAME_CACHE))(any())).thenReturn(Future.successful(Some("test.ods")))
+    when(cacheMap.getEntry[UpscanCsvFilesCallbackList](refEq(CHECK_CSV_FILES))(any())) thenReturn Some(csvFilesCallbackList)
+    when(cacheMap.getEntry[String](refEq(FILE_NAME_CACHE))(any())) thenReturn Some("test.ods")
     when(byteArrayOutputStream.toByteArray).thenReturn(Array[Byte]())
 
     if (fileTypeCSV) {
-      when(cacheMap.getEntry[CheckFileType](refEq(FILE_TYPE_CACHE))(any()))
-        .thenReturn(Future.successful(Some(new CheckFileType(Some(OPTION_CSV)))))
+      when(cacheMap.getEntry[CheckFileType](refEq(FILE_TYPE_CACHE))(any())) thenReturn Some(new CheckFileType(Some(OPTION_CSV)))
     }
     else {
-      when(cacheMap.getEntry[CheckFileType](refEq(FILE_TYPE_CACHE))(any()))
-        .thenReturn(Future.successful(Some(new CheckFileType(Some(OPTION_ODS)))))
+      when(cacheMap.getEntry[CheckFileType](refEq(FILE_TYPE_CACHE))(any())) thenReturn Some(new CheckFileType(Some(OPTION_ODS)))
     }
 
     if (isNilReturn) {
-      when(cacheMap.getEntry[ReportableEvents](refEq(REPORTABLE_EVENTS))(any()))
-        .thenReturn(Future.successful(Some(new ReportableEvents(Some(OPTION_NIL_RETURN)))))
+      when(cacheMap.getEntry[ReportableEvents](refEq(REPORTABLE_EVENTS))(any())) thenReturn Some(new ReportableEvents(Some(OPTION_NIL_RETURN)))
     }
     else {
-      when(cacheMap.getEntry[ReportableEvents](refEq(REPORTABLE_EVENTS))(any()))
-        .thenReturn(Future.successful(Some(new ReportableEvents(Some(OPTION_UPLOAD_SPREADSHEET)))))
+      when(cacheMap.getEntry[ReportableEvents](refEq(REPORTABLE_EVENTS))(any())) thenReturn Some(new ReportableEvents(Some(OPTION_UPLOAD_SPREADSHEET)))
     }
 
     if (fetchAllRes) {

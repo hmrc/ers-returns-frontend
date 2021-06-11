@@ -19,15 +19,15 @@ package controllers
 import _root_.models.{RsFormMappings, _}
 import config.ApplicationConfig
 import connectors.ErsConnector
-import javax.inject.{Inject, Singleton}
-import play.api.Logger
+import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages}
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request, Result}
+import play.api.mvc._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
-import uk.gov.hmrc.play.bootstrap.controller.FrontendController
+import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils._
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -38,7 +38,7 @@ class ReportableEventsController @Inject()(val mcc: MessagesControllerComponents
 																					 implicit val appConfig: ApplicationConfig,
                                            globalErrorView: views.html.global_error,
                                            reportableEventsView: views.html.reportable_events
-																					) extends FrontendController(mcc) with Authenticator with I18nSupport {
+																					) extends FrontendController(mcc) with Authenticator with I18nSupport with Logging {
 
   implicit val ec: ExecutionContext = mcc.executionContext
 
@@ -58,12 +58,12 @@ class ReportableEventsController @Inject()(val mcc: MessagesControllerComponents
           metaData.schemeInfo, metaData.ipRef, metaData.aoRef, metaData.empRef, metaData.agentRef, Some(sapNumber))
         ersUtil.cache(ersUtil.ersMetaData, ersMetaData, requestObject.getSchemeReference).recover {
           case e: Exception =>
-						Logger.error(s"[ReportableEventsController][updateErsMetaData] save failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
+						logger.error(s"[ReportableEventsController][updateErsMetaData] save failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
 						getGlobalErrorPage
 				}
       } recover {
         case e: NoSuchElementException =>
-					Logger.error(s"[ReportableEventsController][updateErsMetaData] fetch failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
+					logger.error(s"[ReportableEventsController][updateErsMetaData] fetch failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
 					getGlobalErrorPage
 			}
     }
@@ -85,7 +85,7 @@ class ReportableEventsController @Inject()(val mcc: MessagesControllerComponents
         ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObj =>
           showReportableEventsSelected(requestObj)(user, request) recover {
             case e: Exception =>
-              Logger.error(s"[ReportableEventsController][reportableEventsSelected] failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
+              logger.error(s"[ReportableEventsController][reportableEventsSelected] failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
               getGlobalErrorPage
           }
         }
@@ -101,12 +101,12 @@ class ReportableEventsController @Inject()(val mcc: MessagesControllerComponents
           if (formData.isNilReturn.get == ersUtil.OPTION_NIL_RETURN) {
             Redirect(routes.SchemeOrganiserController.schemeOrganiserPage())
           } else {
-            Logger.info(s"[ReportableEventsController][showReportableEventsSelected] Redirecting to FileUpload controller to get Partial, timestamp: ${System.currentTimeMillis()}.")
+            logger.info(s"[ReportableEventsController][showReportableEventsSelected] Redirecting to FileUpload controller to get Partial, timestamp: ${System.currentTimeMillis()}.")
             Redirect(routes.CheckFileTypeController.checkFileTypePage())
           }
         } recover {
           case e: Exception =>
-            Logger.error(s"[ReportableEventsController][showReportableEventsSelected] Save reportable event failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
+            logger.error(s"[ReportableEventsController][showReportableEventsSelected] Save reportable event failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
             getGlobalErrorPage
         }
 
@@ -115,7 +115,7 @@ class ReportableEventsController @Inject()(val mcc: MessagesControllerComponents
   }
 
 	def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result = {
-		Ok(globalErrorView(
+		InternalServerError(globalErrorView(
 			"ers.global_errors.title",
 			"ers.global_errors.heading",
 			"ers.global_errors.message"

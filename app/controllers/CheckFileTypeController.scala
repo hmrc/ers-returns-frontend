@@ -17,16 +17,16 @@
 package controllers
 
 import config.ApplicationConfig
-import javax.inject.{Inject, Singleton}
 import models.{RsFormMappings, _}
-import play.api.Logger
+import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.mvc._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
-import uk.gov.hmrc.play.bootstrap.controller.FrontendController
+import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils._
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -36,7 +36,7 @@ class CheckFileTypeController @Inject()(val mcc: MessagesControllerComponents,
 																				implicit val appConfig: ApplicationConfig,
                                         globalErrorView: views.html.global_error,
                                         checkFileTypeView: views.html.check_file_type
-                                       ) extends FrontendController(mcc) with Authenticator with I18nSupport {
+                                       ) extends FrontendController(mcc) with Authenticator with I18nSupport with Logging {
 
   implicit val ec: ExecutionContext = mcc.executionContext
 
@@ -56,7 +56,7 @@ class CheckFileTypeController @Inject()(val mcc: MessagesControllerComponents,
       Ok(checkFileTypeView(requestObject, fileType.checkFileType, RsFormMappings.checkFileTypeForm.fill(fileType)))
     }).recover{
       case e: Throwable =>
-        Logger.error(s"[CheckFileTypeController][showCheckFileTypePage] Rendering CheckFileType view failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
+        logger.error(s"[CheckFileTypeController][showCheckFileTypePage] Rendering CheckFileType view failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
         getGlobalErrorPage
     }
   }
@@ -82,7 +82,7 @@ class CheckFileTypeController @Inject()(val mcc: MessagesControllerComponents,
             }
           }.recover {
             case e: Exception =>
-              Logger.error("[CheckFileTypeController][showCheckFileTypeSelected] Unable to save file type. Error: " + e.getMessage)
+              logger.error("[CheckFileTypeController][showCheckFileTypeSelected] Unable to save file type. Error: " + e.getMessage)
               getGlobalErrorPage
           }
         }

@@ -17,17 +17,17 @@
 package controllers
 
 import config.ApplicationConfig
-import javax.inject.{Inject, Singleton}
 import models._
 import models.upscan.{NotStarted, UploadId, UpscanCsvFilesList, UpscanIds}
-import play.api.Logger
+import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages}
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request, Result}
+import play.api.mvc._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
-import uk.gov.hmrc.play.bootstrap.controller.FrontendController
+import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.ERSUtil
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -37,7 +37,7 @@ class CheckCsvFilesController @Inject()(val mcc: MessagesControllerComponents,
 																				implicit val appConfig: ApplicationConfig,
                                         globalErrorView: views.html.global_error,
                                         checkCsvFileView: views.html.check_csv_file
-                                       ) extends FrontendController(mcc) with Authenticator with I18nSupport {
+                                       ) extends FrontendController(mcc) with Authenticator with I18nSupport with Logging {
 
   implicit val ec: ExecutionContext = mcc.executionContext
 
@@ -87,7 +87,7 @@ class CheckCsvFilesController @Inject()(val mcc: MessagesControllerComponents,
         Redirect(routes.CsvFileUploadController.uploadFilePage())
       }).recover {
         case e: Throwable =>
-          Logger.error(s"[CheckCsvFilesController][performCsvFilesPageSelected] Save data to cache failed with exception ${e.getMessage}.", e)
+          logger.error(s"[CheckCsvFilesController][performCsvFilesPageSelected] Save data to cache failed with exception ${e.getMessage}.", e)
           getGlobalErrorPage
       }
     }

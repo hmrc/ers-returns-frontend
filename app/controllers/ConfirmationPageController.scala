@@ -16,23 +16,22 @@
 
 package controllers
 
-import java.text.SimpleDateFormat
-import java.util.concurrent.TimeUnit
-
 import _root_.models._
 import config.ApplicationConfig
 import connectors.ErsConnector
-import javax.inject.{Inject, Singleton}
-import play.api.Logger
+import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages}
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request, Result}
+import play.api.mvc._
 import services.audit.AuditEvents
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
-import uk.gov.hmrc.play.bootstrap.controller.FrontendController
+import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.SessionKeys.{BUNDLE_REF, DATE_TIME_SUBMITTED}
 import utils._
 
+import java.text.SimpleDateFormat
+import java.util.concurrent.TimeUnit
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -44,7 +43,7 @@ class ConfirmationPageController @Inject()(val mcc: MessagesControllerComponents
 																					 implicit val appConfig: ApplicationConfig,
                                            globalErrorView: views.html.global_error,
                                            confirmationView: views.html.confirmation
-                                          ) extends FrontendController(mcc) with Authenticator with I18nSupport {
+                                          ) extends FrontendController(mcc) with Authenticator with I18nSupport with Logging {
 
   implicit val ec: ExecutionContext = mcc.executionContext
 
@@ -61,7 +60,7 @@ class ConfirmationPageController @Inject()(val mcc: MessagesControllerComponents
       val sessionDateTimeSubmitted: String = request.session.get(DATE_TIME_SUBMITTED).getOrElse("")
       if (sessionBundleRef == "") {
         ersUtil.fetch[ErsMetaData](ersUtil.ersMetaData, schemeRef).flatMap { all =>
-          if (all.sapNumber.isEmpty) Logger.error(s"[ConfirmationPageController][showConfirmationPage] Did cache util fail for scheme $schemeRef all.sapNumber is empty: $all")
+          if (all.sapNumber.isEmpty) logger.error(s"[ConfirmationPageController][showConfirmationPage] Did cache util fail for scheme $schemeRef all.sapNumber is empty: $all")
 					val submissionJson = ersUtil.getSubmissionJson(all.schemeInfo.schemeRef, all.schemeInfo.schemeType, all.schemeInfo.taxYear, "EOY-RETURN")
           ersConnector.connectToEtmpSummarySubmit(all.sapNumber.get, submissionJson).flatMap { bundle =>
             ersUtil.getAllData(bundle, all).flatMap { alldata =>
@@ -72,10 +71,10 @@ class ConfirmationPageController @Inject()(val mcc: MessagesControllerComponents
                   ersConnector.checkForPresubmission(all.schemeInfo, validatedSheets).flatMap { checkResult =>
                     checkResult.status match {
                       case OK =>
-                        Logger.info(s"[ConfirmationPageController][showConfirmationPage] Check for presubmission success with status ${checkResult.status}.")
+                        logger.info(s"[ConfirmationPageController][showConfirmationPage] Check for presubmission success with status ${checkResult.status}.")
                         saveAndSubmit(alldata, all, bundle)
                       case _ =>
-                        Logger.error(s"[ConfirmationPageController][showConfirmationPage] File data not found: ${checkResult.status}")
+                        logger.error(s"[ConfirmationPageController][showConfirmationPage] File data not found: ${checkResult.status}")
                         Future(getGlobalErrorPage)
                     }
                   }
@@ -87,14 +86,14 @@ class ConfirmationPageController @Inject()(val mcc: MessagesControllerComponents
       } else {
         val url: String = appConfig.portalDomain
         ersUtil.fetch[ErsMetaData](ersUtil.ersMetaData, schemeRef).flatMap { all =>
-          Logger.info(s"[ConfirmationPageController][showConfirmationPage] Preventing resubmission of confirmation page, timestamp: ${System.currentTimeMillis()}.")
+          logger.info(s"[ConfirmationPageController][showConfirmationPage] Preventing resubmission of confirmation page, timestamp: ${System.currentTimeMillis()}.")
 
           Future(Ok(confirmationView(requestObject, sessionDateTimeSubmitted, sessionBundleRef, all.schemeInfo.taxYear, url)))
         }
       }
     } recoverWith {
       case e: Throwable =>
-        Logger.error(s"[ConfirmationPageController][showConfirmationPage] Failed to render Confirmation page: ${e.getMessage}")
+        logger.error(s"[ConfirmationPageController][showConfirmationPage] Failed to render Confirmation page: ${e.getMessage}")
         Future.successful(getGlobalErrorPage)
     }
   }
@@ -109,7 +108,7 @@ class ConfirmationPageController @Inject()(val mcc: MessagesControllerComponents
       res.status match {
         case OK =>
           val startTime = System.currentTimeMillis()
-          Logger.info("[ConfirmationPageController][saveAndSubmit] alldata.transferStatus is " + alldata.transferStatus)
+          logger.info("[ConfirmationPageController][saveAndSubmit] alldata.transferStatus is " + alldata.transferStatus)
           if (alldata.transferStatus.contains(ersUtil.largeFileStatus)) {
             None
           } else {
@@ -118,20 +117,20 @@ class ConfirmationPageController @Inject()(val mcc: MessagesControllerComponents
                 case OK =>
                   auditEvents.ersSubmissionAuditEvent(all, bundle)
                   ersUtil.submitReturnToBackend(System.currentTimeMillis() - startTime, TimeUnit.MILLISECONDS)
-                  Logger.info(s"[ConfirmationPageController][saveAndSubmit] Submitting return to backend success with status ${response.status}.")
+                  logger.info(s"[ConfirmationPageController][saveAndSubmit] Submitting return to backend success with status ${response.status}.")
                 case _ =>
                   ersUtil.submitReturnToBackend(System.currentTimeMillis() - startTime, TimeUnit.MILLISECONDS)
-                  Logger.info(s"[ConfirmationPageController][saveAndSubmit] Submitting return to backend failed with status ${response.status}.")
+                  logger.info(s"[ConfirmationPageController][saveAndSubmit] Submitting return to backend failed with status ${response.status}.")
               }
-              Logger.info(s"Process data ends: ${System.currentTimeMillis()}")
+              logger.info(s"Process data ends: ${System.currentTimeMillis()}")
             } recover {
               case e: Throwable =>
-                Logger.error(s"[ConfirmationPageController][saveAndSubmit] Submitting return to backend failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
+                logger.error(s"[ConfirmationPageController][saveAndSubmit] Submitting return to backend failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
                 auditEvents.auditRunTimeError(e.getCause, e.getMessage, all, bundle)
             }
           }
 
-          Logger.warn(s"[ConfirmationPageController][saveAndSubmit] Submission completed for schemeInfo: ${all.schemeInfo.toString}, bundle: $bundle ")
+          logger.warn(s"[ConfirmationPageController][saveAndSubmit] Submission completed for schemeInfo: ${all.schemeInfo.toString}, bundle: $bundle ")
           val url: String = appConfig.portalDomain
 
           ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).map { requestObject =>
@@ -139,11 +138,11 @@ class ConfirmationPageController @Inject()(val mcc: MessagesControllerComponents
 							.withSession(request.session + (BUNDLE_REF -> bundle) + (DATE_TIME_SUBMITTED -> dateTimeSubmitted))
           }
         case _ =>
-          Logger.info(s"[ConfirmationPageController][saveAndSubmit] Save meta data to backend returned status ${res.status}, timestamp: ${System.currentTimeMillis()}.")
+          logger.info(s"[ConfirmationPageController][saveAndSubmit] Save meta data to backend returned status ${res.status}, timestamp: ${System.currentTimeMillis()}.")
           Future.successful(getGlobalErrorPage)
       }
     } recover { case e: Throwable =>
-      Logger.error(s"[ConfirmationPageController][saveAndSubmit] Save meta data to backend failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
+      logger.error(s"[ConfirmationPageController][saveAndSubmit] Save meta data to backend failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
       getGlobalErrorPage
     }
 

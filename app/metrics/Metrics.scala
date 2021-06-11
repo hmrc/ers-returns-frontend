@@ -16,8 +16,9 @@
 
 package metrics
 
-import java.util.concurrent.TimeUnit
 import com.codahale.metrics.MetricRegistry
+
+import java.util.concurrent.TimeUnit
 
 trait Metrics {
 	val registry = new MetricRegistry

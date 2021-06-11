@@ -17,17 +17,17 @@
 package controllers
 
 import config.ApplicationConfig
-import javax.inject.{Inject, Singleton}
 import models._
-import play.api.Logger
+import play.api.Logging
 import play.api.data.Form
-import play.api.i18n.{I18nSupport, Messages, MessagesApi}
+import play.api.i18n.{I18nSupport, Messages}
 import play.api.mvc._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
-import uk.gov.hmrc.play.bootstrap.controller.FrontendController
+import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils._
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -40,7 +40,7 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
                                       groupView: views.html.group,
                                       manualCompanyDetailsView: views.html.manual_company_details,
                                       groupPlanSummaryView: views.html.group_plan_summary
-																		 ) extends FrontendController(mcc) with Authenticator with I18nSupport {
+																		 ) extends FrontendController(mcc) with Authenticator with I18nSupport with Logging {
 
   implicit val ec: ExecutionContext = mcc.executionContext
 
@@ -120,7 +120,7 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
 
     }) recover {
       case e: Exception =>
-        Logger.error(s"[GroupSchemeController][showDeleteCompany] Fetch all data failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
+        logger.error(s"[GroupSchemeController][showDeleteCompany] Fetch all data failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
         getGlobalErrorPage
     }
   }
@@ -149,7 +149,7 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
 
     }) recover {
       case e: Exception =>
-        Logger.error(s"[GroupSchemeController][showEditCompany] Fetch group scheme companies for edit failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
+        logger.error(s"[GroupSchemeController][showEditCompany] Fetch group scheme companies for edit failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
         getGlobalErrorPage
     }
   }
@@ -167,7 +167,7 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
       Ok(groupView(requestObject, groupSchemeInfo.groupScheme, RsFormMappings.groupForm.fill(RS_groupScheme(groupSchemeInfo.groupScheme))))
     } recover {
       case e: Exception =>
-        Logger.warn(s"[GroupSchemeController][showGroupSchemePage] Fetching GroupSchemeInfo from the cache failed: $e")
+        logger.warn(s"[GroupSchemeController][showGroupSchemePage] Fetching GroupSchemeInfo from the cache failed: $e")
         val form = RS_groupScheme(Some(ersUtil.DEFAULT))
         Ok(groupView(requestObject, Some(ersUtil.DEFAULT), RsFormMappings.groupForm.fill(form)))
     }
@@ -232,7 +232,7 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
       Ok(groupPlanSummaryView(requestObject, ersUtil.OPTION_MANUAL, compDetails))
     }) recover {
       case e: Exception =>
-        Logger.error(s"[GroupSchemeController][showGroupPlanSummaryPage]Fetch group scheme companies before call to group plan summary page failed with exception ${e.getMessage}, " +
+        logger.error(s"[GroupSchemeController][showGroupPlanSummaryPage]Fetch group scheme companies before call to group plan summary page failed with exception ${e.getMessage}, " +
 					s"timestamp: ${System.currentTimeMillis()}.")
         getGlobalErrorPage
     }

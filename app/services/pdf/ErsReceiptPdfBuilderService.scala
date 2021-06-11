@@ -16,18 +16,17 @@
 
 package services.pdf
 
-import java.io.ByteArrayOutputStream
-
-import javax.inject.{Inject, Singleton}
 import models.ErsSummary
-import play.api.Logger
+import play.api.Logging
 import play.api.i18n.Messages
 import utils.{ContentUtil, CountryCodes, DateUtils}
 
+import java.io.ByteArrayOutputStream
+import javax.inject.{Inject, Singleton}
 import scala.collection.mutable.ListBuffer
 
 @Singleton
-class ErsReceiptPdfBuilderService @Inject()(val countryCodes: CountryCodes) extends PdfDecoratorControllerFactory {
+class ErsReceiptPdfBuilderService @Inject()(val countryCodes: CountryCodes) extends PdfDecoratorControllerFactory with Logging {
 
   def createPdf(contentStreamer: ErsContentsStreamer, ersSummary: ErsSummary,
                 filesUploaded: Option[ListBuffer[String]], dateSubmitted: String)(implicit messages: Messages): ByteArrayOutputStream = {
@@ -51,7 +50,7 @@ class ErsReceiptPdfBuilderService @Inject()(val countryCodes: CountryCodes) exte
 
     streamer.createNewPage
 
-    Logger.info("Adding metadata")
+    logger.info("Adding metadata")
     streamer.drawText("", blockSpacer)
 
     val confirmationMessage = Messages("ers.pdf.confirmation.submitted",
@@ -70,23 +69,23 @@ class ErsReceiptPdfBuilderService @Inject()(val countryCodes: CountryCodes) exte
     streamer.drawText("", lineSpacer)
     streamer.drawText(ersSummary.bundleRef, answerFontSize)
 
-    Logger.info("Writing Date")
+    logger.info("Writing Date")
     val convertedDate = DateUtils.convertDate(dateSubmitted)
 
     streamer.drawText("", blockSpacer)
     streamer.drawText(Messages("ers.pdf.date_and_time"), headingFontSize)
     streamer.drawText("", lineSpacer)
     streamer.drawText(convertedDate, answerFontSize)
-    Logger.info("Date Wrote:" + convertedDate)
+    logger.info("Date Wrote:" + convertedDate)
 
-    Logger.info("Save page content")
+    logger.info("Save page content")
     streamer.savePageContent()
   }
 
   private def addSummary()(implicit streamer: ErsContentsStreamer, decorator: DecoratorController, messages: Messages): Unit = {
     val blockSpacer = 20
 
-    Logger.info("Adding ERS Summary")
+    logger.info("Adding ERS Summary")
 
     streamer.createNewPage
 
@@ -97,7 +96,7 @@ class ErsReceiptPdfBuilderService @Inject()(val countryCodes: CountryCodes) exte
 
     decorator.decorate(streamer)
 
-    Logger.info("Adding ERS Summary complete")
+    logger.info("Adding ERS Summary complete")
 
     streamer.savePageContent()
   }

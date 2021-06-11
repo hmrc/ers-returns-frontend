@@ -16,28 +16,27 @@
 
 package controllers
 
-import java.util.NoSuchElementException
-
-import akka.stream.Materializer
 import models._
 import org.jsoup.Jsoup
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
+import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.{Matchers, OptionValues, WordSpecLike}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status
 import play.api.i18n
-import play.api.i18n.{Lang, Messages, MessagesApi, MessagesImpl}
-import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents, Request}
+import play.api.i18n.{Messages, MessagesApi, MessagesImpl}
+import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.play.test.UnitSpec
 import utils.Fixtures.ersRequestObject
 import utils.{ERSFakeApplicationConfig, ErsTestHelper, Fixtures}
 import views.html.{global_error, scheme_organiser}
 
+import java.util.NoSuchElementException
 import scala.concurrent.{ExecutionContext, Future}
 
-class SchemeOrganiserControllerSpec extends UnitSpec with ERSFakeApplicationConfig with ErsTestHelper with GuiceOneAppPerSuite {
+class SchemeOrganiserControllerSpec extends WordSpecLike with Matchers with OptionValues with ERSFakeApplicationConfig with ErsTestHelper with GuiceOneAppPerSuite with ScalaFutures {
 
   val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
     messagesActionBuilder,
@@ -114,9 +113,9 @@ class SchemeOrganiserControllerSpec extends UnitSpec with ERSFakeApplicationConf
     "direct to ers errors page if fetching reportableEvents throws exception" in {
       val controllerUnderTest = buildFakeSchemeOrganiserController(reportableEventsRes = false)
 			val req = Fixtures.buildFakeRequestWithSessionIdCSOP("GET")
-      val result = await(controllerUnderTest.showSchemeOrganiserPage(ersRequestObject)(Fixtures.buildFakeUser, req, hc))
+      val result = controllerUnderTest.showSchemeOrganiserPage(ersRequestObject)(Fixtures.buildFakeUser, req, hc)
       contentAsString(result) should include(testMessages("ers.global_errors.message"))
-      contentAsString(result) shouldBe contentAsString(buildFakeSchemeOrganiserController().getGlobalErrorPage(req, testMessages))
+      contentAsString(result) shouldBe contentAsString(Future(buildFakeSchemeOrganiserController().getGlobalErrorPage(req, testMessages)))
     }
 
     "show blank scheme organiser page if fetching file type from cache fails" in {
@@ -234,7 +233,7 @@ class SchemeOrganiserControllerSpec extends UnitSpec with ERSFakeApplicationConf
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(Fixtures.buildFakeUser, request, hc)
       status(result) shouldBe Status.SEE_OTHER
-      result.header.headers("Location") shouldBe routes.GroupSchemeController.groupSchemePage().toString
+      result.futureValue.header.headers("Location") shouldBe routes.GroupSchemeController.groupSchemePage().toString
     }
 
     "direct to ers errors page if saving scheme organiser data throws exception" in {
@@ -253,7 +252,7 @@ class SchemeOrganiserControllerSpec extends UnitSpec with ERSFakeApplicationConf
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(Fixtures.buildFakeUser, request, hc)
       contentAsString(result) should include(testMessages("ers.global_errors.message"))
-      contentAsString(result) shouldBe contentAsString(buildFakeSchemeOrganiserController().getGlobalErrorPage(request, messages))
+      contentAsString(result) shouldBe contentAsString(Future(buildFakeSchemeOrganiserController().getGlobalErrorPage(request, messages)))
     }
 
     "check error for empty company name" in {

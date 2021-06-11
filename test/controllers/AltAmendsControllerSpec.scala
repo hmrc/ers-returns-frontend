@@ -21,25 +21,24 @@ import org.jsoup.Jsoup
 import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
+import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.{Matchers, OptionValues, WordSpecLike}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.data.Form
 import play.api.http.Status
 import play.api.i18n
-import play.api.i18n.{Lang, Messages, MessagesApi, MessagesImpl}
+import play.api.i18n.{MessagesApi, MessagesImpl}
 import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import play.twirl.api.Html
 import uk.gov.hmrc.http.cache.client.CacheMap
-import uk.gov.hmrc.play.test.UnitSpec
-import uk.gov.hmrc.play.bootstrap
 import utils.Fixtures.ersRequestObject
 import utils.{ErsTestHelper, _}
 import views.html.{alterations_activity, alterations_amends, global_error}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class AltAmendsControllerSpec extends UnitSpec with ERSFakeApplicationConfig with ErsTestHelper with GuiceOneAppPerSuite {
+class AltAmendsControllerSpec extends WordSpecLike with Matchers with OptionValues with ERSFakeApplicationConfig with ErsTestHelper with GuiceOneAppPerSuite with ScalaFutures {
 
   val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
     messagesActionBuilder,
@@ -102,7 +101,7 @@ class AltAmendsControllerSpec extends UnitSpec with ERSFakeApplicationConfig wit
       val result = controllerUnderTest.showAltActivityPage()(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionIdCSOP("GET"), hc)
 
       contentAsString(result) should include(testMessages("ers.global_errors.message"))
-      contentAsString(result) shouldBe contentAsString(buildFakeAltAmendsPageController().getGlobalErrorPage)
+      contentAsString(result) shouldBe contentAsString(Future(buildFakeAltAmendsPageController().getGlobalErrorPage))
     }
 
     "direct to ers errors page if fetching requestObject throws exception" in {
@@ -110,7 +109,7 @@ class AltAmendsControllerSpec extends UnitSpec with ERSFakeApplicationConfig wit
       val result = controllerUnderTest.showAltActivityPage()(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionIdCSOP("GET"), hc)
 
       contentAsString(result) should include(testMessages("ers.global_errors.message"))
-      contentAsString(result) shouldBe contentAsString(buildFakeAltAmendsPageController().getGlobalErrorPage)
+      contentAsString(result) shouldBe contentAsString(Future(buildFakeAltAmendsPageController().getGlobalErrorPage))
     }
 
     "show alterations activity page with selection if fetching altAmendsActivity successful" in {
@@ -161,7 +160,7 @@ class AltAmendsControllerSpec extends UnitSpec with ERSFakeApplicationConfig wit
       val request = Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val result = controllerUnderTest.showAltActivitySelected()(Fixtures.buildFakeUser, request, hc)
       status(result) shouldBe Status.SEE_OTHER
-      result.header.headers("Location") shouldBe routes.SummaryDeclarationController.summaryDeclarationPage().toString
+      result.futureValue.header.headers("Location") shouldBe routes.SummaryDeclarationController.summaryDeclarationPage().toString
     }
 
     "give a redirect to alterations amends page if no form errors and YES selected" in {
@@ -171,7 +170,7 @@ class AltAmendsControllerSpec extends UnitSpec with ERSFakeApplicationConfig wit
       val request = Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val result = controllerUnderTest.showAltActivitySelected()(Fixtures.buildFakeUser, request, hc)
       status(result) shouldBe Status.SEE_OTHER
-      result.header.headers("Location") shouldBe routes.AltAmendsController.altAmendsPage().toString
+      result.futureValue.header.headers("Location") shouldBe routes.AltAmendsController.altAmendsPage().toString
     }
 
     "direct to ers errors page if no form errors but unable to save to cache" in {
@@ -181,7 +180,7 @@ class AltAmendsControllerSpec extends UnitSpec with ERSFakeApplicationConfig wit
       val req = Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val result = controllerUnderTest.showAltActivitySelected()(Fixtures.buildFakeUser, req, hc)
       status(result) shouldBe Status.OK
-      contentAsString(result) shouldBe contentAsString(buildFakeAltAmendsPageController().getGlobalErrorPage(req, testMessages))
+      contentAsString(result) shouldBe contentAsString(Future(buildFakeAltAmendsPageController().getGlobalErrorPage(req, testMessages)))
       contentAsString(result) should include(testMessages("ers.global_errors.message"))
     }
 
@@ -190,8 +189,8 @@ class AltAmendsControllerSpec extends UnitSpec with ERSFakeApplicationConfig wit
       val altActivityData = Map("altActivity" -> OPTION_YES)
       val form = RsFormMappings.altActivityForm.bind(altActivityData)
       val req = Fixtures.buildFakeRequest("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-      val result = await(controllerUnderTest.showAltActivitySelected()(Fixtures.buildFakeUser, req, hc))
-      contentAsString(result) shouldBe contentAsString(buildFakeAltAmendsPageController().getGlobalErrorPage(req, testMessages))
+      val result = controllerUnderTest.showAltActivitySelected()(Fixtures.buildFakeUser, req, hc)
+      contentAsString(result) shouldBe contentAsString(Future(buildFakeAltAmendsPageController().getGlobalErrorPage(req, testMessages)))
       contentAsString(result) should include(testMessages("ers.global_errors.message"))
     }
   }
@@ -296,7 +295,7 @@ class AltAmendsControllerSpec extends UnitSpec with ERSFakeApplicationConfig wit
       val request = Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val result = controllerUnderTest.showAltAmendsSelected()(Fixtures.buildFakeUser, request, hc)
       status(result) shouldBe Status.SEE_OTHER
-      result.header.headers("Location") shouldBe routes.AltAmendsController.altAmendsPage().toString
+      result.futureValue.header.headers("Location") shouldBe routes.AltAmendsController.altAmendsPage().toString
     }
 
     "give a redirect status and stay on the same page if form errors" in {
@@ -311,7 +310,7 @@ class AltAmendsControllerSpec extends UnitSpec with ERSFakeApplicationConfig wit
       val request = Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val result = controllerUnderTest.showAltAmendsSelected()(Fixtures.buildFakeUser, request, hc)
       status(result) shouldBe Status.SEE_OTHER
-      result.header.headers("Location") shouldBe routes.AltAmendsController.altAmendsPage().toString
+      result.futureValue.header.headers("Location") shouldBe routes.AltAmendsController.altAmendsPage().toString
     }
 
     "direct to ers errors page if no form errors but unable to save to cache" in {
@@ -326,7 +325,7 @@ class AltAmendsControllerSpec extends UnitSpec with ERSFakeApplicationConfig wit
       val req = Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val result = controllerUnderTest.showAltAmendsSelected()(Fixtures.buildFakeUser, req, hc)
       status(result) shouldBe Status.OK
-      contentAsString(result) shouldBe contentAsString(buildFakeAltAmendsPageController().getGlobalErrorPage(req, testMessages))
+      contentAsString(result) shouldBe contentAsString(Future(buildFakeAltAmendsPageController().getGlobalErrorPage(req, testMessages)))
       contentAsString(result) should include(testMessages("ers.global_errors.message"))
     }
 
@@ -342,7 +341,7 @@ class AltAmendsControllerSpec extends UnitSpec with ERSFakeApplicationConfig wit
       val request = Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val result = controllerUnderTest.showAltAmendsSelected()(Fixtures.buildFakeUser, request, hc)
       status(result) shouldBe Status.SEE_OTHER
-      result.header.headers("Location") shouldBe routes.SummaryDeclarationController.summaryDeclarationPage().toString
+      result.futureValue.header.headers("Location") shouldBe routes.SummaryDeclarationController.summaryDeclarationPage().toString
     }
 
 

@@ -18,17 +18,20 @@ package connectors
 
 import com.github.tomakehurst.wiremock.client.WireMock._
 import models.upscan.{PreparedUpload, Reference, UploadForm, UpscanInitiateRequest}
+import org.scalatest.{Matchers, OptionValues, WordSpecLike}
 import org.scalatestplus.mockito.MockitoSugar
-import org.scalatestplus.play.OneAppPerSuite
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
 import play.api.http.Status._
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
-import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, Upstream4xxResponse, Upstream5xxResponse}
-import uk.gov.hmrc.play.test.UnitSpec
+import play.api.test.Helpers.await
+import uk.gov.hmrc.http.{HeaderCarrier, Upstream4xxResponse, Upstream5xxResponse}
 import utils.WireMockHelper
 
-class UpscanConnectorSpec extends UnitSpec with OneAppPerSuite with MockitoSugar with WireMockHelper {
+import scala.concurrent.duration.SECONDS
+
+class UpscanConnectorSpec extends WordSpecLike with Matchers with OptionValues with GuiceOneAppPerSuite with MockitoSugar with WireMockHelper {
 
 	lazy val connector: UpscanConnector = app.injector.instanceOf[UpscanConnector]
 	implicit val hc: HeaderCarrier = HeaderCarrier()
@@ -51,7 +54,7 @@ class UpscanConnectorSpec extends UnitSpec with OneAppPerSuite with MockitoSugar
             )
         )
 
-        val result = await(connector.getUpscanFormData(request))
+        val result = await(connector.getUpscanFormData(request), 1, SECONDS)
         result shouldBe body.toUpscanInitiateResponse
       }
     }
@@ -65,7 +68,7 @@ class UpscanConnectorSpec extends UnitSpec with OneAppPerSuite with MockitoSugar
                 .withStatus(BAD_REQUEST)
             )
         )
-        a[Upstream4xxResponse] should be thrownBy await(connector.getUpscanFormData(request))
+        a[Upstream4xxResponse] should be thrownBy await(connector.getUpscanFormData(request), 1, SECONDS)
       }
 
       "upscan returns 5xx response" in {
@@ -76,7 +79,7 @@ class UpscanConnectorSpec extends UnitSpec with OneAppPerSuite with MockitoSugar
                 .withStatus(SERVICE_UNAVAILABLE)
             )
         )
-        an[Upstream5xxResponse] should be thrownBy await(connector.getUpscanFormData(request))
+        an[Upstream5xxResponse] should be thrownBy await(connector.getUpscanFormData(request), 1, SECONDS)
       }
     }
   }

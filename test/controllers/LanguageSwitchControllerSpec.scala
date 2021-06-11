@@ -17,19 +17,17 @@
 package controllers
 
 import org.mockito.Mockito.when
-import org.scalatestplus.play.OneAppPerSuite
+import org.scalatest.{Matchers, OptionValues, WordSpecLike}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.i18n
-import play.api.i18n.{Lang, MessagesApi, MessagesImpl}
-import play.api.mvc.{AnyContent, Cookie, Cookies, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents}
+import play.api.i18n.{Lang, MessagesApi}
+import play.api.mvc._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.play.test.UnitSpec
 import utils.ErsTestHelper
 
 import scala.concurrent.ExecutionContext
 
-class LanguageSwitchControllerSpec extends UnitSpec with ErsTestHelper with GuiceOneAppPerSuite {
+class LanguageSwitchControllerSpec extends WordSpecLike with Matchers with OptionValues with ErsTestHelper with GuiceOneAppPerSuite {
 
   val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
     messagesActionBuilder,
