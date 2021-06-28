@@ -42,6 +42,7 @@
 	@reference(requestObject.getPageTitle)
 
 	@govukBackLink(BackLink(
+		content = Text(messages("ers.back")),
 		href = routes.CheckFileTypeController.checkFileTypePage.url,
 	))
 

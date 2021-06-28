@@ -19,7 +19,7 @@
 @import _root_.utils.CountryCodes
 @import views.html.templates.reference
 @import views.html.includes.countries
-@import uk.gov.hmrc.play.views.html.helpers.FormWithCSRF
+
 @import uk.gov.hmrc.govukfrontend.views.html.components.implicits._
 
 @this(
@@ -47,6 +47,7 @@
 	@reference(requestObject.getPageTitle)
 
 	@govukBackLink(BackLink(
+		content = Text(messages("ers.back")),
 		href = ersUtil.getPageBackLink(schemeId, ersUtil.PAGE_SCHEME_ORGANISER, checkFileType, reportableEvents),
 	))
 
@@ -118,6 +119,9 @@
 			name = "addressLine2",
 			autocomplete = Some("address-line2"),
 			value = schemeOrganiser(schemeOrganiserFields.addressLine2).value,
+			errorMessage = schemeOrganiser.error(companyDetailsFields.addressLine2).map { addressLine2 =>
+				ErrorMessage(content = Text(addressLine2.messages.head))
+			},
 			label = Label(
 				content = Text(messages("ers_scheme_organiser.addressLine2.label")),
 				classes = "govuk-visually-hidden"
@@ -130,6 +134,9 @@
 			name = "addressLine3",
 			autocomplete = Some("address-line3"),
 			value = schemeOrganiser(schemeOrganiserFields.addressLine3).value,
+			errorMessage = schemeOrganiser.error(companyDetailsFields.addressLine3).map { addressLine3 =>
+				ErrorMessage(content = Text(addressLine3.messages.head))
+			},
 			label = Label(
 				content = Text(messages("ers_scheme_organiser.addressLine3.label")),
 				classes = "govuk-visually-hidden"
@@ -142,6 +149,9 @@
 			name = "addressLine4",
 			autocomplete = Some("address-line4"),
 			value = schemeOrganiser(schemeOrganiserFields.addressLine4).value,
+			errorMessage = schemeOrganiser.error(companyDetailsFields.addressLine4).map { addressLine4 =>
+				ErrorMessage(content = Text(addressLine4.messages.head))
+			},
 			label = Label(
 				content = Text(messages("ers_scheme_organiser.addressLine4.label")),
 				classes = "govuk-visually-hidden"
@@ -154,6 +164,9 @@
 			name = "postcode",
 			autocomplete = Some("postal-code"),
 			value = schemeOrganiser(schemeOrganiserFields.postcode).value,
+			errorMessage = schemeOrganiser.error(companyDetailsFields.postcode).map { postcode =>
+				ErrorMessage(content = Text(postcode.messages.head))
+			},
 			hint = Some(Hint(content=Text(messages("ers_scheme_organiser.postcode.hint")))),
 			label = Label(
 				content = Text(messages("ers_scheme_organiser.postcode")),
@@ -167,6 +180,9 @@
 			id = "companyReg",
 			name = "companyReg",
 			value = schemeOrganiser(schemeOrganiserFields.companyReg).value,
+			errorMessage = schemeOrganiser.error(companyDetailsFields.companyReg).map { companyReg =>
+				ErrorMessage(content = Text(companyReg.messages.head))
+			},
 			hint = Some(Hint(content=Text(messages("ers_scheme_organiser.company_reg_number.hint")))),
 			label = Label(
 				content = Text(messages("ers_scheme_organiser.company_reg_number")),
@@ -178,6 +194,9 @@
 			id = "corporationRef",
 			name = "corporationRef",
 			value = schemeOrganiser(schemeOrganiserFields.corporationRef).value,
+			errorMessage = schemeOrganiser.error(companyDetailsFields.corporationRef).map { corporationRef =>
+				ErrorMessage(content = Text(corporationRef.messages.head))
+			},
 			hint = Some(Hint(content=Text(messages("ers_scheme_organiser.corporation_tax_ref.hint")))),
 			label = Label(
 				content = Text(messages("ers_scheme_organiser.corporation_tax_ref")),

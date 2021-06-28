@@ -19,7 +19,7 @@
 @import _root_.utils.CountryCodes
 @import views.html.includes.countries
 @import views.html.templates.reference
-@import uk.gov.hmrc.play.views.html.helpers.FormWithCSRF
+
 @import uk.gov.hmrc.govukfrontend.views.html.components.implicits._
 
 @this(
@@ -47,6 +47,7 @@
 	@reference(requestObject.getPageTitle)
 
 	@govukBackLink(BackLink(
+		content = Text(messages("ers.back")),
 		href = routes.GroupSchemeController.groupSchemePage.url,
 	))
 
@@ -118,6 +119,9 @@
 			name = "addressLine2",
 			autocomplete = Some("address-line2"),
 			value = companyDetails(companyDetailsFields.addressLine2).value,
+			errorMessage = companyDetails.error(companyDetailsFields.addressLine2).map { error =>
+				ErrorMessage(content = Text(error.messages.head))
+			},
 			label = Label(
 				content = Text(messages("ers_manual_company_details.addressLine2")),
 				classes = "govuk-visually-hidden"
@@ -130,6 +134,9 @@
 			name = "addressLine3",
 			autocomplete = Some("address-line3"),
 			value = companyDetails(companyDetailsFields.addressLine3).value,
+			errorMessage = companyDetails.error(companyDetailsFields.addressLine3).map { error =>
+				ErrorMessage(content = Text(error.messages.head))
+			},
 			label = Label(
 				content = Text(messages("ers_manual_company_details.addressLine3")),
 				classes = "govuk-visually-hidden"
@@ -142,6 +149,9 @@
 			name = "addressLine4",
 			autocomplete = Some("address-line4"),
 			value = companyDetails(companyDetailsFields.addressLine4).value,
+			errorMessage = companyDetails.error(companyDetailsFields.addressLine4).map { error =>
+				ErrorMessage(content = Text(error.messages.head))
+			},
 			label = Label(
 				content = Text(messages("ers_manual_company_details.addressLine4")),
 				classes = "govuk-visually-hidden"
@@ -154,6 +164,9 @@
 			name = "postcode",
 			autocomplete = Some("postal-code"),
 			value = companyDetails(companyDetailsFields.postcode).value,
+			errorMessage = companyDetails.error(companyDetailsFields.postcode).map { error =>
+				ErrorMessage(content = Text(error.messages.head))
+			},
 			hint = Some(Hint(content=Text(messages("ers_manual_company_details.postcode.hint")))),
 			label = Label(
 				content = Text(messages("ers_manual_company_details.postcode")),
@@ -167,6 +180,9 @@
 			id = "companyReg",
 			name = "companyReg",
 			value = companyDetails(companyDetailsFields.companyReg).value,
+			errorMessage = companyDetails.error(companyDetailsFields.companyReg).map { error =>
+				ErrorMessage(content = Text(error.messages.head))
+			},
 			hint = Some(Hint(content=Text(messages("ers_manual_company_details.company_reg_number.hint")))),
 			label = Label(
 				content = Text(messages("ers_manual_company_details.company_reg_number")),
@@ -178,6 +194,9 @@
 			id = "corporationRef",
 			name = "corporationRef",
 			value = companyDetails(companyDetailsFields.corporationRef).value,
+			errorMessage = companyDetails.error(companyDetailsFields.corporationRef).map { error =>
+				ErrorMessage(content = Text(error.messages.head))
+			},
 			hint = Some(Hint(content=Text(messages("ers_manual_company_details.corporation_tax_ref.hint")))),
 			label = Label(
 				content = Text(messages("ers_manual_company_details.corporation_tax_ref")),

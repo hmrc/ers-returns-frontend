@@ -155,10 +155,9 @@ object RsFormMappings {
 			verifying pattern(addresssRegx.r, error = Messages("ers_scheme_organiser.err.summary.invalid_country"))),
     companyDetailsFields.postcode -> optional(text)
       .transform((x: Option[String]) => x.map(_.toUpperCase()), (z: Option[String]) => z.map(_.toUpperCase()))
-
 			.verifying(Messages("ers_manual_company_details.err.postcode"), so => isValidPostcode(so)),
     companyDetailsFields.companyReg -> optional(text
-			verifying pattern(companyRegPattern.r, error = Messages("ers_manual_company_details.err.summary.company_reg_pattern"))),
+      .verifying(pattern(fieldValidationPatterns.companyRegPattern.r, error = Messages("ers_manual_company_details.err.summary.company_reg_pattern")))),
     companyDetailsFields.corporationRef -> optional(text
 			verifying pattern(corporationRefPattern.r, error = Messages("ers_manual_company_details.err.summary.corporation_ref_pattern")))
   )(CompanyDetails.apply)(CompanyDetails.unapply))
@@ -193,7 +192,7 @@ object RsFormMappings {
       .verifying(Messages("ers_scheme_organiser.err.invalidFormat.postcode"), so => isValidFormatPostcodeSchemeOrganiser(so)),
     schemeOrganiserFields.companyReg -> optional(text
 			.verifying(Messages("ers_scheme_organiser.err.summary.company_reg"), so => checkLength(so, "schemeOrganiserFields.companyRegistrationNum"))
-			verifying pattern(fieldValidationPatterns.onlyCharsAndDigitsRegex.r, error = Messages("ers_scheme_organiser.err.summary.invalidChars.company_reg_pattern"))),
+			.verifying(pattern(fieldValidationPatterns.companyRegPattern.r, error = Messages("ers_scheme_organiser.err.summary.company_reg")))),
     schemeOrganiserFields.corporationRef -> optional(text verifying(Messages("ers_scheme_organiser.err.summary.corporation_ref"), so => checkLength(so, "schemeOrganiserFields.corporationTaxReference")) verifying pattern(fieldValidationPatterns.corporationRefPatternSchemeOrg.r, error = Messages("ers_scheme_organiser.err.summary.invalidChars.corporation_ref_pattern")))
   )(SchemeOrganiserDetails.apply)(SchemeOrganiserDetails.unapply))
 
@@ -217,7 +216,7 @@ object RsFormMappings {
   def checkLength(so: String, field: String): Boolean = field match {
     case "companyDetailsFields.companyName" | "trusteeDetailsFields.name" => so.length <= 120
     case "schemeOrganiserFields.companyName" => so.length <= 35
-		case "schemeOrganiserFields.companyRegistrationNum" => so.length <= 8
+		case "schemeOrganiserFields.companyRegistrationNum" => so.length == 8
 		case "schemeOrganiserFields.corporationTaxReference" => so.length == 10
     case _ => false
   }
@@ -292,7 +291,7 @@ object schemeOrganiserFields {
 
 object fieldValidationPatterns {
 
-  val companyRegPattern = "(^[a-zA-Z0-9]{1,10})$"
+  val companyRegPattern = "(?i)^([0-9]\\d{6,7}|\\d{6,7}|[A-Z]{2}\\d{6})$"
 
   def onlyCharsAndDigitsRegex = "^[a-zA-Z0-9]*$"
 
