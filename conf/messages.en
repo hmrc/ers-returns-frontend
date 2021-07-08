@@ -176,6 +176,11 @@ ers_scheme_organiser.addressLine1 = First line of address
 ers_scheme_organiser.addressLine2 = Second line of address
 ers_scheme_organiser.addressLine3 = Third line of address
 ers_scheme_organiser.addressLine4 = Fourth line of address
+ers_scheme_organiser.addressLine1.label = Building and street (line 1 of 2)
+ers_scheme_organiser.addressLine2.label = Building and street (line 2 of 2)
+ers_scheme_organiser.addressLine3.label = Town or city
+ers_scheme_organiser.addressLine4.label = County
+
 ers_scheme_organiser.postcode = Postcode (optional)
 ers_scheme_organiser.postcode.hint = For example, AA1 1AA
 ers_scheme_organiser.country = Country (optional)
