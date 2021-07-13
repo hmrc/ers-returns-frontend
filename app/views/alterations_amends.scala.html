@@ -16,7 +16,7 @@
 
 @import _root_.utils.ERSUtil
 @import config.ApplicationConfig
-@import uk.gov.hmrc.play.views.html.helpers.FormWithCSRF
+
 @import views.html.templates.reference
 
 @this(
@@ -38,6 +38,7 @@
     @reference(requestObject.getPageTitle)
 
     @govukBackLink(BackLink(
+        content = Text(messages("ers.back")),
         href = ersUtil.getPageBackLink(schemeId, ersUtil.PAGE_ALT_AMENDS)
     ))
 

@@ -431,7 +431,7 @@ class SchemeOrganiserControllerSpec extends WordSpecLike with Matchers with Opti
       val form = _root_.models.RsFormMappings.schemeOrganiserForm.bind(schemeOrganiserData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(Fixtures.buildFakeUser, request, hc)
-      contentAsString(result) should include(testMessages("ers_scheme_organiser.err.summary.invalidChars.company_reg_pattern"))
+      contentAsString(result) should include(testMessages("ers_scheme_organiser.err.summary.company_reg"))
     }
 
     "check error for corporation number more than 10 digits" in {
