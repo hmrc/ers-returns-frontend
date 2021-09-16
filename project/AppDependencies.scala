@@ -8,15 +8,15 @@ object AppDependencies {
     guice,
     ws,
     "uk.gov.hmrc" %% "play-partials" % "8.1.0-play-27",
-    "uk.gov.hmrc" %% "bootstrap-frontend-play-27" % "5.6.0",
+    "uk.gov.hmrc" %% "bootstrap-frontend-play-27" % "5.14.0",
     "uk.gov.hmrc" %% "domain" % "6.1.0-play-27",
     "uk.gov.hmrc" %% "http-caching-client" % "9.5.0-play-27",
     "uk.gov.hmrc" %% "play-language" % "5.1.0-play-27",
     "uk.gov.hmrc" %% "time" % "3.25.0",
     "uk.gov.hmrc" %% "play-frontend-hmrc" % "1.9.0-play-27",
     "org.scala-lang.modules" %% "scala-parser-combinators" % "1.1.2",
-    "org.apache.pdfbox" % "pdfbox" % "1.8.16",
-    "org.apache.pdfbox" % "xmpbox" % "1.8.16",
+    "org.apache.pdfbox" % "pdfbox" % "2.0.24",
+    "org.apache.pdfbox" % "xmpbox" % "2.0.24",
     "com.typesafe.play" %% "play-json-joda" % "2.6.14"
   )
 

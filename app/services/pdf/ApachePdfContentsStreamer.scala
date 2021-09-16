@@ -18,10 +18,10 @@ package services.pdf
 
 import models.ErsSummary
 import org.apache.pdfbox.pdmodel.common.PDMetadata
-import org.apache.pdfbox.pdmodel.edit.PDPageContentStream
+import org.apache.pdfbox.pdmodel.PDPageContentStream
 import org.apache.pdfbox.pdmodel.font.{PDFont, PDTrueTypeFont}
 import org.apache.pdfbox.pdmodel.graphics.color.PDOutputIntent
-import org.apache.pdfbox.pdmodel.graphics.xobject.PDJpeg
+import org.apache.pdfbox.pdmodel.graphics.image.JPEGFactory.createFromImage
 import org.apache.pdfbox.pdmodel.{PDDocument, PDPage}
 import org.apache.xmpbox.XMPMetadata
 import org.apache.xmpbox.xml.{XmpSerializationException, XmpSerializer}
@@ -202,12 +202,12 @@ class ApachePdfContentsStreamer(ersSummary : ErsSummary) extends ErsContentsStre
       val crownImg = ImageIO.read(pathToCrownPng)
       val imagePos = cursorPositioner.getImageRelativeStart
 
-      contentStream.get.drawImage(new PDJpeg(document.get, crownImg, 1.0f),
-        imagePos._1,
-        imagePos._2)
-    } catch {
-      case e:Throwable => logger.error(s"Cannot draw logo with message ${e.getMessage}")
-    }
+    contentStream.get.drawImage(createFromImage(document.get,crownImg),
+      imagePos._1,
+      imagePos._2)
+  } catch {
+    case e:Throwable => logger.error(s"Cannot draw logo with message ${e.getMessage}")
+  }
 
     addPageHeaderText(cursorPositioner)
 
