@@ -17,14 +17,15 @@
 package services.pdf
 
 import org.apache.pdfbox.cos.COSDocument
+import org.apache.pdfbox.io.RandomAccessFile
 import org.apache.pdfbox.pdfparser.PDFParser
 import org.apache.pdfbox.pdmodel.PDDocument
-import org.apache.pdfbox.util.PDFTextStripper
+import org.apache.pdfbox.text.PDFTextStripper
 import org.scalatest.{BeforeAndAfterEach, Matchers, OptionValues, WordSpecLike}
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.Logging
 
-import java.io.{File, FileInputStream}
+import java.io.File
 
 class ErsPdfReaderSpec extends WordSpecLike with Matchers with OptionValues with MockitoSugar with BeforeAndAfterEach with Logging {
   var pdfStripper: PDFTextStripper = mock[PDFTextStripper]
@@ -34,15 +35,15 @@ class ErsPdfReaderSpec extends WordSpecLike with Matchers with OptionValues with
   var parsedText: String = ""
 
   try {
-    var parser: PDFParser = new PDFParser(new FileInputStream(file))
+    val parser: PDFParser = new PDFParser(new RandomAccessFile(file,"r"))
     parser.parse()
-    var cosDoc = parser.getDocument()
+    val cosDoc = parser.getDocument()
     pdfStripper = new PDFTextStripper()
     pdDoc = new PDDocument(cosDoc)
     parsedText = pdfStripper.getText(pdDoc)
   } catch {
     case e: Exception =>
-      logger.error(s"Error reading pdf file..")
+      logger.error(s"Error reading pdf file..",e)
       throw new Exception
   }
 
