@@ -50,10 +50,7 @@ class ApachePdfContentsStreamer(ersSummary : ErsSummary) extends ErsContentsStre
 
   lazy val font: Option[PDFont] = try{
     logger.debug("ers-returns-frontend about to load arialMt.ttf font")
-    println(s"${document.getOrElse("test")}")
-    Some( PDType0Font.load(document.get, getClass.getResourceAsStream("/org/apache/pdfbox/resources/ttf/LiberationSans-Regular.ttf")))
-//    Some( PDType0Font.load(document.get, getClass.getResourceAsStream("/org/apache/pdfbox/resources/ttf/ArialMT.ttf")))
-//    Some( PDType0Font.load(document.get, new File("public/fonts/ARIALMT.ttf")))
+    Some( PDType0Font.load(document.get, new File("public/fonts/ARIALMT.ttf")))
   }catch {
     case e: Exception =>
 			logger.error("can not load the font for the pdf",e)
@@ -125,8 +122,9 @@ class ApachePdfContentsStreamer(ersSummary : ErsSummary) extends ErsContentsStre
 
   def drawLine() : Boolean = {
     val nextPos = cursorPositioner.get.currentPos
-    contentStream.get.drawLine(LEFT_MRGIN, nextPos._2, nextPos._1 + RIGHT_MARGIN, nextPos._2)
-
+    contentStream.get.moveTo(LEFT_MRGIN,nextPos._2)
+    contentStream.get.lineTo(nextPos._1 + RIGHT_MARGIN, nextPos._2)
+    contentStream.get.stroke()
     true
   }
 
@@ -161,8 +159,8 @@ class ApachePdfContentsStreamer(ersSummary : ErsSummary) extends ErsContentsStre
   private def addTextToPdf(string: String, x : Int, y : Int, fontSize : Float): Unit = {
     contentStream.get.beginText()
     contentStream.get.setFont(font.get, fontSize)
-    contentStream.get.moveTextPositionByAmount(x, y)
-    contentStream.get.drawString(string)
+    contentStream.get.newLineAtOffset(x, y)
+    contentStream.get.showText(string)
     contentStream.get.endText()
   }
 
