@@ -19,7 +19,7 @@ package services.pdf
 import models.ErsSummary
 import org.apache.pdfbox.pdmodel.common.PDMetadata
 import org.apache.pdfbox.pdmodel.PDPageContentStream
-import org.apache.pdfbox.pdmodel.font.{PDFont, PDTrueTypeFont}
+import org.apache.pdfbox.pdmodel.font.{PDFont, PDType0Font}
 import org.apache.pdfbox.pdmodel.graphics.color.PDOutputIntent
 import org.apache.pdfbox.pdmodel.graphics.image.JPEGFactory.createFromImage
 import org.apache.pdfbox.pdmodel.{PDDocument, PDPage}
@@ -29,7 +29,7 @@ import play.api.Logging
 import play.api.i18n.Messages
 import utils.DateUtils
 
-import java.io.ByteArrayOutputStream
+import java.io.{ByteArrayOutputStream, File}
 import javax.imageio.ImageIO
 
 trait ErsContentsStreamer {
@@ -50,10 +50,13 @@ class ApachePdfContentsStreamer(ersSummary : ErsSummary) extends ErsContentsStre
 
   lazy val font: Option[PDFont] = try{
     logger.debug("ers-returns-frontend about to load arialMt.ttf font")
-    Some(PDTrueTypeFont.loadTTF(document.get, getClass.getResourceAsStream("/org/apache/pdfbox/resources/ttf/ArialMT.ttf")))
+    println(s"${document.getOrElse("test")}")
+    Some( PDType0Font.load(document.get, getClass.getResourceAsStream("/org/apache/pdfbox/resources/ttf/LiberationSans-Regular.ttf")))
+//    Some( PDType0Font.load(document.get, getClass.getResourceAsStream("/org/apache/pdfbox/resources/ttf/ArialMT.ttf")))
+//    Some( PDType0Font.load(document.get, new File("public/fonts/ARIALMT.ttf")))
   }catch {
     case e: Exception =>
-			logger.error("can not load the font for the pdf")
+			logger.error("can not load the font for the pdf",e)
 			throw e
 	}
   var contentStream : Option[PDPageContentStream] = None

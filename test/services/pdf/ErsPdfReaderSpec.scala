@@ -36,6 +36,7 @@ class ErsPdfReaderSpec extends WordSpecLike with Matchers with OptionValues with
 
   try {
     val parser: PDFParser = new PDFParser(new RandomAccessFile(file,"r"))
+    parser.parse()
     val cosDoc = parser.getDocument()
     pdfStripper = new PDFTextStripper()
     pdDoc = new PDDocument(cosDoc)
