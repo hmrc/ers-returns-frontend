@@ -18,10 +18,10 @@ package services.pdf
 
 import models.ErsSummary
 import org.apache.pdfbox.pdmodel.common.PDMetadata
-import org.apache.pdfbox.pdmodel.edit.PDPageContentStream
-import org.apache.pdfbox.pdmodel.font.{PDFont, PDTrueTypeFont}
+import org.apache.pdfbox.pdmodel.PDPageContentStream
+import org.apache.pdfbox.pdmodel.font.{PDFont, PDType0Font}
 import org.apache.pdfbox.pdmodel.graphics.color.PDOutputIntent
-import org.apache.pdfbox.pdmodel.graphics.xobject.PDJpeg
+import org.apache.pdfbox.pdmodel.graphics.image.JPEGFactory.createFromImage
 import org.apache.pdfbox.pdmodel.{PDDocument, PDPage}
 import org.apache.xmpbox.XMPMetadata
 import org.apache.xmpbox.xml.{XmpSerializationException, XmpSerializer}
@@ -29,7 +29,7 @@ import play.api.Logging
 import play.api.i18n.Messages
 import utils.DateUtils
 
-import java.io.ByteArrayOutputStream
+import java.io.{ByteArrayOutputStream, File}
 import javax.imageio.ImageIO
 
 trait ErsContentsStreamer {
@@ -48,14 +48,15 @@ class ApachePdfContentsStreamer(ersSummary : ErsSummary) extends ErsContentsStre
 
   lazy val document: Option[PDDocument] = Some(new PDDocument()) : Option[PDDocument]
 
-  lazy val font: Option[PDFont] = try{
-    logger.debug("ers-returns-frontend about to load arialMt.ttf font")
-    Some(PDTrueTypeFont.loadTTF(document.get, getClass.getResourceAsStream("/org/apache/pdfbox/resources/ttf/ArialMT.ttf")))
-  }catch {
+  lazy val font: Option[PDFont] = try {
+    logger.debug("ers-returns-frontend about to load ArialMT.ttf font")
+    Some(PDType0Font.load(document.get, getClass.getResourceAsStream("/resources/ArialMT.ttf")))
+  } catch {
     case e: Exception =>
-			logger.error("can not load the font for the pdf")
-			throw e
-	}
+      logger.error("can not load the font for the pdf",e)
+      throw e
+  }
+
   var contentStream : Option[PDPageContentStream] = None
   var cursorPositioner : Option[CursorPositioner] = None
 
@@ -122,8 +123,9 @@ class ApachePdfContentsStreamer(ersSummary : ErsSummary) extends ErsContentsStre
 
   def drawLine() : Boolean = {
     val nextPos = cursorPositioner.get.currentPos
-    contentStream.get.drawLine(LEFT_MRGIN, nextPos._2, nextPos._1 + RIGHT_MARGIN, nextPos._2)
-
+    contentStream.get.moveTo(LEFT_MRGIN,nextPos._2)
+    contentStream.get.lineTo(nextPos._1 + RIGHT_MARGIN, nextPos._2)
+    contentStream.get.stroke()
     true
   }
 
@@ -158,8 +160,8 @@ class ApachePdfContentsStreamer(ersSummary : ErsSummary) extends ErsContentsStre
   private def addTextToPdf(string: String, x : Int, y : Int, fontSize : Float): Unit = {
     contentStream.get.beginText()
     contentStream.get.setFont(font.get, fontSize)
-    contentStream.get.moveTextPositionByAmount(x, y)
-    contentStream.get.drawString(string)
+    contentStream.get.newLineAtOffset(x, y)
+    contentStream.get.showText(string)
     contentStream.get.endText()
   }
 
@@ -202,12 +204,12 @@ class ApachePdfContentsStreamer(ersSummary : ErsSummary) extends ErsContentsStre
       val crownImg = ImageIO.read(pathToCrownPng)
       val imagePos = cursorPositioner.getImageRelativeStart
 
-      contentStream.get.drawImage(new PDJpeg(document.get, crownImg, 1.0f),
-        imagePos._1,
-        imagePos._2)
-    } catch {
-      case e:Throwable => logger.error(s"Cannot draw logo with message ${e.getMessage}")
-    }
+    contentStream.get.drawImage(createFromImage(document.get,crownImg),
+      imagePos._1,
+      imagePos._2)
+  } catch {
+    case e:Throwable => logger.error(s"Cannot draw logo with message ${e.getMessage}")
+  }
 
     addPageHeaderText(cursorPositioner)
 
