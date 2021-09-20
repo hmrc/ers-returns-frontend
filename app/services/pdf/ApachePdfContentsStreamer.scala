@@ -49,8 +49,8 @@ class ApachePdfContentsStreamer(ersSummary : ErsSummary) extends ErsContentsStre
   lazy val document: Option[PDDocument] = Some(new PDDocument()) : Option[PDDocument]
 
   lazy val font: Option[PDFont] = try {
-    logger.debug("ers-returns-frontend about to load arialMT.ttf font")
-    Some(PDType0Font.load(document.get, getClass.getResourceAsStream("/resources/arialMT.ttf")))
+    logger.debug("ers-returns-frontend about to load ArialMT.ttf font")
+    Some(PDType0Font.load(document.get, getClass.getResourceAsStream("/resources/ArialMT.ttf")))
   } catch {
     case e: Exception =>
       logger.error("can not load the font for the pdf",e)
