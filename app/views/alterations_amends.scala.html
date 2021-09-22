@@ -47,7 +47,7 @@
             title = Text(messages("validation.summary.heading")),
             errorList = Seq(
                 ErrorLink(
-                    href = Some("#govuk-checkboxes"),
+                    href = Some("#alterationsAmends"),
                     content = Text(flash.get("alt-amends-not-selected-error").getOrElse(""))
                 )
             )
@@ -105,7 +105,8 @@
                     value = ersUtil.OPTION_YES,
                     checked = altAmends.altAmendsOther.getOrElse("") == ersUtil.OPTION_YES
                 )
-            )
+            ),
+            attributes = Map("id" -> "alterationsAmends")
         ))
 
         @govukInsetText(InsetText(

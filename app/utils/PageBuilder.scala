@@ -24,6 +24,7 @@ trait PageBuilder {
 
   val DEFAULT = ""
   val DEFAULT_COUNTRY = "UK"
+  val OVERSEAS = "Overseas"
 
   // Schemes
   val CSOP: String = "CSOP"

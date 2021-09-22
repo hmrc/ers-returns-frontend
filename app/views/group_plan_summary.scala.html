@@ -48,8 +48,6 @@
 
 	@formWithCSRF(action = routes.GroupSchemeController.groupPlanSummaryContinue(schemeId)) {
 
-		<a class="govuk-link govuk-inset-text govuk-!-display-inline-block govuk-!-margin-top-0 govuk-!-width-full" href="@routes.GroupSchemeController.manualCompanyDetailsPage()">@ersUtil.getPageElement(schemeId, ersUtil.PAGE_GROUP_SUMMARY, "add_company")</a>
-
 		@for((company, index) <- companies.companies.zipWithIndex) {
 			@govukSummaryList(SummaryList(
 				rows = {
@@ -59,7 +57,7 @@
 							content = Text(messages("ers_group_summary.company_name"))
 						),
 						value = Value(
-							classes = "govuk-!-width-one-half govuk-!-font-weight-bold",
+							classes = "govuk-!-width-one-half",
 							content = Text(company.companyName)
 						),
 						actions = Some(Actions(
@@ -69,10 +67,25 @@
 									href = routes.GroupSchemeController.editCompany(index).url,
 									content = Text(messages("ers.change_this")),
 									visuallyHiddenText = Some(company.companyName)
-								),
+								)
+							)
+						))
+					)
+					val companyRegistrationSummary = SummaryListRow(
+						key = Key(
+							classes = "govuk-!-width-one-quarter",
+							content = Text(messages("ers_group_summary.company_registration_location"))
+						),
+						value = Value(
+							classes = "govuk-!-width-one-half",
+							content = Text(ersUtil.companyLocation(company))
+						),
+						actions = Some(Actions(
+							classes = "govuk-!-width-one- quarter",
+							items = Seq(
 								ActionItem(
-									href = routes.GroupSchemeController.deleteCompany(index).url,
-									content = Text(messages("ers.delete")),
+									href = routes.GroupSchemeController.editCompany(index).url,
+									content = Text(messages("ers.change_this")),
 									visuallyHiddenText = Some(company.companyName)
 								)
 							)
@@ -80,35 +93,82 @@
 					)
 					val addressSummary = SummaryListRow(
 						key = Key(
+							classes = "govuk-!-width-one-quarter",
 							content = Text(messages("ers_group_summary.address"))
 						),
 						value = Value(
+							classes = "govuk-!-width-one-half",
 							content = Text(ersUtil.buildAddressSummary(company))
-						)
+						),
+						actions = Some(Actions(
+							classes = "govuk-!-width-one-quarter",
+							items = Seq(
+								ActionItem(
+									href = routes.GroupSchemeController.editCompany(index).url,
+									content = Text(messages("ers.change_this")),
+									visuallyHiddenText = Some(company.companyName)
+								)
+							)
+						))
 					)
 					val crnSummary = SummaryListRow(
 						key = Key(
+							classes = "govuk-!-width-one-quarter",
 							content = Text(messages("ers_group_summary.crn"))
 						),
 						value = Value(
+							classes = "govuk-!-width-one-half",
 							content = Text(company.companyReg.getOrElse(""))
-						)
+						),
+						actions = Some(Actions(
+							classes = "govuk-!-width-one-quarter",
+							items = Seq(
+								ActionItem(
+									href = routes.GroupSchemeController.editCompany(index).url,
+									content = Text(messages("ers.change_this")),
+									visuallyHiddenText = Some(company.companyName)
+								)
+							)
+						))
 					)
 					val ctrSummary = SummaryListRow(
 						key = Key(
+							classes = "govuk-!-width-one-quarter",
 							content = Text(messages("ers_group_summary.ctr"))
 						),
 						value = Value(
+							classes = "govuk-!-width-one-half",
 							content = Text(company.corporationRef.getOrElse(""))
-						)
+						),
+						actions = Some(Actions(
+							classes = "govuk-!-width-one-quarter",
+							items = Seq(
+								ActionItem(
+									href = routes.GroupSchemeController.editCompany(index).url,
+									content = Text(messages("ers.change_this")),
+									visuallyHiddenText = Some(company.companyName)
+								)
+							)
+						))
 					)
 
-					Seq(companyNameSummary, addressSummary) ++
-					{if(company.country.getOrElse("") == ersUtil.DEFAULT_COUNTRY && company.companyReg.isDefined) Seq(crnSummary) else None} ++
-					{if(company.country.getOrElse("") == ersUtil.DEFAULT_COUNTRY && company.corporationRef.isDefined) Seq(ctrSummary) else None}
+					Seq(companyNameSummary, companyRegistrationSummary, addressSummary) ++
+					(if (company.country.contains(ersUtil.DEFAULT_COUNTRY) && company.companyReg.isDefined) Seq(crnSummary) else Seq()) ++
+					(if (company.country.contains(ersUtil.DEFAULT_COUNTRY) && company.corporationRef.isDefined) Seq(ctrSummary) else Seq())
 				}
 			))
+
+			<p class="govuk-body govuk-!-margin-bottom-8">
+				<a class="govuk-link" href=@routes.GroupSchemeController.deleteCompany(index)>
+					@{messages("ers.delete") + " " + company.companyName}
+				</a>
+			</p>
 		}
+
+		<a class="govuk-link govuk-inset-text govuk-!-display-inline-block govuk-!-margin-top-0 govuk-!-width-full"
+		   href=@routes.GroupSchemeController.manualCompanyDetailsPage>
+			@ersUtil.addCompanyMessage(messages, requestObject.schemeType)
+		</a>
 
 		@govukButton(Button(
 			inputType = Some("submit"),

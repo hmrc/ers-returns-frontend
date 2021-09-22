@@ -21,6 +21,7 @@ import metrics.Metrics
 import models._
 import org.joda.time.DateTime
 import play.api.Logging
+import play.api.i18n.Messages
 import play.api.libs.json
 import play.api.libs.json.JsValue
 import play.api.mvc.Request
@@ -247,7 +248,13 @@ class ERSUtil @Inject()(val sessionService: SessionService,
 	}
 
 	final def concatAddress(optionalAddressLines: List[Option[String]], existingAddressLines: String): String = {
-		val definedStrings = optionalAddressLines.flatten
+		var definedStrings: List[String] = Nil
+		try {
+			definedStrings = optionalAddressLines.collect{case Some(s) => s}
+		} catch {case x: Throwable  =>
+			println(x)
+			println()
+		}
 		existingAddressLines ++ definedStrings.map(addressLine => ", " + addressLine).mkString("")
 	}
 
@@ -307,4 +314,22 @@ class ERSUtil @Inject()(val sessionService: SessionService,
 	}
 
 	def isNilReturn(nilReturn:String) :Boolean = nilReturn == OPTION_NIL_RETURN
+
+	def companyLocation(company: CompanyDetails): String = {
+		company.country.collect {
+			case c if c != DEFAULT_COUNTRY => OVERSEAS
+			case c => c
+		}.getOrElse(DEFAULT)
+	}
+
+	def trusteeLocation(trustee: TrusteeDetails): String = {
+		trustee.country.collect {
+			case c if c != DEFAULT_COUNTRY => OVERSEAS
+			case c => c
+		}.getOrElse(DEFAULT)
+	}
+
+	def addCompanyMessage(messages: Messages, schemeOpt: Option[String]): String = {
+		messages.apply(s"ers_group_summary.${schemeOpt.getOrElse("").toLowerCase}.add_company")
+	}
 }

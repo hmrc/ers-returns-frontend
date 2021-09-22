@@ -22,7 +22,7 @@ import play.api.libs.json.{JsError, Json}
 
 class UploadStatusSpec extends WordSpecLike with Matchers with OptionValues {
 
-  val statuses = List(NotStarted, Failed, InProgress)
+  val statuses: List[UploadStatus] = List(NotStarted, Failed, InProgress)
   "UploadStats json Reads" should {
     statuses.foreach { status =>
       s"return $status" when {
@@ -72,10 +72,9 @@ class UploadStatusSpec extends WordSpecLike with Matchers with OptionValues {
         val expectedName = "fileName"
         val expectedUrl = "downloadUrl"
         val noOfRows = 2
-        val expectedJson =
-          s"""{"name":"$expectedName","downloadUrl":"$expectedUrl","_type":"UploadedSuccessfully","noOfRows":$noOfRows}"""
+        val expectedJson = Json.parse(s"""{"name":"$expectedName","downloadUrl":"$expectedUrl","_type":"UploadedSuccessfully","noOfRows":$noOfRows}""")
         val uploadStatus: UploadStatus = UploadedSuccessfully(expectedName, expectedUrl, Some(noOfRows))
-        Json.toJson(uploadStatus).toString() shouldBe expectedJson
+        assert(Json.toJson(uploadStatus) == expectedJson, "The upload status does not match its expected Json form")
       }
     }
   }

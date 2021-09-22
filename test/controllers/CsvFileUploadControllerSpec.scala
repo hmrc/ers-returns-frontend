@@ -484,7 +484,7 @@ class CsvFileUploadControllerSpec extends WordSpecLike with Matchers with Option
         ) thenReturn Future.successful(CacheMap("id",
           data = Map(
             s"${"check-csv-files"}-${testUploadId.value}" ->
-              Json.toJson(uploadedSuccessfully)(implicitly[Writes[UploadStatus]])
+              Json.toJson(asUploadStatus(uploadedSuccessfully))
           )))
         when(
           mockErsUtil.cache(any(), any(), any())(any(), any(), any())
@@ -505,11 +505,11 @@ class CsvFileUploadControllerSpec extends WordSpecLike with Matchers with Option
 
       when(mockErsUtil.fetchAll(anyString())(any(), any())) thenReturn(
         Future(CacheMap("id", data = Map(
-          s"${"check-csv-files"}-${testUploadId.value}" -> Json.toJson(uploadedSuccessfully)(implicitly[Writes[UploadStatus]])
+          s"${"check-csv-files"}-${testUploadId.value}" -> Json.toJson(asUploadStatus(uploadedSuccessfully))
         ))),
         Future(CacheMap("id", data = Map(
-          s"${"check-csv-files"}-${testUploadId.value}" -> Json.toJson(uploadedSuccessfully)(implicitly[Writes[UploadStatus]]),
-          s"${"check-csv-files"}-ID1" -> Json.toJson(uploadedSuccessfully)(implicitly[Writes[UploadStatus]])
+          s"${"check-csv-files"}-${testUploadId.value}" -> Json.toJson(asUploadStatus(uploadedSuccessfully)),
+          s"${"check-csv-files"}-ID1" -> Json.toJson(asUploadStatus(uploadedSuccessfully))
         )))
       )
       when(mockErsUtil.cache(any(), any(), any())(any(), any(), any())).thenReturn(Future.successful(CacheMap("", Map())))
@@ -531,7 +531,7 @@ class CsvFileUploadControllerSpec extends WordSpecLike with Matchers with Option
       ) thenReturn Future.successful(CacheMap("id",
         data = Map(
           s"${"check-csv-files"}-${testUploadId.value}" ->
-            Json.toJson(uploadedSuccessfully)(implicitly[Writes[UploadStatus]])
+            Json.toJson(asUploadStatus(uploadedSuccessfully))
         )))
       when(
         mockErsUtil.cache(any(), any(), any())(any(), any(), any())
@@ -551,9 +551,9 @@ class CsvFileUploadControllerSpec extends WordSpecLike with Matchers with Option
       ) thenReturn Future.successful(CacheMap("id",
         data = Map(
           s"${"check-csv-files"}-${testUploadId.value}" ->
-            Json.toJson(uploadedSuccessfully)(implicitly[Writes[UploadStatus]]),
+            Json.toJson(asUploadStatus(uploadedSuccessfully)),
           s"${"check-csv-files"}-ID1" ->
-            Json.toJson(uploadedSuccessfully)(implicitly[Writes[UploadStatus]])
+            Json.toJson(asUploadStatus(uploadedSuccessfully))
         )))
       when(
         mockErsUtil.cache(any(), any(), any())(any(), any(), any())

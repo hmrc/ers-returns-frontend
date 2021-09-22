@@ -29,6 +29,14 @@ trait UpscanData {
   val uploadedSuccessfully = UploadedSuccessfully("fileName.ods", "https://downloadUrl.com")
   val uploadedSuccessfullyCsv = UploadedSuccessfully("fileName.csv", "https://downloadUrl.com")
 
+  /**
+   * Provides an upcast of UploadStatus ADT members.<p/>
+   * The upcast is needed due to the Play Reads and Writes typeclasses becoming invariant in v. 2.8.<p/>
+   * @param status An UploadStatus value
+   * @return an UplaodStatus reference
+   */
+  def asUploadStatus(status: UploadStatus): UploadStatus = status
+
   val incompleteCsvList = UpscanCsvFilesCallbackList(
     List(
       UpscanCsvFilesCallback(UploadId("ID1"), "file1", InProgress),

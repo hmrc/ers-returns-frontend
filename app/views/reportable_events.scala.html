@@ -46,7 +46,10 @@
 		@if(reportableEvents.hasErrors) {
 			@govukErrorSummary(ErrorSummary(
 				title = Text(messages("validation.summary.heading")),
-				errorList = reportableEvents.errors.asTextErrorLinks
+				errorList = Seq(ErrorLink(
+					href = Some("#isNilReturn"),
+					content = Text(messages("ers_choose.err.message"))
+				))
 			))
 		}
 
