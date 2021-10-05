@@ -41,14 +41,6 @@ function checkFileName() {
     }
 }
 
-function checkFileType() {
-    let expectedFileType = (function() {
-        if(fileType === "csv") {return "text/csv";} else if(fileType === "ods") {return "application/vnd.oasis.opendocument.spreadsheet";}
-    })();
-    let actualFileType = fileUploadInput.files[0].type;
-    return actualFileType === expectedFileType;
-}
-
 function checkFileSize() {
     let actualFileSize = fileUploadInput.files[0].size;
     let maxFileSize = (function() { if(fileType === "csv") {return 100000000;} else if(fileType === "ods") {return 10000000;} })();
@@ -105,22 +97,15 @@ function clearFileUploadErrorMessage() {
 
 function handleErrors(fileChecks) {
     if(fileChecks.validFileName.fileName === true && fileChecks.validFileName.fileNameLength === true && fileChecks.validFileName.fileNameCharacters === true) {
-        if (fileChecks.validFileType === true) {
-            if (fileChecks.validFileSize === true) {
-                ensureUploadButtonIs("enabled");
-                makeErrorSummary("disappear");
-                clearFileUploadErrorMessage();
-            } else {
-                ensureUploadButtonIs("disabled");
-                makeErrorSummary("appear");
-                addErrorToSummary("ers.file.upload."+fileType+".file.large");
-                addErrorMessageToFileUpload("ers.file.upload."+fileType+".file.large");
-            }
+        if (fileChecks.validFileSize === true) {
+            ensureUploadButtonIs("enabled");
+            makeErrorSummary("disappear");
+            clearFileUploadErrorMessage();
         } else {
             ensureUploadButtonIs("disabled");
             makeErrorSummary("appear");
-            addErrorToSummary("ers.file.upload."+fileType+".wrong.type");
-            addErrorMessageToFileUpload("ers.file.upload."+fileType+".wrong.type");
+            addErrorToSummary("ers.file.upload."+fileType+".file.large");
+            addErrorMessageToFileUpload("ers.file.upload."+fileType+".file.large");
         }
     } else if (fileChecks.validFileName.fileName === false) {
         ensureUploadButtonIs("disabled");
@@ -142,7 +127,7 @@ function handleErrors(fileChecks) {
 
 // Event listeners
 fileUploadInput.addEventListener('input', () => {
-    const fileChecks = {validFileName: checkFileName(), validFileType: checkFileType(), validFileSize: checkFileSize()}
+    const fileChecks = {validFileName: checkFileName(), validFileSize: checkFileSize()}
     handleErrors(fileChecks);
 });
 
