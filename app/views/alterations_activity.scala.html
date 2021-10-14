@@ -45,7 +45,7 @@
         @govukErrorSummary(ErrorSummary(
             title = Text(messages("validation.summary.heading")),
             errorList = Seq(ErrorLink(
-                href = Some("#altActivity-hint"),
+                href = Some("#alterationsActivity"),
                 content = Text(ersUtil.getPageElement(schemeId, ersUtil.PAGE_ALT_ACTIVITY, "err.message"))
             ))
         ))
@@ -79,7 +79,8 @@
                     value = Some(ersUtil.OPTION_NO),
                     checked = altActivity == ersUtil.OPTION_NO
                 )
-            )
+            ),
+            attributes = Map("id" -> "alterationsActivity")
         ))
 
         @govukButton(Button(

@@ -305,6 +305,7 @@ ers_group_summary.emi.title = Subsidiary companies in this scheme or arrangement
 ers_group_summary.sip.title = Companies in this group plan
 ers_group_summary.other.title = Companies covered by this return
 ers_group_summary.company_name = Company name
+ers_group_summary.company_registration_location = Where the company is registered
 ers_group_summary.address = Address
 ers_group_summary.crn = Company Registration Number
 ers_group_summary.ctr = Corporation Tax reference
@@ -726,6 +727,7 @@ ers_trustee_summary.name = Name
 ers_trustee_summary.address = Address
 ers_trustee_summary.action = Action
 ers_trustee_summary.trustee_name = Trustee name
+ers_trustee_summary.trustee_location = Where the trustee is based
 
 ers_trustee_summary.altamends.section = Alterations made to this plan
 

@@ -46,7 +46,7 @@
 		@govukErrorSummary(ErrorSummary(
 			title = Text(messages("validation.summary.heading")),
 			errorList = Seq(ErrorLink(
-				href = Some("#govuk-radios"),
+				href = Some("#group"),
 				content = Text(ersUtil.getPageElement(schemeId, ersUtil.PAGE_GROUP_ACTIVITY, "err.message"))
 			))
 		))
@@ -78,7 +78,8 @@
 					content = Text(messages("ers_group_scheme.no"))
 				)
 			),
-			classes = "govuk-radios--inline"
+			classes = "govuk-radios--inline",
+			attributes = Map("id" -> "group")
 		))
 
 		@govukButton(Button(

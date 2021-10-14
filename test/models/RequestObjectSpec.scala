@@ -16,7 +16,7 @@
 
 package models
 
-import org.joda.time.DateTime
+import org.joda.time.{DateTime, Period, PeriodType}
 import org.scalatest.{MustMatchers, PrivateMethodTester, WordSpec}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.i18n.{Lang, Messages, MessagesApi}
@@ -103,17 +103,20 @@ class RequestObjectSpec extends WordSpec with MustMatchers with GuiceOneAppPerSu
       val expectedSchemeInfo =
         SchemeInfo(
           "AA0000000000000",
-          DateTime.now(),
+          null, // absolute DateTime comparison is brittle, tolerance checked below
           "1",
           "2016/17",
           "MyScheme",
           "CSOP"
         )
 
-
       val result = requestObject.toErsMetaData
+      val resultTimestamp = result.schemeInfo.timestamp
+      val adjustedSchemeInfo = result.schemeInfo.copy(timestamp = null)
+      val diff = new Period(resultTimestamp, DateTime.now, PeriodType.millis)
 
-      result.schemeInfo mustBe expectedSchemeInfo
+      diff.getMillis must be < 100
+      adjustedSchemeInfo mustBe expectedSchemeInfo
       result.ipRef mustBe request.remoteAddress
       result.aoRef mustBe None
       result.empRef mustBe "empRef"

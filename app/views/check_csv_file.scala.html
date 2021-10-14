@@ -46,7 +46,7 @@
                 title = Text(messages("validation.summary.heading")),
                 errorList = Seq(ErrorLink(
                     content = Text(flash.get("csv-file-not-selected-error").getOrElse("")),
-                    href = Some(s"#choose-${requestObject.getSchemeName.toLowerCase}-csv-type-hint")
+                    href = Some(s"#checkCsvFile")
                 ))
             ))
         }
@@ -74,7 +74,8 @@
                     name = Some(s"files[${file.fileId.last}].fileId"),
                     id = Some(file.fileId)
                 )
-            }
+            },
+            attributes = Map("id" -> "checkCsvFile")
         ))
 
         @govukButton(Button(

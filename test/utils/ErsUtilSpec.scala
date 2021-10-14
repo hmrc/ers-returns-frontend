@@ -39,7 +39,7 @@ import scala.language.postfixOps
 
 class ErsUtilSpec extends WordSpecLike with Matchers with OptionValues with MockitoSugar with BeforeAndAfterEach with ERSFakeApplicationConfig with ErsTestHelper with ScalaFutures {
 
-  override implicit val hc: HeaderCarrier =  HeaderCarrier(sessionId = Some(SessionId("sessionId")))
+  override implicit val hc: HeaderCarrier = HeaderCarrier(sessionId = Some(SessionId("sessionId")))
   implicit val countryCodes: CountryCodes = mockCountryCodes
 
   override def beforeEach(): Unit = {
@@ -48,7 +48,7 @@ class ErsUtilSpec extends WordSpecLike with Matchers with OptionValues with Mock
   }
 
   "calling cache" should {
-		val ersUtil: ERSUtil = new ERSUtil(mockSessionCache, mockShortLivedCache, mockAppConfig)
+    val ersUtil: ERSUtil = new ERSUtil(mockSessionCache, mockShortLivedCache, mockAppConfig)
 
     "saves entry to shortLivedCache" in {
       val altAmends = AltAmends(Option("0"), Option("0"), Option("0"), Option("0"), Option("0"))
@@ -75,7 +75,7 @@ class ErsUtilSpec extends WordSpecLike with Matchers with OptionValues with Mock
   }
 
   "calling fetch with key" should {
-		val ersUtil: ERSUtil = new ERSUtil(mockSessionCache, mockShortLivedCache, mockAppConfig)
+    val ersUtil: ERSUtil = new ERSUtil(mockSessionCache, mockShortLivedCache, mockAppConfig)
 
     "return required value from cache if no cacheId is given" in {
       val altAmends = AltAmends(Option("0"), Option("0"), Option("0"), Option("0"), Option("0"))
@@ -90,14 +90,14 @@ class ErsUtilSpec extends WordSpecLike with Matchers with OptionValues with Mock
       result.futureValue shouldBe altAmends
     }
 
-		"throw NoSuchElementException if value is not found in cache" in {
-			when(mockShortLivedCache.fetchAndGetEntry[JsValue](anyString(), anyString())(any(), any(), any()))
-				.thenReturn(Future.successful(None))
+    "throw NoSuchElementException if value is not found in cache" in {
+      when(mockShortLivedCache.fetchAndGetEntry[JsValue](anyString(), anyString())(any(), any(), any()))
+        .thenReturn(Future.successful(None))
 
-			intercept[NoSuchElementException] {
+      intercept[NoSuchElementException] {
         await(ersUtil.fetch[AltAmends]("key"), 1, SECONDS)
-			}
-		}
+      }
+    }
 
     "throw Exception if an exception occurs" in {
       when(
@@ -134,7 +134,7 @@ class ErsUtilSpec extends WordSpecLike with Matchers with OptionValues with Mock
   }
 
   "calling fetchOption with key" should {
-		val ersUtil: ERSUtil = new ERSUtil(mockSessionCache, mockShortLivedCache, mockAppConfig)
+    val ersUtil: ERSUtil = new ERSUtil(mockSessionCache, mockShortLivedCache, mockAppConfig)
 
     "return value from cache if it exists" in {
       when(
@@ -170,9 +170,9 @@ class ErsUtilSpec extends WordSpecLike with Matchers with OptionValues with Mock
   }
 
   "calling fetchAll with key" should {
-		val ersUtil: ERSUtil = new ERSUtil(mockSessionCache, mockShortLivedCache, mockAppConfig)
+    val ersUtil: ERSUtil = new ERSUtil(mockSessionCache, mockShortLivedCache, mockAppConfig)
 
-		"return Future[CacheMap] if given value from cache" in {
+    "return Future[CacheMap] if given value from cache" in {
       val anyVal = "abc"
       val cMap = CacheMap(anyVal, Map((anyVal, Json.toJson(anyVal))))
       when(mockShortLivedCache.fetch(anyVal)).thenReturn(Future(Option(cMap)))
@@ -201,13 +201,13 @@ class ErsUtilSpec extends WordSpecLike with Matchers with OptionValues with Mock
     lazy val rsc = ErsMetaData(schemeInfo, "ipRef", Some("aoRef"), "empRef", Some("agentRef"), Some("sapNumber"))
 
     "return valid ERSSummary data" in {
-			val ersUtil: ERSUtil = new ERSUtil(mockSessionCache, mockShortLivedCache, mockAppConfig){
+      val ersUtil: ERSUtil = new ERSUtil(mockSessionCache, mockShortLivedCache, mockAppConfig) {
 
         override def fetchOption[T](key: String, cacheId: String)
-																	 (implicit hc: HeaderCarrier,
-																		formats: json.Format[T],
-																		request: Request[AnyRef]
-																	 ): Future[Option[T]] = {
+                                   (implicit hc: HeaderCarrier,
+                                    formats: json.Format[T],
+                                    request: Request[AnyRef]
+                                   ): Future[Option[T]] = {
           key match {
             case "ReportableEvents" => Future(Some(ReportableEvents(Some(OPTION_NIL_RETURN)).asInstanceOf[T]))
             case "check-file-type" => Future(None)
@@ -224,21 +224,21 @@ class ErsUtilSpec extends WordSpecLike with Matchers with OptionValues with Mock
     }
 
     "return valid ERSSummary data with correct file type" in {
-			val ersUtil: ERSUtil = new ERSUtil(mockSessionCache, mockShortLivedCache, mockAppConfig){
+      val ersUtil: ERSUtil = new ERSUtil(mockSessionCache, mockShortLivedCache, mockAppConfig) {
         override def fetchOption[T](key: String, cacheId: String)
-																	 (implicit hc: HeaderCarrier,
-																		formats: Format[T],
-																		request: Request[AnyRef]
-																	 ): Future[Option[T]] = {
-					key match {
-						case "ReportableEvents" => Future(Some(ReportableEvents(Some(OPTION_NIL_RETURN)).asInstanceOf[T]))
-						case "check-file-type" => Future(Some(CheckFileType(Some("ods")).asInstanceOf[T]))
-						case "scheme-organiser" => Future(None)
-						case "trustees" => Future(None)
-						case "group-scheme-controller" => Future(None)
-						case "alt-activity" => Future(None)
-						case "alt-amends-cache-controller" => Future(Some(AlterationAmends(Some("1"), Some("1"), Some("1"), Some("1"), Some("1")).asInstanceOf[T]))
-					}
+                                   (implicit hc: HeaderCarrier,
+                                    formats: Format[T],
+                                    request: Request[AnyRef]
+                                   ): Future[Option[T]] = {
+          key match {
+            case "ReportableEvents" => Future(Some(ReportableEvents(Some(OPTION_NIL_RETURN)).asInstanceOf[T]))
+            case "check-file-type" => Future(Some(CheckFileType(Some("ods")).asInstanceOf[T]))
+            case "scheme-organiser" => Future(None)
+            case "trustees" => Future(None)
+            case "group-scheme-controller" => Future(None)
+            case "alt-activity" => Future(None)
+            case "alt-amends-cache-controller" => Future(Some(AlterationAmends(Some("1"), Some("1"), Some("1"), Some("1"), Some("1")).asInstanceOf[T]))
+          }
         }
       }
       val result = ersUtil.getAllData(BUNDLE_REF, rsc).futureValue
@@ -247,21 +247,21 @@ class ErsUtilSpec extends WordSpecLike with Matchers with OptionValues with Mock
     }
 
     "throws Exception if data is not found" in {
-			val ersUtil: ERSUtil = new ERSUtil(mockSessionCache, mockShortLivedCache, mockAppConfig){
+      val ersUtil: ERSUtil = new ERSUtil(mockSessionCache, mockShortLivedCache, mockAppConfig) {
         override def fetchOption[T](key: String, cacheId: String)
-																	 (implicit hc: HeaderCarrier,
-																		formats: json.Format[T],
-																		request: Request[AnyRef]
-																	 ): Future[Option[T]] = {
-					key match {
-						case "ReportableEvents" => Future.failed(new NoSuchElementException)
-						case "check-file-type" =>  Future[Option[T]](Option("ods".asInstanceOf[T]))
-						case "scheme-organiser" => Future(None)
-						case "trustees" => Future(None)
-						case "group-scheme-controller" => Future(None)
-						case "alt-activity" => Future(None)
-						case "alt-amends-cache-controller" => Future(Some(AlterationAmends(Some("1"), Some("1"), Some("1"), Some("1"), Some("1")).asInstanceOf[T]))
-					}
+                                   (implicit hc: HeaderCarrier,
+                                    formats: json.Format[T],
+                                    request: Request[AnyRef]
+                                   ): Future[Option[T]] = {
+          key match {
+            case "ReportableEvents" => Future.failed(new NoSuchElementException)
+            case "check-file-type" => Future[Option[T]](Option("ods".asInstanceOf[T]))
+            case "scheme-organiser" => Future(None)
+            case "trustees" => Future(None)
+            case "group-scheme-controller" => Future(None)
+            case "alt-activity" => Future(None)
+            case "alt-amends-cache-controller" => Future(Some(AlterationAmends(Some("1"), Some("1"), Some("1"), Some("1"), Some("1")).asInstanceOf[T]))
+          }
         }
       }
       intercept[Exception] {
@@ -275,12 +275,12 @@ class ErsUtilSpec extends WordSpecLike with Matchers with OptionValues with Mock
 
     "return (AltAmendsActivity = None, AlterationAmends = None) if AltAmendsActivity = None and AlterationAmends are defined" in {
 
-			val ersUtil: ERSUtil = new ERSUtil(mockSessionCache, mockShortLivedCache, mockAppConfig){
+      val ersUtil: ERSUtil = new ERSUtil(mockSessionCache, mockShortLivedCache, mockAppConfig) {
         override def fetchOption[T](key: String, cacheId: String)
-																	 (implicit hc: HeaderCarrier,
-																		formats: json.Format[T],
-																		request: Request[AnyRef]
-																	 ): Future[Option[T]] = {
+                                   (implicit hc: HeaderCarrier,
+                                    formats: json.Format[T],
+                                    request: Request[AnyRef]
+                                   ): Future[Option[T]] = {
           key match {
             case "alt-activity" => Future(None)
             case "alt-amends-cache-controller" => Future(Some(AlterationAmends(Some("1"), Some("1"), Some("1"), Some("1"), Some("1")).asInstanceOf[T]))
@@ -296,15 +296,15 @@ class ErsUtilSpec extends WordSpecLike with Matchers with OptionValues with Mock
 
     "return (AltAmendsActivity = Some(AltAmendsActivity(\"2\")), AlterationAmends = None) if AltAmendsActivity = \"2\" and AlterationAmends are defined" in {
 
-			val ersUtil: ERSUtil = new ERSUtil(mockSessionCache, mockShortLivedCache, mockAppConfig){
+      val ersUtil: ERSUtil = new ERSUtil(mockSessionCache, mockShortLivedCache, mockAppConfig) {
         override def fetchOption[T](key: String, cacheId: String)
-																	 (implicit hc: HeaderCarrier,
-																		formats: json.Format[T],
-																		request: Request[AnyRef]
-																	 ): Future[Option[T]] = {
+                                   (implicit hc: HeaderCarrier,
+                                    formats: json.Format[T],
+                                    request: Request[AnyRef]
+                                   ): Future[Option[T]] = {
           key match {
-						case "alt-activity" => Future(Some(AltAmendsActivity(OPTION_NO).asInstanceOf[T]))
-						case "alt-amends-cache-controller" => Future(Some(AlterationAmends(Some("1"), Some("1"), Some("1"), Some("1"), Some("1")).asInstanceOf[T]))
+            case "alt-activity" => Future(Some(AltAmendsActivity(OPTION_NO).asInstanceOf[T]))
+            case "alt-amends-cache-controller" => Future(Some(AlterationAmends(Some("1"), Some("1"), Some("1"), Some("1"), Some("1")).asInstanceOf[T]))
           }
         }
       }
@@ -317,12 +317,12 @@ class ErsUtilSpec extends WordSpecLike with Matchers with OptionValues with Mock
 
     "return the expected AltAmendsActivity and AlterationAmends are defined" in {
 
-			val ersUtil: ERSUtil = new ERSUtil(mockSessionCache, mockShortLivedCache, mockAppConfig){
+      val ersUtil: ERSUtil = new ERSUtil(mockSessionCache, mockShortLivedCache, mockAppConfig) {
         override def fetchOption[T](key: String, cacheId: String)
-																	 (implicit hc: HeaderCarrier,
-																		formats: json.Format[T],
-																		request: Request[AnyRef]
-																	 ): Future[Option[T]] = {
+                                   (implicit hc: HeaderCarrier,
+                                    formats: json.Format[T],
+                                    request: Request[AnyRef]
+                                   ): Future[Option[T]] = {
           key match {
             case "alt-activity" => Future(Some(AltAmendsActivity(OPTION_YES).asInstanceOf[T]))
             case "alt-amends-cache-controller" => Future(Some(AlterationAmends(Some("1"), Some("1"), Some("1"), Some("1"), Some("1")).asInstanceOf[T]))
@@ -338,12 +338,12 @@ class ErsUtilSpec extends WordSpecLike with Matchers with OptionValues with Mock
 
     "return the expected AltAmendsActivity and if AltAmendsActivity = \"1\" and AlterationAmends are not defined" in {
 
-			val ersUtil: ERSUtil = new ERSUtil(mockSessionCache, mockShortLivedCache, mockAppConfig){
+      val ersUtil: ERSUtil = new ERSUtil(mockSessionCache, mockShortLivedCache, mockAppConfig) {
         override def fetchOption[T](key: String, cacheId: String)
-																	 (implicit hc: HeaderCarrier,
-																		formats: json.Format[T],
-																		request: Request[AnyRef]
-																	 ): Future[Option[T]] = {
+                                   (implicit hc: HeaderCarrier,
+                                    formats: json.Format[T],
+                                    request: Request[AnyRef]
+                                   ): Future[Option[T]] = {
           key match {
             case "alt-activity" => Future(Some(AltAmendsActivity(OPTION_YES).asInstanceOf[T]))
             case "alt-amends-cache-controller" => Future(None)
@@ -368,12 +368,12 @@ class ErsUtilSpec extends WordSpecLike with Matchers with OptionValues with Mock
     )
 
     "return (GroupSchemeInfo = None, CompanyDetailsList = None) if GroupSchemeInfo = None and CompanyDetailsList is defined" in {
-			val ersUtil: ERSUtil = new ERSUtil(mockSessionCache, mockShortLivedCache, mockAppConfig){
+      val ersUtil: ERSUtil = new ERSUtil(mockSessionCache, mockShortLivedCache, mockAppConfig) {
         override def fetchOption[T](key: String, cacheId: String)
-																	 (implicit hc: HeaderCarrier,
-																		formats: json.Format[T],
-																		request: Request[AnyRef]
-																	 ): Future[Option[T]] = {
+                                   (implicit hc: HeaderCarrier,
+                                    formats: json.Format[T],
+                                    request: Request[AnyRef]
+                                   ): Future[Option[T]] = {
           key match {
             case "group-scheme-controller" => Future(None)
             case "group-scheme-companies" => Future(Some(schemeCompanies.asInstanceOf[T]))
@@ -388,14 +388,14 @@ class ErsUtilSpec extends WordSpecLike with Matchers with OptionValues with Mock
     }
 
     "return the expected GroupSchemeInfo and if GroupSchemeInfo.groupScheme = None and CompanyDetailsList are defined" in {
-			val ersUtil: ERSUtil = new ERSUtil(mockSessionCache, mockShortLivedCache, mockAppConfig){
+      val ersUtil: ERSUtil = new ERSUtil(mockSessionCache, mockShortLivedCache, mockAppConfig) {
         override def fetchOption[T](key: String, cacheId: String)
-																	 (implicit hc: HeaderCarrier,
-																		formats: json.Format[T],
-																		request: Request[AnyRef]
-																	 ): Future[Option[T]] = {
+                                   (implicit hc: HeaderCarrier,
+                                    formats: json.Format[T],
+                                    request: Request[AnyRef]
+                                   ): Future[Option[T]] = {
           key match {
-						case "group-scheme-controller" => Future(Some(GroupSchemeInfo(None, Some("")).asInstanceOf[T]))
+            case "group-scheme-controller" => Future(Some(GroupSchemeInfo(None, Some("")).asInstanceOf[T]))
             case "group-scheme-companies" => Future(Some(schemeCompanies.asInstanceOf[T]))
           }
         }
@@ -408,14 +408,14 @@ class ErsUtilSpec extends WordSpecLike with Matchers with OptionValues with Mock
     }
 
     "return the expected GroupSchemeInfo and if GroupSchemeInfo.groupScheme = 1 and CompanyDetailsList is defined" in {
-			val ersUtil: ERSUtil = new ERSUtil(mockSessionCache, mockShortLivedCache, mockAppConfig){
+      val ersUtil: ERSUtil = new ERSUtil(mockSessionCache, mockShortLivedCache, mockAppConfig) {
         override def fetchOption[T](key: String, cacheId: String)
-																	 (implicit hc: HeaderCarrier,
-																		formats: json.Format[T],
-																		request: Request[AnyRef]
-																	 ): Future[Option[T]] = {
+                                   (implicit hc: HeaderCarrier,
+                                    formats: json.Format[T],
+                                    request: Request[AnyRef]
+                                   ): Future[Option[T]] = {
           key match {
-						case "group-scheme-controller" => Future(Some(GroupSchemeInfo(Some("1"), Some("")).asInstanceOf[T]))
+            case "group-scheme-controller" => Future(Some(GroupSchemeInfo(Some("1"), Some("")).asInstanceOf[T]))
             case "group-scheme-companies" => Future(Some(schemeCompanies.asInstanceOf[T]))
           }
         }
@@ -428,14 +428,14 @@ class ErsUtilSpec extends WordSpecLike with Matchers with OptionValues with Mock
     }
 
     "return the expected GroupSchemeInfo and if GroupSchemeInfo.groupScheme = 1 and CompanyDetailsList is not defined" in {
-			val ersUtil: ERSUtil = new ERSUtil(mockSessionCache, mockShortLivedCache, mockAppConfig){
+      val ersUtil: ERSUtil = new ERSUtil(mockSessionCache, mockShortLivedCache, mockAppConfig) {
         override def fetchOption[T](key: String, cacheId: String)
-																	 (implicit hc: HeaderCarrier,
-																		formats: json.Format[T],
-																		request: Request[AnyRef]
-																	 ): Future[Option[T]] = {
+                                   (implicit hc: HeaderCarrier,
+                                    formats: json.Format[T],
+                                    request: Request[AnyRef]
+                                   ): Future[Option[T]] = {
           key match {
-						case "group-scheme-controller" => Future(Some(GroupSchemeInfo(Some("1"), Some("")).asInstanceOf[T]))
+            case "group-scheme-controller" => Future(Some(GroupSchemeInfo(Some("1"), Some("")).asInstanceOf[T]))
             case "group-scheme-companies" => Future(None)
           }
         }
@@ -448,14 +448,14 @@ class ErsUtilSpec extends WordSpecLike with Matchers with OptionValues with Mock
     }
 
     "return the expected GroupSchemeInfo and if GroupSchemeInfo.groupScheme = 2 and CompanyDetailsList are defined" in {
-			val ersUtil: ERSUtil = new ERSUtil(mockSessionCache, mockShortLivedCache, mockAppConfig){
+      val ersUtil: ERSUtil = new ERSUtil(mockSessionCache, mockShortLivedCache, mockAppConfig) {
         override def fetchOption[T](key: String, cacheId: String)
-																	 (implicit hc: HeaderCarrier,
-																		formats: json.Format[T],
-																		request: Request[AnyRef]
-																	 ): Future[Option[T]] = {
+                                   (implicit hc: HeaderCarrier,
+                                    formats: json.Format[T],
+                                    request: Request[AnyRef]
+                                   ): Future[Option[T]] = {
           key match {
-						case "group-scheme-controller" => Future(Some(GroupSchemeInfo(Some("2"), Some("")).asInstanceOf[T]))
+            case "group-scheme-controller" => Future(Some(GroupSchemeInfo(Some("2"), Some("")).asInstanceOf[T]))
             case "group-scheme-companies" => Future(Some(schemeCompanies.asInstanceOf[T]))
           }
         }
@@ -469,8 +469,8 @@ class ErsUtilSpec extends WordSpecLike with Matchers with OptionValues with Mock
   }
 
   "cacheUtil" should {
-		val THOUSAND = 1000
-		val ersUtil: ERSUtil = new ERSUtil(mockSessionCache, mockShortLivedCache, mockAppConfig){
+    val THOUSAND = 1000
+    val ersUtil: ERSUtil = new ERSUtil(mockSessionCache, mockShortLivedCache, mockAppConfig) {
       when(sessionService.getSuccessfulCallbackRecord(any(), any())) thenReturn Future(Some(UploadedSuccessfully("name", "downloadUrl", Some(THOUSAND))))
     }
     "check Nil Return " in {
@@ -486,10 +486,52 @@ class ErsUtilSpec extends WordSpecLike with Matchers with OptionValues with Mock
     }
 
     "getStatus" in {
-      ersUtil.getStatus(Some(THOUSAND*20)).get shouldBe "largefiles"
-      ersUtil.getStatus(Some(THOUSAND*10)).get shouldBe "saved"
-      ersUtil.getStatus(Some(THOUSAND*9)).get shouldBe "saved"
+      ersUtil.getStatus(Some(THOUSAND * 20)).get shouldBe "largefiles"
+      ersUtil.getStatus(Some(THOUSAND * 10)).get shouldBe "saved"
+      ersUtil.getStatus(Some(THOUSAND * 9)).get shouldBe "saved"
     }
   }
 
+  "calling buildAddressSummary" should {
+    val ersUtil: ERSUtil = new ERSUtil(mockSessionCache, mockShortLivedCache, mockAppConfig)
+
+    "build an address summary from CompanyDetails" in {
+      val companyDetails = CompanyDetails(
+        "name",
+         addressLine1 = "ADDRESS1",
+         addressLine2 = Some("ADDRESS2"),
+         addressLine3 = None,
+         addressLine4 = None,
+         postcode = Some("AB123CD"),
+         country = Some("UK"),
+         companyReg = Some("ABC"),
+         corporationRef = Some("DEF")
+      )
+      val expected = "ADDRESS1, ADDRESS2, AB123CD"
+      val addressSummary = ersUtil.buildAddressSummary(companyDetails)
+      assert(addressSummary == expected)
+    }
+
+    "build an address summary from TrusteeDetails" in {
+      val companyDetails = TrusteeDetails(
+        name = "NAME",
+        addressLine1 = "ADDRESS1",
+        addressLine2 = Some("ADDRESS2"),
+        addressLine3 = None,
+        addressLine4 = None,
+        country = Some("UK"),
+        postcode = Some("AB123CD")
+      )
+      val expected = "ADDRESS1, ADDRESS2, AB123CD"
+      val addressSummary = ersUtil.buildAddressSummary(companyDetails)
+      assert(addressSummary == expected)
+    }
+
+    "build an empty String for anything else" in {
+      val expected = ""
+      assert(ersUtil.buildAddressSummary(null) == expected)
+      assert(ersUtil.buildAddressSummary("Hello") == expected)
+      assert(ersUtil.buildAddressSummary(3.14) == expected)
+    }
+  }
 }

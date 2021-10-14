@@ -46,7 +46,10 @@
 		@if(checkFileTypeForm.hasErrors) {
 			@govukErrorSummary(ErrorSummary(
 				title = Text(messages("validation.summary.heading")),
-				errorList = checkFileTypeForm.errors.asTextErrorLinks
+				errorList = Seq(ErrorLink(
+					href = Some("#checkFileType"),
+					content = Text(messages("ers_check_file_type.err.message"))
+				))
 			))
 		}
 
