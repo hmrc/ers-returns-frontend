@@ -20,6 +20,7 @@ import _root_.models._
 import akka.actor.ActorSystem
 import config.ApplicationConfig
 import connectors.ErsConnector
+import controllers.auth.{AuthAction, RequestWithOptionalAuthContext}
 import models.upscan.{Failed, UploadStatus, UploadedSuccessfully}
 import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages}
@@ -45,13 +46,13 @@ class FileUploadController @Inject()(val mcc: MessagesControllerComponents,
                                      globalErrorView: views.html.global_error,
                                      fileUploadErrorsView: views.html.file_upload_errors,
                                      upscanOdsFileUploadView: views.html.upscan_ods_file_upload,
-                                     fileUploadProblemView: views.html.file_upload_problem
-																		) extends FrontendController(mcc) with Authenticator with I18nSupport with Retryable with Logging {
+                                     fileUploadProblemView: views.html.file_upload_problem,
+                                     authAction: AuthAction
+                                    ) extends FrontendController(mcc) with I18nSupport with Retryable {
 
   implicit val ec: ExecutionContext = mcc.executionContext
 
-  def uploadFilePage(): Action[AnyContent] = authorisedForAsync() {
-    implicit user =>
+  def uploadFilePage(): Action[AnyContent] = authAction.async {
       implicit request =>
         val requestObjectFuture = ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
         val upscanFormFuture = upscanService.getUpscanFormDataOds()
@@ -68,9 +69,8 @@ class FileUploadController @Inject()(val mcc: MessagesControllerComponents,
         }
   }
 
-  def success(): Action[AnyContent] = authorisedForAsync() {
-    implicit user =>
-      implicit request =>
+  def success(): Action[AnyContent] = authAction.async {
+    implicit request =>
         val futureRequestObject: Future[RequestObject] = ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
         val futureCallbackData: Future[Option[UploadStatus]] = sessionService.getCallbackRecord.withRetry(appConfig.odsSuccessRetryAmount){
           opt => opt.fold(true) {
@@ -113,8 +113,7 @@ class FileUploadController @Inject()(val mcc: MessagesControllerComponents,
        }
   }
 
-  def validationResults(): Action[AnyContent] = authorisedForAsync() {
-    implicit user =>
+  def validationResults(): Action[AnyContent] = authAction.async {
       implicit request =>
         val futureRequestObject = ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
         val futureCallbackData = sessionService.getCallbackRecord.withRetry(appConfig.odsValidationRetryAmount)(_.exists(_.isInstanceOf[UploadedSuccessfully]))
@@ -144,7 +143,7 @@ class FileUploadController @Inject()(val mcc: MessagesControllerComponents,
   }
 
   def handleValidationResponse(callbackData: UploadedSuccessfully, schemeInfo: SchemeInfo)
-                              (implicit authContext: ERSAuthData, request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
+                              (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
     val schemeRef = schemeInfo.schemeRef
     ersConnector.validateFileData(callbackData, schemeInfo).map { res =>
       logger.info(s"[FileUploadController][handleValidationResponse] Response from validator: ${res.status}, timestamp: ${System.currentTimeMillis()}.")
@@ -162,8 +161,7 @@ class FileUploadController @Inject()(val mcc: MessagesControllerComponents,
     }
   }
 
-  def validationFailure(): Action[AnyContent] = authorisedForAsync() {
-    implicit user =>
+  def validationFailure(): Action[AnyContent] = authAction.async {
       implicit request =>
         logger.info("[FileUploadController][validationFailure] Validation Failure: " + (System.currentTimeMillis() / 1000))
         (for {
@@ -178,8 +176,7 @@ class FileUploadController @Inject()(val mcc: MessagesControllerComponents,
         }
   }
 
-  def failure(): Action[AnyContent] = authorisedForAsync() {
-    implicit user =>
+  def failure(): Action[AnyContent] = authAction.async {
       implicit request =>
         val errorCode = request.getQueryString("errorCode").getOrElse("Unknown")
         val errorMessage = request.getQueryString("errorMessage").getOrElse("Unknown")

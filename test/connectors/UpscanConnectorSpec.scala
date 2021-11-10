@@ -18,7 +18,9 @@ package connectors
 
 import com.github.tomakehurst.wiremock.client.WireMock._
 import models.upscan.{PreparedUpload, Reference, UploadForm, UpscanInitiateRequest}
-import org.scalatest.{Matchers, OptionValues, WordSpecLike}
+import org.scalatest.OptionValues
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
@@ -31,7 +33,7 @@ import utils.WireMockHelper
 
 import scala.concurrent.duration.SECONDS
 
-class UpscanConnectorSpec extends WordSpecLike with Matchers with OptionValues with GuiceOneAppPerSuite with MockitoSugar with WireMockHelper {
+class UpscanConnectorSpec extends AnyWordSpecLike with Matchers with OptionValues with GuiceOneAppPerSuite with MockitoSugar with WireMockHelper {
 
 	lazy val connector: UpscanConnector = app.injector.instanceOf[UpscanConnector]
 	implicit val hc: HeaderCarrier = HeaderCarrier()

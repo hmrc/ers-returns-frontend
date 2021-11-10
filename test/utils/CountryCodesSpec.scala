@@ -16,22 +16,25 @@
 
 package utils
 
-import java.io.InputStream
-
 import akka.stream.Materializer
-import org.scalatestplus.play.OneServerPerSuite
+import org.scalatest.OptionValues
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.Play.current
-import play.api.i18n.{Messages, MessagesApi, MessagesImpl}
-import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.Environment
+import play.api.i18n.MessagesApi
 import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents}
 import play.api.test.Helpers.stubBodyParser
-import play.api.{Application, Environment, Play, i18n}
-import org.scalatest.{Matchers, OptionValues, WordSpecLike}
 
+import java.io.InputStream
 import scala.concurrent.ExecutionContext
 
-class CountryCodesSpec extends WordSpecLike with Matchers with OptionValues with ERSFakeApplicationConfig with ErsTestHelper with GuiceOneAppPerSuite {
+class CountryCodesSpec extends AnyWordSpecLike
+  with Matchers
+  with OptionValues
+  with ERSFakeApplicationConfig
+  with ErsTestHelper
+  with GuiceOneAppPerSuite {
 
   val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
     messagesActionBuilder,
@@ -43,14 +46,12 @@ class CountryCodesSpec extends WordSpecLike with Matchers with OptionValues with
     ExecutionContext.global
   )
 
-  implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
-  implicit lazy val messages: Messages = testMessages.messages
   lazy val appEnvironment: Environment = app.injector.instanceOf[Environment]
 	implicit lazy val mat: Materializer = app.materializer
 
   object TestCountryCodes extends CountryCodes {
 		override def environment: Environment = appEnvironment
-    override val jsonInputStream: Option[InputStream] = app.resourceAsStream("country-code-test.json")
+    override val jsonInputStream: Option[InputStream] = appEnvironment.resourceAsStream("country-code-test.json")
   }
 
 	trait Setup {

@@ -20,8 +20,11 @@ import akka.stream.Materializer
 import connectors.ErsConnector
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
-import org.scalatest.{Matchers, OptionValues, WordSpecLike}
+import org.scalatest.OptionValues
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+
 import play.api.i18n
 import play.api.i18n.{MessagesApi, MessagesImpl}
 import play.api.libs.json.{JsObject, Json}
@@ -34,7 +37,12 @@ import views.html.global_error
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class SubmissionDataControllerSpec extends WordSpecLike with Matchers with OptionValues with ERSFakeApplicationConfig with ErsTestHelper with GuiceOneAppPerSuite {
+class SubmissionDataControllerSpec extends AnyWordSpecLike
+  with Matchers
+  with OptionValues
+  with ERSFakeApplicationConfig
+  with ErsTestHelper
+  with GuiceOneAppPerSuite {
 
   val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
     messagesActionBuilder,
@@ -54,7 +62,7 @@ class SubmissionDataControllerSpec extends WordSpecLike with Matchers with Optio
   "calling createSchemeInfoFromURL" should {
 
     lazy val submissionDataController: SubmissionDataController =
-			new SubmissionDataController(mockMCC, mockAuthConnector, mockErsConnector, mockErsUtil, mockAppConfig, globalErrorView)
+			new SubmissionDataController(mockMCC, mockAuthConnector, mockErsConnector, mockErsUtil, mockAppConfig, globalErrorView, testAuthAction)
 
     "return correct json if all parameters are given in request" in {
       val request = FakeRequest("GET", "/get-submission-data?schemeRef=AA0000000000000&confTime=2016-08-05T11:14:30")
@@ -81,7 +89,7 @@ class SubmissionDataControllerSpec extends WordSpecLike with Matchers with Optio
 
   "calling retrieveSubmissionData" should {
 		lazy val submissionDataController: SubmissionDataController =
-			new SubmissionDataController(mockMCC, mockAuthConnector, mockErsConnector, mockErsUtil, mockAppConfig, globalErrorView)
+			new SubmissionDataController(mockMCC, mockAuthConnector, mockErsConnector, mockErsUtil, mockAppConfig, globalErrorView, testAuthAction)
 
     "redirect to login page if user is not authenticated" in {
 			setUnauthorisedMocks()
@@ -95,7 +103,7 @@ class SubmissionDataControllerSpec extends WordSpecLike with Matchers with Optio
     val mockErsConnector: ErsConnector = mock[ErsConnector]
 
 		class Setup(obj: Option[JsObject] = None)
-			extends SubmissionDataController(mockMCC, mockAuthConnector, mockErsConnector, mockErsUtil, mockAppConfig, globalErrorView) {
+			extends SubmissionDataController(mockMCC, mockAuthConnector, mockErsConnector, mockErsUtil, mockAppConfig, globalErrorView, testAuthAction) {
 			when(mockAppConfig.enableRetrieveSubmissionData).thenReturn(true)
 
 			override def createSchemeInfoFromURL(request: Request[Any]): Option[JsObject] = obj
@@ -103,7 +111,9 @@ class SubmissionDataControllerSpec extends WordSpecLike with Matchers with Optio
 
     "returns NOT_FOUND if not all parameters are given" in {
       lazy val submissionDataController: SubmissionDataController = new Setup()
-      val result = submissionDataController.getRetrieveSubmissionData()(Fixtures.buildFakeUser, FakeRequest(), hc)
+      val authRequest = buildRequestWithAuth(testFakeRequest)
+
+      val result = submissionDataController.getRetrieveSubmissionData()(authRequest, hc)
       status(result) shouldBe NOT_FOUND
     }
 
@@ -114,7 +124,8 @@ class SubmissionDataControllerSpec extends WordSpecLike with Matchers with Optio
       when(mockErsConnector.retrieveSubmissionData(any[JsObject]())(any(), any()))
 				.thenReturn(Future.successful(HttpResponse(OK, "")))
 
-      val result = submissionDataController.getRetrieveSubmissionData()(Fixtures.buildFakeUser, FakeRequest(), hc)
+      val authRequest = buildRequestWithAuth(testFakeRequest)
+      val result = submissionDataController.getRetrieveSubmissionData()(authRequest, hc)
       status(result) shouldBe OK
       contentAsString(result).contains("Retrieve Failure") shouldBe false
     }
@@ -126,7 +137,8 @@ class SubmissionDataControllerSpec extends WordSpecLike with Matchers with Optio
 			when(mockErsConnector.retrieveSubmissionData(any[JsObject]())(any(), any()))
 				.thenReturn(Future.successful(HttpResponse(INTERNAL_SERVER_ERROR, "")))
 
-      val result = submissionDataController.getRetrieveSubmissionData()(Fixtures.buildFakeUser, FakeRequest(), hc)
+      val authRequest = buildRequestWithAuth(testFakeRequest)
+      val result = submissionDataController.getRetrieveSubmissionData()(authRequest, hc)
       status(result) shouldBe OK
       contentAsString(result).contains(testMessages("ers.global_errors.message")) shouldBe true
     }
@@ -138,7 +150,8 @@ class SubmissionDataControllerSpec extends WordSpecLike with Matchers with Optio
 			when(mockErsConnector.retrieveSubmissionData(any[JsObject]())(any(), any()))
 				.thenReturn(Future.failed(new RuntimeException))
 
-      val result = submissionDataController.getRetrieveSubmissionData()(Fixtures.buildFakeUser, FakeRequest(), hc)
+      val authRequest = buildRequestWithAuth(testFakeRequest)
+      val result = submissionDataController.getRetrieveSubmissionData()(authRequest, hc)
       status(result) shouldBe OK
       contentAsString(result).contains(testMessages("ers.global_errors.message")) shouldBe true
     }

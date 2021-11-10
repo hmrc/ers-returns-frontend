@@ -22,8 +22,11 @@ import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.{Matchers, OptionValues, WordSpecLike}
+import org.scalatest.OptionValues
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+
 import play.api.data.Form
 import play.api.http.Status
 import play.api.i18n
@@ -38,7 +41,13 @@ import views.html.{alterations_activity, alterations_amends, global_error}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class AltAmendsControllerSpec extends WordSpecLike with Matchers with OptionValues with ERSFakeApplicationConfig with ErsTestHelper with GuiceOneAppPerSuite with ScalaFutures {
+class AltAmendsControllerSpec extends AnyWordSpecLike
+  with Matchers
+  with OptionValues
+  with ERSFakeApplicationConfig
+  with ErsTestHelper
+  with GuiceOneAppPerSuite
+  with ScalaFutures {
 
   val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
     messagesActionBuilder,
@@ -66,14 +75,14 @@ class AltAmendsControllerSpec extends WordSpecLike with Matchers with OptionValu
                                           alterationsAmendsView: alterations_amends = app.injector.instanceOf[alterations_amends],
                                           globalErrorView: global_error = app.injector.instanceOf[global_error]
                                         ): AltAmendsController =
-      new AltAmendsController (mockMCC, mockAuthConnector, mockErsUtil, mockAppConfig, alterationsActivityView, alterationsAmendsView, globalErrorView) {
-      when(mockErsUtil.fetch[GroupSchemeInfo](ArgumentMatchers.eq("group-scheme-controller"), any())(any(), any(), any()))
+      new AltAmendsController (mockMCC, mockAuthConnector, mockErsUtil, mockAppConfig, alterationsActivityView, alterationsAmendsView, globalErrorView, testAuthAction) {
+      when(mockErsUtil.fetch[GroupSchemeInfo](ArgumentMatchers.eq("group-scheme-controller"), any())(any(), any()))
         .thenReturn(groupSchemeActivity)
 
-      when(mockErsUtil.fetch[AltAmendsActivity](ArgumentMatchers.eq("alt-activity"), any())(any(), any(), any()))
+      when(mockErsUtil.fetch[AltAmendsActivity](ArgumentMatchers.eq("alt-activity"), any())(any(), any()))
 				.thenReturn(altAmendsActivity)
 
-      when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any(), any())).thenReturn(requestObject)
+      when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any())).thenReturn(requestObject)
 
       when(mockErsUtil.cache(ArgumentMatchers.eq("alt-activity"), any(), any())(any(), any(), any()))
 				.thenReturn(cache)
@@ -98,23 +107,27 @@ class AltAmendsControllerSpec extends WordSpecLike with Matchers with OptionValu
 
     "direct to ers errors page if fetching groupSchemeActivity throws exception" in {
       val controllerUnderTest = buildFakeAltAmendsPageController(groupSchemeActivity = Future.failed(new Exception))
-      val result = controllerUnderTest.showAltActivityPage()(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionIdCSOP("GET"), hc)
+      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"), Fixtures.buildFakeUser)
+      val result = controllerUnderTest.showAltActivityPage()(authRequest, hc)
 
       contentAsString(result) should include(testMessages("ers.global_errors.message"))
-      contentAsString(result) shouldBe contentAsString(Future(buildFakeAltAmendsPageController().getGlobalErrorPage))
+      contentAsString(result) shouldBe contentAsString(Future(buildFakeAltAmendsPageController().getGlobalErrorPage(testFakeRequest, testMessages)))
     }
 
     "direct to ers errors page if fetching requestObject throws exception" in {
       val controllerUnderTest = buildFakeAltAmendsPageController(requestObject = Future.failed(new Exception))
-      val result = controllerUnderTest.showAltActivityPage()(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionIdCSOP("GET"), hc)
+      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"), Fixtures.buildFakeUser)
+      val result = controllerUnderTest.showAltActivityPage()(authRequest, hc)
 
       contentAsString(result) should include(testMessages("ers.global_errors.message"))
-      contentAsString(result) shouldBe contentAsString(Future(buildFakeAltAmendsPageController().getGlobalErrorPage))
+      contentAsString(result) shouldBe contentAsString(Future(buildFakeAltAmendsPageController().getGlobalErrorPage(testFakeRequest, testMessages)))
     }
 
     "show alterations activity page with selection if fetching altAmendsActivity successful" in {
       val controllerUnderTest = buildFakeAltAmendsPageController()
-      val result = controllerUnderTest.showAltActivityPage()(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionIdCSOP("GET"), hc)
+      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"), Fixtures.buildFakeUser)
+
+      val result = controllerUnderTest.showAltActivityPage()(authRequest, hc)
       status(result) shouldBe Status.OK
       val document = Jsoup.parse(contentAsString(result))
       document.select("input[id=no]").hasAttr("checked") shouldEqual false
@@ -123,7 +136,9 @@ class AltAmendsControllerSpec extends WordSpecLike with Matchers with OptionValu
 
     "show alterations activity page with nothing selected if fetching altAmendsActivity fails" in {
       val controllerUnderTest = buildFakeAltAmendsPageController(altAmendsActivity = Future.failed(new Exception))
-      val result = controllerUnderTest.showAltActivityPage()(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionIdCSOP("GET"), hc)
+      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"), Fixtures.buildFakeUser)
+
+      val result = controllerUnderTest.showAltActivityPage()(authRequest, hc)
       status(result) shouldBe Status.OK
       val document = Jsoup.parse(contentAsString(result))
       document.select("input[id=no]").hasAttr("checked") shouldEqual false
@@ -149,7 +164,9 @@ class AltAmendsControllerSpec extends WordSpecLike with Matchers with OptionValu
       val altActivityData = Map("" -> "")
       val form = RsFormMappings.altActivityForm.bind(altActivityData)
       val request = Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-      val result = controllerUnderTest.showAltActivitySelected()(Fixtures.buildFakeUser, request, hc)
+      val authRequest = buildRequestWithAuth(request)
+
+      val result = controllerUnderTest.showAltActivitySelected()(authRequest, hc)
       status(result) shouldBe Status.OK
     }
 
@@ -158,7 +175,9 @@ class AltAmendsControllerSpec extends WordSpecLike with Matchers with OptionValu
       val altActivityData = Map("altActivity" -> OPTION_NO)
       val form: Form[AltAmendsActivity] = RsFormMappings.altActivityForm.bind(altActivityData)
       val request = Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-      val result = controllerUnderTest.showAltActivitySelected()(Fixtures.buildFakeUser, request, hc)
+      val authRequest = buildRequestWithAuth(request, Fixtures.buildFakeUser)
+
+      val result = controllerUnderTest.showAltActivitySelected()(authRequest, hc)
       status(result) shouldBe Status.SEE_OTHER
       result.futureValue.header.headers("Location") shouldBe routes.SummaryDeclarationController.summaryDeclarationPage().toString
     }
@@ -168,7 +187,8 @@ class AltAmendsControllerSpec extends WordSpecLike with Matchers with OptionValu
       val altActivityData = Map("altActivity" -> OPTION_YES)
       val form = RsFormMappings.altActivityForm.bind(altActivityData)
       val request = Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-      val result = controllerUnderTest.showAltActivitySelected()(Fixtures.buildFakeUser, request, hc)
+      val authRequest = buildRequestWithAuth(request, Fixtures.buildFakeUser)
+      val result = controllerUnderTest.showAltActivitySelected()(authRequest, hc)
       status(result) shouldBe Status.SEE_OTHER
       result.futureValue.header.headers("Location") shouldBe routes.AltAmendsController.altAmendsPage().toString
     }
@@ -178,7 +198,9 @@ class AltAmendsControllerSpec extends WordSpecLike with Matchers with OptionValu
       val altActivityData = Map("altActivity" -> OPTION_YES)
       val form = RsFormMappings.altActivityForm.bind(altActivityData)
       val req = Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-      val result = controllerUnderTest.showAltActivitySelected()(Fixtures.buildFakeUser, req, hc)
+      val authRequest = buildRequestWithAuth(req, Fixtures.buildFakeUser)
+
+      val result = controllerUnderTest.showAltActivitySelected()(authRequest, hc)
       status(result) shouldBe Status.OK
       contentAsString(result) shouldBe contentAsString(Future(buildFakeAltAmendsPageController().getGlobalErrorPage(req, testMessages)))
       contentAsString(result) should include(testMessages("ers.global_errors.message"))
@@ -189,7 +211,8 @@ class AltAmendsControllerSpec extends WordSpecLike with Matchers with OptionValu
       val altActivityData = Map("altActivity" -> OPTION_YES)
       val form = RsFormMappings.altActivityForm.bind(altActivityData)
       val req = Fixtures.buildFakeRequest("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-      val result = controllerUnderTest.showAltActivitySelected()(Fixtures.buildFakeUser, req, hc)
+      val authRequest = buildRequestWithAuth(req, Fixtures.buildFakeUser)
+      val result = controllerUnderTest.showAltActivitySelected()(authRequest, hc)
       contentAsString(result) shouldBe contentAsString(Future(buildFakeAltAmendsPageController().getGlobalErrorPage(req, testMessages)))
       contentAsString(result) should include(testMessages("ers.global_errors.message"))
     }
@@ -206,11 +229,11 @@ class AltAmendsControllerSpec extends WordSpecLike with Matchers with OptionValu
                                           alterationsActivityView: alterations_activity = app.injector.instanceOf[alterations_activity],
                                           alterationsAmendsView: alterations_amends = app.injector.instanceOf[alterations_amends],
                                           globalErrorView: global_error = app.injector.instanceOf[global_error]
-                                        ): AltAmendsController = new AltAmendsController (mockMCC, mockAuthConnector, mockErsUtil, mockAppConfig, alterationsActivityView, alterationsAmendsView, globalErrorView) {
+                                        ): AltAmendsController = new AltAmendsController (mockMCC, mockAuthConnector, mockErsUtil, mockAppConfig, alterationsActivityView, alterationsAmendsView, globalErrorView, testAuthAction) {
 
-      when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any(), any()))
+      when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any()))
 				.thenReturn(requestObject)
-      when(mockErsUtil.fetchOption[AltAmends](refEq("alt-amends-cache-controller"), any())(any(), any(), any()))
+      when(mockErsUtil.fetchOption[AltAmends](refEq("alt-amends-cache-controller"), any())(any(), any()))
 				.thenReturn(altAmends)
       when(mockErsUtil.cache(refEq("alt-amends-cache-controller"), any(), any())(any(), any(), any()))
 				.thenReturn(cache)
@@ -234,7 +257,9 @@ class AltAmendsControllerSpec extends WordSpecLike with Matchers with OptionValu
 
     "shows alterations amends page with no selection if fetching altAmends fails" in {
       val controllerUnderTest: AltAmendsController = buildFakeAltAmendsPageController(altAmends = Future.failed(new Exception))
-      val result = controllerUnderTest.showAltAmendsPage()(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionIdCSOP("GET"), hc)
+      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"), Fixtures.buildFakeUser)
+
+      val result = controllerUnderTest.showAltAmendsPage()(authRequest, hc)
       status(result) shouldBe Status.OK
       val document = Jsoup.parse(contentAsString(result))
       document.select("input[id=alt-terms-check-box]").hasAttr("checked") shouldEqual false
@@ -246,7 +271,9 @@ class AltAmendsControllerSpec extends WordSpecLike with Matchers with OptionValu
 
     "shows alterations amends page with no selection if fetching altAmends returns None" in {
       val controllerUnderTest: AltAmendsController = buildFakeAltAmendsPageController(altAmends = Future.successful(None))
-      val result = controllerUnderTest.showAltAmendsPage()(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionIdCSOP("GET"), hc)
+      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"), Fixtures.buildFakeUser)
+
+      val result = controllerUnderTest.showAltAmendsPage()(authRequest, hc)
       status(result) shouldBe Status.OK
       val document = Jsoup.parse(contentAsString(result))
       document.select("input[id=alt-terms-check-box]").hasAttr("checked") shouldEqual false
@@ -258,7 +285,9 @@ class AltAmendsControllerSpec extends WordSpecLike with Matchers with OptionValu
 
     "show alterations amends page with selection if fetching altAmends successful" in {
       val controllerUnderTest: AltAmendsController = buildFakeAltAmendsPageController()
-      val result = controllerUnderTest.showAltAmendsPage()(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionIdCSOP("GET"), hc)
+      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"), Fixtures.buildFakeUser)
+
+      val result = controllerUnderTest.showAltAmendsPage()(authRequest, hc)
       status(result) shouldBe Status.OK
       val document = Jsoup.parse(contentAsString(result))
       document.select("input[id=alt-terms-check-box]").hasAttr("checked") shouldEqual false
@@ -293,7 +322,9 @@ class AltAmendsControllerSpec extends WordSpecLike with Matchers with OptionValu
 			)
       val form = RsFormMappings.altAmendsForm.bind(altAmendsData)
       val request = Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-      val result = controllerUnderTest.showAltAmendsSelected()(Fixtures.buildFakeUser, request, hc)
+      val authRequest = buildRequestWithAuth(request, Fixtures.buildFakeUser)
+
+      val result = controllerUnderTest.showAltAmendsSelected()(authRequest, hc)
       status(result) shouldBe Status.SEE_OTHER
       result.futureValue.header.headers("Location") shouldBe routes.AltAmendsController.altAmendsPage().toString
     }
@@ -308,7 +339,9 @@ class AltAmendsControllerSpec extends WordSpecLike with Matchers with OptionValu
 			)
       val form = RsFormMappings.altAmendsForm.bind(altAmendsData)
       val request = Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-      val result = controllerUnderTest.showAltAmendsSelected()(Fixtures.buildFakeUser, request, hc)
+      val authRequest = buildRequestWithAuth(request, Fixtures.buildFakeUser)
+
+      val result = controllerUnderTest.showAltAmendsSelected()(authRequest, hc)
       status(result) shouldBe Status.SEE_OTHER
       result.futureValue.header.headers("Location") shouldBe routes.AltAmendsController.altAmendsPage().toString
     }
@@ -323,7 +356,9 @@ class AltAmendsControllerSpec extends WordSpecLike with Matchers with OptionValu
 			)
       val form = RsFormMappings.altActivityForm.bind(altAmendsData)
       val req = Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-      val result = controllerUnderTest.showAltAmendsSelected()(Fixtures.buildFakeUser, req, hc)
+      val authRequest = buildRequestWithAuth(req, Fixtures.buildFakeUser)
+
+      val result = controllerUnderTest.showAltAmendsSelected()(authRequest, hc)
       status(result) shouldBe Status.OK
       contentAsString(result) shouldBe contentAsString(Future(buildFakeAltAmendsPageController().getGlobalErrorPage(req, testMessages)))
       contentAsString(result) should include(testMessages("ers.global_errors.message"))
@@ -339,7 +374,9 @@ class AltAmendsControllerSpec extends WordSpecLike with Matchers with OptionValu
 			)
       val form = RsFormMappings.altActivityForm.bind(altAmendsData)
       val request = Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-      val result = controllerUnderTest.showAltAmendsSelected()(Fixtures.buildFakeUser, request, hc)
+      val authRequest = buildRequestWithAuth(request, Fixtures.buildFakeUser)
+
+      val result = controllerUnderTest.showAltAmendsSelected()(authRequest, hc)
       status(result) shouldBe Status.SEE_OTHER
       result.futureValue.header.headers("Location") shouldBe routes.SummaryDeclarationController.summaryDeclarationPage().toString
     }

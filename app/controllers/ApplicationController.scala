@@ -17,6 +17,7 @@
 package controllers
 
 import config.ApplicationConfig
+import controllers.auth.{AuthAction, AuthActionGovGateway}
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
@@ -28,30 +29,30 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class ApplicationController @Inject()(val mcc: MessagesControllerComponents,
-																			val authConnector: DefaultAuthConnector,
-																			implicit val ersUtil: ERSUtil,
-																			implicit val appConfig: ApplicationConfig,
-																		  unauthorisedView: views.html.unauthorised,
-																			signedOutView: views.html.signedOut,
-																			notAuthorisedView: views.html.not_authorised
-																		 ) extends FrontendController(mcc) with Authenticator with I18nSupport {
+                                      val authConnector: DefaultAuthConnector,
+                                      implicit val ersUtil: ERSUtil,
+                                      implicit val appConfig: ApplicationConfig,
+                                      unauthorisedView: views.html.unauthorised,
+                                      signedOutView: views.html.signedOut,
+                                      notAuthorisedView: views.html.not_authorised,
+                                      authAction: AuthActionGovGateway
+                                     ) extends FrontendController(mcc) with I18nSupport {
 
-	implicit val ec: ExecutionContext = mcc.executionContext
+  implicit val ec: ExecutionContext = mcc.executionContext
 
   def unauthorised(): Action[AnyContent] = Action {
     implicit request =>
       Unauthorized(unauthorisedView())
   }
 
-	def notAuthorised(): Action[AnyContent] = authorisedForAsync() {
-		implicit user =>
-			implicit request =>
-				Future.successful(Unauthorized(notAuthorisedView.render(request, request2Messages, appConfig)))
-	}
+  def notAuthorised(): Action[AnyContent] = authAction.async {
+      implicit request =>
+        Future.successful(Unauthorized(notAuthorisedView.render(request, request2Messages, appConfig)))
+  }
 
-	def timedOut(): Action[AnyContent] = Action {
-		implicit request =>
-			val loginScreenUrl = appConfig.portalDomain
-			Ok(signedOutView(loginScreenUrl))
-	}
+  def timedOut(): Action[AnyContent] = Action {
+    implicit request =>
+      val loginScreenUrl = appConfig.portalDomain
+      Ok(signedOutView(loginScreenUrl))
+  }
 }

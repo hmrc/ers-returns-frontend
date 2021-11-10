@@ -18,6 +18,7 @@ package controllers
 
 import _root_.models._
 import config._
+import controllers.auth.AuthActionGovGateway
 import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.libs.json.{Json, OFormat}
@@ -38,8 +39,9 @@ class ReturnServiceController @Inject()(val mcc: MessagesControllerComponents,
 																				implicit val appConfig: ApplicationConfig,
                                         globalErrorView: views.html.global_error,
                                         unauthorisedView: views.html.unauthorised,
-                                        startView: views.html.start
-																			 ) extends FrontendController(mcc) with Authenticator with I18nSupport with Logging {
+                                        startView: views.html.start,
+                                        authActionGovGateway: AuthActionGovGateway
+																			 ) extends FrontendController(mcc) with I18nSupport with Logging {
 
   implicit val ec: ExecutionContext = mcc.executionContext
 
@@ -79,10 +81,8 @@ class ReturnServiceController @Inject()(val mcc: MessagesControllerComponents,
     reqObj
   }
 
-  def hmacCheck(): Action[AnyContent] = Action.async {
+  def hmacCheck(): Action[AnyContent] = authActionGovGateway.async {
       implicit request =>
-				authorisedByGovGateway {
-					implicit user =>
 					logger.info("[ReturnServiceController][hmacCheck] HMAC Check Authenticated")
 					if (request.getQueryString("ersSchemeRef").getOrElse("") == "") {
 						logger.warn("[ReturnServiceController][hmacCheck] Missing SchemeRef in URL")
@@ -101,7 +101,6 @@ class ReturnServiceController @Inject()(val mcc: MessagesControllerComponents,
 							showUnauthorisedPage(request)
 						}
 					}
-				}
   }
 
   def showInitialStartPage(requestObject: RequestObject)
@@ -111,8 +110,7 @@ class ReturnServiceController @Inject()(val mcc: MessagesControllerComponents,
       withSession(request.session + ("screenSchemeInfo" -> sessionData) - BUNDLE_REF - DATE_TIME_SUBMITTED)
   }
 
-  def startPage(): Action[AnyContent] = authorisedByGG {
-    implicit user =>
+  def startPage(): Action[AnyContent] = authActionGovGateway.async {
       implicit request =>
         ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).map{
           result =>

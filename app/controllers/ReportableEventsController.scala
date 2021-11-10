@@ -19,6 +19,7 @@ package controllers
 import _root_.models.{RsFormMappings, _}
 import config.ApplicationConfig
 import connectors.ErsConnector
+import controllers.auth.{AuthAction, RequestWithOptionalAuthContext}
 import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.mvc._
@@ -37,21 +38,21 @@ class ReportableEventsController @Inject()(val mcc: MessagesControllerComponents
 																					 implicit val ersUtil: ERSUtil,
 																					 implicit val appConfig: ApplicationConfig,
                                            globalErrorView: views.html.global_error,
-                                           reportableEventsView: views.html.reportable_events
-																					) extends FrontendController(mcc) with Authenticator with I18nSupport with Logging {
+                                           reportableEventsView: views.html.reportable_events,
+                                           authAction: AuthAction
+																					) extends FrontendController(mcc) with I18nSupport with Logging {
 
   implicit val ec: ExecutionContext = mcc.executionContext
 
-  def reportableEventsPage(): Action[AnyContent] = authorisedForAsync() {
-    implicit user =>
+  def reportableEventsPage(): Action[AnyContent] = authAction.async {
       implicit request =>
         ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObj =>
-          updateErsMetaData(requestObj)(user, request, hc)
-          showReportableEventsPage(requestObj)(user, request, hc)
+          updateErsMetaData(requestObj)(request, hc)
+          showReportableEventsPage(requestObj)(request, hc)
         }
   }
 
-  def updateErsMetaData(requestObject: RequestObject)(implicit authContext: ERSAuthData, request: Request[AnyRef], hc: HeaderCarrier): Future[Object] = {
+  def updateErsMetaData(requestObject: RequestObject)(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Object] = {
 		ersConnector.connectToEtmpSapRequest(requestObject.getSchemeReference).flatMap { sapNumber =>
       ersUtil.fetch[ErsMetaData](ersUtil.ersMetaData, requestObject.getSchemeReference).map { metaData =>
         val ersMetaData = ErsMetaData(
@@ -69,7 +70,8 @@ class ReportableEventsController @Inject()(val mcc: MessagesControllerComponents
     }
   }
 
-  def showReportableEventsPage(requestObject: RequestObject)(implicit authContext: ERSAuthData, request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
+  def showReportableEventsPage(requestObject: RequestObject)
+                              (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
     ersUtil.fetch[ReportableEvents](ersUtil.reportableEvents, requestObject.getSchemeReference).map { activity =>
       Ok(reportableEventsView(requestObject, activity.isNilReturn, RsFormMappings.chooseForm.fill(activity)))
     } recover {
@@ -79,11 +81,10 @@ class ReportableEventsController @Inject()(val mcc: MessagesControllerComponents
     }
   }
 
-  def reportableEventsSelected(): Action[AnyContent] = authorisedForAsync() {
-    implicit user =>
+  def reportableEventsSelected(): Action[AnyContent] = authAction.async {
       implicit request =>
         ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObj =>
-          showReportableEventsSelected(requestObj)(user, request) recover {
+          showReportableEventsSelected(requestObj)(request) recover {
             case e: Exception =>
               logger.error(s"[ReportableEventsController][reportableEventsSelected] failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
               getGlobalErrorPage
@@ -91,7 +92,8 @@ class ReportableEventsController @Inject()(val mcc: MessagesControllerComponents
         }
   }
 
-  def showReportableEventsSelected(requestObject: RequestObject)(implicit authContext: ERSAuthData, request: Request[AnyRef]): Future[Result] = {
+  def showReportableEventsSelected(requestObject: RequestObject)
+                                  (implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] = {
     RsFormMappings.chooseForm.bindFromRequest.fold(
       errors => {
         Future.successful(Ok(reportableEventsView(requestObject, Some(""), errors)))

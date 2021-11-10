@@ -19,6 +19,7 @@ package controllers
 import _root_.models._
 import config.ApplicationConfig
 import connectors.ErsConnector
+import controllers.auth.{AuthAction, RequestWithOptionalAuthContext}
 import models.upscan.{UploadedSuccessfully, UpscanCsvFilesCallback, UpscanCsvFilesCallbackList}
 import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages}
@@ -40,21 +41,21 @@ class SummaryDeclarationController @Inject()(val mcc: MessagesControllerComponen
 																						 implicit val ersUtil: ERSUtil,
 																						 implicit val appConfig: ApplicationConfig,
                                              globalErrorView: views.html.global_error,
-                                             summaryView: views.html.summary
-																						) extends FrontendController(mcc) with Authenticator with I18nSupport with Logging {
+                                             summaryView: views.html.summary,
+                                             authAction: AuthAction
+																						) extends FrontendController(mcc) with I18nSupport with Logging {
 
   implicit val ec: ExecutionContext = mcc.executionContext
 
-  def summaryDeclarationPage(): Action[AnyContent] = authorisedForAsync() {
-    implicit user =>
+  def summaryDeclarationPage(): Action[AnyContent] = authAction.async {
       implicit request =>
         ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
-          showSummaryDeclarationPage(requestObject)(user, request, hc)
+          showSummaryDeclarationPage(requestObject)(request, hc)
         }
   }
 
   def showSummaryDeclarationPage(requestObject: RequestObject)
-																(implicit authContext: ERSAuthData, req: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
+																(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
     ersUtil.fetchAll(requestObject.getSchemeReference).flatMap { all =>
       val schemeOrganiser: SchemeOrganiserDetails = all.getEntry[SchemeOrganiserDetails](ersUtil.SCHEME_ORGANISER_CACHE).get
       val groupSchemeInfo: GroupSchemeInfo = all.getEntry[GroupSchemeInfo](ersUtil.GROUP_SCHEME_CACHE_CONTROLLER).getOrElse(new GroupSchemeInfo(None, None))

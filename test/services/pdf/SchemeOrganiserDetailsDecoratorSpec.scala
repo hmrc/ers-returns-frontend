@@ -20,12 +20,14 @@ import models.SchemeOrganiserDetails
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import org.mockito.internal.verification.VerificationModeFactory
-import org.scalatest.{Matchers, OptionValues, WordSpecLike}
+import org.scalatest.OptionValues
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.i18n.Messages
 import utils.CountryCodes
 
-class SchemeOrganiserDetailsDecoratorSpec extends WordSpecLike with Matchers with OptionValues with MockitoSugar {
+class SchemeOrganiserDetailsDecoratorSpec extends AnyWordSpecLike with Matchers with OptionValues with MockitoSugar {
 
   implicit val messages: Messages = mock[Messages]
 	val mockCountryCodes: CountryCodes = mock[CountryCodes]

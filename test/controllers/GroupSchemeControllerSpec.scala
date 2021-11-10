@@ -21,7 +21,9 @@ import models._
 import org.jsoup.Jsoup
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
-import org.scalatest.{BeforeAndAfterEach, Matchers, OptionValues, WordSpecLike}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpecLike
+import org.scalatest.{BeforeAndAfterEach, OptionValues}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.i18n
 import play.api.i18n.{Messages, MessagesApi, MessagesImpl}
@@ -36,7 +38,13 @@ import views.html.{global_error, group, group_plan_summary, manual_company_detai
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class GroupSchemeControllerSpec extends WordSpecLike with Matchers with OptionValues with ErsTestHelper with ERSFakeApplicationConfig with BeforeAndAfterEach with GuiceOneAppPerSuite {
+class GroupSchemeControllerSpec extends AnyWordSpecLike
+  with Matchers
+  with OptionValues
+  with ErsTestHelper
+  with ERSFakeApplicationConfig
+  with BeforeAndAfterEach
+  with GuiceOneAppPerSuite {
 
   val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
     messagesActionBuilder,
@@ -78,7 +86,7 @@ class GroupSchemeControllerSpec extends WordSpecLike with Matchers with OptionVa
 	}
 
   lazy val testGroupSchemeController: GroupSchemeController = new GroupSchemeController(
-    mockMCC, mockAuthConnector, mockCountryCodes, mockErsUtil, mockAppConfig, globalErrorView, groupView, manualCompanyDetailsView, groupPlanSummaryView
+    mockMCC, mockAuthConnector, mockCountryCodes, mockErsUtil, mockAppConfig, globalErrorView, groupView, manualCompanyDetailsView, groupPlanSummaryView, testAuthAction
   )
 
   "manualCompanyDetailsPage" should {
@@ -98,9 +106,10 @@ class GroupSchemeControllerSpec extends WordSpecLike with Matchers with OptionVa
 
   "showManualCompanyDetailsPage" should {
     "display company details page for correct scheme" in {
-      when(mockErsUtil.fetch[RequestObject](refEq(mockErsUtil.ersRequestObject))(any(), any(), any(), any())).thenReturn(Future.successful(ersRequestObject))
+      when(mockErsUtil.fetch[RequestObject](refEq(mockErsUtil.ersRequestObject))(any(), any(), any())).thenReturn(Future.successful(ersRequestObject))
 
-      val result = testGroupSchemeController.showManualCompanyDetailsPage(1)(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+      val result = testGroupSchemeController.showManualCompanyDetailsPage(1)(authRequest)
       status(result) shouldBe OK
       contentAsString(result).contains(Messages("ers_manual_company_details.csop.title"))
     }
@@ -143,21 +152,24 @@ class GroupSchemeControllerSpec extends WordSpecLike with Matchers with OptionVa
     }
 
     "display error if showManualCompanyDetailsSubmit is called with authentication and form errors" in {
-      val result = testGroupSchemeController.showManualCompanyDetailsSubmit(ersRequestObject, 1000)(Fixtures.buildFakeUser, buildCompanyDetailsRequest(isValid = false))
+      val authRequest = buildRequestWithAuth(buildCompanyDetailsRequest(isValid = false))
+
+      val result = testGroupSchemeController.showManualCompanyDetailsSubmit(ersRequestObject, 1000)(authRequest)
       status(result) shouldBe OK
       contentAsString(result) should (include ("govuk-error-summary"))
     }
 
     "redirect to Group Summary page if showManualCompanyDetailsSubmit is called with authentication and correct form data entered for 1st company" in {
       when(
-        mockErsUtil.fetch[CompanyDetailsList](refEq(mockErsUtil.GROUP_SCHEME_COMPANIES), anyString())(any(), any(), any())
+        mockErsUtil.fetch[CompanyDetailsList](refEq(mockErsUtil.GROUP_SCHEME_COMPANIES), anyString())(any(), any())
       ).thenReturn(
         Future.successful(companyDetailsList)
       )
       when(
         mockErsUtil.cache(refEq(mockErsUtil.GROUP_SCHEME_COMPANIES), any[CompanyDetailsList](), anyString())(any(), any(), any())
       ) thenReturn Future.successful(mock[CacheMap])
-      val result = testGroupSchemeController.showManualCompanyDetailsSubmit(ersRequestObject, 10000)(Fixtures.buildFakeUser, buildCompanyDetailsRequest(isValid = true))
+      val authRequest = buildRequestWithAuth(buildCompanyDetailsRequest(isValid = true))
+      val result = testGroupSchemeController.showManualCompanyDetailsSubmit(ersRequestObject, 10000)(authRequest)
       status(result) shouldBe SEE_OTHER
       headers(result).get("Location").get.contains("/group-summary")
     }
@@ -165,7 +177,7 @@ class GroupSchemeControllerSpec extends WordSpecLike with Matchers with OptionVa
 
     "redirect to Group Summary page if showManualCompanyDetailsSubmit is called with authentication and correct form data for additional company" in {
       when(
-        mockErsUtil.fetch[CompanyDetailsList](refEq(mockErsUtil.GROUP_SCHEME_COMPANIES), anyString())(any(), any(), any())
+        mockErsUtil.fetch[CompanyDetailsList](refEq(mockErsUtil.GROUP_SCHEME_COMPANIES), anyString())(any(), any())
       ).thenReturn(
         Future.successful(companyDetailsList)
       )
@@ -174,14 +186,16 @@ class GroupSchemeControllerSpec extends WordSpecLike with Matchers with OptionVa
       ).thenReturn(
         Future.successful(mock[CacheMap])
       )
-      val result = testGroupSchemeController.showManualCompanyDetailsSubmit(ersRequestObject, 1)(Fixtures.buildFakeUser, buildCompanyDetailsRequest(isValid = true))
+
+      val authRequest = buildRequestWithAuth(buildCompanyDetailsRequest(isValid = true))
+      val result = testGroupSchemeController.showManualCompanyDetailsSubmit(ersRequestObject, 1)(authRequest)
       status(result) shouldBe SEE_OTHER
       headers(result).get("Location").get.contains("/group-summary")
     }
 
     "redirect to Group Summary page if showManualCompanyDetailsSubmit is called with authentication and correct form data for updated company" in {
       when(
-        mockErsUtil.fetch[CompanyDetailsList](refEq(mockErsUtil.GROUP_SCHEME_COMPANIES), anyString())(any(), any(), any())
+        mockErsUtil.fetch[CompanyDetailsList](refEq(mockErsUtil.GROUP_SCHEME_COMPANIES), anyString())(any(), any())
       ).thenReturn(
         Future.successful(companyDetailsList)
       )
@@ -190,7 +204,9 @@ class GroupSchemeControllerSpec extends WordSpecLike with Matchers with OptionVa
       ).thenReturn(
         Future.successful(mock[CacheMap])
       )
-      val result = testGroupSchemeController.showManualCompanyDetailsSubmit(ersRequestObject, 0)(Fixtures.buildFakeUser, buildCompanyDetailsRequest(isValid = true))
+
+      val authRequest = buildRequestWithAuth(buildCompanyDetailsRequest(isValid = true))
+      val result = testGroupSchemeController.showManualCompanyDetailsSubmit(ersRequestObject, 0)(authRequest)
       status(result) shouldBe SEE_OTHER
       headers(result).get("Location").get.contains("/group-summary")
     }
@@ -198,7 +214,7 @@ class GroupSchemeControllerSpec extends WordSpecLike with Matchers with OptionVa
 
     "redirect to Group Summary page if data is filled correctly and there is nothing in existing cache" in {
       when(
-        mockErsUtil.fetch[CompanyDetailsList](refEq(mockErsUtil.GROUP_SCHEME_COMPANIES), anyString())(any(), any(), any())
+        mockErsUtil.fetch[CompanyDetailsList](refEq(mockErsUtil.GROUP_SCHEME_COMPANIES), anyString())(any(), any())
       ).thenReturn(
         Future.failed(new NoSuchElementException("Nothing in cache"))
       )
@@ -207,7 +223,9 @@ class GroupSchemeControllerSpec extends WordSpecLike with Matchers with OptionVa
       ).thenReturn(
         Future.successful(mock[CacheMap])
       )
-      val result = testGroupSchemeController.showManualCompanyDetailsSubmit(ersRequestObject, 1000)(Fixtures.buildFakeUser, buildCompanyDetailsRequest(isValid = true))
+
+      val authRequest = buildRequestWithAuth(buildCompanyDetailsRequest(isValid = true))
+      val result = testGroupSchemeController.showManualCompanyDetailsSubmit(ersRequestObject, 1000)(authRequest)
       status(result) shouldBe SEE_OTHER
       headers(result).get("Location").get.contains("/group-summary")
     }
@@ -216,7 +234,7 @@ class GroupSchemeControllerSpec extends WordSpecLike with Matchers with OptionVa
   "calling replace company" should {
 
 		lazy val controllerUnderTest: GroupSchemeController = new GroupSchemeController(
-    mockMCC, mockAuthConnector, mockCountryCodes, mockErsUtil, mockAppConfig, globalErrorView, groupView, manualCompanyDetailsView, groupPlanSummaryView
+    mockMCC, mockAuthConnector, mockCountryCodes, mockErsUtil, mockAppConfig, globalErrorView, groupView, manualCompanyDetailsView, groupPlanSummaryView, testAuthAction
   )
 
     "replace a companies and keep the other companies" when {
@@ -311,10 +329,12 @@ class GroupSchemeControllerSpec extends WordSpecLike with Matchers with OptionVa
       ) thenReturn Future.failed(new NoSuchElementException("Nothing in cache"))
 
       when(
-        mockErsUtil.fetch[RequestObject](refEq(mockErsUtil.ersRequestObject))(any(), any(), any(), any())
+        mockErsUtil.fetch[RequestObject](refEq(mockErsUtil.ersRequestObject))(any(), any(), any())
       ) thenReturn Future.successful(ersRequestObject)
 
-      val result = testGroupSchemeController.showDeleteCompany(0)(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc)
+
+      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
+      val result = testGroupSchemeController.showDeleteCompany(0)(authRequest, hc)
       status(result) shouldBe OK
       contentAsString(result).contains(Messages("ers.global_errors.title")) shouldBe true
     }
@@ -326,10 +346,11 @@ class GroupSchemeControllerSpec extends WordSpecLike with Matchers with OptionVa
       ) thenReturn Future.successful(mock[CacheMap])
 
       when(
-        mockErsUtil.fetch[RequestObject](refEq(mockErsUtil.ersRequestObject))(any(), any(), any(), any())
+        mockErsUtil.fetch[RequestObject](refEq(mockErsUtil.ersRequestObject))(any(), any(), any())
       ) thenReturn Future.failed(new Exception)
 
-      val result = testGroupSchemeController.showDeleteCompany(0)(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc)
+      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
+      val result = testGroupSchemeController.showDeleteCompany(0)(authRequest, hc)
       status(result) shouldBe OK
       contentAsString(result).contains(Messages("ers.global_errors.title")) shouldBe true
     }
@@ -340,7 +361,7 @@ class GroupSchemeControllerSpec extends WordSpecLike with Matchers with OptionVa
 				.thenReturn(Future.successful(CacheMap("id1", Map(GROUP_SCHEME_COMPANIES -> Json.toJson(companyDetailsList)))))
 
       when(
-        mockErsUtil.fetch[RequestObject](refEq(mockErsUtil.ersRequestObject))(any(), any(), any(), any())
+        mockErsUtil.fetch[RequestObject](refEq(mockErsUtil.ersRequestObject))(any(), any(), any())
       ) thenReturn Future.successful(ersRequestObject)
 
       when(
@@ -348,7 +369,8 @@ class GroupSchemeControllerSpec extends WordSpecLike with Matchers with OptionVa
       ) thenReturn Future(mock[CacheMap])
 
 
-      val result = testGroupSchemeController.showDeleteCompany(0)(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc)
+      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
+      val result = testGroupSchemeController.showDeleteCompany(0)(authRequest, hc)
       status(result) shouldBe SEE_OTHER
       headers(result).get("Location").get.contains("/group-summary")
     }
@@ -364,7 +386,7 @@ class GroupSchemeControllerSpec extends WordSpecLike with Matchers with OptionVa
       )
 
       when(
-        mockErsUtil.fetch[RequestObject](refEq(mockErsUtil.ersRequestObject))(any(), any(), any(), any())
+        mockErsUtil.fetch[RequestObject](refEq(mockErsUtil.ersRequestObject))(any(), any(), any())
       ) thenReturn Future.successful(ersRequestObject)
 
       when(
@@ -373,7 +395,8 @@ class GroupSchemeControllerSpec extends WordSpecLike with Matchers with OptionVa
 
       val expected = CompanyDetailsList(List(company))
 
-      val result = testGroupSchemeController.showDeleteCompany(0)(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc)
+      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
+      val result = testGroupSchemeController.showDeleteCompany(0)(authRequest, hc)
       status(result) shouldBe SEE_OTHER
 
       verify(mockErsUtil, times(1)).cache(refEq(GROUP_SCHEME_COMPANIES), refEq(expected), refEq(ersRequestObject.getSchemeReference))(any(), any(), any())
@@ -398,14 +421,15 @@ class GroupSchemeControllerSpec extends WordSpecLike with Matchers with OptionVa
     "display error page if fetch company details list fails" in {
 
       when(
-        mockErsUtil.fetch[CompanyDetailsList](refEq(mockErsUtil.GROUP_SCHEME_COMPANIES), anyString())(any(), any(), any())
+        mockErsUtil.fetch[CompanyDetailsList](refEq(mockErsUtil.GROUP_SCHEME_COMPANIES), anyString())(any(), any())
       ) thenReturn Future.failed(new NoSuchElementException("Nothing in cache"))
 
       when(
-        mockErsUtil.fetch[RequestObject](refEq(mockErsUtil.ersRequestObject))(any(), any(), any(), any())
+        mockErsUtil.fetch[RequestObject](refEq(mockErsUtil.ersRequestObject))(any(), any(), any())
       ) thenReturn Future.successful(ersRequestObject)
 
-      val result = testGroupSchemeController.showEditCompany(0)(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc)
+      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
+      val result = testGroupSchemeController.showEditCompany(0)(authRequest, hc)
       status(result) shouldBe OK
       contentAsString(result).contains(Messages("ers.global_errors.title")) shouldBe true
     }
@@ -413,14 +437,15 @@ class GroupSchemeControllerSpec extends WordSpecLike with Matchers with OptionVa
     "display error page if fetch request object fails" in {
 
       when(
-        mockErsUtil.fetch[CompanyDetailsList](refEq(mockErsUtil.GROUP_SCHEME_COMPANIES), anyString())(any(), any(), any())
+        mockErsUtil.fetch[CompanyDetailsList](refEq(mockErsUtil.GROUP_SCHEME_COMPANIES), anyString())(any(), any())
       ) thenReturn Future.successful(companyDetailsList)
 
       when(
-        mockErsUtil.fetch[RequestObject](refEq(mockErsUtil.ersRequestObject))(any(), any(), any(), any())
+        mockErsUtil.fetch[RequestObject](refEq(mockErsUtil.ersRequestObject))(any(), any(), any())
       ) thenReturn Future.failed(new Exception)
 
-      val result = testGroupSchemeController.showEditCompany(0)(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc)
+      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
+      val result = testGroupSchemeController.showEditCompany(0)(authRequest, hc)
       status(result) shouldBe OK
       contentAsString(result).contains(Messages("ers.global_errors.title")) shouldBe true
     }
@@ -428,14 +453,15 @@ class GroupSchemeControllerSpec extends WordSpecLike with Matchers with OptionVa
     "display manualCompanyDetailsPage with the selected company details if showEditCompany is called with authentication and correct cache" in {
 
       when(
-        mockErsUtil.fetch[CompanyDetailsList](refEq(mockErsUtil.GROUP_SCHEME_COMPANIES), anyString())(any(), any(), any())
+        mockErsUtil.fetch[CompanyDetailsList](refEq(mockErsUtil.GROUP_SCHEME_COMPANIES), anyString())(any(), any())
       ) thenReturn Future.successful(companyDetailsList)
 
       when(
-        mockErsUtil.fetch[RequestObject](refEq(mockErsUtil.ersRequestObject))(any(), any(), any(), any())
+        mockErsUtil.fetch[RequestObject](refEq(mockErsUtil.ersRequestObject))(any(), any(), any())
       ) thenReturn Future.successful(ersRequestObject)
 
-      val result = testGroupSchemeController.showEditCompany(0)(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionIdCSOP("GET"), hc)
+      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+      val result = testGroupSchemeController.showEditCompany(0)(authRequest, hc)
       status(result) shouldBe OK
       contentAsString(result).contains(Messages("ers_manual_company_details.csop.title"))
     }
@@ -459,11 +485,13 @@ class GroupSchemeControllerSpec extends WordSpecLike with Matchers with OptionVa
   "showGroupSchemePage" should {
     "display group scheme page if there is no data in cache" in {
       when(
-        mockErsUtil.fetch[GroupSchemeInfo](refEq(mockErsUtil.GROUP_SCHEME_CACHE_CONTROLLER), anyString())(any(), any(), any())
+        mockErsUtil.fetch[GroupSchemeInfo](refEq(mockErsUtil.GROUP_SCHEME_CACHE_CONTROLLER), anyString())(any(), any())
       ).thenReturn(
         Future.failed(new NoSuchElementException("Nothing in cache"))
       )
-      val result = testGroupSchemeController.showGroupSchemePage(ersRequestObject)(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc)
+
+      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
+      val result = testGroupSchemeController.showGroupSchemePage(ersRequestObject)(authRequest, hc)
       status(result) shouldBe OK
       val document = Jsoup.parse(contentAsString(result))
       document.select("input[id=yes]").hasAttr("checked") shouldEqual false
@@ -471,11 +499,13 @@ class GroupSchemeControllerSpec extends WordSpecLike with Matchers with OptionVa
     }
     "display group scheme page if there is cached data" in {
       when(
-        mockErsUtil.fetch[GroupSchemeInfo](refEq(mockErsUtil.GROUP_SCHEME_CACHE_CONTROLLER), anyString())(any(), any(), any())
+        mockErsUtil.fetch[GroupSchemeInfo](refEq(mockErsUtil.GROUP_SCHEME_CACHE_CONTROLLER), anyString())(any(), any())
       ).thenReturn(
         Future.successful(GroupSchemeInfo(Option(OPTION_YES), None))
       )
-      val result = testGroupSchemeController.showGroupSchemePage(ersRequestObject)(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc)
+
+      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
+      val result = testGroupSchemeController.showGroupSchemePage(ersRequestObject)(authRequest, hc)
       status(result) shouldBe OK
       val document = Jsoup.parse(contentAsString(result))
       document.select("input[id=yes]").hasAttr("checked") shouldEqual true
@@ -517,14 +547,18 @@ class GroupSchemeControllerSpec extends WordSpecLike with Matchers with OptionVa
 
     "display errors if invalid data is sent" in {
       val request = buildGroupSchemeSelectedRequest(None, "CSOP")
-      val result = testGroupSchemeController.showGroupSchemeSelected(ersRequestObject, SCHEME_CSOP)(Fixtures.buildFakeUser, request)
+      val authRequest = buildRequestWithAuth(request)
+
+      val result = testGroupSchemeController.showGroupSchemeSelected(ersRequestObject, SCHEME_CSOP)(authRequest)
       status(result) shouldBe OK
       contentAsString(result).contains(Messages("validation.summary.heading")) shouldBe true
     }
 
     "display errors if no data is set" in {
       val request = buildGroupSchemeSelectedRequest(None, "")
-      val result = testGroupSchemeController.showGroupSchemeSelected(ersRequestObject, SCHEME_CSOP)(Fixtures.buildFakeUser, request)
+      val authRequest = buildRequestWithAuth(request)
+
+      val result = testGroupSchemeController.showGroupSchemeSelected(ersRequestObject, SCHEME_CSOP)(authRequest)
       status(result) shouldBe OK
       contentAsString(result).contains(Messages("validation.summary.heading")) shouldBe true
     }
@@ -536,7 +570,9 @@ class GroupSchemeControllerSpec extends WordSpecLike with Matchers with OptionVa
         Future.successful(mock[CacheMap])
       )
       val request = buildGroupSchemeSelectedRequest(Some(true), "CSOP")
-      val result = testGroupSchemeController.showGroupSchemeSelected(ersRequestObject, SCHEME_CSOP)(Fixtures.buildFakeUser, request)
+      val authRequest = buildRequestWithAuth(request)
+
+      val result = testGroupSchemeController.showGroupSchemeSelected(ersRequestObject, SCHEME_CSOP)(authRequest)
       status(result) shouldBe SEE_OTHER
       headers(result).get("Location").get.contains("/add-company-details-manually")
     }
@@ -548,7 +584,9 @@ class GroupSchemeControllerSpec extends WordSpecLike with Matchers with OptionVa
         Future.successful(mock[CacheMap])
       )
       val request = buildGroupSchemeSelectedRequest(Some(false), "CSOP")
-      val result = testGroupSchemeController.showGroupSchemeSelected(ersRequestObject, SCHEME_CSOP)(Fixtures.buildFakeUser, request)
+      val authRequest = buildRequestWithAuth(request)
+
+      val result = testGroupSchemeController.showGroupSchemeSelected(ersRequestObject, SCHEME_CSOP)(authRequest)
       status(result) shouldBe SEE_OTHER
       headers(result).get("Location").get.contains("/alterations")
     }
@@ -560,7 +598,9 @@ class GroupSchemeControllerSpec extends WordSpecLike with Matchers with OptionVa
         Future.successful(mock[CacheMap])
       )
       val request = buildGroupSchemeSelectedRequest(Some(true), "SAYE")
-      val result = testGroupSchemeController.showGroupSchemeSelected(ersRequestObject, mockErsUtil.SCHEME_SAYE)(Fixtures.buildFakeUser, request)
+      val authRequest = buildRequestWithAuth(request)
+
+      val result = testGroupSchemeController.showGroupSchemeSelected(ersRequestObject, mockErsUtil.SCHEME_SAYE)(authRequest)
       status(result) shouldBe SEE_OTHER
       headers(result).get("Location").get.contains("/add-company-details-manually")
     }
@@ -572,7 +612,9 @@ class GroupSchemeControllerSpec extends WordSpecLike with Matchers with OptionVa
         Future.successful(mock[CacheMap])
       )
       val request = buildGroupSchemeSelectedRequest(Some(false), "SAYE")
-      val result = testGroupSchemeController.showGroupSchemeSelected(ersRequestObject, mockErsUtil.SCHEME_SAYE)(Fixtures.buildFakeUser, request)
+      val authRequest = buildRequestWithAuth(request)
+
+      val result = testGroupSchemeController.showGroupSchemeSelected(ersRequestObject, mockErsUtil.SCHEME_SAYE)(authRequest)
       status(result) shouldBe SEE_OTHER
       headers(result).get("Location").get.contains("/alterations")
     }
@@ -584,7 +626,9 @@ class GroupSchemeControllerSpec extends WordSpecLike with Matchers with OptionVa
         Future.successful(mock[CacheMap])
       )
       val request = buildGroupSchemeSelectedRequest(Some(true), "EMI")
-      val result = testGroupSchemeController.showGroupSchemeSelected(ersRequestObject, mockErsUtil.SCHEME_EMI)(Fixtures.buildFakeUser, request)
+      val authRequest = buildRequestWithAuth(request)
+
+      val result = testGroupSchemeController.showGroupSchemeSelected(ersRequestObject, mockErsUtil.SCHEME_EMI)(authRequest)
       status(result) shouldBe SEE_OTHER
       headers(result).get("Location").get.contains("/add-company-details-manually")
     }
@@ -596,7 +640,9 @@ class GroupSchemeControllerSpec extends WordSpecLike with Matchers with OptionVa
         Future.successful(mock[CacheMap])
       )
       val request = buildGroupSchemeSelectedRequest(Some(false), "EMI")
-      val result = testGroupSchemeController.showGroupSchemeSelected(ersRequestObject, mockErsUtil.SCHEME_EMI)(Fixtures.buildFakeUser, request)
+      val authRequest = buildRequestWithAuth(request)
+
+      val result = testGroupSchemeController.showGroupSchemeSelected(ersRequestObject, mockErsUtil.SCHEME_EMI)(authRequest)
       status(result) shouldBe SEE_OTHER
       headers(result).get("Location").get.contains("/summary")
     }
@@ -608,7 +654,9 @@ class GroupSchemeControllerSpec extends WordSpecLike with Matchers with OptionVa
         Future.successful(mock[CacheMap])
       )
       val request = buildGroupSchemeSelectedRequest(Some(true), "SIP")
-      val result = testGroupSchemeController.showGroupSchemeSelected(ersRequestObject, mockErsUtil.SCHEME_SIP)(Fixtures.buildFakeUser, request)
+      val authRequest = buildRequestWithAuth(request)
+
+      val result = testGroupSchemeController.showGroupSchemeSelected(ersRequestObject, mockErsUtil.SCHEME_SIP)(authRequest)
       status(result) shouldBe SEE_OTHER
       headers(result).get("Location").get.contains("/add-company-details-manually")
     }
@@ -620,7 +668,9 @@ class GroupSchemeControllerSpec extends WordSpecLike with Matchers with OptionVa
         Future.successful(mock[CacheMap])
       )
       val request = buildGroupSchemeSelectedRequest(Some(false), "SIP")
-      val result = testGroupSchemeController.showGroupSchemeSelected(ersRequestObject, mockErsUtil.SCHEME_SIP)(Fixtures.buildFakeUser, request)
+      val authRequest = buildRequestWithAuth(request)
+
+      val result = testGroupSchemeController.showGroupSchemeSelected(ersRequestObject, mockErsUtil.SCHEME_SIP)(authRequest)
       status(result) shouldBe SEE_OTHER
       headers(result).get("Location").get.contains("/trustee-details")
     }
@@ -632,7 +682,9 @@ class GroupSchemeControllerSpec extends WordSpecLike with Matchers with OptionVa
         Future.successful(mock[CacheMap])
       )
       val request = buildGroupSchemeSelectedRequest(Some(true), "OTHER")
-      val result = testGroupSchemeController.showGroupSchemeSelected(ersRequestObject, mockErsUtil.SCHEME_OTHER)(Fixtures.buildFakeUser, request)
+      val authRequest = buildRequestWithAuth(request)
+
+      val result = testGroupSchemeController.showGroupSchemeSelected(ersRequestObject, mockErsUtil.SCHEME_OTHER)(authRequest)
       status(result) shouldBe SEE_OTHER
       headers(result).get("Location").get.contains("/add-company-details-manually")
     }
@@ -644,7 +696,9 @@ class GroupSchemeControllerSpec extends WordSpecLike with Matchers with OptionVa
         Future.successful(mock[CacheMap])
       )
       val request = buildGroupSchemeSelectedRequest(Some(false), "OTHER")
-      val result = testGroupSchemeController.showGroupSchemeSelected(ersRequestObject, mockErsUtil.SCHEME_OTHER)(Fixtures.buildFakeUser, request)
+      val authRequest = buildRequestWithAuth(request)
+
+      val result = testGroupSchemeController.showGroupSchemeSelected(ersRequestObject, mockErsUtil.SCHEME_OTHER)(authRequest)
       status(result) shouldBe SEE_OTHER
       headers(result).get("Location").get.contains("/summary")
     }
@@ -670,14 +724,15 @@ class GroupSchemeControllerSpec extends WordSpecLike with Matchers with OptionVa
     "display error page if fetch company details list fails" in {
 
       when(
-        mockErsUtil.fetch[CompanyDetailsList](refEq(mockErsUtil.GROUP_SCHEME_COMPANIES), anyString())(any(), any(), any())
+        mockErsUtil.fetch[CompanyDetailsList](refEq(mockErsUtil.GROUP_SCHEME_COMPANIES), anyString())(any(), any())
       ) thenReturn Future.failed(new NoSuchElementException("Nothing in cache"))
 
       when(
-        mockErsUtil.fetch[RequestObject](refEq(mockErsUtil.ersRequestObject))(any(), any(), any(), any())
+        mockErsUtil.fetch[RequestObject](refEq(mockErsUtil.ersRequestObject))(any(), any(), any())
       ) thenReturn Future.successful(ersRequestObject)
 
-      val result = testGroupSchemeController.showGroupPlanSummaryPage()(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc)
+      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
+      val result = testGroupSchemeController.showGroupPlanSummaryPage()(authRequest, hc)
       status(result) shouldBe OK
       contentAsString(result).contains(Messages("ers.global_errors.title")) shouldBe true
     }
@@ -685,28 +740,32 @@ class GroupSchemeControllerSpec extends WordSpecLike with Matchers with OptionVa
     "display error page if fetch request object fails" in {
 
       when(
-        mockErsUtil.fetch[CompanyDetailsList](refEq(mockErsUtil.GROUP_SCHEME_COMPANIES), anyString())(any(), any(), any())
+        mockErsUtil.fetch[CompanyDetailsList](refEq(mockErsUtil.GROUP_SCHEME_COMPANIES), anyString())(any(), any())
       ) thenReturn Future.successful(mock[CompanyDetailsList])
 
       when(
-        mockErsUtil.fetch[RequestObject](refEq(mockErsUtil.ersRequestObject))(any(), any(), any(), any())
+        mockErsUtil.fetch[RequestObject](refEq(mockErsUtil.ersRequestObject))(any(), any(), any())
       ) thenReturn Future.failed(new Exception)
 
-      val result = testGroupSchemeController.showGroupPlanSummaryPage()(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc)
+
+      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
+      val result = testGroupSchemeController.showGroupPlanSummaryPage()(authRequest, hc)
       status(result) shouldBe OK
       contentAsString(result).contains(Messages("ers.global_errors.title")) shouldBe true
     }
 
     "display group plan summary if showGroupPlanSummaryPage is called with authentication and correct cache" in {
       when(
-        mockErsUtil.fetch[CompanyDetailsList](refEq(mockErsUtil.GROUP_SCHEME_COMPANIES), anyString())(any(), any(), any())
+        mockErsUtil.fetch[CompanyDetailsList](refEq(mockErsUtil.GROUP_SCHEME_COMPANIES), anyString())(any(), any())
       ) thenReturn Future.successful(companyDetailsList)
 
       when(
-        mockErsUtil.fetch[RequestObject](refEq(mockErsUtil.ersRequestObject))(any(), any(), any(), any())
+        mockErsUtil.fetch[RequestObject](refEq(mockErsUtil.ersRequestObject))(any(), any(), any())
       ) thenReturn Future.successful(ersRequestObject)
 
-      val result = testGroupSchemeController.showGroupPlanSummaryPage()(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionIdCSOP("GET"), hc)
+
+      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+      val result = testGroupSchemeController.showGroupPlanSummaryPage()(authRequest, hc)
       status(result) shouldBe OK
       contentAsString(result).contains(Messages("ers_group_summary.csop.title"))
     }
@@ -727,32 +786,34 @@ class GroupSchemeControllerSpec extends WordSpecLike with Matchers with OptionVa
   }
 
   "continueFromGroupPlanSummaryPage" should {
+    def authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
+
     "redirect to alterations page for CSOP" in {
-      val result = testGroupSchemeController.continueFromGroupPlanSummaryPage(mockErsUtil.SCHEME_CSOP)(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc)
+      val result = testGroupSchemeController.continueFromGroupPlanSummaryPage(mockErsUtil.SCHEME_CSOP)(authRequest, hc)
       status(result) shouldBe SEE_OTHER
       headers(result).get("Location").get.contains("/alterations")
     }
 
     "redirect to alterations page for SAYE" in {
-      val result = testGroupSchemeController.continueFromGroupPlanSummaryPage(mockErsUtil.SCHEME_SAYE)(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc)
+      val result = testGroupSchemeController.continueFromGroupPlanSummaryPage(mockErsUtil.SCHEME_SAYE)(authRequest, hc)
       status(result) shouldBe SEE_OTHER
       headers(result).get("Location").get.contains("/alterations")
     }
 
     "redirect to summary page for EMI" in {
-      val result = testGroupSchemeController.continueFromGroupPlanSummaryPage(mockErsUtil.SCHEME_EMI)(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc)
+      val result = testGroupSchemeController.continueFromGroupPlanSummaryPage(mockErsUtil.SCHEME_EMI)(authRequest, hc)
       status(result) shouldBe SEE_OTHER
       headers(result).get("Location").get.contains("/summary")
     }
 
     "redirect to trustee page for SIP" in {
-      val result = testGroupSchemeController.continueFromGroupPlanSummaryPage(mockErsUtil.SCHEME_SIP)(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc)
+      val result = testGroupSchemeController.continueFromGroupPlanSummaryPage(mockErsUtil.SCHEME_SIP)(authRequest, hc)
       status(result) shouldBe SEE_OTHER
       headers(result).get("Location").get.contains("/trustee-details")
     }
 
     "redirect to summary page for OTHER" in {
-      val result = testGroupSchemeController.continueFromGroupPlanSummaryPage(mockErsUtil.SCHEME_OTHER)(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc)
+      val result = testGroupSchemeController.continueFromGroupPlanSummaryPage(mockErsUtil.SCHEME_OTHER)(authRequest, hc)
       status(result) shouldBe SEE_OTHER
       headers(result).get("Location").get.contains("/summary")
     }

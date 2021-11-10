@@ -17,17 +17,24 @@
 package utils
 
 import akka.stream.Materializer
-import org.scalatest.{Matchers, OptionValues, WordSpecLike}
+import org.scalatest.OptionValues
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.i18n
-import play.api.i18n.{Messages, MessagesApi, MessagesImpl}
+import play.api.i18n.{Messages, MessagesApi}
 import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents}
 import play.api.test.Helpers.stubBodyParser
 
 import scala.concurrent.ExecutionContext
 
-class ContentUtilTest extends WordSpecLike with Matchers with OptionValues with ERSFakeApplicationConfig with MockitoSugar with ErsTestHelper with GuiceOneAppPerSuite {
+class ContentUtilTest extends AnyWordSpecLike
+  with Matchers
+  with OptionValues
+  with ERSFakeApplicationConfig
+  with MockitoSugar
+  with ErsTestHelper
+  with GuiceOneAppPerSuite {
 
   val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
     messagesActionBuilder,
@@ -39,8 +46,6 @@ class ContentUtilTest extends WordSpecLike with Matchers with OptionValues with 
     ExecutionContext.global
   )
 
-  implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
-  implicit lazy val messages: Messages = testMessages.messages
   implicit lazy val mat: Materializer = app.materializer
 
   "getSchemeName" should {

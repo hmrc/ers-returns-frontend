@@ -23,8 +23,11 @@ import org.jsoup.Jsoup
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.{Matchers, OptionValues, WordSpecLike}
+import org.scalatest.OptionValues
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+
 import play.api.http.Status
 import play.api.i18n
 import play.api.i18n.{MessagesApi, MessagesImpl}
@@ -38,7 +41,13 @@ import views.html.{global_error, reportable_events}
 import java.util.NoSuchElementException
 import scala.concurrent.{ExecutionContext, Future}
 
-class ReportableEventsControllerSpec extends WordSpecLike with Matchers with OptionValues with ERSFakeApplicationConfig with ErsTestHelper with GuiceOneAppPerSuite with ScalaFutures {
+class ReportableEventsControllerSpec extends AnyWordSpecLike
+  with Matchers
+  with OptionValues
+  with ERSFakeApplicationConfig
+  with ErsTestHelper
+  with GuiceOneAppPerSuite
+  with ScalaFutures {
 
   val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
     messagesActionBuilder,
@@ -65,25 +74,26 @@ class ReportableEventsControllerSpec extends WordSpecLike with Matchers with Opt
 																						schemeOrganiserDetailsRes: Boolean = true,
 																						schemeOrganiserDataCached: Boolean = false,
 																						reportableEventsRes: Boolean = true
-																					 ): ReportableEventsController = new ReportableEventsController(mockMCC, mockAuthConnector, mockErsConnector, mockErsUtil, mockAppConfig, globalErrorView, reportableEventsView) {
+																					 ): ReportableEventsController = new ReportableEventsController(mockMCC, mockAuthConnector, mockErsConnector, mockErsUtil,
+      mockAppConfig, globalErrorView, reportableEventsView, testAuthAction) {
       val schemeInfo: SchemeInfo = SchemeInfo("XA1100000000000", DateTime.now, "1", "2016", "CSOP 2015/16", "CSOP")
       val ersMetaData: ErsMetaData = ErsMetaData(schemeInfo, "300.300.300.300", None, "", None, None)
 
-			when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any(), any())).thenReturn(Future.successful(ersRequestObject))
+			when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any())).thenReturn(Future.successful(ersRequestObject))
 
       when(mockErsConnector.connectToEtmpSapRequest(anyString())(any(), any()))
 				.thenReturn(if(sapRequestRes) Future.successful("1234567890") else Future.failed(new RuntimeException))
 
-      when(mockErsUtil.fetch[ReportableEvents](refEq(TEST_REPORTABLE_EVENTS), anyString())(any(), any(), any()))
+      when(mockErsUtil.fetch[ReportableEvents](refEq(TEST_REPORTABLE_EVENTS), anyString())(any(), any()))
 				.thenReturn(if(reportableEventsRes) Future.successful(ReportableEvents(Some(TEST_OPTION_NIL_RETURN))) else Future.failed(new NoSuchElementException))
 
-			when(mockErsUtil.fetch[ErsMetaData](refEq(mockErsUtil.ersMetaData), anyString())(any(), any(), any()))
+			when(mockErsUtil.fetch[ErsMetaData](refEq(mockErsUtil.ersMetaData), anyString())(any(), any()))
 				.thenReturn(if (ersMetaDataRes) Future.successful(ersMetaData) else Future.failed(new NoSuchElementException))
 
 			when(mockErsUtil.cache(refEq(mockErsUtil.ersMetaData), any(), any())(any(), any(), any()))
 				.thenReturn(if (ersMetaDataCachedOk) Future.successful(null) else Future.failed(new Exception))
 
-			when(mockErsUtil.fetch[SchemeOrganiserDetails](refEq(mockErsUtil.SCHEME_ORGANISER_CACHE), anyString())(any(), any(), any()))
+			when(mockErsUtil.fetch[SchemeOrganiserDetails](refEq(mockErsUtil.SCHEME_ORGANISER_CACHE), anyString())(any(), any()))
 				.thenReturn(
         if (schemeOrganiserDetailsRes) {
 					if (schemeOrganiserDataCached) {
@@ -113,21 +123,27 @@ class ReportableEventsControllerSpec extends WordSpecLike with Matchers with Opt
 
     "direct to ers errors page if fetching ersMetaData throws exception" in {
       val controllerUnderTest = buildFakeReportableEventsController(ersMetaDataRes = false)
-      val result = controllerUnderTest.updateErsMetaData(ersRequestObject)(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionIdCSOP("GET"), hc)
+      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+
+      val result = controllerUnderTest.updateErsMetaData(ersRequestObject)(authRequest, hc)
       status(result.asInstanceOf[Future[Result]]) shouldBe 500
-      contentAsString(result.asInstanceOf[Future[Result]]) shouldBe contentAsString(Future.successful(controllerUnderTest.getGlobalErrorPage))
+      contentAsString(result.asInstanceOf[Future[Result]]) shouldBe contentAsString(Future.successful(controllerUnderTest.getGlobalErrorPage(testFakeRequest, testMessages)))
     }
 
     "direct to ers errors page if saving ersMetaData throws exception" in {
       val controllerUnderTest = buildFakeReportableEventsController(ersMetaDataCachedOk = false)
-      val result = controllerUnderTest.updateErsMetaData(ersRequestObject)(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionIdCSOP("GET"), hc).futureValue
+      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+
+      val result = controllerUnderTest.updateErsMetaData(ersRequestObject)(authRequest, hc).futureValue
       status(result.asInstanceOf[Future[Result]]) shouldBe 500
-      contentAsString(result.asInstanceOf[Future[Result]]) shouldBe contentAsString(Future.successful(controllerUnderTest.getGlobalErrorPage))
+      contentAsString(result.asInstanceOf[Future[Result]]) shouldBe contentAsString(Future.successful(controllerUnderTest.getGlobalErrorPage(testFakeRequest, testMessages)))
     }
 
     "show blank reportable events page if fetching reportableEvents throws exception" in {
       val controllerUnderTest = buildFakeReportableEventsController(reportableEventsRes = false)
-      val result = controllerUnderTest.showReportableEventsPage(ersRequestObject)(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionIdCSOP("GET"), hc)
+      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+
+      val result = controllerUnderTest.showReportableEventsPage(ersRequestObject)(authRequest, hc)
       status(result) shouldBe Status.OK
       val document = Jsoup.parse(contentAsString(result))
       document.select("input[id=upload-spreadsheet-radio-button]").hasAttr("checked") shouldEqual false
@@ -136,7 +152,9 @@ class ReportableEventsControllerSpec extends WordSpecLike with Matchers with Opt
 
     "show reportable events page with NO selected" in {
       val controllerUnderTest = buildFakeReportableEventsController()
-      val result = controllerUnderTest.showReportableEventsPage(ersRequestObject)(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionIdCSOP("GET"), hc)
+      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+
+      val result = controllerUnderTest.showReportableEventsPage(ersRequestObject)(authRequest, hc)
       status(result) shouldBe Status.OK
       val document = Jsoup.parse(contentAsString(result))
       document.select("input[id=upload-spreadsheet-radio-button]").hasAttr("checked") shouldEqual false
@@ -154,25 +172,26 @@ class ReportableEventsControllerSpec extends WordSpecLike with Matchers with Opt
 																						schemeOrganiserDetailsRes: Boolean = true,
 																						schemeOrganiserDataCached: Boolean = false,
 																						reportableEventsRes: Boolean = true
-																					 ): ReportableEventsController = new ReportableEventsController(mockMCC, mockAuthConnector, mockErsConnector, mockErsUtil, mockAppConfig, globalErrorView, reportableEventsView) {
+																					 ): ReportableEventsController = new ReportableEventsController(mockMCC, mockAuthConnector, mockErsConnector,
+      mockErsUtil, mockAppConfig, globalErrorView, reportableEventsView, testAuthAction) {
       val schemeInfo: SchemeInfo = SchemeInfo("XA1100000000000", DateTime.now, "1", "2016", "CSOP 2015/16", "CSOP")
       val ersMetaData: ErsMetaData = ErsMetaData(schemeInfo, "300.300.300.300", None, "", None, None)
 
-			when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any(), any())).thenReturn(Future.successful(ersRequestObject))
+			when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any())).thenReturn(Future.successful(ersRequestObject))
 
       when(mockErsConnector.connectToEtmpSapRequest(anyString())(any(), any()))
 				.thenReturn(if (sapRequestRes) Future.successful("1234567890") else Future.failed(new RuntimeException))
 
-      when(mockErsUtil.fetch[ReportableEvents](refEq(TEST_REPORTABLE_EVENTS), any())(any(), any(), any()))
+      when(mockErsUtil.fetch[ReportableEvents](refEq(TEST_REPORTABLE_EVENTS), any())(any(), any()))
 				.thenReturn(if (reportableEventsRes) Future.successful(ReportableEvents(Some(TEST_OPTION_NIL_RETURN))) else Future.failed(new NoSuchElementException))
 
-      when(mockErsUtil.fetch[ErsMetaData](refEq(mockErsUtil.ersMetaData), any())(any(), any(), any()))
+      when(mockErsUtil.fetch[ErsMetaData](refEq(mockErsUtil.ersMetaData), any())(any(), any()))
 				.thenReturn(if (ersMetaDataRes) Future.successful(ersMetaData) else Future.failed(new NoSuchElementException))
 
       when(mockErsUtil.cache(refEq(mockErsUtil.reportableEvents), any(), any())(any(), any(), any()))
 				.thenReturn(if (ersMetaDataCachedOk) Future.successful(null) else Future.failed(new Exception))
 
-      when(mockErsUtil.fetch[SchemeOrganiserDetails](refEq(mockErsUtil.SCHEME_ORGANISER_CACHE), any())(any(), any(), any()))
+      when(mockErsUtil.fetch[SchemeOrganiserDetails](refEq(mockErsUtil.SCHEME_ORGANISER_CACHE), any())(any(), any()))
 				.thenReturn(
         if (schemeOrganiserDetailsRes) {
 					if (schemeOrganiserDataCached) {
@@ -205,7 +224,9 @@ class ReportableEventsControllerSpec extends WordSpecLike with Matchers with Opt
       val reportableEventsData = Map("" -> "")
       val form = _root_.models.RsFormMappings.chooseForm.bind(reportableEventsData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-      val result = controllerUnderTest.showReportableEventsSelected(ersRequestObject)(Fixtures.buildFakeUser, request)
+      val authRequest = buildRequestWithAuth(request)
+
+      val result = controllerUnderTest.showReportableEventsSelected(ersRequestObject)(authRequest)
       status(result) shouldBe Status.OK
     }
 
@@ -213,7 +234,9 @@ class ReportableEventsControllerSpec extends WordSpecLike with Matchers with Opt
       val controllerUnderTest: ReportableEventsController = buildFakeReportableEventsController()
       val form = "isNilReturn" -> mockErsUtil.OPTION_UPLOAD_SPREEDSHEET
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form)
-      val result = controllerUnderTest.showReportableEventsSelected(ersRequestObject)(Fixtures.buildFakeUser, request)
+      val authRequest = buildRequestWithAuth(request)
+
+      val result = controllerUnderTest.showReportableEventsSelected(ersRequestObject)(authRequest)
       status(result) shouldBe Status.SEE_OTHER
       result.futureValue.header.headers("Location") shouldBe routes.CheckFileTypeController.checkFileTypePage().toString
     }
@@ -222,7 +245,9 @@ class ReportableEventsControllerSpec extends WordSpecLike with Matchers with Opt
       val controllerUnderTest: ReportableEventsController = buildFakeReportableEventsController()
       val form = "isNilReturn" -> mockErsUtil.OPTION_NIL_RETURN
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form)
-      val result = controllerUnderTest.showReportableEventsSelected(ersRequestObject)(Fixtures.buildFakeUser, request)
+      val authRequest = buildRequestWithAuth(request)
+
+      val result = controllerUnderTest.showReportableEventsSelected(ersRequestObject)(authRequest)
       status(result) shouldBe Status.SEE_OTHER
       result.futureValue.header.headers("Location") shouldBe routes.SchemeOrganiserController.schemeOrganiserPage().toString
     }
@@ -231,7 +256,9 @@ class ReportableEventsControllerSpec extends WordSpecLike with Matchers with Opt
       val controllerUnderTest: ReportableEventsController = buildFakeReportableEventsController(ersMetaDataCachedOk = false)
       val form = "isNilReturn" -> mockErsUtil.OPTION_NIL_RETURN
       val req = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form)
-      val result = controllerUnderTest.showReportableEventsSelected(ersRequestObject)(Fixtures.buildFakeUser, req)
+      val authRequest = buildRequestWithAuth(req)
+
+      val result = controllerUnderTest.showReportableEventsSelected(ersRequestObject)(authRequest)
       status(result) shouldBe Status.INTERNAL_SERVER_ERROR
       contentAsString(result) should include(testMessages("ers.global_errors.message"))
       contentAsString(result) shouldBe contentAsString(Future(buildFakeReportableEventsController().getGlobalErrorPage(req, testMessages)))

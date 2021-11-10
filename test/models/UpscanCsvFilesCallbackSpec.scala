@@ -17,10 +17,12 @@
 package models
 
 import models.upscan._
-import org.scalatest.{Matchers, OptionValues, WordSpecLike}
+import org.scalatest.OptionValues
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpecLike
 import utils.UpscanData
 
-class UpscanCsvFilesCallbackSpec extends WordSpecLike with Matchers with OptionValues with UpscanData {
+class UpscanCsvFilesCallbackSpec extends AnyWordSpecLike with Matchers with OptionValues with UpscanData {
 
   "isStarted" should {
     "return true" when {

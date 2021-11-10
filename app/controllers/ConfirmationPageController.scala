@@ -19,6 +19,7 @@ package controllers
 import _root_.models._
 import config.ApplicationConfig
 import connectors.ErsConnector
+import controllers.auth.{AuthAction, RequestWithOptionalAuthContext}
 import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.mvc._
@@ -42,18 +43,18 @@ class ConfirmationPageController @Inject()(val mcc: MessagesControllerComponents
 																					 implicit val ersUtil: ERSUtil,
 																					 implicit val appConfig: ApplicationConfig,
                                            globalErrorView: views.html.global_error,
-                                           confirmationView: views.html.confirmation
-                                          ) extends FrontendController(mcc) with Authenticator with I18nSupport with Logging {
+                                           confirmationView: views.html.confirmation,
+                                           authAction: AuthAction
+                                          ) extends FrontendController(mcc) with I18nSupport with Logging {
 
   implicit val ec: ExecutionContext = mcc.executionContext
 
-  def confirmationPage(): Action[AnyContent] = authorisedForAsync() {
-    implicit authContext: ERSAuthData =>
+  def confirmationPage(): Action[AnyContent] = authAction.async {
 			implicit request =>
-          showConfirmationPage()(authContext, request, hc)
+          showConfirmationPage()(request, hc)
   }
 
-  def showConfirmationPage()(implicit authContext: ERSAuthData, request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
+  def showConfirmationPage()(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
     ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
       val schemeRef: String = requestObject.getSchemeReference
       val sessionBundleRef: String = request.session.get(BUNDLE_REF).getOrElse("")
@@ -99,7 +100,7 @@ class ConfirmationPageController @Inject()(val mcc: MessagesControllerComponents
   }
 
   def saveAndSubmit(alldata: ErsSummary, all: ErsMetaData, bundle: String)
-									 (implicit authContext: ERSAuthData, request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
+									 (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
 
     val jsonDateTimeFormat = new SimpleDateFormat("d MMMM yyyy, h:mma")
     val dateTimeSubmitted = jsonDateTimeFormat.format(alldata.confirmationDateTime.toDate).replace("AM", "am").replace("PM", "pm")

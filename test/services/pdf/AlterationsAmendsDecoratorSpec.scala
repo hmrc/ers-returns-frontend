@@ -21,18 +21,25 @@ import models._
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import org.mockito.internal.verification.VerificationModeFactory
-import org.scalatest.{Matchers, OptionValues, WordSpecLike}
+import org.scalatest.OptionValues
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.i18n
-import play.api.i18n.{Messages, MessagesApi, MessagesImpl}
+import play.api.i18n.{Messages, MessagesApi}
 import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents}
 import play.api.test.Helpers.stubBodyParser
 import utils.{ERSFakeApplicationConfig, ErsTestHelper}
 
 import scala.concurrent.ExecutionContext
 
-class AlterationsAmendsDecoratorSpec extends WordSpecLike with Matchers with OptionValues with MockitoSugar with ERSFakeApplicationConfig with ErsTestHelper with GuiceOneAppPerSuite {
+class AlterationsAmendsDecoratorSpec extends AnyWordSpecLike
+  with Matchers
+  with OptionValues
+  with MockitoSugar
+  with ERSFakeApplicationConfig
+  with ErsTestHelper
+  with GuiceOneAppPerSuite {
 
   val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
     messagesActionBuilder,
@@ -44,12 +51,9 @@ class AlterationsAmendsDecoratorSpec extends WordSpecLike with Matchers with Opt
     ExecutionContext.global
   )
 
-  implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
-  implicit lazy val messages: Messages = testMessages.messages
-
   implicit lazy val mat: Materializer = app.materializer
 
-  lazy val altAmends = AlterationAmends(altAmendsTerms = Some("1"),
+  lazy val altAmends: AlterationAmends = AlterationAmends(altAmendsTerms = Some("1"),
     altAmendsEligibility = None,
     altAmendsExchange = Some("1"),
     altAmendsVariations = None,

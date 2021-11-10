@@ -101,7 +101,7 @@ class ERSUtil @Inject()(val sessionService: SessionService,
 	def remove(cacheId: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] =
 		shortLivedCache.remove(cacheId)
 
-	def fetch[T](key:String)(implicit hc:HeaderCarrier, ec: ExecutionContext, formats: json.Format[T], request: Request[AnyRef]): Future[T] = {
+	def fetch[T](key:String)(implicit hc:HeaderCarrier, ec: ExecutionContext, formats: json.Format[T]): Future[T] = {
 		shortLivedCache.fetchAndGetEntry[JsValue](getCacheId, key).map{ res =>
 			res.get.as[T]
 		}recover{
@@ -114,7 +114,7 @@ class ERSUtil @Inject()(val sessionService: SessionService,
 		}
 	}
 
-	def fetch[T](key: String, cacheId: String)(implicit hc: HeaderCarrier, formats: json.Format[T], request: Request[AnyRef]): Future[T] = {
+	def fetch[T](key: String, cacheId: String)(implicit hc: HeaderCarrier, formats: json.Format[T]): Future[T] = {
 		val startTime = System.currentTimeMillis()
 		shortLivedCache.fetchAndGetEntry[JsValue](cacheId, key).map { res =>
 			cacheTimeFetch(System.currentTimeMillis() - startTime, TimeUnit.MILLISECONDS)
@@ -130,7 +130,7 @@ class ERSUtil @Inject()(val sessionService: SessionService,
 		}
 	}
 
-	def fetchOption[T](key: String, cacheId: String)(implicit hc: HeaderCarrier, formats: json.Format[T], request: Request[AnyRef]): Future[Option[T]] = {
+	def fetchOption[T](key: String, cacheId: String)(implicit hc: HeaderCarrier, formats: json.Format[T]): Future[Option[T]] = {
 		val startTime = System.currentTimeMillis()
 		shortLivedCache.fetchAndGetEntry[T](cacheId, key).map { res =>
 			cacheTimeFetch(System.currentTimeMillis() - startTime, TimeUnit.MILLISECONDS)

@@ -17,10 +17,12 @@
 package utils
 
 import org.scalatestplus.mockito.MockitoSugar
-import org.scalatest.{Matchers, OptionValues, WordSpecLike}
+import org.scalatest.OptionValues
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpecLike
 import controllers._
 
-class JsonParserTest extends WordSpecLike with Matchers with OptionValues with ERSFakeApplicationConfig with MockitoSugar {
+class JsonParserTest extends AnyWordSpecLike with Matchers with OptionValues with ERSFakeApplicationConfig with MockitoSugar {
 	class TestJsonParser extends JsonParser
 	val testJsonParser = new TestJsonParser
 

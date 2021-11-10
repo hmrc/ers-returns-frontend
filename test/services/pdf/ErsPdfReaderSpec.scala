@@ -21,13 +21,15 @@ import org.apache.pdfbox.io.RandomAccessFile
 import org.apache.pdfbox.pdfparser.PDFParser
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.text.PDFTextStripper
-import org.scalatest.{BeforeAndAfterEach, Matchers, OptionValues, WordSpecLike}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpecLike
+import org.scalatest.{BeforeAndAfterEach, OptionValues}
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.Logging
 
 import java.io.File
 
-class ErsPdfReaderSpec extends WordSpecLike with Matchers with OptionValues with MockitoSugar with BeforeAndAfterEach with Logging {
+class ErsPdfReaderSpec extends AnyWordSpecLike with Matchers with OptionValues with MockitoSugar with BeforeAndAfterEach with Logging {
   var pdfStripper: PDFTextStripper = mock[PDFTextStripper]
   var pdDoc: PDDocument = mock[PDDocument]
   var cosDocCOSDocument: COSDocument = mock[COSDocument]

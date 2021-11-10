@@ -18,6 +18,7 @@ package controllers
 
 import _root_.models._
 import config.ApplicationConfig
+import controllers.auth.{AuthAction, RequestWithOptionalAuthContext}
 import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.mvc._
@@ -36,18 +37,18 @@ class AltAmendsController @Inject()(val mcc: MessagesControllerComponents,
 																		implicit val appConfig: ApplicationConfig,
                                     alterationsActivityView: views.html.alterations_activity,
                                     alterationsAmendsView: views.html.alterations_amends,
-                                    globalErrorView: views.html.global_error
-																	  ) extends FrontendController(mcc) with Authenticator with I18nSupport with Logging {
+                                    globalErrorView: views.html.global_error,
+                                    authAction: AuthAction
+																	  ) extends FrontendController(mcc) with I18nSupport with Logging {
 
   implicit val ec: ExecutionContext = mcc.executionContext
 
-  def altActivityPage(): Action[AnyContent] = authorisedForAsync() {
-    implicit user =>
+  def altActivityPage(): Action[AnyContent] = authAction.async {
       implicit request =>
-        showAltActivityPage()(user, request, hc)
+        showAltActivityPage()
   }
 
-  def showAltActivityPage()(implicit authContext: ERSAuthData, request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
+  def showAltActivityPage()(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
     ( for {
       requestObject     <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
       groupSchemeInfo   <- ersUtil.fetch[GroupSchemeInfo](ersUtil.GROUP_SCHEME_CACHE_CONTROLLER, requestObject.getSchemeReference)
@@ -69,14 +70,13 @@ class AltAmendsController @Inject()(val mcc: MessagesControllerComponents,
   }
 
 
-  def altActivitySelected(): Action[AnyContent] = authorisedForAsync() {
-    implicit user =>
+  def altActivitySelected(): Action[AnyContent] = authAction.async {
       implicit request =>
-          showAltActivitySelected()(user, request, hc)
+          showAltActivitySelected()(request, hc)
 
   }
 
-  def showAltActivitySelected()(implicit authContext: ERSAuthData, request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
+  def showAltActivitySelected()(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
 
     ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
       RsFormMappings.altActivityForm.bindFromRequest.fold(
@@ -99,13 +99,12 @@ class AltAmendsController @Inject()(val mcc: MessagesControllerComponents,
     }
   }
 
-  def altAmendsPage(): Action[AnyContent] = authorisedForAsync() {
-    implicit user =>
+  def altAmendsPage(): Action[AnyContent] = authAction.async {
       implicit request =>
-          showAltAmendsPage()(user, request, hc)
+          showAltAmendsPage()(request, hc)
   }
 
-  def showAltAmendsPage()(implicit authContext: ERSAuthData, request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
+  def showAltAmendsPage()(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
 
     for {
       requestObject <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
@@ -117,13 +116,12 @@ class AltAmendsController @Inject()(val mcc: MessagesControllerComponents,
     }
   }
 
-  def altAmendsSelected(): Action[AnyContent] = authorisedForAsync() {
-    implicit user =>
+  def altAmendsSelected(): Action[AnyContent] = authAction.async {
       implicit request =>
-        showAltAmendsSelected()(user, request, hc)
+        showAltAmendsSelected()(request, hc)
   }
 
-  def showAltAmendsSelected()(implicit authContext: ERSAuthData, request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
+  def showAltAmendsSelected()(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
 
     ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
       RsFormMappings.altAmendsForm.bindFromRequest.fold(

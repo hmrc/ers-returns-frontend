@@ -17,6 +17,7 @@
 package controllers
 
 import config.ApplicationConfig
+import controllers.auth.{AuthAction, RequestWithOptionalAuthContext}
 import models._
 import models.upscan.{NotStarted, UploadId, UpscanCsvFilesList, UpscanIds}
 import play.api.Logging
@@ -32,22 +33,22 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class CheckCsvFilesController @Inject()(val mcc: MessagesControllerComponents,
-																				val authConnector: DefaultAuthConnector,
-																				implicit val ersUtil: ERSUtil,
-																				implicit val appConfig: ApplicationConfig,
+                                        val authConnector: DefaultAuthConnector,
+                                        implicit val ersUtil: ERSUtil,
+                                        implicit val appConfig: ApplicationConfig,
                                         globalErrorView: views.html.global_error,
-                                        checkCsvFileView: views.html.check_csv_file
-                                       ) extends FrontendController(mcc) with Authenticator with I18nSupport with Logging {
+                                        checkCsvFileView: views.html.check_csv_file,
+                                        authAction: AuthAction
+                                       ) extends FrontendController(mcc) with I18nSupport with Logging {
 
   implicit val ec: ExecutionContext = mcc.executionContext
 
-  def checkCsvFilesPage(): Action[AnyContent] = authorisedForAsync() {
-    implicit user =>
+  def checkCsvFilesPage(): Action[AnyContent] = authAction.async {
       implicit request =>
-        showCheckCsvFilesPage()(user, request, hc)
+        showCheckCsvFilesPage()(request, hc)
   }
 
-  def showCheckCsvFilesPage()(implicit authContext: ERSAuthData, request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
+  def showCheckCsvFilesPage()(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
     val requestObjectFuture = ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
     ersUtil.remove(ersUtil.CSV_FILES_UPLOAD)
     (for {
@@ -60,13 +61,12 @@ class CheckCsvFilesController @Inject()(val mcc: MessagesControllerComponents,
     }
   }
 
-  def checkCsvFilesPageSelected(): Action[AnyContent] = authorisedForAsync() {
-    implicit user =>
+  def checkCsvFilesPageSelected(): Action[AnyContent] = authAction.async {
       implicit request =>
         validateCsvFilesPageSelected()
   }
 
-  def validateCsvFilesPageSelected()(implicit authContext: ERSAuthData, request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
+  def validateCsvFilesPageSelected()(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
     RsFormMappings.csvFileCheckForm.bindFromRequest.fold(
       _ =>
         reloadWithError(),
@@ -103,15 +103,15 @@ class CheckCsvFilesController @Inject()(val mcc: MessagesControllerComponents,
   def reloadWithError()(implicit messages: Messages): Future[Result] = {
     Future.successful(
       Redirect(routes.CheckCsvFilesController.checkCsvFilesPage())
-				.flashing("csv-file-not-selected-error" -> messages(ersUtil.PAGE_CHECK_CSV_FILE + ".err.message"))
+        .flashing("csv-file-not-selected-error" -> messages(ersUtil.PAGE_CHECK_CSV_FILE + ".err.message"))
     )
   }
 
-	def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result = {
-		Ok(globalErrorView(
-			"ers.global_errors.title",
-			"ers.global_errors.heading",
-			"ers.global_errors.message"
-		)(request, messages, appConfig))
-	}
+  def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result = {
+    Ok(globalErrorView(
+      "ers.global_errors.title",
+      "ers.global_errors.heading",
+      "ers.global_errors.message"
+    )(request, messages, appConfig))
+  }
 }

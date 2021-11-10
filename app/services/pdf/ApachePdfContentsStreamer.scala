@@ -18,18 +18,17 @@ package services.pdf
 
 import models.ErsSummary
 import org.apache.pdfbox.pdmodel.common.PDMetadata
-import org.apache.pdfbox.pdmodel.PDPageContentStream
 import org.apache.pdfbox.pdmodel.font.{PDFont, PDType0Font}
 import org.apache.pdfbox.pdmodel.graphics.color.PDOutputIntent
 import org.apache.pdfbox.pdmodel.graphics.image.JPEGFactory.createFromImage
-import org.apache.pdfbox.pdmodel.{PDDocument, PDPage}
+import org.apache.pdfbox.pdmodel.{PDDocument, PDPage, PDPageContentStream}
 import org.apache.xmpbox.XMPMetadata
 import org.apache.xmpbox.xml.{XmpSerializationException, XmpSerializer}
 import play.api.Logging
 import play.api.i18n.Messages
 import utils.DateUtils
 
-import java.io.{ByteArrayOutputStream, File}
+import java.io.ByteArrayOutputStream
 import javax.imageio.ImageIO
 
 trait ErsContentsStreamer {

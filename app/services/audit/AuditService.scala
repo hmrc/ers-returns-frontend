@@ -18,9 +18,9 @@ package services.audit
 
 import org.joda.time.DateTime
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.audit.DefaultAuditConnector
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import uk.gov.hmrc.play.audit.model.DataEvent
-import uk.gov.hmrc.play.bootstrap.audit.DefaultAuditConnector
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future

@@ -16,34 +16,64 @@
 
 package controllers.auth
 
-import config.ApplicationConfig
-import models.ERSAuthData
+import models.{ERSAuthData, ErsMetaData, RequestObject, SchemeInfo}
+import org.joda.time.DateTime
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
-import org.scalatest.{Matchers, OptionValues, WordSpecLike}
-import play.api.mvc.{Result, Results}
+import org.scalatest.OptionValues
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpecLike
+import org.scalatestplus.play.guice.GuiceFakeApplicationFactory
+import play.api.i18n.MessagesApi
+import play.api.mvc._
 import play.api.test.DefaultAwaitTimeout
-import play.api.test.Helpers.{redirectLocation, status}
+import play.api.test.Helpers.{redirectLocation, status, stubBodyParser}
 import uk.gov.hmrc.auth.core.AffinityGroup.Agent
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.domain.EmpRef
+import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.ErsTestHelper
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
-class AuthFunctionalitySpec extends WordSpecLike with Matchers with OptionValues with ErsTestHelper with DefaultAwaitTimeout {
+class AuthFunctionalitySpec extends AnyWordSpecLike
+	with Matchers
+	with OptionValues
+	with ErsTestHelper
+	with DefaultAwaitTimeout
+	with GuiceFakeApplicationFactory {
 
   class Setup(enrolmentSet: Set[Enrolment], affGroup: Option[AffinityGroup] = None, testEmpRef: EmpRef = EmpRef("", "")) {
-    val controllerHarness: AuthFunctionality = new AuthFunctionality {
-      override val authConnector: AuthConnector = mockAuthConnector
-			override val appConfig: ApplicationConfig = mockAppConfig
-    }
+		val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
+			messagesActionBuilder,
+			DefaultActionBuilder(stubBodyParser[AnyContent]()),
+			cc.parsers,
+			fakeApplication.injector.instanceOf[MessagesApi],
+			cc.langs,
+			cc.fileMimeTypes,
+			ExecutionContext.global
+		)
+
+		class TestController(authAction: AuthAction, val mcc: MessagesControllerComponents) extends FrontendController(mcc){
+			def onPageLoad(): Action[AnyContent] = authAction { _ => Ok }
+		}
+
+    val controllerHarness = new TestController(testAuthAction, mockMCC)
 
 		val ersAuthData: ERSAuthData = ERSAuthData(
 			enrolments = enrolmentSet,
 			affinityGroup = affGroup,
 			empRef = testEmpRef
 		)
+
+		lazy val schemeInfo: SchemeInfo = SchemeInfo("XA1100000000000", DateTime.now, "1", "2016", "EMI", "EMI")
+		val validErsMetaData: ErsMetaData = ErsMetaData(schemeInfo, "ipRef", Some("aoRef"), "1234/GA4567", Some("agentRef"), Some("sapNumber"))
+		val reqObj: RequestObject = RequestObject(None, None, None, None, None, None, Some("1234/GA4567"), None, None)
+
+		when(mockErsUtil.fetch[RequestObject](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
+			.thenReturn(Future.successful(reqObj))
+		when(mockErsUtil.fetch[ErsMetaData](ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+			.thenReturn(Future.successful(validErsMetaData))
   }
 
   "authoriseFor" should {
@@ -52,9 +82,7 @@ class AuthFunctionalitySpec extends WordSpecLike with Matchers with OptionValues
         when(mockAuthConnector.authorise[RetrievalType](ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future.successful(buildRetrieval(ersAuthData)))
 
-        val func: ERSAuthData => Future[Result] = (_: ERSAuthData) => Future.successful(Results.Ok("test"))
-
-        val res: Future[Result] = controllerHarness.authoriseFor(func)
+        val res: Future[Result] = controllerHarness.onPageLoad()(requestWithAuth)
         status(res) shouldBe 200
       }
     }
@@ -63,9 +91,8 @@ class AuthFunctionalitySpec extends WordSpecLike with Matchers with OptionValues
 			"it receives a NoActiveSessionException" in new Setup(invalidEnrolmentSet) {
 				setUnauthorisedMocks()
 
-				val func: ERSAuthData => Future[Result] = (_: ERSAuthData) => Future.successful(Results.Ok("test"))
+				val res: Future[Result] = controllerHarness.onPageLoad()(requestWithAuth)
 
-				val res: Future[Result] = controllerHarness.authoriseFor(func)
 				status(res) shouldBe 303
 				redirectLocation(res) shouldBe Some("http://localhost:9949/gg/sign-in?continue=http%3A%2F%2Flocalhost%3A9290%2Fsubmit-your-ers-annual-return&origin=ers-returns-frontend")
 			}
@@ -74,9 +101,8 @@ class AuthFunctionalitySpec extends WordSpecLike with Matchers with OptionValues
 				when(mockAuthConnector.authorise[RetrievalType](ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
 					.thenReturn(Future.failed(UnsupportedAuthProvider("Not GGW")))
 
-				val func: ERSAuthData => Future[Result] = (_: ERSAuthData) => Future.successful(Results.Ok("test"))
+				val res: Future[Result] = controllerHarness.onPageLoad()(requestWithAuth)
 
-				val res: Future[Result] = controllerHarness.authoriseFor(func)
 				status(res) shouldBe 303
 				redirectLocation(res) shouldBe Some("/submit-your-ers-annual-return/unauthorised")
 			}

@@ -18,7 +18,7 @@ package controllers
 
 import config.ApplicationConfig
 import connectors.ErsConnector
-import models.ERSAuthData
+import controllers.auth.{AuthAction, RequestWithOptionalAuthContext}
 import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.libs.json.{JsObject, Json}
@@ -37,8 +37,9 @@ class SubmissionDataController @Inject()(val mcc: MessagesControllerComponents,
 																				 val ersConnector: ErsConnector,
 																				 implicit val ersUtil: ERSUtil,
 																				 implicit val appConfig: ApplicationConfig,
-                                         globalErrorView: views.html.global_error
-																				) extends FrontendController(mcc) with Authenticator with I18nSupport with Logging {
+                                         globalErrorView: views.html.global_error,
+                                         authAction: AuthAction
+																				) extends FrontendController(mcc) with I18nSupport with Logging {
 
   implicit val ec: ExecutionContext = mcc.executionContext
 
@@ -61,13 +62,12 @@ class SubmissionDataController @Inject()(val mcc: MessagesControllerComponents,
 
   }
 
-  def retrieveSubmissionData(): Action[AnyContent] = authorisedForAsync() {
-    implicit user =>
+  def retrieveSubmissionData(): Action[AnyContent] = authAction.async {
       implicit request =>
-        getRetrieveSubmissionData()(user, request, hc)
+        getRetrieveSubmissionData()(request, hc)
   }
 
-  def getRetrieveSubmissionData()(implicit authContext: ERSAuthData, request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
+  def getRetrieveSubmissionData()(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
 
     logger.debug("Retrieve Submission Data Request")
 
