@@ -17,6 +17,7 @@
 package controllers
 
 import config.ApplicationConfig
+import controllers.auth.{AuthAction, RequestWithOptionalAuthContext}
 import models._
 import play.api.Logging
 import play.api.data.Form
@@ -37,21 +38,21 @@ class SchemeOrganiserController @Inject()(val mcc: MessagesControllerComponents,
 																					implicit val ersUtil: ERSUtil,
 																					implicit val appConfig: ApplicationConfig,
                                           globalErrorView: views.html.global_error,
-                                          schemeOrganiserView: views.html.scheme_organiser
-																				 ) extends FrontendController(mcc) with Authenticator with I18nSupport with Logging {
+                                          schemeOrganiserView: views.html.scheme_organiser,
+                                          authAction: AuthAction
+																				 ) extends FrontendController(mcc) with I18nSupport with Logging {
 
   implicit val ec: ExecutionContext = mcc.executionContext
 
-  def schemeOrganiserPage(): Action[AnyContent] = authorisedForAsync() {
-    implicit user =>
+  def schemeOrganiserPage(): Action[AnyContent] = authAction.async {
       implicit request =>
         ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
-          showSchemeOrganiserPage(requestObject)(user, request, hc)
+          showSchemeOrganiserPage(requestObject)(request, hc)
         }
   }
 
   def showSchemeOrganiserPage(requestObject: RequestObject)
-														 (implicit authContext: ERSAuthData, req: Request[AnyContent], hc: HeaderCarrier): Future[Result] = {
+														 (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
     logger.info(s"[SchemeOrganiserController][showSchemeOrganiserPage] schemeRef: ${requestObject.getSchemeReference}.")
 		lazy val form = SchemeOrganiserDetails("", "", Some(""), Some(""), Some(""), Some(ersUtil.DEFAULT_COUNTRY), Some(""), Some(""), Some(""))
 
@@ -84,16 +85,15 @@ class SchemeOrganiserController @Inject()(val mcc: MessagesControllerComponents,
 		}
   }
 
-  def schemeOrganiserSubmit(): Action[AnyContent] = authorisedForAsync() {
-    implicit user =>
+  def schemeOrganiserSubmit(): Action[AnyContent] = authAction.async {
       implicit request =>
         ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
-          showSchemeOrganiserSubmit(requestObject)(user, request, hc)
+          showSchemeOrganiserSubmit(requestObject)(request, hc)
         }
   }
 
   def showSchemeOrganiserSubmit(requestObject: RequestObject)
-															 (implicit authContext: ERSAuthData, req: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
+															 (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
     RsFormMappings.schemeOrganiserForm.bindFromRequest.fold(
       errors => {
         val correctOrder = errors.errors.map(_.key).distinct

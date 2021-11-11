@@ -21,7 +21,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils
 import play.api.mvc.Request
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
-import uk.gov.hmrc.play.bootstrap.audit.DefaultAuditConnector
+import uk.gov.hmrc.play.audit.DefaultAuditConnector
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future

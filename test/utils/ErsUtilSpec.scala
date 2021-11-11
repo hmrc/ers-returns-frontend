@@ -16,28 +16,36 @@
 
 package utils
 
-import java.util.NoSuchElementException
 import models._
 import models.upscan.UploadedSuccessfully
 import org.joda.time.DateTime
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
-import org.scalatest.BeforeAndAfterEach
+import org.scalatest.{BeforeAndAfterEach, OptionValues}
 import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json
 import play.api.libs.json.{Format, JsValue, Json}
-import play.api.mvc.Request
-import uk.gov.hmrc.http.{HeaderCarrier, SessionId}
-import uk.gov.hmrc.http.cache.client.CacheMap
-import org.scalatest.{Matchers, OptionValues, WordSpecLike}
 import play.api.test.Helpers.await
+import uk.gov.hmrc.http.cache.client.CacheMap
+import uk.gov.hmrc.http.{HeaderCarrier, SessionId}
 import utils.SessionKeys.BUNDLE_REF
+
+import java.util.NoSuchElementException
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 import scala.language.postfixOps
 
-class ErsUtilSpec extends WordSpecLike with Matchers with OptionValues with MockitoSugar with BeforeAndAfterEach with ERSFakeApplicationConfig with ErsTestHelper with ScalaFutures {
+class ErsUtilSpec extends AnyWordSpecLike
+  with Matchers
+  with OptionValues
+  with MockitoSugar
+  with BeforeAndAfterEach
+  with ERSFakeApplicationConfig
+  with ErsTestHelper
+  with ScalaFutures {
 
   override implicit val hc: HeaderCarrier = HeaderCarrier(sessionId = Some(SessionId("sessionId")))
   implicit val countryCodes: CountryCodes = mockCountryCodes
@@ -205,8 +213,7 @@ class ErsUtilSpec extends WordSpecLike with Matchers with OptionValues with Mock
 
         override def fetchOption[T](key: String, cacheId: String)
                                    (implicit hc: HeaderCarrier,
-                                    formats: json.Format[T],
-                                    request: Request[AnyRef]
+                                    formats: json.Format[T]
                                    ): Future[Option[T]] = {
           key match {
             case "ReportableEvents" => Future(Some(ReportableEvents(Some(OPTION_NIL_RETURN)).asInstanceOf[T]))
@@ -227,8 +234,7 @@ class ErsUtilSpec extends WordSpecLike with Matchers with OptionValues with Mock
       val ersUtil: ERSUtil = new ERSUtil(mockSessionCache, mockShortLivedCache, mockAppConfig) {
         override def fetchOption[T](key: String, cacheId: String)
                                    (implicit hc: HeaderCarrier,
-                                    formats: Format[T],
-                                    request: Request[AnyRef]
+                                    formats: Format[T]
                                    ): Future[Option[T]] = {
           key match {
             case "ReportableEvents" => Future(Some(ReportableEvents(Some(OPTION_NIL_RETURN)).asInstanceOf[T]))
@@ -250,8 +256,7 @@ class ErsUtilSpec extends WordSpecLike with Matchers with OptionValues with Mock
       val ersUtil: ERSUtil = new ERSUtil(mockSessionCache, mockShortLivedCache, mockAppConfig) {
         override def fetchOption[T](key: String, cacheId: String)
                                    (implicit hc: HeaderCarrier,
-                                    formats: json.Format[T],
-                                    request: Request[AnyRef]
+                                    formats: json.Format[T]
                                    ): Future[Option[T]] = {
           key match {
             case "ReportableEvents" => Future.failed(new NoSuchElementException)
@@ -278,8 +283,7 @@ class ErsUtilSpec extends WordSpecLike with Matchers with OptionValues with Mock
       val ersUtil: ERSUtil = new ERSUtil(mockSessionCache, mockShortLivedCache, mockAppConfig) {
         override def fetchOption[T](key: String, cacheId: String)
                                    (implicit hc: HeaderCarrier,
-                                    formats: json.Format[T],
-                                    request: Request[AnyRef]
+                                    formats: json.Format[T]
                                    ): Future[Option[T]] = {
           key match {
             case "alt-activity" => Future(None)
@@ -299,8 +303,7 @@ class ErsUtilSpec extends WordSpecLike with Matchers with OptionValues with Mock
       val ersUtil: ERSUtil = new ERSUtil(mockSessionCache, mockShortLivedCache, mockAppConfig) {
         override def fetchOption[T](key: String, cacheId: String)
                                    (implicit hc: HeaderCarrier,
-                                    formats: json.Format[T],
-                                    request: Request[AnyRef]
+                                    formats: json.Format[T]
                                    ): Future[Option[T]] = {
           key match {
             case "alt-activity" => Future(Some(AltAmendsActivity(OPTION_NO).asInstanceOf[T]))
@@ -320,8 +323,7 @@ class ErsUtilSpec extends WordSpecLike with Matchers with OptionValues with Mock
       val ersUtil: ERSUtil = new ERSUtil(mockSessionCache, mockShortLivedCache, mockAppConfig) {
         override def fetchOption[T](key: String, cacheId: String)
                                    (implicit hc: HeaderCarrier,
-                                    formats: json.Format[T],
-                                    request: Request[AnyRef]
+                                    formats: json.Format[T]
                                    ): Future[Option[T]] = {
           key match {
             case "alt-activity" => Future(Some(AltAmendsActivity(OPTION_YES).asInstanceOf[T]))
@@ -341,8 +343,7 @@ class ErsUtilSpec extends WordSpecLike with Matchers with OptionValues with Mock
       val ersUtil: ERSUtil = new ERSUtil(mockSessionCache, mockShortLivedCache, mockAppConfig) {
         override def fetchOption[T](key: String, cacheId: String)
                                    (implicit hc: HeaderCarrier,
-                                    formats: json.Format[T],
-                                    request: Request[AnyRef]
+                                    formats: json.Format[T]
                                    ): Future[Option[T]] = {
           key match {
             case "alt-activity" => Future(Some(AltAmendsActivity(OPTION_YES).asInstanceOf[T]))
@@ -371,8 +372,7 @@ class ErsUtilSpec extends WordSpecLike with Matchers with OptionValues with Mock
       val ersUtil: ERSUtil = new ERSUtil(mockSessionCache, mockShortLivedCache, mockAppConfig) {
         override def fetchOption[T](key: String, cacheId: String)
                                    (implicit hc: HeaderCarrier,
-                                    formats: json.Format[T],
-                                    request: Request[AnyRef]
+                                    formats: json.Format[T]
                                    ): Future[Option[T]] = {
           key match {
             case "group-scheme-controller" => Future(None)
@@ -391,8 +391,7 @@ class ErsUtilSpec extends WordSpecLike with Matchers with OptionValues with Mock
       val ersUtil: ERSUtil = new ERSUtil(mockSessionCache, mockShortLivedCache, mockAppConfig) {
         override def fetchOption[T](key: String, cacheId: String)
                                    (implicit hc: HeaderCarrier,
-                                    formats: json.Format[T],
-                                    request: Request[AnyRef]
+                                    formats: json.Format[T]
                                    ): Future[Option[T]] = {
           key match {
             case "group-scheme-controller" => Future(Some(GroupSchemeInfo(None, Some("")).asInstanceOf[T]))
@@ -411,8 +410,7 @@ class ErsUtilSpec extends WordSpecLike with Matchers with OptionValues with Mock
       val ersUtil: ERSUtil = new ERSUtil(mockSessionCache, mockShortLivedCache, mockAppConfig) {
         override def fetchOption[T](key: String, cacheId: String)
                                    (implicit hc: HeaderCarrier,
-                                    formats: json.Format[T],
-                                    request: Request[AnyRef]
+                                    formats: json.Format[T]
                                    ): Future[Option[T]] = {
           key match {
             case "group-scheme-controller" => Future(Some(GroupSchemeInfo(Some("1"), Some("")).asInstanceOf[T]))
@@ -431,8 +429,7 @@ class ErsUtilSpec extends WordSpecLike with Matchers with OptionValues with Mock
       val ersUtil: ERSUtil = new ERSUtil(mockSessionCache, mockShortLivedCache, mockAppConfig) {
         override def fetchOption[T](key: String, cacheId: String)
                                    (implicit hc: HeaderCarrier,
-                                    formats: json.Format[T],
-                                    request: Request[AnyRef]
+                                    formats: json.Format[T]
                                    ): Future[Option[T]] = {
           key match {
             case "group-scheme-controller" => Future(Some(GroupSchemeInfo(Some("1"), Some("")).asInstanceOf[T]))
@@ -451,8 +448,7 @@ class ErsUtilSpec extends WordSpecLike with Matchers with OptionValues with Mock
       val ersUtil: ERSUtil = new ERSUtil(mockSessionCache, mockShortLivedCache, mockAppConfig) {
         override def fetchOption[T](key: String, cacheId: String)
                                    (implicit hc: HeaderCarrier,
-                                    formats: json.Format[T],
-                                    request: Request[AnyRef]
+                                    formats: json.Format[T]
                                    ): Future[Option[T]] = {
           key match {
             case "group-scheme-controller" => Future(Some(GroupSchemeInfo(Some("2"), Some("")).asInstanceOf[T]))

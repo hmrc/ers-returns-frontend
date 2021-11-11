@@ -17,6 +17,7 @@
 package controllers
 
 import config.ApplicationConfig
+import controllers.auth.{AuthAction, RequestWithOptionalAuthContext}
 import models._
 import play.api.Logging
 import play.api.data.Form
@@ -39,32 +40,32 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
                                       globalErrorView: views.html.global_error,
                                       groupView: views.html.group,
                                       manualCompanyDetailsView: views.html.manual_company_details,
-                                      groupPlanSummaryView: views.html.group_plan_summary
-																		 ) extends FrontendController(mcc) with Authenticator with I18nSupport with Logging {
+                                      groupPlanSummaryView: views.html.group_plan_summary,
+                                      authAction: AuthAction
+																		 ) extends FrontendController(mcc) with I18nSupport with Logging {
 
   implicit val ec: ExecutionContext = mcc.executionContext
 
-  def manualCompanyDetailsPage(index: Int): Action[AnyContent] = authorisedForAsync() {
-    implicit user =>
+  def manualCompanyDetailsPage(index: Int): Action[AnyContent] = authAction.async {
       implicit request =>
-        showManualCompanyDetailsPage(index)(user, request)
+        showManualCompanyDetailsPage(index)(request)
   }
 
-  def showManualCompanyDetailsPage(index: Int)(implicit authContext: ERSAuthData, request: Request[AnyContent]): Future[Result] = {
+  def showManualCompanyDetailsPage(index: Int)(implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] = {
     ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).map { requestObject =>
       Ok(manualCompanyDetailsView(requestObject, index, RsFormMappings.companyDetailsForm))
     }
   }
 
-  def manualCompanyDetailsSubmit(index: Int): Action[AnyContent] = authorisedForAsync() {
-    implicit user =>
+  def manualCompanyDetailsSubmit(index: Int): Action[AnyContent] = authAction.async {
       implicit request =>
         ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
-          showManualCompanyDetailsSubmit(requestObject, index)(user, request)
+          showManualCompanyDetailsSubmit(requestObject, index)(request)
         }
   }
 
-  def showManualCompanyDetailsSubmit(requestObject: RequestObject, index: Int)(implicit authContext: ERSAuthData, request: Request[AnyRef]): Future[Result] = {
+  def showManualCompanyDetailsSubmit(requestObject: RequestObject, index: Int)
+                                    (implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] = {
     RsFormMappings.companyDetailsForm.bindFromRequest.fold(
       errors => {
         Future(Ok(manualCompanyDetailsView(requestObject, index, errors)))
@@ -98,13 +99,12 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
       }
     }).distinct
 
-  def deleteCompany(id: Int): Action[AnyContent] = authorisedForAsync() {
-    implicit user =>
+  def deleteCompany(id: Int): Action[AnyContent] = authAction.async {
       implicit request =>
-        showDeleteCompany(id)(user, request, hc)
+        showDeleteCompany(id)(request, hc)
   }
 
-  def showDeleteCompany(id: Int)(implicit authContext: ERSAuthData, request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
+  def showDeleteCompany(id: Int)(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
 
     (for {
       requestObject <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
@@ -128,13 +128,12 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
   private def filterDeletedCompany(companyList: CompanyDetailsList, id: Int): List[CompanyDetails] =
     companyList.companies.zipWithIndex.filterNot(_._2 == id).map(_._1)
 
-  def editCompany(id: Int): Action[AnyContent] = authorisedForAsync() {
-    implicit user =>
+  def editCompany(id: Int): Action[AnyContent] = authAction.async {
       implicit request =>
-          showEditCompany(id)(user, request, hc)
+          showEditCompany(id)(request, hc)
   }
 
-  def showEditCompany(id: Int)(implicit authContext: ERSAuthData, request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
+  def showEditCompany(id: Int)(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
 
     (for {
       requestObject <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
@@ -154,15 +153,15 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
     }
   }
 
-  def groupSchemePage(): Action[AnyContent] = authorisedForAsync() {
-    implicit user =>
+  def groupSchemePage(): Action[AnyContent] = authAction.async {
       implicit request =>
         ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
-          showGroupSchemePage(requestObject)(user, request, hc)
+          showGroupSchemePage(requestObject)(request, hc)
         }
   }
 
-  def showGroupSchemePage(requestObject: RequestObject)(implicit authContext: ERSAuthData, request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
+  def showGroupSchemePage(requestObject: RequestObject)
+                         (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
     ersUtil.fetch[GroupSchemeInfo](ersUtil.GROUP_SCHEME_CACHE_CONTROLLER, requestObject.getSchemeReference).map { groupSchemeInfo =>
       Ok(groupView(requestObject, groupSchemeInfo.groupScheme, RsFormMappings.groupForm.fill(RS_groupScheme(groupSchemeInfo.groupScheme))))
     } recover {
@@ -173,15 +172,15 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
     }
   }
 
-  def groupSchemeSelected(scheme: String): Action[AnyContent] = authorisedForAsync() {
-    implicit user =>
+  def groupSchemeSelected(scheme: String): Action[AnyContent] = authAction.async {
       implicit request =>
         ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
-          showGroupSchemeSelected(requestObject, scheme)(user, request)
+          showGroupSchemeSelected(requestObject, scheme)(request)
         }
   }
 
-  def showGroupSchemeSelected(requestObject: RequestObject, scheme: String)(implicit authContext: ERSAuthData, request: Request[AnyRef]): Future[Result] = {
+  def showGroupSchemeSelected(requestObject: RequestObject, scheme: String)
+                             (implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] = {
     RsFormMappings.groupForm.bindFromRequest.fold(
       errors => {
         val correctOrder = errors.errors.map(_.key).distinct
@@ -217,13 +216,12 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
   }
 
 
-  def groupPlanSummaryPage(): Action[AnyContent] = authorisedForAsync() {
-    implicit user =>
+  def groupPlanSummaryPage(): Action[AnyContent] = authAction.async {
       implicit request =>
-          showGroupPlanSummaryPage()(user, request, hc)
+          showGroupPlanSummaryPage()(request, hc)
   }
 
-  def showGroupPlanSummaryPage()(implicit authContext: ERSAuthData, request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
+  def showGroupPlanSummaryPage()(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
 
     (for {
       requestObject <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
@@ -238,13 +236,12 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
     }
   }
 
-  def groupPlanSummaryContinue(scheme: String): Action[AnyContent] = authorisedForAsync() {
-    implicit user =>
+  def groupPlanSummaryContinue(scheme: String): Action[AnyContent] = authAction.async {
       implicit request =>
-        continueFromGroupPlanSummaryPage(scheme)(user, request, hc)
+        continueFromGroupPlanSummaryPage(scheme)(request, hc)
   }
 
-  def continueFromGroupPlanSummaryPage(scheme: String)(implicit authContext: ERSAuthData, request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
+  def continueFromGroupPlanSummaryPage(scheme: String)(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
     scheme match {
       case ersUtil.SCHEME_CSOP | ersUtil.SCHEME_SAYE =>
         Future(Redirect(routes.AltAmendsController.altActivityPage()))

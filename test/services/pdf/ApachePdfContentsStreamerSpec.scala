@@ -17,18 +17,26 @@
 package services.pdf
 
 import akka.stream.Materializer
-import org.scalatest.{Matchers, OptionValues, WordSpecLike}
+import models.ErsSummary
+import org.scalatest.OptionValues
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.i18n
-import play.api.i18n.{Messages, MessagesApi, MessagesImpl}
+import play.api.i18n.MessagesApi
 import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents}
 import play.api.test.Helpers.stubBodyParser
 import utils.{ERSFakeApplicationConfig, ErsTestHelper, Fixtures}
 
 import scala.concurrent.ExecutionContext
 
-class ApachePdfContentsStreamerSpec extends WordSpecLike with Matchers with OptionValues with MockitoSugar with ERSFakeApplicationConfig with ErsTestHelper with GuiceOneAppPerSuite {
+class ApachePdfContentsStreamerSpec extends AnyWordSpecLike
+  with Matchers
+  with OptionValues
+  with MockitoSugar
+  with ERSFakeApplicationConfig
+  with ErsTestHelper
+  with GuiceOneAppPerSuite {
 
   val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
     messagesActionBuilder,
@@ -40,13 +48,9 @@ class ApachePdfContentsStreamerSpec extends WordSpecLike with Matchers with Opti
     ExecutionContext.global
   )
 
-  implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
-  implicit lazy val messages: Messages = testMessages.messages
-
-
   implicit lazy val mat: Materializer = app.materializer
 
-  val ersSummary = Fixtures.ersSummary
+  val ersSummary: ErsSummary = Fixtures.ersSummary
   val streamer = new ApachePdfContentsStreamer(ersSummary)
 
   "Apache Pdf Contents Streamer" should {

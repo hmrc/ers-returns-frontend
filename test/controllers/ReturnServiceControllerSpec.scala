@@ -22,8 +22,11 @@ import org.joda.time.DateTime
 import org.jsoup.Jsoup
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito._
-import org.scalatest.{Matchers, OptionValues, WordSpecLike}
+import org.scalatest.OptionValues
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+
 import play.api.http.Status
 import play.api.i18n
 import play.api.i18n.{Messages, MessagesApi, MessagesImpl}
@@ -40,7 +43,12 @@ import views.html.{global_error, start, unauthorised}
 import scala.concurrent.{ExecutionContext, Future}
 
 
-class ReturnServiceControllerSpec extends WordSpecLike with Matchers with OptionValues with ERSFakeApplicationConfig with ErsTestHelper with GuiceOneAppPerSuite {
+class ReturnServiceControllerSpec extends AnyWordSpecLike
+  with Matchers
+  with OptionValues
+  with ERSFakeApplicationConfig
+  with ErsTestHelper
+  with GuiceOneAppPerSuite {
 
   val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
     messagesActionBuilder,
@@ -67,7 +75,7 @@ class ReturnServiceControllerSpec extends WordSpecLike with Matchers with Option
 			Some("CSOP"), Some("agentRef"), Some("empRef"), Some("ts"), Some("hmac"))
 
   def buildFakeReturnServiceController(accessThresholdValue: Int = hundred): ReturnServiceController =
-		new ReturnServiceController(mockMCC, mockAuthConnector, mockErsUtil, mockAppConfig, globalErrorView, unauthorisedView, startView) {
+		new ReturnServiceController(mockMCC, mockAuthConnector, mockErsUtil, mockAppConfig, globalErrorView, unauthorisedView, startView, testAuthActionGov) {
 
 		override lazy val accessThreshold: Int = accessThresholdValue
     override val accessDeniedUrl: String = "/denied.html"
@@ -77,7 +85,7 @@ class ReturnServiceControllerSpec extends WordSpecLike with Matchers with Option
 			.thenReturn(Future.successful(HttpResponse(OK, "")))
 		when(mockErsUtil.cache(any(), any())(any(), any(), any(), any())).thenReturn(cacheResponse)
 		when(mockErsUtil.cache(any(), any(),any())(any(), any(), any())).thenReturn(cacheResponse)
-		when(mockErsUtil.fetch[RequestObject](any(), any())(any(), any(), any())).thenReturn(Future.successful(rscAsRequestObject))
+		when(mockErsUtil.fetch[RequestObject](any(), any())(any(), any())).thenReturn(Future.successful(rscAsRequestObject))
   }
 
   "Calling ReturnServiceController.cacheParams with existing cache storage for the given schemeId and schemeRef" should {

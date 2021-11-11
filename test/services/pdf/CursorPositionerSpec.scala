@@ -16,10 +16,12 @@
 
 package services.pdf
 
-import org.scalatest.{Matchers, OptionValues, WordSpecLike}
+import org.scalatest.OptionValues
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatestplus.mockito.MockitoSugar
 
-class CursorPositionerSpec extends WordSpecLike with Matchers with OptionValues with MockitoSugar{
+class CursorPositionerSpec extends AnyWordSpecLike with Matchers with OptionValues with MockitoSugar{
   var cursorPositioner = new CursorPositioner
   cursorPositioner.fontSize = 1
 

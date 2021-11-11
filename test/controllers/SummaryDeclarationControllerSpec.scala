@@ -18,13 +18,16 @@ package controllers
 
 import akka.stream.Materializer
 import connectors.ErsConnector
+import controllers.auth.RequestWithOptionalAuthContext
 import metrics.Metrics
 import models._
 import models.upscan.UpscanCsvFilesCallbackList
 import org.joda.time.DateTime
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
-import org.scalatest.{Matchers, OptionValues, WordSpecLike}
+import org.scalatest.OptionValues
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status
@@ -43,7 +46,14 @@ import views.html.{global_error, summary}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class SummaryDeclarationControllerSpec extends WordSpecLike with Matchers with OptionValues with ERSFakeApplicationConfig with MockitoSugar with ErsTestHelper with UpscanData with GuiceOneAppPerSuite {
+class SummaryDeclarationControllerSpec extends AnyWordSpecLike
+	with Matchers
+	with OptionValues
+	with ERSFakeApplicationConfig
+	with MockitoSugar
+	with ErsTestHelper
+	with UpscanData
+	with GuiceOneAppPerSuite {
 
 	val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
 		messagesActionBuilder,
@@ -162,7 +172,7 @@ class SummaryDeclarationControllerSpec extends WordSpecLike with Matchers with O
 		override lazy val metrics: Metrics = mockMetrics
 		override lazy val ersUrl = "ers-returns"
 		override lazy val validatorUrl = "ers-file-validator"
-		override def connectToEtmpSapRequest(schemeRef: String)(implicit authContext: ERSAuthData, hc: HeaderCarrier): Future[String] = Future("1234567890")
+		override def connectToEtmpSapRequest(schemeRef: String)(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[String] = Future("1234567890")
 	}
 
 
@@ -174,7 +184,8 @@ class SummaryDeclarationControllerSpec extends WordSpecLike with Matchers with O
 																		 new TestErsUtil(fetchMapVal),
 																		 mockAppConfig,
 																		 globalErrorView,
-																		 summaryView
+																		 summaryView,
+																		 testAuthAction
 		) {
 			when(mockHttp.POST[ValidatorData, HttpResponse](ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())
 			(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(Future.successful(HttpResponse(OK, "")))
@@ -192,14 +203,18 @@ class SummaryDeclarationControllerSpec extends WordSpecLike with Matchers with O
   "Calling SummaryDeclarationController.showSummaryDeclarationPage (GET) with authentication missing elements in the cache" should {
     "direct to ers errors page" in {
       val controllerUnderTest = buildFakeSummaryDeclarationController()
-      contentAsString(controllerUnderTest.showSummaryDeclarationPage(ersRequestObject)(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc)) shouldBe contentAsString(Future(controllerUnderTest.getGlobalErrorPage))
+			val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
+
+			contentAsString(controllerUnderTest.showSummaryDeclarationPage(ersRequestObject)(authRequest, hc)) shouldBe contentAsString(Future(controllerUnderTest.getGlobalErrorPage(testFakeRequest, testMessages)))
     }
   }
 
   "Calling SummaryDeclarationController.showSummaryDeclarationPage (GET) with authentication and required elements (Nil Return) in the cache" should {
     "show the scheme organiser page" in {
       val controllerUnderTest = buildFakeSummaryDeclarationController("withAllNillReturn")
-      val result = controllerUnderTest.showSummaryDeclarationPage(ersRequestObject)(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc)
+			val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
+
+			val result = controllerUnderTest.showSummaryDeclarationPage(ersRequestObject)(authRequest, hc)
       status(result) shouldBe Status.OK
     }
   }
@@ -207,7 +222,9 @@ class SummaryDeclarationControllerSpec extends WordSpecLike with Matchers with O
   "Calling SummaryDeclarationController.showSummaryDeclarationPage (GET) with authentication and required elements (CSV File Upload) in the cache" should {
     "show the scheme organiser page" in {
       val controllerUnderTest = buildFakeSummaryDeclarationController("withAllCSVFile")
-      val result = controllerUnderTest.showSummaryDeclarationPage(ersRequestObject)(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc)
+			val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
+
+			val result = controllerUnderTest.showSummaryDeclarationPage(ersRequestObject)(authRequest, hc)
       status(result) shouldBe Status.OK
     }
   }
@@ -215,7 +232,9 @@ class SummaryDeclarationControllerSpec extends WordSpecLike with Matchers with O
   "Calling SummaryDeclarationController.showSummaryDeclarationPage (GET) with authentication and required elements (ODS File Upload) in the cache" should {
     "show the scheme organiser page" in {
       val controllerUnderTest = buildFakeSummaryDeclarationController("withAllODSFile")
-      val result = controllerUnderTest.showSummaryDeclarationPage(ersRequestObject)(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc)
+			val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
+
+			val result = controllerUnderTest.showSummaryDeclarationPage(ersRequestObject)(authRequest, hc)
       status(result) shouldBe Status.OK
     }
   }
@@ -223,7 +242,9 @@ class SummaryDeclarationControllerSpec extends WordSpecLike with Matchers with O
   "Calling SummaryDeclarationController.showSummaryDeclarationPage (GET) with authentication and required elements in the cache (ODS)" should {
     "show the scheme organiser page" in {
       val controllerUnderTest = buildFakeSummaryDeclarationController("odsFile")
-      val result = controllerUnderTest.showSummaryDeclarationPage(ersRequestObject)(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc)
+			val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
+
+			val result = controllerUnderTest.showSummaryDeclarationPage(ersRequestObject)(authRequest, hc)
       status(result) shouldBe Status.OK
     }
   }
@@ -231,7 +252,9 @@ class SummaryDeclarationControllerSpec extends WordSpecLike with Matchers with O
   "Calling SummaryDeclarationController.showSummaryDeclarationPage (GET) with authentication and required elements (no group scheme info) in the cache" should {
     "show the scheme organiser page" in {
       val controllerUnderTest = buildFakeSummaryDeclarationController("noGroupSchemeInfo")
-      val result = controllerUnderTest.showSummaryDeclarationPage(ersRequestObject)(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc)
+			val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
+
+			val result = controllerUnderTest.showSummaryDeclarationPage(ersRequestObject)(authRequest, hc)
       status(result) shouldBe Status.OK
     }
   }

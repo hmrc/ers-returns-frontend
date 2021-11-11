@@ -23,7 +23,9 @@ import models.{ERSAuthData, SchemeInfo, ValidatorData}
 import org.joda.time.DateTime
 import org.mockito.Mockito.{reset => mreset, _}
 import org.mockito.{ArgumentCaptor, ArgumentMatchers}
-import org.scalatest.{Matchers, OptionValues, WordSpecLike}
+import org.scalatest.OptionValues
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.i18n
@@ -37,7 +39,7 @@ import utils.{ERSFakeApplicationConfig, ErsTestHelper, UpscanData, WireMockHelpe
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class ERSConnectorSpec extends WordSpecLike with Matchers with OptionValues
+class ERSConnectorSpec extends AnyWordSpecLike with Matchers with OptionValues
 												with MockitoSugar
 												with ERSFakeApplicationConfig
 												with ErsTestHelper
@@ -90,7 +92,7 @@ class ERSConnectorSpec extends WordSpecLike with Matchers with OptionValues
 				(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(HttpResponse(OK, "")))
 
-      val result = await(ersConnectorMockHttp.validateFileData(uploadedSuccessfully, schemeInfo))
+      val result = await(ersConnectorMockHttp.validateFileData(uploadedSuccessfully, schemeInfo)(requestWithAuth, hc))
       result.status shouldBe OK
       stringCaptor.getValue should include("123%2FABCDE")
     }
@@ -104,7 +106,7 @@ class ERSConnectorSpec extends WordSpecLike with Matchers with OptionValues
           )
         )
 
-        val result = await(ersConnector.validateFileData(uploadedSuccessfully, schemeInfo))
+        val result = await(ersConnector.validateFileData(uploadedSuccessfully, schemeInfo)(requestWithAuth, hc))
         result.status shouldBe OK
       }
 
@@ -116,7 +118,7 @@ class ERSConnectorSpec extends WordSpecLike with Matchers with OptionValues
           )
         )
 
-        val result = await(ersConnector.validateFileData(uploadedSuccessfully, schemeInfo))
+        val result = await(ersConnector.validateFileData(uploadedSuccessfully, schemeInfo)(requestWithAuth, hc))
         result.status shouldBe ACCEPTED
       }
     }
@@ -130,7 +132,7 @@ class ERSConnectorSpec extends WordSpecLike with Matchers with OptionValues
           )
         )
 
-        val result = await(ersConnector.validateFileData(uploadedSuccessfully, schemeInfo))
+        val result = await(ersConnector.validateFileData(uploadedSuccessfully, schemeInfo)(requestWithAuth, hc))
         result.status shouldBe BAD_REQUEST
       }
 
@@ -142,7 +144,7 @@ class ERSConnectorSpec extends WordSpecLike with Matchers with OptionValues
           )
         )
 
-        val result = await(ersConnector.validateFileData(uploadedSuccessfully, schemeInfo))
+        val result = await(ersConnector.validateFileData(uploadedSuccessfully, schemeInfo)(requestWithAuth, hc))
         result.status shouldBe BAD_REQUEST
       }
 
@@ -151,7 +153,7 @@ class ERSConnectorSpec extends WordSpecLike with Matchers with OptionValues
         when(mockHttp.POST[ValidatorData, HttpResponse](ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())
 					(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future.failed(new Exception("Test exception")))
-        val result = await(ersConnectorMockHttp.validateFileData(uploadedSuccessfully, schemeInfo))
+        val result = await(ersConnectorMockHttp.validateFileData(uploadedSuccessfully, schemeInfo)(requestWithAuth, hc))
         result.status shouldBe BAD_REQUEST
       }
     }
@@ -164,7 +166,7 @@ class ERSConnectorSpec extends WordSpecLike with Matchers with OptionValues
       when(mockHttp.POST[ValidatorData, HttpResponse](stringCaptor.capture(), ArgumentMatchers.any(), ArgumentMatchers.any())
 				(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(HttpResponse(OK, "")))
-      val result = await(ersConnectorMockHttp.validateFileData(uploadedSuccessfully, schemeInfo))
+      val result = await(ersConnectorMockHttp.validateFileData(uploadedSuccessfully, schemeInfo)(requestWithAuth, hc))
       result.status shouldBe OK
       stringCaptor.getValue should include("123%2FABCDE")
     }
@@ -178,7 +180,7 @@ class ERSConnectorSpec extends WordSpecLike with Matchers with OptionValues
           )
         )
 
-        val result = await(ersConnector.validateCsvFileData(List(uploadedSuccessfully), schemeInfo))
+        val result = await(ersConnector.validateCsvFileData(List(uploadedSuccessfully), schemeInfo)(requestWithAuth, hc))
         result.status shouldBe OK
       }
 
@@ -190,7 +192,7 @@ class ERSConnectorSpec extends WordSpecLike with Matchers with OptionValues
           )
         )
 
-        val result = await(ersConnector.validateCsvFileData(List(uploadedSuccessfully), schemeInfo))
+        val result = await(ersConnector.validateCsvFileData(List(uploadedSuccessfully), schemeInfo)(requestWithAuth, hc))
         result.status shouldBe ACCEPTED
       }
     }
@@ -204,7 +206,7 @@ class ERSConnectorSpec extends WordSpecLike with Matchers with OptionValues
           )
         )
 
-        val result = await(ersConnector.validateCsvFileData(List(uploadedSuccessfully), schemeInfo))
+        val result = await(ersConnector.validateCsvFileData(List(uploadedSuccessfully), schemeInfo)(requestWithAuth, hc))
         result.status shouldBe BAD_REQUEST
       }
 
@@ -216,7 +218,7 @@ class ERSConnectorSpec extends WordSpecLike with Matchers with OptionValues
           )
         )
 
-        val result = await(ersConnector.validateCsvFileData(List(uploadedSuccessfully), schemeInfo))
+        val result = await(ersConnector.validateCsvFileData(List(uploadedSuccessfully), schemeInfo)(requestWithAuth, hc))
         result.status shouldBe BAD_REQUEST
       }
 
@@ -225,7 +227,7 @@ class ERSConnectorSpec extends WordSpecLike with Matchers with OptionValues
         when(mockHttp.POST[ValidatorData, HttpResponse](ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())
 					(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future.failed(new Exception("Test exception")))
-        val result = await(ersConnectorMockHttp.validateCsvFileData(List(uploadedSuccessfully), schemeInfo))
+        val result = await(ersConnectorMockHttp.validateCsvFileData(List(uploadedSuccessfully), schemeInfo)(requestWithAuth, hc))
         result.status shouldBe BAD_REQUEST
       }
     }
@@ -243,7 +245,7 @@ class ERSConnectorSpec extends WordSpecLike with Matchers with OptionValues
         Future.successful(HttpResponse(OK, ""))
       )
 
-      val result = await(ersConnectorMockHttp.retrieveSubmissionData(data))
+      val result = await(ersConnectorMockHttp.retrieveSubmissionData(data)(requestWithAuth, hc))
       result.status shouldBe OK
     }
 
@@ -256,7 +258,7 @@ class ERSConnectorSpec extends WordSpecLike with Matchers with OptionValues
         Future.successful(HttpResponse(INTERNAL_SERVER_ERROR, ""))
       )
 
-      val result = await(ersConnectorMockHttp.retrieveSubmissionData(data))
+      val result = await(ersConnectorMockHttp.retrieveSubmissionData(data)(requestWithAuth, hc))
       result.status shouldBe INTERNAL_SERVER_ERROR
     }
 
@@ -270,7 +272,7 @@ class ERSConnectorSpec extends WordSpecLike with Matchers with OptionValues
       )
 
       intercept[Exception] {
-        await(ersConnector.retrieveSubmissionData(data))
+        await(ersConnector.retrieveSubmissionData(data)(requestWithAuth, hc))
       }
     }
 

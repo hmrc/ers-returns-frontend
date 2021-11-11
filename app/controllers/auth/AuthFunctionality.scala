@@ -17,24 +17,37 @@
 package controllers.auth
 
 import config.ApplicationConfig
-import models.ERSAuthData
+import models.{ERSAuthData, ErsMetaData, RequestObject}
 import play.api.Logging
+import play.api.libs.json.{Json, OFormat}
 import play.api.mvc.Results.Redirect
-import play.api.mvc.{AnyContent, Request, Result}
+import play.api.mvc._
 import uk.gov.hmrc.auth.core.AffinityGroup._
 import uk.gov.hmrc.auth.core.AuthProvider.GovernmentGateway
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals.{authorisedEnrolments, _}
 import uk.gov.hmrc.auth.core.retrieve.~
+import uk.gov.hmrc.domain.EmpRef
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
+import uk.gov.hmrc.play.http.HeaderCarrierConverter
+import utils.ERSUtil
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
-trait AuthFunctionality extends AuthorisedFunctions with Logging {
 
-	val appConfig: ApplicationConfig
+case class RequestWithOptionalAuthContext[A](request: Request[A], authData: ERSAuthData) extends WrappedRequest[A](request)
+trait AuthIdentifierAction extends ActionBuilder[RequestWithOptionalAuthContext, AnyContent] with ActionFunction[Request, RequestWithOptionalAuthContext]
 
-	lazy val signInUrl: String = appConfig.ggSignInUrl
+@Singleton
+class AuthAction @Inject()(override val authConnector: DefaultAuthConnector,
+                           appConfig: ApplicationConfig,
+                           ersUtil: ERSUtil,
+                           val parser: BodyParsers.Default
+                          )(implicit val executionContext: ExecutionContext) extends AuthorisedFunctions with AuthIdentifierAction with Logging {
+
+  lazy val signInUrl: String = appConfig.ggSignInUrl
   lazy val origin: String = appConfig.appName
 
   def loginParams: Map[String, Seq[String]] = Map(
@@ -42,28 +55,78 @@ trait AuthFunctionality extends AuthorisedFunctions with Logging {
     "origin" -> Seq(origin)
   )
 
-	private def handleException(implicit request: Request[AnyContent]): PartialFunction[Throwable, Result] = {
-		case _: NoActiveSession => Redirect(signInUrl, loginParams)
-		case er: AuthorisationException =>
-			logger.error(s"[AuthFunctionality][handleException] Auth exception: $er")
-			Redirect(controllers.routes.ApplicationController.unauthorised().url)
-	}
+  def delegationModelUser(metaData: ErsMetaData, authContext: ERSAuthData): ERSAuthData = {
+    val twoPartKey = metaData.empRef.split('/')
+    authContext.copy(empRef = EmpRef(twoPartKey(0), twoPartKey(1)))
+  }
 
-  def authoriseFor[A](body: ERSAuthData => Future[Result])
-                     (implicit hc: HeaderCarrier, ec: ExecutionContext, req: Request[AnyContent]): Future[Result] = {
-    authorised((Enrolment("IR-PAYE") or Enrolment("HMRC-AGENT-AGENT") or Agent) and AuthProviders(GovernmentGateway))
-      .retrieve(authorisedEnrolments and affinityGroup) {
+  override def invokeBlock[A](request: Request[A], block: RequestWithOptionalAuthContext[A] => Future[Result]): Future[Result] = {
+    implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
+    implicit val formatRSParams: OFormat[ErsMetaData] = Json.format[ErsMetaData]
+
+      authorised((Enrolment("IR-PAYE") or Enrolment("HMRC-AGENT-AGENT") or Agent) and AuthProviders(GovernmentGateway))
+        .retrieve(authorisedEnrolments and affinityGroup) {
+          case authorisedEnrolments ~ affinityGroup  =>
+            val authContext = ERSAuthData(authorisedEnrolments.enrolments, affinityGroup)
+
+            if (authContext.isAgent) {
+              for {
+                requestObject <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
+                all <- ersUtil.fetch[ErsMetaData](ersUtil.ersMetaData, requestObject.getSchemeReference)
+                result <- block(RequestWithOptionalAuthContext(request, delegationModelUser(all, authContext: ERSAuthData)))
+              } yield {
+                result
+              }
+            } else {
+              val alteredAuthContext: ERSAuthData = authContext.getEnrolment("IR-PAYE") map { enrol =>
+                authContext.copy(empRef = EmpRef(enrol.identifiers.head.value, enrol.identifiers(1).value))
+              } getOrElse authContext
+
+              block(RequestWithOptionalAuthContext(request, alteredAuthContext))
+            }
+        } recover {
+        case _: NoActiveSession => Redirect(signInUrl, loginParams)
+        case er: AuthorisationException =>
+          logger.error(s"[AuthFunctionality][handleException] Auth exception: $er")
+          Redirect(controllers.routes.ApplicationController.unauthorised().url)
+      }
+  }
+}
+
+
+@Singleton
+class AuthActionGovGateway @Inject()(override val authConnector: DefaultAuthConnector,
+                           appConfig: ApplicationConfig,
+                           ersUtil: ERSUtil,
+                           val parser: BodyParsers.Default
+                          )(implicit val executionContext: ExecutionContext) extends AuthorisedFunctions with AuthIdentifierAction with Logging {
+
+  lazy val signInUrl: String = appConfig.ggSignInUrl
+  lazy val origin: String = appConfig.appName
+
+  def loginParams: Map[String, Seq[String]] = Map(
+    "continue" -> Seq(appConfig.loginCallback),
+    "origin" -> Seq(origin)
+  )
+
+  def delegationModelUser(metaData: ErsMetaData, authContext: ERSAuthData): ERSAuthData = {
+    val twoPartKey = metaData.empRef.split('/')
+    authContext.copy(empRef = EmpRef(twoPartKey(0), twoPartKey(1)))
+  }
+
+  override def invokeBlock[A](request: Request[A], block: RequestWithOptionalAuthContext[A] => Future[Result]): Future[Result] = {
+    implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
+    implicit val formatRSParams: OFormat[ErsMetaData] = Json.format[ErsMetaData]
+
+    authorised(AuthProviders(GovernmentGateway)).retrieve(allEnrolments and affinityGroup) {
         case authorisedEnrolments ~ affinityGroup  =>
-						body(ERSAuthData(authorisedEnrolments.enrolments, affinityGroup))
-      } recover handleException
-	}
-
-	def authorisedByGovGateway[A](body: ERSAuthData => Future[Result])
-										 (implicit hc: HeaderCarrier, ec: ExecutionContext, req: Request[AnyContent]): Future[Result] = {
-		authorised(AuthProviders(GovernmentGateway))
-			.retrieve(authorisedEnrolments and affinityGroup) {
-				case authorisedEnrolments ~ affinityGroup  =>
-					body(ERSAuthData(authorisedEnrolments.enrolments, affinityGroup))
-			} recover handleException
-	}
+          val authContext = ERSAuthData(authorisedEnrolments.enrolments, affinityGroup)
+          block(RequestWithOptionalAuthContext(request, authContext))
+      } recover {
+      case _: NoActiveSession => Redirect(signInUrl, loginParams)
+      case er: AuthorisationException =>
+        logger.error(s"[AuthFunctionality][handleException] Auth exception: $er")
+        Redirect(controllers.routes.ApplicationController.unauthorised().url)
+    }
+  }
 }

@@ -16,17 +16,22 @@
 
 package utils
 
-import akka.actor.ActorSystem
+import akka.stream.Materializer
 import config.{ApplicationConfig, ERSShortLivedCache}
 import connectors.ErsConnector
+import controllers.auth.{AuthAction, AuthActionGovGateway, RequestWithOptionalAuthContext}
 import metrics.Metrics
+import models.ERSAuthData
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.mockito.Mockito._
 import org.scalatestplus.mockito.MockitoSugar
-import play.api.test.FakeRequest
+import play.api.i18n
+import play.api.i18n.{Messages, MessagesImpl}
+import play.api.mvc.BodyParsers.Default
 import play.api.mvc._
-import play.api.test.Helpers.{contentAsString, defaultAwaitTimeout, stubBodyParser, stubControllerComponents, stubMessagesApi}
+import play.api.test.FakeRequest
+import play.api.test.Helpers.{contentAsString, defaultAwaitTimeout, stubBodyParser, stubControllerComponents, stubMessages, stubMessagesApi}
 import play.twirl.api.Html
 import services.SessionService
 import services.audit.AuditEvents
@@ -41,10 +46,20 @@ trait ErsTestHelper extends MockitoSugar with AuthHelper with ERSFakeApplication
 
 	val messagesActionBuilder: MessagesActionBuilder = new DefaultMessagesActionBuilderImpl(stubBodyParser[AnyContent](), stubMessagesApi())
 	val cc: ControllerComponents = stubControllerComponents()
-	implicit val request: FakeRequest[AnyContent] = FakeRequest()
+	val mockMaterializer: Materializer = mock[Materializer]
+	val defaultParser = new Default()(mockMaterializer)
+
+	def buildRequestWithAuth(req: Request[AnyContent], authData: ERSAuthData = Fixtures.buildFakeUser): RequestWithOptionalAuthContext[AnyContent] =
+		RequestWithOptionalAuthContext(req, authData)
 
 	implicit val hc: HeaderCarrier = HeaderCarrier()
 	implicit val ec: ExecutionContext = cc.executionContext
+	implicit val testFakeRequest: FakeRequest[AnyContent] = FakeRequest()
+	implicit lazy val messages = MessagesImpl(i18n.Lang("en"), stubMessagesApi())
+
+
+	val requestWithAuth: RequestWithOptionalAuthContext[AnyContent] = RequestWithOptionalAuthContext(testFakeRequest, defaultErsAuthData)
+
 
 	val OPTION_YES = "1"
 	val OPTION_NO = "2"
@@ -71,6 +86,11 @@ trait ErsTestHelper extends MockitoSugar with AuthHelper with ERSFakeApplication
 	val mockShortLivedCache: ERSShortLivedCache = mock[ERSShortLivedCache]
 	val mockSessionCache: SessionService = mock[SessionService]
 	val mockCountryCodes: CountryCodes = mock[CountryCodes]
+
+
+	val testAuthAction = new AuthAction(mockAuthConnector, mockAppConfig, mockErsUtil, defaultParser)(ec)
+	val testAuthActionGov = new AuthActionGovGateway(mockAuthConnector, mockAppConfig, mockErsUtil, defaultParser)(ec)
+
 
 	when(mockCountryCodes.countriesMap).thenReturn(List(Country("United Kingdom", "UK"), Country("South Africa", "ZA")))
 

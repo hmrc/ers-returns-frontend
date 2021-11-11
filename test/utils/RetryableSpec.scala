@@ -21,12 +21,14 @@ import config.ApplicationConfig
 import org.mockito.Mockito.{times, verify, when}
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import org.scalatest.{Matchers, OptionValues, WordSpecLike}
+import org.scalatest.OptionValues
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpecLike
 import play.api.test.Helpers.await
 import scala.concurrent.Future
 import scala.concurrent.duration.SECONDS
 
-class RetryableSpec extends WordSpecLike with Matchers with OptionValues with MockitoSugar with GuiceOneAppPerSuite {
+class RetryableSpec extends AnyWordSpecLike with Matchers with OptionValues with MockitoSugar with GuiceOneAppPerSuite {
 
   class RetryTest extends Retryable {
 		import scala.concurrent.duration._

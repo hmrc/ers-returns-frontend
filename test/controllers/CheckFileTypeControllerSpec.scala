@@ -21,12 +21,14 @@ import models.{CheckFileType, RequestObject, RsFormMappings}
 import org.jsoup.Jsoup
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
+import org.scalatest.OptionValues
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.{Matchers, OptionValues, WordSpecLike}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status
 import play.api.i18n
-import play.api.i18n.{Messages, MessagesApi, MessagesImpl}
+import play.api.i18n.{MessagesApi, MessagesImpl}
 import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -37,7 +39,13 @@ import views.html.{check_file_type, global_error}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class CheckFileTypeControllerSpec extends WordSpecLike with Matchers with OptionValues with ERSFakeApplicationConfig with ErsTestHelper with GuiceOneAppPerSuite with ScalaFutures {
+class CheckFileTypeControllerSpec extends AnyWordSpecLike
+  with Matchers
+  with OptionValues
+  with ERSFakeApplicationConfig
+  with ErsTestHelper
+  with GuiceOneAppPerSuite
+  with ScalaFutures {
 
   val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
     messagesActionBuilder,
@@ -50,7 +58,6 @@ class CheckFileTypeControllerSpec extends WordSpecLike with Matchers with Option
   )
 
   implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
-  implicit lazy val messages: Messages = testMessages.messages
 
   implicit lazy val mat: Materializer = app.materializer
   val globalErrorView: global_error = app.injector.instanceOf[global_error]
@@ -61,9 +68,9 @@ class CheckFileTypeControllerSpec extends WordSpecLike with Matchers with Option
     def buildFakeCheckingServiceController(
                                             fileType: Future[CheckFileType] = Future.successful(CheckFileType(Some("csv"))),
                                             requestObject: Future[RequestObject] = Future.successful(ersRequestObject)
-                                          ): CheckFileTypeController = new CheckFileTypeController(mockMCC, mockAuthConnector, mockErsUtil, mockAppConfig, globalErrorView, checkFileTypeView) {
-      when(mockErsUtil.fetch[CheckFileType](refEq("check-file-type"), any())(any(), any(), any())).thenReturn(fileType)
-      when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any(), any())).thenReturn(requestObject)
+                                          ): CheckFileTypeController = new CheckFileTypeController(mockMCC, mockAuthConnector, mockErsUtil, mockAppConfig, globalErrorView, checkFileTypeView, testAuthActionGov) {
+      when(mockErsUtil.fetch[CheckFileType](refEq("check-file-type"), any())(any(), any())).thenReturn(fileType)
+      when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any())).thenReturn(requestObject)
     }
 
     "give a redirect status (to company authentication frontend) on GET if user is not authenticated" in {
@@ -82,7 +89,7 @@ class CheckFileTypeControllerSpec extends WordSpecLike with Matchers with Option
 
     "give a status OK if fetch successful and shows check file type page with file type selected" in {
       val controllerUnderTest = buildFakeCheckingServiceController()
-      val result = controllerUnderTest.showCheckFileTypePage()(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc)
+      val result = controllerUnderTest.showCheckFileTypePage()(buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET")), hc)
       status(result) shouldBe Status.OK
       val document = Jsoup.parse(contentAsString(result))
       document.select("input[id=csv]").hasAttr("checked") shouldEqual true
@@ -91,7 +98,7 @@ class CheckFileTypeControllerSpec extends WordSpecLike with Matchers with Option
 
     "give a status OK if fetch fails then show check file type page with nothing selected" in {
       val controllerUnderTest = buildFakeCheckingServiceController(fileType = Future.failed(new Exception))
-      val result = controllerUnderTest.showCheckFileTypePage()(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionId("GET"), hc)
+      val result = controllerUnderTest.showCheckFileTypePage()(buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET")), hc)
       status(result) shouldBe Status.OK
       val document = Jsoup.parse(contentAsString(result))
       document.select("input[id=csv]").hasAttr("checked") shouldEqual false
@@ -101,7 +108,7 @@ class CheckFileTypeControllerSpec extends WordSpecLike with Matchers with Option
     "render error page if fetch on Request Object fails" in {
       val controllerUnderTest = buildFakeCheckingServiceController(requestObject = Future.failed(new Exception))
 			val req = Fixtures.buildFakeRequestWithSessionId("GET")
-      val result = controllerUnderTest.showCheckFileTypePage()(Fixtures.buildFakeUser, req, hc)
+      val result = controllerUnderTest.showCheckFileTypePage()(buildRequestWithAuth(req), hc)
 
       contentAsString(result) should include(testMessages("ers.global_errors.message"))
       contentAsString(result) shouldBe contentAsString(Future(controllerUnderTest.getGlobalErrorPage(req, testMessages)))
@@ -114,9 +121,9 @@ class CheckFileTypeControllerSpec extends WordSpecLike with Matchers with Option
     def buildFakeCheckingServiceController(
                                             cache: Future[CacheMap] = Future.successful(mock[CacheMap]),
                                            requestObject: Future[RequestObject] = Future.successful(ersRequestObject)): CheckFileTypeController =
-			new CheckFileTypeController(mockMCC, mockAuthConnector, mockErsUtil, mockAppConfig, globalErrorView, checkFileTypeView){
+			new CheckFileTypeController(mockMCC, mockAuthConnector, mockErsUtil, mockAppConfig, globalErrorView, checkFileTypeView, testAuthActionGov){
       when(mockErsUtil.cache(matches("check-file-type"), any(), any())(any(), any(), any())).thenReturn(cache)
-      when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any(), any())).thenReturn(requestObject)
+      when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any())).thenReturn(requestObject)
     }
 
     "give a redirect status (to company authentication frontend) on GET if user is not authenticated" in {
@@ -138,7 +145,7 @@ class CheckFileTypeControllerSpec extends WordSpecLike with Matchers with Option
       val fileTypeData = Map("" -> "")
       val form = RsFormMappings.checkFileTypeForm.bind(fileTypeData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-      val result = controllerUnderTest.showCheckFileTypeSelected()(request, hc)
+      val result = controllerUnderTest.showCheckFileTypeSelected()(buildRequestWithAuth(request), hc)
       status(result) shouldBe Status.OK
     }
 
@@ -147,7 +154,7 @@ class CheckFileTypeControllerSpec extends WordSpecLike with Matchers with Option
       val checkFileTypeData = Map("checkFileType" -> "csv")
       val form = RsFormMappings.schemeTypeForm.bind(checkFileTypeData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-      val result = controllerUnderTest.showCheckFileTypeSelected()(request, hc)
+      val result = controllerUnderTest.showCheckFileTypeSelected()(buildRequestWithAuth(request), hc)
       status(result) shouldBe Status.SEE_OTHER
       result.futureValue.header.headers("Location") shouldBe routes.CheckCsvFilesController.checkCsvFilesPage().toString
     }
@@ -157,7 +164,7 @@ class CheckFileTypeControllerSpec extends WordSpecLike with Matchers with Option
       val checkFileTypeData = Map("checkFileType" -> "ods")
       val form = RsFormMappings.schemeTypeForm.bind(checkFileTypeData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-      val result = controllerUnderTest.showCheckFileTypeSelected()(request, hc)
+      val result = controllerUnderTest.showCheckFileTypeSelected()(buildRequestWithAuth(request), hc)
       status(result) shouldBe Status.SEE_OTHER
       result.futureValue.header.headers("Location") shouldBe routes.FileUploadController.uploadFilePage().toString
     }
@@ -167,8 +174,8 @@ class CheckFileTypeControllerSpec extends WordSpecLike with Matchers with Option
       val schemeTypeData = Map("checkFileType" -> "csv")
       val form = RsFormMappings.schemeTypeForm.bind(schemeTypeData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-      val result = controllerUnderTest.showCheckFileTypeSelected()(request, hc)
-      contentAsString(result) shouldBe contentAsString(Future(controllerUnderTest.getGlobalErrorPage(request,messages)))
+      val result = controllerUnderTest.showCheckFileTypeSelected()(buildRequestWithAuth(request), hc)
+      contentAsString(result) shouldBe contentAsString(Future(controllerUnderTest.getGlobalErrorPage(request,testMessages)))
       contentAsString(result) should include(testMessages("ers.global_errors.message"))
     }
 

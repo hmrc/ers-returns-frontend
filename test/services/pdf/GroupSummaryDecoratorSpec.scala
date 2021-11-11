@@ -19,13 +19,15 @@ package services.pdf
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import org.mockito.internal.verification.VerificationModeFactory
-import org.scalatest.{Matchers, OptionValues, WordSpecLike}
+import org.scalatest.OptionValues
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.i18n.Messages
 import utils.Fixtures
 
 
-class GroupSummaryDecoratorSpec extends WordSpecLike with Matchers with OptionValues with MockitoSugar  {
+class GroupSummaryDecoratorSpec extends AnyWordSpecLike with Matchers with OptionValues with MockitoSugar  {
 
   implicit val messages: Messages = mock[Messages]
 

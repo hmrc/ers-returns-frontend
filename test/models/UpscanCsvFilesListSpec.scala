@@ -17,10 +17,12 @@
 package models
 
 import models.upscan.UploadId
-import org.scalatest.{Matchers, OptionValues, WordSpecLike}
+import org.scalatest.OptionValues
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpecLike
 import utils.UpscanData
 
-class UpscanCsvFilesListSpec extends WordSpecLike with Matchers with OptionValues with UpscanData {
+class UpscanCsvFilesListSpec extends AnyWordSpecLike with Matchers with OptionValues with UpscanData {
 
   "updateToInProgress" should {
     "update a NotStarted upload with matching ID to InProgress" in {

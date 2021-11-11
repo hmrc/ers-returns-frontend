@@ -18,6 +18,7 @@ package controllers
 
 import config.ApplicationConfig
 import connectors.ErsConnector
+import controllers.auth.{AuthAction, RequestWithOptionalAuthContext}
 import models._
 import play.api.Logging
 import play.api.data.Form
@@ -40,21 +41,21 @@ class TrusteeController @Inject()(val mcc: MessagesControllerComponents,
 																	implicit val appConfig: ApplicationConfig,
                                   globalErrorView: views.html.global_error,
                                   trusteeDetailsView: views.html.trustee_details,
-                                  trusteeSummaryView: views.html.trustee_summary
-                                 ) extends FrontendController(mcc) with Authenticator with I18nSupport with Logging {
+                                  trusteeSummaryView: views.html.trustee_summary,
+                                  authAction: AuthAction
+                                 ) extends FrontendController(mcc) with I18nSupport with Logging {
 
   implicit val ec: ExecutionContext = mcc.executionContext
 
-  def trusteeDetailsPage(index: Int): Action[AnyContent] = authorisedForAsync() {
-    implicit user: ERSAuthData =>
+  def trusteeDetailsPage(index: Int): Action[AnyContent] = authAction.async {
       implicit request =>
         ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
-          showTrusteeDetailsPage(requestObject, index)(user, request, hc)
+          showTrusteeDetailsPage(requestObject, index)(request, hc)
         }
   }
 
   def showTrusteeDetailsPage(requestObject: RequestObject, index: Int)
-														(implicit authContext: ERSAuthData, request: Request[AnyContent], hc: HeaderCarrier): Future[Result] = {
+														(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
     ersUtil.fetch[GroupSchemeInfo](ersUtil.GROUP_SCHEME_CACHE_CONTROLLER, requestObject.getSchemeReference).map { groupSchemeActivity =>
       Ok(trusteeDetailsView(requestObject, groupSchemeActivity.groupScheme.getOrElse(ersUtil.DEFAULT), index, RsFormMappings.trusteeDetailsForm))
     } recover {
@@ -64,16 +65,15 @@ class TrusteeController @Inject()(val mcc: MessagesControllerComponents,
 		}
   }
 
-  def trusteeDetailsSubmit(index: Int): Action[AnyContent] = authorisedForAsync() {
-    implicit user =>
+  def trusteeDetailsSubmit(index: Int): Action[AnyContent] = authAction.async {
       implicit request =>
         ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
-          showTrusteeDetailsSubmit(requestObject, index)(user, request, hc)
+          showTrusteeDetailsSubmit(requestObject, index)(request, hc)
         }
   }
 
   def showTrusteeDetailsSubmit(requestObject: RequestObject, index: Int)
-															(implicit authContext: ERSAuthData, request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
+															(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
     RsFormMappings.trusteeDetailsForm.bindFromRequest.fold(
       errors => {
         ersUtil.fetch[GroupSchemeInfo](ersUtil.GROUP_SCHEME_CACHE_CONTROLLER, requestObject.getSchemeReference).map { groupSchemeActivity =>
@@ -119,13 +119,12 @@ class TrusteeController @Inject()(val mcc: MessagesControllerComponents,
       }
     }).distinct
 
-  def deleteTrustee(id: Int): Action[AnyContent] = authorisedForAsync() {
-    implicit user =>
+  def deleteTrustee(id: Int): Action[AnyContent] = authAction.async {
       implicit request =>
-        showDeleteTrustee(id)(user, request, hc)
+        showDeleteTrustee(id)(request, hc)
   }
 
-  def showDeleteTrustee(id: Int)(implicit authContext: ERSAuthData, request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
+  def showDeleteTrustee(id: Int)(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
 
     (for {
       requestObject      <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
@@ -143,13 +142,12 @@ class TrusteeController @Inject()(val mcc: MessagesControllerComponents,
   private def filterDeletedTrustee(trusteeDetailsList: TrusteeDetailsList, id: Int): List[TrusteeDetails] =
     trusteeDetailsList.trustees.zipWithIndex.filterNot(_._2 == id).map(_._1)
 
-  def editTrustee(id: Int): Action[AnyContent] = authorisedForAsync() {
-    implicit user =>
+  def editTrustee(id: Int): Action[AnyContent] = authAction.async {
       implicit request =>
-          showEditTrustee(id)(user, request, hc)
+          showEditTrustee(id)(request, hc)
   }
 
-  def showEditTrustee(id: Int)(implicit authContext: ERSAuthData, request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
+  def showEditTrustee(id: Int)(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
     (for {
       requestObject       <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
       groupSchemeActivity <- ersUtil.fetch[GroupSchemeInfo](ersUtil.GROUP_SCHEME_CACHE_CONTROLLER, requestObject.getSchemeReference)
@@ -166,13 +164,12 @@ class TrusteeController @Inject()(val mcc: MessagesControllerComponents,
     }
   }
 
-  def trusteeSummaryPage(): Action[AnyContent] = authorisedForAsync() {
-    implicit user =>
+  def trusteeSummaryPage(): Action[AnyContent] = authAction.async {
       implicit request =>
-          showTrusteeSummaryPage()(user, request, hc)
+          showTrusteeSummaryPage()(request, hc)
   }
 
-  def showTrusteeSummaryPage()(implicit authContext: ERSAuthData, request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
+  def showTrusteeSummaryPage()(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
 
     (for {
       requestObject      <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
@@ -187,13 +184,12 @@ class TrusteeController @Inject()(val mcc: MessagesControllerComponents,
     }
   }
 
-  def trusteeSummaryContinue(): Action[AnyContent] = authorisedForAsync() {
-    implicit user =>
+  def trusteeSummaryContinue(): Action[AnyContent] = authAction.async {
       implicit request =>
-        continueFromTrusteeSummaryPage()(user, request, hc)
+        continueFromTrusteeSummaryPage()(request, hc)
   }
 
-  def continueFromTrusteeSummaryPage()(implicit authContext: ERSAuthData, request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
+  def continueFromTrusteeSummaryPage()(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
     Future(Redirect(routes.AltAmendsController.altActivityPage()))
   }
 

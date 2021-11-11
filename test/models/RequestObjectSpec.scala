@@ -17,14 +17,16 @@
 package models
 
 import org.joda.time.{DateTime, Period, PeriodType}
-import org.scalatest.{MustMatchers, PrivateMethodTester, WordSpec}
+import org.scalatest.matchers.must.Matchers
+import org.scalatest.wordspec.AnyWordSpecLike
+import org.scalatest.PrivateMethodTester
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.i18n.{Lang, Messages, MessagesApi}
 import play.api.test.FakeRequest
 import utils.DateUtils
 import utils.Fixtures.ersRequestObject
 
-class RequestObjectSpec extends WordSpec with MustMatchers with GuiceOneAppPerSuite with PrivateMethodTester {
+class RequestObjectSpec extends AnyWordSpecLike with Matchers with GuiceOneAppPerSuite with PrivateMethodTester {
 
   def messagesApi: MessagesApi = app.injector.instanceOf[MessagesApi]
   implicit val messages: Messages = messagesApi.preferred(Seq(Lang.get("en").get))

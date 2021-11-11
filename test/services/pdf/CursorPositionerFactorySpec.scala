@@ -17,9 +17,10 @@
 package services.pdf
 
 import org.scalatest.matchers.{BePropertyMatchResult, BePropertyMatcher}
-import org.scalatest.{Matchers, OptionValues, WordSpecLike}
-
-class CursorPositionerFactorySpec extends WordSpecLike with Matchers with OptionValues {
+import org.scalatest.OptionValues
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpecLike
+class CursorPositionerFactorySpec extends AnyWordSpecLike with Matchers with OptionValues {
   // a function to get matching an instance to be of certain type
   def anInstanceOf[T](implicit manifest: Manifest[T]) = {
     val clazz = manifest.runtimeClass.asInstanceOf[Class[T]]

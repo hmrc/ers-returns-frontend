@@ -17,6 +17,7 @@
 package controllers
 
 import config.ApplicationConfig
+import controllers.auth.{AuthAction, RequestWithOptionalAuthContext}
 import models._
 import models.upscan.{UploadedSuccessfully, UpscanCsvFilesCallback, UpscanCsvFilesCallbackList}
 import play.api.Logging
@@ -34,17 +35,17 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class PdfGenerationController @Inject()(val mcc: MessagesControllerComponents,
-																				val authConnector: DefaultAuthConnector,
-																				val pdfBuilderService: ErsReceiptPdfBuilderService,
-																				implicit val ersUtil: ERSUtil,
-																				implicit val appConfig: ApplicationConfig,
-                                        globalErrorView: views.html.global_error
-																			 ) extends FrontendController(mcc) with Authenticator with I18nSupport with Logging {
+                                        val authConnector: DefaultAuthConnector,
+                                        val pdfBuilderService: ErsReceiptPdfBuilderService,
+                                        implicit val ersUtil: ERSUtil,
+                                        implicit val appConfig: ApplicationConfig,
+                                        globalErrorView: views.html.global_error,
+                                        authAction: AuthAction
+                                       ) extends FrontendController(mcc) with I18nSupport with Logging {
 
   implicit val ec: ExecutionContext = mcc.executionContext
 
-  def buildPdfForBundle(bundle: String, dateSubmitted: String): Action[AnyContent] = authorisedForAsync() {
-    implicit user =>
+  def buildPdfForBundle(bundle: String, dateSubmitted: String): Action[AnyContent] = authAction.async {
       implicit request =>
         ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
           generatePdf(requestObject, bundle, dateSubmitted)
@@ -52,7 +53,7 @@ class PdfGenerationController @Inject()(val mcc: MessagesControllerComponents,
   }
 
   def generatePdf(requestObject: RequestObject, bundle: String, dateSubmitted: String)
-								 (implicit authContext: ERSAuthData, request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
+                 (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
 
     logger.debug("ers returns frontend getting into the controller to generate the pdf")
     val cache: Future[ErsMetaData] = ersUtil.fetch[ErsMetaData](ersUtil.ersMetaData, requestObject.getSchemeReference)
@@ -101,11 +102,11 @@ class PdfGenerationController @Inject()(val mcc: MessagesControllerComponents,
     }
   }
 
-	def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result = {
-		Ok(globalErrorView(
-			"ers.global_errors.title",
-			"ers.global_errors.heading",
-			"ers.global_errors.message"
-		)(request, messages, appConfig))
-	}
+  def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result = {
+    Ok(globalErrorView(
+      "ers.global_errors.title",
+      "ers.global_errors.heading",
+      "ers.global_errors.message"
+    )(request, messages, appConfig))
+  }
 }

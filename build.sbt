@@ -65,3 +65,7 @@ TwirlKeys.templateImports ++= Seq(
   "uk.gov.hmrc.hmrcfrontend.views.html.components._",
   "uk.gov.hmrc.hmrcfrontend.views.html.helpers._"
 )
+
+dependencyOverrides ++= Seq(
+  "com.fasterxml.jackson.module" %% "jackson-module-scala"  % "2.12.0" force(),
+)

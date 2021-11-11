@@ -20,12 +20,14 @@ import models._
 import org.jsoup.Jsoup
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
+import org.scalatest.OptionValues
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.{Matchers, OptionValues, WordSpecLike}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status
 import play.api.i18n
-import play.api.i18n.{Messages, MessagesApi, MessagesImpl}
+import play.api.i18n.{MessagesApi, MessagesImpl}
 import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -36,7 +38,13 @@ import views.html.{global_error, scheme_organiser}
 import java.util.NoSuchElementException
 import scala.concurrent.{ExecutionContext, Future}
 
-class SchemeOrganiserControllerSpec extends WordSpecLike with Matchers with OptionValues with ERSFakeApplicationConfig with ErsTestHelper with GuiceOneAppPerSuite with ScalaFutures {
+class SchemeOrganiserControllerSpec extends AnyWordSpecLike
+  with Matchers
+  with OptionValues
+  with ERSFakeApplicationConfig
+  with ErsTestHelper
+  with GuiceOneAppPerSuite
+  with ScalaFutures {
 
   val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
     messagesActionBuilder,
@@ -49,7 +57,6 @@ class SchemeOrganiserControllerSpec extends WordSpecLike with Matchers with Opti
   )
 
   implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
-  implicit lazy val messages: Messages = testMessages.messages
   val globalErrorView: global_error = app.injector.instanceOf[global_error]
   val schemeOrganiserView: scheme_organiser = app.injector.instanceOf[scheme_organiser]
 
@@ -59,12 +66,13 @@ class SchemeOrganiserControllerSpec extends WordSpecLike with Matchers with Opti
 																					 schemeOrganiserDataCached: Boolean = false,
 																					 reportableEventsRes: Boolean = true,
 																					 fileTypeRes: Boolean = true
-																					): SchemeOrganiserController = new SchemeOrganiserController(mockMCC, mockAuthConnector, mockCountryCodes, mockErsUtil, mockAppConfig, globalErrorView, schemeOrganiserView) {
+																					): SchemeOrganiserController = new SchemeOrganiserController(mockMCC, mockAuthConnector, mockCountryCodes,
+      mockErsUtil, mockAppConfig, globalErrorView, schemeOrganiserView, testAuthAction) {
 
-			when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any(), any())).thenReturn(Future.successful(ersRequestObject))
+			when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any())).thenReturn(Future.successful(ersRequestObject))
 
 			when(
-        mockErsUtil.fetch[ReportableEvents](refEq(REPORTABLE_EVENTS), any())(any(), any(), any())
+        mockErsUtil.fetch[ReportableEvents](refEq(REPORTABLE_EVENTS), any())(any(), any())
       ).thenReturn(
         if (reportableEventsRes) {
           Future.successful(ReportableEvents(Some(OPTION_NO)))
@@ -73,7 +81,7 @@ class SchemeOrganiserControllerSpec extends WordSpecLike with Matchers with Opti
         }
       )
       when(
-        mockErsUtil.fetchOption[CheckFileType](refEq(FILE_TYPE_CACHE), any())(any(), any(), any())
+        mockErsUtil.fetchOption[CheckFileType](refEq(FILE_TYPE_CACHE), any())(any(), any())
       ).thenReturn(
         if (fileTypeRes) {
           Future.successful(Some(CheckFileType(Some(OPTION_CSV))))
@@ -82,7 +90,7 @@ class SchemeOrganiserControllerSpec extends WordSpecLike with Matchers with Opti
         }
       )
       when(
-        mockErsUtil.fetch[SchemeOrganiserDetails](refEq(SCHEME_ORGANISER_CACHE), any())(any(), any(), any())
+        mockErsUtil.fetch[SchemeOrganiserDetails](refEq(SCHEME_ORGANISER_CACHE), any())(any(), any())
       ).thenReturn(
         if (schemeOrganiserDetailsRes) {
           if (schemeOrganiserDataCached) {
@@ -113,14 +121,18 @@ class SchemeOrganiserControllerSpec extends WordSpecLike with Matchers with Opti
     "direct to ers errors page if fetching reportableEvents throws exception" in {
       val controllerUnderTest = buildFakeSchemeOrganiserController(reportableEventsRes = false)
 			val req = Fixtures.buildFakeRequestWithSessionIdCSOP("GET")
-      val result = controllerUnderTest.showSchemeOrganiserPage(ersRequestObject)(Fixtures.buildFakeUser, req, hc)
+      val authRequest = buildRequestWithAuth(req)
+
+      val result = controllerUnderTest.showSchemeOrganiserPage(ersRequestObject)(authRequest, hc)
       contentAsString(result) should include(testMessages("ers.global_errors.message"))
       contentAsString(result) shouldBe contentAsString(Future(buildFakeSchemeOrganiserController().getGlobalErrorPage(req, testMessages)))
     }
 
     "show blank scheme organiser page if fetching file type from cache fails" in {
       val controllerUnderTest = buildFakeSchemeOrganiserController(fileTypeRes = false)
-      val result = controllerUnderTest.showSchemeOrganiserPage(ersRequestObject)(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionIdCSOP("GET"), hc)
+      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+
+      val result = controllerUnderTest.showSchemeOrganiserPage(ersRequestObject)(authRequest, hc)
       status(result) shouldBe Status.OK
       val document = Jsoup.parse(contentAsString(result))
       document.select("input[id=company-name]").hasText shouldEqual false
@@ -129,7 +141,9 @@ class SchemeOrganiserControllerSpec extends WordSpecLike with Matchers with Opti
 
     "show blank scheme organiser page if fetching scheme organiser details from cache fails" in {
       val controllerUnderTest = buildFakeSchemeOrganiserController(schemeOrganiserDetailsRes = false)
-      val result = controllerUnderTest.showSchemeOrganiserPage(ersRequestObject)(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionIdCSOP("GET"), hc)
+      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+
+      val result = controllerUnderTest.showSchemeOrganiserPage(ersRequestObject)(authRequest, hc)
       status(result) shouldBe Status.OK
       val document = Jsoup.parse(contentAsString(result))
       document.select("input[id=company-name]").hasText shouldEqual false
@@ -138,7 +152,9 @@ class SchemeOrganiserControllerSpec extends WordSpecLike with Matchers with Opti
 
     "show filled out scheme organiser page if fetching scheme organiser details from cache is successful" in {
       val controllerUnderTest = buildFakeSchemeOrganiserController(schemeOrganiserDataCached = true)
-      val result = controllerUnderTest.showSchemeOrganiserPage(ersRequestObject)(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionIdCSOP("GET"), hc)
+      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+
+      val result = controllerUnderTest.showSchemeOrganiserPage(ersRequestObject)(authRequest, hc)
       status(result) shouldBe Status.OK
       val document = Jsoup.parse(contentAsString(result))
       document.select("input[id=companyName]").`val`() shouldEqual "Name"
@@ -155,25 +171,26 @@ class SchemeOrganiserControllerSpec extends WordSpecLike with Matchers with Opti
 																					 reportableEventsRes: Boolean = true,
 																					 fileTypeRes: Boolean = true,
 																					 schemeOrganiserDataCachedOk: Boolean = true
-																					): SchemeOrganiserController = new SchemeOrganiserController(mockMCC, mockAuthConnector, mockCountryCodes, mockErsUtil, mockAppConfig, globalErrorView, schemeOrganiserView) {
+																					): SchemeOrganiserController = new SchemeOrganiserController(mockMCC, mockAuthConnector, mockCountryCodes, mockErsUtil,
+      mockAppConfig, globalErrorView, schemeOrganiserView, testAuthAction) {
 
-			when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any(), any())).thenReturn(Future.successful(ersRequestObject))
+			when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any())).thenReturn(Future.successful(ersRequestObject))
 
-			when(mockErsUtil.fetch[ReportableEvents](refEq(REPORTABLE_EVENTS), any())(any(), any(), any())).thenReturn(
+			when(mockErsUtil.fetch[ReportableEvents](refEq(REPORTABLE_EVENTS), any())(any(), any())).thenReturn(
         if (reportableEventsRes) {
           Future.successful(ReportableEvents(Some(OPTION_NO)))
         } else {
           Future.failed(new Exception)
         }
       )
-      when(mockErsUtil.fetchOption[CheckFileType](refEq(FILE_TYPE_CACHE), any())(any(), any(), any())).thenReturn(
+      when(mockErsUtil.fetchOption[CheckFileType](refEq(FILE_TYPE_CACHE), any())(any(), any())).thenReturn(
         if (fileTypeRes) {
           Future.successful(Some(CheckFileType(Some(OPTION_CSV))))
         } else {
           Future.failed(new NoSuchElementException)
         }
       )
-      when(mockErsUtil.fetch[SchemeOrganiserDetails](refEq(SCHEME_ORGANISER_CACHE), any())(any(), any(), any())).thenReturn(
+      when(mockErsUtil.fetch[SchemeOrganiserDetails](refEq(SCHEME_ORGANISER_CACHE), any())(any(), any())).thenReturn(
         if (schemeOrganiserDetailsRes) {
           if (schemeOrganiserDataCached) {
             Future.successful(SchemeOrganiserDetails("Name", Fixtures.companyName, None, None, None, None, None, None, None))
@@ -213,7 +230,9 @@ class SchemeOrganiserControllerSpec extends WordSpecLike with Matchers with Opti
       val schemeOrganiserData = Map("" -> "")
       val form = RsFormMappings.schemeOrganiserForm.bind(schemeOrganiserData)
       val request = Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-      val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(Fixtures.buildFakeUser, request, hc)
+      val authRequest = buildRequestWithAuth(request)
+
+      val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(authRequest, hc)
       status(result) shouldBe Status.OK
     }
 
@@ -231,7 +250,9 @@ class SchemeOrganiserControllerSpec extends WordSpecLike with Matchers with Opti
 			)
       val form = _root_.models.RsFormMappings.schemeOrganiserForm.bind(schemeOrganiserData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-      val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(Fixtures.buildFakeUser, request, hc)
+      val authRequest = buildRequestWithAuth(request)
+
+      val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(authRequest, hc)
       status(result) shouldBe Status.SEE_OTHER
       result.futureValue.header.headers("Location") shouldBe routes.GroupSchemeController.groupSchemePage().toString
     }
@@ -250,9 +271,11 @@ class SchemeOrganiserControllerSpec extends WordSpecLike with Matchers with Opti
 			)
       val form = _root_.models.RsFormMappings.schemeOrganiserForm.bind(schemeOrganiserData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-      val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(Fixtures.buildFakeUser, request, hc)
+      val authRequest = buildRequestWithAuth(request)
+
+      val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(authRequest, hc)
       contentAsString(result) should include(testMessages("ers.global_errors.message"))
-      contentAsString(result) shouldBe contentAsString(Future(buildFakeSchemeOrganiserController().getGlobalErrorPage(request, messages)))
+      contentAsString(result) shouldBe contentAsString(Future(buildFakeSchemeOrganiserController().getGlobalErrorPage(request, testMessages)))
     }
 
     "check error for empty company name" in {
@@ -269,7 +292,9 @@ class SchemeOrganiserControllerSpec extends WordSpecLike with Matchers with Opti
       )
       val form = _root_.models.RsFormMappings.schemeOrganiserForm.bind(schemeOrganiserData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-      val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(Fixtures.buildFakeUser, request, hc)
+      val authRequest = buildRequestWithAuth(request)
+
+      val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(authRequest, hc)
       contentAsString(result) should include(testMessages("ers_scheme_organiser.err.summary.company_name_required"))
     }
     "check error for company name more than 36 characters" in {
@@ -286,7 +311,9 @@ class SchemeOrganiserControllerSpec extends WordSpecLike with Matchers with Opti
       )
       val form = _root_.models.RsFormMappings.schemeOrganiserForm.bind(schemeOrganiserData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-      val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(Fixtures.buildFakeUser, request, hc)
+      val authRequest = buildRequestWithAuth(request)
+
+      val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(authRequest, hc)
       contentAsString(result) should include(testMessages("ers_scheme_organiser.err.company_name"))
     }
 
@@ -304,7 +331,9 @@ class SchemeOrganiserControllerSpec extends WordSpecLike with Matchers with Opti
       )
       val form = _root_.models.RsFormMappings.schemeOrganiserForm.bind(schemeOrganiserData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-      val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(Fixtures.buildFakeUser, request, hc)
+      val authRequest = buildRequestWithAuth(request)
+
+      val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(authRequest, hc)
       contentAsString(result) should include(testMessages("ers_scheme_organiser.err.invalidChars.company_name"))
     }
 
@@ -322,7 +351,9 @@ class SchemeOrganiserControllerSpec extends WordSpecLike with Matchers with Opti
       )
       val form = _root_.models.RsFormMappings.schemeOrganiserForm.bind(schemeOrganiserData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-      val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(Fixtures.buildFakeUser, request, hc)
+      val authRequest = buildRequestWithAuth(request)
+
+      val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(authRequest, hc)
       contentAsString(result) should include(testMessages("ers_scheme_organiser.err.summary.address_line1_required"))
     }
 
@@ -340,7 +371,9 @@ class SchemeOrganiserControllerSpec extends WordSpecLike with Matchers with Opti
       )
       val form = _root_.models.RsFormMappings.schemeOrganiserForm.bind(schemeOrganiserData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-      val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(Fixtures.buildFakeUser, request, hc)
+      val authRequest = buildRequestWithAuth(request)
+
+      val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(authRequest, hc)
       contentAsString(result) should include(testMessages("ers_scheme_organiser.err.address_line1"))
     }
 
@@ -358,7 +391,9 @@ class SchemeOrganiserControllerSpec extends WordSpecLike with Matchers with Opti
       )
       val form = _root_.models.RsFormMappings.schemeOrganiserForm.bind(schemeOrganiserData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-      val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(Fixtures.buildFakeUser, request, hc)
+      val authRequest = buildRequestWithAuth(request)
+
+      val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(authRequest, hc)
       contentAsString(result) should include(testMessages("ers_scheme_organiser.err.invalidChars.address_line1"))
     }
 
@@ -376,7 +411,9 @@ class SchemeOrganiserControllerSpec extends WordSpecLike with Matchers with Opti
       )
       val form = _root_.models.RsFormMappings.schemeOrganiserForm.bind(schemeOrganiserData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-      val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(Fixtures.buildFakeUser, request, hc)
+      val authRequest = buildRequestWithAuth(request)
+
+      val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(authRequest, hc)
       contentAsString(result) should include(testMessages("ers_scheme_organiser.err.postcode"))
     }
 
@@ -394,7 +431,9 @@ class SchemeOrganiserControllerSpec extends WordSpecLike with Matchers with Opti
       )
       val form = _root_.models.RsFormMappings.schemeOrganiserForm.bind(schemeOrganiserData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-      val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(Fixtures.buildFakeUser, request, hc)
+      val authRequest = buildRequestWithAuth(request)
+
+      val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(authRequest, hc)
       contentAsString(result) should include(testMessages("ers_scheme_organiser.err.invalidChars.postcode"))
     }
 
@@ -412,7 +451,9 @@ class SchemeOrganiserControllerSpec extends WordSpecLike with Matchers with Opti
       )
       val form = _root_.models.RsFormMappings.schemeOrganiserForm.bind(schemeOrganiserData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-      val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(Fixtures.buildFakeUser, request, hc)
+      val authRequest = buildRequestWithAuth(request)
+
+      val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(authRequest, hc)
       contentAsString(result) should include(testMessages("ers_scheme_organiser.err.summary.company_reg"))
     }
 
@@ -430,7 +471,9 @@ class SchemeOrganiserControllerSpec extends WordSpecLike with Matchers with Opti
       )
       val form = _root_.models.RsFormMappings.schemeOrganiserForm.bind(schemeOrganiserData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-      val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(Fixtures.buildFakeUser, request, hc)
+      val authRequest = buildRequestWithAuth(request)
+
+      val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(authRequest, hc)
       contentAsString(result) should include(testMessages("ers_scheme_organiser.err.summary.company_reg"))
     }
 
@@ -448,7 +491,9 @@ class SchemeOrganiserControllerSpec extends WordSpecLike with Matchers with Opti
       )
       val form = _root_.models.RsFormMappings.schemeOrganiserForm.bind(schemeOrganiserData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-      val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(Fixtures.buildFakeUser, request, hc)
+      val authRequest = buildRequestWithAuth(request)
+
+      val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(authRequest, hc)
       contentAsString(result) should include(testMessages("ers_scheme_organiser.err.summary.corporation_ref"))
     }
 
@@ -466,7 +511,9 @@ class SchemeOrganiserControllerSpec extends WordSpecLike with Matchers with Opti
       )
       val form = _root_.models.RsFormMappings.schemeOrganiserForm.bind(schemeOrganiserData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-      val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(Fixtures.buildFakeUser, request, hc)
+      val authRequest = buildRequestWithAuth(request)
+
+      val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(authRequest, hc)
       contentAsString(result) should include(testMessages("ers_scheme_organiser.err.summary.invalidChars.corporation_ref_pattern"))
     }
 
@@ -484,7 +531,9 @@ class SchemeOrganiserControllerSpec extends WordSpecLike with Matchers with Opti
       )
       val form = _root_.models.RsFormMappings.schemeOrganiserForm.bind(schemeOrganiserData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-      val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(Fixtures.buildFakeUser, request, hc)
+      val authRequest = buildRequestWithAuth(request)
+
+      val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(authRequest, hc)
       contentAsString(result) should include(testMessages("ers_scheme_organiser.err.invalidFormat.postcode"))
     }
 

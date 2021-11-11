@@ -17,10 +17,12 @@
 package models
 
 import models.upscan._
-import org.scalatest.{Matchers, OptionValues, WordSpecLike}
+import org.scalatest.OptionValues
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpecLike
 import play.api.libs.json.{JsError, Json}
 
-class UploadStatusSpec extends WordSpecLike with Matchers with OptionValues {
+class UploadStatusSpec extends AnyWordSpecLike with Matchers with OptionValues {
 
   val statuses: List[UploadStatus] = List(NotStarted, Failed, InProgress)
   "UploadStats json Reads" should {

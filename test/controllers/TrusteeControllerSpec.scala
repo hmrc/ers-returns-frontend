@@ -20,8 +20,11 @@ import models._
 import org.mockito.ArgumentMatchers.{eq => meq, _}
 import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.{Matchers, OptionValues, WordSpecLike}
+import org.scalatest.OptionValues
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+
 import play.api.http.Status
 import play.api.i18n
 import play.api.i18n.{MessagesApi, MessagesImpl}
@@ -36,7 +39,13 @@ import views.html.{global_error, trustee_details, trustee_summary}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class TrusteeControllerSpec extends WordSpecLike with Matchers with OptionValues with ERSFakeApplicationConfig with ErsTestHelper with GuiceOneAppPerSuite with ScalaFutures {
+class TrusteeControllerSpec extends AnyWordSpecLike
+  with Matchers
+  with OptionValues
+  with ERSFakeApplicationConfig
+  with ErsTestHelper
+  with GuiceOneAppPerSuite
+  with ScalaFutures {
 
   val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
     messagesActionBuilder,
@@ -64,14 +73,15 @@ class TrusteeControllerSpec extends WordSpecLike with Matchers with OptionValues
     def buildFakeTrusteePageController(groupSchemeActivityRes: Future[GroupSchemeInfo] = Future.successful(groupScheme),
                                        trusteeDetailsRes: Future[TrusteeDetailsList] = Future.successful(TrusteeDetailsList(trusteeList)),
                                        cacheRes: Future[CacheMap] = Future.successful(mock[CacheMap])
-																			): TrusteeController = new TrusteeController(mockMCC, mockAuthConnector, mockErsConnector, mockCountryCodes, mockErsUtil, mockAppConfig, globalErrorView, trusteeDetailsView, trusteeSummaryView) {
+																			): TrusteeController = new TrusteeController(mockMCC, mockAuthConnector, mockErsConnector, mockCountryCodes,
+      mockErsUtil, mockAppConfig, globalErrorView, trusteeDetailsView, trusteeSummaryView, testAuthAction) {
 
-			when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any(), any())).thenReturn(Future.successful(ersRequestObject))
+			when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any())).thenReturn(Future.successful(ersRequestObject))
 
-			when(mockErsUtil.fetch[GroupSchemeInfo](matches(mockErsUtil.GROUP_SCHEME_CACHE_CONTROLLER), any())(any(), any(), any())
+			when(mockErsUtil.fetch[GroupSchemeInfo](matches(mockErsUtil.GROUP_SCHEME_CACHE_CONTROLLER), any())(any(), any())
 			) thenReturn groupSchemeActivityRes
 
-      when(mockErsUtil.fetch[TrusteeDetailsList](matches(mockErsUtil.TRUSTEES_CACHE), any())(any(), any(), any())
+      when(mockErsUtil.fetch[TrusteeDetailsList](matches(mockErsUtil.TRUSTEES_CACHE), any())(any(), any())
 			) thenReturn trusteeDetailsRes
 
       when(mockErsUtil.cache(matches(mockErsUtil.TRUSTEES_CACHE), any(), any())(any(), any(), any())
@@ -94,12 +104,16 @@ class TrusteeControllerSpec extends WordSpecLike with Matchers with OptionValues
 
     "direct to ers errors page if fetching groupSchemeActivity throws exception" in {
       val controllerUnderTest = buildFakeTrusteePageController(groupSchemeActivityRes = failure)
-      contentAsString(controllerUnderTest.showTrusteeDetailsPage(ersRequestObject, tenThousand)(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionIdCSOP("GET"), hc)) shouldBe contentAsString(Future(controllerUnderTest.getGlobalErrorPage))
+      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+
+      contentAsString(controllerUnderTest.showTrusteeDetailsPage(ersRequestObject, tenThousand)(authRequest, hc)) shouldBe contentAsString(Future(controllerUnderTest.getGlobalErrorPage(testFakeRequest, testMessages)))
     }
 
     "show alterations trustee details page with no data pre-filled" in {
       val controllerUnderTest = buildFakeTrusteePageController()
-      val result = controllerUnderTest.showTrusteeDetailsPage(ersRequestObject, tenThousand)(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionIdCSOP("GET"), hc)
+      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+
+      val result = controllerUnderTest.showTrusteeDetailsPage(ersRequestObject, tenThousand)(authRequest, hc)
       status(result) shouldBe Status.OK
     }
 
@@ -122,7 +136,9 @@ class TrusteeControllerSpec extends WordSpecLike with Matchers with OptionValues
       val trusteeData = Map("" -> "")
       val form = RsFormMappings.trusteeDetailsForm.bind(trusteeData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-      val result = controllerUnderTest.showTrusteeDetailsSubmit(ersRequestObject, tenThousand)(Fixtures.buildFakeUser, request, hc)
+      val authRequest = buildRequestWithAuth(request)
+
+      val result = controllerUnderTest.showTrusteeDetailsSubmit(ersRequestObject, tenThousand)(authRequest, hc)
       status(result) shouldBe Status.OK
     }
 
@@ -131,7 +147,9 @@ class TrusteeControllerSpec extends WordSpecLike with Matchers with OptionValues
       val trusteeData = Map("" -> "")
       val form = RsFormMappings.trusteeDetailsForm.bind(trusteeData)
       val req = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-      contentAsString(controllerUnderTest.showTrusteeDetailsSubmit(ersRequestObject, tenThousand)(Fixtures.buildFakeUser, req, hc)) shouldBe contentAsString(Future(controllerUnderTest.getGlobalErrorPage(req, testMessages)))
+      val authRequest = buildRequestWithAuth(req)
+
+      contentAsString(controllerUnderTest.showTrusteeDetailsSubmit(ersRequestObject, tenThousand)(authRequest, hc)) shouldBe contentAsString(Future(controllerUnderTest.getGlobalErrorPage(req, testMessages)))
     }
 
     "if no form errors with new trustee (index tenThousand) and fetch trustee details success" in {
@@ -146,7 +164,9 @@ class TrusteeControllerSpec extends WordSpecLike with Matchers with OptionValues
 			)
       val form = RsFormMappings.trusteeDetailsForm.bind(trusteeData)
       val request = Fixtures.buildFakeRequestWithSessionIdSIP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-      val result = controllerUnderTest.showTrusteeDetailsSubmit(ersRequestObject, tenThousand)(Fixtures.buildFakeUser, request, hc)
+      val authRequest = buildRequestWithAuth(request)
+
+      val result = controllerUnderTest.showTrusteeDetailsSubmit(ersRequestObject, tenThousand)(authRequest, hc)
       status(result) shouldBe Status.SEE_OTHER
       result.futureValue.header.headers("Location") shouldBe routes.TrusteeController.trusteeSummaryPage().toString
     }
@@ -163,7 +183,9 @@ class TrusteeControllerSpec extends WordSpecLike with Matchers with OptionValues
 			)
       val form = RsFormMappings.trusteeDetailsForm.bind(trusteeData)
       val request = Fixtures.buildFakeRequestWithSessionIdSIP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-      val result = controllerUnderTest.showTrusteeDetailsSubmit(ersRequestObject, tenThousand)(Fixtures.buildFakeUser, request, hc)
+      val authRequest = buildRequestWithAuth(request)
+
+      val result = controllerUnderTest.showTrusteeDetailsSubmit(ersRequestObject, tenThousand)(authRequest, hc)
       status(result) shouldBe Status.SEE_OTHER
       result.futureValue.header.headers("Location") shouldBe routes.TrusteeController.trusteeSummaryPage().toString
     }
@@ -180,7 +202,9 @@ class TrusteeControllerSpec extends WordSpecLike with Matchers with OptionValues
 			)
       val form = RsFormMappings.trusteeDetailsForm.bind(trusteeData)
       val request = Fixtures.buildFakeRequestWithSessionIdSIP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-      val result = controllerUnderTest.showTrusteeDetailsSubmit(ersRequestObject, 1)(Fixtures.buildFakeUser, request, hc)
+      val authRequest = buildRequestWithAuth(request)
+
+      val result = controllerUnderTest.showTrusteeDetailsSubmit(ersRequestObject, 1)(authRequest, hc)
       status(result) shouldBe Status.SEE_OTHER
       result.futureValue.header.headers("Location") shouldBe routes.TrusteeController.trusteeSummaryPage().toString
     }
@@ -197,7 +221,9 @@ class TrusteeControllerSpec extends WordSpecLike with Matchers with OptionValues
 			)
       val form = RsFormMappings.trusteeDetailsForm.bind(trusteeData)
       val request = Fixtures.buildFakeRequestWithSessionIdSIP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-      val result = controllerUnderTest.showTrusteeDetailsSubmit(ersRequestObject, 0)(Fixtures.buildFakeUser, request, hc)
+      val authRequest = buildRequestWithAuth(request)
+
+      val result = controllerUnderTest.showTrusteeDetailsSubmit(ersRequestObject, 0)(authRequest, hc)
       status(result) shouldBe Status.SEE_OTHER
       result.futureValue.header.headers("Location") shouldBe routes.TrusteeController.trusteeSummaryPage().toString
     }
@@ -221,9 +247,10 @@ class TrusteeControllerSpec extends WordSpecLike with Matchers with OptionValues
     def buildFakeTrusteeController(trusteeDetailsRes: Future[TrusteeDetailsList] = Future.successful(TrusteeDetailsList(trusteeList)),
 																	 cacheRes: Future[CacheMap] = Future.successful(mock[CacheMap]),
 																	 requestObjectRes: Future[RequestObject] = Future.successful(ersRequestObject)
-																	): TrusteeController = new TrusteeController(mockMCC, mockAuthConnector, mockErsConnector, mockCountryCodes, mockErsUtil, mockAppConfig, globalErrorView, trusteeDetailsView, trusteeSummaryView) {
+																	): TrusteeController = new TrusteeController(mockMCC, mockAuthConnector, mockErsConnector, mockCountryCodes, mockErsUtil,
+      mockAppConfig, globalErrorView, trusteeDetailsView, trusteeSummaryView, testAuthAction) {
 			when(
-        mockErsUtil.fetch[TrusteeDetailsList](refEq(mockErsUtil.TRUSTEES_CACHE), any())(any(), any(), any())
+        mockErsUtil.fetch[TrusteeDetailsList](refEq(mockErsUtil.TRUSTEES_CACHE), any())(any(), any())
       ) thenReturn trusteeDetailsRes
 
       when(
@@ -231,7 +258,7 @@ class TrusteeControllerSpec extends WordSpecLike with Matchers with OptionValues
       ) thenReturn cacheRes
 
       when(
-        mockErsUtil.fetch[RequestObject](any())(any(), any(), any(), any())
+        mockErsUtil.fetch[RequestObject](any())(any(), any(), any())
       ) thenReturn requestObjectRes
     }
 
@@ -251,17 +278,23 @@ class TrusteeControllerSpec extends WordSpecLike with Matchers with OptionValues
 
     "throws exception if fetching trustee details direct to ers errors page" in {
       val controllerUnderTest = buildFakeTrusteeController(trusteeDetailsRes = failure)
-      contentAsString(controllerUnderTest.showDeleteTrustee(tenThousand)(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionIdCSOP("GET"), hc)) shouldBe contentAsString(Future(controllerUnderTest.getGlobalErrorPage))
+      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+
+      contentAsString(controllerUnderTest.showDeleteTrustee(tenThousand)(authRequest, hc)) shouldBe contentAsString(Future(controllerUnderTest.getGlobalErrorPage(testFakeRequest, testMessages)))
     }
 
     "throws exception if fetching request object direct to ers errors page" in {
       val controllerUnderTest = buildFakeTrusteeController(requestObjectRes = failure)
-      contentAsString(controllerUnderTest.showDeleteTrustee(tenThousand)(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionIdCSOP("GET"), hc)) shouldBe contentAsString(Future(controllerUnderTest.getGlobalErrorPage))
+      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+
+      contentAsString(controllerUnderTest.showDeleteTrustee(tenThousand)(authRequest, hc)) shouldBe contentAsString(Future(controllerUnderTest.getGlobalErrorPage(testFakeRequest, testMessages)))
     }
 
     "throws exception if cache fails direct to ers errors page" in {
       val controllerUnderTest = buildFakeTrusteeController(cacheRes = failure)
-      contentAsString(controllerUnderTest.showDeleteTrustee(tenThousand)(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionIdCSOP("GET"), hc)) shouldBe contentAsString(Future(controllerUnderTest.getGlobalErrorPage))
+      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+
+      contentAsString(controllerUnderTest.showDeleteTrustee(tenThousand)(authRequest, hc)) shouldBe contentAsString(Future(controllerUnderTest.getGlobalErrorPage(testFakeRequest, testMessages)))
     }
 
     "delete trustee for given index and redirect to trustee summary page" in {
@@ -270,7 +303,9 @@ class TrusteeControllerSpec extends WordSpecLike with Matchers with OptionValues
       val cacheMap = CacheMap("_id", Map(mockErsUtil.TRUSTEES_CACHE -> Json.toJson(trusteeList)))
 
       val controllerUnderTest = buildFakeTrusteeController(cacheRes = Future.successful(cacheMap))
-      val result = controllerUnderTest.showDeleteTrustee(1)(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionIdCSOP("GET"), hc)
+      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+
+      val result = controllerUnderTest.showDeleteTrustee(1)(authRequest, hc)
       status(result) shouldBe Status.SEE_OTHER
 
       verify(mockErsUtil, times(1))
@@ -289,20 +324,21 @@ class TrusteeControllerSpec extends WordSpecLike with Matchers with OptionValues
 																	 trusteeDetailsRes: Future[TrusteeDetailsList] = Future.successful(TrusteeDetailsList(trusteeList)),
 																	 cacheRes: Future[CacheMap] = Future.successful(mock[CacheMap]),
 																	 requestObjectRes: Future[RequestObject] = Future.successful(ersRequestObject)
-                                  ): TrusteeController = new TrusteeController(mockMCC, mockAuthConnector, mockErsConnector, mockCountryCodes, mockErsUtil, mockAppConfig, globalErrorView, trusteeDetailsView, trusteeSummaryView) {
+                                  ): TrusteeController = new TrusteeController(mockMCC, mockAuthConnector, mockErsConnector, mockCountryCodes,
+      mockErsUtil, mockAppConfig, globalErrorView, trusteeDetailsView, trusteeSummaryView, testAuthAction) {
 
 			when(
-        mockErsUtil.fetch[GroupSchemeInfo](refEq(mockErsUtil.GROUP_SCHEME_CACHE_CONTROLLER), anyString())(any(), any(), any())
+        mockErsUtil.fetch[GroupSchemeInfo](refEq(mockErsUtil.GROUP_SCHEME_CACHE_CONTROLLER), anyString())(any(), any())
       ) thenReturn groupSchemeActivityRes
       when(
-        mockErsUtil.fetch[TrusteeDetailsList](refEq(mockErsUtil.TRUSTEES_CACHE), anyString())(any(), any(), any())
+        mockErsUtil.fetch[TrusteeDetailsList](refEq(mockErsUtil.TRUSTEES_CACHE), anyString())(any(), any())
       ) thenReturn trusteeDetailsRes
       when(
         mockErsUtil.cache(refEq(mockErsUtil.TRUSTEES_CACHE), anyString(), anyString())(any(), any(), any())
       ) thenReturn cacheRes
 
       when(
-        mockErsUtil.fetch[RequestObject](any())(any(), any(), any(), any())
+        mockErsUtil.fetch[RequestObject](any())(any(), any(), any())
       ) thenReturn requestObjectRes
     }
 
@@ -322,35 +358,46 @@ class TrusteeControllerSpec extends WordSpecLike with Matchers with OptionValues
 
     "direct to ers errors page if fetching group scheme activity fails" in {
       val controllerUnderTest = buildFakeTrusteeController(groupSchemeActivityRes = failure)
-      contentAsString(controllerUnderTest.showEditTrustee(tenThousand)(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionIdCSOP("GET"), hc)) shouldBe contentAsString(Future(controllerUnderTest.getGlobalErrorPage))
+      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+
+      contentAsString(controllerUnderTest.showEditTrustee(tenThousand)(authRequest, hc)) shouldBe contentAsString(Future(controllerUnderTest.getGlobalErrorPage(testFakeRequest, testMessages)))
     }
 
     "direct to ers errors page if fetching trustee details list fails" in {
       val controllerUnderTest = buildFakeTrusteeController(trusteeDetailsRes = failure)
-      contentAsString(controllerUnderTest.showEditTrustee(tenThousand)(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionIdCSOP("GET"), hc)) shouldBe contentAsString(Future(controllerUnderTest.getGlobalErrorPage))
+      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+
+      contentAsString(controllerUnderTest.showEditTrustee(tenThousand)(authRequest, hc)) shouldBe contentAsString(Future(controllerUnderTest.getGlobalErrorPage(testFakeRequest, testMessages)))
     }
 
     "direct to ers errors page if fetching request object fails" in {
       val controllerUnderTest = buildFakeTrusteeController(requestObjectRes = failure)
-      contentAsString(controllerUnderTest.showEditTrustee(tenThousand)(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionIdCSOP("GET"), hc)) shouldBe contentAsString(Future(controllerUnderTest.getGlobalErrorPage))
+      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+
+      contentAsString(controllerUnderTest.showEditTrustee(tenThousand)(authRequest, hc)) shouldBe contentAsString(Future(controllerUnderTest.getGlobalErrorPage(testFakeRequest, testMessages)))
     }
 
     "edit trustee for given index and display trustee summary page pre-filled" in {
       val controllerUnderTest = buildFakeTrusteeController()
-      val result = controllerUnderTest.showEditTrustee(0)(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionIdCSOP("GET"), hc)
+      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+
+      val result = controllerUnderTest.showEditTrustee(0)(authRequest, hc)
       status(result) shouldBe Status.OK
     }
 
     "traverse the trustee list and display trustee summary page" in {
       val controllerUnderTest = buildFakeTrusteeController()
-      val result = controllerUnderTest.showEditTrustee(10)(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionIdCSOP("GET"), hc)
+      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+
+      val result = controllerUnderTest.showEditTrustee(10)(authRequest, hc)
       status(result) shouldBe Status.OK
     }
 
   }
 
   "calling replace trustee" should {
-    def controllerUnderTest: TrusteeController = new TrusteeController(mockMCC, mockAuthConnector, mockErsConnector, mockCountryCodes, mockErsUtil, mockAppConfig, globalErrorView, trusteeDetailsView, trusteeSummaryView)
+    def controllerUnderTest: TrusteeController = new TrusteeController(mockMCC, mockAuthConnector, mockErsConnector, mockCountryCodes,
+      mockErsUtil, mockAppConfig, globalErrorView, trusteeDetailsView, trusteeSummaryView, testAuthAction)
 
     "replace a trustee and keep the other trustees" when {
 
@@ -432,10 +479,11 @@ class TrusteeControllerSpec extends WordSpecLike with Matchers with OptionValues
     def buildFakeTrusteeController(trusteeDetailsRes: Future[TrusteeDetailsList] = Future.successful(TrusteeDetailsList(trusteeList)),
 																	 cacheRes: Future[CacheMap] = Future.successful(mock[CacheMap]),
 																	 requestObjectRes: Future[RequestObject] = Future.successful(ersRequestObject)
-                                  ): TrusteeController = new TrusteeController(mockMCC, mockAuthConnector, mockErsConnector, mockCountryCodes, mockErsUtil, mockAppConfig, globalErrorView, trusteeDetailsView, trusteeSummaryView) {
+                                  ): TrusteeController = new TrusteeController(mockMCC, mockAuthConnector, mockErsConnector, mockCountryCodes, mockErsUtil,
+      mockAppConfig, globalErrorView, trusteeDetailsView, trusteeSummaryView, testAuthAction) {
 
 			when(
-        mockErsUtil.fetch[TrusteeDetailsList](refEq(mockErsUtil.TRUSTEES_CACHE), anyString())(any(), any(), any())
+        mockErsUtil.fetch[TrusteeDetailsList](refEq(mockErsUtil.TRUSTEES_CACHE), anyString())(any(), any())
       ) thenReturn trusteeDetailsRes
 
       when(
@@ -443,7 +491,7 @@ class TrusteeControllerSpec extends WordSpecLike with Matchers with OptionValues
       ) thenReturn cacheRes
 
       when(
-        mockErsUtil.fetch[RequestObject](any())(any(), any(), any(), any())
+        mockErsUtil.fetch[RequestObject](any())(any(), any(), any())
       ) thenReturn requestObjectRes
     }
 
@@ -463,17 +511,23 @@ class TrusteeControllerSpec extends WordSpecLike with Matchers with OptionValues
 
     "direct to ers errors page if fetching trustee details list fails" in {
       val controllerUnderTest = buildFakeTrusteeController(trusteeDetailsRes = failure)
-      contentAsString(controllerUnderTest.showTrusteeSummaryPage()(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionIdCSOP("GET"), hc)) shouldBe contentAsString(Future(controllerUnderTest.getGlobalErrorPage))
+      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+
+      contentAsString(controllerUnderTest.showTrusteeSummaryPage()(authRequest, hc)) shouldBe contentAsString(Future(controllerUnderTest.getGlobalErrorPage(testFakeRequest, testMessages)))
     }
 
     "direct to ers errors page if fetching request object fails" in {
       val controllerUnderTest = buildFakeTrusteeController(requestObjectRes = failure)
-      contentAsString(controllerUnderTest.showTrusteeSummaryPage()(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionIdCSOP("GET"), hc)) shouldBe contentAsString(Future(controllerUnderTest.getGlobalErrorPage))
+      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+
+      contentAsString(controllerUnderTest.showTrusteeSummaryPage()(authRequest, hc)) shouldBe contentAsString(Future(controllerUnderTest.getGlobalErrorPage(testFakeRequest, testMessages)))
     }
 
     "display trustee summary page pre-filled" in {
       val controllerUnderTest = buildFakeTrusteeController()
-      val result = controllerUnderTest.showTrusteeSummaryPage()(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionIdCSOP("GET"), hc)
+      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+
+      val result = controllerUnderTest.showTrusteeSummaryPage()(authRequest, hc)
       status(result) shouldBe Status.OK
     }
 
@@ -492,7 +546,9 @@ class TrusteeControllerSpec extends WordSpecLike with Matchers with OptionValues
 
     "redirect to alterations activity page" in {
       val controllerUnderTest = buildFakeTrusteeController()
-      val result = controllerUnderTest.continueFromTrusteeSummaryPage()(Fixtures.buildFakeUser, Fixtures.buildFakeRequestWithSessionIdCSOP("GET"), hc)
+      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+
+      val result = controllerUnderTest.continueFromTrusteeSummaryPage()(authRequest, hc)
       status(result) shouldBe Status.SEE_OTHER
     }
   }

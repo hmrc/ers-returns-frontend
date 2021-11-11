@@ -26,7 +26,7 @@ class Bindings extends Module {
   }
 
   private def bindDeps() = Seq(
-    bind(classOf[CountryCodes]).to(classOf[CountryCodesImpl])
+    play.api.inject.bind(classOf[CountryCodes]).to(classOf[CountryCodesImpl])
 	)
 
 }

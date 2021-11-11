@@ -21,7 +21,9 @@ import models.upscan._
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{eq => meq, _}
 import org.mockito.Mockito._
-import org.scalatest.{BeforeAndAfterEach, Matchers, OptionValues, WordSpecLike}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpecLike
+import org.scalatest.{BeforeAndAfterEach, OptionValues}
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.i18n.{MessagesApi, MessagesImpl}
@@ -37,7 +39,7 @@ import java.net.URL
 import java.time.Instant
 import scala.concurrent.{ExecutionContext, Future}
 
-class CsvFileUploadCallbackControllerSpec extends WordSpecLike with Matchers with OptionValues
+class CsvFileUploadCallbackControllerSpec extends AnyWordSpecLike with Matchers with OptionValues
 	with ERSFakeApplicationConfig with MockitoSugar with BeforeAndAfterEach with UpscanData with ErsTestHelper with GuiceOneAppPerSuite {
 
   val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(

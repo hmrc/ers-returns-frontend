@@ -21,11 +21,13 @@ import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.mockito.internal.verification.VerificationModeFactory
-import org.scalatest.{BeforeAndAfterEach, Matchers, OptionValues, WordSpecLike}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpecLike
+import org.scalatest.{BeforeAndAfterEach, OptionValues}
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.i18n
-import play.api.i18n.{Messages, MessagesApi, MessagesImpl}
+import play.api.i18n.{MessagesApi, MessagesImpl}
 import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents}
 import play.api.test.Helpers.stubBodyParser
 import services.pdf.{DecoratorController, ErsContentsStreamer, ErsReceiptPdfBuilderService}
@@ -34,8 +36,14 @@ import utils.{ContentUtil, ERSFakeApplicationConfig, ErsTestHelper, Fixtures}
 import java.io.ByteArrayOutputStream
 import scala.concurrent.ExecutionContext
 
-class ErsReceiptPdfBuilderServiceSpec extends WordSpecLike with Matchers with OptionValues with MockitoSugar with BeforeAndAfterEach
-  with ERSFakeApplicationConfig with ErsTestHelper with GuiceOneAppPerSuite {
+class ErsReceiptPdfBuilderServiceSpec extends AnyWordSpecLike
+  with Matchers
+  with OptionValues
+  with MockitoSugar
+  with BeforeAndAfterEach
+  with ERSFakeApplicationConfig
+  with ErsTestHelper
+  with GuiceOneAppPerSuite {
 
   val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
     messagesActionBuilder,
@@ -47,11 +55,9 @@ class ErsReceiptPdfBuilderServiceSpec extends WordSpecLike with Matchers with Op
     ExecutionContext.global
   )
 
-  implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
-  implicit lazy val messages: Messages = testMessages.messages
-
   implicit lazy val mat: Materializer = app.materializer
 	val testErsReceiptPdfBuilderService = new ErsReceiptPdfBuilderService(mockCountryCodes)
+  implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
 
   def verifyBlankBlock(streamer: ErsContentsStreamer) {
     verify(streamer, VerificationModeFactory.times(4))

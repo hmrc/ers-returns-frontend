@@ -48,7 +48,7 @@ class ApplicationControllerSpec extends PlaySpec with ErsTestHelper with GuiceOn
   val signedOutView: signedOut = app.injector.instanceOf[signedOut]
   val notAuthorisedView: views.html.not_authorised = app.injector.instanceOf[not_authorised]
 
-	val testController = new ApplicationController(mockMCC, mockAuthConnector, mockErsUtil, mockAppConfig, unauthorisedView, signedOutView, notAuthorisedView)
+	val testController = new ApplicationController(mockMCC, mockAuthConnector, mockErsUtil, mockAppConfig, unauthorisedView, signedOutView, notAuthorisedView, testAuthActionGov)
 
   "ApplicationController" must {
 

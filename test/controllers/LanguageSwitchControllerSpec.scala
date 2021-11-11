@@ -17,8 +17,11 @@
 package controllers
 
 import org.mockito.Mockito.when
-import org.scalatest.{Matchers, OptionValues, WordSpecLike}
+import org.scalatest.OptionValues
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+
 import play.api.i18n.{Lang, MessagesApi}
 import play.api.mvc._
 import play.api.test.FakeRequest
@@ -27,7 +30,7 @@ import utils.ErsTestHelper
 
 import scala.concurrent.ExecutionContext
 
-class LanguageSwitchControllerSpec extends WordSpecLike with Matchers with OptionValues with ErsTestHelper with GuiceOneAppPerSuite {
+class LanguageSwitchControllerSpec extends AnyWordSpecLike with Matchers with OptionValues with ErsTestHelper with GuiceOneAppPerSuite {
 
   val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
     messagesActionBuilder,

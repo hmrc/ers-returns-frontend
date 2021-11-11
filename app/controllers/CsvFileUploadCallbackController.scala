@@ -32,11 +32,11 @@ import scala.util.control.NonFatal
 
 @Singleton
 class CsvFileUploadCallbackController @Inject()(val mcc: MessagesControllerComponents,
-																								val ersConnector: ErsConnector,
-																								val authConnector: DefaultAuthConnector,
-																								implicit val ersUtil: ERSUtil,
-																								implicit val appConfig: ApplicationConfig
-																							 ) extends FrontendController(mcc) with Logging {
+                                                val ersConnector: ErsConnector,
+                                                val authConnector: DefaultAuthConnector,
+                                                implicit val ersUtil: ERSUtil,
+                                                implicit val appConfig: ApplicationConfig
+                                               ) extends FrontendController(mcc) with Logging {
 
   implicit val ec: ExecutionContext = mcc.executionContext
 
@@ -56,7 +56,7 @@ class CsvFileUploadCallbackController @Inject()(val mcc: MessagesControllerCompo
               Failed
           }
           logger.info(s"[CsvFileUploadCallbackController][callback] Updating CSV callback for " +
-						s"upload id: ${uploadId.value} to ${uploadStatus.getClass.getSimpleName}")
+            s"upload id: ${uploadId.value} to ${uploadStatus.getClass.getSimpleName}")
           ersUtil.cache(s"${ersUtil.CHECK_CSV_FILES}-${uploadId.value}", uploadStatus, scRef).map {
             _ => Ok
           } recover {

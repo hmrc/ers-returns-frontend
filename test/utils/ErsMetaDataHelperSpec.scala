@@ -18,16 +18,17 @@ package utils
 
 import models.{ErsMetaData, SchemeInfo}
 import org.joda.time.DateTime
-import org.scalatest.Matchers
+import org.scalatest.OptionValues
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
 import play.api.i18n.{Lang, Messages, MessagesApi}
 import play.api.inject.Injector
 import play.api.inject.guice.GuiceApplicationBuilder
-import org.scalatest.{Matchers, OptionValues, WordSpecLike}
 
-class ErsMetaDataHelperSpec extends WordSpecLike with Matchers with OptionValues with MockitoSugar with GuiceOneAppPerSuite {
+class ErsMetaDataHelperSpec extends AnyWordSpecLike with Matchers with OptionValues with MockitoSugar with GuiceOneAppPerSuite {
   def injector: Injector = app.injector
   def messagesApi: MessagesApi = injector.instanceOf[MessagesApi]
   override def fakeApplication(): Application = new GuiceApplicationBuilder().configure(Map("play.i18n.langs"->List("en-GB","en","cy-GB", "cy"))).build()

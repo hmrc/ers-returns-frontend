@@ -17,6 +17,7 @@
 package controllers
 
 import config.ApplicationConfig
+import controllers.auth.{AuthActionGovGateway, RequestWithOptionalAuthContext}
 import models.{RsFormMappings, _}
 import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages}
@@ -35,18 +36,18 @@ class CheckFileTypeController @Inject()(val mcc: MessagesControllerComponents,
 																				implicit val ersUtil: ERSUtil,
 																				implicit val appConfig: ApplicationConfig,
                                         globalErrorView: views.html.global_error,
-                                        checkFileTypeView: views.html.check_file_type
-                                       ) extends FrontendController(mcc) with Authenticator with I18nSupport with Logging {
+                                        checkFileTypeView: views.html.check_file_type,
+                                        authActionGovGateway: AuthActionGovGateway
+                                       ) extends FrontendController(mcc) with I18nSupport with Logging {
 
   implicit val ec: ExecutionContext = mcc.executionContext
 
-  def checkFileTypePage(): Action[AnyContent] = authorisedByGG {
-    implicit authContext =>
+  def checkFileTypePage(): Action[AnyContent] = authActionGovGateway.async {
       implicit request =>
-          showCheckFileTypePage()(authContext, request, hc)
+          showCheckFileTypePage()(request, hc)
   }
 
-  def showCheckFileTypePage()(implicit authContext: ERSAuthData, request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
+  def showCheckFileTypePage()(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
     (for {
       requestObject <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
       fileType      <- ersUtil.fetch[CheckFileType](ersUtil.FILE_TYPE_CACHE, requestObject.getSchemeReference).recover{
@@ -61,13 +62,12 @@ class CheckFileTypeController @Inject()(val mcc: MessagesControllerComponents,
     }
   }
 
-  def checkFileTypeSelected(): Action[AnyContent] = authorisedByGG {
-    implicit authContext: ERSAuthData =>
+  def checkFileTypeSelected(): Action[AnyContent] = authActionGovGateway.async {
       implicit request =>
           showCheckFileTypeSelected()(request, hc)
   }
 
-  def showCheckFileTypeSelected()(implicit request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
+  def showCheckFileTypeSelected()(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
     ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
       RsFormMappings.checkFileTypeForm.bindFromRequest.fold(
         errors => {

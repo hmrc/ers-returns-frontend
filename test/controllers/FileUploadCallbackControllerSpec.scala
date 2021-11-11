@@ -36,7 +36,12 @@ import utils.{ERSFakeApplicationConfig, ErsTestHelper, UpscanData}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class FileUploadCallbackControllerSpec extends PlaySpec with MockitoSugar with ERSFakeApplicationConfig with UpscanData with ErsTestHelper with GuiceOneAppPerSuite {
+class FileUploadCallbackControllerSpec extends PlaySpec
+  with MockitoSugar
+  with ERSFakeApplicationConfig
+  with UpscanData
+  with ErsTestHelper
+  with GuiceOneAppPerSuite {
 
   val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
     messagesActionBuilder,
