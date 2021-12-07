@@ -19,6 +19,7 @@
 @import _root_.utils.CountryCodes
 @import views.html.templates.reference
 @import views.html.includes.countries
+@import views.html.helper.CSPNonce
 
 @import uk.gov.hmrc.govukfrontend.views.html.components.implicits._
 
@@ -39,7 +40,7 @@
 @schemeId = @{requestObject.getSchemeId}
 
 @scripts = {
-	<script type="text/javascript" src='@controllers.routes.Assets.versioned("javascripts/uk-or-overseas-form-reveal.js")'></script>
+	<script type="text/javascript" src='@controllers.routes.Assets.versioned("javascripts/uk-or-overseas-form-reveal.js")' @{CSPNonce.attr}></script>
 }
 
 @govuk_wrapper(title = ersUtil.getPageElement(schemeId, ersUtil.PAGE_SCHEME_ORGANISER, "title") + " " + messages("ers.title.postfix"), Some(scripts)) {

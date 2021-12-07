@@ -19,6 +19,7 @@
 @import models.upscan.UpscanInitiateResponse
 @import config.ApplicationConfig
 @import _root_.utils.ERSUtil
+@import views.html.helper.CSPNonce
 
 @this(
 		govuk_wrapper: govuk_wrapper,
@@ -33,8 +34,8 @@
 @schemeId = @{requestObject.getSchemeId}
 
 @scripts = {
-	<script src='@routes.Assets.versioned("/javascripts/file-upload.js")'></script>
-	<script src='@routes.Assets.versioned("/javascripts/welsh-translation.js")'></script>
+	<script src='@routes.Assets.versioned("/javascripts/file-upload.js")' @{CSPNonce.attr}></script>
+	<script src='@routes.Assets.versioned("/javascripts/welsh-translation.js")' @{CSPNonce.attr}></script>
 }
 
 @govuk_wrapper(title = messages("ers.upload_ods_file.page_title"), Some(scripts)) {
