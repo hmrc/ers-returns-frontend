@@ -16,10 +16,12 @@
 
 @import config.ApplicationConfig
 
-@import uk.gov.hmrc.hmrcfrontend.views.html.helpers.{HmrcStandardFooter, HmrcStandardHeader, HmrcHead, HmrcScripts}
+@import uk.gov.hmrc.hmrcfrontend.views.html.helpers.{HmrcStandardFooter, HmrcStandardHeader, HmrcHead, HmrcScripts, HmrcLayout}
+@import views.html.helper.CSPNonce
+
 
 @this(
-        govukLayout: GovukLayout,
+        hmrcLayout: HmrcLayout,
         hmrcHead: HmrcHead,
         hmrcStandardHeader: HmrcStandardHeader,
         hmrcStandardFooter: HmrcStandardFooter,
@@ -54,16 +56,29 @@
     </div>
 }
 
-@govukLayout(
+@hmrcLayout(
     pageTitle = Some(title),
-    headBlock = Some(hmrcHead(Some(head))),
-    headerBlock = Some(hmrcStandardHeader(
-        serviceName = Some(messages("service.name")),
-        serviceUrl = Some(controllers.routes.ReturnServiceController.startPage.url),
-        signOutUrl = if(!disableSignOut) Some(applicationConfig.signOut) else None,
-        userResearchBanner = if(isUserResearchBannerVisible) Some(UserResearchBanner(url = applicationConfig.urBannerLink)) else None
-    )),
-    beforeContentBlock = if(applicationConfig.languageTranslationEnabled) Some(hmrcLanguageSelectHelper()) else None,
-    scriptsBlock = Some(hmrcScripts(scriptElement)),
-    footerBlock = Some(hmrcStandardFooter())
+    isWelshTranslationAvailable = applicationConfig.languageTranslationEnabled,
+    serviceName = Some(messages("service.name")),
+    serviceUrl = Some(controllers.routes.ReturnServiceController.startPage.url),
+    signOutUrl = if(!disableSignOut) Some(applicationConfig.signOut) else None,
+    userResearchBannerUrl = if(isUserResearchBannerVisible) Some(applicationConfig.urBannerLink) else None,
+    additionalScriptsBlock = Some(hmrcScripts(scriptElement)),
+    nonce = CSPNonce.get
 )(content)
+
+@*
+* @govukLayout(
+*     pageTitle = Some(title),
+*     headBlock = Some(hmrcHead(Some(head))),
+*     headerBlock = Some(hmrcStandardHeader(
+*         serviceName = Some(messages("service.name")),
+*         serviceUrl = Some(controllers.routes.ReturnServiceController.startPage.url),
+*         signOutUrl = if(!disableSignOut) Some(applicationConfig.signOut) else None,
+*         userResearchBanner = if(isUserResearchBannerVisible) Some(UserResearchBanner(url = applicationConfig.urBannerLink)) else None
+*     )),
+*     beforeContentBlock = if(applicationConfig.languageTranslationEnabled) Some(hmrcLanguageSelectHelper()) else None,
+*     scriptsBlock = Some(hmrcScripts(scriptElement)),
+*     footerBlock = Some(hmrcStandardFooter())
+* )(content)
+*@

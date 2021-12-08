@@ -20,6 +20,7 @@
 @import views.html.includes.countries
 @import views.html.templates.reference
 @import uk.gov.hmrc.govukfrontend.views.html.components.implicits._
+@import views.html.helper.CSPNonce
 
 
 @this(
@@ -39,7 +40,7 @@
 @schemeId = @{requestObject.getSchemeId}
 
 @scripts = {
-    <script type="text/javascript" src='@controllers.routes.Assets.versioned("javascripts/trustee-uk-or-overseas-form-reveal.js")'></script>
+    <script type="text/javascript" src='@controllers.routes.Assets.versioned("javascripts/trustee-uk-or-overseas-form-reveal.js")' @{CSPNonce.attr}></script>
 }
 
 @govuk_wrapper(title = messages("ers.add_trustee.page_title"), Some(scripts)) {
