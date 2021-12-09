@@ -35,6 +35,8 @@ class ApplicationConfig @Inject()(config: ServicesConfig) {
 
 	def routeToSwitchLanguage: String => Call = (lang: String) => routes.LanguageSwitchController.switchToLanguage(lang)
 
+	lazy val csp: String = config.getString("play.filters.csp.directives.script-src")
+
 	lazy val appName: String = config.getString("appName")
 	lazy val authBaseUrl: String = config.baseUrl("auth")
 	lazy val googleTagManagerId: String = config.getString("google-tag-manager.id")

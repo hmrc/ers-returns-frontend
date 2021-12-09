@@ -112,6 +112,7 @@ class ReturnServiceController @Inject()(val mcc: MessagesControllerComponents,
 
   def startPage(): Action[AnyContent] = authActionGovGateway.async {
       implicit request =>
+        logger.error(appConfig.csp)
         ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).map{
           result =>
             Ok(startView(result)).withSession(request.session - BUNDLE_REF - DATE_TIME_SUBMITTED)
