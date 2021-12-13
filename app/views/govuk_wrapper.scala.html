@@ -22,7 +22,7 @@
 
 
 @this(
-        govukLayout: GovukLayout,
+        hmrcLayout: HmrcLayout,
         hmrcHead: HmrcHead,
         hmrcStandardHeader: HmrcStandardHeader,
         hmrcStandardFooter: HmrcStandardFooter,
@@ -58,28 +58,14 @@
     </div>
 }
 
-@* @hmrcLayout(
-*      pageTitle = Some(title),
-*      isWelshTranslationAvailable = applicationConfig.languageTranslationEnabled,
-*      serviceName = Some(messages("service.name")),
-*      serviceUrl = Some(controllers.routes.ReturnServiceController.startPage.url),
-*      signOutUrl = if(!disableSignOut) Some(applicationConfig.signOut) else None,
-*      userResearchBannerUrl = if(isUserResearchBannerVisible) Some(applicationConfig.urBannerLink) else None,
-*      additionalScriptsBlock = Some(hmrcScripts(nonce = CSPNonce.get, scriptsBlock = scriptElement)),
-*      nonce = CSPNonce.get
-*  )(content)
-*@
-
-@govukLayout(
+@hmrcLayout(
     pageTitle = Some(title),
-    headBlock = Some(hmrcHead(Some(head), CSPNonce.get)),
-    headerBlock = Some(hmrcStandardHeader(
-        serviceName = Some(messages("service.name")),
-        serviceUrl = Some(controllers.routes.ReturnServiceController.startPage.url),
-        signOutUrl = if(!disableSignOut) Some(applicationConfig.signOut) else None,
-        userResearchBanner = if(isUserResearchBannerVisible) Some(UserResearchBanner(url = applicationConfig.urBannerLink)) else None
-    )),
-    beforeContentBlock = if(applicationConfig.languageTranslationEnabled) Some(hmrcLanguageSelectHelper()) else None,
-    scriptsBlock = Some(hmrcScripts(nonce = CSPNonce.get, scriptsBlock = scriptElement)),
-    footerBlock = Some(hmrcStandardFooter())
+    additionalHeadBlock = Some(hmrcHead(Some(head), CSPNonce.get)),
+    isWelshTranslationAvailable = applicationConfig.languageTranslationEnabled,
+    serviceName = Some(messages("service.name")),
+    serviceUrl = Some(controllers.routes.ReturnServiceController.startPage.url),
+    signOutUrl = if(!disableSignOut) Some(applicationConfig.signOut) else None,
+    userResearchBannerUrl = if(isUserResearchBannerVisible) Some(applicationConfig.urBannerLink) else None,
+    additionalScriptsBlock = Some(hmrcScripts(nonce = CSPNonce.get, scriptsBlock = scriptElement)),
+    nonce = CSPNonce.get
 )(content)
