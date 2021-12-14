@@ -48,7 +48,7 @@ class FileUploadController @Inject()(val mcc: MessagesControllerComponents,
                                      upscanOdsFileUploadView: views.html.upscan_ods_file_upload,
                                      fileUploadProblemView: views.html.file_upload_problem,
                                      authAction: AuthAction
-                                    ) extends FrontendController(mcc) with I18nSupport with Retryable {
+                                    ) extends FrontendController(mcc) with I18nSupport with Retryable with Logging {
 
   implicit val ec: ExecutionContext = mcc.executionContext
 

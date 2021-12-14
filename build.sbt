@@ -9,7 +9,7 @@ import uk.gov.hmrc.versioning.SbtGitVersioning.autoImport.majorVersion
 
 val appName: String = "ers-returns-frontend"
 
-val silencerVersion = "1.7.1"
+val silencerVersion = "1.7.7"
 
 lazy val plugins: Seq[Plugins] = Seq(play.sbt.PlayScala, SbtDistributablesPlugin)
 
@@ -30,7 +30,7 @@ lazy val microservice = Project(appName, file("."))
     scalaSettings,
     defaultSettings(),
     targetJvm := "jvm-1.8",
-    scalaVersion := "2.12.12",
+    scalaVersion := "2.12.15",
     libraryDependencies ++= AppDependencies.apply(),
     parallelExecution in Test := false,
     fork in Test := false,
