@@ -49,7 +49,7 @@ POST        /select-alterations-or-a-variation              controllers.AltAmend
 
 GET         /add-trustee       				                controllers.TrusteeController.trusteeDetailsPage(index: Int = 10000)
 POST        /add-trustee      					            controllers.TrusteeController.trusteeDetailsSubmit(index: Int)
-GET         /add-trustee/:index/delete                      controllers.TrusteeController.deleteTrustee(index: Int)
+POST        /add-trustee/:index/delete                      controllers.TrusteeController.deleteTrustee(index: Int)
 GET         /add-trustee/:index/edit     	                controllers.TrusteeController.editTrustee(index: Int)
 
 GET         /trustees       				                controllers.TrusteeController.trusteeSummaryPage()
@@ -57,7 +57,7 @@ POST        /trustees       				                controllers.TrusteeController.tr
 
 GET 		/add-subsidiary-company   		        		controllers.GroupSchemeController.manualCompanyDetailsPage(index: Int = 10000)
 POST 		/add-subsidiary-company       					controllers.GroupSchemeController.manualCompanyDetailsSubmit(index: Int)
-GET 		/add-subsidiary-company/:index/delete       	controllers.GroupSchemeController.deleteCompany(index: Int)
+POST 		/add-subsidiary-company/:index/delete       	controllers.GroupSchemeController.deleteCompany(index: Int)
 GET 		/add-subsidiary-company/:index/edit 	    	controllers.GroupSchemeController.editCompany(index: Int)
 
 GET 		/company-details  		                        controllers.SchemeOrganiserController.schemeOrganiserPage()

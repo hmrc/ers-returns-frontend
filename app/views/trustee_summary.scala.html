@@ -1,5 +1,5 @@
 @*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -120,10 +120,10 @@
                 rows = summaryBuilder(trustee, index)
             ))
 
-            <p class="govuk-body govuk-!-margin-bottom-8">
-                <a class="govuk-link" href=@routes.TrusteeController.deleteTrustee(index)>
-                    @{messages("ers.delete") + " " + trustee.name}
-                </a>
+            <p class="govuk-body govuk-!-margin-bottom-8 govuk-link">
+               <a class="govuk-link" href="">
+                 <input class="govuk-link link_button" type="submit" formaction="@routes.TrusteeController.deleteTrustee(index)" value='@{messages("ers.delete") + " " + trustee.name}'>
+               </a>
             </p>
 
         }
