@@ -1,5 +1,5 @@
 @*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -158,12 +158,13 @@
 				}
 			))
 
-			<p class="govuk-body govuk-!-margin-bottom-8">
-				<a class="govuk-link" href=@routes.GroupSchemeController.deleteCompany(index)>
-					@{messages("ers.delete") + " " + company.companyName}
-				</a>
-			</p>
-		}
+         <p class="govuk-body govuk-!-margin-bottom-8 govuk-link">
+	         <a class="govuk-link" href="">
+		       <input class="govuk-link link_button" type="submit" formaction="@routes.GroupSchemeController.deleteCompany(index)" value='@{messages("ers.delete") + " " + company.companyName}'>
+	         </a>
+         </p>
+
+		 }
 
 		<a class="govuk-link govuk-inset-text govuk-!-display-inline-block govuk-!-margin-top-0 govuk-!-width-full"
 		   href=@routes.GroupSchemeController.manualCompanyDetailsPage>
