@@ -79,7 +79,7 @@
                     content = Text(fileNameMsg)
                 ),
                 value = Value(
-                    content = HtmlContent(value = Html(filename))
+                    content = HtmlContent(value = Html(filename.replace("<", "&lt;").replace(">", "&gt;")))
                 ),
                 actions = Some(Actions(
                     items = Seq(
