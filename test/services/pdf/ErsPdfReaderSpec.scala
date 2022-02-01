@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,13 +23,23 @@ import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.text.PDFTextStripper
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
-import org.scalatest.{BeforeAndAfterEach, OptionValues}
+import org.scalatest.OptionValues
 import org.scalatestplus.mockito.MockitoSugar
-import play.api.Logging
-
 import java.io.File
 
-class ErsPdfReaderSpec extends AnyWordSpecLike with Matchers with OptionValues with MockitoSugar with BeforeAndAfterEach with Logging {
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+
+import utils.ERSFakeApplicationConfig
+
+
+
+class ErsPdfReaderSpec extends AnyWordSpecLike
+  with Matchers
+  with OptionValues
+  with MockitoSugar
+  with ERSFakeApplicationConfig
+  with GuiceOneAppPerSuite {
+
   var pdfStripper: PDFTextStripper = mock[PDFTextStripper]
   var pdDoc: PDDocument = mock[PDDocument]
   var cosDocCOSDocument: COSDocument = mock[COSDocument]
@@ -45,7 +55,7 @@ class ErsPdfReaderSpec extends AnyWordSpecLike with Matchers with OptionValues w
     parsedText = pdfStripper.getText(pdDoc)
   } catch {
     case e: Exception =>
-      logger.error(s"Error reading pdf file..",e)
+      println(s"Error reading pdf file..", e)
       throw new Exception
   }
 
@@ -53,7 +63,7 @@ class ErsPdfReaderSpec extends AnyWordSpecLike with Matchers with OptionValues w
     "contain hmrc header" in {
       parsedText should include("HM Revenue & Customs")
       parsedText should include("Enterprise Management Incentives")
-      parsedText should include("Confirmation receipt")
+      parsedText should include("Submission receipt")
     }
 
     "contain Scheme name" in {
@@ -63,17 +73,17 @@ class ErsPdfReaderSpec extends AnyWordSpecLike with Matchers with OptionValues w
 
     "contain scheme reference" in {
       parsedText should include ("Unique scheme reference")
-      parsedText should include ("XA11000001231273")
+      parsedText should include ("XA1100000000000")
     }
 
     "contain tax year" in {
-      parsedText should include ("Tax Year")
-      parsedText should include ("2015/16")
+      parsedText should include ("Tax year")
+      parsedText should include ("2021/22")
     }
 
     "contain data and time information" in {
-      parsedText should include ("Date and time submitted")
-      parsedText should include ("26 May 2016, 13:59 AM")
+      parsedText should include ("Time and date of submission")
+      parsedText should include ("12:08PM on Tue 25 January 2022")
     }
   }
 }

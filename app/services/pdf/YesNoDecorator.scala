@@ -17,29 +17,17 @@
 package services.pdf
 
 import play.api.i18n.Messages
-import utils.DecoratorConstants._
 import utils.PageBuilder
 
 class YesNoDecorator(headingTitle: String,
-										 isNilReturn: String,
-										 headingFontSize: Float = headingFontSizeDefault,
-										 answerFontSize: Float = answerFontSizeDefault,
-										 lineSpacer: Float = lineSpacerDefault,
-										 blockSpacer: Float = blockSpacerDefault
+										 isNilReturn: String
 										) extends Decorator with PageBuilder {
 
-  def decorate(streamer: ErsContentsStreamer)(implicit messages: Messages): Unit = {
-
-    streamer.drawText(headingTitle, headingFontSize)
-    streamer.drawText("", lineSpacer)
-
-    streamer.drawText(isNilReturn match {
+  def decorate(implicit messages: Messages): String = {
+    val content = isNilReturn match {
       case OPTION_YES => Messages("ers.yes")
       case OPTION_NO => Messages("ers.no")
-    }, answerFontSize)
-
-    streamer.drawText("", blockSpacer)
-    streamer.drawLine()
-    streamer.drawText("", blockSpacer)
+    }
+    buildEntry(headingTitle, content)
   }
 }

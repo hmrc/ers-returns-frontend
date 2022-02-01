@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,6 @@
 package services.pdf
 
 import akka.stream.Materializer
-import org.mockito.ArgumentMatchers._
-import org.mockito.Mockito._
-import org.mockito.internal.verification.VerificationModeFactory
 import org.scalatest.OptionValues
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
@@ -54,44 +51,34 @@ class FileNamesDecoratorSpec extends AnyWordSpecLike
   implicit lazy val mat: Materializer = app.materializer
 
   "file name decorator" should {
-    "not show file names when nil reuturn is false" in {
-      val decorator = new FileNamesDecorator("2", Some(ListBuffer[String]()), 0.0F, 0.0F, 0.0F, 0.0F)
-      val streamer = mock[ErsContentsStreamer]
+    "return an empty string when list of files is empty" in {
+      val decorator = new FileNamesDecorator("2", Some(ListBuffer[String]()))
 
-      decorator.decorate(streamer)
+      val output = decorator.decorate
 
-      verify(streamer, VerificationModeFactory.times(0)).drawText(any(), any())(any())
+      output shouldBe ""
     }
 
-    "show ods files names when nil return is true" in {
-      val streamer = mock[ErsContentsStreamer]
-      val decorator = new FileNamesDecorator("1", Some(ListBuffer[String]("odsFile")), 1.0F, 2.0F, 3.0F, 4.0F)
+    "return ods files names when nil return is false" in {
+      val decorator = new FileNamesDecorator("1", Some(ListBuffer[String]("odsFile")))
 
-      decorator.decorate(streamer)
+      val output = decorator.decorate
 
-      verify(streamer, VerificationModeFactory.times(1)).drawText(org.mockito.ArgumentMatchers.eq(Messages("ers_summary_declaration.file_name"): String), org.mockito.ArgumentMatchers.eq(1.0F: Float))(any())
-      verify(streamer, VerificationModeFactory.times(1)).drawText(org.mockito.ArgumentMatchers.eq("odsFile": String), org.mockito.ArgumentMatchers.eq(2.0F: Float))(any())
+      output.contains(Messages("ers_summary_declaration.file_name")) shouldBe true
+      output.contains("odsFile") shouldBe true
+      output.contains("<hr/>") shouldBe true
     }
 
     "show csv files names when nil return is true" in {
-      val streamer = mock[ErsContentsStreamer]
-      val decorator = new FileNamesDecorator("1", Some(ListBuffer[String]("csvFile0", "csvFile1")), 1.0F, 2.0F, 3.0F, 4.0F)
+      val decorator = new FileNamesDecorator("1", Some(ListBuffer[String]("csvFile0", "csvFile1")))
 
-      decorator.decorate(streamer)
+      val output = decorator.decorate
 
-      verify(streamer, VerificationModeFactory.times(1)).drawText(org.mockito.ArgumentMatchers.eq(Messages("ers_summary_declaration.file_names"): String), org.mockito.ArgumentMatchers.eq(1.0F: Float))(any())
-      verify(streamer, VerificationModeFactory.times(1)).drawText(org.mockito.ArgumentMatchers.eq("csvFile0": String), org.mockito.ArgumentMatchers.eq(2.0F: Float))(any())
-      verify(streamer, VerificationModeFactory.times(1)).drawText(org.mockito.ArgumentMatchers.eq("csvFile1": String), org.mockito.ArgumentMatchers.eq(2.0F: Float))(any())
-    }
+      output.contains(Messages("ers_summary_declaration.file_name")) shouldBe true
+      output.contains("csvFile0") shouldBe true
+      output.contains("csvFile1") shouldBe true
+      output.contains("<hr/>") shouldBe true
 
-    "show block spacer at the end" in {
-      val streamer = mock[ErsContentsStreamer]
-      val decorator = new FileNamesDecorator("1", Some(ListBuffer[String]("odsFile")), 1.0F, 2.0F, 3.0F, 4.0F)
-
-      decorator.decorate(streamer)
-
-      verify(streamer, VerificationModeFactory.times(2)).drawText(org.mockito.ArgumentMatchers.eq("": String), org.mockito.ArgumentMatchers.eq(4.0F: Float))(any())
-      verify(streamer, VerificationModeFactory.times(1)).drawLine()
     }
   }
 }

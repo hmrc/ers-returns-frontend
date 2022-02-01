@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,6 @@
 package services.pdf
 
 import akka.stream.Materializer
-import org.mockito.ArgumentMatchers
-import org.mockito.Mockito._
-import org.mockito.internal.verification.VerificationModeFactory
 import org.scalatest.OptionValues
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
@@ -57,34 +54,23 @@ class YesNoDecoratorSpec extends AnyWordSpecLike
 
   "nil returns decorator" should {
     "show Yes if there is nil return" in {
-      val streamer = mock[ErsContentsStreamer]
-      val decorator = new YesNoDecorator("title", "1", 1.0f, 2.0F, 3.0F, 4.0F)
+      val decorator = new YesNoDecorator("title", "1")
 
-      decorator.decorate(streamer)(testMessages)
+      val output = decorator.decorate
 
-      verify(streamer, VerificationModeFactory.times(1)).drawText(ArgumentMatchers.eq("title": String), ArgumentMatchers.eq(1.0F: Float))(ArgumentMatchers.any())
-      verify(streamer, VerificationModeFactory.times(1)).drawText(ArgumentMatchers.eq("Yes": String), ArgumentMatchers.eq(2.0F: Float))(ArgumentMatchers.any())
+      output.contains("title") shouldBe true
+      output.contains("Yes") shouldBe true
+      output.contains("<hr/>") shouldBe true
     }
 
     "show No if there is no nil return" in {
-      val streamer = mock[ErsContentsStreamer]
-      val decorator = new YesNoDecorator("title", "2", 1.0f, 2.0F, 3.0F, 4.0F)
+      val decorator = new YesNoDecorator("title", "2")
 
-      decorator.decorate(streamer)(testMessages)
+      val output = decorator.decorate
 
-      verify(streamer, VerificationModeFactory.times(1)).drawText(ArgumentMatchers.eq("title": String), ArgumentMatchers.eq(1.0F: Float))(ArgumentMatchers.any())
-      verify(streamer, VerificationModeFactory.times(1)).drawText(ArgumentMatchers.eq("No": String), ArgumentMatchers.eq(2.0F: Float))(ArgumentMatchers.any())
-    }
-
-    "show section divider after the block is rendered" in {
-      val streamer = mock[ErsContentsStreamer]
-      val decorator = new YesNoDecorator("title", "2", 1.0f, 2.0F, 3.0F, 4.0F)
-
-      decorator.decorate(streamer)(testMessages)
-
-      verify(streamer, VerificationModeFactory.times(1)).drawText(ArgumentMatchers.eq("": String), ArgumentMatchers.eq(3.0F: Float))(ArgumentMatchers.any())
-      verify(streamer, VerificationModeFactory.times(2)).drawText(ArgumentMatchers.eq("": String), ArgumentMatchers.eq(4.0F: Float))(ArgumentMatchers.any())
-      verify(streamer, VerificationModeFactory.times(1)).drawLine()
+      output.contains("title") shouldBe true
+      output.contains("No") shouldBe true
+      output.contains("<hr/>") shouldBe true
     }
    }
 

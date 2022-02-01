@@ -18,29 +18,15 @@ package services.pdf
 
 import models.TrusteeDetailsList
 import play.api.i18n.Messages
-import utils.DecoratorConstants._
 
-class TrusteesDecorator(trusteesList: Option[TrusteeDetailsList],
-												headingFontSize: Float = headingFontSizeDefault,
-												answerFontSize: Float = answerFontSizeDefault,
-												lineSpacer: Float = lineSpacerDefault,
-												blockSpacer: Float = blockSpacerDefault
+class TrusteesDecorator(trusteesList: Option[TrusteeDetailsList]
 											 ) extends Decorator {
 
-  def decorate(streamer: ErsContentsStreamer)(implicit messages: Messages): Unit = {
-    if (trusteesList.isDefined) {
-			streamer.drawText("", lineSpacer)
-			streamer.drawText(Messages("ers_trustee_summary.title"), headingFontSize)
-			streamer.drawText("", lineSpacer)
-
-			for (trustee <- trusteesList.get.trustees) {
-				streamer.drawText(trustee.name, answerFontSize)
-				streamer.drawText("", lineSpacer)
-			}
-
-			streamer.drawText("", blockSpacer)
-			streamer.drawLine()
-			streamer.drawText("", blockSpacer)
+	def decorate(implicit messages: Messages): String = {
+		if (trusteesList.isDefined) {
+			buildEntryMultiple(messages("ers_trustee_summary.title"), trusteesList.get.trustees.map(_.name).toArray)
+		} else {
+			""
 		}
-  }
+	}
 }

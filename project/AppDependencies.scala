@@ -4,6 +4,9 @@ import sbt._
 
 object AppDependencies {
 
+  val pdfboxVersion = "2.0.25"
+  val openHtmlVersion = "1.0.10"
+
   val compile: Seq[ModuleID] = Seq(
     guice,
     ws,
@@ -15,9 +18,14 @@ object AppDependencies {
     "uk.gov.hmrc"                 %%    "time"                          %   "3.25.0",
     "uk.gov.hmrc"                 %%    "play-frontend-hmrc"            %   "1.31.0-play-28",
     "org.scala-lang.modules"      %%    "scala-parser-combinators"      %   "2.1.0",
-    "org.apache.pdfbox"           %     "pdfbox"                        %   "2.0.24",
-    "org.apache.pdfbox"           %     "xmpbox"                        %   "2.0.24",
-    "com.typesafe.play"           %%    "play-json-joda"                %   "2.9.2"
+    "org.apache.pdfbox"           %     "pdfbox"                        %   pdfboxVersion,
+    "org.apache.pdfbox"           %     "xmpbox"                        %   pdfboxVersion,
+    "org.apache.xmlgraphics"      %     "batik-transcoder"              %   "1.14",
+    "org.apache.xmlgraphics"      %     "batik-codec"                   %   "1.14",
+    "com.typesafe.play"           %%    "play-json-joda"                %   "2.9.2",
+    "com.openhtmltopdf"           %     "openhtmltopdf-core"            %   openHtmlVersion,
+    "com.openhtmltopdf"           %     "openhtmltopdf-pdfbox"          %   openHtmlVersion,
+    "com.openhtmltopdf"           %     "openhtmltopdf-svg-support"     %   openHtmlVersion
   )
 
   trait TestDependencies {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package controllers
 import akka.stream.Materializer
 import org.scalatestplus.play.PlaySpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import play.api.http.Status.UNAUTHORIZED
 import play.api.i18n
 import play.api.i18n.{MessagesApi, MessagesImpl}
 import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents}
@@ -54,7 +55,7 @@ class ApplicationControllerSpec extends PlaySpec with ErsTestHelper with GuiceOn
 
     "respond to /unauthorised" in {
       val result = route(app, FakeRequest(GET, "/submit-your-ers-annual-return/unauthorised"))
-      status(result.get) must not equal NOT_FOUND
+      status(result.get) mustBe UNAUTHORIZED
     }
   }
 

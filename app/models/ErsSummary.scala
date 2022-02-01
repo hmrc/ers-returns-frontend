@@ -80,7 +80,7 @@ case class CompanyDetailsList(companies: List[CompanyDetails])
 object CompanyDetailsList {
   implicit val format: OFormat[CompanyDetailsList] = Json.format[CompanyDetailsList]
 }
-case class  GroupSchemeInfo(
+case class GroupSchemeInfo(
                              groupScheme: Option[String],
                              groupSchemeType: Option[String]
 

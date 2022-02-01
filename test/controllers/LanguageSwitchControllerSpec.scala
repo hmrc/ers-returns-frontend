@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,10 @@
 package controllers
 
 import org.mockito.Mockito.when
-import org.scalatest.OptionValues
+import org.scalatest.{OptionValues, PrivateMethodTester}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-
 import play.api.i18n.{Lang, MessagesApi}
 import play.api.mvc._
 import play.api.test.FakeRequest
@@ -30,7 +29,13 @@ import utils.ErsTestHelper
 
 import scala.concurrent.ExecutionContext
 
-class LanguageSwitchControllerSpec extends AnyWordSpecLike with Matchers with OptionValues with ErsTestHelper with GuiceOneAppPerSuite {
+class LanguageSwitchControllerSpec
+  extends AnyWordSpecLike
+  with Matchers
+  with OptionValues
+  with ErsTestHelper
+  with GuiceOneAppPerSuite
+  with PrivateMethodTester {
 
   val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
     messagesActionBuilder,
@@ -71,5 +76,17 @@ class LanguageSwitchControllerSpec extends AnyWordSpecLike with Matchers with Op
       cookie.name shouldBe "PLAY_LANG"
       cookie.value shouldBe "en"
     }
+  }
+
+  "asRelativeUrl method" should {
+
+    "build the relative url given valid input" in {
+      val controller = new LanguageSwitchController(mockAppConfig, mockMCC)
+      val privateMethod = PrivateMethod[Option[String]]('asRelativeUrl)
+      val result = controller.invokePrivate(privateMethod("http://localhost:9000/test?testing#testerino"))
+
+      result.get shouldBe "/test?testing#testerino"
+    }
+
   }
 }

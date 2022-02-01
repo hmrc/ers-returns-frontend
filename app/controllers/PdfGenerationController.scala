@@ -23,13 +23,14 @@ import models.upscan.{UploadedSuccessfully, UpscanCsvFilesCallback, UpscanCsvFil
 import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.mvc._
-import services.pdf.{ApachePdfContentsStreamer, ErsReceiptPdfBuilderService}
+import services.pdf.ErsReceiptPdfBuilderService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.ERSUtil
-
 import javax.inject.{Inject, Singleton}
+import org.joda.time.DateTime
+
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -55,12 +56,12 @@ class PdfGenerationController @Inject()(val mcc: MessagesControllerComponents,
   def generatePdf(requestObject: RequestObject, bundle: String, dateSubmitted: String)
                  (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
 
-    logger.debug("ers returns frontend getting into the controller to generate the pdf")
+    logger.debug("getting into the controller to generate the pdf")
     val cache: Future[ErsMetaData] = ersUtil.fetch[ErsMetaData](ersUtil.ersMetaData, requestObject.getSchemeReference)
     cache.flatMap { all =>
-      logger.debug("ers returns frontend pdf generation: got the metadata")
+      logger.debug("pdf generation: got the metadata")
       ersUtil.getAllData(bundle, all).flatMap { alldata =>
-        logger.debug("ers returns frontend generation: got the cache map")
+        logger.debug("pdf generation: got the cache map")
 
         ersUtil.fetchAll(requestObject.getSchemeReference).map { all =>
           val filesUploaded: ListBuffer[String] = ListBuffer()
@@ -85,7 +86,7 @@ class PdfGenerationController @Inject()(val mcc: MessagesControllerComponents,
               filesUploaded += all.getEntry[String](ersUtil.FILE_NAME_CACHE).get
             }
           }
-          val pdf = pdfBuilderService.createPdf(new ApachePdfContentsStreamer(alldata), alldata, Some(filesUploaded), dateSubmitted).toByteArray
+          val pdf = pdfBuilderService.createPdf(alldata, Some(filesUploaded), dateSubmitted).toByteArray
           Ok(pdf)
             .as("application/pdf")
             .withHeaders(CONTENT_DISPOSITION -> s"inline; filename=$bundle-confirmation.pdf")

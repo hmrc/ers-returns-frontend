@@ -19,5 +19,24 @@ package services.pdf
 import play.api.i18n.Messages
 
 trait Decorator {
-  def decorate(ersContentsStreamer: ErsContentsStreamer)(implicit messages: Messages): Unit
+
+  def decorate(implicit messages: Messages): String
+
+  def buildEntry(title: String, content: String): String = {
+    s"""<div style="display: block;">
+      <h2 style="margin-bottom: 0em;">$title</h2>
+      <p style="margin-top: 0.3em; padding-left: 0.05em">$content</p>
+      <hr/>
+      </div>
+      """
+  }
+
+  def buildEntryMultiple(title: String, content: Array[String]): String = {
+    val start = s"""
+                <div style="display: block;">
+                <h2 style="margin-bottom: 0em;">$title</h2>
+      """
+    val elements = content.map(item => s"""<p style="margin-top: 0.3em; padding-left: 0.05em">$item</p>""").mkString
+    start + elements + "<hr/></div>"
+  }
 }

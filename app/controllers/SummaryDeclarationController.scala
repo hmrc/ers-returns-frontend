@@ -109,7 +109,7 @@ class SummaryDeclarationController @Inject()(val mcc: MessagesControllerComponen
     cacheMap.getEntry[TrusteeDetailsList](ersUtil.TRUSTEES_CACHE).getOrElse(TrusteeDetailsList(List[TrusteeDetails]()))
 
   def getAltAmends(cacheMap: CacheMap): AlterationAmends =
-    cacheMap.getEntry[AlterationAmends](ersUtil.ALT_AMENDS_CACHE_CONTROLLER).getOrElse(new AlterationAmends(None, None, None, None, None))
+    cacheMap.getEntry[AlterationAmends](ersUtil.ALT_AMENDS_CACHE_CONTROLLER).getOrElse(AlterationAmends(None, None, None, None, None))
 
   def getCompDetails(cacheMap: CacheMap): CompanyDetailsList =
     cacheMap.getEntry[CompanyDetailsList](ersUtil.GROUP_SCHEME_COMPANIES).getOrElse(CompanyDetailsList(List[CompanyDetails]()))

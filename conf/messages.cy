@@ -1,9 +1,9 @@
 service.name = Cyflwyno eich Datganiad Blynyddol ar gyfer ERS
 
-ers.csop = Cynllun Opsiwn Prynu Cyfranddaliadau Cwmni
+ers.csop = Opsiwn Prynu Cyfranddaliadau Cwmni
 ers.emi = Cymhellion Rheoli Mentrau
 ers.saye =Cynilo Wrth Ennill
-ers.sip = Cynllun Cymell Cyfranddaliadau
+ers.sip = Cymell Cyfranddaliadau
 ers.other = Arall
 ers.header = Cyflwyno eich Datganiad Blynyddol ar gyfer ERS
 ers.app_title = Cyflwyno eich Datganiad Blynyddol ar gyfer ERS
@@ -22,9 +22,9 @@ ers.invalidCharacters = Dileu cymeriadau annilys
 ers.error.title = Heb awdurdod
 ers.warning = Rhybudd
 
-ers.scheme.CSOP = Cynllun Opsiwn Prynu Cyfranddaliadau Cwmni (CSOP)
+ers.scheme.CSOP = Opsiwn Prynu Cyfranddaliadau Cwmni (CSOP)
 ers.scheme.EMI = Cymhellion Rheoli Mentrau (EMI)
-ers.scheme.SIP = Cynllun Cymell Cyfranddaliadau (SIP)
+ers.scheme.SIP = Cymell Cyfranddaliadau (SIP)
 ers.scheme.SAYE = Cynilo Wrth Ennill (SAYE)
 ers.scheme.OTHER = ARALL
 ers.scheme.title = Cynllun {0}
@@ -108,9 +108,9 @@ ers_start.other.relevant_bullet_3 = gellir nodi manylion unrhyw gwmnïau eraill 
 ers_start.filesize = E-bostiwch <a class="govuk-link" href="mailto:shareschemes@hmrc.gsi.gov.uk">shareschemes@hmrc.gsi.gov.uk</a> a byddwn yn eich helpu gyda’ch cyflwyniad.
 ers_start.start_now_button = Dechrau nawr
 ers_choose.title = Digwyddiadau i’w nodi
-ers_choose.csop.question = A oes opsiynau wedi eu caniatáu, wedi eu harfer, wedi eu rhyddhau (gan gynnwys cyfnewidfeydd), wedi dod i ben neu wedi eu dileu, yn ystod y flwyddyn dreth?
-ers_choose.saye.question = A oes opsiynau wedi eu caniatáu, wedi eu harfer, wedi eu rhyddhau (gan gynnwys cyfnewidfeydd), wedi dod i ben neu wedi eu dileu, yn ystod y flwyddyn dreth?
-ers_choose.emi.question = A oes opsiynau wedi eu caniatáu, wedi eu harfer, wedi eu rhyddhau, wedi dod i ben neu wedi eu dileu, yn ystod y flwyddyn dreth?
+ers_choose.csop.question = A oes opsiynau wedi eu haddasu, wedi eu harfer, wedi eu rhyddhau (gan gynnwys cyfnewidfeydd), wedi dod i ben neu wedi eu dileu, yn ystod y flwyddyn dreth?
+ers_choose.saye.question = A oes opsiynau wedi eu haddasu, wedi eu harfer, wedi eu rhyddhau (gan gynnwys cyfnewidfeydd), wedi dod i ben neu wedi eu dileu, yn ystod y flwyddyn dreth?
+ers_choose.emi.question = A oes opsiynau wedi eu haddasu, wedi eu disodli, wedi eu rhyddhau, wedi dod i ben, wedi eu canslo neu wedi eu harfer yn ystod y flwyddyn dreth?
 ers_choose.sip.question = A oes cyfranddaliadau wedi'u dyfarnu, neu a oes cyfranddaliadau wedi peidio â bod yn rhan o'r cynllun, yn ystod y flwyddyn dreth?
 ers_choose.other.question = A oes unrhyw ddigwyddiadau wedi bod yn ystod y flwyddyn dreth sy’n ymwneud ag opsiynau neu warantau (gan gynnwys cyfranddaliadau)?
 ers_choose.option_1 = Iawn
@@ -136,7 +136,7 @@ ers_scheme_organiser.addressLine3.label = Tref neu ddinas
 ers_scheme_organiser.addressLine4.label = Sir
 ers_scheme_organiser.postcode = Cod post (dewisol)
 ers_scheme_organiser.postcode.hint = Er enghraifft, AA1 1AA
-ers_scheme_organiser.country = Gwlad (dewisol)
+ers_scheme_organiser.country = Gwlad (dewisol)Cynllun Opsiwn Prynu Cyfranddaliadau Cwmni
 ers_scheme_organiser.company_reg_number = Rhif Cofrestru’r Cwmni (dewisol)
 ers_scheme_organiser.company_reg_number.hint = Dylai hyn fod yr un peth â’r hyn a restrir ar gofrestr Tŷ’r Cwmnïau. Mae’n naill ai 8 rhif neu 2 lythyren a 6 rhif.
 ers_scheme_organiser.corporation_tax_ref =Cyfeirnod Treth Gorfforaeth (dewisol)
@@ -315,15 +315,18 @@ ers_summary_declaration.saye.organiser = Trefnydd y cynllun
 ers_summary_declaration.emi.organiser = Manylion cwmni’r cyflogwr
 ers_summary_declaration.sip.organiser =Manylion y cwmni sefydlu
 ers_summary_declaration.other.organiser = Manylion y cwmni
+
 ers_confirmation.page_title = Cadarnhad
 ers_confirmation.submitted = Mae eich Datganiad Blynyddol ar gyfer {0} wedi’i gyflwyno
 ers_confirmation.date_and_time = Dyddiad ac amser cyflwyno: {0}
 ers_confirmation.sub_heading = Beth nesaf?
 ers_confirmation.instructions = Dylech ganiatáu 48 awr cyn i chi ddefnyddio gwasanaethau ar-lein CThEM er mwyn gwirio statws eich cyflwyniad o dan ‘Gwarantau ar Sail Cyflogaeth’ (tarwch olwg ar gynlluniau a threfniadau).
-ers_confirmation.download_confirmation = Cadarnhad o lawrlwytho (PDF, {0}KB)
-ers_confirmation.submission_ref = Cyfeirnod ac amser:
+ers_confirmation.download_confirmation = Lawrlwythwch eich derbynneb am gyflwyno [PDF, {0}KB] (yn agor tab newydd)
+ers-confirmation.submission_date = Cyflwynwyd am
+ers-confirmation.submission_on = ar ddydd
+ers_confirmation.submission_ref = Eich cyfeirnod:
 ers_confirmation.return = Rheoli’ch cynlluniau a’ch trefniadau
-ers_confirmation.pdf_info =Gallwch lawrlwytho cadarnhad fel PDF (bydd yn agor mewn ffenestr neu dab newydd).
+ers_confirmation.pdf_info =Gallwch lawrlwytho cadarnhad fel PDF.
 ers_confirmation.csop.finished = http://www.gov.uk/done/company-share-option-plan-return
 ers_confirmation.emi.finished =http://www.gov.uk/done/enterprise-management-incentives-return
 ers_confirmation.saye.finished = http://www.gov.uk/done/save-as-you-earn-return
@@ -331,9 +334,11 @@ ers_confirmation.sip.finished = http://www.gov.uk/done/share-incentive-plan-retu
 ers_confirmation.other.finished = http://www.gov.uk/done/other-employment-related-securities-return
 ers_confirmation.feedback = Beth oedd eich barn am y gwasanaeth hwn?
 ers_confirmation.feedback_time =(mae’n cymryd 30 eiliad)
+
 ers_signed_out.info = Er eich diogelwch, gwnaethom eich allgofnodi.
 ers_signed_out.link = Mewngofnodi
 ers_upload_form.processing_alert = Rydym yn gwirio eich ffeil am wallau. Peidiwch ag adnewyddu’r dudalen.
+
 file_upload.title = Uwchlwythwch eich ffeil ODS
 file_upload.contact_us = Cysylltwch â ni ar ein tudalen adborth
 file_upload.size_warning.link.before =Os yw’ch ffeil yn fwy na 10MB, ni allwch ddefnyddio’r gwasanaeth hwn. E-bostiwch
@@ -364,6 +369,7 @@ csv_file_upload.contact_us = Cysylltwch â ni ar ein tudalen adborth
 csv_file_upload.file_size = os yw unrhyw un o’ch ffeiliau’n fwy na 100MB.
 csv_file_upload.you_have_uploaded = Rydych wedi uwchlwytho:
 csv_file_upload.summary_error = Dewiswch ffeil wahanol i’w huwchlwytho
+
 ers_scheme_type.page_title = Cynllun neu drefniant ERS
 ers_scheme_type.question = Ar gyfer pa fath o gynllun neu drefniant ERS y mae’r ffeil hon?
 ers_scheme_type.csop =Cynllun Opsiwn Prynu Cyfranddaliadau Cwmni (CSOP - Ffurflen 35)
@@ -490,6 +496,7 @@ ers.bulk.success.emi.info = Os nad oes gwallau yn {0}, byddwch nesaf yn ychwaneg
 ers.bulk.success.other.info = Os nad oes gwallau yn {0}, byddwch nesaf yn ychwanegu manylion y cwmni
 ers.bulk.success.sip.info = Os nad oes gwallau yn {0}, byddwch nesaf yn ychwanegu manylion y cwmni
 ers.bulk.success.saye.info = Os nad oes gwallau yn {0}, byddwch nesaf yn ychwanegu manylion trefnydd y cynllun
+
 validation.summary.heading = Mae problem wedi codi
 validation.summary.info2 = Mae angen i chi wneud y canlynol:
 ers_alt_activity.csop.title = A oes addasiadau wedi eu gwneud i nodweddion allweddol y cynllun hwn neu a oes amrywiad wedi bod yn y cyfalaf cyfranddaliadau?
@@ -535,6 +542,7 @@ ers_alt_amends.sip.option_5 = Arall
 ers_alt_amends.sip.alert = Mae ysgrifennydd y cwmni, neu’r person sy’n gweithredu ar ran ysgrifennydd y cwmni, yn datgan nad yw’r addasiad neu’r amrywiad yn unrhyw gyfalaf cyfranddaliadau wedi achosi i ofynion Rhannau 2 i 6 Atodlen 4 o Ddeddf Treth Incwm (Enillion a Phensiynau) 2003 i beidio â chael eu bodloni mewn perthynas â’r Cynllun Cymell Cyfranddaliadau.
 ers_alt_amends.sip.err.message = Dewiswch yr holl addasiadau sy’n berthnasol
 ers_alt_amends.continue = Derbyn a mynd yn eich blaen
+
 ers_trustee_details.title = Ychwanegu manylion yr ymddiriedolwr
 ers_trustee_details.question = Ymhle y mae’r ymddiriedolwr wedi’i leoli?
 ers_trustee_details.uk = Y DU
@@ -580,16 +588,25 @@ ers.global_errors.message = Mae’n ddrwg gennym, mae problem gyda’r gwasanaet
 ers.global_errors.heading = Cyflwyno eich Datganiad Blynyddol ar gyfer ERS
 ers.global_errors.title = Mae’n ddrwg gennym, mae problem gyda’r gwasanaeth - Cyflwyno eich Datganiad Blynyddol ar gyfer ERS – GOV.UK
 ers.global.errors.try.later = Rhowch gynnig arall arni yn nes ymlaen.
-urbanner.message.text =Helpwch i wella gwasanaethau digidol drwy ymuno â phanel defnyddwyr CThEM (yn agor ffenestr newydd)
+urbanner.message.text = Helpwch i wella gwasanaethau digidol drwy ymuno â phanel defnyddwyr CThEM (yn agor ffenestr newydd)
 urbanner.message.reject = Dim diolch
 
-ers.taxYear.text =i
-ers.pdf.confirmation.submitted=Mae eich datganiad blynyddol ar gyfer {0} wedi’i gyflwyno ar gyfer blwyddyn dreth {1}.
-ers.pdf.scheme=Enw’r cynllun:
-ers.pdf.refcode=Cyfeirnod:
-ers.pdf.date_and_time=Dyddiad ac amser cyflwyno:
-ers.pdf.summary_information=Gwybodaeth gryno
-ers.pdf.header=Cyllid a Thollau EM
+#********************************************************************
+# PDF text
+#********************************************************************
+
+ers.taxYear.text = i
+ers.pdf.confirmation.submitted = Mae eich datganiad blynyddol ar gyfer {0} wedi’i gyflwyno.
+ers.pdf.scheme = Enw’r cynllun
+ers.pdf.refcode = Cyfeirnod
+ers.pdf.unique_scheme_ref = Cyfeirnod unigryw y cynllun
+ers.pdf.date_and_time = Amser a dyddiad cyflwyno
+ers.pdf.summary_information = Gwybodaeth gryno
+ers.pdf.header = Cyllid a Thollau EM
+ers.pdf.title = Derbynneb am gyflwyno
+ers.pdf.tax_year = Blwyddyn dreth
+ers.pdf.filename = Gwarantau ar Sail Cyflogaeth - Derbynneb am gyflwyno
+
 
 #********************************************************************
 # Page not found

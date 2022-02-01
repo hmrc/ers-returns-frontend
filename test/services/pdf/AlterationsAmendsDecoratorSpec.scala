@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,6 @@ package services.pdf
 
 import akka.stream.Materializer
 import models._
-import org.mockito.ArgumentMatchers
-import org.mockito.Mockito._
-import org.mockito.internal.verification.VerificationModeFactory
 import org.scalatest.OptionValues
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
@@ -70,39 +67,27 @@ class AlterationsAmendsDecoratorSpec extends AnyWordSpecLike
 
   "alterations amends decorator" should {
 
-    "draw a block divider" in {
-      val decorator = new AlterationsAmendsDecorator(map, 1.0f, 2.0F, 3.0F, 4.0F)
-      val streamer = mock[ErsContentsStreamer]
-
-      decorator.decorate(streamer)
-
-      verify(streamer, VerificationModeFactory.times(2)).drawText(org.mockito.ArgumentMatchers.eq(Messages(""): String), org.mockito.ArgumentMatchers.eq(4.0F: Float))(ArgumentMatchers.any())
-      verify(streamer, VerificationModeFactory.times(1)).drawLine()
-    }
-
     "stream nothing if map is empty" in {
-      val decorator = new AlterationsAmendsDecorator(Map[String, String](), 1.0f, 2.0F, 3.0F, 4.0F)
-      val streamer = mock[ErsContentsStreamer]
+      val decorator = new AlterationsAmendsDecorator(Map[String, String]())
 
-      decorator.decorate(streamer)
+      val output = decorator.decorate
 
-      verify(streamer, VerificationModeFactory.times(0)).drawText(org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.anyFloat())(ArgumentMatchers.any())
+      output shouldBe ""
+
     }
 
     "stream csop alterations amends title and given fields" in {
 
-      val decorator = new AlterationsAmendsDecorator(map, 1.0f, 2.0F, 3.0F, 4.0F)
-      val streamer = mock[ErsContentsStreamer]
+      val decorator = new AlterationsAmendsDecorator(map)
 
-      decorator.decorate(streamer)
+      val output = decorator.decorate
 
-      verify(streamer, VerificationModeFactory.times(1)).drawText(org.mockito.ArgumentMatchers.eq(Messages("ers_trustee_summary.altamends.section"): String), org.mockito.ArgumentMatchers.eq(1.0F: Float))(ArgumentMatchers.any())
-      verify(streamer, VerificationModeFactory.times(1)).drawText(org.mockito.ArgumentMatchers.eq(s"${Messages("ers_alt_amends.csop.option_1")}.": String), org.mockito.ArgumentMatchers.eq(2.0F: Float))(ArgumentMatchers.any())
-      verify(streamer, VerificationModeFactory.times(0)).drawText(org.mockito.ArgumentMatchers.eq(s"${Messages("ers_alt_amends.csop.option_2")}.": String), org.mockito.ArgumentMatchers.eq(2.0F: Float))(ArgumentMatchers.any())
-      verify(streamer, VerificationModeFactory.times(1)).drawText(org.mockito.ArgumentMatchers.eq(s"${Messages("ers_alt_amends.csop.option_3")}.": String), org.mockito.ArgumentMatchers.eq(2.0F: Float))(ArgumentMatchers.any())
-      verify(streamer, VerificationModeFactory.times(0)).drawText(org.mockito.ArgumentMatchers.eq(s"${Messages("ers_alt_amends.csop.option_4")}.": String), org.mockito.ArgumentMatchers.eq(2.0F: Float))(ArgumentMatchers.any())
-      verify(streamer, VerificationModeFactory.times(1)).drawText(org.mockito.ArgumentMatchers.eq(s"${Messages("ers_alt_amends.csop.option_5")}.": String), org.mockito.ArgumentMatchers.eq(2.0F: Float))(ArgumentMatchers.any())
-
+      output.contains(Messages("ers_trustee_summary.altamends.section")) shouldBe true
+      output.contains(Messages("ers_alt_amends.csop.option_1")) shouldBe true
+      output.contains(Messages("ers_alt_amends.csop.option_2")) shouldBe false
+      output.contains(Messages("ers_alt_amends.csop.option_3")) shouldBe true
+      output.contains(Messages("ers_alt_amends.csop.option_4")) shouldBe false
+      output.contains(Messages("ers_alt_amends.csop.option_5")) shouldBe true
     }
   }
 }

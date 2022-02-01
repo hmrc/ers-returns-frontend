@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,6 @@
 package services
 
 import akka.stream.Materializer
-import org.mockito.ArgumentMatchers
-import org.mockito.ArgumentMatchers._
-import org.mockito.Mockito._
-import org.mockito.internal.verification.VerificationModeFactory
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatest.{BeforeAndAfterEach, OptionValues}
@@ -30,10 +26,9 @@ import play.api.i18n
 import play.api.i18n.{MessagesApi, MessagesImpl}
 import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents}
 import play.api.test.Helpers.stubBodyParser
-import services.pdf.{DecoratorController, ErsContentsStreamer, ErsReceiptPdfBuilderService}
+import services.pdf.ErsReceiptPdfBuilderService
 import utils.{ContentUtil, ERSFakeApplicationConfig, ErsTestHelper, Fixtures}
 
-import java.io.ByteArrayOutputStream
 import scala.concurrent.ExecutionContext
 
 class ErsReceiptPdfBuilderServiceSpec extends AnyWordSpecLike
@@ -59,62 +54,18 @@ class ErsReceiptPdfBuilderServiceSpec extends AnyWordSpecLike
 	val testErsReceiptPdfBuilderService = new ErsReceiptPdfBuilderService(mockCountryCodes)
   implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
 
-  def verifyBlankBlock(streamer: ErsContentsStreamer) {
-    verify(streamer, VerificationModeFactory.times(4))
-			.drawText(ArgumentMatchers.eq("": String), ArgumentMatchers.eq(36.0F: Float))(ArgumentMatchers.any())
-  }
-
-  def verifyBlankLine(streamer: ErsContentsStreamer) {
-    verify(streamer, VerificationModeFactory.times(4))
-			.drawText(ArgumentMatchers.eq("": String), ArgumentMatchers.eq(12.0F: Float))(ArgumentMatchers.any())
-  }
-
   "ErsReceiptPdfBuilderService" should {
-    "ask the streamer to add ers summary metadata to the output pdf" in {
+    "generate the ERS summary metdata" in {
+			val output = testErsReceiptPdfBuilderService.addMetaData(Fixtures.ersSummary, "12 August 2016, 4:28pm")
 
-      implicit val streamer: ErsContentsStreamer = mock[ErsContentsStreamer]
-      implicit val decorator: DecoratorController = mock[DecoratorController]
+      val expectedConfirmationMessage = s"Your ${ContentUtil.getSchemeAbbreviation("emi")} annual return has been submitted."
 
-      when(streamer.drawText(anyString(), anyInt())(any())).thenReturn(true)
-      when(streamer.saveErsSummary()).thenReturn(new ByteArrayOutputStream)
-      when(streamer.savePageContent()).thenReturn(true)
-      when(streamer.createNewPage()(any())).thenReturn(true)
-
-			testErsReceiptPdfBuilderService.addMetaData(Fixtures.ersSummary, "12 August 2016, 4:28pm")
-
-      val expectedConfirmationMessage = s"Your ${ContentUtil.getSchemeAbbreviation("emi")} " +
-        s"annual return has been submitted for tax year 2014 to 2015."
-      verify(streamer, VerificationModeFactory.times(1))
-				.drawText(ArgumentMatchers.eq(expectedConfirmationMessage: String), ArgumentMatchers.eq(16.0F: Float))(ArgumentMatchers.any())
-      verify(streamer, VerificationModeFactory.times(1))
-				.drawText(ArgumentMatchers.eq("Scheme name:": String), ArgumentMatchers.eq(16.0F: Float))(ArgumentMatchers.any())
-      verify(streamer, VerificationModeFactory.times(1))
-				.drawText(ArgumentMatchers.eq("My scheme": String), ArgumentMatchers.eq(12.0F: Float))(ArgumentMatchers.any())
-      verify(streamer, VerificationModeFactory.times(1))
-				.drawText(ArgumentMatchers.eq("Reference code:": String), ArgumentMatchers.eq(16.0F: Float))(ArgumentMatchers.any())
-      verify(streamer, VerificationModeFactory.times(1))
-				.drawText(ArgumentMatchers.eq("testbundle": String), ArgumentMatchers.eq(12.0F: Float))(ArgumentMatchers.any())
-      verify(streamer, VerificationModeFactory.times(1))
-				.drawText(ArgumentMatchers.eq("Date and time submitted:": String), ArgumentMatchers.eq(16.0F: Float))(ArgumentMatchers.any())
-      verify(streamer, VerificationModeFactory.times(1))
-				.drawText(ArgumentMatchers.eq("12 August 2016, 4:28PM": String), ArgumentMatchers.any())(ArgumentMatchers.any())
-      verify(streamer, VerificationModeFactory.times(4))
-				.drawText(ArgumentMatchers.eq("": String), ArgumentMatchers.eq(36.0F: Float))(ArgumentMatchers.any())
-
-      verifyBlankBlock(streamer)
-      verifyBlankLine(streamer)
-    }
-
-    "ask the streamer to save the metadata to the output pdf" in {
-      implicit val streamer: ErsContentsStreamer = mock[ErsContentsStreamer]
-      implicit val decorator: DecoratorController = mock[DecoratorController]
-
-      when(streamer.saveErsSummary()).thenReturn(new ByteArrayOutputStream)
-      when(streamer.savePageContent()).thenReturn(true)
-      when(streamer.createNewPage()).thenReturn(true)
-
-			testErsReceiptPdfBuilderService.addMetaData(Fixtures.ersSummary, "12 August 2016, 12:28pm")
-      verify(streamer, VerificationModeFactory.times(1)).savePageContent()
+      output.contains(expectedConfirmationMessage) shouldBe true
+      output.contains("Scheme name") shouldBe true
+      output.contains("My scheme") shouldBe true
+      output.contains("testbundle") shouldBe true
+      output.contains("Time and date of submission") shouldBe true
+      output.contains("4:28PM on Fri 12 August 2016") shouldBe true
     }
   }
 }

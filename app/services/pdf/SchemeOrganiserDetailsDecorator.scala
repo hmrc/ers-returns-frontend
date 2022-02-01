@@ -19,58 +19,14 @@ package services.pdf
 import models.SchemeOrganiserDetails
 import play.api.i18n.Messages
 import utils.CountryCodes
-import utils.DecoratorConstants._
 
 class SchemeOrganiserDetailsDecorator(title: String,
 																			schemeOrganiser: SchemeOrganiserDetails,
-																			countryCodes: CountryCodes,
-																			headingFontSize: Float = headingFontSizeDefault,
-																			answerFontSize: Float = answerFontSizeDefault,
-																			lineSpacer: Float = lineSpacerDefault,
-																			blockSpacer: Float = blockSpacerDefault
+																			countryCodes: CountryCodes
 																			) extends Decorator {
 
-  def decorate(streamer: ErsContentsStreamer)(implicit messages: Messages): Unit = {
-    streamer.drawText(title, headingFontSize)
-    streamer.drawText("", blockSpacer)
-    streamer.drawText(schemeOrganiser.companyName, answerFontSize)
-    streamer.drawText("", lineSpacer)
 
-    streamer.drawText(schemeOrganiser.addressLine1, answerFontSize)
-    streamer.drawText("", lineSpacer)
-
-    if (schemeOrganiser.addressLine2.isDefined) {
-      streamer.drawText(schemeOrganiser.addressLine2.getOrElse(""), answerFontSize)
-      streamer.drawText("", lineSpacer)
-    }
-    if (schemeOrganiser.addressLine3.isDefined) {
-      streamer.drawText(schemeOrganiser.addressLine3.getOrElse(""), answerFontSize)
-      streamer.drawText("", lineSpacer)
-    }
-    if (schemeOrganiser.addressLine4.isDefined) {
-      streamer.drawText(schemeOrganiser.addressLine4.getOrElse(""), answerFontSize)
-      streamer.drawText("", lineSpacer)
-    }
-    if (schemeOrganiser.country.isDefined) {
-      streamer.drawText(countryCodes.getCountry(schemeOrganiser.country.getOrElse("")).get, answerFontSize)
-      streamer.drawText("", lineSpacer)
-    }
-    if (schemeOrganiser.postcode.isDefined) {
-      streamer.drawText(schemeOrganiser.postcode.getOrElse(""), answerFontSize)
-      streamer.drawText("", lineSpacer)
-    }
-    if (schemeOrganiser.companyReg.isDefined) {
-      streamer.drawText(schemeOrganiser.companyReg.getOrElse(""), answerFontSize)
-      streamer.drawText("", lineSpacer)
-    }
-    if (schemeOrganiser.corporationRef.isDefined) {
-      streamer.drawText(schemeOrganiser.corporationRef.getOrElse(""), answerFontSize)
-      streamer.drawText("", lineSpacer)
-    }
-
-    streamer.drawText("", blockSpacer)
-    streamer.drawLine()
-    streamer.drawText("", blockSpacer)
-
+  def decorate(implicit messages: Messages): String = {
+    buildEntryMultiple(title, schemeOrganiser.toArray(countryCodes))
   }
 }

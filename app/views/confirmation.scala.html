@@ -36,18 +36,27 @@
 
 	@govukPanel(Panel(
 		title = Text(messages("ers_confirmation.submitted",ContentUtil.getSchemeName(schemeId))),
-		content = HtmlContent(s"""${messages("ers_confirmation.submission_ref")}<br>$bundle<br>${DateUtils.convertDate(dateSubmitted)}""")
+		content = HtmlContent(s"""${messages("ers_confirmation.submission_ref")}<br><b>$bundle</b><br>""")
 	))
+
+	<p class="govuk-body">
+		@Html(messages("ers-confirmation.submission_date")) @DateUtils.convertDate(dateSubmitted).
+	</p>
 
 	<p class="govuk-body">
 		@Html(messages("ers_confirmation.pdf_info"))
 	</p>
 
-	@govukButton(Button(
-		content = Text(messages("ers_confirmation.download_confirmation", 15)),
-		href = Some(routes.PdfGenerationController.buildPdfForBundle(bundle, dateSubmitted).url),
-		attributes = Map("id" -> "download-confirmation-button"),
-	))
+	<p class="govuk-body">
+		<svg id="download-icon" class="download-icon" width="25" height="25" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+			<rect x="1" y="3" width="12" height="17" fill="#0B0C0C"></rect>
+			<rect x="14" y="5" width="2" height="18" fill="#0B0C0C"></rect>
+			<rect x="4" y="21" width="12" height="2" fill="#0B0C0C"></rect>
+		</svg>
+		<a id="download-confirmation-button" class="govuk-link" href="@Some(routes.PdfGenerationController.buildPdfForBundle(bundle, dateSubmitted).url)" target="_blank">
+			@Html(messages("ers_confirmation.download_confirmation", 15))
+		</a>
+	</p>
 
 	<h2 class="govuk-heading-m">
 		@Html(messages("ers_confirmation.sub_heading"))
