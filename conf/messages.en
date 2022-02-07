@@ -47,6 +47,7 @@ ers.title.postfix = – Employment Related Securities – GOV.UK
 
 ers.reference.info = Scheme information you have selected
 
+ers_upload_form.processing_alert = We’re checking your file for errors. Do not refresh the page.
 
 #********************************************************************
 # Group scheme messages

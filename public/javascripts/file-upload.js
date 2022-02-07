@@ -133,4 +133,5 @@ fileUploadInput.addEventListener('input', () => {
 
 uploadFileButton.addEventListener('click', () => {
     document.getElementById('progress-spinner').classList.remove('govuk-!-display-none');
+    document.getElementById('warning-text').setAttribute("role", "alert")
 });
