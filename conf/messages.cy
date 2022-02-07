@@ -333,6 +333,7 @@ ers_confirmation.feedback = Beth oedd eich barn am y gwasanaeth hwn?
 ers_confirmation.feedback_time =(mae’n cymryd 30 eiliad)
 ers_signed_out.info = Er eich diogelwch, gwnaethom eich allgofnodi.
 ers_signed_out.link = Mewngofnodi
+ers_upload_form.processing_alert = Rydym yn gwirio eich ffeil am wallau. Peidiwch ag adnewyddu’r dudalen.
 file_upload.title = Uwchlwythwch eich ffeil ODS
 file_upload.contact_us = Cysylltwch â ni ar ein tudalen adborth
 file_upload.size_warning.link.before =Os yw’ch ffeil yn fwy na 10MB, ni allwch ddefnyddio’r gwasanaeth hwn. E-bostiwch

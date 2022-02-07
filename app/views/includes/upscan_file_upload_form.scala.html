@@ -19,7 +19,8 @@
 @this(
         govukFileUpload: GovukFileUpload,
         govukButton: GovukButton,
-        hmrcPageHeading: HmrcPageHeading
+        hmrcPageHeading: HmrcPageHeading,
+        govukWarningText: GovukWarningText
 )
 
 @(      fileType: String,
@@ -61,5 +62,15 @@
         attributes = Map("id" -> "submit")
     ))
 
-    <div class="govuk-!-display-none" id="progress-spinner"><img id="progress-spinner-img" src="@routes.Assets.versioned("images/spinner.gif")" alt="Loading ..."/></div>
+    <div class="govuk-!-display-none" id="progress-spinner">
+        <div class="govuk-!-margin-bottom-2 spinner">
+            <img id="progress-spinner-img" src='@routes.Assets.versioned("images/spinner.gif")'>
+        </div>
+
+        @govukWarningText(WarningText(
+            iconFallbackText = messages("ers.warning"),
+            content = Text(messages("ers_upload_form.processing_alert")),
+            attributes = Map("id" -> "warning-text")
+        ))
+    </div>
 </form>
