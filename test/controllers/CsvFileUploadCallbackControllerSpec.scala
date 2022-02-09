@@ -34,9 +34,11 @@ import play.api.test.Helpers._
 import play.api.{Environment, i18n}
 import uk.gov.hmrc.http.cache.client.CacheMap
 import utils.{ERSFakeApplicationConfig, ErsTestHelper, UpscanData}
-
 import java.net.URL
 import java.time.Instant
+
+import controllers.internal.CsvFileUploadCallbackController
+
 import scala.concurrent.{ExecutionContext, Future}
 
 class CsvFileUploadCallbackControllerSpec extends AnyWordSpecLike with Matchers with OptionValues
