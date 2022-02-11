@@ -97,7 +97,7 @@ class ErsReceiptPdfBuilderService @Inject()(val countryCodes: CountryCodes) exte
   }
 
   def pdfHeader(implicit messages: Messages): String = {
-    val crownIcon = Source.fromFile("conf/resources/crown.svg")
+    val crownIcon = Source.fromFile(getClass.getResource("/resources/crown.svg").toURI)
     val startHtml = s"""<div style="padding-bottom: 0.3em; margin-top: -1em;">"""
     val endHtml =
       s"""<p style="padding-left: 0.5em; display: inline-block; font-size: 16pt; vertical-align: middle;">${messages("ers.pdf.header")}</p>
