@@ -49,7 +49,7 @@ class UpscanServiceSpec extends AnyWordSpecLike with Matchers with OptionValues 
     "get form data from Upscan Connector with an initiate request" in {
       implicit val request: Request[AnyRef] = FakeRequest("GET", "http://localhost:9290/")
       val hc = HeaderCarrier(sessionId = Some(SessionId("sessionid")))
-      val callback = controllers.routes.FileUploadCallbackController.callback(hc.sessionId.get.value).absoluteURL()
+      val callback = controllers.internal.routes.FileUploadCallbackController.callback(hc.sessionId.get.value).absoluteURL()
       val success = controllers.routes.FileUploadController.success().absoluteURL()
       val failure = controllers.routes.FileUploadController.failure().absoluteURL()
       val expectedInitiateRequest = UpscanInitiateRequest(callback, success, failure, 1, 10485760)
@@ -72,7 +72,7 @@ class UpscanServiceSpec extends AnyWordSpecLike with Matchers with OptionValues 
       val uploadId = UploadId("TestUploadId")
       val scRef = "ScRef"
       val hc = HeaderCarrier(sessionId = Some(SessionId("sessionid")))
-      val callback = controllers.routes.CsvFileUploadCallbackController.callback(uploadId, scRef).absoluteURL()
+      val callback = controllers.internal.routes.CsvFileUploadCallbackController.callback(uploadId, scRef).absoluteURL()
       val success = controllers.routes.CsvFileUploadController.success(uploadId).absoluteURL()
       val failure = controllers.routes.CsvFileUploadController.failure().absoluteURL()
       val expectedInitiateRequest = UpscanInitiateRequest(callback, success, failure, 1, 104857600)

@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package controllers
+package controllers.internal
 
+import javax.inject.{Inject, Singleton}
 import models.upscan._
 import play.api.Logging
 import play.api.libs.json.JsValue
@@ -24,7 +25,6 @@ import services.SessionService
 import uk.gov.hmrc.http.{HeaderCarrier, SessionId}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
-import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton

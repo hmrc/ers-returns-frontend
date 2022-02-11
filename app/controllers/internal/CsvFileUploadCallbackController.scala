@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package controllers
+package controllers.internal
 
 import config.ApplicationConfig
 import connectors.ErsConnector
+import javax.inject.{Inject, Singleton}
 import models.upscan._
 import play.api.Logging
 import play.api.libs.json.JsValue
@@ -26,7 +27,6 @@ import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.ERSUtil
 
-import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
 

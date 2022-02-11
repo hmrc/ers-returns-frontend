@@ -33,8 +33,9 @@ class UpscanService @Inject()(
   val isSecure: Boolean = applicationConfig.upscanProtocol == "https"
   lazy val redirectUrlBase: String = applicationConfig.upscanRedirectBase
   private def urlToString(c: Call): String = redirectUrlBase + c.url
+
   def getUpscanFormDataCsv(uploadId: UploadId, scRef: String)(implicit hc: HeaderCarrier, request: Request[AnyRef]): Future[UpscanInitiateResponse] = {
-    val callback = controllers.routes.CsvFileUploadCallbackController.callback(uploadId, scRef)
+    val callback = controllers.internal.routes.CsvFileUploadCallbackController.callback(uploadId, scRef)
       .absoluteURL(isSecure)
 
     val success = controllers.routes.CsvFileUploadController.success(uploadId)
@@ -44,7 +45,7 @@ class UpscanService @Inject()(
   }
 
   def getUpscanFormDataOds()(implicit hc: HeaderCarrier, request: Request[_]): Future[UpscanInitiateResponse] = {
-    val callback = controllers.routes.FileUploadCallbackController.callback(hc.sessionId.get.value)
+    val callback = controllers.internal.routes.FileUploadCallbackController.callback(hc.sessionId.get.value)
       .absoluteURL(isSecure)
 
     val success = controllers.routes.FileUploadController.success()

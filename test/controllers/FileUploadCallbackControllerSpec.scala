@@ -34,6 +34,9 @@ import services.SessionService
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.{ERSFakeApplicationConfig, ErsTestHelper, UpscanData}
 
+import controllers.internal.FileUploadCallbackController
+
+
 import scala.concurrent.{ExecutionContext, Future}
 
 class FileUploadCallbackControllerSpec extends PlaySpec
@@ -66,7 +69,7 @@ class FileUploadCallbackControllerSpec extends PlaySpec
     "update callback" when {
       "Upload status is UpscanReadyCallback" in {
         val uploadStatusCaptor: ArgumentCaptor[UploadStatus] = ArgumentCaptor.forClass(classOf[UploadStatus])
-        val request = FakeRequest(controllers.routes.FileUploadCallbackController.callback(sessionId))
+        val request = FakeRequest(controllers.internal.routes.FileUploadCallbackController.callback(sessionId))
           .withBody(Json.toJson(readyCallback))
 
         when(mockSessionService.updateCallbackRecord(meq(sessionId), uploadStatusCaptor.capture())(any[Request[_]], any[HeaderCarrier]))
@@ -81,7 +84,7 @@ class FileUploadCallbackControllerSpec extends PlaySpec
 
       "Upload status is failed" in {
         val uploadStatusCaptor: ArgumentCaptor[UploadStatus] = ArgumentCaptor.forClass(classOf[UploadStatus])
-        val request = FakeRequest(controllers.routes.FileUploadCallbackController.callback(sessionId))
+        val request = FakeRequest(controllers.internal.routes.FileUploadCallbackController.callback(sessionId))
           .withBody(Json.toJson(failedCallback))
 
         when(mockSessionService.updateCallbackRecord(meq(sessionId), uploadStatusCaptor.capture())(any[Request[_]], any[HeaderCarrier]))
@@ -96,7 +99,7 @@ class FileUploadCallbackControllerSpec extends PlaySpec
 
     "return Internal Server Error" when {
       "an exception occurs updating callback record" in {
-        val request = FakeRequest(controllers.routes.FileUploadCallbackController.callback(sessionId))
+        val request = FakeRequest(controllers.internal.routes.FileUploadCallbackController.callback(sessionId))
           .withBody(Json.toJson(failedCallback))
 
         when(mockSessionService.updateCallbackRecord(meq(sessionId), any[UploadStatus])(any[Request[_]], any[HeaderCarrier]))
@@ -108,7 +111,7 @@ class FileUploadCallbackControllerSpec extends PlaySpec
 
     "throw an exception" when {
       "callback data cannot be parsed" in {
-        val request = FakeRequest(controllers.routes.FileUploadCallbackController.callback(sessionId))
+        val request = FakeRequest(controllers.internal.routes.FileUploadCallbackController.callback(sessionId))
           .withBody(Json.parse("""{"unexpectedKey": "unexpectedValue"}"""))
 
         status(TestFileUploadCallbackController.callback(sessionId)(request)) mustBe BAD_REQUEST
