@@ -116,7 +116,7 @@ class ErsReceiptPdfBuilderService @Inject()(val countryCodes: CountryCodes) exte
     val builder = new PdfRendererBuilder
     builder
       .useColorProfile(IOUtils.toByteArray(getClass.getResourceAsStream("/resources/sRGB-Color-Space-Profile.icm")))
-      .useFont(new File("conf/resources/ArialMT.ttf"), "arial")
+      .useFont(new File(getClass.getResource("/resources/ArialMT.ttf").toURI), "arial")
       .usePdfUaAccessbility(true)
       .usePdfAConformance(PdfRendererBuilder.PdfAConformance.PDFA_2_B)
       .withHtmlContent(html , "/")
