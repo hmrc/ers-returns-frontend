@@ -20,7 +20,7 @@ import org.joda.time.DateTime
 import play.api.i18n.Messages
 import play.api.libs.json.{Json, OFormat}
 import play.api.mvc.Request
-import utils.DateUtils
+import utils.{CountryCodes, DateUtils}
 
 case class RS_scheme(scheme: String)
 
@@ -69,7 +69,20 @@ case class SchemeOrganiserDetails(
                                       postcode: Option[String],
                                       companyReg: Option[String],
                                       corporationRef: Option[String]
-                                      )
+                                      ) {
+  def toArray(countryCodes: CountryCodes): Array[String] = {
+    Array(companyName,
+      addressLine1,
+      addressLine2.getOrElse(""),
+      addressLine3.getOrElse(""),
+      addressLine4.getOrElse(""),
+      countryCodes.getCountry(country.getOrElse("")).getOrElse(""),
+      postcode.getOrElse(""),
+      companyReg.getOrElse(""),
+      corporationRef.getOrElse("")
+    ).filter(_.nonEmpty)
+  }
+}
 object SchemeOrganiserDetails {
   implicit val format: OFormat[SchemeOrganiserDetails] = Json.format[SchemeOrganiserDetails]
 }

@@ -17,37 +17,24 @@
 package services.pdf
 
 import play.api.i18n.Messages
-import utils.DecoratorConstants._
 import utils.PageBuilder
 
 import scala.collection.mutable.ListBuffer
 
 class FileNamesDecorator(reportableEvents: String,
-												 filesUploaded: Option[ListBuffer[String]],
-												 headingFontSize: Float = headingFontSizeDefault,
-												 answerFontSize: Float = answerFontSizeDefault,
-												 lineSpacer: Float = lineSpacerDefault,
-												 blockSpacer: Float = blockSpacerDefault
+												 filesUploaded: Option[ListBuffer[String]]
 												) extends Decorator with PageBuilder {
 
-  def decorate(streamer: ErsContentsStreamer)(implicit messages: Messages): Unit = {
+  def decorate(implicit messages: Messages): String = {
 		if (reportableEvents != OPTION_NIL_RETURN) {
-		if (filesUploaded.get.length == 1) {
-			streamer.drawText(Messages("ers_summary_declaration.file_name"), headingFontSize)
+			val heading = if (filesUploaded.get.length == 1) {
+				messages("ers_summary_declaration.file_name")
+			} else {
+				messages("ers_summary_declaration.file_names")
+			}
+			buildEntryMultiple(heading, filesUploaded.get.toArray)
 		} else {
-			streamer.drawText(Messages("ers_summary_declaration.file_names"), headingFontSize)
-		}
-
-		streamer.drawText("", lineSpacer)
-
-		filesUploaded.get.foreach { filename =>
-			streamer.drawText(filename, answerFontSize)
-			streamer.drawText("", lineSpacer)
-		}
-
-		streamer.drawText("", blockSpacer)
-		streamer.drawLine()
-		streamer.drawText("", blockSpacer)
+			""
 		}
 	}
 }

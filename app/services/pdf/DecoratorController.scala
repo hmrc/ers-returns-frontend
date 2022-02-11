@@ -26,8 +26,8 @@ class DecoratorController(val decorators: Array[Decorator]) {
 
 	def addDecorator(decorator: Decorator): DecoratorController = new DecoratorController(decorators :+ decorator)
 
-	def decorate(streamer: ErsContentsStreamer)(implicit messages: Messages): Unit = {
-		decorators.foreach(decorator => decorator.decorate(streamer))
+	def decorate(implicit messages: Messages): String = {
+		decorators.map(decorator => decorator.decorate).mkString
 	}
 
 	def addFileNamesDecorator(filesUploaded: Option[ListBuffer[String]], ersSummary: ErsSummary): DecoratorController = {

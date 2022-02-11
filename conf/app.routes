@@ -2,19 +2,19 @@
 
 ->          /hmrc-frontend                                  hmrcfrontend.Routes
 
-GET         /assets/*file                               	controllers.Assets.versioned(path="/public", file)
+GET         /assets/*file                                    controllers.Assets.versioned(path="/public", file)
 
-GET         /upload-ods-file                                controllers.FileUploadController.uploadFilePage()
+GET         /upload-ods-file                                 controllers.FileUploadController.uploadFilePage()
 GET         /errors-have-been-found-ods                     controllers.FileUploadController.validationFailure()
-GET         /file-upload/failure                            controllers.FileUploadController.failure()
+GET         /file-upload/failure                             controllers.FileUploadController.failure()
 GET         /if-there-are-no-errors-ods                     controllers.FileUploadController.success()
-POST        /file-upload/callback                           controllers.FileUploadCallbackController.callback(sessionId: String)
+POST        /file-upload/callback                            controllers.FileUploadCallbackController.callback(sessionId: String)
 
 GET         /upload-csv                                     controllers.CsvFileUploadController.uploadFilePage()
 GET         /errors-have-been-found-csv                     controllers.CsvFileUploadController.validationFailure()
-GET         /csv-file-upload/failure                        controllers.CsvFileUploadController.failure()
+GET         /csv-file-upload/failure                         controllers.CsvFileUploadController.failure()
 GET         /if-there-are-no-errors-csv                     controllers.CsvFileUploadController.success(uploadId: UploadId)
-POST        /csv-file-upload/callback                       controllers.CsvFileUploadCallbackController.callback(uploadId: UploadId, scRef: String)
+POST        /csv-file-upload/callback                        controllers.CsvFileUploadCallbackController.callback(uploadId: UploadId, scRef: String)
 
 GET 		/                                               controllers.ReturnServiceController.hmacCheck()
 GET 		/start                                          controllers.ReturnServiceController.startPage()
@@ -23,14 +23,14 @@ GET 		/reportable-events			                    controllers.ReportableEventsContr
 POST 		/reportable-events			                    controllers.ReportableEventsController.reportableEventsSelected()
 
 GET         /unauthorised                                   controllers.ApplicationController.unauthorised()
-GET         /file-validation-results                        controllers.FileUploadController.validationResults()
-GET         /csv-file-validation-results                    controllers.CsvFileUploadController.validationResults()
+GET         /file-validation-results                         controllers.FileUploadController.validationResults()
+GET         /csv-file-validation-results                     controllers.CsvFileUploadController.validationResults()
 
 GET 		/not-authorised                                 controllers.ApplicationController.notAuthorised()
 GET 		/signed-out                 	                controllers.ApplicationController.timedOut()
 
-GET         /choose-csv-files                               controllers.CheckCsvFilesController.checkCsvFilesPage()
-POST        /choose-csv-files                               controllers.CheckCsvFilesController.checkCsvFilesPageSelected()
+GET         /choose-csv-files                                controllers.CheckCsvFilesController.checkCsvFilesPage()
+POST        /choose-csv-files                                controllers.CheckCsvFilesController.checkCsvFilesPageSelected()
 
 GET 		/group-scheme   			                    controllers.GroupSchemeController.groupSchemePage()
 POST 		/group-scheme   				                controllers.GroupSchemeController.groupSchemeSelected(scheme: String)
@@ -65,10 +65,10 @@ POST 		/company-details 			                    controllers.SchemeOrganiserContro
 
 GET 		/annual-return-summary		                    controllers.SummaryDeclarationController.summaryDeclarationPage()
 
-GET 		/confirmation                                   controllers.ConfirmationPageController.confirmationPage()
+GET 		/confirmation                                    controllers.ConfirmationPageController.confirmationPage()
 
 GET 		/confirmation/:bundle 		                    controllers.PdfGenerationController.buildPdfForBundle(bundle: String, dateSubmitted: String)
 
 GET         /retrieve-submission-data                       controllers.SubmissionDataController.retrieveSubmissionData()
 
-GET         /language/:lang                                 @controllers.LanguageSwitchController.switchToLanguage(lang: String)
+GET         /language/:lang                                 controllers.LanguageSwitchController.switchToLanguage(lang: String)

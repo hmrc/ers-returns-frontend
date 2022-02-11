@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,25 +17,22 @@
 package services.pdf
 
 import models.SchemeOrganiserDetails
-import org.mockito.ArgumentMatchers
-import org.mockito.Mockito._
-import org.mockito.internal.verification.VerificationModeFactory
 import org.scalatest.OptionValues
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.i18n.Messages
 import utils.CountryCodes
 
-class SchemeOrganiserDetailsDecoratorSpec extends AnyWordSpecLike with Matchers with OptionValues with MockitoSugar {
+class SchemeOrganiserDetailsDecoratorSpec extends AnyWordSpecLike with Matchers with OptionValues with MockitoSugar with GuiceOneAppPerSuite {
 
   implicit val messages: Messages = mock[Messages]
-	val mockCountryCodes: CountryCodes = mock[CountryCodes]
+  val mockCountryCodes: CountryCodes = app.injector.instanceOf[CountryCodes]
 
   "Company details title decorator" should {
 
     "add company details to the ers stream" in {
-      val streamer = mock[ErsContentsStreamer]
       val schemeOrganiser: SchemeOrganiserDetails = SchemeOrganiserDetails(
         "companyName",
         "addressLine1",
@@ -48,43 +45,20 @@ class SchemeOrganiserDetailsDecoratorSpec extends AnyWordSpecLike with Matchers 
         Some("corporationRef")
       )
 
-      val decorator = new SchemeOrganiserDetailsDecorator("title", schemeOrganiser, mockCountryCodes, 1.0F, 2.0F, 3.0F, 4.0F)
+      val decorator = new SchemeOrganiserDetailsDecorator("title", schemeOrganiser, mockCountryCodes)
 
-      decorator.decorate(streamer)
+      val output = decorator.decorate
 
-      verify(streamer, VerificationModeFactory.times(1)).drawText(org.mockito.ArgumentMatchers.eq("title": String), org.mockito.ArgumentMatchers.eq(1.0F: Float))(ArgumentMatchers.any())
-      verify(streamer, VerificationModeFactory.times(1)).drawText(org.mockito.ArgumentMatchers.eq("companyName": String), org.mockito.ArgumentMatchers.eq(2.0F: Float))(ArgumentMatchers.any())
-      verify(streamer, VerificationModeFactory.times(1)).drawText(org.mockito.ArgumentMatchers.eq("addressLine1": String), org.mockito.ArgumentMatchers.eq(2.0F: Float))(ArgumentMatchers.any())
-      verify(streamer, VerificationModeFactory.times(1)).drawText(org.mockito.ArgumentMatchers.eq("addressLine2": String), org.mockito.ArgumentMatchers.eq(2.0F: Float))(ArgumentMatchers.any())
-      verify(streamer, VerificationModeFactory.times(1)).drawText(org.mockito.ArgumentMatchers.eq("addressLine3": String), org.mockito.ArgumentMatchers.eq(2.0F: Float))(ArgumentMatchers.any())
-      verify(streamer, VerificationModeFactory.times(1)).drawText(org.mockito.ArgumentMatchers.eq("addressLine4": String), org.mockito.ArgumentMatchers.eq(2.0F: Float))(ArgumentMatchers.any())
-      verify(streamer, VerificationModeFactory.times(1)).drawText(org.mockito.ArgumentMatchers.eq("post code": String), org.mockito.ArgumentMatchers.eq(2.0F: Float))(ArgumentMatchers.any())
-      verify(streamer, VerificationModeFactory.times(1)).drawText(org.mockito.ArgumentMatchers.eq("company reg": String), org.mockito.ArgumentMatchers.eq(2.0F: Float))(ArgumentMatchers.any())
-      verify(streamer, VerificationModeFactory.times(1)).drawText(org.mockito.ArgumentMatchers.eq("corporationRef": String), org.mockito.ArgumentMatchers.eq(2.0F: Float))(ArgumentMatchers.any())
-
-      verify(streamer, VerificationModeFactory.times(8)).drawText(org.mockito.ArgumentMatchers.eq("": String), org.mockito.ArgumentMatchers.eq(3.0F: Float))(ArgumentMatchers.any())
+      output.contains("title") shouldBe true
+      output.contains("companyName") shouldBe true
+      output.contains("addressLine1") shouldBe true
+      output.contains("addressLine2") shouldBe true
+      output.contains("addressLine3") shouldBe true
+      output.contains("addressLine4") shouldBe true
+      output.contains("post code") shouldBe true
+      output.contains("company reg") shouldBe true
+      output.contains("corporationRef") shouldBe true
+      output.contains("<hr/>") shouldBe true
      }
-
-    "show block spacer at the end of the section" in {
-      val streamer = mock[ErsContentsStreamer]
-      val schemeOrganiser: SchemeOrganiserDetails = SchemeOrganiserDetails(
-        "companyName",
-        "addressLine1",
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
-        None
-      )
-
-      val decorator = new SchemeOrganiserDetailsDecorator("title", schemeOrganiser, mockCountryCodes, 1.0F, 2.0F, 3.0F, 4.0F)
-
-      decorator.decorate(streamer)
-
-      verify(streamer, VerificationModeFactory.times(3)).drawText(org.mockito.ArgumentMatchers.eq("": String), org.mockito.ArgumentMatchers.eq(4.0F: Float))(ArgumentMatchers.any())
-      verify(streamer, VerificationModeFactory.times(1)).drawLine()
-    }
   }
 }

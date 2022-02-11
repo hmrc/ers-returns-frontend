@@ -417,10 +417,12 @@ ers_confirmation.submitted = Your {0} annual return has been submitted
 ers_confirmation.date_and_time = Date and time submitted: {0}
 ers_confirmation.sub_heading = What next
 ers_confirmation.instructions = Allow 48 hours before you use HMRC Online services to check the status of your submission in Employment Related Securities (view schemes and arrangements).
-ers_confirmation.download_confirmation = Download confirmation (PDF, {0}KB)
-ers_confirmation.submission_ref = Reference code and time:
+ers_confirmation.download_confirmation = Download your submission receipt [PDF, {0}KB] (opens in a new tab)
+ers-confirmation.submission_date = Submitted at
+ers-confirmation.submission_on = on
+ers_confirmation.submission_ref = Your reference number:
 ers_confirmation.return = Manage your schemes and arrangements
-ers_confirmation.pdf_info = You can download confirmation as a PDF (it will open in a new window or tab).
+ers_confirmation.pdf_info = You can download confirmation as a PDF.
 ers_confirmation.csop.finished = http://www.gov.uk/done/company-share-option-plan-return
 ers_confirmation.emi.finished = http://www.gov.uk/done/enterprise-management-incentives-return
 ers_confirmation.saye.finished = http://www.gov.uk/done/save-as-you-earn-return
@@ -764,13 +766,17 @@ urbanner.message.reject = No thanks
 # pdf text
 #********************************************************************
 
-ers.pdf.confirmation.submitted=Your {0} annual return has been submitted for tax year {1}.
-ers.pdf.scheme=Scheme name:
-ers.pdf.refcode=Reference code:
-ers.pdf.date_and_time=Date and time submitted:
-ers.pdf.summary_information=Summary information
-ers.taxYear.text=to
-ers.pdf.header=HM Revenue & Customs
+ers.pdf.confirmation.submitted = Your {0} annual return has been submitted.
+ers.pdf.scheme = Scheme name
+ers.pdf.refcode = Reference code
+ers.pdf.unique_scheme_ref = Unique scheme reference
+ers.pdf.date_and_time = Time and date of submission
+ers.pdf.summary_information = Summary information
+ers.taxYear.text = to
+ers.pdf.header = HM Revenue &#38; Customs
+ers.pdf.title = Submission receipt
+ers.pdf.tax_year = Tax year
+ers.pdf.filename = Employment Related Securities - Submission Receipt
 
 #********************************************************************
 # Page not found

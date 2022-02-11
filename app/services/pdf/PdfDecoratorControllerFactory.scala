@@ -72,7 +72,7 @@ trait PdfDecoratorControllerFactory extends PageBuilder {
 				.addYesNoDecorator("ers_group_activity.other.question", ersSummary.groupService.get.groupScheme.get)
 				.addGroupSummaryDecorator("other", ersSummary)
 
-      case _ => throw new IllegalArgumentException
+      case _ => throw new IllegalArgumentException("Invalid scheme type provided")
     }
   }
 

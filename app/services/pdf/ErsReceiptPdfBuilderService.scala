@@ -20,84 +20,111 @@ import models.ErsSummary
 import play.api.Logging
 import play.api.i18n.Messages
 import utils.{ContentUtil, CountryCodes, DateUtils}
+import java.io.{ByteArrayOutputStream, File}
 
-import java.io.ByteArrayOutputStream
+import com.openhtmltopdf.pdfboxout.{PDFontSupplier, PdfRendererBuilder}
+import com.openhtmltopdf.svgsupport.BatikSVGDrawer
 import javax.inject.{Inject, Singleton}
+import org.apache.commons.io.IOUtils
+import org.apache.pdfbox.pdmodel.font.PDType1Font
+
 import scala.collection.mutable.ListBuffer
+import scala.io.Source
 
 @Singleton
 class ErsReceiptPdfBuilderService @Inject()(val countryCodes: CountryCodes) extends PdfDecoratorControllerFactory with Logging {
 
-  def createPdf(contentStreamer: ErsContentsStreamer, ersSummary: ErsSummary,
-                filesUploaded: Option[ListBuffer[String]], dateSubmitted: String)(implicit messages: Messages): ByteArrayOutputStream = {
-    implicit val streamer : ErsContentsStreamer = contentStreamer
+  def createPdf(ersSummary: ErsSummary,
+                filesUploaded: Option[ListBuffer[String]],
+                dateSubmitted: String)
+               (implicit messages: Messages): ByteArrayOutputStream = {
+
     implicit val decorator: DecoratorController = createPdfDecoratorControllerForScheme(ersSummary.metaData.schemeInfo.schemeType, ersSummary, filesUploaded)
 
-    addMetaData(ersSummary, dateSubmitted)
-    addSummary()
-    streamer.saveErsSummary()
+    val startBoilerplate =
+      s"""
+         |<!DOCTYPE html>
+         |<html lang="${messages.lang.code}">
+         |<head>
+         |<title>${messages("ers.pdf.filename")}</title>
+         |<meta name="Lang" content="${messages.lang.code}"/>
+         |<meta name="subject" content="${messages("ers.pdf.filename")}"/>
+         |<meta name="about" content="HMRC PDFA Document"/>
+         |<style>
+         |  body {margin: 0; font-family: 'arial'; font-size: 16px;}
+         |  header {margin: 0; font-family: 'arial'; font-size: 16px;}
+         |  h1 {font-size: 36pt; letter-spacing: 0.04em;}
+         |  h2 {font-size: 1em;}
+         |</style>
+         |</head>
+         |<body>
+         |${pdfHeader}
+         |""".stripMargin
+
+    val endBoilerplate = "</body></html>"
+    val html = startBoilerplate + addMetaData(ersSummary, dateSubmitted) + addSummary() + endBoilerplate
+    buildPdf(html)
   }
 
-  def addMetaData(ersSummary : ErsSummary, dateSubmitted: String)
-								 (implicit streamer: ErsContentsStreamer, decorator: DecoratorController, messages: Messages): Unit = {
+  def addMetaData(ersSummary: ErsSummary, dateSubmitted: String)(implicit messages: Messages): String = {
 
-    val headingFontSize = 16
-    val answerFontSize = 12
-    val lineSpacer = 12
-    val blockSpacer = 36
-
-    val ersMetaData = ersSummary.metaData
-
-    streamer.createNewPage
-
-    logger.info("Adding metadata")
-    streamer.drawText("", blockSpacer)
-
-    val confirmationMessage = Messages("ers.pdf.confirmation.submitted",
-      ContentUtil.getSchemeAbbreviation(ersMetaData.schemeInfo.schemeType), DateUtils.getFullTaxYear(ersSummary.metaData.schemeInfo.taxYear))
-
-    streamer.drawText(confirmationMessage, headingFontSize)
-    streamer.drawText("", lineSpacer)
-
-    streamer.drawText("", blockSpacer)
-    streamer.drawText(Messages("ers.pdf.scheme"), headingFontSize)
-    streamer.drawText("", lineSpacer)
-    streamer.drawText(ersMetaData.schemeInfo.schemeName, answerFontSize)
-
-    streamer.drawText("", blockSpacer)
-    streamer.drawText(Messages("ers.pdf.refcode"), headingFontSize)
-    streamer.drawText("", lineSpacer)
-    streamer.drawText(ersSummary.bundleRef, answerFontSize)
-
-    logger.info("Writing Date")
-    val convertedDate = DateUtils.convertDate(dateSubmitted)
-
-    streamer.drawText("", blockSpacer)
-    streamer.drawText(Messages("ers.pdf.date_and_time"), headingFontSize)
-    streamer.drawText("", lineSpacer)
-    streamer.drawText(convertedDate, answerFontSize)
-    logger.info("Date Wrote:" + convertedDate)
-
-    logger.info("Save page content")
-    streamer.savePageContent()
+    s"""<h1 style="padding-top: 3em;">${messages("ers.pdf.title")}</h1>
+       |
+       |<p style="padding-bottom: 1em; font-size: 14pt;">${messages("ers.pdf.confirmation.submitted", ContentUtil.getSchemeAbbreviation(ersSummary.metaData.schemeInfo.schemeType))}</p>
+       |<div style="display: block;">
+       |
+       |<h2 style="margin-bottom: 0em;">${messages("ers.pdf.scheme")}</h2>
+       |<p style="margin-top: 0.3em; padding-left: 0.05em">${ersSummary.metaData.schemeInfo.schemeName}</p>
+       |
+       |<h2 style="margin-bottom: 0em;">${messages("ers.pdf.unique_scheme_ref")}</h2>
+       |<p style="margin-top: 0.3em; padding-left: 0.05em">${ersSummary.bundleRef}</p>
+       |
+       |<h2 style="margin-bottom: 0em;">${messages("ers.pdf.tax_year")}</h2>
+       |<p style="margin-top: 0.3em; padding-left: 0.05em">${ersSummary.metaData.schemeInfo.taxYear}</p>
+       |
+       |<h2 style="margin-bottom: 0em;">${messages("ers.pdf.date_and_time")}</h2>
+       |<p style="margin-top: 0.3em; padding-left: 0.05em">${DateUtils.convertDate(dateSubmitted)}</p>
+       |
+       |</div>
+       |<footer>
+       |<div style="text-align: center; padding-top: 19em;">
+       |<hr/>
+       |<br/>
+       |<a style="color: black;">https://www.gov.uk/employment-related-securities-files</a>
+       |</div>
+       |</footer>
+       |""".stripMargin
   }
 
-  private def addSummary()(implicit streamer: ErsContentsStreamer, decorator: DecoratorController, messages: Messages): Unit = {
-    val blockSpacer = 20
-
-    logger.info("Adding ERS Summary")
-
-    streamer.createNewPage
-
-    streamer.drawText(Messages("ers.pdf.summary_information"), 18)
-    streamer.drawText("", blockSpacer)
-    streamer.drawLine()
-    streamer.drawText("", blockSpacer)
-
-    decorator.decorate(streamer)
-
-    logger.info("Adding ERS Summary complete")
-
-    streamer.savePageContent()
+  def pdfHeader(implicit messages: Messages): String = {
+    val crownIcon = Source.fromFile("conf/resources/crown.svg")
+    val startHtml = s"""<div style="padding-bottom: 0.3em; margin-top: -1em;">"""
+    val endHtml =
+      s"""<p style="padding-left: 0.5em; display: inline-block; font-size: 16pt; vertical-align: middle;">${messages("ers.pdf.header")}</p>
+            </div><hr/>"""
+    val headingHtml = startHtml ++ crownIcon.getLines().mkString ++ endHtml
+    crownIcon.close()
+    headingHtml
   }
+
+  def addSummary()(implicit decorator: DecoratorController, messages: Messages): String = {
+    decorator.decorate
+  }
+
+  def buildPdf(html: String)(implicit messages: Messages): ByteArrayOutputStream = {
+    val os = new ByteArrayOutputStream()
+    val builder = new PdfRendererBuilder
+    builder
+      .useColorProfile(IOUtils.toByteArray(getClass.getResourceAsStream("/resources/sRGB-Color-Space-Profile.icm")))
+      .useFont(new File("conf/resources/ArialMT.ttf"), "arial")
+      .usePdfUaAccessbility(true)
+      .usePdfAConformance(PdfRendererBuilder.PdfAConformance.PDFA_2_B)
+      .withHtmlContent(html , "/")
+      .useFastMode
+      .useSVGDrawer(new BatikSVGDrawer())
+      .toStream(os)
+      .run()
+    os
+  }
+
 }

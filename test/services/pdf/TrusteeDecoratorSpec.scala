@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,22 +16,15 @@
 
 package services.pdf
 
-import akka.stream.Materializer
 import models.{TrusteeDetails, TrusteeDetailsList}
-import org.mockito.ArgumentMatchers
-import org.mockito.Mockito._
-import org.mockito.internal.verification.VerificationModeFactory
 import org.scalatest.OptionValues
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.i18n.{Messages, MessagesApi}
-import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents}
-import play.api.test.Helpers.stubBodyParser
-import utils.{ERSFakeApplicationConfig, ErsTestHelper}
+import play.api.i18n.Messages
 
-import scala.concurrent.ExecutionContext
+import utils.{ERSFakeApplicationConfig, ErsTestHelper}
 
 class TrusteeDecoratorSpec extends AnyWordSpecLike
   with Matchers
@@ -41,50 +34,24 @@ class TrusteeDecoratorSpec extends AnyWordSpecLike
   with ErsTestHelper
   with GuiceOneAppPerSuite {
 
-  val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
-    messagesActionBuilder,
-    DefaultActionBuilder(stubBodyParser[AnyContent]()),
-    cc.parsers,
-    fakeApplication.injector.instanceOf[MessagesApi],
-    cc.langs,
-    cc.fileMimeTypes,
-    ExecutionContext.global
-  )
-
-  implicit lazy val mat: Materializer = app.materializer
-
-  lazy val trusteeList = new TrusteeDetailsList(List(new TrusteeDetails("name", "address", None, None, None, None, None)))
-  lazy val decorator = new TrusteesDecorator(Some(trusteeList), 1.0F, 2.0F, 3.0F, 4.0F)
-
   "Trusstees Decorator" should {
 
-    "draw block spacer at end of section" in {
-      val streamer = mock[ErsContentsStreamer]
-      decorator.decorate(streamer)
+    "add title and trustee's name to section" in {
+      val trusteeList = new TrusteeDetailsList(List(new TrusteeDetails("trustee name", "address", None, None, None, None, None)))
+      val decorator = new TrusteesDecorator(Some(trusteeList))
+      val output = decorator.decorate
 
-      verify(streamer, VerificationModeFactory.times(2)).drawText(org.mockito.ArgumentMatchers.eq("": String), org.mockito.ArgumentMatchers.eq(4.0F: Float))(ArgumentMatchers.any())
-      verify(streamer, VerificationModeFactory.times(1)).drawLine()
-
-    }
-
-    "add title to section" in {
-      val streamer = mock[ErsContentsStreamer]
-      decorator.decorate(streamer)
-      verify(streamer, VerificationModeFactory.times(1)).drawText(org.mockito.ArgumentMatchers.eq(Messages("ers_trustee_summary.title"): String), org.mockito.ArgumentMatchers.eq(1.0F: Float))(ArgumentMatchers.any())
-    }
-
-    "add trustee name to the section" in {
-      val streamer = mock[ErsContentsStreamer]
-      decorator.decorate(streamer)
-      verify(streamer, VerificationModeFactory.times(1)).drawText(org.mockito.ArgumentMatchers.eq("name": String), org.mockito.ArgumentMatchers.eq(2.0F: Float))(ArgumentMatchers.any())
+      output.contains(Messages("ers_trustee_summary.title")) shouldBe true
+      output.contains("trustee name") shouldBe true
+      output.contains("<hr/>") shouldBe true
     }
 
     "not add trustee names if list is empty" in {
-      val decorator = new TrusteesDecorator(None, 1.0F, 2.0F, 3.0F, 4.0F)
-      val streamer = mock[ErsContentsStreamer]
-      decorator.decorate(streamer)
+      val decorator = new TrusteesDecorator(None)
 
-      verify(streamer, VerificationModeFactory.times(0)).drawText(org.mockito.ArgumentMatchers.eq(Messages("ers_trustee_summary.title"): String), org.mockito.ArgumentMatchers.eq(2.0F: Float))(ArgumentMatchers.any())
+      val output = decorator.decorate
+
+      output shouldBe ""
     }
   }
 }

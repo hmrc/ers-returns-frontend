@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,6 @@
 
 package services.pdf
 
-import org.mockito.ArgumentMatchers
-import org.mockito.Mockito._
-import org.mockito.internal.verification.VerificationModeFactory
 import org.scalatest.OptionValues
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
@@ -26,47 +23,28 @@ import org.scalatestplus.mockito.MockitoSugar
 import play.api.i18n.Messages
 import utils.Fixtures
 
-
 class GroupSummaryDecoratorSpec extends AnyWordSpecLike with Matchers with OptionValues with MockitoSugar  {
 
   implicit val messages: Messages = mock[Messages]
 
-  val decorator = new GroupSummaryDecorator("title", Fixtures.ersSummary.companies, 1.0F, 2.0F, 3.0F, 4.0F)
-
   "GroupSummary Decorator" should {
 
     "not add anything if companies is not defined" in {
-      val decorator = new GroupSummaryDecorator("title", None, 1.0F, 2.0F, 3.0F, 4.0F)
-      val streamer = mock[ErsContentsStreamer]
-      decorator.decorate(streamer)
+      val decorator = new GroupSummaryDecorator("title", None)
 
-      verify(streamer, VerificationModeFactory.times(0)).drawText(
-        ArgumentMatchers.eq("title": String), ArgumentMatchers.eq(1.0F: Float))(ArgumentMatchers.any())
-      verify(streamer, VerificationModeFactory.times(0)).drawText(ArgumentMatchers.eq("": String), ArgumentMatchers.eq(3.0F: Float))(ArgumentMatchers.any())
+      val output = decorator.decorate
 
+      output shouldBe ""
     }
-    "add title to section" in {
-      val streamer = mock[ErsContentsStreamer]
-      decorator.decorate(streamer)
 
-      verify(streamer, VerificationModeFactory.times(1)).drawText(ArgumentMatchers.eq("title": String), ArgumentMatchers.eq(1.0F: Float))(ArgumentMatchers.any())
+    "add title and company name to section" in {
+      val decorator = new GroupSummaryDecorator("title", Fixtures.ersSummary.companies)
+
+      val output = decorator.decorate
+
+      output.contains("title") shouldBe true
+      output.contains("testCompany") shouldBe true
+      output.contains("<hr/>") shouldBe true
      }
-
-    "add company name to section" in {
-      val streamer = mock[ErsContentsStreamer]
-      decorator.decorate(streamer)
-
-      verify(streamer, VerificationModeFactory.times(1)).drawText(ArgumentMatchers.eq("testCompany": String), ArgumentMatchers.eq(2.0F: Float))(ArgumentMatchers.any())
-     }
-
-    "add block spacer at the end of the section" in {
-      val streamer = mock[ErsContentsStreamer]
-      decorator.decorate(streamer)
-
-      verify(streamer, VerificationModeFactory.times(3)).drawText(ArgumentMatchers.eq("": String), ArgumentMatchers.eq(3.0F: Float))(ArgumentMatchers.any())
-      verify(streamer, VerificationModeFactory.times(2)).drawText(ArgumentMatchers.eq("": String), ArgumentMatchers.eq(4.0F: Float))(ArgumentMatchers.any())
-      verify(streamer, VerificationModeFactory.times(1)).drawLine()
-
-    }
    }
 }

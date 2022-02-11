@@ -17,32 +17,17 @@
 package services.pdf
 
 import play.api.i18n.Messages
-import utils.DecoratorConstants._
 
-class AlterationsAmendsDecorator(map: Map[String, String],
-																 headingFontSize: Float = headingFontSizeDefault,
-																 answerFontSize: Float = answerFontSizeDefault,
-																 lineSpacer: Float = lineSpacerDefault,
-																 blockSize: Float = blockSpacerDefault
+class AlterationsAmendsDecorator(map: Map[String, String]
 																) extends Decorator {
 
-  private def addTextToPdf(streamer: ErsContentsStreamer, text: String, fontSize: Float, lineSpacer: Float)
-													(implicit messages: Messages): Unit = {
-    streamer.drawText(text, fontSize)
-    streamer.drawText("", lineSpacer)
-  }
-
-  def decorate(streamer: ErsContentsStreamer)(implicit messages: Messages): Unit = {
-    if(map.nonEmpty) {
-			addTextToPdf(streamer, map("title"), headingFontSize, lineSpacer)
-
-			Array("option1", "option2", "option3", "option4", "option5").foreach { key =>
-				if (map.contains(key)) addTextToPdf(streamer, s"${map(key)}.", answerFontSize, lineSpacer)
-			}
-
-			streamer.drawText("", blockSize)
-			streamer.drawLine()
-			streamer.drawText("", blockSize)
+	def decorate(implicit messages: Messages): String = {
+		if (map.nonEmpty) {
+			val keys = Array("option1", "option2", "option3", "option4", "option5")
+			val subValues = map.filter(entry => keys.contains(entry._1)).values.toArray
+			buildEntryMultiple(map("title"), subValues)
+		} else {
+			""
 		}
-  }
+	}
 }

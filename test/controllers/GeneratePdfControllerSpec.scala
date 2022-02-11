@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import play.api.i18n.{MessagesApi, MessagesImpl}
 import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import services.pdf.{ErsContentsStreamer, ErsReceiptPdfBuilderService}
+import services.pdf.ErsReceiptPdfBuilderService
 import uk.gov.hmrc.http.cache.client.CacheMap
 import utils.Fixtures._
 import utils.{ERSFakeApplicationConfig, ErsTestHelper, Fixtures}
@@ -136,7 +136,7 @@ class GeneratePdfControllerSpec extends AnyWordSpecLike
     val csvFilesCallBack: UpscanCsvFilesCallback = UpscanCsvFilesCallback(UploadId("uploadId"), "file0", UploadedSuccessfully("name", "downloadUrl"))
     val csvFilesCallbackList: UpscanCsvFilesCallbackList = UpscanCsvFilesCallbackList(List(csvFilesCallBack))
 
-    when(pdfBuilderMock.createPdf(any[ErsContentsStreamer], any[ErsSummary], any(), any())(any())).thenReturn(byteArrayOutputStream)
+    when(pdfBuilderMock.createPdf(any[ErsSummary], any(), any())(any())).thenReturn(byteArrayOutputStream)
     when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any())).thenReturn(Future.successful(ersRequestObject))
     when(mockErsUtil.fetch[ErsMetaData](refEq(ersMetaData), anyString())(any(), any())).thenReturn(Future.successful(rsc))
     when(cacheMap.getEntry[UpscanCsvFilesCallbackList](refEq(CHECK_CSV_FILES))(any())) thenReturn Some(csvFilesCallbackList)
