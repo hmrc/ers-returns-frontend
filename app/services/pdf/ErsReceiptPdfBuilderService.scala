@@ -97,7 +97,7 @@ class ErsReceiptPdfBuilderService @Inject()(val countryCodes: CountryCodes) exte
   }
 
   def pdfHeader(implicit messages: Messages): String = {
-    val crownIcon = Source.fromFile("conf/resources/crown.svg")
+    val crownIcon = Source.fromFile(getClass.getResource("/resources/crown.svg").toURI)
     val startHtml = s"""<div style="padding-bottom: 0.3em; margin-top: -1em;">"""
     val endHtml =
       s"""<p style="padding-left: 0.5em; display: inline-block; font-size: 16pt; vertical-align: middle;">${messages("ers.pdf.header")}</p>
@@ -116,7 +116,7 @@ class ErsReceiptPdfBuilderService @Inject()(val countryCodes: CountryCodes) exte
     val builder = new PdfRendererBuilder
     builder
       .useColorProfile(IOUtils.toByteArray(getClass.getResourceAsStream("/resources/sRGB-Color-Space-Profile.icm")))
-      .useFont(new File("conf/resources/ArialMT.ttf"), "arial")
+      .useFont(new File(getClass.getResource("/resources/ArialMT.ttf").toURI), "arial")
       .usePdfUaAccessbility(true)
       .usePdfAConformance(PdfRendererBuilder.PdfAConformance.PDFA_2_B)
       .withHtmlContent(html , "/")
