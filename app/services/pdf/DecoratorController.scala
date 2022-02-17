@@ -27,7 +27,9 @@ class DecoratorController(val decorators: Array[Decorator]) {
 	def addDecorator(decorator: Decorator): DecoratorController = new DecoratorController(decorators :+ decorator)
 
 	def decorate(implicit messages: Messages): String = {
-		decorators.map(decorator => decorator.decorate).mkString
+		val html = decorators.map(decorator => decorator.decorate).mkString
+		"(?:&)(?!&amp;)".r
+			.replaceAllIn(html, "&amp;")
 	}
 
 	def addFileNamesDecorator(filesUploaded: Option[ListBuffer[String]], ersSummary: ErsSummary): DecoratorController = {
