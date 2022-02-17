@@ -2,10 +2,6 @@
 
 ->          /hmrc-frontend                                  hmrcfrontend.Routes
 
-#To be removed
-POST        /file-upload/callback                           controllers.internal.FileUploadCallbackController.callback(sessionId: String)
-POST        /csv-file-upload/callback                       controllers.internal.CsvFileUploadCallbackController.callback(uploadId: UploadId, scRef: String)
-
 GET         /assets/*file                               	controllers.Assets.versioned(path="/public", file)
 
 GET         /upload-ods-file                                 controllers.FileUploadController.uploadFilePage()
