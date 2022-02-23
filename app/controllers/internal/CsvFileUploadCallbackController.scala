@@ -50,6 +50,7 @@ class CsvFileUploadCallbackController @Inject()(val mcc: MessagesControllerCompo
         valid = callback => {
           val uploadStatus: UploadStatus = callback match {
             case callback: UpscanReadyCallback =>
+              logger.info(s"Download URL ${callback.downloadUrl}")
               UploadedSuccessfully(callback.uploadDetails.fileName, callback.downloadUrl.toExternalForm)
             case UpscanFailedCallback(_, details) =>
               logger.warn(s"[CsvFileUploadCallbackController][callback] CSV Callback for upload id: ${uploadId.value} failed. Reason: ${details.failureReason}. Message: ${details.message}")
