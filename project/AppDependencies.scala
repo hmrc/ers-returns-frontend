@@ -10,14 +10,14 @@ object AppDependencies {
   val compile: Seq[ModuleID] = Seq(
     guice,
     ws,
-    "uk.gov.hmrc"                 %%    "play-partials"                 %   "8.2.0-play-28",
-    "uk.gov.hmrc"                 %%    "bootstrap-frontend-play-28"    %   "5.18.0",
-    "uk.gov.hmrc"                 %%    "domain"                        %   "6.2.0-play-28",
-    "uk.gov.hmrc"                 %%    "http-caching-client"           %   "9.5.0-play-28",
+    "uk.gov.hmrc"                 %%    "play-partials"                 %   "8.3.0-play-28",
+    "uk.gov.hmrc"                 %%    "bootstrap-frontend-play-28"    %   "5.20.0",
+    "uk.gov.hmrc"                 %%    "domain"                        %   "7.0.0-play-28",
+    "uk.gov.hmrc"                 %%    "http-caching-client"           %   "9.6.0-play-28",
     "uk.gov.hmrc"                 %%    "play-language"                 %   "5.1.0-play-28",
     "uk.gov.hmrc"                 %%    "time"                          %   "3.25.0",
-    "uk.gov.hmrc"                 %%    "play-frontend-hmrc"            %   "1.31.0-play-28",
-    "org.scala-lang.modules"      %%    "scala-parser-combinators"      %   "2.1.0",
+    "uk.gov.hmrc"                 %%    "play-frontend-hmrc"            %   "3.5.0-play-28",
+    "org.scala-lang.modules"      %%    "scala-parser-combinators"      %   "2.1.1",
     "org.apache.pdfbox"           %     "pdfbox"                        %   pdfboxVersion,
     "org.apache.pdfbox"           %     "xmpbox"                        %   pdfboxVersion,
     "org.apache.xmlgraphics"      %     "batik-transcoder"              %   "1.14",
@@ -36,7 +36,7 @@ object AppDependencies {
   object Test {
     def apply(): Seq[ModuleID] = new TestDependencies {
       override lazy val test = Seq(
-        "org.scalatest"           %%    "scalatest"             %     "3.2.10"        % scope,
+        "org.scalatest"           %%    "scalatest"             %     "3.2.11"        % scope,
         "org.scalatestplus"       %%    "mockito-3-4"           %     "3.2.10.0"      % scope,
         "org.scalatestplus.play"  %%    "scalatestplus-play"    %     "5.1.0"         % scope,
         "com.vladsch.flexmark"     %     "flexmark-all"           %     "0.62.2"        % scope,
