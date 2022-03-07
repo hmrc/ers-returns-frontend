@@ -16,6 +16,7 @@
 
 package controllers.auth
 
+import akka.http.scaladsl.model.Uri
 import config.ApplicationConfig
 import models.{ERSAuthData, ErsMetaData, RequestObject}
 import play.api.Logging
@@ -50,8 +51,8 @@ class AuthAction @Inject()(override val authConnector: DefaultAuthConnector,
   lazy val signInUrl: String = appConfig.ggSignInUrl
   lazy val origin: String = appConfig.appName
 
-  def loginParams: Map[String, Seq[String]] = Map(
-    "continue" -> Seq(appConfig.loginCallback),
+  def loginParams(params: Map[String, String]): Map[String, Seq[String]] = Map(
+    "continue" -> Seq(Uri(appConfig.loginCallback).withQuery(Uri.Query(params)).toString()),
     "origin" -> Seq(origin)
   )
 
@@ -85,7 +86,7 @@ class AuthAction @Inject()(override val authConnector: DefaultAuthConnector,
               block(RequestWithOptionalAuthContext(request, alteredAuthContext))
             }
         } recover {
-        case _: NoActiveSession => Redirect(signInUrl, loginParams)
+        case _: NoActiveSession => Redirect(signInUrl, loginParams(request.queryString.map {case(k,v) => k->v.headOption.getOrElse("")}))
         case er: AuthorisationException =>
           logger.error(s"[AuthFunctionality][handleException] Auth exception: $er")
           Redirect(controllers.routes.ApplicationController.unauthorised().url)
@@ -104,8 +105,8 @@ class AuthActionGovGateway @Inject()(override val authConnector: DefaultAuthConn
   lazy val signInUrl: String = appConfig.ggSignInUrl
   lazy val origin: String = appConfig.appName
 
-  def loginParams: Map[String, Seq[String]] = Map(
-    "continue" -> Seq(appConfig.loginCallback),
+  def loginParams(params: Map[String, String]): Map[String, Seq[String]] = Map(
+    "continue" -> Seq(Uri(appConfig.loginCallback).withQuery(Uri.Query(params)).toString()),
     "origin" -> Seq(origin)
   )
 
@@ -123,7 +124,7 @@ class AuthActionGovGateway @Inject()(override val authConnector: DefaultAuthConn
           val authContext = ERSAuthData(authorisedEnrolments.enrolments, affinityGroup)
           block(RequestWithOptionalAuthContext(request, authContext))
       } recover {
-      case _: NoActiveSession => Redirect(signInUrl, loginParams)
+      case _: NoActiveSession => Redirect(signInUrl, loginParams(request.queryString.map {case(k,v) => k->v.headOption.getOrElse("")}))
       case er: AuthorisationException =>
         logger.error(s"[AuthFunctionality][handleException] Auth exception: $er")
         Redirect(controllers.routes.ApplicationController.unauthorised().url)

@@ -26,7 +26,7 @@ import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatestplus.play.guice.GuiceFakeApplicationFactory
 import play.api.i18n.MessagesApi
 import play.api.mvc._
-import play.api.test.DefaultAwaitTimeout
+import play.api.test.{DefaultAwaitTimeout, FakeRequest}
 import play.api.test.Helpers.{redirectLocation, status, stubBodyParser}
 import uk.gov.hmrc.auth.core.AffinityGroup.Agent
 import uk.gov.hmrc.auth.core._
@@ -95,6 +95,18 @@ class AuthFunctionalitySpec extends AnyWordSpecLike
 
 				status(res) shouldBe 303
 				redirectLocation(res) shouldBe Some("http://localhost:9949/gg/sign-in?continue=http%3A%2F%2Flocalhost%3A9290%2Fsubmit-your-ers-annual-return&origin=ers-returns-frontend")
+			}
+
+			"it receives a NoActiveSessionException and preserves query parameters" in new Setup(invalidEnrolmentSet) {
+				setUnauthorisedMocks()
+
+				implicit val testFakeRequest: FakeRequest[AnyContent] = FakeRequest("GET", "/my-resources?a=1&b=2&c=3")
+				val requestWithAuth: RequestWithOptionalAuthContext[AnyContent] = RequestWithOptionalAuthContext(testFakeRequest, defaultErsAuthData)
+
+				val res: Future[Result] = controllerHarness.onPageLoad()(requestWithAuth)
+
+				status(res) shouldBe 303
+				redirectLocation(res) shouldBe Some("http://localhost:9949/gg/sign-in?continue=http%3A%2F%2Flocalhost%3A9290%2Fsubmit-your-ers-annual-return%3Fa%3D1%26b%3D2%26c%3D3&origin=ers-returns-frontend")
 			}
 
 			"it receives an AuthorisationException" in new Setup(invalidEnrolmentSet) {
