@@ -17,6 +17,8 @@
 package services
 
 import akka.stream.Materializer
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.when
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatest.{BeforeAndAfterEach, OptionValues}
@@ -27,7 +29,7 @@ import play.api.i18n.{MessagesApi, MessagesImpl}
 import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents}
 import play.api.test.Helpers.stubBodyParser
 import services.pdf.ErsReceiptPdfBuilderService
-import utils.{ContentUtil, ERSFakeApplicationConfig, ErsTestHelper, Fixtures}
+import utils.{ContentUtil, ERSFakeApplicationConfig, ERSUtil, ErsTestHelper, Fixtures}
 
 import scala.concurrent.ExecutionContext
 
@@ -51,11 +53,13 @@ class ErsReceiptPdfBuilderServiceSpec extends AnyWordSpecLike
   )
 
   implicit lazy val mat: Materializer = app.materializer
+  implicit val ersUtil: ERSUtil = mockErsUtil
 	val testErsReceiptPdfBuilderService = new ErsReceiptPdfBuilderService(mockCountryCodes)
   implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
 
   "ErsReceiptPdfBuilderService" should {
     "generate the ERS summary metdata" in {
+      when(mockErsUtil.replaceAmpersand(any[String])).thenAnswer(_.getArgument(0))
 			val output = testErsReceiptPdfBuilderService.addMetaData(Fixtures.ersSummary, "12 August 2016, 4:28pm")
 
       val expectedConfirmationMessage = s"Your ${ContentUtil.getSchemeAbbreviation("emi")} annual return has been submitted."

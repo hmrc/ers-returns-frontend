@@ -21,9 +21,10 @@ import controllers.routes
 import play.api.i18n.Lang
 import play.api.mvc.Call
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-
 import javax.inject.Singleton
+
 import scala.concurrent.duration._
+import scala.util.matching.Regex
 
 @Singleton
 class ApplicationConfig @Inject()(config: ServicesConfig) {
@@ -87,5 +88,7 @@ class ApplicationConfig @Inject()(config: ServicesConfig) {
 	lazy val sessionCacheDomain: String = config.getString(s"microservice.services.cachable.session-cache.domain")
 
 	lazy val useNewValidator: Boolean = config.getBoolean("feature-flag.new-validator")
+
+	lazy val ampersandRegex: Regex = "(?!&amp;)(?:&)".r
 
 }

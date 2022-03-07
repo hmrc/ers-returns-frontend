@@ -16,20 +16,21 @@
 
 package services.pdf
 
+import javax.inject.Inject
 import models.{ErsSummary, TrusteeDetailsList}
 import play.api.i18n.Messages
-import utils.CountryCodes
+import utils.{CountryCodes, ERSUtil}
 
 import scala.collection.mutable.ListBuffer
 
-class DecoratorController(val decorators: Array[Decorator]) {
+class DecoratorController@Inject()(val decorators: Array[Decorator])(implicit ERSUtil: ERSUtil) {
 
 	def addDecorator(decorator: Decorator): DecoratorController = new DecoratorController(decorators :+ decorator)
 
 	def decorate(implicit messages: Messages): String = {
-		val html = decorators.map(decorator => decorator.decorate).mkString
-		"(?:&)(?!&amp;)".r
-			.replaceAllIn(html, "&amp;")
+		ERSUtil.replaceAmpersand(
+			decorators.map(decorator => decorator.decorate).mkString
+		)
 	}
 
 	def addFileNamesDecorator(filesUploaded: Option[ListBuffer[String]], ersSummary: ErsSummary): DecoratorController = {

@@ -18,7 +18,7 @@ package services.pdf
 
 import models.{AlterationAmends, ErsSummary}
 import play.api.i18n.Messages
-import utils.{CountryCodes, PageBuilder}
+import utils.{CountryCodes, ERSUtil, PageBuilder}
 
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
@@ -26,6 +26,7 @@ import scala.collection.mutable.ListBuffer
 trait PdfDecoratorControllerFactory extends PageBuilder {
 
 	val countryCodes: CountryCodes
+	implicit val ERSUtil: ERSUtil
 
   def createPdfDecoratorControllerForScheme(scheme: String, ersSummary: ErsSummary, filesUploaded: Option[ListBuffer[String]])
 																					 (implicit messages: Messages): DecoratorController = {
