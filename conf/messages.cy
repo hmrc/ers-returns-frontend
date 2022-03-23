@@ -130,10 +130,10 @@ ers_scheme_organiser.addressLine1 = Llinell gyntaf y cyfeiriad
 ers_scheme_organiser.addressLine2 = Ail linell y cyfeiriad
 ers_scheme_organiser.addressLine3 = Trydedd linell y cyfeiriad
 ers_scheme_organiser.addressLine4 = Pedwaredd linell y cyfeiriad
-ers_scheme_organiser.addressLine1.label = Adeilad a stryd (llinell 1 o 2)
-ers_scheme_organiser.addressLine2.label = Adeilad a stryd (llinell 2 o 2)
-ers_scheme_organiser.addressLine3.label = Tref neu ddinas
-ers_scheme_organiser.addressLine4.label = Sir
+ers_scheme_organiser.addressLine1.label = Adeilad a stryd <span class="govuk-visually-hidden">llinell 1 o 2</span>
+ers_scheme_organiser.addressLine2.label = <span class="govuk-visually-hidden">Adeilad a stryd llinell 2 o 2</span>
+ers_scheme_organiser.addressLine3.label = Tref neu ddinas (dewisol)
+ers_scheme_organiser.addressLine4.label = Sir (dewisol)
 ers_scheme_organiser.postcode = Cod post (dewisol)
 ers_scheme_organiser.postcode.hint = Er enghraifft, AA1 1AA
 ers_scheme_organiser.country = Gwlad (dewisol)Cynllun Opsiwn Prynu Cyfranddaliadau Cwmni
@@ -225,6 +225,7 @@ ers_group_file_check.other.intro_para = Dewiswch y ffeil gwerthoedd wedi eu gwah
 ers_group_file_check.choose_file_button = Dewiswch eich ffeil
 ers_group_file_check.remove_file_link = Dileu ffeil
 ers_group_file_check.check_file_button = Uwchlwytho ffeil
+ers_group_file_check.upload_a_file = Uwchlwytho ffeil
 ers_group_file_check.file_name = Dim ffeil wedi’i dewis.
 ers_group_file_check.format_errors = Mae’r ffeil yn cynnwys gwallau fformatio.
 ers_group_file_check.file_type_error = Mae’r ffeil a atodwyd yn y fformat anghywir. Dim ond ffeiliau .csv y gallwn eu derbyn.

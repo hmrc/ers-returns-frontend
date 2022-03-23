@@ -35,6 +35,7 @@
 		hmrcPageHeading: HmrcPageHeading
 )
 
+
 @(requestObject: RequestObject, checkFileType: String, schemeOrganiser: Form[models.SchemeOrganiserDetails], reportableEvents: String = "2")(implicit request: Request[AnyRef], flash: Flash, messages: Messages, countryCodes: CountryCodes, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 
 @schemeId = @{requestObject.getSchemeId}
@@ -110,7 +111,7 @@
 			  ErrorMessage(content = Text(addressLine1.messages.head))
 			},
 			label = Label(
-				content = Text(messages("ers_scheme_organiser.addressLine1.label"))
+				content = HtmlContent(messages("ers_scheme_organiser.addressLine1.label"))
 			)
 		))
 
@@ -124,8 +125,7 @@
 				ErrorMessage(content = Text(addressLine2.messages.head))
 			},
 			label = Label(
-				content = Text(messages("ers_scheme_organiser.addressLine2.label")),
-				classes = "govuk-visually-hidden"
+				content = HtmlContent(messages("ers_scheme_organiser.addressLine2.label")),
 			)
 		))
 
@@ -139,8 +139,7 @@
 				ErrorMessage(content = Text(addressLine3.messages.head))
 			},
 			label = Label(
-				content = Text(messages("ers_scheme_organiser.addressLine3.label")),
-				classes = "govuk-visually-hidden"
+				content = Text(messages("ers_scheme_organiser.addressLine3.label"))
 			)
 		))
 
@@ -154,8 +153,7 @@
 				ErrorMessage(content = Text(addressLine4.messages.head))
 			},
 			label = Label(
-				content = Text(messages("ers_scheme_organiser.addressLine4.label")),
-				classes = "govuk-visually-hidden"
+				content = Text(messages("ers_scheme_organiser.addressLine4.label"))
 			)
 		))
 
