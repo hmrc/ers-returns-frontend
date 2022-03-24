@@ -530,4 +530,23 @@ class ErsUtilSpec extends AnyWordSpecLike
       assert(ersUtil.buildAddressSummary(3.14) == expected)
     }
   }
+
+  "calling replaceAmpersand" should {
+    val ersUtil: ERSUtil = new ERSUtil(mockSessionCache, mockShortLivedCache, mockAppConfig)
+
+    "do nothing to a string with no ampersands" in {
+      val input = "I am some test input"
+      ersUtil.replaceAmpersand(input) shouldBe "I am some test input"
+    }
+
+    "replace any ampersands with &amp;" in {
+      val input = "I am some test input & stuff &"
+      ersUtil.replaceAmpersand(input) shouldBe "I am some test input &amp; stuff &amp;"
+    }
+
+    "not affect any &amp; that already exists" in {
+      val input = "I am some test input & stuff &amp;"
+      ersUtil.replaceAmpersand(input) shouldBe "I am some test input &amp; stuff &amp;"
+    }
+  }
 }

@@ -19,20 +19,19 @@ package services.pdf
 import models.ErsSummary
 import play.api.Logging
 import play.api.i18n.Messages
-import utils.{ContentUtil, CountryCodes, DateUtils}
+import utils.{ContentUtil, CountryCodes, DateUtils, ERSUtil}
 import java.io.{ByteArrayOutputStream, File}
 
-import com.openhtmltopdf.pdfboxout.{PDFontSupplier, PdfRendererBuilder}
+import com.openhtmltopdf.pdfboxout.PdfRendererBuilder
 import com.openhtmltopdf.svgsupport.BatikSVGDrawer
 import javax.inject.{Inject, Singleton}
 import org.apache.commons.io.IOUtils
-import org.apache.pdfbox.pdmodel.font.PDType1Font
 
 import scala.collection.mutable.ListBuffer
 import scala.io.Source
 
 @Singleton
-class ErsReceiptPdfBuilderService @Inject()(val countryCodes: CountryCodes) extends PdfDecoratorControllerFactory with Logging {
+class ErsReceiptPdfBuilderService @Inject()(val countryCodes: CountryCodes)(implicit val ERSUtil: ERSUtil) extends PdfDecoratorControllerFactory with Logging {
 
   def createPdf(ersSummary: ErsSummary,
                 filesUploaded: Option[ListBuffer[String]],
@@ -67,8 +66,9 @@ class ErsReceiptPdfBuilderService @Inject()(val countryCodes: CountryCodes) exte
   }
 
   def addMetaData(ersSummary: ErsSummary, dateSubmitted: String)(implicit messages: Messages): String = {
-
-    s"""<h1 style="padding-top: 3em;">${messages("ers.pdf.title")}</h1>
+    ERSUtil.replaceAmpersand(
+      s"""
+       |<h1 style="padding-top: 3em;">${messages("ers.pdf.title")}</h1>
        |
        |<p style="padding-bottom: 1em; font-size: 14pt;">${messages("ers.pdf.confirmation.submitted", ContentUtil.getSchemeAbbreviation(ersSummary.metaData.schemeInfo.schemeType))}</p>
        |<div style="display: block;">
@@ -94,6 +94,7 @@ class ErsReceiptPdfBuilderService @Inject()(val countryCodes: CountryCodes) exte
        |</div>
        |</footer>
        |""".stripMargin
+    )
   }
 
   def pdfHeader(implicit messages: Messages): String = {

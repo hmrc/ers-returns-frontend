@@ -27,7 +27,7 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.i18n.{Messages, MessagesApi}
 import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents}
 import play.api.test.Helpers.stubBodyParser
-import utils.{CountryCodes, ERSFakeApplicationConfig, ErsTestHelper, Fixtures}
+import utils.{CountryCodes, ERSFakeApplicationConfig, ERSUtil, ErsTestHelper, Fixtures}
 
 import scala.concurrent.ExecutionContext
 
@@ -51,10 +51,11 @@ class PdfDecoratorControllerFactorySpec extends AnyWordSpecLike
 
   implicit lazy val mat: Materializer = app.materializer
 
-	class TestPdfDecoratorControllerFactory extends PdfDecoratorControllerFactory {
-		val mockCountryCodes: CountryCodes = mock[CountryCodes]
-		override val countryCodes: CountryCodes = mockCountryCodes
-	}
+  class TestPdfDecoratorControllerFactory extends PdfDecoratorControllerFactory {
+    val mockCountryCodes: CountryCodes = mock[CountryCodes]
+    override val countryCodes: CountryCodes = mockCountryCodes
+    override val ERSUtil: ERSUtil = new ERSUtil(mockSessionCache, mockShortLivedCache, mockAppConfig)(ec, mockCountryCodes)
+  }
 
   lazy val altAmends: AlterationAmends = AlterationAmends(altAmendsTerms = Some("1"),
     altAmendsEligibility = Some("1"),

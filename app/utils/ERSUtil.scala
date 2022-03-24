@@ -332,4 +332,9 @@ class ERSUtil @Inject()(val sessionService: SessionService,
 	def addCompanyMessage(messages: Messages, schemeOpt: Option[String]): String = {
 		messages.apply(s"ers_group_summary.${schemeOpt.getOrElse("").toLowerCase}.add_company")
 	}
+
+	def replaceAmpersand(input: String): String = {
+		appConfig.ampersandRegex
+			.replaceAllIn(input, "&amp;")
+	}
 }
