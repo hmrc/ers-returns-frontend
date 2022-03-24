@@ -46,7 +46,7 @@
                 title = Text(messages("validation.summary.heading")),
                 errorList = Seq(ErrorLink(
                     content = Text(flash.get("csv-file-not-selected-error").getOrElse("")),
-                    href = Some(s"#checkCsvFile")
+                    href = Some(s"#${csvFilesList.files.headOption.map(f => f.fileId).getOrElse("checkCsvFile")}")
                 ))
             ))
         }

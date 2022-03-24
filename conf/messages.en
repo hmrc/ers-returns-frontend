@@ -177,10 +177,10 @@ ers_scheme_organiser.addressLine1 = First line of address
 ers_scheme_organiser.addressLine2 = Second line of address
 ers_scheme_organiser.addressLine3 = Third line of address
 ers_scheme_organiser.addressLine4 = Fourth line of address
-ers_scheme_organiser.addressLine1.label = Building and street (line 1 of 2)
-ers_scheme_organiser.addressLine2.label = Building and street (line 2 of 2)
-ers_scheme_organiser.addressLine3.label = Town or city
-ers_scheme_organiser.addressLine4.label = County
+ers_scheme_organiser.addressLine1.label = Building and street <span class="govuk-visually-hidden">line 1 of 2</span>
+ers_scheme_organiser.addressLine2.label = <span class="govuk-visually-hidden">Building and street line 2 of 2</span>
+ers_scheme_organiser.addressLine3.label = Town or city (optional)
+ers_scheme_organiser.addressLine4.label = County (optional)
 
 ers_scheme_organiser.postcode = Postcode (optional)
 ers_scheme_organiser.postcode.hint = For example, AA1 1AA
@@ -291,6 +291,7 @@ ers_group_file_check.other.intro_para = Choose the comma separated values (.csv)
 ers_group_file_check.choose_file_button = Choose your file
 ers_group_file_check.remove_file_link = Remove file
 ers_group_file_check.check_file_button = Upload file
+ers_group_file_check.upload_a_file = Upload a file
 ers_group_file_check.file_name = No file selected.
 ers_group_file_check.format_errors = File contains formatting errors.
 ers_group_file_check.file_type_error = The attached file is in the wrong format. We’re only able to accept .csv files.

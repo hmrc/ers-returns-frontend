@@ -49,7 +49,7 @@
         label = Label(
             forAttr = Some("fileToUpload"),
             isPageHeading = false,
-            content = if (fileType == ".csv") Text(messages("csv_file_upload.upload_your_file", messages(expectedFileName))) else Text(""),
+            content = if (fileType == ".csv") Text(messages("csv_file_upload.upload_your_file", messages(expectedFileName))) else Text(messages("ers_group_file_check.upload_a_file")),
             attributes = if (fileType == ".csv") Map(
                 "data-file-name" -> s"${messages(ersUtil.getPageElement(schemeId, ersUtil.PAGE_CHECK_CSV_FILE,fileId+".file_name"))}")
                 else Map()
