@@ -49,7 +49,7 @@
 
     @govukBackLink(BackLink(
         content = Text(messages("ers.back")),
-        href = ersUtil.getPageBackLink(schemeId, ersUtil.PAGE_TRUSTEE_DETAILS, groupSchemeActivity),
+        href = request.headers.get("Referer").getOrElse(ersUtil.getPageBackLink(schemeId, ersUtil.PAGE_TRUSTEE_DETAILS, groupSchemeActivity))
     ))
 
     @if(trusteeDetails.hasErrors) {

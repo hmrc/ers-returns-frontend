@@ -16,7 +16,7 @@ object AppDependencies {
     "uk.gov.hmrc"                 %%    "http-caching-client"           %   "9.6.0-play-28",
     "uk.gov.hmrc"                 %%    "play-language"                 %   "5.2.0-play-28",
     "uk.gov.hmrc"                 %%    "time"                          %   "3.25.0",
-    "uk.gov.hmrc"                 %%    "play-frontend-hmrc"            %   "3.7.0-play-28",
+    "uk.gov.hmrc"                 %%    "play-frontend-hmrc"            %   "3.9.0-play-28",
     "org.scala-lang.modules"      %%    "scala-parser-combinators"      %   "2.1.1",
     "org.apache.pdfbox"           %     "pdfbox"                        %   pdfboxVersion,
     "org.apache.pdfbox"           %     "xmpbox"                        %   pdfboxVersion,
