@@ -18,6 +18,7 @@
 @import _root_.utils.ERSUtil
 @import config.ApplicationConfig
 @import views.html.templates.reference
+@import views.html.helper.CSPNonce
 
 @this(
         govuk_wrapper: govuk_wrapper,
@@ -100,13 +101,15 @@
     trusteeNameSummary ++ trusteeLocationSummary ++ addressSummary
 }
 
-@govuk_wrapper(title = messages("ers.trustees.page_title")) {
+@scripts = {
+    <script type="text/javascript" src='@controllers.routes.Assets.versioned("javascripts/iebacklink.js")' @{CSPNonce.attr}></script>
+}
+@govuk_wrapper(title = messages("ers.trustees.page_title"), Some(scripts)) {
 
     @reference(requestObject.getPageTitle)
 
     @govukBackLink(BackLink(
-        content = Text(messages("ers.back")),
-        href = routes.TrusteeController.trusteeDetailsPage.url,
+        attributes = Map("id" -> "back-link"), classes="js-enabled", content = HtmlContent(messages("ers.back"))
     ))
 
     @hmrcPageHeading(PageHeading(
