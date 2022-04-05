@@ -40,7 +40,7 @@
 @schemeId = @{requestObject.getSchemeId}
 
 @scripts = {
-    <script type="text/javascript" src='@controllers.routes.Assets.versioned("javascripts/trustee-uk-or-overseas-form-reveal.js")' @{CSPNonce.attr}></script>
+    <script type="text/javascript" src='@controllers.routes.Assets.versioned("javascripts/iebacklink.js")' @{CSPNonce.attr}></script>
 }
 
 @govuk_wrapper(title = messages("ers.add_trustee.page_title"), Some(scripts)) {
@@ -48,8 +48,7 @@
     @reference(requestObject.getPageTitle)
 
     @govukBackLink(BackLink(
-        content = Text(messages("ers.back")),
-        href = ersUtil.getPageBackLink(schemeId, ersUtil.PAGE_TRUSTEE_DETAILS, groupSchemeActivity),
+        attributes = Map("id" -> "back-link"), classes="js-enabled", content = HtmlContent(messages("ers.back"))
     ))
 
     @if(trusteeDetails.hasErrors) {

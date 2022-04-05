@@ -35,7 +35,7 @@
 
 @head = {
     <meta name="format-detection" content="telephone=no"/>
-    <link rel="stylesheet" href="assets/css/ers.css">
+    <link rel="stylesheet" href="assets/css/ers.css" type="text/css" @{CSPNonce.attr}>
     @if(!disableSignOut) {
         @hmrcTimeoutDialogHelper(
             signOutUrl = applicationConfig.signOut,
