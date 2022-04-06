@@ -38,8 +38,7 @@
 	@reference(requestObject.getPageTitle)
 
 	@govukBackLink(BackLink(
-		content = Text(messages("ers.back")),
-		href = routes.SchemeOrganiserController.schemeOrganiserPage.url,
+		attributes = Map("id" -> "back-link"), classes="js-enabled", content = HtmlContent(messages("ers.back"))
 	))
 
 	@if(groupSchemeForm.hasErrors) {

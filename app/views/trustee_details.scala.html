@@ -41,7 +41,6 @@
 
 @scripts = {
     <script type="text/javascript" src='@controllers.routes.Assets.versioned("javascripts/trustee-uk-or-overseas-form-reveal.js")' @{CSPNonce.attr}></script>
-    <script type="text/javascript" src='@controllers.routes.Assets.versioned("javascripts/iebacklink.js")' @{CSPNonce.attr}></script>
 }
 
 @govuk_wrapper(title = messages("ers.add_trustee.page_title"), Some(scripts)) {
