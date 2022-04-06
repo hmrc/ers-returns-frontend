@@ -34,12 +34,10 @@
 @schemeId = @{requestObject.getSchemeId}
 
 @govuk_wrapper(title = ersUtil.getPageElement(schemeId, "ers", "is_group_scheme.page_title") + " " + Messages("ers.title.postfix")) {
-
 	@reference(requestObject.getPageTitle)
 
 	@govukBackLink(BackLink(
-		content = Text(messages("ers.back")),
-		href = routes.SchemeOrganiserController.schemeOrganiserPage.url,
+		attributes = Map("id" -> "back-link"), classes="js-enabled", content = HtmlContent(messages("ers.back"))
 	))
 
 	@if(groupSchemeForm.hasErrors) {
