@@ -101,7 +101,10 @@
     trusteeNameSummary ++ trusteeLocationSummary ++ addressSummary
 }
 
-@govuk_wrapper(title = messages("ers.trustees.page_title"), None) {
+@scripts = {
+    <script type="text/javascript" src='@controllers.routes.Assets.versioned("javascripts/iebacklink.js")' @{CSPNonce.attr}></script>
+}
+@govuk_wrapper(title = messages("ers.trustees.page_title"), Some(scripts)) {
 
     @reference(requestObject.getPageTitle)
 

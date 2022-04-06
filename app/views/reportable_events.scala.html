@@ -37,7 +37,8 @@
 	@reference(requestObject.getPageTitle)
 
 	@govukBackLink(BackLink(
-		attributes = Map("id" -> "back-link"), classes="js-enabled", content = HtmlContent(messages("ers.back"))
+		content = Text(messages("ers.back")),
+		href = routes.ReturnServiceController.startPage.url,
 	))
 
 	@formWithCSRF(action = routes.ReportableEventsController.reportableEventsSelected) {
