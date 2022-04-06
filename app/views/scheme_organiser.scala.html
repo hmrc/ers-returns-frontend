@@ -49,7 +49,8 @@
 	@reference(requestObject.getPageTitle)
 
 	@govukBackLink(BackLink(
-		attributes = Map("id" -> "back-link"), classes="js-enabled", content = HtmlContent(messages("ers.back"))
+		content = Text(messages("ers.back")),
+		href = ersUtil.getPageBackLink(schemeId, ersUtil.PAGE_SCHEME_ORGANISER, checkFileType, reportableEvents),
 	))
 
 	@if(schemeOrganiser.hasErrors) {
