@@ -58,6 +58,11 @@
     </div>
 }
 
+@scripts = {
+    <script type="text/javascript" src='@controllers.routes.Assets.versioned("javascripts/iebacklink.js")' @{CSPNonce.attr}></script>
+    @scriptElement.getOrElse("")
+}
+
 @hmrcLayout(
     pageTitle = Some(title),
     additionalHeadBlock = Some(hmrcHead(Some(head), CSPNonce.get)),
@@ -66,6 +71,6 @@
     serviceUrl = Some(controllers.routes.ReturnServiceController.startPage.url),
     signOutUrl = if(!disableSignOut) Some(applicationConfig.signOut) else None,
     userResearchBannerUrl = if(isUserResearchBannerVisible) Some(applicationConfig.urBannerLink) else None,
-    additionalScriptsBlock = Some(hmrcScripts(nonce = CSPNonce.get, scriptsBlock = scriptElement)),
+    additionalScriptsBlock = Some(hmrcScripts(nonce = CSPNonce.get, scriptsBlock = Some(scripts))),
     nonce = CSPNonce.get
 )(content)
