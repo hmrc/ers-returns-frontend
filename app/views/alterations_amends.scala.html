@@ -38,8 +38,7 @@
     @reference(requestObject.getPageTitle)
 
     @govukBackLink(BackLink(
-        content = Text(messages("ers.back")),
-        href = ersUtil.getPageBackLink(schemeId, ersUtil.PAGE_ALT_AMENDS)
+        attributes = Map("id" -> "back-link"), classes="js-enabled", content = HtmlContent(messages("ers.back"))
     ))
 
     @if(flash.get("alt-amends-not-selected-error").isDefined) {

@@ -35,8 +35,7 @@
     @reference(requestObject.getPageTitle)
 
     @govukBackLink(BackLink(
-        content = Text(messages("ers.back")),
-        href = routes.CheckFileTypeController.checkFileTypePage.url,
+        attributes = Map("id" -> "back-link"), classes="js-enabled", content = HtmlContent(messages("ers.back"))
     ))
 
     @formWithCSRF(action = routes.CheckCsvFilesController.checkCsvFilesPageSelected()) {

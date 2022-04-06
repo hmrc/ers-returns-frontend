@@ -38,8 +38,7 @@
 	@reference(requestObject.getPageTitle)
 
 	@govukBackLink(BackLink(
-		content = Text(messages("ers.back")),
-		href = ersUtil.getPageBackLink(schemeId,ersUtil.PAGE_GROUP_SUMMARY,groupSchemeType),
+		attributes = Map("id" -> "back-link"), classes="js-enabled", content = HtmlContent(messages("ers.back"))
 	))
 
 	@hmrcPageHeading(PageHeading(

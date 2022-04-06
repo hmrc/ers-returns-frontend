@@ -37,8 +37,7 @@
     @reference(requestObject.getPageTitle)
 
     @govukBackLink(BackLink(
-        content = Text(messages("ers.back")),
-        href = ersUtil.getPageBackLink(schemeId, ersUtil.PAGE_ALT_ACTIVITY, groupSchemeActivity)
+        attributes = Map("id" -> "back-link"), classes="js-enabled", content = HtmlContent(messages("ers.back"))
     ))
 
     @if(altActivityForm.hasErrors) {
