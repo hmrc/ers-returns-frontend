@@ -27,8 +27,9 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils._
-
 import javax.inject.{Inject, Singleton}
+import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
+
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -40,7 +41,7 @@ class ReportableEventsController @Inject()(val mcc: MessagesControllerComponents
                                            globalErrorView: views.html.global_error,
                                            reportableEventsView: views.html.reportable_events,
                                            authAction: AuthAction
-																					) extends FrontendController(mcc) with I18nSupport with Logging {
+																					) extends FrontendController(mcc) with I18nSupport with WithUnsafeDefaultFormBinding with Logging {
 
   implicit val ec: ExecutionContext = mcc.executionContext
 
