@@ -45,8 +45,10 @@ class ApplicationController @Inject()(val mcc: MessagesControllerComponents,
       Unauthorized(unauthorisedView())
   }
 
+  //TODO investigate why both of these are needed
   def notAuthorised(): Action[AnyContent] = authAction.async {
       implicit request =>
+        //TODO the content of this page references ERS Checking - needs investigation
         Future.successful(Unauthorized(notAuthorisedView.render(request, request2Messages, appConfig)))
   }
 
