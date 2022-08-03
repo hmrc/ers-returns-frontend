@@ -471,8 +471,11 @@ ers_file_format_successful.return_to_start_page_link = Gwiriwch daenlen cynllun 
 ers_file_format_successful.banner = &#10004 Nid oes gwallau fformatio yn eich taenlen
 ers_service_unavailable.page_title = Gwiriwch eich ffeiliau ERS
 ers_service_unavailable.para1 = Nid yw’r Gwasanaeth Gwirio ar gael ar hyn o bryd, rhowch gynnig arall arni’n hwyrach
+
+# TODO Why is there a reference to ERS Checking?
 ers_not_authorised.page_title = Gwiriwch eich ffeiliau ERS
 ers_not_authorised.para1 = Nid ydych wedi’ch awdurdodi i gyrchu’r gwasanaeth gwirio ERS
+
 ers_html_error_report.styles = <div></div>
 ers_html_error_report.styles2 = <style>article table td, article table th ‘{’background:none; padding:10px 20px 10px 0’}’ article table td, article table th ‘{’border:none;’}’ article table td, article table th ‘{’border-bottom: 1px solid #BFC1C3;’}’ .column, .row ‘{’width:10%’}’ .report-title ‘{’text-align:right; margin-top:0; margin-bottom:0;’}’</style>
 ers_html_error_report.report_title =Adroddiad o wallau fformatio

@@ -155,5 +155,16 @@ class SubmissionDataControllerSpec extends AnyWordSpecLike
       status(result) shouldBe OK
       contentAsString(result).contains(testMessages("ers.global_errors.message")) shouldBe true
     }
+
+    "shows not found page if enableRetrieveSubmissionData is false" in {
+      lazy val submissionDataController: SubmissionDataController =
+        new SubmissionDataController(mockMCC, mockAuthConnector, mockErsConnector, mockErsUtil, mockAppConfig, globalErrorView, testAuthAction)
+      when(mockAppConfig.enableRetrieveSubmissionData).thenReturn(false)
+
+      val authRequest = buildRequestWithAuth(testFakeRequest)
+
+      val result = submissionDataController.getRetrieveSubmissionData()(authRequest, hc)
+      status(result) shouldBe NOT_FOUND
+    }
   }
 }

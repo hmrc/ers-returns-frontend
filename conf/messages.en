@@ -597,6 +597,7 @@ ers_file_format_successful.banner = &#10004 There are no formatting errors in yo
 ers_service_unavailable.page_title = Check your ERS files
 ers_service_unavailable.para1 = The Checking Service is currently unavailable, please try again later
 
+# TODO Why is there a reference to ERS Checking?
 ers_not_authorised.page_title = Check your ERS files
 ers_not_authorised.para1 = You’re not authorised to access ERS checking service
 

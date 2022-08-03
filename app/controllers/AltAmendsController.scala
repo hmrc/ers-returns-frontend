@@ -26,8 +26,9 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.ERSUtil
-
 import javax.inject.{Inject, Singleton}
+import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
+
 import scala.concurrent._
 
 @Singleton
@@ -39,7 +40,7 @@ class AltAmendsController @Inject()(val mcc: MessagesControllerComponents,
                                     alterationsAmendsView: views.html.alterations_amends,
                                     globalErrorView: views.html.global_error,
                                     authAction: AuthAction
-																	  ) extends FrontendController(mcc) with I18nSupport with Logging {
+																	  ) extends FrontendController(mcc) with I18nSupport with WithUnsafeDefaultFormBinding with Logging {
 
   implicit val ec: ExecutionContext = mcc.executionContext
 

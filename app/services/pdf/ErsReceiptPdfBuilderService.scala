@@ -24,6 +24,8 @@ import java.io.{ByteArrayOutputStream, File}
 
 import com.openhtmltopdf.pdfboxout.PdfRendererBuilder
 import com.openhtmltopdf.svgsupport.BatikSVGDrawer
+import com.openhtmltopdf.util.XRLog
+
 import javax.inject.{Inject, Singleton}
 import org.apache.commons.io.IOUtils
 
@@ -32,6 +34,8 @@ import scala.io.Source
 
 @Singleton
 class ErsReceiptPdfBuilderService @Inject()(val countryCodes: CountryCodes)(implicit val ERSUtil: ERSUtil) extends PdfDecoratorControllerFactory with Logging {
+
+  XRLog.listRegisteredLoggers.forEach((logger: String) => XRLog.setLevel(logger, java.util.logging.Level.WARNING))
 
   def createPdf(ersSummary: ErsSummary,
                 filesUploaded: Option[ListBuffer[String]],

@@ -38,7 +38,7 @@ import services.audit.AuditEvents
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 trait ErsTestHelper extends MockitoSugar with AuthHelper with ERSFakeApplicationConfig {
 

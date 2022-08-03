@@ -75,7 +75,7 @@ class ConfirmationPageControllerSpec extends AnyWordSpecLike
 		when(mockErsUtil.VALIDATED_SHEEETS).thenReturn("validated-sheets")
 	}
 
-  "calling ConformationPage" should {
+  "calling showConfirmationPage" should {
 
     val schemeInfo = SchemeInfo("XA1100000000000", DateTime.now, "1", "2016", "EMI", "EMI")
     val rsc = ErsMetaData(schemeInfo, "ipRef", Some("aoRef"), "empRef", Some("agentRef"), Some("sapNumber"))
@@ -125,7 +125,6 @@ class ConfirmationPageControllerSpec extends AnyWordSpecLike
       val controllerUnderTest: ConfirmationPageController = buildFakeConfirmationPageController()
       val result = controllerUnderTest.confirmationPage().apply(Fixtures.buildFakeRequestWithSessionId("GET"))
       status(result) shouldBe Status.OK
-
     }
 
     "show user research banner for confirmation page" in {
@@ -213,6 +212,16 @@ class ConfirmationPageControllerSpec extends AnyWordSpecLike
       val controllerUnderTest = buildFakeConfirmationPageController(presubmission = Future.failed(new RuntimeException))
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
       val result = controllerUnderTest.showConfirmationPage()(authRequest, hc)
+      contentAsString(result) shouldBe contentAsString(Future(controllerUnderTest.getGlobalErrorPage(testFakeRequest, testMessages)))
+      contentAsString(result) should include(testMessages("ers.global_errors.message"))
+    }
+
+    "show the page without re-submitting if a bundleRef already exists" in {
+      when(mockAppConfig.portalDomain).thenReturn("/")
+      val controllerUnderTest = buildFakeConfirmationPageController(presubmission = Future.failed(new RuntimeException))
+      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET").withSession(("bundleRef", "123456")))
+      val result = controllerUnderTest.showConfirmationPage()(authRequest, hc)
+
       contentAsString(result) shouldBe contentAsString(Future(controllerUnderTest.getGlobalErrorPage(testFakeRequest, testMessages)))
       contentAsString(result) should include(testMessages("ers.global_errors.message"))
     }
