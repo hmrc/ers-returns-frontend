@@ -343,6 +343,7 @@ ers_manual_is_the_company_in_uk.title = Where is the company registered?
 ers_manual_company_details_uk.title = Add company details
 ers_manual_company_details_overseas.title = What is the company name?
 ers_manual_address_uk.title = What is the company?s address?
+ers_manual_company_details.itciu.title = Where is the company registered?
 
 #********************************************************************
 # Address messages
