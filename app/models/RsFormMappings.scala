@@ -271,6 +271,7 @@ object companyDetailsFields {
   val addressLine2 = "addressLine2"
   val addressLine3 = "addressLine3"
   val addressLine4 = "addressLine4"
+  val addressLine5 = "addressLine5"
   val country = "country"
   val postcode = "postcode"
   val companyReg = "companyReg"
