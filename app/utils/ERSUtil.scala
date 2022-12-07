@@ -67,6 +67,7 @@ class ERSUtil @Inject()(val sessionService: SessionService,
 
 	val SCHEME_ORGANISER_CACHE: String = "scheme-organiser"
 	val TRUSTEES_CACHE: String = "trustees"
+	val TRUSTEE_NAME_CACHE: String = "trustee-name"
 	val ERROR_REPORT_DATETIME: String = "error-report-datetime"
 
 	// Params
@@ -90,7 +91,7 @@ class ERSUtil @Inject()(val sessionService: SessionService,
 
 	val VALIDATED_SHEEETS: String = "validated-sheets"
 
-	def cache[T](key:String, body:T)(implicit hc:HeaderCarrier, ec:ExecutionContext, formats: json.Format[T], request: Request[AnyRef]): Future[CacheMap] =
+	def cache[T](key: String, body: T)(implicit hc: HeaderCarrier, ec: ExecutionContext, formats: json.Format[T], request: Request[AnyRef]): Future[CacheMap] =
 		shortLivedCache.cache[T](getCacheId, key, body)
 
 	def cache[T](key: String, body: T, cacheId: String)(implicit hc: HeaderCarrier, formats: json.Format[T], request: Request[AnyRef]): Future[CacheMap] = {

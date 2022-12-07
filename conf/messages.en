@@ -690,6 +690,22 @@ ers_alt_amends.continue = Accept and continue
 # trustee messages
 #********************************************************************
 
+ers_trustee_name.title = What is the trustee’s name?
+
+ers_trustee_based.title = Where is the trustee based?
+
+ers_trustee_address.title = What is the trustee's address?
+ers_trustee_address.buildingOrStreet = Building and street
+ers_trustee_address.townOrCity = Town or City
+ers_trustee_address.country = Country
+ers_trustee_address.postcode = Postcode
+
+ers_trustee_address.line1 = Address line 1
+ers_trustee_address.line2 = Address line 2
+ers_trustee_address.line3 = Address line 3
+ers_trustee_address.line4 = Address line 4
+ers_trustee_address.line5 = Address line 5
+
 ers_trustee_details.title = Add trustee details
 ers_trustee_details.question = Where is the trustee based?
 ers_trustee_details.uk = UK
@@ -723,6 +739,8 @@ ers_trustee_details.err.invalidChars.address_line2 = Check the second line of th
 ers_trustee_details.err.address_line3 = Check the third line of the address (it must be less than 28 characters)
 ers_trustee_details.err.invalidChars.address_line3 = Check the third line of the address (it contains invalid characters)
 ers_trustee_details.err.address_line4 = Check the fourth line of the address (it must be less than 19 characters)
+ers_trustee_details.err.invalidChars.address_line4 = Check the fourth line of the address (it contains invalid characters)
+ers_trustee_details.err.address_line5 = Check the fifth line of the address (it must be less than 19 characters)
 ers_trustee_details.err.invalidChars.address_line4 = Check the fourth line of the address (it contains invalid characters)
 ers_trustee_details.err.postcode = Check the postcode (it must be valid and less than 9 characters)
 

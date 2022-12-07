@@ -207,7 +207,7 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
 
             case (ersUtil.SCHEME_EMI | ersUtil.SCHEME_OTHER, _) => Redirect(routes.SummaryDeclarationController.summaryDeclarationPage())
 
-            case (ersUtil.SCHEME_SIP, _) => Redirect(routes.TrusteeController.trusteeDetailsPage())
+            case (ersUtil.SCHEME_SIP, _) => Redirect(controllers.trustees.routes.TrusteeNameController.questionPage())
 
             case (_,_) => getGlobalErrorPage
           }
