@@ -82,6 +82,7 @@ case class SchemeOrganiserDetails(
       companyReg.getOrElse(""),
       corporationRef.getOrElse("")
     ).filter(_.nonEmpty)
+  }
 }
 object SchemeOrganiserDetails {
   implicit val format: OFormat[SchemeOrganiserDetails] = Json.format[SchemeOrganiserDetails]
@@ -99,6 +100,44 @@ case class TrusteeDetails(
 object TrusteeDetails {
   implicit val format: OFormat[TrusteeDetails] = Json.format[TrusteeDetails]
 }
+
+case class TrusteeBasedInUk(basedInUk: Boolean)
+
+object TrusteeBasedInUk {
+  implicit val format: OFormat[TrusteeBasedInUk] = Json.format[TrusteeBasedInUk]
+}
+
+case class TrusteeName(name: String)
+
+object TrusteeName {
+  implicit val format: OFormat[TrusteeName] = Json.format[TrusteeName]
+}
+
+case class TrusteeAddressUk(
+                           buildingAndStreetLine1: String,
+                           buildingAndStreetLine2: Option[String],
+                           townOrCity: Option[String],
+                           country: Option[String],
+                           postcode: Option[String]
+                           )
+
+object TrusteeAddressUk {
+  implicit val format: OFormat[TrusteeAddressUk] = Json.format[TrusteeAddressUk]
+}
+
+case class TrusteeAddressOverseas(
+                                   addressLine1: String,
+                                   addressLine2: Option[String],
+                                   addressLine3: Option[String],
+                                   addressLine4: Option[String],
+                                   addressLine5: Option[String],
+                                   country: Option[String],
+                                 )
+
+object TrusteeAddressOverseas {
+  implicit val format: OFormat[TrusteeAddressOverseas] = Json.format[TrusteeAddressOverseas]
+}
+
 
 case class TrusteeDetailsList(trustees: List[TrusteeDetails])
 object TrusteeDetailsList {

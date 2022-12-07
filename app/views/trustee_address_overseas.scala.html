@@ -1,0 +1,133 @@
+@*
+ * Copyright 2022 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import _root_.utils.ERSUtil
+@import config.ApplicationConfig
+@import _root_.utils.CountryCodes
+@import views.html.includes.countries
+@import views.html.templates.reference
+@import uk.gov.hmrc.govukfrontend.views.html.components.implicits._
+@import views.html.helper.CSPNonce
+
+
+@this(
+    govuk_wrapper: govuk_wrapper,
+    countriesSelect: countries,
+    formWithCSRF: FormWithCSRF,
+    govukBackLink: GovukBackLink,
+    govukErrorSummary: GovukErrorSummary,
+    govukInput: GovukInput,
+    govukButton: GovukButton,
+    govukRadios: GovukRadios,
+    hmrcPageHeading: HmrcPageHeading
+)
+
+@(requestObject: RequestObject, groupSchemeActivity: String, index: Int, trusteeDetails: Form[models.TrusteeAddressOverseas])(implicit request: Request[AnyRef], messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
+
+@schemeId = @{requestObject.getSchemeId}
+
+@govuk_wrapper(title = messages("ers_trustee_name.title")) {
+
+@reference(requestObject.getPageTitle)
+
+@govukBackLink(BackLink(
+    attributes = Map("id" -> "back-link"), classes="js-enabled", content = HtmlContent(messages("ers.back"))
+))
+
+@if(trusteeDetails.hasErrors) {
+    @govukErrorSummary(ErrorSummary(
+        title = Text(messages("validation.summary.heading")),
+        errorList = trusteeDetails.errors.asTextErrorLinks
+    ))
+}
+
+@hmrcPageHeading(PageHeading(
+    text = messages("ers_trustee_name.title")
+))
+
+@formWithCSRF(action = routes.TrusteeController.trusteeDetailsSubmit(index)) { @*//TODO Update this with new controller method *@
+
+@govukInput(Input(
+    classes = "govuk-!-width-one-half",
+    id = "addressLine1",
+    name = "addressLine1",
+    autocomplete = Some("address-line1"),
+    value = trusteeDetails(trusteeDetailsFields.addressLine1).value,
+    errorMessage = trusteeDetails.error(trusteeDetailsFields.addressLine1).map { addressLine1 =>
+        ErrorMessage(content = Text(addressLine1.messages.head))
+    },
+    label = Label(
+        content = Text(messages("ers_trustee_address.line1")),
+        classes = "govuk-visually-hidden"
+    )
+))
+
+@govukInput(Input(
+    classes = "govuk-!-width-one-half",
+    id = "addressLine2",
+    name = "addressLine2",
+    autocomplete = Some("address-line2"),
+    value = trusteeDetails(trusteeDetailsFields.addressLine2).value,
+    label = Label(
+        content = Text(messages("ers_trustee_address.line2")),
+        classes = "govuk-visually-hidden"
+    )
+))
+
+@govukInput(Input(
+    classes = "govuk-!-width-one-half",
+    id = "addressLine3",
+    name = "addressLine3",
+    autocomplete = Some("address-line3"),
+    value = trusteeDetails(trusteeDetailsFields.addressLine3).value,
+    label = Label(
+        content = Text(messages("ers_trustee_address.line3")),
+        classes = "govuk-visually-hidden"
+    )
+))
+
+@govukInput(Input(
+    classes = "govuk-!-width-one-half",
+    id = "addressLine4",
+    name = "addressLine4",
+    autocomplete = Some("address-line4"),
+    value = trusteeDetails(trusteeDetailsFields.addressLine4).value,
+    label = Label(
+        content = Text(messages("ers_trustee_address.line4")),
+        classes = "govuk-visually-hidden"
+    )
+))
+
+@govukInput(Input(
+    classes = "govuk-input--width-5",
+    id = "addressLine5",
+    name = "addressLine5",
+    autocomplete = Some("address-line5"),
+    value = trusteeDetails(trusteeDetailsFields.postcode).value,
+    hint = Some(Hint(content=Text(messages("ers_trustee_details.postcode.hint")))),
+    label = Label(
+        content = Text(messages("ers_trustee_address.line5")),
+        classes = "govuk-visually-hidden"
+    )
+))
+
+@govukButton(Button(
+    inputType = Some("submit"),
+    content = Text(messages("ers.continue")),
+    attributes = Map("id" -> "continue"),
+))
+}
+}

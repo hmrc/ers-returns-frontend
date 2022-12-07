@@ -50,6 +50,14 @@ POST        /add-trustee      					            controllers.TrusteeController.tru
 POST        /add-trustee/:index/delete                      controllers.TrusteeController.deleteTrustee(index: Int)
 GET         /add-trustee/:index/edit     	                controllers.TrusteeController.editTrustee(index: Int)
 
+GET         /trustee-name                                   controllers.trustees.TrusteeNameController.questionPage(index: Int = 10000)
+POST        /trustee-name                                   controllers.trustees.TrusteeNameController.questionSubmit(index: Int)
+
+GET         /trustee-based                                  controllers.trustees.TrusteeBasedController.questionPage(index: Int = 10000)
+POST        /trustee-based                                  controllers.trustees.TrusteeBasedController.questionSubmit(index: Int)
+
+#TODO Add other routes for address questions as above
+
 GET         /trustees       				                controllers.TrusteeController.trusteeSummaryPage()
 POST        /trustees       				                controllers.TrusteeController.trusteeSummaryContinue()
 

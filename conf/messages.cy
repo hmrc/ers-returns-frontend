@@ -547,6 +547,26 @@ ers_alt_amends.sip.alert = Mae ysgrifennydd y cwmni, neu’r person sy’n gweit
 ers_alt_amends.sip.err.message = Dewiswch yr holl addasiadau sy’n berthnasol
 ers_alt_amends.continue = Derbyn a mynd yn eich blaen
 
+#********************************************************************
+# trustee messages
+#********************************************************************
+
+ers_trustee_name.title = Beth yw enw’r ymddiriedolwr?
+
+ers_trustee_based.title = Ymhle y mae’r ymddiriedolwr wedi’i leoli?
+
+ers_trustee_address.title = Beth yw cyfeiriad yr ymddiriedolwr?
+ers_trustee_address.line1 = Adeilad a stryd
+ers_trustee_address.line3 = Tref neu Ddinas
+ers_trustee_address.line4 = Gwlad
+ers_trustee_address.postcode = Cod post
+
+ers_trustee_address.line1 = Cyfeiriad – llinell 1
+ers_trustee_address.line2 = Cyfeiriad – llinell 2
+ers_trustee_address.line3 = Cyfeiriad – llinell 3
+ers_trustee_address.line4 = Cyfeiriad – llinell 4
+ers_trustee_address.line5 = Cyfeiriad – llinell 5
+
 ers_trustee_details.title = Ychwanegu manylion yr ymddiriedolwr
 ers_trustee_details.question = Ymhle y mae’r ymddiriedolwr wedi’i leoli?
 ers_trustee_details.uk = Y DU
@@ -579,6 +599,8 @@ ers_trustee_details.err.address_line3 = Gwiriwch drydedd linell y cyfeiriad (mae
 ers_trustee_details.err.invalidChars.address_line3 = Gwiriwch drydedd linell y cyfeiriad (mae’n cynnwys cymeriadau annilys)
 ers_trustee_details.err.address_line4 = Gwiriwch bedwaredd linell y cyfeiriad (mae’n rhaid iddi gynnwys llai na 19 o gymeriadau)
 ers_trustee_details.err.invalidChars.address_line4 = Gwiriwch bedwaredd linell y cyfeiriad (mae’n cynnwys cymeriadau annilys)
+ers_trustee_details.err.address_line5 = Gwiriwch bedwaredd linell y cyfeiriad (mae’n rhaid iddi gynnwys llai na 19 o gymeriadau)
+ers_trustee_details.err.invalidChars.address_line5 = Gwiriwch bedwaredd linell y cyfeiriad (mae’n cynnwys cymeriadau annilys) //TODO Fix Welsh here
 ers_trustee_details.err.postcode =Gwiriwch y cod post (mae’n rhaid iddo fod yn ddilys ac yn cynnwys llai na 9 cymeriad)
 ers_trustee_summary.title = Ymddiriedolwyr y Cynllun Cymell Cyfranddaliadau hwn
 ers_trustee_summary.add_trustee = Ychwanegu ymddiriedolwr

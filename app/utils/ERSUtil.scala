@@ -71,9 +71,10 @@ class ERSUtil @Inject() (
 
   val FILE_NAME_CACHE: String = "file-name"
 
-  val SCHEME_ORGANISER_CACHE: String = "scheme-organiser"
-  val TRUSTEES_CACHE: String         = "trustees"
-  val ERROR_REPORT_DATETIME: String  = "error-report-datetime"
+	val SCHEME_ORGANISER_CACHE: String = "scheme-organiser"
+	val TRUSTEES_CACHE: String = "trustees"
+	val TRUSTEE_NAME_CACHE: String = "trustee-name"
+	val ERROR_REPORT_DATETIME: String = "error-report-datetime"
 
   // Params
   val PORTAL_AOREF_CACHE: String          = "portal-ao-ref"
@@ -96,12 +97,8 @@ class ERSUtil @Inject() (
 
   val VALIDATED_SHEEETS: String = "validated-sheets"
 
-  def cache[T](key: String, body: T)(implicit
-    hc: HeaderCarrier,
-    ec: ExecutionContext,
-    formats: json.Format[T]
-  ): Future[CacheMap] =
-    shortLivedCache.cache[T](getCacheId, key, body)
+	def cache[T](key: String, body: T)(implicit hc: HeaderCarrier, ec: ExecutionContext, formats: json.Format[T], request: Request[AnyRef]): Future[CacheMap] =
+		shortLivedCache.cache[T](getCacheId, key, body)
 
   def cache[T](key: String, body: T, cacheId: String)(implicit
     hc: HeaderCarrier,

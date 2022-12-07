@@ -202,6 +202,56 @@ object RsFormMappings {
     )(TrusteeDetails.apply)(TrusteeDetails.unapply)
   )
 
+  def trusteeBasedInUkForm()(implicit messages: Messages): Form[TrusteeBasedInUk] = Form(mapping(
+    trusteeBasedInUkFields.basedinUk -> boolean
+  )(TrusteeBasedInUk.apply)(TrusteeBasedInUk.unapply))
+
+
+  def trusteeNameForm()(implicit messages: Messages): Form[TrusteeName] = Form(mapping(
+    trusteeNameFields.name -> text
+      .verifying(Messages("ers_trustee_details.err.summary.name_required"), _.nonEmpty)
+      .verifying(Messages("ers_trustee_details.err.name"), so => checkLength(so, "trusteeDetailsFields.name"))
+      .verifying(Messages("ers_trustee_details.err.invalidChars.name"), so => validInputCharacters(so, addresssRegx))
+  )(TrusteeName.apply)(TrusteeName.unapply))
+
+  def trusteeAddressUkForm()(implicit messages: Messages): Form[TrusteeAddressUk] = Form(mapping(
+    trusteeAddressUkFields.buildingAndStreetLine1 -> text
+      .verifying(Messages("ers_trustee_details.err.summary.address_line1_required"), _.nonEmpty)
+      .verifying(Messages("ers_trustee_details.err.address_line1"), so => checkAddressLength(so, "trusteeDetailsFields.addressLine1"))
+      .verifying(Messages("ers_trustee_details.err.invalidChars.address_line1"), so => validInputCharacters(so, addresssRegx)),
+    trusteeAddressUkFields.buildingAndStreetLine2 -> optional(text
+      .verifying(Messages("ers_trustee_details.err.address_line2"), so => checkAddressLength(so, "trusteeDetailsFields.addressLine2"))
+      .verifying(Messages("ers_trustee_details.err.invalidChars.address_line2"), so => validInputCharacters(so, addresssRegx))),
+    trusteeAddressUkFields.townOrCity -> optional(text
+      .verifying(Messages("ers_trustee_details.err.address_line3"), so => checkAddressLength(so, "trusteeDetailsFields.addressLine3"))
+      .verifying(Messages("ers_trustee_details.err.invalidChars.address_line3"), so => validInputCharacters(so, addresssRegx))),
+    trusteeAddressUkFields.country -> optional(text
+      verifying pattern(addresssRegx.r, error = Messages("ers_scheme_organiser.err.summary.invalid_country"))),
+    trusteeAddressUkFields.postcode -> optional(text)
+      .transform((x: Option[String]) => x.map(_.toUpperCase()), (z: Option[String]) => z.map(_.toUpperCase()))
+      .verifying(Messages("ers_trustee_details.err.postcode"), so => isValidPostcode(so))
+  )(TrusteeAddressUk.apply)(TrusteeAddressUk.unapply))
+
+  def trusteeAddressOverseasForm()(implicit messages: Messages): Form[TrusteeAddressOverseas] = Form(mapping(
+    trusteeAddressOverseasFields.addressLine1 -> text.verifying(Messages("ers_trustee_details.err.summary.address_line1_required"), _.nonEmpty)
+      .verifying(Messages("ers_trustee_details.err.address_line1"), so => checkAddressLength(so, "trusteeDetailsFields.addressLine1"))
+      .verifying(Messages("ers_trustee_details.err.invalidChars.address_line1"), so => validInputCharacters(so, addresssRegx)),
+    trusteeAddressOverseasFields.addressLine2 -> optional(text
+      .verifying(Messages("ers_trustee_details.err.address_line2"), so => checkAddressLength(so, "trusteeDetailsFields.addressLine2"))
+      .verifying(Messages("ers_trustee_details.err.invalidChars.address_line2"), so => validInputCharacters(so, addresssRegx))),
+    trusteeAddressOverseasFields.addressLine3 -> optional(text
+      .verifying(Messages("ers_trustee_details.err.address_line3"), so => checkAddressLength(so, "trusteeDetailsFields.addressLine3"))
+      .verifying(Messages("ers_trustee_details.err.invalidChars.address_line3"), so => validInputCharacters(so, addresssRegx))),
+    trusteeAddressOverseasFields.addressLine4 -> optional(text
+      .verifying(Messages("ers_trustee_details.err.address_line4"), so => checkAddressLength(so, "trusteeDetailsFields.addressLine4"))
+      .verifying(Messages("ers_trustee_details.err.invalidChars.address_line4"), so => validInputCharacters(so, addresssRegx))),
+    trusteeAddressOverseasFields.addressLine5 -> optional(text
+      .verifying(Messages("ers_trustee_details.err.address_line5"), so => checkAddressLength(so, "trusteeDetailsFields.addressLine5"))
+      .verifying(Messages("ers_trustee_details.err.invalidChars.address_line5"), so => validInputCharacters(so, addresssRegx))),
+    trusteeAddressOverseasFields.country -> optional(text
+      verifying pattern(addresssRegx.r, error = Messages("ers_scheme_organiser.err.summary.invalid_country")))
+  )(TrusteeAddressOverseas.apply)(TrusteeAddressOverseas.unapply))
+
   /*
    * Manual Company Details Form definition
    */
@@ -451,6 +501,31 @@ object trusteeDetailsFields {
   val addressLine4 = "addressLine4"
   val country      = "country"
   val postcode     = "postcode"
+}
+
+object trusteeBasedInUkFields {
+  val basedinUk = "basedInUk"
+}
+
+object trusteeNameFields {
+  val name = "name"
+}
+
+object trusteeAddressUkFields {
+  val buildingAndStreetLine1 = "buildingAndStreetLine1"
+  val buildingAndStreetLine2 = "buildingAndStreetLine2"
+  val townOrCity = "townOrCity"
+  val country = "country"
+  val postcode = "postcode"
+}
+
+object trusteeAddressOverseasFields {
+  val addressLine1 = "addressLine1"
+  val addressLine2 = "addressLine2"
+  val addressLine3 = "addressLine3"
+  val addressLine4 = "addressLine4"
+  val addressLine5 = "addressLine5"
+  val country = "country"
 }
 
 object companyDetailsFields {
