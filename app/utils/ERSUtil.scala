@@ -28,10 +28,12 @@ import play.api.mvc.Request
 import services.SessionService
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
-
 import java.util.concurrent.TimeUnit
+
 import javax.inject.{Inject, Singleton}
+
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success, Try}
 
 @Singleton
 class ERSUtil @Inject()(val sessionService: SessionService,
@@ -68,6 +70,8 @@ class ERSUtil @Inject()(val sessionService: SessionService,
 	val SCHEME_ORGANISER_CACHE: String = "scheme-organiser"
 	val TRUSTEES_CACHE: String = "trustees"
 	val TRUSTEE_NAME_CACHE: String = "trustee-name"
+	val TRUSTEE_BASED_CACHE: String = "trustee-based"
+	val TRUSTEE_ADDRESS_CACHE: String = "trustee-address"
 	val ERROR_REPORT_DATETIME: String = "error-report-datetime"
 
 	// Params
@@ -91,10 +95,10 @@ class ERSUtil @Inject()(val sessionService: SessionService,
 
 	val VALIDATED_SHEEETS: String = "validated-sheets"
 
-	def cache[T](key: String, body: T)(implicit hc: HeaderCarrier, ec: ExecutionContext, formats: json.Format[T], request: Request[AnyRef]): Future[CacheMap] =
+	def cache[T](key: String, body: T)(implicit hc: HeaderCarrier, ec: ExecutionContext, formats: json.Format[T]): Future[CacheMap] =
 		shortLivedCache.cache[T](getCacheId, key, body)
 
-	def cache[T](key: String, body: T, cacheId: String)(implicit hc: HeaderCarrier, formats: json.Format[T], request: Request[AnyRef]): Future[CacheMap] = {
+	def cache[T](key: String, body: T, cacheId: String)(implicit hc: HeaderCarrier, formats: json.Format[T]): Future[CacheMap] = {
 		logger.info(s"[ERSUtil][cache]cache saving key:$key, cacheId:$cacheId")
 		shortLivedCache.cache[T](cacheId, key, body)
 	}
@@ -115,7 +119,7 @@ class ERSUtil @Inject()(val sessionService: SessionService,
 		}
 	}
 
-	def fetch[T](key: String, cacheId: String)(implicit hc: HeaderCarrier, formats: json.Format[T]): Future[T] = {
+	def fetch[T](key: String, cacheId: String)(implicit hc: HeaderCarrier, formats: json.Format[T]): Future[T] = { //TODO fix this so that we don't get the warn log when the question page is loaded for hte first time
 		val startTime = System.currentTimeMillis()
 		shortLivedCache.fetchAndGetEntry[JsValue](cacheId, key).map { res =>
 			cacheTimeFetch(System.currentTimeMillis() - startTime, TimeUnit.MILLISECONDS)
@@ -128,6 +132,12 @@ class ERSUtil @Inject()(val sessionService: SessionService,
 				logger.error(s"[ERSUtil][fetch] fetch(with 2 params) failed to get key [$key] for cacheId: [$cacheId] with exception ${er.getMessage}, " +
 					s"timestamp: ${System.currentTimeMillis()}.")
 				throw new Exception
+		}
+	}
+
+	def fetchTrusteesOptionally(key: String, cacheId: String)(implicit hc: HeaderCarrier, formats: json.Format[TrusteeDetailsList]): Future[TrusteeDetailsList] = {
+		fetch[TrusteeDetailsList](key, cacheId).recover {
+			case _: NoSuchElementException => TrusteeDetailsList(List.empty[TrusteeDetails])
 		}
 	}
 
@@ -167,19 +177,12 @@ class ERSUtil @Inject()(val sessionService: SessionService,
 																					 ec: ExecutionContext,
 																					 request: Request[AnyRef]
 																					): Future[(Option[AltAmendsActivity], Option[AlterationAmends])] = {
-		fetchOption[AltAmendsActivity](altAmendsActivity, schemeRef).flatMap {
-			altamends =>
-				if(altamends.getOrElse(AltAmendsActivity("")).altActivity == OPTION_YES) {
-					fetchOption[AlterationAmends](ALT_AMENDS_CACHE_CONTROLLER, schemeRef).map {
-						amc =>
-							(altamends, amc)
-					}
-				}
-				else {
-					Future{
-						(altamends, None)
-					}
-				}
+		//TODO this change may mess with tests, think it should be good tho
+		for {
+			altAmends <- fetchOption[AltAmendsActivity](altAmendsActivity, schemeRef)
+			amc <- fetchOption[AlterationAmends](ALT_AMENDS_CACHE_CONTROLLER, schemeRef)
+		} yield {
+			(altAmends, amc)
 		}
 	}
 
@@ -187,17 +190,12 @@ class ERSUtil @Inject()(val sessionService: SessionService,
 												(implicit hc: HeaderCarrier,
 												 ec: ExecutionContext,
 												 request: Request[AnyRef]): Future[(Option[GroupSchemeInfo], Option[CompanyDetailsList])] = {
-		fetchOption[GroupSchemeInfo](GROUP_SCHEME_CACHE_CONTROLLER, schemeRef).flatMap { gsc =>
-			if (gsc.getOrElse(GroupSchemeInfo(None, None)).groupScheme.getOrElse("") == OPTION_YES) {
-				fetchOption[CompanyDetailsList](GROUP_SCHEME_COMPANIES, schemeRef).map { comp =>
-					(gsc, comp)
-				}
-			}
-			else {
-				Future {
-					(gsc, None)
-				}
-			}
+		//TODO this change may mess with tests, think it should be good tho
+		for {
+			gsc <- fetchOption[GroupSchemeInfo](GROUP_SCHEME_CACHE_CONTROLLER, schemeRef)
+			comp <- fetchOption[CompanyDetailsList](GROUP_SCHEME_COMPANIES, schemeRef)
+		} yield {
+			(gsc, comp)
 		}
 	}
 
@@ -205,28 +203,22 @@ class ERSUtil @Inject()(val sessionService: SessionService,
 	def getAllData(bundleRef: String, ersMetaData: ErsMetaData)
 								(implicit hc: HeaderCarrier, ec: ExecutionContext, request: Request[AnyRef]): Future[ErsSummary] = {
 		val schemeRef = ersMetaData.schemeInfo.schemeRef
-		fetchOption[ReportableEvents](reportableEvents, schemeRef).flatMap { repEvents =>
-			fetchOption[CheckFileType](FILE_TYPE_CACHE, schemeRef).flatMap { checkFileType =>
-				fetchOption[SchemeOrganiserDetails](SCHEME_ORGANISER_CACHE, schemeRef).flatMap { soc =>
-					fetchOption[TrusteeDetailsList](TRUSTEES_CACHE, schemeRef).flatMap { td =>
-						getGroupSchemeData(schemeRef).flatMap { gc =>
-							getAltAmmendsData(schemeRef).flatMap { altData =>
-								getNoOfRows(repEvents.get.isNilReturn.get).map { trows =>
-									val fileType = if (checkFileType.isDefined) {
-										Some(checkFileType.get.checkFileType.get)
-									} else {
-										None
-									}
-									new ErsSummary(bundleRef, repEvents.get.isNilReturn.get, fileType, DateTime.now, metaData = ersMetaData,
-										altAmendsActivity = altData._1, alterationAmends = altData._2, groupService = gc._1,
-										schemeOrganiser = soc, companies = gc._2, trustees = td, nofOfRows = trows, transferStatus = getStatus(trows) )
-								}
-							}
-						}
-					}
-				}
-			}
-		}.recover {
+		(for {
+			repEvents <- fetchOption[ReportableEvents](reportableEvents, schemeRef)
+			checkFileType <- fetchOption[CheckFileType](FILE_TYPE_CACHE, schemeRef)
+			soc <- fetchOption[SchemeOrganiserDetails](SCHEME_ORGANISER_CACHE, schemeRef)
+			td <- fetchOption[TrusteeDetailsList](TRUSTEES_CACHE, schemeRef)
+			gc <- getGroupSchemeData(schemeRef)
+			altData <- getAltAmmendsData(schemeRef)
+			trows <- getNoOfRows(repEvents.get.isNilReturn.get)
+		} yield {
+			val fileType = checkFileType.map(_.checkFileType.get)
+			ErsSummary(bundleRef, repEvents.get.isNilReturn.get, fileType, DateTime.now, metaData = ersMetaData,
+				altAmendsActivity = altData._1, alterationAmends = altData._2, groupService = gc._1,
+				schemeOrganiser = soc, companies = gc._2, trustees = td, nofOfRows = trows, transferStatus = getStatus(trows)
+			)
+		}
+		).recover {
 			case e: NoSuchElementException =>
 				logger.error(s"CacheUtil: Get all data from cache failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.", e)
 				throw new Exception
@@ -249,13 +241,7 @@ class ERSUtil @Inject()(val sessionService: SessionService,
 	}
 
 	final def concatAddress(optionalAddressLines: List[Option[String]], existingAddressLines: String): String = {
-		var definedStrings: List[String] = Nil
-		try {
-			definedStrings = optionalAddressLines.collect{case Some(s) => s}
-		} catch {case x: Throwable  =>
-			println(x)
-			println()
-		}
+		val definedStrings = optionalAddressLines.filter(_.isDefined).map(_.get)
 		existingAddressLines ++ definedStrings.map(addressLine => ", " + addressLine).mkString("")
 	}
 
@@ -314,7 +300,7 @@ class ERSUtil @Inject()(val sessionService: SessionService,
 		hc.sessionId.getOrElse(throw new RuntimeException("")).value
 	}
 
-	def isNilReturn(nilReturn:String) :Boolean = nilReturn == OPTION_NIL_RETURN
+	def isNilReturn(nilReturn: String) :Boolean = nilReturn == OPTION_NIL_RETURN
 
 	def companyLocation(company: CompanyDetails): String = {
 		company.country.collect {

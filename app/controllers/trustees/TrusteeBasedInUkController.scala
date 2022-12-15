@@ -18,9 +18,9 @@ package controllers.trustees
 
 import config.ApplicationConfig
 import connectors.ErsConnector
-import controllers.auth.AuthAction
+import controllers.auth.{AuthAction, RequestWithOptionalAuthContext}
 import javax.inject.Inject
-import models.{RequestObject, RsFormMappings, TrusteeAddressUk}
+import models.{GroupSchemeInfo, RequestObject, RsFormMappings, TrusteeBasedInUk}
 import play.api.data.Form
 import play.api.libs.json.Format
 import play.api.mvc.{AnyContent, MessagesControllerComponents, Request, Result}
@@ -34,7 +34,7 @@ import utils.{CountryCodes, ERSUtil}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class TrusteeAddressUkController @Inject()(val mcc: MessagesControllerComponents,
+class TrusteeBasedInUkController @Inject()(val mcc: MessagesControllerComponents,
                                            val authConnector: DefaultAuthConnector,
                                            val ersConnector: ErsConnector,
                                            val globalErrorView: views.html.global_error,
@@ -43,27 +43,33 @@ class TrusteeAddressUkController @Inject()(val mcc: MessagesControllerComponents
                                            implicit val countryCodes: CountryCodes,
                                            implicit val ersUtil: ERSUtil,
                                            implicit val appConfig: ApplicationConfig,
-                                           trusteeAddressUkView: views.html.trustee_address_uk
-                                          )
-  extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with TrusteeBaseController[TrusteeAddressUk] {
+                                           trusteeBasedInUkView: views.html.trustee_based_in_uk
+                                      )
+  extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with TrusteeBaseController[TrusteeBasedInUk] {
 
   implicit val ec: ExecutionContext = mcc.executionContext
 
-  val cacheKey: String = ersUtil.TRUSTEE_ADDRESS_CACHE
-  implicit val format: Format[TrusteeAddressUk] = TrusteeAddressUk.format
+  val cacheKey: String = ersUtil.TRUSTEE_BASED_CACHE
+  implicit val format: Format[TrusteeBasedInUk] = TrusteeBasedInUk.format
 
   def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier): Future[Result] = {
-    trusteeService.updateTrusteeCache(index).map { _ =>
-      Redirect(controllers.routes.TrusteeController.trusteeSummaryPage())
-      //TODO Update this to the next page in the journey innit (might be right now, until I move stuff to new summary controller or whatever)
+    for {
+      requestObject <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
+      trusteeBasedInUk <- ersUtil.fetch[TrusteeBasedInUk](cacheKey, requestObject.getSchemeReference)
+    } yield {
+      (trusteeBasedInUk.basedInUk, edit) match {
+        case (true, true)    => Redirect(controllers.trustees.routes.TrusteeAddressUkController.editQuestion(index))
+        case (true, false)   => Redirect(controllers.trustees.routes.TrusteeAddressUkController.questionPage())
+        case (false, true)   => Redirect(controllers.trustees.routes.TrusteeAddressOverseasController.editQuestion(index))
+        case (false, false)  => Redirect(controllers.trustees.routes.TrusteeAddressOverseasController.questionPage())
+      }
     }
   }
 
-  def form(implicit request: Request[AnyContent]): Form[TrusteeAddressUk] = RsFormMappings.trusteeAddressUkForm()
+  def form(implicit request: Request[AnyContent]): Form[TrusteeBasedInUk] = RsFormMappings.trusteeBasedInUkForm()
 
-  def view(requestObject: RequestObject, groupSchemeActivity: String, index: Int, trusteeAddressUkForm: Form[TrusteeAddressUk], edit: Boolean = false)
-          (implicit request: Request[AnyContent], hc: HeaderCarrier): Html = {
-    trusteeAddressUkView(requestObject, groupSchemeActivity, index, trusteeAddressUkForm, edit)
+  def view(requestObject: RequestObject, groupSchemeActivity: String, index: Int, trusteeBasedInUkForm: Form[TrusteeBasedInUk], edit: Boolean = false)
+                   (implicit request: Request[AnyContent], hc: HeaderCarrier): Html = {
+    trusteeBasedInUkView(requestObject, groupSchemeActivity, index, trusteeBasedInUkForm, edit)
   }
-
 }

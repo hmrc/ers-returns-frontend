@@ -556,16 +556,16 @@ ers_trustee_name.title = Beth yw enw’r ymddiriedolwr?
 ers_trustee_based.title = Ymhle y mae’r ymddiriedolwr wedi’i leoli?
 
 ers_trustee_address.title = Beth yw cyfeiriad yr ymddiriedolwr?
-ers_trustee_address.line1 = Adeilad a stryd
-ers_trustee_address.line3 = Tref neu Ddinas
-ers_trustee_address.line4 = Gwlad
+ers_trustee_address.buildingAndStreet = Adeilad a stryd
+ers_trustee_address.townOrCity = Tref neu Ddinas
+ers_trustee_address.county = Sir
 ers_trustee_address.postcode = Cod post
 
 ers_trustee_address.line1 = Cyfeiriad – llinell 1
-ers_trustee_address.line2 = Cyfeiriad – llinell 2
-ers_trustee_address.line3 = Cyfeiriad – llinell 3
-ers_trustee_address.line4 = Cyfeiriad – llinell 4
-ers_trustee_address.line5 = Cyfeiriad – llinell 5
+ers_trustee_address.line2 = Cyfeiriad – llinell 2 (dewisol)
+ers_trustee_address.line3 = Cyfeiriad – llinell 3 (dewisol)
+ers_trustee_address.line4 = Cyfeiriad – llinell 4 (dewisol)
+ers_trustee_address.line5 = Cyfeiriad – llinell 5 (dewisol)
 
 ers_trustee_details.title = Ychwanegu manylion yr ymddiriedolwr
 ers_trustee_details.question = Ymhle y mae’r ymddiriedolwr wedi’i leoli?
