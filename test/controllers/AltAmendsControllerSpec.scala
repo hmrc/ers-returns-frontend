@@ -94,8 +94,8 @@ class AltAmendsControllerSpec
 
         when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any())).thenReturn(requestObject)
 
-        when(mockErsUtil.cache(ArgumentMatchers.eq("alt-activity"), any(), any())(any(), any()))
-          .thenReturn(cache)
+      when(mockErsUtil.cache(ArgumentMatchers.eq("alt-activity"), any(), any())(any(), any()))
+				.thenReturn(cache)
 
         when(mockErsUtil.getPageElement(any(), any(), any(), any())(any())).thenCallRealMethod()
       }

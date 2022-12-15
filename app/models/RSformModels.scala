@@ -89,15 +89,41 @@ object SchemeOrganiserDetails {
 }
 
 case class TrusteeDetails(
-  name: String,
-  addressLine1: String,
-  addressLine2: Option[String],
-  addressLine3: Option[String],
-  addressLine4: Option[String],
-  country: Option[String],
-  postcode: Option[String]
-)
+                              name: String,
+                              addressLine1: String,
+                              addressLine2: Option[String],
+                              addressLine3: Option[String],
+                              addressLine4: Option[String],
+                              country: Option[String],
+                              postcode: Option[String]
+                              )
+
 object TrusteeDetails {
+
+  def apply(name: TrusteeName, addressUk: TrusteeAddressUk): TrusteeDetails = {
+    TrusteeDetails(
+      name.name,
+      addressUk.addressLine1,
+      addressUk.addressLine2,
+      addressUk.addressLine3,
+      addressUk.addressLine4,
+      Some("UK"),
+      addressUk.addressLine5
+    )
+  }
+
+  def apply(name: TrusteeName, addressOverseas: TrusteeAddressOverseas): TrusteeDetails = {
+    TrusteeDetails(
+      name.name,
+      addressOverseas.addressLine1,
+      addressOverseas.addressLine2,
+      addressOverseas.addressLine3,
+      addressOverseas.addressLine4,
+      addressOverseas.country,
+      addressOverseas.addressLine5
+    )
+  }
+
   implicit val format: OFormat[TrusteeDetails] = Json.format[TrusteeDetails]
 }
 
@@ -112,18 +138,20 @@ case class TrusteeName(name: String)
 object TrusteeName {
   implicit val format: OFormat[TrusteeName] = Json.format[TrusteeName]
 }
-
+/*
 case class TrusteeAddressUk(
                            buildingAndStreetLine1: String,
                            buildingAndStreetLine2: Option[String],
                            townOrCity: Option[String],
-                           country: Option[String],
+                           county: Option[String],
                            postcode: Option[String]
                            )
 
 object TrusteeAddressUk {
   implicit val format: OFormat[TrusteeAddressUk] = Json.format[TrusteeAddressUk]
 }
+
+ */
 
 case class TrusteeAddressOverseas(
                                    addressLine1: String,
@@ -136,6 +164,19 @@ case class TrusteeAddressOverseas(
 
 object TrusteeAddressOverseas {
   implicit val format: OFormat[TrusteeAddressOverseas] = Json.format[TrusteeAddressOverseas]
+}
+
+case class TrusteeAddressUk(
+                                   addressLine1: String,
+                                   addressLine2: Option[String],
+                                   addressLine3: Option[String],
+                                   addressLine4: Option[String],
+                                   addressLine5: Option[String],
+                                   country: Option[String] = Some("UK"),
+                                 )
+
+object TrusteeAddressUk {
+  implicit val format: OFormat[TrusteeAddressUk] = Json.format[TrusteeAddressUk]
 }
 
 

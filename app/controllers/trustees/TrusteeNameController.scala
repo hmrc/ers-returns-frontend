@@ -25,23 +25,25 @@ import play.api.data.Form
 import play.api.libs.json.Format
 import play.api.mvc.{AnyContent, MessagesControllerComponents, Request, Result}
 import play.twirl.api.Html
+import services.TrusteeService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.{CountryCodes, ERSUtil}
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 class TrusteeNameController @Inject()(val mcc: MessagesControllerComponents,
                                       val authConnector: DefaultAuthConnector,
                                       val ersConnector: ErsConnector,
                                       val globalErrorView: views.html.global_error,
                                       val authAction: AuthAction,
+                                      val trusteeService: TrusteeService,
                                       implicit val countryCodes: CountryCodes,
                                       implicit val ersUtil: ERSUtil,
                                       implicit val appConfig: ApplicationConfig,
-                                      trusteeNameView: views.html.trustee_name,
+                                      trusteeNameView: views.html.trustee_name
                                      )
   extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with TrusteeBaseController[TrusteeName] {
 
@@ -50,13 +52,19 @@ class TrusteeNameController @Inject()(val mcc: MessagesControllerComponents,
   val cacheKey: String = ersUtil.TRUSTEE_NAME_CACHE
   implicit val format: Format[TrusteeName] = TrusteeName.format
 
-  val nextPageRedirect: Result = Redirect(controllers.trustees.routes.TrusteeBasedController.questionPage())
+  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier): Future[Result] = {
+    if (edit) {
+      Future.successful(Redirect(controllers.trustees.routes.TrusteeBasedInUkController.editQuestion(index)))
+    } else {
+      Future.successful(Redirect(controllers.trustees.routes.TrusteeBasedInUkController.questionPage()))
+    }
+  }
 
   def form(implicit request: Request[AnyContent]): Form[TrusteeName] = RsFormMappings.trusteeNameForm()
 
-  def view(requestObject: RequestObject, groupSchemeActivity: String, index: Int, trusteeNameForm: Form[TrusteeName])
+  def view(requestObject: RequestObject, groupSchemeActivity: String, index: Int, trusteeNameForm: Form[TrusteeName], edit: Boolean = false)
                    (implicit request: Request[AnyContent], hc: HeaderCarrier): Html = {
-    trusteeNameView(requestObject, groupSchemeActivity, index, trusteeNameForm)
+    trusteeNameView(requestObject, groupSchemeActivity, index, trusteeNameForm, edit)
   }
 
 }

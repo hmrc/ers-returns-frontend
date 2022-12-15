@@ -46,7 +46,7 @@
                 classes = "govuk-!-width-one-quarter",
                 items = Seq(
                     ActionItem(
-                        href = routes.TrusteeController.editTrustee(index).url,
+                        href = controllers.trustees.routes.TrusteeNameController.editQuestion(index).url,
                         content = Text(messages("ers.change_this")),
                         visuallyHiddenText = Some(messages("ers.change_this"))
                     )
@@ -68,7 +68,7 @@
                 classes = "govuk-!-width-one-quarter",
                 items = Seq(
                     ActionItem(
-                        href = routes.TrusteeController.editTrustee(index).url,
+                        href = controllers.trustees.routes.TrusteeBasedInUkController.editQuestion(index).url,
                         content = Text(messages("ers.change_this")),
                         visuallyHiddenText = Some(messages("ers.change_this"))
                     )
@@ -88,7 +88,11 @@
                 classes = "govuk-!-width-one-quarter",
                 items = Seq(
                     ActionItem(
-                        href = routes.TrusteeController.editTrustee(index).url,
+                        href = if(trustee.country.getOrElse("") == "UK"){
+                            controllers.trustees.routes.TrusteeAddressUkController.editQuestion(index).url
+                        } else {
+                            controllers.trustees.routes.TrusteeAddressOverseasController.editQuestion(index).url
+                        },
                         content = Text(messages("ers.change_this")),
                         visuallyHiddenText = Some(messages("ers.change_this"))
                     )
@@ -127,7 +131,7 @@
         }
 
 @*//TODO Update to match prototype summary page here *@
-        <a class="govuk-link govuk-inset-text govuk-!-display-inline-block govuk-!-margin-top-0 govuk-!-width-full" href="@routes.TrusteeController.trusteeDetailsPage()">@Html(messages("ers_trustee_summary.add_trustee"))</a>
+        <a class="govuk-link govuk-inset-text govuk-!-display-inline-block govuk-!-margin-top-0 govuk-!-width-full" href="@controllers.trustees.routes.TrusteeNameController.questionPage()">@Html(messages("ers_trustee_summary.add_trustee"))</a>
 
         @govukButton(Button(
             inputType = Some("submit"),
