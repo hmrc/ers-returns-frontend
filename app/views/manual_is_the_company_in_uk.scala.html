@@ -43,7 +43,7 @@
     <script type="text/javascript" src='@controllers.routes.Assets.versioned("javascripts/uk-or-overseas-form-reveal.js")' @{CSPNonce.attr}></script>
 }
 
-@govuk_wrapper(title = ersUtil.getPageElement(schemeId, "ers", "group_add.page_title") + " " + messages("ers.title.postfix"), Some(scripts)) {
+@govuk_wrapper(title = messages("ers_manual_is_the_company_in_uk.title"), Some(scripts)) {
 
     @reference(requestObject.getPageTitle)
 
@@ -59,15 +59,12 @@
     }
 
     @hmrcPageHeading(PageHeading(
-        text = ersUtil.getPageElement(schemeId, ersUtil.PAGE_MANUAL_COMPANY_DETAILS, "title")
+        text = messages("ers_manual_is_the_company_in_uk.title")
     ))
 
     @formWithCSRF(action = routes.GroupSchemeController.manualCompanyDetailsSubmit(index)) {
 
         @govukRadios(Radios(
-            fieldset = Some(Fieldset(
-                legend = Some(Legend(content=Text(ersUtil.getPageElement(schemeId, ersUtil.PAGE_MANUAL_COMPANY_DETAILS, "question"))))
-            )),
             name = "radio-inline-group",
             items = Seq(
                 RadioItem(
