@@ -43,11 +43,8 @@
     <script type="text/javascript" src='@controllers.routes.Assets.versioned("javascripts/uk-or-overseas-form-reveal.js")' @{CSPNonce.attr}></script>
 }
 
-<<<<<<< HEAD
+
 @govuk_wrapper(title = messages("ers_manual_is_the_company_in_uk.title"), Some(scripts)) {
-=======
-@govuk_wrapper(title = ersUtil.getPageElement(schemeId, "ers", "group_add.page_title") + " " + messages("ers.title.postfix"), Some(scripts)) {
->>>>>>> b9c6c91 ([DDCE-2358] Initial Pages + messages file)
 
     @reference(requestObject.getPageTitle)
 
@@ -63,22 +60,12 @@
     }
 
     @hmrcPageHeading(PageHeading(
-<<<<<<< HEAD
         text = messages("ers_manual_is_the_company_in_uk.title")
-=======
-        text = ersUtil.getPageElement(schemeId, ersUtil.PAGE_MANUAL_COMPANY_DETAILS, "title")
->>>>>>> b9c6c91 ([DDCE-2358] Initial Pages + messages file)
     ))
 
     @formWithCSRF(action = routes.GroupSchemeController.manualCompanyDetailsSubmit(index)) {
 
         @govukRadios(Radios(
-<<<<<<< HEAD
-=======
-            fieldset = Some(Fieldset(
-                legend = Some(Legend(content=Text(ersUtil.getPageElement(schemeId, ersUtil.PAGE_MANUAL_COMPANY_DETAILS, "question"))))
-            )),
->>>>>>> b9c6c91 ([DDCE-2358] Initial Pages + messages file)
             name = "radio-inline-group",
             items = Seq(
                 RadioItem(

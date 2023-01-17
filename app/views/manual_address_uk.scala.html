@@ -43,11 +43,7 @@
 	<script type="text/javascript" src='@controllers.routes.Assets.versioned("javascripts/uk-or-overseas-form-reveal.js")' @{CSPNonce.attr}></script>
 }
 
-<<<<<<< HEAD
 @govuk_wrapper(title = messages("ers_manual_address_uk.title"), Some(scripts)) {
-=======
-@govuk_wrapper(title = ersUtil.getPageElement(schemeId, "ers", "group_add.page_title") + " " + messages("ers.title.postfix"), Some(scripts)) {
->>>>>>> b9c6c91 ([DDCE-2358] Initial Pages + messages file)
 
 	@reference(requestObject.getPageTitle)
 
@@ -63,16 +59,11 @@
 	}
 
 	@hmrcPageHeading(PageHeading(
-<<<<<<< HEAD
 		text = messages("ers_manual_address_uk.title")
-=======
-		text = ersUtil.getPageElement(schemeId, ersUtil.PAGE_MANUAL_COMPANY_DETAILS, "title")
->>>>>>> b9c6c91 ([DDCE-2358] Initial Pages + messages file)
 	))
 
 	@formWithCSRF(action = routes.GroupSchemeController.manualCompanyDetailsSubmit(index)) {
 
-<<<<<<< HEAD
 		@govukInput(Input(
 			id = "bulding",
 			name = "building",
@@ -94,33 +85,10 @@
 			errorMessage = companyDetails.error(companyAddressUkFields.buildingAndStreetLine2).map { street =>
 				ErrorMessage(content = Text(street.messages.head))
 			},
-=======
-		@govukRadios(Radios(
-			fieldset = Some(Fieldset(
-				legend = Some(Legend(content=Text(ersUtil.getPageElement(schemeId, ersUtil.PAGE_MANUAL_COMPANY_DETAILS, "question"))))
-			)),
-			name = "radio-inline-group",
-			items = Seq(
-				RadioItem(
-					checked = companyDetails(companyDetailsFields.country).value.contains(ersUtil.DEFAULT_COUNTRY) || companyDetails(companyDetailsFields.country).value.isEmpty,
-					id = Some("uk-radio-button"),
-					value = Some("1"),
-					content = Text(messages("ers_manual_company_details.uk"))
-				),
-				RadioItem(
-					checked = !companyDetails(companyDetailsFields.country).value.contains(ersUtil.DEFAULT_COUNTRY) && companyDetails(companyDetailsFields.country).value.isDefined,
-					id = Some("overseas-radio-button"),
-					value = Some("2"),
-					content = Text(messages("ers_manual_company_details.overseas"))
-				)
-			),
-			classes = "govuk-radios--inline"
->>>>>>> b9c6c91 ([DDCE-2358] Initial Pages + messages file)
 		))
 
 		@govukInput(Input(
 			classes = "govuk-!-width-one-half",
-<<<<<<< HEAD
 			id = "townCity",
 			name = "townCity",
 			autocomplete = Some("townCity"),
@@ -130,22 +98,11 @@
 			},
 			label = Label(
 				content = Text(messages("ers_manual_address_uk.town"))
-=======
-			id = "companyName",
-			name = "companyName",
-			value = companyDetails(companyDetailsFields.companyName).value,
-			errorMessage = companyDetails.error(companyDetailsFields.companyName).map { name =>
-			  ErrorMessage(content = Text(name.messages.head))
-			},
-			label = Label(
-				content = Text(messages("ers_manual_company_details.company_name"))
->>>>>>> b9c6c91 ([DDCE-2358] Initial Pages + messages file)
 			)
 		))
 
 		@govukInput(Input(
 			classes = "govuk-!-width-one-half",
-<<<<<<< HEAD
 			id = "county",
 			name = "county",
 			autocomplete = Some("county"),
@@ -155,62 +112,6 @@
 			},
 			label = Label(
 				content = Text(messages("ers_manual_address_uk.county"))
-=======
-			id = "addressLine1",
-			name = "addressLine1",
-			autocomplete = Some("address-line1"),
-			value = companyDetails(companyDetailsFields.addressLine1).value,
-			errorMessage = companyDetails.error(companyDetailsFields.addressLine1).map { addressLine1 =>
-				ErrorMessage(content = Text(addressLine1.messages.head))
-			},
-			label = Label(
-				content = Text(messages("ers_manual_company_details.address"))
-			)
-		))
-
-		@govukInput(Input(
-			classes = "govuk-!-width-one-half",
-			id = "addressLine2",
-			name = "addressLine2",
-			autocomplete = Some("address-line2"),
-			value = companyDetails(companyDetailsFields.addressLine2).value,
-			errorMessage = companyDetails.error(companyDetailsFields.addressLine2).map { error =>
-				ErrorMessage(content = Text(error.messages.head))
-			},
-			label = Label(
-				content = Text(messages("ers_manual_company_details.addressLine2")),
-				classes = "govuk-visually-hidden"
-			)
-		))
-
-		@govukInput(Input(
-			classes = "govuk-!-width-one-half",
-			id = "addressLine3",
-			name = "addressLine3",
-			autocomplete = Some("address-line3"),
-			value = companyDetails(companyDetailsFields.addressLine3).value,
-			errorMessage = companyDetails.error(companyDetailsFields.addressLine3).map { error =>
-				ErrorMessage(content = Text(error.messages.head))
-			},
-			label = Label(
-				content = Text(messages("ers_manual_company_details.addressLine3")),
-				classes = "govuk-visually-hidden"
-			)
-		))
-
-		@govukInput(Input(
-			classes = "govuk-!-width-one-half",
-			id = "addressLine4",
-			name = "addressLine4",
-			autocomplete = Some("address-line4"),
-			value = companyDetails(companyDetailsFields.addressLine4).value,
-			errorMessage = companyDetails.error(companyDetailsFields.addressLine4).map { error =>
-				ErrorMessage(content = Text(error.messages.head))
-			},
-			label = Label(
-				content = Text(messages("ers_manual_company_details.addressLine4")),
-				classes = "govuk-visually-hidden"
->>>>>>> b9c6c91 ([DDCE-2358] Initial Pages + messages file)
 			)
 		))
 
@@ -219,14 +120,9 @@
 			id = "postcode",
 			name = "postcode",
 			autocomplete = Some("postal-code"),
-<<<<<<< HEAD
 			value = companyDetails(companyAddressUkFields.postcode).value,
 			errorMessage = companyDetails.error(companyAddressUkFields.postcode).map { error =>
-=======
-			value = companyDetails(companyDetailsFields.postcode).value,
-			errorMessage = companyDetails.error(companyDetailsFields.postcode).map { error =>
->>>>>>> b9c6c91 ([DDCE-2358] Initial Pages + messages file)
-				ErrorMessage(content = Text(error.messages.head))
+			ErrorMessage(content = Text(error.messages.head))
 			},
 			hint = Some(Hint(content=Text(messages("ers_manual_company_details.postcode.hint")))),
 			label = Label(
@@ -234,39 +130,6 @@
 			)
 		))
 
-<<<<<<< HEAD
-=======
-		@countriesSelect(companyDetails(companyDetailsFields.country).value)
-
-		@govukInput(Input(
-			classes = "govuk-!-width-one-half",
-			id = "companyReg",
-			name = "companyReg",
-			value = companyDetails(companyDetailsFields.companyReg).value,
-			errorMessage = companyDetails.error(companyDetailsFields.companyReg).map { error =>
-				ErrorMessage(content = Text(error.messages.head))
-			},
-			hint = Some(Hint(content=Text(messages("ers_manual_company_details.company_reg_number.hint")))),
-			label = Label(
-				content = Text(messages("ers_manual_company_details.company_reg_number")),
-			)
-		))
-
-		@govukInput(Input(
-			classes = "govuk-!-width-one-half",
-			id = "corporationRef",
-			name = "corporationRef",
-			value = companyDetails(companyDetailsFields.corporationRef).value,
-			errorMessage = companyDetails.error(companyDetailsFields.corporationRef).map { error =>
-				ErrorMessage(content = Text(error.messages.head))
-			},
-			hint = Some(Hint(content=Text(messages("ers_manual_company_details.corporation_tax_ref.hint")))),
-			label = Label(
-				content = Text(messages("ers_manual_company_details.corporation_tax_ref")),
-			)
-		))
-
->>>>>>> b9c6c91 ([DDCE-2358] Initial Pages + messages file)
 		@govukButton(Button(
 			inputType = Some("submit"),
 			content = Text(messages("ers_manual_company_details.continue")),
