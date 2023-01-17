@@ -326,7 +326,7 @@ ers_group_summary.sip.add_company = Add a company
 ers_group_summary.other.add_company = Add a company
 
 #********************************************************************
-# Company details
+# Company messages
 #********************************************************************
 
 ers_manual_company_details.csop.title = Add company details
@@ -339,7 +339,10 @@ ers_manual_company_details.sip.title = Add company details
 ers_manual_company_details.sip.question = Where is your company registered?
 ers_manual_company_details.other.title = Add details for the included company
 ers_manual_company_details.other.question = Where is the company registered?
-ers_manual_company_details.itciu.title = Where is the company registered?
+ers_manual_is_the_company_in_uk.title = Where is the company registered?
+ers_manual_company_details_uk.title = Add company details
+ers_manual_company_details_overseas.title = What is the company name?
+ers_manual_address_uk.title = What is the company?s address?
 
 #********************************************************************
 # Address messages

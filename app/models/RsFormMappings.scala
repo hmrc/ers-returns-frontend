@@ -163,6 +163,29 @@ object RsFormMappings {
   )(CompanyDetails.apply)(CompanyDetails.unapply))
 
   /*
+   * Manual Company Details UK Address definition
+   */
+  def trusteeAddressUkForm()(implicit messages: Messages): Form[CompanyAddressUk] = Form(mapping(
+    companyAd.addressLine1 -> text.verifying(Messages("ers_trustee_details.err.summary.address_line1_required"), _.nonEmpty)
+      .verifying(Messages("ers_trustee_details.err.address_line1"), so => checkAddressLength(so, "trusteeDetailsFields.addressLine1"))
+      .verifying(Messages("ers_trustee_details.err.invalidChars.address_line1"), so => validInputCharacters(so, addresssRegx)),
+    trusteeAddressFields.addressLine2 -> optional(text
+      .verifying(Messages("ers_trustee_details.err.address_line2"), so => checkAddressLength(so, "trusteeDetailsFields.addressLine2"))
+      .verifying(Messages("ers_trustee_details.err.invalidChars.address_line2"), so => validInputCharacters(so, addresssRegx))),
+    trusteeAddressFields.addressLine3 -> optional(text
+      .verifying(Messages("ers_trustee_details.err.address_line3"), so => checkAddressLength(so, "trusteeDetailsFields.addressLine3"))
+      .verifying(Messages("ers_trustee_details.err.invalidChars.address_line3"), so => validInputCharacters(so, addresssRegx))),
+    trusteeAddressFields.addressLine4 -> optional(text
+      .verifying(Messages("ers_trustee_details.err.address_line4"), so => checkAddressLength(so, "trusteeDetailsFields.addressLine4"))
+      .verifying(Messages("ers_trustee_details.err.invalidChars.address_line4"), so => validInputCharacters(so, addresssRegx))),
+    trusteeAddressFields.addressLine5 -> optional(text)
+      .transform((x: Option[String]) => x.map(_.toUpperCase()), (z: Option[String]) => z.map(_.toUpperCase()))
+      .verifying(Messages("ers_trustee_details.err.postcode"), so => isValidPostcode(so)),
+    trusteeAddressFields.country -> optional(text
+      .verifying(pattern(addresssRegx.r, error = Messages("ers_scheme_organiser.err.summary.invalid_country"))))
+  )(TrusteeAddressUk.apply)(TrusteeAddressUk.unapply))
+
+  /*
    * Scheme Organiser Form definition
    */
   def schemeOrganiserForm()(implicit messages: Messages): Form[SchemeOrganiserDetails] = Form(mapping(
@@ -271,11 +294,37 @@ object companyDetailsFields {
   val addressLine2 = "addressLine2"
   val addressLine3 = "addressLine3"
   val addressLine4 = "addressLine4"
-  val addressLine5 = "addressLine5"
   val country = "country"
   val postcode = "postcode"
   val companyReg = "companyReg"
   val corporationRef = "corporationRef"
+}
+
+object companyAddressUkFields {
+  val buildingAndStreetLine1 = "buildingAndStreetLine1"
+  val buildingAndStreetLine2 = "buildingAndStreetLine2"
+  val townOrCity = "townOrCity"
+  val county = "county"
+  val postcode = "postcode"
+  val country = "country"
+}
+
+object companyAddressOverseasFields {
+  val addressLine1 = "addressLine1"
+  val addressLine2 = "addressLine2"
+  val addressLine3 = "addressLine3"
+  val addressLine4 = "addressLine4"
+  val addressLine5 = "addressLine5"
+  val country = "country"
+}
+
+object companyAddressFields {
+  val addressLine1 = "addressLine1"
+  val addressLine2 = "addressLine2"
+  val addressLine3 = "addressLine3"
+  val addressLine4 = "addressLine4"
+  val addressLine5 = "addressLine5"
+  val country = "country"
 }
 
 object schemeOrganiserFields {

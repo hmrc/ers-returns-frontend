@@ -73,8 +73,80 @@ case class CompanyDetails(
                               corporationRef: Option[String]
                               )
 object CompanyDetails {
+
+  def apply(name: CompanyName, addressUk: CompanyAddressUk): CompanyDetails = {
+    CompanyDetails(
+      name.name,
+      addressUk.addressLine1,
+      addressUk.addressLine2,
+      addressUk.addressLine3,
+      addressUk.addressLine4,
+      Some("UK"),
+      addressUk.addressLine5,
+      name.companyReg,
+      name.companyRef
+    )
+  }
+
+  def apply(name: CompanyName, addressOverseas: CompanyAddressOverseas): CompanyDetails = {
+    CompanyDetails(
+      name.name,
+      addressOverseas.addressLine1,
+      addressOverseas.addressLine2,
+      addressOverseas.addressLine3,
+      addressOverseas.addressLine4,
+      addressOverseas.country,
+      addressOverseas.addressLine5,
+      None,
+      None
+    )
+  }
+
   implicit val format: OFormat[CompanyDetails] = Json.format[CompanyDetails]
 }
+
+case class CompanyBasedInUk(basedInUk: Boolean)
+
+object CompanyBasedInUk {
+  implicit val format: OFormat[CompanyBasedInUk] = Json.format[CompanyBasedInUk]
+}
+
+case class CompanyName(
+                        name: String,
+                        companyReg: Option[String],
+                        companyRef: Option[String]
+                      )
+
+object CompanyName {
+  implicit val format: OFormat[CompanyName] = Json.format[CompanyName]
+}
+
+case class CompanyAddressOverseas(
+                                   addressLine1: String,
+                                   addressLine2: Option[String],
+                                   addressLine3: Option[String],
+                                   addressLine4: Option[String],
+                                   addressLine5: Option[String],
+                                   country: Option[String],
+                                 )
+
+object CompanyAddressOverseas {
+  implicit val format: OFormat[CompanyAddressOverseas] = Json.format[CompanyAddressOverseas]
+}
+
+case class CompanyAddressUk(
+                             addressLine1: String,
+                             addressLine2: Option[String],
+                             addressLine3: Option[String],
+                             addressLine4: Option[String],
+                             addressLine5: Option[String],
+                             country: Option[String] = Some("UK"),
+                           )
+
+object CompanyAddressUk {
+  implicit val format: OFormat[CompanyAddressUk] = Json.format[CompanyAddressUk]
+}
+
 case class CompanyDetailsList(companies: List[CompanyDetails])
 
 object CompanyDetailsList {
