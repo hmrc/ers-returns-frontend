@@ -11,12 +11,12 @@ object AppDependencies {
     guice,
     ws,
     "uk.gov.hmrc"            %%    "play-partials"              % "8.3.0-play-28",
-    "uk.gov.hmrc"            %%    "bootstrap-frontend-play-28" % "6.4.0",
+    "uk.gov.hmrc"            %%    "bootstrap-frontend-play-28" % "7.12.0",
     "uk.gov.hmrc"            %%    "domain"                     % "8.1.0-play-28",
-    "uk.gov.hmrc"            %%    "http-caching-client"        % "9.6.0-play-28",
+    "uk.gov.hmrc"            %%    "http-caching-client"        % "10.0.0-play-28",
     "uk.gov.hmrc"            %%    "play-language"              % "5.3.0-play-28",
     "uk.gov.hmrc"            %%    "time"                       % "3.25.0",
-    "uk.gov.hmrc"            %%    "play-frontend-hmrc"         % "3.22.0-play-28",
+    "uk.gov.hmrc"            %%    "play-frontend-hmrc"         % "6.2.0-play-28",
     "org.scala-lang.modules" %%    "scala-parser-combinators"   % "2.1.1",
     "org.apache.pdfbox"      %     "pdfbox"                     % pdfboxVersion,
     "org.apache.pdfbox"      %     "xmpbox"                     % pdfboxVersion,
@@ -25,7 +25,8 @@ object AppDependencies {
     "com.typesafe.play"      %%    "play-json-joda"             % "2.9.2",
     "com.openhtmltopdf"      %     "openhtmltopdf-core"         % openHtmlVersion,
     "com.openhtmltopdf"      %     "openhtmltopdf-pdfbox"       % openHtmlVersion,
-    "com.openhtmltopdf"      %     "openhtmltopdf-svg-support"  % openHtmlVersion
+    "com.openhtmltopdf"      %     "openhtmltopdf-svg-support"  % openHtmlVersion,
+    "commons-codec"           %  "commons-codec"              % "1.15"
   )
 
   trait TestDependencies {
