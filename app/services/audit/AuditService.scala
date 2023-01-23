@@ -22,14 +22,13 @@ import uk.gov.hmrc.play.audit.DefaultAuditConnector
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import uk.gov.hmrc.play.audit.model.DataEvent
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 trait AuditService {
   val auditSource = "ers-returns-frontend"
   val auditConnector: DefaultAuditConnector
 
-  def sendEvent(transactionName : String, details: Map[String, String])(implicit hc: HeaderCarrier): Future[AuditResult] = {
+  def sendEvent(transactionName : String, details: Map[String, String])(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[AuditResult] = {
     auditConnector.sendEvent(buildEvent(transactionName, details))
 	}
 

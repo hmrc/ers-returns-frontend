@@ -21,8 +21,7 @@ import akka.pattern.after
 import config.ApplicationConfig
 import play.api.Logging
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration.FiniteDuration
 
 trait Retryable extends Logging {
@@ -31,7 +30,7 @@ trait Retryable extends Logging {
   case class LoopException[A](retryNumber: Int, finalFutureData: Option[A]) extends Exception(s"Failed to meet predicate after retrying $retryNumber times.")
 
   implicit class RetryCache[A](f: => Future[A]) {
-    def withRetry(maxTimes: Int)(pToBreakLoop: A => Boolean)(implicit actorSystem: ActorSystem): Future[A] = {
+    def withRetry(maxTimes: Int)(pToBreakLoop: A => Boolean)(implicit actorSystem: ActorSystem, ec: ExecutionContext): Future[A] = {
       val delay: FiniteDuration = appConfig.retryDelay
       val scheduler: Scheduler = actorSystem.getScheduler
       def loop(count: Int = 0, previous: Option[A] = None): Future[A] = {

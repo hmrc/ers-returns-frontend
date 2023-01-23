@@ -24,10 +24,10 @@ import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import uk.gov.hmrc.play.audit.DefaultAuditConnector
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class AuditEvents @Inject()(val auditConnector: DefaultAuditConnector) extends AuditService {
+class AuditEvents @Inject()(val auditConnector: DefaultAuditConnector)(implicit val ec: ExecutionContext) extends AuditService {
 
   def auditRunTimeError(exception : Throwable, contextInfo : String, rsc: ErsMetaData, bundle : String)
 											 (implicit request: Request[_], hc: HeaderCarrier) : Unit = {
