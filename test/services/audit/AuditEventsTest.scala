@@ -20,23 +20,22 @@ import models.{ErsMetaData, SchemeInfo}
 import org.joda.time.DateTime
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
-import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.OptionValues
+import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.test.FakeRequest
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.audit.DefaultAuditConnector
 import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
 import uk.gov.hmrc.play.audit.model.DataEvent
-import uk.gov.hmrc.play.bootstrap.audit.DefaultAuditConnector
+import utils.ErsTestHelper
 
 import scala.concurrent.Future
 
-class AuditEventsTest extends AnyWordSpecLike with Matchers with OptionValues with MockitoSugar with ScalaFutures {
+class AuditEventsTest extends AnyWordSpecLike with Matchers with OptionValues with MockitoSugar with ScalaFutures with ErsTestHelper {
 
 	val mockAuditConnector: DefaultAuditConnector = mock[DefaultAuditConnector]
-	implicit val hc: HeaderCarrier = HeaderCarrier()
 	implicit val request = FakeRequest()
 	val rsc = new ErsMetaData(new SchemeInfo(
 		schemeRef = "testSchemeRef",
