@@ -1,0 +1,57 @@
+[info] welcome to sbt 1.7.2 (Azul Systems, Inc. Java 14.0.2)
+[info] loading global plugins from /Users/jackwozniak/.sbt/1.0/plugins
+[info] loading settings for project ers-returns-frontend-build from plugins.sbt ...
+[info] loading project definition from /Users/jackwozniak/IdeaProjects/ers-returns-frontend/project
+[info] SbtAutoBuildPlugin - adding build settings
+[info] loading settings for project ers-returns-frontend from build.sbt ...
+[info] SbtAutoBuildPlugin - repository is marked public. Licence headers will be added to all source files
+[info]   __              __
+[info]   \ \     ____   / /____ _ __  __
+[info]    \ \   / __ \ / // __ `// / / /
+[info]    / /  / /_/ // // /_/ // /_/ /
+[info]   /_/  / .___//_/ \__,_/ \__, /
+[info]       /_/               /____/
+[info] 
+[info] Version 2.8.18 running Java 14.0.2
+[info] 
+[info] Play is run entirely by the community. Please consider contributing and/or donating:
+[info] https://www.playframework.com/sponsors
+[info] 
+[info] !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+[info]   Java version is 14. Play supports only 8, 11 and, experimentally, 17.
+[info] !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+[info] 
+[warn] there's a key that's not used by any other settings/tasks:
+[warn]  
+[warn] * ers-returns-frontend / Runtime / fork
+[warn]   +- /Users/jackwozniak/IdeaProjects/ers-returns-frontend/build.sbt:38
+[warn]  
+[warn] note: a setting might still be used by a command; to exclude a key from this `lintUnused` check
+[warn] either append it to `Global / excludeLintKeys` or call .withRank(KeyRanks.Invisible) on the key
+[success] Total time: 0 s, completed 24 Jan 2023, 13:43:43
+[info] Defining ThisBuild / coverageEnabled
+[info] The new value will be used by Compile / compile / scalacOptions, libraryDependencies
+[info] Reapplying settings...
+[info] SbtAutoBuildPlugin - repository is marked public. Licence headers will be added to all source files
+[info]   __              __
+[info]   \ \     ____   / /____ _ __  __
+[info]    \ \   / __ \ / // __ `// / / /
+[info]    / /  / /_/ // // /_/ // /_/ /
+[info]   /_/  / .___//_/ \__,_/ \__, /
+[info]       /_/               /____/
+[info] 
+[info] Version 2.8.18 running Java 14.0.2
+[info] 
+[info] Play is run entirely by the community. Please consider contributing and/or donating:
+[info] https://www.playframework.com/sponsors
+[info] 
+[info] !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+[info]   Java version is 14. Play supports only 8, 11 and, experimentally, 17.
+[info] !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+[info] 
+[info] * SimpleCommand(git)
+[info] * SimpleCommand(start)
+[info] * SimpleCommand(runProd)
+[info] * SimpleCommand(testProd)
+[info] * SimpleCommand(stopProd)
+[info] * SimpleCommand(h2-browser)
