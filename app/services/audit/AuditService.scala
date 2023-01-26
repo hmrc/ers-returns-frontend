@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,14 +22,13 @@ import uk.gov.hmrc.play.audit.DefaultAuditConnector
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import uk.gov.hmrc.play.audit.model.DataEvent
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 trait AuditService {
   val auditSource = "ers-returns-frontend"
   val auditConnector: DefaultAuditConnector
 
-  def sendEvent(transactionName : String, details: Map[String, String])(implicit hc: HeaderCarrier): Future[AuditResult] = {
+  def sendEvent(transactionName : String, details: Map[String, String])(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[AuditResult] = {
     auditConnector.sendEvent(buildEvent(transactionName, details))
 	}
 

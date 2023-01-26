@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package config
 
 import play.api.Configuration
-import uk.gov.hmrc.crypto.{ApplicationCrypto, CryptoWithKeysFromConfig}
+import uk.gov.hmrc.crypto.{ApplicationCrypto, CryptoWithKeysFromConfig, Decrypter, Encrypter}
 import uk.gov.hmrc.http.cache.client.{SessionCache, ShortLivedCache, ShortLivedHttpCaching}
 import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
 
@@ -44,5 +44,5 @@ class ERSShortLivedCache @Inject()(val http: DefaultHttpClient,
 																	 val configuration: Configuration
 																 ) extends ShortLivedCache {
 	def shortLiveCache: ShortLivedHttpCaching = new ERSShortLivedHttpCache(http, appConfig)
-	override implicit lazy val crypto: CryptoWithKeysFromConfig = new ApplicationCrypto(configuration.underlying).JsonCrypto
+	override implicit lazy val crypto: Encrypter with Decrypter = new ApplicationCrypto(configuration.underlying).JsonCrypto
 }

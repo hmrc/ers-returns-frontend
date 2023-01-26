@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,13 +27,13 @@ import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import uk.gov.hmrc.play.audit.http.connector.AuditResult.{Disabled, Failure, Success}
 import uk.gov.hmrc.play.audit.model.DataEvent
 import uk.gov.hmrc.play.audit.DefaultAuditConnector
+import utils.ErsTestHelper
 
 import scala.concurrent.Future
 
-class AuditServiceTest extends AnyWordSpecLike with Matchers with MockitoSugar {
+class AuditServiceTest extends AnyWordSpecLike with Matchers with MockitoSugar with ErsTestHelper {
 
 	val mockAuditConnector: DefaultAuditConnector = mock[DefaultAuditConnector]
-	implicit val hc: HeaderCarrier = HeaderCarrier()
 
 	val dataEvent: DataEvent = DataEvent(
 		auditSource = "ers-returns-frontend",
