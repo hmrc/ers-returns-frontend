@@ -220,6 +220,19 @@ object RsFormMappings {
   )(SchemeOrganiserDetails.apply)(SchemeOrganiserDetails.unapply))
 
   /*
+  Subsidiary Company Form Definition
+   */
+
+  def companyBasedInUkForm()(implicit messages: Messages): Form[CompanyBasedInUk] = Form(mapping(
+    companyBasedInUkFields.basedinUk -> boolean
+  )(CompanyBasedInUk.apply)(CompanyBasedInUk.unapply))
+
+
+  object companyBasedInUkFields {
+    val basedinUk = "basedInUk"
+  }
+
+  /*
 * scheme type Form definition.
 */
   def schemeTypeForm()(implicit messages: Messages): Form[RS_schemeType] = Form(
