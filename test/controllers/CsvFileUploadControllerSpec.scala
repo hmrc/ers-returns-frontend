@@ -696,7 +696,7 @@ class CsvFileUploadControllerSpec extends AnyWordSpecLike with Matchers with Opt
       reset(mockErsConnector)
 
       val testUploadedSuccessfully = new UploadedSuccessfully(
-        "CSOP_OptionsGranted_V3.csv",
+        "CSOP_OptionsGranted_V4.csv",
         "http://somedownloadlink.com/034099340"
       )
       val testCsvCallbackData = List[UploadedSuccessfully](testUploadedSuccessfully)
@@ -712,7 +712,7 @@ class CsvFileUploadControllerSpec extends AnyWordSpecLike with Matchers with Opt
       ) thenReturn Future.successful(testUpscanCsvFileList)
       when(
         mockErsUtil.getPageElement(any(), any(), any(), any())(any())
-      ) thenReturn "CSOP_OptionsGranted_V3.csv"
+      ) thenReturn "CSOP_OptionsGranted_V4.csv"
       when(
         mockErsConnector.validateCsvFileData(any[List[UploadedSuccessfully]](), any[SchemeInfo]())(any(), any())
       ) thenReturn Future.successful(HttpResponse(OK, ""))
@@ -728,7 +728,7 @@ class CsvFileUploadControllerSpec extends AnyWordSpecLike with Matchers with Opt
       reset(mockErsConnector)
 
       val testUploadedSuccessfully = new UploadedSuccessfully(
-        "CSOP_OptionsExercised_V3",
+        "CSOP_OptionsExercised_V4",
         "http://somedownloadlink.com/034099340"
       )
       val testCsvCallbackData = List[UploadedSuccessfully](testUploadedSuccessfully)
@@ -744,7 +744,7 @@ class CsvFileUploadControllerSpec extends AnyWordSpecLike with Matchers with Opt
       ) thenReturn Future.successful(testUpscanCsvFileList)
       when(
         mockErsUtil.getPageElement(any(), any(), any(), any())(any())
-      ) thenReturn "CSOP_OptionsGranted_V3.csv"
+      ) thenReturn "CSOP_OptionsGranted_V4.csv"
 
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
       val result = csvFileUploadController
@@ -755,7 +755,7 @@ class CsvFileUploadControllerSpec extends AnyWordSpecLike with Matchers with Opt
 
     "redirect to getGlobalErrorPage if checkFileNames throws an exception" in {
       val testUploadedSuccessfully = new UploadedSuccessfully(
-        "CSOP_OptionsExercised_V3",
+        "CSOP_OptionsExercised_V4",
         "http://somedownloadlink.com/034099340"
       )
       val testCsvCallbackData = List[UploadedSuccessfully](testUploadedSuccessfully)
