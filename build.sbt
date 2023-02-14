@@ -9,7 +9,7 @@ import uk.gov.hmrc.versioning.SbtGitVersioning.autoImport.majorVersion
 
 val appName: String = "ers-returns-frontend"
 
-val silencerVersion = "1.7.9"
+val silencerVersion = "1.7.12"
 
 lazy val plugins: Seq[Plugins] = Seq(play.sbt.PlayScala, SbtDistributablesPlugin)
 
@@ -70,3 +70,5 @@ TwirlKeys.templateImports ++= Seq(
 dependencyOverrides ++= Seq(
   "com.fasterxml.jackson.module" %% "jackson-module-scala"  % "2.12.0" force(),
 )
+
+addCommandAlias("scalastyleAll", "all scalastyle test:scalastyle")
