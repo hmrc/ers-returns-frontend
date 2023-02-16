@@ -2,9 +2,6 @@
 import uk.gov.hmrc._
 import DefaultBuildSettings._
 import scoverage.ScoverageKeys
-import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.publishingSettings
-import uk.gov.hmrc.SbtAutoBuildPlugin
-import uk.gov.hmrc.versioning.SbtGitVersioning
 import uk.gov.hmrc.versioning.SbtGitVersioning.autoImport.majorVersion
 
 val appName: String = "ers-returns-frontend"
@@ -26,7 +23,6 @@ lazy val microservice = Project(appName, file("."))
   .enablePlugins(plugins: _*)
   .settings(
     scoverageSettings,
-    publishingSettings,
     scalaSettings,
     defaultSettings(),
     targetJvm := "jvm-1.8",
