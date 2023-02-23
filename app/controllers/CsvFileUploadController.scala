@@ -219,7 +219,7 @@ class CsvFileUploadController @Inject() (
         }
         .forall(names => names._1 == names._2)
       if (uploadedWithCorrectName) {
-        validateCsv(csvCallbackData, schemeInfo)
+        validateCsv(csvCallbackData, schemeInfo) //TODO HERE IS CALL TO FILE-VALIDATOR
       } else {
         logger.info(s"[CsvFileUploadController][checkFileNames] User uploaded the wrong file")
         Future(getFileUploadProblemPage())
