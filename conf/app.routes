@@ -4,14 +4,14 @@
 
 GET         /assets/*file                               	controllers.Assets.versioned(path="/public", file)
 
-GET         /upload-ods-file                                 controllers.FileUploadController.uploadFilePage()
+GET         /upload-ods-file                                controllers.FileUploadController.uploadFilePage()
 GET         /errors-have-been-found-ods                     controllers.FileUploadController.validationFailure()
-GET         /file-upload/failure                             controllers.FileUploadController.failure()
+GET         /file-upload/failure                            controllers.FileUploadController.failure()
 GET         /if-there-are-no-errors-ods                     controllers.FileUploadController.success()
 
 GET         /upload-csv                                     controllers.CsvFileUploadController.uploadFilePage()
 GET         /errors-have-been-found-csv                     controllers.CsvFileUploadController.validationFailure()
-GET         /csv-file-upload/failure                         controllers.CsvFileUploadController.failure()
+GET         /csv-file-upload/failure                        controllers.CsvFileUploadController.failure()
 GET         /if-there-are-no-errors-csv                     controllers.CsvFileUploadController.success(uploadId: UploadId)
 
 GET 		/                                               controllers.ReturnServiceController.hmacCheck()
