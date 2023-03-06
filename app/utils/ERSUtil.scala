@@ -252,8 +252,7 @@ class ERSUtil @Inject()(val sessionService: SessionService,
 		try {
 			definedStrings = optionalAddressLines.collect{case Some(s) => s}
 		} catch {case x: Throwable  =>
-			println(x)
-			println()
+			logger.warn(x.getMessage())
 		}
 		existingAddressLines ++ definedStrings.map(addressLine => ", " + addressLine).mkString("")
 	}
