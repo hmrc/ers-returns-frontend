@@ -54,7 +54,7 @@ class IsCompanyUkController @Inject()(val mcc: MessagesControllerComponents,
 
 //  val nextPageRedirect: Result = Redirect(controllers.subsidiaries.routes.CompanyDetailsController.questionPage())
 
-  def form(implicit request: Request[AnyContent]): Form[CompanyBasedInUk] = RsFormMappings.CompanyBasedInUkForm()
+  def form(implicit request: Request[AnyContent]): Form[CompanyBasedInUk] = RsFormMappings.companyBasedInUkForm()
 
   def view(requestObject: RequestObject, groupSchemeActivity: String, index: Int, trusteeBasedInUkForm: Form[CompanyBasedInUk])
           (implicit request: Request[AnyContent], hc: HeaderCarrier): Html = {
