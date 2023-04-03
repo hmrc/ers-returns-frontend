@@ -59,6 +59,7 @@ class ERSUtil @Inject()(val sessionService: SessionService,
 	val GROUP_SCHEME_CACHE: String = "group-scheme"
 	val GROUP_SCHEME_TYPE_CACHE: String = "group-scheme-type"
 	val altAmendsActivity: String = "alt-activity"
+	val SUBSIDIARY_NAME_CACHE: String = "subsidiary-name"
 
 	val CHECK_CSV_FILES: String = "check-csv-files"
 	val CSV_FILES_UPLOAD: String = "csv-files-upload"

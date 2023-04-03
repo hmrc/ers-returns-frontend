@@ -20,7 +20,7 @@ package controllers.subsidiaries
 import config.ApplicationConfig
 import connectors.ErsConnector
 import controllers.auth.AuthAction
-import models.{CompanyBasedInUk, IsBasedInUk, RequestObject, RsFormMappings}
+import models.{CompanyBasedInUk, RequestObject, RsFormMappings}
 import play.api.data.Form
 import play.api.libs.json.Format
 import play.api.mvc.{AnyContent, MessagesControllerComponents, Request, Result}
