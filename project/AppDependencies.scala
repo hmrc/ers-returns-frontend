@@ -29,28 +29,19 @@ object AppDependencies {
     "commons-codec"          %  "commons-codec"              % "1.15"
   )
 
-  trait TestDependencies {
-    lazy val scope: String = "test"
-    lazy val test: Seq[ModuleID] = ???
-  }
+  val test: Seq[sbt.ModuleID] = Seq(
+    "uk.gov.hmrc"             %% "bootstrap-test-play-28" % bootstrapVersion,
+    "org.scalatest"           %% "scalatest"              % "3.2.15",
+    "org.scalatestplus"       %% "mockito-3-4"            % "3.2.10.0",
+    "org.scalatestplus.play"  %% "scalatestplus-play"     % "5.1.0",
+    "com.vladsch.flexmark"    % "flexmark-all"            % "0.62.2",
+    "org.pegdown"             % "pegdown"                 % "1.6.0",
+    "org.jsoup"               % "jsoup"                   % "1.15.3",
+    "com.typesafe.play"       %% "play-test"              % PlayVersion.current,
+    "com.github.tomakehurst"  % "wiremock-standalone"     % "2.27.2"
+  ).map(_ % "test")
 
-  object Test {
-    def apply(): Seq[ModuleID] = new TestDependencies {
-      override lazy val test: Seq[sbt.ModuleID] = Seq(
-        "uk.gov.hmrc"             %% "bootstrap-test-play-28" % bootstrapVersion    % scope,
-        "org.scalatest"           %% "scalatest"              % "3.2.15"            % scope,
-        "org.scalatestplus"       %% "mockito-3-4"            % "3.2.10.0"          % scope,
-        "org.scalatestplus.play"  %% "scalatestplus-play"     % "5.1.0"             % scope,
-        "com.vladsch.flexmark"    %  "flexmark-all"           % "0.62.2"            % scope,
-        "org.pegdown"             %  "pegdown"                % "1.6.0"             % scope,
-        "org.jsoup"               %  "jsoup"                  % "1.15.3"            % scope,
-        "com.typesafe.play"       %% "play-test"              % PlayVersion.current % scope,
-        "com.github.tomakehurst"  %  "wiremock-standalone"    % "2.27.2"            % scope
-      )
-    }.test
-  }
-
-  def apply(): Seq[ModuleID] = compile ++ Test()
+  def apply(): Seq[ModuleID] = compile ++ test
 
   val overrides: Seq[ModuleID] = Seq(
     "org.scala-lang.modules"      %%    "scala-parser-combinators"      %   "2.1.1"
