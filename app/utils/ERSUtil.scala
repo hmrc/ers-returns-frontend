@@ -59,7 +59,6 @@ class ERSUtil @Inject()(val sessionService: SessionService,
 	val GROUP_SCHEME_CACHE: String = "group-scheme"
 	val GROUP_SCHEME_TYPE_CACHE: String = "group-scheme-type"
 	val altAmendsActivity: String = "alt-activity"
-	val SUBSIDIARY_NAME_CACHE: String = "subsidiary-name"
 
 	val CHECK_CSV_FILES: String = "check-csv-files"
 	val CSV_FILES_UPLOAD: String = "csv-files-upload"
@@ -90,6 +89,9 @@ class ERSUtil @Inject()(val sessionService: SessionService,
 	val IP_REF: String = "ip-ref"
 
 	val VALIDATED_SHEEETS: String = "validated-sheets"
+
+
+	val SUBSIDIARY_NAME_CACHE: String = "subsidiary-name"
 
 	def cache[T](key:String, body:T)(implicit hc:HeaderCarrier, ec:ExecutionContext, formats: json.Format[T], request: Request[AnyRef]): Future[CacheMap] =
 		shortLivedCache.cache[T](getCacheId, key, body)
