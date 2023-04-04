@@ -1,3 +1,18 @@
+/*
+ * Copyright 2023 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 /*
  * Copyright 2023 HM Revenue & Customs
@@ -32,7 +47,7 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.{CountryCodes, ERSUtil}
 
 import javax.inject.Inject
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 
 class IsCompanyUkController @Inject()(val mcc: MessagesControllerComponents,
@@ -43,7 +58,7 @@ class IsCompanyUkController @Inject()(val mcc: MessagesControllerComponents,
                                       implicit val countryCodes: CountryCodes,
                                       implicit val ersUtil: ERSUtil,
                                       implicit val appConfig: ApplicationConfig,
-                                      pageView: views.html.manual_is_the_company_in_the_uk
+                                      pageView: views.html.manual_is_the_company_in_uk
                                      )
   extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with SubsidiariesBaseController[IsCompanyUkController] {
 
@@ -52,13 +67,25 @@ class IsCompanyUkController @Inject()(val mcc: MessagesControllerComponents,
   val cacheKey: String = ersUtil.SUBSIDIARY_NAME_CACHE
   implicit val format: Format[CompanyBasedInUk] = CompanyBasedInUk.format
 
-//  val nextPageRedirect: Result = Redirect(controllers.subsidiaries.routes.CompanyDetailsController.questionPage())
+  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier): Future[Result] = {
+    for {
+      requestObject <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
+      subsidiaryBasedInUk <- ersUtil.fetch[CompanyBasedInUk](cacheKey, requestObject.getSchemeReference)
+    } yield {
+      (subsidiaryBasedInUk.basedInUk, edit) match {
+        case (true, true)    => Redirect(controllers.subsidiaries.routes.CompanyAddressUkController.editQuestion(index))
+        case (true, false)   => Redirect(controllers.subsidiaries.routes.CompanyAddressUkController.questionPage())
+        case (false, true)   => Redirect(controllers.subsidiaries.routes.CompanyAddressOverseasController.editQuestion(index))
+        case (false, false)  => Redirect(controllers.subsidiaries.routes.CompanyAddressOverseasController.questionPage())
+      }
+    }
+  }
 
   def form(implicit request: Request[AnyContent]): Form[CompanyBasedInUk] = RsFormMappings.companyBasedInUkForm()
 
-  def view(requestObject: RequestObject, groupSchemeActivity: String, index: Int, trusteeBasedInUkForm: Form[CompanyBasedInUk])
+  def view(requestObject: RequestObject, groupSchemeActivity: String, index: Int, companyBasedInUkForm: Form[CompanyBasedInUk])
           (implicit request: Request[AnyContent], hc: HeaderCarrier): Html = {
-    pageView(requestObject, groupSchemeActivity, index, trusteeBasedInUkForm)
+    pageView(requestObject, groupSchemeActivity, index, companyBasedInUkForm)
   }
 
 }
