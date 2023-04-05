@@ -165,6 +165,8 @@ object RsFormMappings {
   /*
    * Manual Company Details UK Address definition
    */
+
+  /*
   def trusteeAddressUkForm()(implicit messages: Messages): Form[CompanyAddressUk] = Form(mapping(
     companyAd.addressLine1 -> text.verifying(Messages("ers_trustee_details.err.summary.address_line1_required"), _.nonEmpty)
       .verifying(Messages("ers_trustee_details.err.address_line1"), so => checkAddressLength(so, "trusteeDetailsFields.addressLine1"))
@@ -184,6 +186,7 @@ object RsFormMappings {
     trusteeAddressFields.country -> optional(text
       .verifying(pattern(addresssRegx.r, error = Messages("ers_scheme_organiser.err.summary.invalid_country"))))
   )(TrusteeAddressUk.apply)(TrusteeAddressUk.unapply))
+  */
 
   /*
    * Scheme Organiser Form definition
@@ -224,7 +227,8 @@ object RsFormMappings {
    */
 
   def companyBasedInUkForm()(implicit messages: Messages): Form[CompanyBasedInUk] = Form(mapping(
-    companyBasedInUkFields.basedinUk -> boolean
+    companyBasedInUkFields.basedinUk -> number
+      .transform(int => if (int == 0 ) true else false, (bool : Boolean) => if (bool) 0  else 1)
   )(CompanyBasedInUk.apply)(CompanyBasedInUk.unapply))
 
 
