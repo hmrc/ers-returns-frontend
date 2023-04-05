@@ -2,14 +2,11 @@
 import uk.gov.hmrc._
 import DefaultBuildSettings._
 import scoverage.ScoverageKeys
-import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.publishingSettings
-import uk.gov.hmrc.SbtAutoBuildPlugin
-import uk.gov.hmrc.versioning.SbtGitVersioning
 import uk.gov.hmrc.versioning.SbtGitVersioning.autoImport.majorVersion
 
 val appName: String = "ers-returns-frontend"
 
-val silencerVersion = "1.7.9"
+val silencerVersion = "1.7.12"
 
 lazy val plugins: Seq[Plugins] = Seq(play.sbt.PlayScala, SbtDistributablesPlugin)
 
@@ -26,7 +23,6 @@ lazy val microservice = Project(appName, file("."))
   .enablePlugins(plugins: _*)
   .settings(
     scoverageSettings,
-    publishingSettings,
     scalaSettings,
     defaultSettings(),
     targetJvm := "jvm-1.8",
@@ -70,3 +66,5 @@ TwirlKeys.templateImports ++= Seq(
 dependencyOverrides ++= Seq(
   "com.fasterxml.jackson.module" %% "jackson-module-scala"  % "2.12.0" force(),
 )
+
+addCommandAlias("scalastyleAll", "all scalastyle test:scalastyle")
