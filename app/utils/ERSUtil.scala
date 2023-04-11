@@ -92,6 +92,7 @@ class ERSUtil @Inject()(val sessionService: SessionService,
 
 
 	val SUBSIDIARY_NAME_CACHE: String = "subsidiary-name"
+	val SUBSIDIARY_ADDRESS_CACHE: String = "subsidiary-address-uk"
 
 	def cache[T](key:String, body:T)(implicit hc:HeaderCarrier, ec:ExecutionContext, formats: json.Format[T], request: Request[AnyRef]): Future[CacheMap] =
 		shortLivedCache.cache[T](getCacheId, key, body)

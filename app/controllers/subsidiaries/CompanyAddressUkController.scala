@@ -19,9 +19,47 @@ package controllers.subsidiaries
 import config.ApplicationConfig
 import connectors.ErsConnector
 import controllers.auth.AuthAction
+import play.api.libs.json.Format
+import play.api.mvc.MessagesControllerComponents
+import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
+import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
+import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
+import utils.{CountryCodes, ERSUtil}
+
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class CompanyAddressUkController @Inject(){
+class CompanyAddressUkController @Inject()(val mcc: MessagesControllerComponents,
+val authConnector: DefaultAuthConnector,
+val ersConnector: ErsConnector,
+val globalErrorView: views.html.global_error,
+val authAction: AuthAction,
+implicit val countryCodes: CountryCodes,
+implicit val ersUtil: ERSUtil,
+implicit val appConfig: ApplicationConfig,
+trusteeAddressUkView: views.html.manual_address_uk
+)
+extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with SubsidiariesBaseController[CompanyAddressUkController] {
+
+implicit val ec: ExecutionContext = mcc.executionContext
+
+val cacheKey: String = ersUtil.SUBSIDIARY_ADDRESS_CACHE
+implicit val format: Format[TrusteeAddressUk] = TrusteeAddressUk.format
+
+def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier): Future[Result] = {
+trusteeService.updateTrusteeCache(index).map { _ =>
+Redirect(controllers.routes.TrusteeController.trusteeSummaryPage())
+//TODO Update this to the next page in the journey innit (might be right now, until I move stuff to new summary controller or whatever)
+}
+}
+
+def form(implicit request: Request[AnyContent]): Form[TrusteeAddressUk] = RsFormMappings.trusteeAddressUkForm()
+
+def view(requestObject: RequestObject, groupSchemeActivity: String, index: Int, trusteeAddressUkForm: Form[TrusteeAddressUk], edit: Boolean = false)
+(implicit request: Request[AnyContent], hc: HeaderCarrier): Html = {
+trusteeAddressUkView(requestObject, groupSchemeActivity, index, trusteeAddressUkForm, edit)
+}
+
+}
 
 }
