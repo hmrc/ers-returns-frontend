@@ -19,8 +19,12 @@ package controllers.subsidiaries
 import config.ApplicationConfig
 import connectors.ErsConnector
 import controllers.auth.AuthAction
+import models.{CompanyAddressUk, RequestObject, RsFormMappings}
+import play.api.data.Form
 import play.api.libs.json.Format
-import play.api.mvc.MessagesControllerComponents
+import play.api.mvc.{AnyContent, MessagesControllerComponents, Request}
+import play.twirl.api.Html
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -44,22 +48,17 @@ extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with Subsidiar
 implicit val ec: ExecutionContext = mcc.executionContext
 
 val cacheKey: String = ersUtil.SUBSIDIARY_ADDRESS_CACHE
-implicit val format: Format[TrusteeAddressUk] = TrusteeAddressUk.format
+implicit val format: Format[CompanyAddressUk] = CompanyAddressUk.format
 
-def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier): Future[Result] = {
-trusteeService.updateTrusteeCache(index).map { _ =>
-Redirect(controllers.routes.TrusteeController.trusteeSummaryPage())
-//TODO Update this to the next page in the journey innit (might be right now, until I move stuff to new summary controller or whatever)
-}
-}
+//def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier): Future[Result] = {
+//
+//}
 
-def form(implicit request: Request[AnyContent]): Form[TrusteeAddressUk] = RsFormMappings.trusteeAddressUkForm()
+def form(implicit request: Request[AnyContent]): Form[CompanyAddressUk] = RsFormMappings.companyAddressUkForm()
 
-def view(requestObject: RequestObject, groupSchemeActivity: String, index: Int, trusteeAddressUkForm: Form[TrusteeAddressUk], edit: Boolean = false)
+def view(requestObject: RequestObject, groupSchemeActivity: String, index: Int, companyAddressUkForm: Form[CompanyAddressUk])
 (implicit request: Request[AnyContent], hc: HeaderCarrier): Html = {
-trusteeAddressUkView(requestObject, groupSchemeActivity, index, trusteeAddressUkForm, edit)
-}
-
+trusteeAddressUkView(requestObject, groupSchemeActivity, index, companyAddressUkForm)
 }
 
 }
