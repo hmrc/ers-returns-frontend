@@ -16,6 +16,49 @@
 
 package controllers.subsidiaries
 
-class CompanyAddressOverseasController {
+import config.ApplicationConfig
+import connectors.ErsConnector
+import controllers.auth.AuthAction
+import models.{CompanyAddressUk, RequestObject, RsFormMappings}
+import play.api.data.Form
+import play.api.libs.json.Format
+import play.api.mvc.{AnyContent, MessagesControllerComponents, Request}
+import play.twirl.api.Html
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
+import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
+import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
+import utils.{CountryCodes, ERSUtil}
+
+import javax.inject.Inject
+import scala.concurrent.ExecutionContext
+
+class CompanyAddressOverseasController  @Inject()(val mcc: MessagesControllerComponents,
+                                                  val authConnector: DefaultAuthConnector,
+                                                  val ersConnector: ErsConnector,
+                                                  val globalErrorView: views.html.global_error,
+                                                  val authAction: AuthAction,
+                                                  implicit val countryCodes: CountryCodes,
+                                                  implicit val ersUtil: ERSUtil,
+                                                  implicit val appConfig: ApplicationConfig,
+                                                  companyAddressOverseasView: views.html.manual_address_uk
+                                                 )
+  extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with SubsidiariesBaseController[CompanyAddressUkController] {
+
+  implicit val ec: ExecutionContext = mcc.executionContext
+
+  val cacheKey: String = ersUtil.SUBSIDIARY_ADDRESS_CACHE
+  implicit val format: Format[CompanyAddressUk] = CompanyAddressUk.format
+
+  //def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier): Future[Result] = {
+  //
+  //}
+
+  def form(implicit request: Request[AnyContent]): Form[CompanyAddressUk] = RsFormMappings.companyAddressUkForm()
+
+  def view(requestObject: RequestObject, groupSchemeActivity: String, index: Int, companyAddressOverseaForm: Form[CompanyAddressUk])
+          (implicit request: Request[AnyContent], hc: HeaderCarrier): Html = {
+    companyAddressOverseasView(requestObject, groupSchemeActivity, index, companyAddressUkForm)
+  }
 
 }
