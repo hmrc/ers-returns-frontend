@@ -19,7 +19,7 @@ package controllers.subsidiaries
 import config.ApplicationConfig
 import connectors.ErsConnector
 import controllers.auth.AuthAction
-import models.{CompanyAddressUk, RequestObject, RsFormMappings}
+import models.{CompanyAddressOverseas, CompanyAddressUk, RequestObject, RsFormMappings}
 import play.api.data.Form
 import play.api.libs.json.Format
 import play.api.mvc.{AnyContent, MessagesControllerComponents, Request}
@@ -43,22 +43,22 @@ class CompanyAddressOverseasController  @Inject()(val mcc: MessagesControllerCom
                                                   implicit val appConfig: ApplicationConfig,
                                                   companyAddressOverseasView: views.html.manual_address_uk
                                                  )
-  extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with SubsidiariesBaseController[CompanyAddressUkController] {
+  extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with SubsidiariesBaseController[CompanyAddressOverseasController] {
 
   implicit val ec: ExecutionContext = mcc.executionContext
 
   val cacheKey: String = ersUtil.SUBSIDIARY_ADDRESS_CACHE
-  implicit val format: Format[CompanyAddressUk] = CompanyAddressUk.format
+  implicit val format: Format[CompanyAddressOverseas] = CompanyAddressOverseas.format
 
   //def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier): Future[Result] = {
   //
   //}
 
-  def form(implicit request: Request[AnyContent]): Form[CompanyAddressUk] = RsFormMappings.companyAddressUkForm()
+  def form(implicit request: Request[AnyContent]): Form[CompanyAddressOverseas] = RsFormMappings.companyAddressOverseasForm()
 
-  def view(requestObject: RequestObject, groupSchemeActivity: String, index: Int, companyAddressOverseaForm: Form[CompanyAddressUk])
+  def view(requestObject: RequestObject, groupSchemeActivity: String, index: Int, companyAddressOverseasForm: Form[CompanyAddressUk])
           (implicit request: Request[AnyContent], hc: HeaderCarrier): Html = {
-    companyAddressOverseasView(requestObject, groupSchemeActivity, index, companyAddressUkForm)
+    companyAddressOverseasView(requestObject, groupSchemeActivity, index, companyAddressOverseasForm)
   }
 
 }

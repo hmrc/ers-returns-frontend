@@ -58,10 +58,14 @@ POST 		/add-subsidiary-company       					controllers.GroupSchemeController.manu
 POST 		/add-subsidiary-company/:index/delete       	controllers.GroupSchemeController.deleteCompany(index: Int)
 GET 		/add-subsidiary-company/:index/edit 	    	controllers.GroupSchemeController.editCompany(index: Int)
 
-GET         /where-subsidiary-based                            controllers.subsidiaries.IsCompanyUkController.questionPage(index: Int = 10000)
-POST        /where-subsidiary-based                            controllers.subsidiaries.IsCompanyUkController.questionSubmit(index: Int)
-GET         /where-subsidiary-based/:index/edit                controllers.subsidiaries.IsCompanyUkController.editQuestion(index: Int)
-POST        /where-subsidiary-based/:index/edit                controllers.subsidiaries.IsCompanyUkController.editQuestionSubmit(index: Int)
+GET         /where-subsidiary-registered                            controllers.subsidiaries.IsCompanyUkController.questionPage(index: Int = 10000)
+POST        /where-subsidiary-registered                            controllers.subsidiaries.IsCompanyUkController.questionSubmit(index: Int)
+
+GET         /subsidiary-address                            controllers.subsidiaries.CompanyAddressUkController.questionPage(index: Int = 10000)
+POST        /subsidiary-address                            controllers.subsidiaries.CompanyAddressUkController.questionSubmit(index: Int)
+
+GET         /overseas-subsidiary-address                           controllers.subsidiaries.CompanyAddressOverseasController.questionPage(index: Int = 10000)
+POST        /overseas-subsidiary-address                            controllers.subsidiaries.CompanyAddressOverseasController.questionSubmit(index: Int)
 
 GET 		/company-details  		                        controllers.SchemeOrganiserController.schemeOrganiserPage()
 POST 		/company-details 			                    controllers.SchemeOrganiserController.schemeOrganiserSubmit()
