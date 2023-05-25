@@ -60,7 +60,7 @@ class CsvFileUploadControllerSpec extends AnyWordSpecLike with Matchers with Opt
     messagesActionBuilder,
     DefaultActionBuilder(stubBodyParser[AnyContent]()),
     cc.parsers,
-    fakeApplication.injector.instanceOf[MessagesApi],
+    fakeApplication().injector.instanceOf[MessagesApi],
     cc.langs,
     cc.fileMimeTypes,
     ExecutionContext.global
@@ -85,14 +85,6 @@ class CsvFileUploadControllerSpec extends AnyWordSpecLike with Matchers with Opt
 	}
 
   override def beforeEach(): Unit = {
-    super.beforeEach()
-    reset(
-      mockAuthConnector,
-      mockSessionService,
-      mockErsConnector,
-			mockErsUtil,
-      mockUpscanService
-    )
 		when(mockErsUtil.CSV_FILES_UPLOAD).thenReturn("csv-files-upload")
 		when(mockErsUtil.CHECK_CSV_FILES).thenReturn("check-csv-files")
 		when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any()))
@@ -162,7 +154,7 @@ class CsvFileUploadControllerSpec extends AnyWordSpecLike with Matchers with Opt
       val updatedCallbackCaptor: ArgumentCaptor[UpscanCsvFilesCallbackList] = ArgumentCaptor.forClass(classOf[UpscanCsvFilesCallbackList])
       when(mockErsUtil.fetch[UpscanCsvFilesList](meq("csv-files-upload"), any[String])(any[HeaderCarrier], any()))
         .thenReturn(Future.successful(notStartedUpscanCsvFilesList))
-      when(mockErsUtil.cache(meq("csv-files-upload"), updatedCallbackCaptor.capture(), any[String])(any[HeaderCarrier], any(), any()))
+      when(mockErsUtil.cache(meq("csv-files-upload"), updatedCallbackCaptor.capture(), any[String])(any[HeaderCarrier], any()))
         .thenReturn(Future.successful(mock[CacheMap]))
 
       await(csvFileUploadController.success(testUploadId)(testFakeRequest))
@@ -173,7 +165,7 @@ class CsvFileUploadControllerSpec extends AnyWordSpecLike with Matchers with Opt
       "no file in the cache has UploadStatus of NotStarted after update" in {
         when(mockErsUtil.fetch[UpscanCsvFilesList](meq("csv-files-upload"), any[String])(any[HeaderCarrier], any()))
           .thenReturn(Future.successful(notStartedUpscanCsvFilesList))
-        when(mockErsUtil.cache(meq("csv-files-upload"), any[UpscanCsvFilesList], any[String])(any[HeaderCarrier], any(), any()))
+        when(mockErsUtil.cache(meq("csv-files-upload"), any[UpscanCsvFilesList], any[String])(any[HeaderCarrier], any()))
           .thenReturn(Future.successful(mock[CacheMap]))
 
         val result = csvFileUploadController.success(testUploadId)(testFakeRequest)
@@ -187,7 +179,7 @@ class CsvFileUploadControllerSpec extends AnyWordSpecLike with Matchers with Opt
     "a file in the cache has an UploadStatus of NotStarted after update" in {
       when(mockErsUtil.fetch[UpscanCsvFilesList](meq("csv-files-upload"), any[String])(any[HeaderCarrier], any()))
         .thenReturn(Future.successful(multipleNotStartedUpscanCsvFilesList))
-      when(mockErsUtil.cache(meq("csv-files-upload"), any[UpscanCsvFilesList], any[String])(any[HeaderCarrier], any(), any()))
+      when(mockErsUtil.cache(meq("csv-files-upload"), any[UpscanCsvFilesList], any[String])(any[HeaderCarrier], any()))
         .thenReturn(Future.successful(mock[CacheMap]))
       val result = csvFileUploadController.success(testUploadId)(testFakeRequest)
       status(result) shouldBe SEE_OTHER
@@ -209,7 +201,7 @@ class CsvFileUploadControllerSpec extends AnyWordSpecLike with Matchers with Opt
     "saving the cache fails" in {
       when(mockErsUtil.fetch[UpscanCsvFilesList](meq("csv-files-upload"), any[String])(any[HeaderCarrier], any()))
         .thenReturn(Future.successful(multipleNotStartedUpscanCsvFilesList))
-      when(mockErsUtil.cache(meq("csv-files-upload"), any[UpscanCsvFilesCallbackList], any[String])(any[HeaderCarrier], any(), any()))
+      when(mockErsUtil.cache(meq("csv-files-upload"), any[UpscanCsvFilesCallbackList], any[String])(any[HeaderCarrier], any()))
         .thenReturn(Future.failed(new Exception("Expected Exception")))
 
       val result = csvFileUploadController.success(testUploadId)(testFakeRequest)
@@ -503,7 +495,7 @@ class CsvFileUploadControllerSpec extends AnyWordSpecLike with Matchers with Opt
               Json.toJson(asUploadStatus(uploadedSuccessfully))
           )))
         when(
-          mockErsUtil.cache(any(), any(), any())(any(), any(), any())
+          mockErsUtil.cache(any(), any(), any())(any(), any())
         ) thenReturn Future.successful(CacheMap("", Map()))
 
         val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
@@ -521,7 +513,7 @@ class CsvFileUploadControllerSpec extends AnyWordSpecLike with Matchers with Opt
 			when(mockErsUtil.fetch[UpscanCsvFilesList](meq("csv-files-upload"), anyString())(any(), any()))
 				.thenReturn(Future.successful(multipleInPrgoressUpscanCsvFilesList))
 
-      when(mockErsUtil.fetchAll(anyString())(any(), any())) thenReturn(
+      when(mockErsUtil.fetchAll(anyString())(any(), any())).thenReturn(
         Future(CacheMap("id", data = Map(
           s"${"check-csv-files"}-${testUploadId.value}" -> Json.toJson(asUploadStatus(uploadedSuccessfully))
         ))),
@@ -530,10 +522,10 @@ class CsvFileUploadControllerSpec extends AnyWordSpecLike with Matchers with Opt
           s"${"check-csv-files"}-ID1" -> Json.toJson(asUploadStatus(uploadedSuccessfully))
         )))
       )
-      when(mockErsUtil.cache(any(), any(), any())(any(), any(), any())).thenReturn(Future.successful(CacheMap("", Map())))
+      when(mockErsUtil.cache(any(), any(), any())(any(), any())).thenReturn(Future.successful(CacheMap("", Map())))
 
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
-      val result = await(csvFileUploadControllerWithRetry(3).extractCsvCallbackData(Fixtures.EMISchemeInfo)(authRequest, hc))
+      await(csvFileUploadControllerWithRetry(3).extractCsvCallbackData(Fixtures.EMISchemeInfo)(authRequest, hc))
       verify(mockErsUtil, times(2)).fetchAll(any())(any(), any())
     }
 
@@ -553,7 +545,7 @@ class CsvFileUploadControllerSpec extends AnyWordSpecLike with Matchers with Opt
             Json.toJson(asUploadStatus(uploadedSuccessfully))
         )))
       when(
-        mockErsUtil.cache(any(), any(), any())(any(), any(), any())
+        mockErsUtil.cache(any(), any(), any())(any(), any())
       ) thenReturn Future.successful(CacheMap("", Map()))
 
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
@@ -577,7 +569,7 @@ class CsvFileUploadControllerSpec extends AnyWordSpecLike with Matchers with Opt
             Json.toJson(asUploadStatus(uploadedSuccessfully))
         )))
       when(
-        mockErsUtil.cache(any(), any(), any())(any(), any(), any())
+        mockErsUtil.cache(any(), any(), any())(any(), any())
       ) thenReturn Future.successful(CacheMap("", Map()))
 
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
@@ -724,7 +716,7 @@ class CsvFileUploadControllerSpec extends AnyWordSpecLike with Matchers with Opt
       result.futureValue.header.headers("Location") shouldBe routes.SchemeOrganiserController.schemeOrganiserPage().toString
     }
 
-    "redirect to getFileUploadProblemPage if file name check is unsuccessful" in {
+    "redirect to getFileUploadProblemPage() if file name check is unsuccessful" in {
       reset(mockErsConnector)
 
       val testUploadedSuccessfully = new UploadedSuccessfully(

@@ -49,14 +49,12 @@ class ErsPdfReaderSpec extends AnyWordSpecLike
   try {
     val parser: PDFParser = new PDFParser(new RandomAccessFile(file,"r"))
     parser.parse()
-    val cosDoc = parser.getDocument()
+    val cosDoc = parser.getDocument
     pdfStripper = new PDFTextStripper()
     pdDoc = new PDDocument(cosDoc)
     parsedText = pdfStripper.getText(pdDoc)
   } catch {
-    case e: Exception =>
-      println(s"Error reading pdf file..", e)
-      throw new Exception
+    case e: Exception => throw new Exception
   }
 
   "confirmation pdf file" should {

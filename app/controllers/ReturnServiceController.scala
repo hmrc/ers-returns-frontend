@@ -48,7 +48,7 @@ class ReturnServiceController @Inject()(val mcc: MessagesControllerComponents,
 	lazy val accessThreshold: Int = appConfig.accessThreshold
 	val accessDeniedUrl = "/outage-ers-frontend/index.html"
 
-  def cacheParams(ersRequestObject: RequestObject)(implicit request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
+  def cacheParams(ersRequestObject: RequestObject)(implicit request: Request[_], hc: HeaderCarrier): Future[Result] = {
     implicit val formatRSParams: OFormat[RequestObject] = Json.format[RequestObject]
 
     logger.debug("Request Object created --> " + ersRequestObject)
@@ -57,7 +57,7 @@ class ReturnServiceController @Inject()(val mcc: MessagesControllerComponents,
       ersUtil.cache(ersUtil.ersRequestObject, ersRequestObject) flatMap {
         _ => {
           logger.info(s"[ReturnServiceController][cacheParams] Request Object Cached -->  $ersRequestObject")
-					Future.successful(showInitialStartPage(ersRequestObject)(request, hc))
+					Future.successful(showInitialStartPage(ersRequestObject)(request))
         }
     }
     } recover { case e: Exception =>
@@ -104,7 +104,7 @@ class ReturnServiceController @Inject()(val mcc: MessagesControllerComponents,
   }
 
   def showInitialStartPage(requestObject: RequestObject)
-													(implicit request: Request[AnyRef], hc: HeaderCarrier): Result = {
+													(implicit request: Request[_]): Result = {
     val sessionData = s"${requestObject.getSchemeId} - ${requestObject.getPageTitle}"
     Ok(startView(requestObject)).
       withSession(request.session + ("screenSchemeInfo" -> sessionData) - BUNDLE_REF - DATE_TIME_SUBMITTED)
@@ -118,7 +118,7 @@ class ReturnServiceController @Inject()(val mcc: MessagesControllerComponents,
         }
   }
 
-  def showUnauthorisedPage(implicit request: Request[AnyRef]): Future[Result] = {
+  def showUnauthorisedPage(implicit request: Request[_]): Future[Result] = {
     Future.successful(Unauthorized(unauthorisedView()))
   }
 

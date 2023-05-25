@@ -192,7 +192,7 @@ class CsvFileUploadController @Inject()(val mcc: MessagesControllerComponents,
         validateCsv(csvCallbackData, schemeInfo)
       } else {
         logger.info(s"[CsvFileUploadController][checkFileNames] User uploaded the wrong file")
-        Future(getFileUploadProblemPage)
+        Future(getFileUploadProblemPage())
       }
     } recover {
       case e: Exception =>
@@ -251,7 +251,7 @@ class CsvFileUploadController @Inject()(val mcc: MessagesControllerComponents,
         val errorMessage = request.getQueryString("errorMessage").getOrElse("Unknown")
         val errorRequestId = request.getQueryString("errorRequestId").getOrElse("Unknown")
         logger.error(s"Upscan Failure. errorCode: $errorCode, errorMessage: $errorMessage, errorRequestId: $errorRequestId")
-        Future.successful(getFileUploadProblemPage)
+        Future.successful(getFileUploadProblemPage())
   }
 
   def getFileUploadProblemPage()(implicit request: Request[_], messages: Messages): Result = {

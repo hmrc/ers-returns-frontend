@@ -47,12 +47,14 @@ class ERSConnectorSpec extends AnyWordSpecLike with Matchers with OptionValues
 												with UpscanData
                         with GuiceOneAppPerSuite {
 
+  override implicit val ec: ExecutionContext = app.injector.instanceOf[ExecutionContext]
+
   lazy val newConfig: Map[String, Any] = config + ("microservice.services.ers-file-validator.port" -> server.port())
   val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
     messagesActionBuilder,
     DefaultActionBuilder(stubBodyParser[AnyContent]()),
     cc.parsers,
-    fakeApplication.injector.instanceOf[MessagesApi],
+    fakeApplication().injector.instanceOf[MessagesApi],
     cc.langs,
     cc.fileMimeTypes,
     ExecutionContext.global
@@ -60,7 +62,6 @@ class ERSConnectorSpec extends AnyWordSpecLike with Matchers with OptionValues
 
   implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
   implicit lazy val mat: Materializer = app.materializer
-  override implicit val ec: ExecutionContext = mockMCC.executionContext
   implicit lazy val authContext: ERSAuthData = defaultErsAuthData
 	lazy val testHttp: DefaultHttpClient = app.injector.instanceOf[DefaultHttpClient]
 

@@ -25,7 +25,7 @@
         govukInsetText: GovukInsetText
 )
 
-@(requestObject: RequestObject)(implicit request: Request[AnyRef], messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
+@(requestObject: RequestObject)(implicit request: Request[_], messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 
 @schemeId = @{requestObject.getSchemeId}
 
@@ -40,7 +40,7 @@
     <p id="lead-paragraph" class="govuk-body">@ersUtil.getPageElement(schemeId, ersUtil.PAGE_START, "intro_para")</p>
 
     @govukButton(Button(
-        href = Some(routes.ReportableEventsController.reportableEventsPage.url),
+        href = Some(routes.ReportableEventsController.reportableEventsPage().url),
         isStartButton = true,
         content = Text(messages("ers_start.start_now_button")),
         attributes = Map("id" -> "start-button")

@@ -34,7 +34,7 @@ class RetryableSpec extends AnyWordSpecLike with Matchers with OptionValues with
   class RetryTest extends Retryable {
 		import scala.concurrent.duration._
 		val mockAppConfig: ApplicationConfig = mock[ApplicationConfig]
-		when(mockAppConfig.retryDelay).thenReturn(1 millisecond)
+		when(mockAppConfig.retryDelay).thenReturn(1.millisecond)
 
 		implicit lazy val actorSystem: ActorSystem = app.actorSystem
     override val appConfig: ApplicationConfig = mockAppConfig

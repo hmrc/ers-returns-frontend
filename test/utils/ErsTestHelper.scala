@@ -27,18 +27,18 @@ import org.jsoup.nodes.Document
 import org.mockito.Mockito._
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.i18n
-import play.api.i18n.{Messages, MessagesImpl}
+import play.api.i18n.MessagesImpl
 import play.api.mvc.BodyParsers.Default
 import play.api.mvc._
 import play.api.test.FakeRequest
-import play.api.test.Helpers.{contentAsString, defaultAwaitTimeout, stubBodyParser, stubControllerComponents, stubMessages, stubMessagesApi}
+import play.api.test.Helpers.{contentAsString, defaultAwaitTimeout, stubBodyParser, stubControllerComponents, stubMessagesApi}
 import play.twirl.api.Html
 import services.SessionService
 import services.audit.AuditEvents
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 trait ErsTestHelper extends MockitoSugar with AuthHelper with ERSFakeApplicationConfig {
 
@@ -105,7 +105,7 @@ trait ErsTestHelper extends MockitoSugar with AuthHelper with ERSFakeApplication
 	when(mockAppConfig.ampersandRegex).thenReturn("(?!&amp;)(?:&)".r)
 
 	import scala.concurrent.duration._
-	when(mockAppConfig.retryDelay).thenReturn(3 milliseconds)
+	when(mockAppConfig.retryDelay).thenReturn(3.milliseconds)
 
 	when(mockErsUtil.PAGE_ALT_ACTIVITY).thenReturn("ers_alt_activity")
 	when(mockErsUtil.CSV_FILES_UPLOAD).thenReturn("csv-files-upload")

@@ -51,7 +51,7 @@ class CheckFileTypeControllerSpec extends AnyWordSpecLike
     messagesActionBuilder,
     DefaultActionBuilder(stubBodyParser[AnyContent]()),
     cc.parsers,
-    fakeApplication.injector.instanceOf[MessagesApi],
+    fakeApplication().injector.instanceOf[MessagesApi],
     cc.langs,
     cc.fileMimeTypes,
     ExecutionContext.global
@@ -122,7 +122,7 @@ class CheckFileTypeControllerSpec extends AnyWordSpecLike
                                             cache: Future[CacheMap] = Future.successful(mock[CacheMap]),
                                            requestObject: Future[RequestObject] = Future.successful(ersRequestObject)): CheckFileTypeController =
 			new CheckFileTypeController(mockMCC, mockAuthConnector, mockErsUtil, mockAppConfig, globalErrorView, checkFileTypeView, testAuthActionGov){
-      when(mockErsUtil.cache(matches("check-file-type"), any(), any())(any(), any(), any())).thenReturn(cache)
+      when(mockErsUtil.cache(matches("check-file-type"), any(), any())(any(), any())).thenReturn(cache)
       when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any())).thenReturn(requestObject)
     }
 
@@ -143,7 +143,7 @@ class CheckFileTypeControllerSpec extends AnyWordSpecLike
     "give a bad request status and stay on the same page if form errors" in {
       val controllerUnderTest = buildFakeCheckingServiceController()
       val fileTypeData = Map("" -> "")
-      val form = RsFormMappings.checkFileTypeForm.bind(fileTypeData)
+      val form = RsFormMappings.checkFileTypeForm().bind(fileTypeData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val result = controllerUnderTest.showCheckFileTypeSelected()(buildRequestWithAuth(request), hc)
       status(result) shouldBe Status.OK
@@ -152,7 +152,7 @@ class CheckFileTypeControllerSpec extends AnyWordSpecLike
     "if no form errors with file type = csv and save success" in {
       val controllerUnderTest = buildFakeCheckingServiceController()
       val checkFileTypeData = Map("checkFileType" -> "csv")
-      val form = RsFormMappings.schemeTypeForm.bind(checkFileTypeData)
+      val form = RsFormMappings.schemeTypeForm().bind(checkFileTypeData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val result = controllerUnderTest.showCheckFileTypeSelected()(buildRequestWithAuth(request), hc)
       status(result) shouldBe Status.SEE_OTHER
@@ -162,7 +162,7 @@ class CheckFileTypeControllerSpec extends AnyWordSpecLike
     "if no form errors with file type = ods and save success" in {
       val controllerUnderTest = buildFakeCheckingServiceController()
       val checkFileTypeData = Map("checkFileType" -> "ods")
-      val form = RsFormMappings.schemeTypeForm.bind(checkFileTypeData)
+      val form = RsFormMappings.schemeTypeForm().bind(checkFileTypeData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val result = controllerUnderTest.showCheckFileTypeSelected()(buildRequestWithAuth(request), hc)
       status(result) shouldBe Status.SEE_OTHER
@@ -172,7 +172,7 @@ class CheckFileTypeControllerSpec extends AnyWordSpecLike
     "if no form errors with scheme type and save fails" in {
       val controllerUnderTest = buildFakeCheckingServiceController(cache = Future.failed(new Exception))
       val schemeTypeData = Map("checkFileType" -> "csv")
-      val form = RsFormMappings.schemeTypeForm.bind(schemeTypeData)
+      val form = RsFormMappings.schemeTypeForm().bind(schemeTypeData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val result = controllerUnderTest.showCheckFileTypeSelected()(buildRequestWithAuth(request), hc)
       contentAsString(result) shouldBe contentAsString(Future(controllerUnderTest.getGlobalErrorPage(request,testMessages)))

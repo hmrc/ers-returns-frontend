@@ -51,7 +51,7 @@ class TrusteeControllerSpec extends AnyWordSpecLike
     messagesActionBuilder,
     DefaultActionBuilder(stubBodyParser[AnyContent]()),
     cc.parsers,
-    fakeApplication.injector.instanceOf[MessagesApi],
+    fakeApplication().injector.instanceOf[MessagesApi],
     cc.langs,
     cc.fileMimeTypes,
     ExecutionContext.global
@@ -84,7 +84,7 @@ class TrusteeControllerSpec extends AnyWordSpecLike
       when(mockErsUtil.fetch[TrusteeDetailsList](matches(mockErsUtil.TRUSTEES_CACHE), any())(any(), any())
 			) thenReturn trusteeDetailsRes
 
-      when(mockErsUtil.cache(matches(mockErsUtil.TRUSTEES_CACHE), any(), any())(any(), any(), any())
+      when(mockErsUtil.cache(matches(mockErsUtil.TRUSTEES_CACHE), any(), any())(any(), any())
       ) thenReturn cacheRes
     }
 
@@ -134,7 +134,7 @@ class TrusteeControllerSpec extends AnyWordSpecLike
     "give a OK status and stay on the same page if form errors" in {
       val controllerUnderTest = buildFakeTrusteePageController()
       val trusteeData = Map("" -> "")
-      val form = RsFormMappings.trusteeDetailsForm.bind(trusteeData)
+      val form = RsFormMappings.trusteeDetailsForm().bind(trusteeData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val authRequest = buildRequestWithAuth(request)
 
@@ -145,7 +145,7 @@ class TrusteeControllerSpec extends AnyWordSpecLike
     "if form errors and if fetching groupSchemeActivity fails direct to ers errors page" in {
       val controllerUnderTest = buildFakeTrusteePageController(groupSchemeActivityRes = failure)
       val trusteeData = Map("" -> "")
-      val form = RsFormMappings.trusteeDetailsForm.bind(trusteeData)
+      val form = RsFormMappings.trusteeDetailsForm().bind(trusteeData)
       val req = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val authRequest = buildRequestWithAuth(req)
 
@@ -162,7 +162,7 @@ class TrusteeControllerSpec extends AnyWordSpecLike
 				"country" -> "UK",
 				"postcode" -> ""
 			)
-      val form = RsFormMappings.trusteeDetailsForm.bind(trusteeData)
+      val form = RsFormMappings.trusteeDetailsForm().bind(trusteeData)
       val request = Fixtures.buildFakeRequestWithSessionIdSIP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val authRequest = buildRequestWithAuth(request)
 
@@ -181,7 +181,7 @@ class TrusteeControllerSpec extends AnyWordSpecLike
 				"country" -> "UK",
 				"postcode" -> ""
 			)
-      val form = RsFormMappings.trusteeDetailsForm.bind(trusteeData)
+      val form = RsFormMappings.trusteeDetailsForm().bind(trusteeData)
       val request = Fixtures.buildFakeRequestWithSessionIdSIP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val authRequest = buildRequestWithAuth(request)
 
@@ -200,7 +200,7 @@ class TrusteeControllerSpec extends AnyWordSpecLike
 				"country" -> "UK",
 				"postcode" -> ""
 			)
-      val form = RsFormMappings.trusteeDetailsForm.bind(trusteeData)
+      val form = RsFormMappings.trusteeDetailsForm().bind(trusteeData)
       val request = Fixtures.buildFakeRequestWithSessionIdSIP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val authRequest = buildRequestWithAuth(request)
 
@@ -219,7 +219,7 @@ class TrusteeControllerSpec extends AnyWordSpecLike
 				"country" -> "UK",
 				"postcode" -> ""
 			)
-      val form = RsFormMappings.trusteeDetailsForm.bind(trusteeData)
+      val form = RsFormMappings.trusteeDetailsForm().bind(trusteeData)
       val request = Fixtures.buildFakeRequestWithSessionIdSIP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val authRequest = buildRequestWithAuth(request)
 
@@ -254,7 +254,7 @@ class TrusteeControllerSpec extends AnyWordSpecLike
       ) thenReturn trusteeDetailsRes
 
       when(
-        mockErsUtil.cache(refEq(mockErsUtil.TRUSTEES_CACHE), any(), any())(any(), any(), any())
+        mockErsUtil.cache(refEq(mockErsUtil.TRUSTEES_CACHE), any(), any())(any(), any())
       ) thenReturn cacheRes
 
       when(
@@ -309,7 +309,7 @@ class TrusteeControllerSpec extends AnyWordSpecLike
       status(result) shouldBe Status.SEE_OTHER
 
       verify(mockErsUtil, times(1))
-        .cache(meq("trustees"), meq(TrusteeDetailsList(expected)), meq(ersRequestObject.getSchemeReference))(any(), any(), any())
+        .cache(meq("trustees"), meq(TrusteeDetailsList(expected)), meq(ersRequestObject.getSchemeReference))(any(), any())
     }
 
   }
@@ -334,7 +334,7 @@ class TrusteeControllerSpec extends AnyWordSpecLike
         mockErsUtil.fetch[TrusteeDetailsList](refEq(mockErsUtil.TRUSTEES_CACHE), anyString())(any(), any())
       ) thenReturn trusteeDetailsRes
       when(
-        mockErsUtil.cache(refEq(mockErsUtil.TRUSTEES_CACHE), anyString(), anyString())(any(), any(), any())
+        mockErsUtil.cache(refEq(mockErsUtil.TRUSTEES_CACHE), anyString(), anyString())(any(), any())
       ) thenReturn cacheRes
 
       when(
@@ -487,7 +487,7 @@ class TrusteeControllerSpec extends AnyWordSpecLike
       ) thenReturn trusteeDetailsRes
 
       when(
-        mockErsUtil.cache(refEq(mockErsUtil.TRUSTEES_CACHE), anyString(), anyString())(any(), any(), any())
+        mockErsUtil.cache(refEq(mockErsUtil.TRUSTEES_CACHE), anyString(), anyString())(any(), any())
       ) thenReturn cacheRes
 
       when(
@@ -546,9 +546,8 @@ class TrusteeControllerSpec extends AnyWordSpecLike
 
     "redirect to alterations activity page" in {
       val controllerUnderTest = buildFakeTrusteeController()
-      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
 
-      val result = controllerUnderTest.continueFromTrusteeSummaryPage()(authRequest, hc)
+      val result = controllerUnderTest.continueFromTrusteeSummaryPage()
       status(result) shouldBe Status.SEE_OTHER
     }
   }

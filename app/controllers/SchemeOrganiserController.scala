@@ -65,19 +65,19 @@ class SchemeOrganiserController @Inject()(val mcc: MessagesControllerComponents,
           } else {
             ""
           }
-          Ok(schemeOrganiserView(requestObject, FileType, RsFormMappings.schemeOrganiserForm.fill(res), reportableEvent.isNilReturn.get))
+          Ok(schemeOrganiserView(requestObject, FileType, RsFormMappings.schemeOrganiserForm().fill(res), reportableEvent.isNilReturn.get))
         } recover {
           case _: NoSuchElementException =>
             Ok(schemeOrganiserView(
 							requestObject,
 							fileType.get.checkFileType.get,
-							RsFormMappings.schemeOrganiserForm.fill(form),
+							RsFormMappings.schemeOrganiserForm().fill(form),
 							reportableEvent.isNilReturn.get
 						))
         }
       } recover {
         case _: NoSuchElementException =>
-          Ok(schemeOrganiserView(requestObject, "", RsFormMappings.schemeOrganiserForm.fill(form), reportableEvent.isNilReturn.get))
+          Ok(schemeOrganiserView(requestObject, "", RsFormMappings.schemeOrganiserForm().fill(form), reportableEvent.isNilReturn.get))
       }
     } recover {
       case e: Exception =>
@@ -95,7 +95,7 @@ class SchemeOrganiserController @Inject()(val mcc: MessagesControllerComponents,
 
   def showSchemeOrganiserSubmit(requestObject: RequestObject)
 															 (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
-    RsFormMappings.schemeOrganiserForm.bindFromRequest.fold(
+    RsFormMappings.schemeOrganiserForm().bindFromRequest().fold(
       errors => {
         val correctOrder = errors.errors.map(_.key).distinct
         val incorrectOrderGrouped = errors.errors.groupBy(_.key).map(_._2.head).toSeq

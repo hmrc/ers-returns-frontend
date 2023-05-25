@@ -68,7 +68,7 @@
     additionalHeadBlock = Some(hmrcHead(Some(head), CSPNonce.get)),
     isWelshTranslationAvailable = applicationConfig.languageTranslationEnabled,
     serviceName = Some(messages("service.name")),
-    serviceUrl = Some(controllers.routes.ReturnServiceController.startPage.url),
+    serviceUrl = Some(controllers.routes.ReturnServiceController.startPage().url),
     signOutUrl = if(!disableSignOut) Some(applicationConfig.signOut) else None,
     userResearchBannerUrl = if(isUserResearchBannerVisible) Some(applicationConfig.urBannerLink) else None,
     additionalScriptsBlock = Some(hmrcScripts(nonce = CSPNonce.get, scriptsBlock = Some(scripts))),

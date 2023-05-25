@@ -116,7 +116,7 @@ class ErsReceiptPdfBuilderService @Inject()(val countryCodes: CountryCodes)(impl
     decorator.decorate
   }
 
-  def buildPdf(html: String)(implicit messages: Messages): ByteArrayOutputStream = {
+  def buildPdf(html: String): ByteArrayOutputStream = {
     val os = new ByteArrayOutputStream()
     val builder = new PdfRendererBuilder
     builder

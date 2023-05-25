@@ -55,7 +55,7 @@ class CheckFileTypeController @Inject()(val mcc: MessagesControllerComponents,
         case _: NoSuchElementException => CheckFileType(Some(""))
       }
     } yield {
-      Ok(checkFileTypeView(requestObject, fileType.checkFileType, RsFormMappings.checkFileTypeForm.fill(fileType)))
+      Ok(checkFileTypeView(requestObject, fileType.checkFileType, RsFormMappings.checkFileTypeForm().fill(fileType)))
     }).recover{
       case e: Throwable =>
         logger.error(s"[CheckFileTypeController][showCheckFileTypePage] Rendering CheckFileType view failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
@@ -70,7 +70,7 @@ class CheckFileTypeController @Inject()(val mcc: MessagesControllerComponents,
 
   def showCheckFileTypeSelected()(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
     ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
-      RsFormMappings.checkFileTypeForm.bindFromRequest.fold(
+      RsFormMappings.checkFileTypeForm().bindFromRequest().fold(
         errors => {
           Future.successful(Ok(checkFileTypeView(requestObject, Some(""), errors)))
         },

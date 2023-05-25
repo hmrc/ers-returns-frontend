@@ -117,7 +117,7 @@ class AuthActionGovGateway @Inject()(override val authConnector: DefaultAuthConn
 
   override def invokeBlock[A](request: Request[A], block: RequestWithOptionalAuthContext[A] => Future[Result]): Future[Result] = {
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
-    implicit val formatRSParams: OFormat[ErsMetaData] = Json.format[ErsMetaData]
+    //implicit val formatRSParams: OFormat[ErsMetaData] = Json.format[ErsMetaData]
 
     authorised(AuthProviders(GovernmentGateway)).retrieve(allEnrolments and affinityGroup) {
         case authorisedEnrolments ~ affinityGroup  =>

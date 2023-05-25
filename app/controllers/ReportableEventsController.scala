@@ -74,11 +74,11 @@ class ReportableEventsController @Inject()(val mcc: MessagesControllerComponents
   def showReportableEventsPage(requestObject: RequestObject)
                               (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
     ersUtil.fetch[ReportableEvents](ersUtil.reportableEvents, requestObject.getSchemeReference).map { activity =>
-      Ok(reportableEventsView(requestObject, activity.isNilReturn, RsFormMappings.chooseForm.fill(activity)))
+      Ok(reportableEventsView(requestObject, activity.isNilReturn, RsFormMappings.chooseForm().fill(activity)))
     } recover {
       case _: NoSuchElementException =>
         val form = ReportableEvents(Some(""))
-        Ok(reportableEventsView(requestObject, Some(""), RsFormMappings.chooseForm.fill(form)))
+        Ok(reportableEventsView(requestObject, Some(""), RsFormMappings.chooseForm().fill(form)))
     }
   }
 
@@ -95,7 +95,7 @@ class ReportableEventsController @Inject()(val mcc: MessagesControllerComponents
 
   def showReportableEventsSelected(requestObject: RequestObject)
                                   (implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] = {
-    RsFormMappings.chooseForm.bindFromRequest.fold(
+    RsFormMappings.chooseForm().bindFromRequest().fold(
       errors => {
         Future.successful(Ok(reportableEventsView(requestObject, Some(""), errors)))
       },

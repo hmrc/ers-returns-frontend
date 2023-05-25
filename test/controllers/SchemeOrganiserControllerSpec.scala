@@ -50,7 +50,7 @@ class SchemeOrganiserControllerSpec extends AnyWordSpecLike
     messagesActionBuilder,
     DefaultActionBuilder(stubBodyParser[AnyContent]()),
     cc.parsers,
-    fakeApplication.injector.instanceOf[MessagesApi],
+    fakeApplication().injector.instanceOf[MessagesApi],
     cc.langs,
     cc.fileMimeTypes,
     ExecutionContext.global
@@ -201,7 +201,7 @@ class SchemeOrganiserControllerSpec extends AnyWordSpecLike
           Future.failed(new NoSuchElementException)
         }
       )
-      when(mockErsUtil.cache(refEq(SCHEME_ORGANISER_CACHE), any(), any())(any(), any(), any())).thenReturn(
+      when(mockErsUtil.cache(refEq(SCHEME_ORGANISER_CACHE), any(), any())(any(), any())).thenReturn(
         if (schemeOrganiserDataCachedOk) {
           Future.successful(null)
         } else {
@@ -228,7 +228,7 @@ class SchemeOrganiserControllerSpec extends AnyWordSpecLike
     "give a Ok status and stay on the same page if form errors and display the error" in {
       val controllerUnderTest = buildFakeSchemeOrganiserController()
       val schemeOrganiserData = Map("" -> "")
-      val form = RsFormMappings.schemeOrganiserForm.bind(schemeOrganiserData)
+      val form = RsFormMappings.schemeOrganiserForm().bind(schemeOrganiserData)
       val request = Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val authRequest = buildRequestWithAuth(request)
 
@@ -248,7 +248,7 @@ class SchemeOrganiserControllerSpec extends AnyWordSpecLike
 				"companyReg" -> "AB123456",
 				"corporationRef" -> "1234567890"
 			)
-      val form = _root_.models.RsFormMappings.schemeOrganiserForm.bind(schemeOrganiserData)
+      val form = _root_.models.RsFormMappings.schemeOrganiserForm().bind(schemeOrganiserData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val authRequest = buildRequestWithAuth(request)
 
@@ -269,7 +269,7 @@ class SchemeOrganiserControllerSpec extends AnyWordSpecLike
 				"companyReg" -> "AB123456",
 				"corporationRef" -> "1234567890"
 			)
-      val form = _root_.models.RsFormMappings.schemeOrganiserForm.bind(schemeOrganiserData)
+      val form = _root_.models.RsFormMappings.schemeOrganiserForm().bind(schemeOrganiserData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val authRequest = buildRequestWithAuth(request)
 
@@ -290,7 +290,7 @@ class SchemeOrganiserControllerSpec extends AnyWordSpecLike
         "companyReg" -> "AB123456",
         "corporationRef" -> "1234567890"
       )
-      val form = _root_.models.RsFormMappings.schemeOrganiserForm.bind(schemeOrganiserData)
+      val form = _root_.models.RsFormMappings.schemeOrganiserForm().bind(schemeOrganiserData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val authRequest = buildRequestWithAuth(request)
 
@@ -309,7 +309,7 @@ class SchemeOrganiserControllerSpec extends AnyWordSpecLike
         "companyReg" -> "AB123456",
         "corporationRef" -> "1234567890"
       )
-      val form = _root_.models.RsFormMappings.schemeOrganiserForm.bind(schemeOrganiserData)
+      val form = _root_.models.RsFormMappings.schemeOrganiserForm().bind(schemeOrganiserData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val authRequest = buildRequestWithAuth(request)
 
@@ -329,7 +329,7 @@ class SchemeOrganiserControllerSpec extends AnyWordSpecLike
         "companyReg" -> "AB123456",
         "corporationRef" -> "1234567890"
       )
-      val form = _root_.models.RsFormMappings.schemeOrganiserForm.bind(schemeOrganiserData)
+      val form = _root_.models.RsFormMappings.schemeOrganiserForm().bind(schemeOrganiserData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val authRequest = buildRequestWithAuth(request)
 
@@ -349,7 +349,7 @@ class SchemeOrganiserControllerSpec extends AnyWordSpecLike
         "companyReg" -> "AB123456",
         "corporationRef" -> "1234567890"
       )
-      val form = _root_.models.RsFormMappings.schemeOrganiserForm.bind(schemeOrganiserData)
+      val form = _root_.models.RsFormMappings.schemeOrganiserForm().bind(schemeOrganiserData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val authRequest = buildRequestWithAuth(request)
 
@@ -369,7 +369,7 @@ class SchemeOrganiserControllerSpec extends AnyWordSpecLike
         "companyReg" -> "AB123456",
         "corporationRef" -> "1234567890"
       )
-      val form = _root_.models.RsFormMappings.schemeOrganiserForm.bind(schemeOrganiserData)
+      val form = _root_.models.RsFormMappings.schemeOrganiserForm().bind(schemeOrganiserData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val authRequest = buildRequestWithAuth(request)
 
@@ -389,7 +389,7 @@ class SchemeOrganiserControllerSpec extends AnyWordSpecLike
         "companyReg" -> "AB123456",
         "corporationRef" -> "1234567890"
       )
-      val form = _root_.models.RsFormMappings.schemeOrganiserForm.bind(schemeOrganiserData)
+      val form = _root_.models.RsFormMappings.schemeOrganiserForm().bind(schemeOrganiserData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val authRequest = buildRequestWithAuth(request)
 
@@ -409,7 +409,7 @@ class SchemeOrganiserControllerSpec extends AnyWordSpecLike
         "companyReg" -> "AB123456",
         "corporationRef" -> "1234567890"
       )
-      val form = _root_.models.RsFormMappings.schemeOrganiserForm.bind(schemeOrganiserData)
+      val form = _root_.models.RsFormMappings.schemeOrganiserForm().bind(schemeOrganiserData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val authRequest = buildRequestWithAuth(request)
 
@@ -429,7 +429,7 @@ class SchemeOrganiserControllerSpec extends AnyWordSpecLike
         "companyReg" -> "AB123456",
         "corporationRef" -> "1234567890"
       )
-      val form = _root_.models.RsFormMappings.schemeOrganiserForm.bind(schemeOrganiserData)
+      val form = _root_.models.RsFormMappings.schemeOrganiserForm().bind(schemeOrganiserData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val authRequest = buildRequestWithAuth(request)
 
@@ -449,7 +449,7 @@ class SchemeOrganiserControllerSpec extends AnyWordSpecLike
         "companyReg" -> "AB12345612",
         "corporationRef" -> "1234567890"
       )
-      val form = _root_.models.RsFormMappings.schemeOrganiserForm.bind(schemeOrganiserData)
+      val form = _root_.models.RsFormMappings.schemeOrganiserForm().bind(schemeOrganiserData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val authRequest = buildRequestWithAuth(request)
 
@@ -469,7 +469,7 @@ class SchemeOrganiserControllerSpec extends AnyWordSpecLike
         "companyReg" -> "AB12345)",
         "corporationRef" -> "1234567890"
       )
-      val form = _root_.models.RsFormMappings.schemeOrganiserForm.bind(schemeOrganiserData)
+      val form = _root_.models.RsFormMappings.schemeOrganiserForm().bind(schemeOrganiserData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val authRequest = buildRequestWithAuth(request)
 
@@ -489,7 +489,7 @@ class SchemeOrganiserControllerSpec extends AnyWordSpecLike
         "companyReg" -> "AB123456",
         "corporationRef" -> "12345678901"
       )
-      val form = _root_.models.RsFormMappings.schemeOrganiserForm.bind(schemeOrganiserData)
+      val form = _root_.models.RsFormMappings.schemeOrganiserForm().bind(schemeOrganiserData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val authRequest = buildRequestWithAuth(request)
 
@@ -509,7 +509,7 @@ class SchemeOrganiserControllerSpec extends AnyWordSpecLike
         "companyReg" -> "AB123456",
         "corporationRef" -> "1234567-89"
       )
-      val form = _root_.models.RsFormMappings.schemeOrganiserForm.bind(schemeOrganiserData)
+      val form = _root_.models.RsFormMappings.schemeOrganiserForm().bind(schemeOrganiserData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val authRequest = buildRequestWithAuth(request)
 
@@ -529,7 +529,7 @@ class SchemeOrganiserControllerSpec extends AnyWordSpecLike
         "companyReg" -> "AB123456",
         "corporationRef" -> "1234567890"
       )
-      val form = _root_.models.RsFormMappings.schemeOrganiserForm.bind(schemeOrganiserData)
+      val form = _root_.models.RsFormMappings.schemeOrganiserForm().bind(schemeOrganiserData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val authRequest = buildRequestWithAuth(request)
 

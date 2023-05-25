@@ -37,17 +37,18 @@ class LanguageSwitchControllerSpec
   with GuiceOneAppPerSuite
   with PrivateMethodTester {
 
+  override implicit val ec: ExecutionContext = app.injector.instanceOf[ExecutionContext]
+
   val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
     messagesActionBuilder,
     DefaultActionBuilder(stubBodyParser[AnyContent]()),
     cc.parsers,
-    fakeApplication.injector.instanceOf[MessagesApi],
+    fakeApplication().injector.instanceOf[MessagesApi],
     cc.langs,
     cc.fileMimeTypes,
     ExecutionContext.global
   )
 
-  override implicit val ec: ExecutionContext = mockMCC.executionContext
 	lazy val langMap: Map[String, Lang] = Map(
 		"english" -> Lang("en"),
 		"cymraeg" -> Lang("cy")
@@ -82,7 +83,7 @@ class LanguageSwitchControllerSpec
 
     "build the relative url given valid input" in {
       val controller = new LanguageSwitchController(mockAppConfig, mockMCC)
-      val privateMethod = PrivateMethod[Option[String]]('asRelativeUrl)
+      val privateMethod = PrivateMethod[Option[String]](Symbol("asRelativeUrl"))
       val result = controller.invokePrivate(privateMethod("http://localhost:9000/test?testing#testerino"))
 
       result.get shouldBe "/test?testing#testerino"

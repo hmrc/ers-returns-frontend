@@ -75,7 +75,7 @@ class RequestObjectSpec extends AnyWordSpecLike with Matchers with GuiceOneAppPe
           None,
           None
         )
-      val privateToSchemeInfo = PrivateMethod[SchemeInfo]('toSchemeInfo)
+      val privateToSchemeInfo = PrivateMethod[SchemeInfo](Symbol("toSchemeInfo"))
       val result = requestObject invokePrivate privateToSchemeInfo()
 
       result.schemeName mustBe "MyScheme"

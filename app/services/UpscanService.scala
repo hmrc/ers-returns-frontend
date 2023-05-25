@@ -34,7 +34,7 @@ class UpscanService @Inject()(
   lazy val redirectUrlBase: String = applicationConfig.upscanRedirectBase
   private def urlToString(c: Call): String = redirectUrlBase + c.url
 
-  def getUpscanFormDataCsv(uploadId: UploadId, scRef: String)(implicit hc: HeaderCarrier, request: Request[AnyRef]): Future[UpscanInitiateResponse] = {
+  def getUpscanFormDataCsv(uploadId: UploadId, scRef: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[UpscanInitiateResponse] = {
     val callback = controllers.internal.routes.CsvFileUploadCallbackController.callback(uploadId, scRef)
       .absoluteURL(isSecure)
 

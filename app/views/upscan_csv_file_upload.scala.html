@@ -28,7 +28,7 @@
         govukInsetText: GovukInsetText
 )
 
-@(requestObject: RequestObject, upscanInitiateResponse: UpscanInitiateResponse, fileId: String)(implicit request: Request[AnyRef], messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
+@(requestObject: RequestObject, upscanInitiateResponse: UpscanInitiateResponse, fileId: String)(implicit request: Request[_], messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 
 @schemeId = @{requestObject.getSchemeId}
 
@@ -52,7 +52,7 @@
 
     @govukBackLink(BackLink(
         content = Text(messages("ers.back")),
-        href = routes.CheckCsvFilesController.checkCsvFilesPage.url,
+        href = routes.CheckCsvFilesController.checkCsvFilesPage().url,
     ))
 
     @govukErrorSummary(ErrorSummary(

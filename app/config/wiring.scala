@@ -17,13 +17,13 @@
 package config
 
 import play.api.Configuration
-import uk.gov.hmrc.crypto.{ApplicationCrypto, CryptoWithKeysFromConfig, Decrypter, Encrypter}
+import uk.gov.hmrc.crypto.{ApplicationCrypto, Decrypter, Encrypter}
+import uk.gov.hmrc.http.HttpClient
 import uk.gov.hmrc.http.cache.client.{SessionCache, ShortLivedCache, ShortLivedHttpCaching}
-import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
 
 import javax.inject.Inject
 
-class ERSFileValidatorSessionCache @Inject()(val http: DefaultHttpClient,
+class ERSFileValidatorSessionCache @Inject()(val http: HttpClient,
 																						 appConfig: ApplicationConfig
 																						) extends SessionCache {
 	lazy val defaultSource: String = appConfig.appName
@@ -31,7 +31,7 @@ class ERSFileValidatorSessionCache @Inject()(val http: DefaultHttpClient,
 	lazy val domain: String = appConfig.sessionCacheDomain
 }
 
-class ERSShortLivedHttpCache @Inject()(val http: DefaultHttpClient,
+class ERSShortLivedHttpCache @Inject()(val http: HttpClient,
 																			 appConfig: ApplicationConfig
 																			) extends ShortLivedHttpCaching {
 	override lazy val defaultSource: String = appConfig.appName
@@ -39,7 +39,7 @@ class ERSShortLivedHttpCache @Inject()(val http: DefaultHttpClient,
 	lazy val domain: String = appConfig.shortLivedCacheDomain
 }
 
-class ERSShortLivedCache @Inject()(val http: DefaultHttpClient,
+class ERSShortLivedCache @Inject()(val http: HttpClient,
 																	appConfig: ApplicationConfig,
 																	 val configuration: Configuration
 																 ) extends ShortLivedCache {

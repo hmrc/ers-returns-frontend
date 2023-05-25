@@ -49,7 +49,7 @@ class FileUploadControllerSpec extends PlaySpec
     messagesActionBuilder,
     DefaultActionBuilder(stubBodyParser[AnyContent]()),
     cc.parsers,
-    fakeApplication.injector.instanceOf[MessagesApi],
+    fakeApplication().injector.instanceOf[MessagesApi],
     cc.langs,
     cc.fileMimeTypes,
     ExecutionContext.global
@@ -108,7 +108,7 @@ class FileUploadControllerSpec extends PlaySpec
       "Upscan form data is successfully returned and callback record is created in session cache" in {
         when(mockUpscanService.getUpscanFormDataOds()(any[HeaderCarrier], any[Request[_]]))
           .thenReturn(Future.successful(upscanInitiateResponse))
-        when(mockSessionService.createCallbackRecord(any[Request[_]], any[HeaderCarrier]))
+        when(mockSessionService.createCallbackRecord(any[HeaderCarrier]))
           .thenReturn(Future.successful(()))
 
         setAuthMocks()
@@ -126,14 +126,14 @@ class FileUploadControllerSpec extends PlaySpec
         val result = TestFileUploadController.uploadFilePage()(testFakeRequest)
         checkGlobalErrorPage(result)
 
-        verify(mockSessionService, never()).createCallbackRecord(any(), any())
+        verify(mockSessionService, never()).createCallbackRecord(any())
       }
 
 
       "Session service returns an exception creating callback record" in {
         when(mockUpscanService.getUpscanFormDataOds()(any[HeaderCarrier], any[Request[_]]))
           .thenReturn(Future.successful(upscanInitiateResponse))
-        when(mockSessionService.createCallbackRecord(any[Request[_]], any[HeaderCarrier]))
+        when(mockSessionService.createCallbackRecord(any[HeaderCarrier]))
             .thenReturn(Future.failed(new Exception("Expected exception")))
 
         setAuthMocks()
@@ -148,9 +148,9 @@ class FileUploadControllerSpec extends PlaySpec
       "Callback record is returned with a successful upload and file name is cached" in {
         when(mockErsUtil.fetch[RequestObject](anyString())(any(), any(), any()))
           .thenReturn(Future.successful(ersRequestObject))
-        when(mockSessionService.getCallbackRecord(any[Request[_]], any[HeaderCarrier]))
+        when(mockSessionService.getCallbackRecord(any[HeaderCarrier]))
           .thenReturn(Future.successful(Some(uploadedSuccessfully)))
-        when(mockErsUtil.cache(meq("file-name"), meq(uploadedSuccessfully.name), any())(any[HeaderCarrier], any(), any[Request[AnyRef]]))
+        when(mockErsUtil.cache(meq("file-name"), meq(uploadedSuccessfully.name), any())(any[HeaderCarrier], any()))
           .thenReturn(Future.successful(mock[CacheMap]))
 
         setAuthMocks()
@@ -163,9 +163,9 @@ class FileUploadControllerSpec extends PlaySpec
 
     "return global error page" when {
       "caching file name fails" in {
-        when(mockSessionService.getCallbackRecord(any[Request[_]], any[HeaderCarrier]))
+        when(mockSessionService.getCallbackRecord(any[HeaderCarrier]))
           .thenReturn(Future.successful(Some(uploadedSuccessfully)))
-        when(mockErsUtil.cache(meq("file-name"), meq(uploadedSuccessfully.name), any())(any[HeaderCarrier], any(), any[Request[AnyRef]]))
+        when(mockErsUtil.cache(meq("file-name"), meq(uploadedSuccessfully.name), any())(any[HeaderCarrier], any()))
           .thenReturn(Future.failed(new Exception))
 
         setAuthMocks()
@@ -178,9 +178,9 @@ class FileUploadControllerSpec extends PlaySpec
       "file name includes .csv" in {
         when(mockErsUtil.fetch[RequestObject](anyString())(any(), any(), any()))
           .thenReturn(Future.successful(ersRequestObject))
-        when(mockSessionService.getCallbackRecord(any[Request[_]], any[HeaderCarrier]))
+        when(mockSessionService.getCallbackRecord(any[HeaderCarrier]))
           .thenReturn(Future.successful(Some(uploadedSuccessfullyCsv)))
-        when(mockErsUtil.cache(meq("file-name"), meq(uploadedSuccessfullyCsv.name), any())(any[HeaderCarrier], any(), any[Request[AnyRef]]))
+        when(mockErsUtil.cache(meq("file-name"), meq(uploadedSuccessfullyCsv.name), any())(any[HeaderCarrier], any()))
           .thenReturn(Future.successful(mock[CacheMap]))
 
         setAuthMocks()
@@ -195,7 +195,7 @@ class FileUploadControllerSpec extends PlaySpec
       "Ers Meta Data is returned, callback record is uploaded successfully, remove presubmission data returns OK and validate file data returns OK" in {
         when(mockErsUtil.fetch[RequestObject](anyString())(any(), any(), any()))
           .thenReturn(Future.successful(ersRequestObject))
-        when(mockSessionService.getCallbackRecord(any[Request[_]], any[HeaderCarrier]))
+        when(mockSessionService.getCallbackRecord(any[HeaderCarrier]))
           .thenReturn(Future.successful(Some(uploadedSuccessfully)))
         when(mockErsConnector.removePresubmissionData(any())(any[RequestWithOptionalAuthContext[AnyContent]], any[HeaderCarrier]))
           .thenReturn(Future.successful(HttpResponse(OK, "")))
@@ -213,7 +213,7 @@ class FileUploadControllerSpec extends PlaySpec
       "Ers Meta Data is returned, callback record is uploaded successfully, remove presubmission data returns OK and validate file data returns Accepted" in {
         when(mockErsUtil.fetch[RequestObject](anyString())(any(), any(), any()))
           .thenReturn(Future.successful(ersRequestObject))
-        when(mockSessionService.getCallbackRecord(any[Request[_]], any[HeaderCarrier]))
+        when(mockSessionService.getCallbackRecord(any[HeaderCarrier]))
           .thenReturn(Future.successful(Some(uploadedSuccessfully)))
         when(mockErsConnector.removePresubmissionData(any())(any[RequestWithOptionalAuthContext[AnyContent]], any[HeaderCarrier]))
           .thenReturn(Future.successful(HttpResponse(OK, "")))
@@ -247,7 +247,7 @@ class FileUploadControllerSpec extends PlaySpec
       }
 
       "session service throws an exception retrieving callback data" in {
-        when(mockSessionService.getCallbackRecord(any[Request[_]], any[HeaderCarrier]))
+        when(mockSessionService.getCallbackRecord(any[HeaderCarrier]))
           .thenReturn(Future.failed(new Exception))
         setAuthMocks()
         val result = TestFileUploadController.validationResults()(testFakeRequest)
@@ -255,7 +255,7 @@ class FileUploadControllerSpec extends PlaySpec
       }
 
       "session service returns a file which has not been successfully uploaded" in {
-        when(mockSessionService.getCallbackRecord(any[Request[_]], any[HeaderCarrier]))
+        when(mockSessionService.getCallbackRecord(any[HeaderCarrier]))
           .thenReturn(Future.successful(Some(Failed)))
         setAuthMocks()
         val result = TestFileUploadController.validationResults()(testFakeRequest)
