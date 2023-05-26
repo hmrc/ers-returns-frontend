@@ -31,9 +31,7 @@ object DateUtils extends Logging {
   def getCurrentDateTime: String = {
     val instant: Instant = Instant.now().truncatedTo(ChronoUnit.SECONDS)
     val formatter: DateTimeFormatter = DateTimeFormatter.ISO_INSTANT
-    val str: String = formatter.format(instant)
-    println(str)
-    str
+    formatter.format(instant)
   }
 
   def convertDate(date: String, format: String = "dd MMMM yyyy, hh:mma")(implicit messages: Messages): String = {
