@@ -32,6 +32,54 @@
 
 package controllers.subsidiaries
 
-class CompanyDetailsOverseasController {
+import config.ApplicationConfig
+import connectors.ErsConnector
+import controllers.auth.AuthAction
+import models.{CompanyName, CompanyOverseasName, RequestObject, RsFormMappings}
+import play.api.data.Form
+import play.api.libs.json.Format
+import play.api.mvc.{AnyContent, MessagesControllerComponents, Request}
+import play.twirl.api.Html
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
+import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
+import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
+import utils.{CountryCodes, ERSUtil}
+
+import javax.inject.Inject
+import scala.concurrent.ExecutionContext
+
+class CompanyDetailsOverseasController @Inject()(val mcc: MessagesControllerComponents,
+                                                 val authConnector: DefaultAuthConnector,
+                                                 val ersConnector: ErsConnector,
+                                                 val globalErrorView: views.html.global_error,
+                                                 val authAction: AuthAction,
+                                                 implicit val countryCodes: CountryCodes,
+                                                 implicit val ersUtil: ERSUtil,
+                                                 implicit val appConfig: ApplicationConfig,
+                                                 companyOverseasDetailsView: views.html.manual_company_details_overseas
+                                                )
+  extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with SubsidiariesBaseController[CompanyName] {
+
+  implicit val ec: ExecutionContext = mcc.executionContext
+
+  val cacheKey: String = ersUtil.SUBSIDIARY_NAME_CACHE
+
+  implicit val format: Format[CompanyName] = CompanyName.format
+
+  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier) = {
+    //    if (edit) {
+    //      Future.successful(Redirect(controllers.trustees.routes.TrusteeBasedInUkController.editQuestion(index)))
+    //    } else {
+    //      Future.successful(Redirect(controllers.trustees.routes.TrusteeBasedInUkController.questionPage()))
+    //    }
+  }
+
+  def form(implicit request: Request[AnyContent]): Form[CompanyName] = RsFormMappings.companyNameForm()
+
+  def view(requestObject: RequestObject, groupSchemeActivity: String, index: Int, companyNameOverseasForm: Form[CompanyName])
+          (implicit request: Request[AnyContent], hc: HeaderCarrier): Html = {
+    companyOverseasDetailsView(requestObject, groupSchemeActivity, index, companyNameOverseasForm)
+  }
 
 }

@@ -277,11 +277,16 @@ object RsFormMappings {
   }
 
 
-  def companyNameUKForm()(implicit messages: Messages): Form[CompanyName] = Form(mapping(
+  def companyNameForm()(implicit messages: Messages): Form[CompanyName] = Form(mapping(
     companyNameFields.name -> text
-      .verifying(Messages("ers_trustee_details.err.summary.name_required"), _.nonEmpty)
-      .verifying(Messages("ers_trustee_details.err.name"), so => checkLength(so, "trusteeDetailsFields.name"))
-      .verifying(Messages("ers_trustee_details.err.invalidChars.name"), so => validInputCharacters(so, addresssRegx))
+      .verifying(Messages("ers_manual_company_details.err.summary.name_required"), _.nonEmpty)
+      .verifying(Messages("ers_manual_company_details.err.name"), so => checkLength(so, "companyNameFields.name"))
+      .verifying(Messages("ers_manual_company_details.err.invalidChars.name"), so => validInputCharacters(so, addresssRegx)),
+    companyNameFields.companyReg -> optional(text
+      .verifying(Messages("ers_manual_company_details.err.company_reg"), so => checkLength(so, "companyNameFields.companyReg"))
+      .verifying(pattern(fieldValidationPatterns.companyRegPattern.r, error = Messages("ers_scheme_organiser.err.company_ref")))),
+    companyNameFields.companyRef -> optional(text
+      verifying pattern(corporationRefPattern.r, error = Messages("ers_manual_company_details.err.corporation_ref_pattern")))
   )(CompanyName.apply)(CompanyName.unapply(_)))
 
   /*
@@ -406,6 +411,8 @@ object schemeOrganiserFields {
 
 object companyNameFields {
   val name = "name"
+  val companyReg = "ref"
+  val companyRef = "id"
 }
 
 object fieldValidationPatterns {

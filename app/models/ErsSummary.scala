@@ -121,6 +121,14 @@ object CompanyName {
   implicit val format: OFormat[CompanyName] = Json.format[CompanyName]
 }
 
+case class CompanyOverseasName(
+                               name: String
+                              )
+
+object CompanyOverseasName {
+  implicit val format: OFormat[CompanyOverseasName] = Json.format[CompanyOverseasName]
+}
+
 case class CompanyAddressOverseas(
                                    addressLine1: String,
                                    addressLine2: Option[String],

@@ -41,7 +41,7 @@ class CompanyAddressOverseasController  @Inject()(val mcc: MessagesControllerCom
                                                   implicit val countryCodes: CountryCodes,
                                                   implicit val ersUtil: ERSUtil,
                                                   implicit val appConfig: ApplicationConfig,
-                                                  companyAddressOverseasView: views.html.manual_address_uk
+                                                  companyAddressOverseasView: views.html.manual_address_overseas
                                                  )
   extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with SubsidiariesBaseController[CompanyAddressOverseasController] {
 
@@ -56,7 +56,7 @@ class CompanyAddressOverseasController  @Inject()(val mcc: MessagesControllerCom
 
   def form(implicit request: Request[AnyContent]): Form[CompanyAddressOverseas] = RsFormMappings.companyAddressOverseasForm()
 
-  def view(requestObject: RequestObject, groupSchemeActivity: String, index: Int, companyAddressOverseasForm: Form[CompanyAddressUk])
+  def view(requestObject: RequestObject, groupSchemeActivity: String, index: Int, companyAddressOverseasForm: Form[CompanyAddressOverseas])
           (implicit request: Request[AnyContent], hc: HeaderCarrier): Html = {
     companyAddressOverseasView(requestObject, groupSchemeActivity, index, companyAddressOverseasForm)
   }

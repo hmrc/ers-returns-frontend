@@ -48,7 +48,7 @@ import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.{CountryCodes, ERSUtil}
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 class CompanyDetailsUkController @Inject()(val mcc: MessagesControllerComponents,
                                            val authConnector: DefaultAuthConnector,
@@ -68,18 +68,15 @@ class CompanyDetailsUkController @Inject()(val mcc: MessagesControllerComponents
 
   implicit val format: Format[CompanyName] = CompanyName.format
 
-  //  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier): Future[Result] = {
-//    if (edit) {
-//      Future.successful(Redirect(controllers.trustees.routes.TrusteeBasedInUkController.editQuestion(index)))
-//    } else {
-//      Future.successful(Redirect(controllers.trustees.routes.TrusteeBasedInUkController.questionPage()))
-//    }
-//  }
+    def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier) = {
+//
+ }
 
-  def form(implicit request: Request[AnyContent]): Form[CompanyName] = RsFormMappings.companyNameUKForm()
+  def form(implicit request: Request[AnyContent]): Form[CompanyName] = RsFormMappings.companyNameForm()
 
   def view(requestObject: RequestObject, groupSchemeActivity: String, index: Int, companyNameUKForm: Form[CompanyName])
           (implicit request: Request[AnyContent], hc: HeaderCarrier): Html = {
     companyUKNameView(requestObject, groupSchemeActivity, index, companyNameUKForm)
   }
+
 }

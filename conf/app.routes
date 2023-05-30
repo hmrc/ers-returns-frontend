@@ -67,6 +67,12 @@ POST        /subsidiary-address                            controllers.subsidiar
 GET         /overseas-subsidiary-address                           controllers.subsidiaries.CompanyAddressOverseasController.questionPage(index: Int = 10000)
 POST        /overseas-subsidiary-address                            controllers.subsidiaries.CompanyAddressOverseasController.questionSubmit(index: Int)
 
+GET         /subsidiary-details-uk                         controllers.subsidiaries.CompanyDetailsUkController.questionPage(index: Int = 10000)
+POST        /subsidiary-details-uk                         controllers.subsidiaries.CompanyDetailsUkController.questionSubmit(index: Int)
+
+GET         /subsidiary-details-overseas                        controllers.subsidiaries.CompanyDetailsOverseasController.questionPage(index: Int = 10000)
+POST        /subsidiary-details-overseas                       controllers.subsidiaries.CompanyDetailsOverseasController.questionSubmit(index: Int)
+
 GET 		/company-details  		                        controllers.SchemeOrganiserController.schemeOrganiserPage()
 POST 		/company-details 			                    controllers.SchemeOrganiserController.schemeOrganiserSubmit()
 
