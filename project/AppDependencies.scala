@@ -4,7 +4,7 @@ import sbt.*
 
 object AppDependencies {
 
-  val pdfboxVersion = "2.0.27"
+  val pdfboxVersion = "2.0.28"
   val openHtmlVersion = "1.0.10"
   val bootstrapVersion = "7.15.0"
 

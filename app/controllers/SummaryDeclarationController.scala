@@ -82,7 +82,7 @@ class SummaryDeclarationController @Inject()(val mcc: MessagesControllerComponen
           for (file <- csvFilesCallback) {
             fileNames = fileNames + Messages(
 							ersUtil.getPageElement(requestObject.getSchemeId, ersUtil.PAGE_CHECK_CSV_FILE, file.fileId + ".file_name")
-						) + "<br>"
+						) + "\n"
             fileCount += 1
           }
         } else {
