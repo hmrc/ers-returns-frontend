@@ -69,8 +69,12 @@ class CompanyDetailsUkController @Inject()(val mcc: MessagesControllerComponents
   implicit val format: Format[CompanyName] = CompanyName.format
 
     def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier) = {
-//
- }
+      if (edit) {
+        Future.successful(Redirect(controllers.routes.SummaryDeclarationController.summaryDeclarationPage()))
+      } else {
+        Future.successful(Redirect(controllers.subsidiaries.routes.CompanyAddressUkController.questionPage()))
+      }
+    }
 
   def form(implicit request: Request[AnyContent]): Form[CompanyName] = RsFormMappings.companyNameForm()
 

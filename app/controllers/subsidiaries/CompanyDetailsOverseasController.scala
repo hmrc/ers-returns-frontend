@@ -38,7 +38,7 @@ import controllers.auth.AuthAction
 import models.{CompanyName, CompanyOverseasName, RequestObject, RsFormMappings}
 import play.api.data.Form
 import play.api.libs.json.Format
-import play.api.mvc.{AnyContent, MessagesControllerComponents, Request}
+import play.api.mvc.{AnyContent, MessagesControllerComponents, Request, Result}
 import play.twirl.api.Html
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
@@ -47,7 +47,7 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.{CountryCodes, ERSUtil}
 
 import javax.inject.Inject
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 class CompanyDetailsOverseasController @Inject()(val mcc: MessagesControllerComponents,
                                                  val authConnector: DefaultAuthConnector,
@@ -68,11 +68,13 @@ class CompanyDetailsOverseasController @Inject()(val mcc: MessagesControllerComp
   implicit val format: Format[CompanyName] = CompanyName.format
 
   def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier) = {
-    //    if (edit) {
-    //      Future.successful(Redirect(controllers.trustees.routes.TrusteeBasedInUkController.editQuestion(index)))
-    //    } else {
-    //      Future.successful(Redirect(controllers.trustees.routes.TrusteeBasedInUkController.questionPage()))
-    //    }
+    {
+      if (edit) {
+        Future.successful(Redirect(controllers.routes.SummaryDeclarationController.summaryDeclarationPage()))
+      } else {
+        Future.successful(Redirect(controllers.subsidiaries.routes.CompanyAddressOverseasController.questionPage()))
+      }
+    }
   }
 
   def form(implicit request: Request[AnyContent]): Form[CompanyName] = RsFormMappings.companyNameForm()

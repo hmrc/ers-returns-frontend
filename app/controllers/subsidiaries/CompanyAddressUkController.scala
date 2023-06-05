@@ -22,7 +22,7 @@ import controllers.auth.AuthAction
 import models.{CompanyAddressUk, RequestObject, RsFormMappings}
 import play.api.data.Form
 import play.api.libs.json.Format
-import play.api.mvc.{AnyContent, MessagesControllerComponents, Request}
+import play.api.mvc.{AnyContent, MessagesControllerComponents, Request, Result}
 import play.twirl.api.Html
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
@@ -50,9 +50,9 @@ implicit val ec: ExecutionContext = mcc.executionContext
 val cacheKey: String = ersUtil.SUBSIDIARY_ADDRESS_CACHE
 implicit val format: Format[CompanyAddressUk] = CompanyAddressUk.format
 
-//def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier): Future[Result] = {
-//
-//}
+def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier): Future[Result] = {
+  Future.successful(Redirect(controllers.routes.SummaryDeclarationController.summaryDeclarationPage()))
+}
 
 def form(implicit request: Request[AnyContent]): Form[CompanyAddressUk] = RsFormMappings.companyAddressUkForm()
 

@@ -22,7 +22,7 @@ import controllers.auth.AuthAction
 import models.{CompanyAddressOverseas, CompanyAddressUk, RequestObject, RsFormMappings}
 import play.api.data.Form
 import play.api.libs.json.Format
-import play.api.mvc.{AnyContent, MessagesControllerComponents, Request}
+import play.api.mvc.{AnyContent, MessagesControllerComponents, Request, Result}
 import play.twirl.api.Html
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
@@ -31,7 +31,7 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.{CountryCodes, ERSUtil}
 
 import javax.inject.Inject
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 class CompanyAddressOverseasController  @Inject()(val mcc: MessagesControllerComponents,
                                                   val authConnector: DefaultAuthConnector,
@@ -50,9 +50,9 @@ class CompanyAddressOverseasController  @Inject()(val mcc: MessagesControllerCom
   val cacheKey: String = ersUtil.SUBSIDIARY_ADDRESS_CACHE
   implicit val format: Format[CompanyAddressOverseas] = CompanyAddressOverseas.format
 
-  //def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier): Future[Result] = {
-  //
-  //}
+  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier): Future[Result] = {
+  Future.successful(Redirect(controllers.routes.SummaryDeclarationController.summaryDeclarationPage()))
+  }
 
   def form(implicit request: Request[AnyContent]): Form[CompanyAddressOverseas] = RsFormMappings.companyAddressOverseasForm()
 
