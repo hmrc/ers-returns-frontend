@@ -70,7 +70,7 @@ class CompanyDetailsUkController @Inject()(val mcc: MessagesControllerComponents
 
     def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier) = {
       if (edit) {
-        Future.successful(Redirect(controllers.routes.SummaryDeclarationController.summaryDeclarationPage()))
+        Future.successful(Redirect(controllers.routes.GroupSchemeController.editCompany(index)))
       } else {
         Future.successful(Redirect(controllers.subsidiaries.routes.CompanyAddressUkController.questionPage()))
       }

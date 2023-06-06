@@ -72,9 +72,10 @@ class IsCompanyUkController @Inject()(val mcc: MessagesControllerComponents,
       requestObject <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
       subsidiaryBasedInUk <- ersUtil.fetch[CompanyBasedInUk](cacheKey, requestObject.getSchemeReference)
     } yield {
-      (subsidiaryBasedInUk.basedInUk) match {
-        case true => Redirect(controllers.subsidiaries.routes.CompanyDetailsUkController.questionPage())
-        case false  => Redirect(controllers.subsidiaries.routes.CompanyDetailsOverseasController.questionPage())
+      (subsidiaryBasedInUk.basedInUk, edit) match {
+        case (true, false) => Redirect(controllers.subsidiaries.routes.CompanyDetailsUkController.questionPage())
+        case (false, true)  => Redirect(controllers.subsidiaries.routes.CompanyDetailsOverseasController.questionPage())
+        //case (true, true) => Redirect(controllers.subsidiaries.routes.CompanyDetailsUkController.
       }
     }
   }
