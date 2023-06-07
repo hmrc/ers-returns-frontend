@@ -68,7 +68,7 @@ class CheckCsvFilesController @Inject()(val mcc: MessagesControllerComponents,
   }
 
   def validateCsvFilesPageSelected()(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
-    RsFormMappings.csvFileCheckForm.bindFromRequest.fold(
+    RsFormMappings.csvFileCheckForm().bindFromRequest().fold(
       _ =>
         reloadWithError(),
       formData =>
@@ -76,7 +76,7 @@ class CheckCsvFilesController @Inject()(val mcc: MessagesControllerComponents,
     )
   }
 
-  def performCsvFilesPageSelected(formData: CsvFilesList)(implicit request: Request[AnyRef], hc: HeaderCarrier): Future[Result] = {
+  def performCsvFilesPageSelected(formData: CsvFilesList)(implicit request: Request[_], hc: HeaderCarrier): Future[Result] = {
     val csvFilesCallbackList: UpscanCsvFilesList = createCacheData(formData.files)
     if(csvFilesCallbackList.ids.isEmpty) {
       reloadWithError()

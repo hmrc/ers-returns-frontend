@@ -52,7 +52,7 @@ class GeneratePdfControllerSpec extends AnyWordSpecLike
     messagesActionBuilder,
     DefaultActionBuilder(stubBodyParser[AnyContent]()),
     cc.parsers,
-    fakeApplication.injector.instanceOf[MessagesApi],
+    fakeApplication().injector.instanceOf[MessagesApi],
     cc.langs,
     cc.fileMimeTypes,
     ExecutionContext.global
@@ -167,11 +167,11 @@ class GeneratePdfControllerSpec extends AnyWordSpecLike
     }
 
     if (getAllDataRes) {
-      when(mockErsUtil.getAllData(anyString(), any[ErsMetaData]())(any(), any(), any()))
+      when(mockErsUtil.getAllData(anyString(), any[ErsMetaData]())(any(), any()))
         .thenReturn(Future.successful(ersSummary))
     }
     else {
-      when(mockErsUtil.getAllData(anyString(), any[ErsMetaData]())(any(), any(), any()))
+      when(mockErsUtil.getAllData(anyString(), any[ErsMetaData]())(any(), any()))
         .thenReturn(Future.failed(new Exception))
     }
   }

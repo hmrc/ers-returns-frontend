@@ -90,10 +90,10 @@ class ERSUtil @Inject()(val sessionService: SessionService,
 
 	val VALIDATED_SHEEETS: String = "validated-sheets"
 
-	def cache[T](key:String, body:T)(implicit hc:HeaderCarrier, ec:ExecutionContext, formats: json.Format[T], request: Request[AnyRef]): Future[CacheMap] =
+	def cache[T](key:String, body:T)(implicit hc:HeaderCarrier, ec:ExecutionContext, formats: json.Format[T]): Future[CacheMap] =
 		shortLivedCache.cache[T](getCacheId, key, body)
 
-	def cache[T](key: String, body: T, cacheId: String)(implicit hc: HeaderCarrier, formats: json.Format[T], request: Request[AnyRef]): Future[CacheMap] = {
+	def cache[T](key: String, body: T, cacheId: String)(implicit hc: HeaderCarrier, formats: json.Format[T]): Future[CacheMap] = {
 		logger.info(s"[ERSUtil][cache]cache saving key:$key, cacheId:$cacheId")
 		shortLivedCache.cache[T](cacheId, key, body)
 	}
@@ -145,7 +145,7 @@ class ERSUtil @Inject()(val sessionService: SessionService,
 		}
 	}
 
-	def fetchAll(sr: String)(implicit hc: HeaderCarrier, request: Request[AnyRef]): Future[CacheMap] = {
+	def fetchAll(sr: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[CacheMap] = {
 		val startTime = System.currentTimeMillis()
 		shortLivedCache.fetch(sr).map { res =>
 			cacheTimeFetch(System.currentTimeMillis() - startTime, TimeUnit.MILLISECONDS)
@@ -163,8 +163,7 @@ class ERSUtil @Inject()(val sessionService: SessionService,
 	}
 
 	def getAltAmmendsData(schemeRef: String)(implicit hc: HeaderCarrier,
-																					 ec: ExecutionContext,
-																					 request: Request[AnyRef]
+																					 ec: ExecutionContext
 																					): Future[(Option[AltAmendsActivity], Option[AlterationAmends])] = {
 		fetchOption[AltAmendsActivity](altAmendsActivity, schemeRef).flatMap {
 			altamends =>
@@ -184,8 +183,7 @@ class ERSUtil @Inject()(val sessionService: SessionService,
 
 	def getGroupSchemeData(schemeRef: String)
 												(implicit hc: HeaderCarrier,
-												 ec: ExecutionContext,
-												 request: Request[AnyRef]): Future[(Option[GroupSchemeInfo], Option[CompanyDetailsList])] = {
+												 ec: ExecutionContext): Future[(Option[GroupSchemeInfo], Option[CompanyDetailsList])] = {
 		fetchOption[GroupSchemeInfo](GROUP_SCHEME_CACHE_CONTROLLER, schemeRef).flatMap { gsc =>
 			if (gsc.getOrElse(GroupSchemeInfo(None, None)).groupScheme.getOrElse("") == OPTION_YES) {
 				fetchOption[CompanyDetailsList](GROUP_SCHEME_COMPANIES, schemeRef).map { comp =>
@@ -200,9 +198,8 @@ class ERSUtil @Inject()(val sessionService: SessionService,
 		}
 	}
 
-
 	def getAllData(bundleRef: String, ersMetaData: ErsMetaData)
-								(implicit hc: HeaderCarrier, ec: ExecutionContext, request: Request[AnyRef]): Future[ErsSummary] = {
+								(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[ErsSummary] = {
 		val schemeRef = ersMetaData.schemeInfo.schemeRef
 		fetchOption[ReportableEvents](reportableEvents, schemeRef).flatMap { repEvents =>
 			fetchOption[CheckFileType](FILE_TYPE_CACHE, schemeRef).flatMap { checkFileType =>
@@ -239,7 +236,7 @@ class ERSUtil @Inject()(val sessionService: SessionService,
 			Some(savedStatus)
 		}
 
-	def getNoOfRows(nilReturn:String)(implicit hc: HeaderCarrier, ec: ExecutionContext, request: Request[AnyRef]): Future[Option[Int]] = {
+	def getNoOfRows(nilReturn:String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[Int]] = {
 		if (isNilReturn(nilReturn: String)) {
 			Future.successful(None)
 		} else {

@@ -61,7 +61,7 @@ object RsFormMappings {
   /*
   * Is a group scheme type Form definition
   */
-  def groupTypeForm()(implicit messages: Messages): Form[RS_groupSchemeType] = {
+  def groupTypeForm(): Form[RS_groupSchemeType] = {
 		Form(mapping("groupSchemeType" -> text)(RS_groupSchemeType.apply)(RS_groupSchemeType.unapply))
 	}
 
@@ -193,17 +193,17 @@ object RsFormMappings {
     schemeOrganiserFields.companyReg -> optional(text
 			.verifying(Messages("ers_scheme_organiser.err.summary.company_reg"), so => checkLength(so, "schemeOrganiserFields.companyRegistrationNum"))
 			.verifying(pattern(fieldValidationPatterns.companyRegPattern.r, error = Messages("ers_scheme_organiser.err.summary.company_reg")))),
-    schemeOrganiserFields.corporationRef -> optional(text verifying(Messages("ers_scheme_organiser.err.summary.corporation_ref"), so => checkLength(so, "schemeOrganiserFields.corporationTaxReference")) verifying pattern(fieldValidationPatterns.corporationRefPatternSchemeOrg.r, error = Messages("ers_scheme_organiser.err.summary.invalidChars.corporation_ref_pattern")))
+    schemeOrganiserFields.corporationRef -> optional(text.verifying(Messages("ers_scheme_organiser.err.summary.corporation_ref"),
+      so => checkLength(so, "schemeOrganiserFields.corporationTaxReference")).verifying(pattern(fieldValidationPatterns.corporationRefPatternSchemeOrg.r,
+      error = Messages("ers_scheme_organiser.err.summary.invalidChars.corporation_ref_pattern"))))
   )(SchemeOrganiserDetails.apply)(SchemeOrganiserDetails.unapply))
 
   /*
 * scheme type Form definition.
 */
-  def schemeTypeForm()(implicit messages: Messages): Form[RS_schemeType] = Form(
+  def schemeTypeForm(): Form[RS_schemeType] = Form(
 
     mapping("schemeType" -> text)(RS_schemeType.apply)(RS_schemeType.unapply))
-
-
 
 	def checkAddressLength(so: String, field: String): Boolean = {
 		field.split('.').last match {

@@ -53,7 +53,7 @@ class ReportableEventsControllerSpec extends AnyWordSpecLike
     messagesActionBuilder,
     DefaultActionBuilder(stubBodyParser[AnyContent]()),
     cc.parsers,
-    fakeApplication.injector.instanceOf[MessagesApi],
+    fakeApplication().injector.instanceOf[MessagesApi],
     cc.langs,
     cc.fileMimeTypes,
     ExecutionContext.global
@@ -90,7 +90,7 @@ class ReportableEventsControllerSpec extends AnyWordSpecLike
 			when(mockErsUtil.fetch[ErsMetaData](refEq(mockErsUtil.ersMetaData), anyString())(any(), any()))
 				.thenReturn(if (ersMetaDataRes) Future.successful(ersMetaData) else Future.failed(new NoSuchElementException))
 
-			when(mockErsUtil.cache(refEq(mockErsUtil.ersMetaData), any(), any())(any(), any(), any()))
+			when(mockErsUtil.cache(refEq(mockErsUtil.ersMetaData), any(), any())(any(), any()))
 				.thenReturn(if (ersMetaDataCachedOk) Future.successful(null) else Future.failed(new Exception))
 
 			when(mockErsUtil.fetch[SchemeOrganiserDetails](refEq(mockErsUtil.SCHEME_ORGANISER_CACHE), anyString())(any(), any()))
@@ -188,7 +188,7 @@ class ReportableEventsControllerSpec extends AnyWordSpecLike
       when(mockErsUtil.fetch[ErsMetaData](refEq(mockErsUtil.ersMetaData), any())(any(), any()))
 				.thenReturn(if (ersMetaDataRes) Future.successful(ersMetaData) else Future.failed(new NoSuchElementException))
 
-      when(mockErsUtil.cache(refEq(mockErsUtil.reportableEvents), any(), any())(any(), any(), any()))
+      when(mockErsUtil.cache(refEq(mockErsUtil.reportableEvents), any(), any())(any(), any()))
 				.thenReturn(if (ersMetaDataCachedOk) Future.successful(null) else Future.failed(new Exception))
 
       when(mockErsUtil.fetch[SchemeOrganiserDetails](refEq(mockErsUtil.SCHEME_ORGANISER_CACHE), any())(any(), any()))
@@ -222,7 +222,7 @@ class ReportableEventsControllerSpec extends AnyWordSpecLike
     "if nothing selected give a status of OK and show the reportable events page displaying form errors" in {
       val controllerUnderTest: ReportableEventsController = buildFakeReportableEventsController()
       val reportableEventsData = Map("" -> "")
-      val form = _root_.models.RsFormMappings.chooseForm.bind(reportableEventsData)
+      val form = _root_.models.RsFormMappings.chooseForm().bind(reportableEventsData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val authRequest = buildRequestWithAuth(request)
 

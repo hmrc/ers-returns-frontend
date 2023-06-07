@@ -18,21 +18,20 @@ package utils
 
 
 import com.ibm.icu.util.ULocale
-import org.joda.time.DateTime
-import org.joda.time.format.{DateTimeFormat, DateTimeFormatter}
 import play.api.Logging
 import play.api.i18n.Messages
-import uk.gov.hmrc.time.DateTimeUtils
 
 import java.text.SimpleDateFormat
+import java.time.Instant
+import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 
 object DateUtils extends Logging {
 
   def getCurrentDateTime: String = {
-    val date: DateTime = DateTimeUtils.now
-    val fmt: DateTimeFormatter = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss'Z'")
-    val str: String = date.toString(fmt)
-    str
+    val instant: Instant = Instant.now().truncatedTo(ChronoUnit.SECONDS)
+    val formatter: DateTimeFormatter = DateTimeFormatter.ISO_INSTANT
+    formatter.format(instant)
   }
 
   def convertDate(date: String, format: String = "dd MMMM yyyy, hh:mma")(implicit messages: Messages): String = {

@@ -39,7 +39,7 @@ import scala.concurrent.Future
 
 class UpscanServiceSpec extends AnyWordSpecLike with Matchers with OptionValues with GuiceOneAppPerSuite with MockitoSugar with ScalaFutures {
 
-  override def fakeApplication: Application = new GuiceApplicationBuilder()
+  override def fakeApplication(): Application = new GuiceApplicationBuilder()
     .overrides(bind[UpscanConnector].toInstance(mockUpscanConnector))
     .build()
 
@@ -47,7 +47,7 @@ class UpscanServiceSpec extends AnyWordSpecLike with Matchers with OptionValues 
 
   "getUpscanFormDataOds" must {
     "get form data from Upscan Connector with an initiate request" in {
-      implicit val request: Request[AnyRef] = FakeRequest("GET", "http://localhost:9290/")
+      implicit val request: Request[_] = FakeRequest("GET", "http://localhost:9290/")
       val hc = HeaderCarrier(sessionId = Some(SessionId("sessionid")))
       val callback = controllers.internal.routes.FileUploadCallbackController.callback(hc.sessionId.get.value).absoluteURL()
       val success = controllers.routes.FileUploadController.success().absoluteURL()
@@ -68,7 +68,7 @@ class UpscanServiceSpec extends AnyWordSpecLike with Matchers with OptionValues 
 
   "getUpscanFormDataCsv" must {
     "get form data from Upscan Connector with an initiate and uploadId" in {
-      implicit val request: Request[AnyRef] = FakeRequest("GET", "http://localhost:9290/")
+      implicit val request: Request[_] = FakeRequest("GET", "http://localhost:9290/")
       val uploadId = UploadId("TestUploadId")
       val scRef = "ScRef"
       val hc = HeaderCarrier(sessionId = Some(SessionId("sessionid")))

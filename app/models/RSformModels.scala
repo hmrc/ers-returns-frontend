@@ -138,7 +138,7 @@ case class RequestObject(
       getSchemeType
     )
 
-  def toErsMetaData(implicit request: Request[AnyRef]): ErsMetaData = {
+  def toErsMetaData(implicit request: Request[_]): ErsMetaData = {
     ErsMetaData(
       toSchemeInfo,
       request.remoteAddress,

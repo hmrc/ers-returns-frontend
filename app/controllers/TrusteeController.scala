@@ -58,7 +58,7 @@ class TrusteeController @Inject()(val mcc: MessagesControllerComponents,
   def showTrusteeDetailsPage(requestObject: RequestObject, index: Int)
 														(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
     ersUtil.fetch[GroupSchemeInfo](ersUtil.GROUP_SCHEME_CACHE_CONTROLLER, requestObject.getSchemeReference).map { groupSchemeActivity =>
-      Ok(trusteeDetailsView(requestObject, groupSchemeActivity.groupScheme.getOrElse(ersUtil.DEFAULT), index, RsFormMappings.trusteeDetailsForm))
+      Ok(trusteeDetailsView(requestObject, groupSchemeActivity.groupScheme.getOrElse(ersUtil.DEFAULT), index, RsFormMappings.trusteeDetailsForm()))
     } recover {
       case e: Exception =>
 				logger.error(s"[TrusteeController][showTrusteeDetailsPage] Get data from cache failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
@@ -75,7 +75,7 @@ class TrusteeController @Inject()(val mcc: MessagesControllerComponents,
 
   def showTrusteeDetailsSubmit(requestObject: RequestObject, index: Int)
 															(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
-    RsFormMappings.trusteeDetailsForm.bindFromRequest.fold(
+    RsFormMappings.trusteeDetailsForm().bindFromRequest().fold(
       errors => {
         ersUtil.fetch[GroupSchemeInfo](ersUtil.GROUP_SCHEME_CACHE_CONTROLLER, requestObject.getSchemeReference).map { groupSchemeActivity =>
           val correctOrder = errors.errors.map(_.key).distinct
@@ -156,7 +156,7 @@ class TrusteeController @Inject()(val mcc: MessagesControllerComponents,
       formDetails         = trusteeDetailsList.trustees(id)
     } yield {
 
-        Ok(trusteeDetailsView(requestObject, groupSchemeActivity.groupScheme.get, id, RsFormMappings.trusteeDetailsForm.fill(formDetails)))
+        Ok(trusteeDetailsView(requestObject, groupSchemeActivity.groupScheme.get, id, RsFormMappings.trusteeDetailsForm().fill(formDetails)))
 
     }) recover {
       case e: Exception =>
@@ -186,11 +186,10 @@ class TrusteeController @Inject()(val mcc: MessagesControllerComponents,
   }
 
   def trusteeSummaryContinue(): Action[AnyContent] = authAction.async {
-      implicit request =>
-        continueFromTrusteeSummaryPage()(request, hc)
+    continueFromTrusteeSummaryPage()
   }
 
-  def continueFromTrusteeSummaryPage()(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
+  def continueFromTrusteeSummaryPage(): Future[Result] = {
     Future(Redirect(routes.AltAmendsController.altActivityPage()))
   }
 

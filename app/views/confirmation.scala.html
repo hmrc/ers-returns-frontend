@@ -25,10 +25,9 @@
 		govukButton: GovukButton
 )
 
-@(requestObject: RequestObject, dateSubmitted: String, bundle: String, taxYear: String, url: String)(implicit request: Request[AnyRef], messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
+@(requestObject: RequestObject, dateSubmitted: String, bundle: String, taxYear: String, url: String)(implicit request: Request[_], messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 
 @schemeId = @{requestObject.getSchemeId}
-@schemeRef = @{requestObject.getSchemeReference}
 
 @govuk_wrapper(title = messages("ers.confirmation.page_title"), isUserResearchBannerVisible = true) {
 

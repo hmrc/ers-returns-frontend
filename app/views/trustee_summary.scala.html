@@ -29,9 +29,7 @@
         hmrcPageHeading: HmrcPageHeading
 )
 
-@(requestObject: RequestObject, trustees: TrusteeDetailsList)(implicit request: Request[AnyRef], flash: Flash, messages: Messages, countryCodes: CountryCodes, ersUtil: ERSUtil, appConfig: ApplicationConfig)
-
-@schemeId = @{requestObject.getSchemeId}
+@(requestObject: RequestObject, trustees: TrusteeDetailsList)(implicit request: Request[_], messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 
 @summaryBuilder(trustee: TrusteeDetails, index: Int) = @{
     val trusteeNameSummary = Seq(

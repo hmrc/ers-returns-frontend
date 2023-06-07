@@ -59,7 +59,7 @@ class SummaryDeclarationControllerSpec extends AnyWordSpecLike
 		messagesActionBuilder,
 		DefaultActionBuilder(stubBodyParser[AnyContent]()),
 		cc.parsers,
-		fakeApplication.injector.instanceOf[MessagesApi],
+		fakeApplication().injector.instanceOf[MessagesApi],
 		cc.langs,
 		cc.fileMimeTypes,
 		ExecutionContext.global
@@ -105,39 +105,39 @@ class SummaryDeclarationControllerSpec extends AnyWordSpecLike
 	class TestErsUtil(fetchAllMapVal: String) extends ERSUtil(mockSessionCache, mockShortLivedCache, mockAppConfig){
 
 		override def cache[T](key: String, body: T, cacheId: String)
-												 (implicit hc: HeaderCarrier, formats: json.Format[T], request: Request[AnyRef]): Future[CacheMap] = {
+												 (implicit hc: HeaderCarrier, formats: json.Format[T]): Future[CacheMap] = {
 			Future.successful(CacheMap("fakeId", Map()))
 		}
 
 		override def getAllData(bundleRef: String, ersMetaData: ErsMetaData)
-													 (implicit hc: HeaderCarrier, ec: ExecutionContext, request: Request[AnyRef]): Future[ErsSummary] = {
+													 (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[ErsSummary] = {
 			Future.successful(new ErsSummary("testbundle", "false", None, DateTime.now, ersMetaData, None, None, None, None, None, None, None, None))
 		}
 
 		@throws(classOf[NoSuchElementException])
-    override def fetchAll(cacheId: String)(implicit hc: HeaderCarrier, request: Request[AnyRef]): Future[CacheMap] = {
+    override def fetchAll(cacheId: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[CacheMap] = {
 			fetchAllMapVal match {
 				case "e" => Future(throw new NoSuchElementException)
 				case "withSchemeTypeSchemeRef" =>
-					val data = commonAllDataMap.filterKeys(Seq("scheme-type", "portal-scheme-ref").contains(_))
+					val data = commonAllDataMap.view.filterKeys(Seq("scheme-type", "portal-scheme-ref").contains(_)).toMap
 					val cm: CacheMap = new CacheMap("id1", data)
 					Future.successful(cm)
 				case "withAll" =>
 					val findList = Seq("scheme-organiser", "group-scheme-controller", "group-scheme-companies", "trustees", "ReportableEvents", "ErsMetaData")
 					val addList = Map("check-file-type" -> Json.toJson(fileTypeCSV), "check-csv-files" -> Json.toJson(csvFilesCallbackList))
-					val data = commonAllDataMap.filterKeys(findList.contains(_)) ++ addList
+					val data = commonAllDataMap.view.filterKeys(findList.contains(_)).toMap ++ addList
 					val cm: CacheMap = new CacheMap("id1", data)
 					Future.successful(cm)
 				case "noGroupSchemeInfo" =>
 					val findList = Seq("scheme-organiser", "group-scheme-companies", "trustees", "ReportableEvents", "ErsMetaData")
 					val addList = Map("check-file-type" -> Json.toJson(fileTypeCSV), "check-csv-files" -> Json.toJson(csvFilesCallbackList))
-					val data = commonAllDataMap.filterKeys(findList.contains(_)) ++ addList
+					val data = commonAllDataMap.view.filterKeys(findList.contains(_)).toMap ++ addList
 					val cm: CacheMap = new CacheMap("id1", data)
 					Future.successful(cm)
 				case "odsFile" =>
 					val findList = Seq("scheme-type", "portal-scheme-ref", "alt-activity", "scheme-organiser", "group-scheme-companies", "trustees", "ReportableEvents", "ErsMetaData")
 					val addList = Map("check-file-type" -> Json.toJson(fileTypeODS), "file-name" -> Json.toJson(fileNameODS))
-					val data = commonAllDataMap.filterKeys(findList.contains(_)) ++ addList
+					val data = commonAllDataMap.view.filterKeys(findList.contains(_)).toMap ++ addList
 					val cm: CacheMap = new CacheMap("id1", data)
 					Future.successful(cm)
 				case "withAllNillReturn" =>
@@ -145,7 +145,7 @@ class SummaryDeclarationControllerSpec extends AnyWordSpecLike
 					val fileType: CheckFileType = new CheckFileType(None)
 					val findList = Seq("scheme-organiser", "group-scheme-controller", "group-scheme-companies", "trustees", "ErsMetaData")
 					val addList = Map("ReportableEvents" -> Json.toJson(reportableEvents), "check-file-type" -> Json.toJson(fileType), "check-csv-files" -> Json.toJson(csvFilesCallbackList))
-					val data = commonAllDataMap.filterKeys(findList.contains(_)) ++ addList
+					val data = commonAllDataMap.view.filterKeys(findList.contains(_)).toMap ++ addList
 					val cm: CacheMap = new CacheMap("id1", data)
 					Future.successful(cm)
 				case "withAllCSVFile" =>
@@ -153,7 +153,7 @@ class SummaryDeclarationControllerSpec extends AnyWordSpecLike
 					val fileType: CheckFileType = new CheckFileType(Some(OPTION_CSV))
 					val findList = Seq("scheme-organiser", "group-scheme-controller", "group-scheme-companies", "trustees", "ErsMetaData")
 					val addList = Map("ReportableEvents" -> Json.toJson(reportableEvents), "check-file-type" -> Json.toJson(fileType), "check-csv-files" -> Json.toJson(csvFilesCallbackList))
-					val data = commonAllDataMap.filterKeys(findList.contains(_)) ++ addList
+					val data = commonAllDataMap.view.filterKeys(findList.contains(_)).toMap ++ addList
 					val cm: CacheMap = new CacheMap("id1", data)
 					Future.successful(cm)
 				case "withAllODSFile" =>
@@ -161,7 +161,7 @@ class SummaryDeclarationControllerSpec extends AnyWordSpecLike
 					val fileType: CheckFileType = new CheckFileType(Some(OPTION_ODS))
 					val findList = Seq("scheme-organiser", "group-scheme-controller", "group-scheme-companies", "trustees", "ErsMetaData")
 					val addList = Map("ReportableEvents" -> Json.toJson(reportableEvents), "check-file-type" -> Json.toJson(fileType), "check-csv-files" -> Json.toJson(csvFilesCallbackList), "file-name" -> Json.toJson(fileNameODS))
-					val data = commonAllDataMap.filterKeys(findList.contains(_)) ++ addList
+					val data = commonAllDataMap.view.filterKeys(findList.contains(_)).toMap ++ addList
 					val cm: CacheMap = new CacheMap("id1", data)
 					Future.successful(cm)
 			}

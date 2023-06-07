@@ -53,7 +53,7 @@ class AltAmendsControllerSpec extends AnyWordSpecLike
     messagesActionBuilder,
     DefaultActionBuilder(stubBodyParser[AnyContent]()),
     cc.parsers,
-    fakeApplication.injector.instanceOf[MessagesApi],
+    fakeApplication().injector.instanceOf[MessagesApi],
     cc.langs,
     cc.fileMimeTypes,
     ExecutionContext.global
@@ -84,7 +84,7 @@ class AltAmendsControllerSpec extends AnyWordSpecLike
 
       when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any())).thenReturn(requestObject)
 
-      when(mockErsUtil.cache(ArgumentMatchers.eq("alt-activity"), any(), any())(any(), any(), any()))
+      when(mockErsUtil.cache(ArgumentMatchers.eq("alt-activity"), any(), any())(any(), any()))
 				.thenReturn(cache)
 
       when(mockErsUtil.getPageElement(any(), any(), any(), any())(any())).thenCallRealMethod()
@@ -162,7 +162,7 @@ class AltAmendsControllerSpec extends AnyWordSpecLike
     "give a Ok status and stay on the same page if form errors and display the error" in {
       val controllerUnderTest = buildFakeAltAmendsPageController()
       val altActivityData = Map("" -> "")
-      val form = RsFormMappings.altActivityForm.bind(altActivityData)
+      val form = RsFormMappings.altActivityForm().bind(altActivityData)
       val request = Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val authRequest = buildRequestWithAuth(request)
 
@@ -173,7 +173,7 @@ class AltAmendsControllerSpec extends AnyWordSpecLike
     "give a redirect to summary declaration page if no form errors and NO selected" in {
       val controllerUnderTest = buildFakeAltAmendsPageController()
       val altActivityData = Map("altActivity" -> OPTION_NO)
-      val form: Form[AltAmendsActivity] = RsFormMappings.altActivityForm.bind(altActivityData)
+      val form: Form[AltAmendsActivity] = RsFormMappings.altActivityForm().bind(altActivityData)
       val request = Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val authRequest = buildRequestWithAuth(request, Fixtures.buildFakeUser)
 
@@ -185,7 +185,7 @@ class AltAmendsControllerSpec extends AnyWordSpecLike
     "give a redirect to alterations amends page if no form errors and YES selected" in {
       val controllerUnderTest = buildFakeAltAmendsPageController()
       val altActivityData = Map("altActivity" -> OPTION_YES)
-      val form = RsFormMappings.altActivityForm.bind(altActivityData)
+      val form = RsFormMappings.altActivityForm().bind(altActivityData)
       val request = Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val authRequest = buildRequestWithAuth(request, Fixtures.buildFakeUser)
       val result = controllerUnderTest.showAltActivitySelected()(authRequest, hc)
@@ -196,7 +196,7 @@ class AltAmendsControllerSpec extends AnyWordSpecLike
     "direct to ers errors page if no form errors but unable to save to cache" in {
       val controllerUnderTest = buildFakeAltAmendsPageController(cache = Future.failed(new Exception))
       val altActivityData = Map("altActivity" -> OPTION_YES)
-      val form = RsFormMappings.altActivityForm.bind(altActivityData)
+      val form = RsFormMappings.altActivityForm().bind(altActivityData)
       val req = Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val authRequest = buildRequestWithAuth(req, Fixtures.buildFakeUser)
 
@@ -209,7 +209,7 @@ class AltAmendsControllerSpec extends AnyWordSpecLike
     "direct to ers errors page if no form errors and no sessionId" in {
       val controllerUnderTest = buildFakeAltAmendsPageController(cache = Future.failed(new Exception))
       val altActivityData = Map("altActivity" -> OPTION_YES)
-      val form = RsFormMappings.altActivityForm.bind(altActivityData)
+      val form = RsFormMappings.altActivityForm().bind(altActivityData)
       val req = Fixtures.buildFakeRequest("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val authRequest = buildRequestWithAuth(req, Fixtures.buildFakeUser)
       val result = controllerUnderTest.showAltActivitySelected()(authRequest, hc)
@@ -235,7 +235,7 @@ class AltAmendsControllerSpec extends AnyWordSpecLike
 				.thenReturn(requestObject)
       when(mockErsUtil.fetchOption[AltAmends](refEq("alt-amends-cache-controller"), any())(any(), any()))
 				.thenReturn(altAmends)
-      when(mockErsUtil.cache(refEq("alt-amends-cache-controller"), any(), any())(any(), any(), any()))
+      when(mockErsUtil.cache(refEq("alt-amends-cache-controller"), any(), any())(any(), any()))
 				.thenReturn(cache)
 			when(mockErsUtil.getPageElement(any(), any(),any(), any())(any())).thenReturn("")
     }
@@ -320,7 +320,7 @@ class AltAmendsControllerSpec extends AnyWordSpecLike
 				"altAmendsVariations" -> "",
 				"altAmendsOther" -> ""
 			)
-      val form = RsFormMappings.altAmendsForm.bind(altAmendsData)
+      val form = RsFormMappings.altAmendsForm().bind(altAmendsData)
       val request = Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val authRequest = buildRequestWithAuth(request, Fixtures.buildFakeUser)
 
@@ -337,7 +337,7 @@ class AltAmendsControllerSpec extends AnyWordSpecLike
 				"altAmendsVariations" -> "",
 				"altAmendsOther" -> ""
 			)
-      val form = RsFormMappings.altAmendsForm.bind(altAmendsData)
+      val form = RsFormMappings.altAmendsForm().bind(altAmendsData)
       val request = Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val authRequest = buildRequestWithAuth(request, Fixtures.buildFakeUser)
 
@@ -354,7 +354,7 @@ class AltAmendsControllerSpec extends AnyWordSpecLike
 				"altAmendsVariations" -> "1",
 				"altAmendsOther" -> "1"
 			)
-      val form = RsFormMappings.altActivityForm.bind(altAmendsData)
+      val form = RsFormMappings.altActivityForm().bind(altAmendsData)
       val req = Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val authRequest = buildRequestWithAuth(req, Fixtures.buildFakeUser)
 
@@ -372,7 +372,7 @@ class AltAmendsControllerSpec extends AnyWordSpecLike
 				"altAmendsVariations" -> "1",
 				"altAmendsOther" -> "1"
 			)
-      val form = RsFormMappings.altActivityForm.bind(altAmendsData)
+      val form = RsFormMappings.altActivityForm().bind(altAmendsData)
       val request = Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val authRequest = buildRequestWithAuth(request, Fixtures.buildFakeUser)
 

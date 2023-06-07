@@ -29,9 +29,7 @@
 		govukButton: GovukButton
 )
 
-@(requestObject: RequestObject, checkFileType: Option[String], checkFileTypeForm: Form[models.CheckFileType])(implicit request: Request[AnyRef], flash: Flash, messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
-
-@schemeId = @{requestObject.getSchemeId}
+@(requestObject: RequestObject, checkFileType: Option[String], checkFileTypeForm: Form[models.CheckFileType])(implicit request: Request[_], messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 
 @govuk_wrapper(title = messages("ers.choose_file_type.page_title")) {
 
@@ -39,7 +37,7 @@
 
 	@govukBackLink(BackLink(
 		content = Text(messages("ers.back")),
-		href = routes.ReportableEventsController.reportableEventsPage.url,
+		href = routes.ReportableEventsController.reportableEventsPage().url,
 	))
 
 	@formWithCSRF(action = routes.CheckFileTypeController.checkFileTypeSelected()) {

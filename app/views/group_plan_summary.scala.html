@@ -16,7 +16,6 @@
 
 @import _root_.utils.ERSUtil
 @import config.ApplicationConfig
-@import _root_.utils.CountryCodes
 
 @import views.html.templates.reference
 
@@ -29,7 +28,7 @@
 		formWithCSRF: FormWithCSRF
 )
 
-@(requestObject: RequestObject, groupSchemeType: String, companies: CompanyDetailsList)(implicit request: Request[AnyRef], flash: Flash, messages: Messages, countryCodes: CountryCodes, ersUtil: ERSUtil, appConfig: ApplicationConfig)
+@(requestObject: RequestObject, groupSchemeType: String, companies: CompanyDetailsList)(implicit request: Request[_], messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 
 @schemeId = @{requestObject.getSchemeId}
 
@@ -167,7 +166,7 @@
 		 }
 
 		<a class="govuk-link govuk-inset-text govuk-!-display-inline-block govuk-!-margin-top-0 govuk-!-width-full"
-		   href=@routes.GroupSchemeController.manualCompanyDetailsPage>
+		   href=@routes.GroupSchemeController.manualCompanyDetailsPage()>
 			@ersUtil.addCompanyMessage(messages, requestObject.schemeType)
 		</a>
 

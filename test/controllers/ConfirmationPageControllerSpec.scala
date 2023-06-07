@@ -53,7 +53,7 @@ class ConfirmationPageControllerSpec extends AnyWordSpecLike
     messagesActionBuilder,
     DefaultActionBuilder(stubBodyParser[AnyContent]()),
     cc.parsers,
-    fakeApplication.injector.instanceOf[MessagesApi],
+    fakeApplication().injector.instanceOf[MessagesApi],
     cc.langs,
     cc.fileMimeTypes,
     ExecutionContext.global
@@ -99,7 +99,7 @@ class ConfirmationPageControllerSpec extends AnyWordSpecLike
       when(mockErsUtil.fetch[ErsMetaData](refEq("ErsMetaData"), anyString())(any(), any())
       ) thenReturn ersMetaRes
 
-      when(mockErsUtil.getAllData(anyString(), any[ErsMetaData]())(any(), any(), any())
+      when(mockErsUtil.getAllData(anyString(), any[ErsMetaData]())(any(), any())
       ) thenReturn Future.successful(if (isNilReturn) ersSummaryNilReturn2 else ersSummary)
 
       when(mockErsUtil.fetch[String](refEq("validated-sheets"), anyString())(any(), any())
@@ -143,7 +143,7 @@ class ConfirmationPageControllerSpec extends AnyWordSpecLike
 
     "direct to ers errors page if fetching all data throws exception" in {
       val controllerUnderTest = buildFakeConfirmationPageController()
-			when(mockErsUtil.getAllData(anyString(), any[ErsMetaData]())(any(), any(), any())).thenReturn(Future.failed(new RuntimeException))
+			when(mockErsUtil.getAllData(anyString(), any[ErsMetaData]())(any(), any())).thenReturn(Future.failed(new RuntimeException))
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
       val result = controllerUnderTest.showConfirmationPage()(authRequest, hc)
       contentAsString(result) shouldBe contentAsString(Future(controllerUnderTest.getGlobalErrorPage(testFakeRequest, testMessages)))
@@ -160,7 +160,7 @@ class ConfirmationPageControllerSpec extends AnyWordSpecLike
 
     "return OK if there are no exceptions thrown and confirmation date time already exists" in {
       val mockedSession = mock[Session]
-      val mockedRequest = mock[Request[AnyRef]]
+      val mockedRequest = mock[Request[_]]
 
       when(
         mockedSession.get(anyString())

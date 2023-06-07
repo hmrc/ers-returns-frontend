@@ -61,7 +61,7 @@ class AltAmendsController @Inject()(val mcc: MessagesControllerComponents,
         requestObject,
         altAmendsActivity.altActivity,
         groupSchemeInfo.groupScheme.getOrElse(ersUtil.DEFAULT),
-        RsFormMappings.altActivityForm.fill(altAmendsActivity)
+        RsFormMappings.altActivityForm().fill(altAmendsActivity)
       ))
       }).recover {
         case e: Exception =>
@@ -80,7 +80,7 @@ class AltAmendsController @Inject()(val mcc: MessagesControllerComponents,
   def showAltActivitySelected()(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
 
     ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
-      RsFormMappings.altActivityForm.bindFromRequest.fold(
+      RsFormMappings.altActivityForm().bindFromRequest().fold(
         errors => {
           Future.successful(Ok(alterationsActivityView(requestObject, "", "", errors)))
         },
@@ -125,7 +125,7 @@ class AltAmendsController @Inject()(val mcc: MessagesControllerComponents,
   def showAltAmendsSelected()(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
 
     ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
-      RsFormMappings.altAmendsForm.bindFromRequest.fold(
+      RsFormMappings.altAmendsForm().bindFromRequest().fold(
         _ => {
           Future.successful(Redirect(routes.AltAmendsController.altAmendsPage())
 						.flashing("alt-amends-not-selected-error" -> ersUtil.getPageElement(requestObject.getSchemeId, ersUtil.PAGE_ALT_AMENDS, "err.message")))

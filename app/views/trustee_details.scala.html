@@ -35,9 +35,7 @@
         hmrcPageHeading: HmrcPageHeading
 )
 
-@(requestObject: RequestObject, groupSchemeActivity: String, index: Int, trusteeDetails: Form[models.TrusteeDetails])(implicit request: Request[AnyRef], flash: Flash, messages: Messages, countryCodes: CountryCodes, ersUtil: ERSUtil, appConfig: ApplicationConfig)
-
-@schemeId = @{requestObject.getSchemeId}
+@(requestObject: RequestObject, groupSchemeActivity: String, index: Int, trusteeDetails: Form[models.TrusteeDetails])(implicit request: Request[_], messages: Messages, countryCodes: CountryCodes, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 
 @scripts = {
     <script type="text/javascript" src='@controllers.routes.Assets.versioned("javascripts/trustee-uk-or-overseas-form-reveal.js")' @{CSPNonce.attr}></script>

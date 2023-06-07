@@ -55,13 +55,13 @@ trait AuthHelper extends MockitoSugar {
 
 	def setAuthMocks(): OngoingStubbing[Future[RetrievalType]] = {
 		when(mockAuthConnector
-			.authorise[RetrievalType](ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
-			.thenReturn(Future.successful(buildRetrieval(defaultErsAuthData)))
+			.authorise[RetrievalType](ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any())
+		) thenReturn Future.successful(buildRetrieval(defaultErsAuthData))
 	}
 
 	def setUnauthorisedMocks(): OngoingStubbing[Future[RetrievalType]] = {
 		when(mockAuthConnector
-			.authorise[RetrievalType](ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
-			.thenReturn(Future.failed(MissingBearerToken("No authenticated bearer token")))
+			.authorise[RetrievalType](ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any())
+		) thenReturn Future.failed(MissingBearerToken("No authenticated bearer token"))
 	}
 }

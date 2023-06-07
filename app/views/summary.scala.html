@@ -28,7 +28,7 @@
         govukWarningText: GovukWarningText
 )
 
-@(requestObject: RequestObject, reportableEvents: String, fileType: String, filename: String, fileCount: Int = 0, groupScheme: String, schemeOrganiser: SchemeOrganiserDetails, companies: CompanyDetailsList, altAmendsActivity: String, altAmends: AlterationAmends, trustees: TrusteeDetailsList)(implicit request: Request[AnyRef], flash: Flash, messages: Messages, countryCodes: CountryCodes, ersUtil: ERSUtil, appConfig: ApplicationConfig)
+@(requestObject: RequestObject, reportableEvents: String, fileType: String, filename: String, fileCount: Int = 0, groupScheme: String, schemeOrganiser: SchemeOrganiserDetails, companies: CompanyDetailsList, altAmendsActivity: String, altAmends: AlterationAmends, trustees: TrusteeDetailsList)(implicit request: Request[_], messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 
 @schemeId = @{requestObject.getSchemeId}
 
@@ -67,7 +67,7 @@
                 actions = Some(Actions(
                     items = Seq(
                         ActionItem(
-                            href = routes.ReportableEventsController.reportableEventsPage.url,
+                            href = routes.ReportableEventsController.reportableEventsPage().url,
                             content = Text(messages("ers_summary_declaration.change_this")),
                             visuallyHiddenText = Some(ersUtil.getPageElement(schemeId, ersUtil.PAGE_CHOOSE, "question"))
                         )
@@ -79,15 +79,15 @@
                     content = Text(fileNameMsg)
                 ),
                 value = Value(
-                    content = HtmlContent(value = Html(filename.replace("<", "&lt;").replace(">", "&gt;")))
+                    content = HtmlContent(value = Html(filename))
                 ),
                 actions = Some(Actions(
                     items = Seq(
                         ActionItem(
                             href = if(fileType == ersUtil.OPTION_ODS)
-                                routes.FileUploadController.uploadFilePage.url
+                                routes.FileUploadController.uploadFilePage().url
                             else
-                                routes.CheckCsvFilesController.checkCsvFilesPage.url,
+                                routes.CheckCsvFilesController.checkCsvFilesPage().url,
                             content = Text(messages("ers_summary_declaration.change_this")),
                             visuallyHiddenText = Some(fileNameMsg)
                         )
@@ -104,7 +104,7 @@
                 actions = Some(Actions(
                     items = Seq(
                         ActionItem(
-                            href = routes.SchemeOrganiserController.schemeOrganiserPage.url,
+                            href = routes.SchemeOrganiserController.schemeOrganiserPage().url,
                             content = Text(messages("ers_summary_declaration.change_this")),
                             visuallyHiddenText = Some(ersUtil.getPageElement(schemeId, ersUtil.PAGE_SUMMARY_DECLARATION, "organiser"))
                         )
@@ -126,7 +126,7 @@
                 actions = Some(Actions(
                     items = Seq(
                         ActionItem(
-                            href = routes.GroupSchemeController.groupSchemePage.url,
+                            href = routes.GroupSchemeController.groupSchemePage().url,
                             content = Text(messages("ers_summary_declaration.change_this")),
                             visuallyHiddenText = Some(ersUtil.getPageElement(schemeId, ersUtil.PAGE_GROUP_ACTIVITY, "question"))
                         )
@@ -143,7 +143,7 @@
                 actions = Some(Actions(
                     items = Seq(
                         ActionItem(
-                            href = routes.GroupSchemeController.groupSchemePage.url,
+                            href = routes.GroupSchemeController.groupSchemePage().url,
                             content = Text(messages("ers_summary_declaration.change_this")),
                             visuallyHiddenText = Some(ersUtil.getPageElement(schemeId, ersUtil.PAGE_GROUP_SUMMARY, "title"))
                         )
@@ -160,7 +160,7 @@
                 actions = Some(Actions(
                     items = Seq(
                         ActionItem(
-                            href = routes.GroupSchemeController.groupSchemePage.url,
+                            href = routes.GroupSchemeController.groupSchemePage().url,
                             content = Text(messages("ers_summary_declaration.change_this")),
                             visuallyHiddenText = Some(messages("ers_trustee_summary.title"))
                         )
@@ -183,7 +183,7 @@
                 actions = Some(Actions(
                     items = Seq(
                         ActionItem(
-                            href = routes.AltAmendsController.altActivityPage.url,
+                            href = routes.AltAmendsController.altActivityPage().url,
                             content = Text(messages("ers_summary_declaration.change_this")),
                             visuallyHiddenText = Some(ersUtil.getPageElement(schemeId, ersUtil.PAGE_ALT_ACTIVITY, "question"))
                         )
@@ -206,7 +206,7 @@
                 actions = Some(Actions(
                     items = Seq(
                         ActionItem(
-                            href = routes.AltAmendsController.altAmendsPage.url,
+                            href = routes.AltAmendsController.altAmendsPage().url,
                             content = Text(messages("ers_summary_declaration.change_this")),
                             visuallyHiddenText = Some(messages("ers_trustee_summary.altamends.section"))
                         )
@@ -232,6 +232,6 @@
     @govukButton(Button(
         content = Text(messages("ers_summary_declaration.button")),
         attributes = Map("id" -> "continue"),
-        href = Some(routes.ConfirmationPageController.confirmationPage.url)
+        href = Some(routes.ConfirmationPageController.confirmationPage().url)
     ))
 }

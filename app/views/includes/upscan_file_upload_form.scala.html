@@ -29,7 +29,7 @@
         headerMsg: String,
         schemeId: String,
         fileId: String
-)(implicit request: Request[AnyRef], messages: Messages, ersUtil: ERSUtil)
+)(implicit messages: Messages, ersUtil: ERSUtil)
 
 @expectedFileName = @{ersUtil.getPageElement(schemeId, ersUtil.PAGE_CHECK_CSV_FILE,fileId+".file_name")}
 

@@ -87,10 +87,10 @@ class FileUploadController @Inject()(val mcc: MessagesControllerComponents,
             case Some(file: UploadedSuccessfully) =>
               if(file.name.contains(".csv")) {
                 logger.info("[FileUploadController][success] User uploaded a csv file instead of an ods file")
-                Future(getFileUploadProblemPage)
+                Future(getFileUploadProblemPage())
               } else if (!file.name.contains(".ods")) {
                 logger.info("[FileUploadController][success] User uploaded a non ods file")
-                Future(getFileUploadProblemPage)
+                Future(getFileUploadProblemPage())
               } else {
                 ersUtil.cache[String](ersUtil.FILE_NAME_CACHE, file.name, requestObject.getSchemeReference).map { _ =>
                   Redirect(routes.FileUploadController.validationResults())
@@ -104,7 +104,7 @@ class FileUploadController @Inject()(val mcc: MessagesControllerComponents,
               throw new Exception("Upload data missing in cache for ODS file.")
           }
         }).flatMap(identity) recover {
-         case e: LoopException[Option[UploadStatus]] =>
+         case e: LoopException[Option[UploadStatus] @unchecked] =>
            logger.error(s"[FileUploadController][success] Failed to verify upload. Upload status: ${e.finalFutureData.flatten}", e)
            getGlobalErrorPage
          case e: Exception =>
@@ -133,7 +133,7 @@ class FileUploadController @Inject()(val mcc: MessagesControllerComponents,
         } yield {
           validationResponse
         }) recover {
-          case e: LoopException[Option[UploadStatus]] =>
+          case e: LoopException[Option[UploadStatus] @unchecked] =>
             logger.error(s"[FileUploadController][validationResults] Failed to validate as file is not yet successfully uploaded. Current cache data: ${e.finalFutureData.flatten}", e)
             getGlobalErrorPage
           case e: Throwable =>
@@ -182,7 +182,7 @@ class FileUploadController @Inject()(val mcc: MessagesControllerComponents,
         val errorMessage = request.getQueryString("errorMessage").getOrElse("Unknown")
         val errorRequestId = request.getQueryString("errorRequestId").getOrElse("Unknown")
         logger.error(s"Upscan Failure. errorCode: $errorCode, errorMessage: $errorMessage, errorRequestId: $errorRequestId")
-        Future.successful(getFileUploadProblemPage)
+        Future.successful(getFileUploadProblemPage())
   }
 
   def getFileUploadProblemPage()(implicit request: Request[_], messages: Messages): Result = {

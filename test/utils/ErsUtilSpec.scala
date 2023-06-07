@@ -467,7 +467,7 @@ class ErsUtilSpec extends AnyWordSpecLike
   "cacheUtil" should {
     val THOUSAND = 1000
     val ersUtil: ERSUtil = new ERSUtil(mockSessionCache, mockShortLivedCache, mockAppConfig) {
-      when(sessionService.getSuccessfulCallbackRecord(any(), any())) thenReturn Future(Some(UploadedSuccessfully("name", "downloadUrl", Some(THOUSAND))))
+      when(sessionService.getSuccessfulCallbackRecord(any())) thenReturn Future(Some(UploadedSuccessfully("name", "downloadUrl", Some(THOUSAND))))
     }
     "check Nil Return " in {
       ersUtil.isNilReturn("2") shouldBe true

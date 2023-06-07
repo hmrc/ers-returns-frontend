@@ -33,7 +33,7 @@ object Fixtures extends AuthHelper {
 	val nino: String = new Generator().nextNino.nino
 	val companyName = "Company Name"
 
-	def getAwaitDuration: Duration = 60 seconds
+	def getAwaitDuration: Duration = 60.seconds
 
 	val buildFakeUser: ERSAuthData = defaultErsAuthData
 

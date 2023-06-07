@@ -18,7 +18,6 @@ package services.audit
 
 import models.ErsMetaData
 import org.apache.commons.lang3.exception.ExceptionUtils
-import play.api.mvc.Request
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import uk.gov.hmrc.play.audit.DefaultAuditConnector
@@ -30,7 +29,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class AuditEvents @Inject()(val auditConnector: DefaultAuditConnector)(implicit val ec: ExecutionContext) extends AuditService {
 
   def auditRunTimeError(exception : Throwable, contextInfo : String, rsc: ErsMetaData, bundle : String)
-											 (implicit request: Request[_], hc: HeaderCarrier) : Unit = {
+											 (implicit hc: HeaderCarrier) : Unit = {
     sendEvent("RunTimeError",
       Map("ErrorMessage" -> exception.getMessage,
         "Context" -> contextInfo,

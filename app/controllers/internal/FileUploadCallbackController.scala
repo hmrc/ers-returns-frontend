@@ -49,7 +49,7 @@ class FileUploadCallbackController @Inject()(val mcc: MessagesControllerComponen
             Failed
         }
         logger.info(s"Updating callback for session: $sessionId to ${uploadStatus.getClass.getSimpleName}")
-        sessionService.updateCallbackRecord(sessionId, uploadStatus)(request, headerCarrier).map(_ => Ok) recover {
+        sessionService.updateCallbackRecord(sessionId, uploadStatus)(headerCarrier).map(_ => Ok) recover {
           case e: Throwable =>
             logger.error(s"[FileUploadCallbackController][callback] Failed to update callback record for session: $sessionId, timestamp: ${System.currentTimeMillis()}.", e)
             InternalServerError("Exception occurred when attempting to update callback data")

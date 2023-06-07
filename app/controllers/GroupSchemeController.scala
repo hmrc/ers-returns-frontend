@@ -54,7 +54,7 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
 
   def showManualCompanyDetailsPage(index: Int)(implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] = {
     ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).map { requestObject =>
-      Ok(manualCompanyDetailsView(requestObject, index, RsFormMappings.companyDetailsForm))
+      Ok(manualCompanyDetailsView(requestObject, index, RsFormMappings.companyDetailsForm()))
     }
   }
 
@@ -67,7 +67,7 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
 
   def showManualCompanyDetailsSubmit(requestObject: RequestObject, index: Int)
                                     (implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] = {
-    RsFormMappings.companyDetailsForm.bindFromRequest.fold(
+    RsFormMappings.companyDetailsForm().bindFromRequest().fold(
       errors => {
         Future(Ok(manualCompanyDetailsView(requestObject, index, errors)))
       },
@@ -145,7 +145,7 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
 
     } yield {
 
-      Ok(manualCompanyDetailsView(requestObject, id, RsFormMappings.companyDetailsForm.fill(companyDetails)))
+      Ok(manualCompanyDetailsView(requestObject, id, RsFormMappings.companyDetailsForm().fill(companyDetails)))
 
     }) recover {
       case e: Exception =>
@@ -164,12 +164,12 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
   def showGroupSchemePage(requestObject: RequestObject)
                          (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
     ersUtil.fetch[GroupSchemeInfo](ersUtil.GROUP_SCHEME_CACHE_CONTROLLER, requestObject.getSchemeReference).map { groupSchemeInfo =>
-      Ok(groupView(requestObject, groupSchemeInfo.groupScheme, RsFormMappings.groupForm.fill(RS_groupScheme(groupSchemeInfo.groupScheme))))
+      Ok(groupView(requestObject, groupSchemeInfo.groupScheme, RsFormMappings.groupForm().fill(RS_groupScheme(groupSchemeInfo.groupScheme))))
     } recover {
       case e: Exception =>
         logger.warn(s"[GroupSchemeController][showGroupSchemePage] Fetching GroupSchemeInfo from the cache failed: $e")
         val form = RS_groupScheme(Some(ersUtil.DEFAULT))
-        Ok(groupView(requestObject, Some(ersUtil.DEFAULT), RsFormMappings.groupForm.fill(form)))
+        Ok(groupView(requestObject, Some(ersUtil.DEFAULT), RsFormMappings.groupForm().fill(form)))
     }
   }
 
@@ -182,7 +182,7 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
 
   def showGroupSchemeSelected(requestObject: RequestObject, scheme: String)
                              (implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] = {
-    RsFormMappings.groupForm.bindFromRequest.fold(
+    RsFormMappings.groupForm().bindFromRequest().fold(
       errors => {
         val correctOrder = errors.errors.map(_.key).distinct
         val incorrectOrderGrouped = errors.errors.groupBy(_.key).map(_._2.head).toSeq
@@ -238,11 +238,10 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
   }
 
   def groupPlanSummaryContinue(scheme: String): Action[AnyContent] = authAction.async {
-      implicit request =>
-        continueFromGroupPlanSummaryPage(scheme)(request, hc)
+      continueFromGroupPlanSummaryPage(scheme)
   }
 
-  def continueFromGroupPlanSummaryPage(scheme: String)(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
+  def continueFromGroupPlanSummaryPage(scheme: String): Future[Result] = {
     scheme match {
       case ersUtil.SCHEME_CSOP | ersUtil.SCHEME_SAYE =>
         Future(Redirect(routes.AltAmendsController.altActivityPage()))
