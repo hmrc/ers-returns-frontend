@@ -51,7 +51,13 @@ val cacheKey: String = ersUtil.SUBSIDIARY_ADDRESS_CACHE
 implicit val format: Format[CompanyAddressUk] = CompanyAddressUk.format
 
 def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier): Future[Result] = {
-  Future.successful(Redirect(controllers.routes.SummaryDeclarationController.summaryDeclarationPage()))
+  {
+    if (edit) {
+      Future.successful(Redirect(controllers.routes.GroupSchemeController.editCompany(index)))
+    } else {
+      Future.successful(Redirect(controllers.routes.GroupSchemeController.groupSchemePage()))
+    }
+  }
 }
 
 def form(implicit request: Request[AnyContent]): Form[CompanyAddressUk] = RsFormMappings.companyAddressUkForm()

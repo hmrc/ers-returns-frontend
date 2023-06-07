@@ -74,7 +74,7 @@ class IsCompanyUkController @Inject()(val mcc: MessagesControllerComponents,
     } yield {
       (subsidiaryBasedInUk.basedInUk, edit) match {
         case (true, false) => Redirect(controllers.subsidiaries.routes.CompanyDetailsUkController.questionPage())
-        case (false, true)  => Redirect(controllers.subsidiaries.routes.CompanyDetailsOverseasController.questionPage())
+        case (false, false)  => Redirect(controllers.subsidiaries.routes.CompanyDetailsOverseasController.questionPage())
         //case (true, true) => Redirect(controllers.subsidiaries.routes.CompanyDetailsUkController.
       }
     }
