@@ -50,17 +50,17 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 
-class IsCompanyUkController @Inject()(val mcc: MessagesControllerComponents,
-                                      val authConnector: DefaultAuthConnector,
-                                      val ersConnector: ErsConnector,
-                                      val globalErrorView: views.html.global_error,
-                                      val authAction: AuthAction,
-                                      implicit val countryCodes: CountryCodes,
-                                      implicit val ersUtil: ERSUtil,
-                                      implicit val appConfig: ApplicationConfig,
-                                      pageView: views.html.manual_is_the_company_in_uk
+class IsSubCompanyUkController @Inject()(val mcc: MessagesControllerComponents,
+                                         val authConnector: DefaultAuthConnector,
+                                         val ersConnector: ErsConnector,
+                                         val globalErrorView: views.html.global_error,
+                                         val authAction: AuthAction,
+                                         implicit val countryCodes: CountryCodes,
+                                         implicit val ersUtil: ERSUtil,
+                                         implicit val appConfig: ApplicationConfig,
+                                         pageView: views.html.manual_is_the_company_in_uk
                                      )
-  extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with SubsidiariesBaseController[IsCompanyUkController] {
+  extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with SubsidiariesBaseController[IsSubCompanyUkController] {
 
   implicit val ec: ExecutionContext = mcc.executionContext
 

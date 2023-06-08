@@ -41,7 +41,7 @@ trait SubsidiariesBaseController[A] extends FrontendController with I18nSupport 
   implicit val ec: ExecutionContext
   implicit val format: Format[A]
 
-  val nextPageRedirect: Result
+  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier): Future[Result]
 
   def form(implicit request: Request[AnyContent]): Form[A]
 
@@ -89,7 +89,7 @@ trait SubsidiariesBaseController[A] extends FrontendController with I18nSupport 
       },
       result =>
         ersUtil.cache[A](cacheKey, result, requestObject.getSchemeReference).map { _ =>
-          nextPageRedirect
+          nextPageRedirect(index, edit)
         }
     )
   }

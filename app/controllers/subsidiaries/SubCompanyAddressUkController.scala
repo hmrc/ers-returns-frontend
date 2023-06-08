@@ -33,17 +33,17 @@ import utils.{CountryCodes, ERSUtil}
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class CompanyAddressUkController @Inject()(val mcc: MessagesControllerComponents,
-                                            val authConnector: DefaultAuthConnector,
-                                            val ersConnector: ErsConnector,
-                                            val globalErrorView: views.html.global_error,
-                                            val authAction: AuthAction,
-                                            implicit val countryCodes: CountryCodes,
-                                            implicit val ersUtil: ERSUtil,
-                                            implicit val appConfig: ApplicationConfig,
-                                            trusteeAddressUkView: views.html.manual_address_uk
+class SubCompanyAddressUkController @Inject()(val mcc: MessagesControllerComponents,
+                                              val authConnector: DefaultAuthConnector,
+                                              val ersConnector: ErsConnector,
+                                              val globalErrorView: views.html.global_error,
+                                              val authAction: AuthAction,
+                                              implicit val countryCodes: CountryCodes,
+                                              implicit val ersUtil: ERSUtil,
+                                              implicit val appConfig: ApplicationConfig,
+                                              trusteeAddressUkView: views.html.manual_address_uk
                                             )
-extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with SubsidiariesBaseController[CompanyAddressUkController] {
+extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with SubsidiariesBaseController[SubCompanyAddressUkController] {
 
 implicit val ec: ExecutionContext = mcc.executionContext
 

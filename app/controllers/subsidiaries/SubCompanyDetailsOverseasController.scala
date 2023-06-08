@@ -35,9 +35,7 @@ package controllers.subsidiaries
 import config.ApplicationConfig
 import connectors.ErsConnector
 import controllers.auth.AuthAction
-
-import javax.inject.Inject
-import models.{CompanyName, RequestObject, RsFormMappings}
+import models.{CompanyName, CompanyOverseasName, RequestObject, RsFormMappings}
 import play.api.data.Form
 import play.api.libs.json.Format
 import play.api.mvc.{AnyContent, MessagesControllerComponents, Request, Result}
@@ -48,18 +46,19 @@ import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.{CountryCodes, ERSUtil}
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class CompanyDetailsUkController @Inject()(val mcc: MessagesControllerComponents,
-                                           val authConnector: DefaultAuthConnector,
-                                           val ersConnector: ErsConnector,
-                                           val globalErrorView: views.html.global_error,
-                                           val authAction: AuthAction,
-                                           implicit val countryCodes: CountryCodes,
-                                           implicit val ersUtil: ERSUtil,
-                                           implicit val appConfig: ApplicationConfig,
-                                           companyUKNameView: views.html.manual_company_details_uk
-                                          )
+class SubCompanyDetailsOverseasController @Inject()(val mcc: MessagesControllerComponents,
+                                                    val authConnector: DefaultAuthConnector,
+                                                    val ersConnector: ErsConnector,
+                                                    val globalErrorView: views.html.global_error,
+                                                    val authAction: AuthAction,
+                                                    implicit val countryCodes: CountryCodes,
+                                                    implicit val ersUtil: ERSUtil,
+                                                    implicit val appConfig: ApplicationConfig,
+                                                    companyOverseasDetailsView: views.html.manual_company_details_overseas
+                                                )
   extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with SubsidiariesBaseController[CompanyName] {
 
   implicit val ec: ExecutionContext = mcc.executionContext
@@ -68,19 +67,21 @@ class CompanyDetailsUkController @Inject()(val mcc: MessagesControllerComponents
 
   implicit val format: Format[CompanyName] = CompanyName.format
 
-    def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier) = {
+  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier)= {
+    {
       if (edit) {
         Future.successful(Redirect(controllers.routes.GroupSchemeController.editCompany(index)))
       } else {
-        Future.successful(Redirect(controllers.subsidiaries.routes.CompanyAddressUkController.questionPage()))
+        Future.successful(Redirect(controllers.subsidiaries.routes.CompanyAddressOverseasController.questionPage()))
       }
     }
+  }
 
   def form(implicit request: Request[AnyContent]): Form[CompanyName] = RsFormMappings.companyNameForm()
 
-  def view(requestObject: RequestObject, groupSchemeActivity: String, index: Int, companyNameUKForm: Form[CompanyName])
+  def view(requestObject: RequestObject, groupSchemeActivity: String, index: Int, companyNameOverseasForm: Form[CompanyName])
           (implicit request: Request[AnyContent], hc: HeaderCarrier): Html = {
-    companyUKNameView(requestObject, groupSchemeActivity, index, companyNameUKForm)
+    companyOverseasDetailsView(requestObject, groupSchemeActivity, index, companyNameOverseasForm)
   }
 
 }

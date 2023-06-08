@@ -33,17 +33,17 @@ import utils.{CountryCodes, ERSUtil}
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class CompanyAddressOverseasController  @Inject()(val mcc: MessagesControllerComponents,
-                                                  val authConnector: DefaultAuthConnector,
-                                                  val ersConnector: ErsConnector,
-                                                  val globalErrorView: views.html.global_error,
-                                                  val authAction: AuthAction,
-                                                  implicit val countryCodes: CountryCodes,
-                                                  implicit val ersUtil: ERSUtil,
-                                                  implicit val appConfig: ApplicationConfig,
-                                                  companyAddressOverseasView: views.html.manual_address_overseas
+class SubCompanyAddressOverseasController  @Inject()(val mcc: MessagesControllerComponents,
+                                                     val authConnector: DefaultAuthConnector,
+                                                     val ersConnector: ErsConnector,
+                                                     val globalErrorView: views.html.global_error,
+                                                     val authAction: AuthAction,
+                                                     implicit val countryCodes: CountryCodes,
+                                                     implicit val ersUtil: ERSUtil,
+                                                     implicit val appConfig: ApplicationConfig,
+                                                     companyAddressOverseasView: views.html.manual_address_overseas
                                                  )
-  extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with SubsidiariesBaseController[CompanyAddressOverseasController] {
+  extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with SubsidiariesBaseController[SubCompanyAddressOverseasController] {
 
   implicit val ec: ExecutionContext = mcc.executionContext
 
