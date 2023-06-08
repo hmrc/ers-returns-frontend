@@ -72,15 +72,15 @@ class SubCompanyDetailsUkController @Inject()(val mcc: MessagesControllerCompone
       if (edit) {
         Future.successful(Redirect(controllers.routes.GroupSchemeController.editCompany(index)))
       } else {
-        Future.successful(Redirect(controllers.subsidiaries.routes.CompanyAddressUkController.questionPage()))
+        Future.successful(Redirect(controllers.subsidiaries.routes.SubCompanyAddressUkController.questionPage()))
       }
     }
 
   def form(implicit request: Request[AnyContent]): Form[CompanyName] = RsFormMappings.companyNameForm()
 
-  def view(requestObject: RequestObject, groupSchemeActivity: String, index: Int, companyNameUKForm: Form[CompanyName])
+  def view(requestObject: RequestObject, groupSchemeActivity: String, index: Int, companyNameUKForm: Form[CompanyName], edit: Boolean = false)
           (implicit request: Request[AnyContent], hc: HeaderCarrier): Html = {
-    companyUKNameView(requestObject, groupSchemeActivity, index, companyNameUKForm)
+    companyUKNameView(requestObject, groupSchemeActivity, index, companyNameUKForm, edit)
   }
 
 }

@@ -35,10 +35,10 @@ package controllers.subsidiaries
 import config.ApplicationConfig
 import connectors.ErsConnector
 import controllers.auth.AuthAction
-import models.{CompanyName, CompanyOverseasName, RequestObject, RsFormMappings}
+import models.{CompanyName, RequestObject, RsFormMappings}
 import play.api.data.Form
 import play.api.libs.json.Format
-import play.api.mvc.{AnyContent, MessagesControllerComponents, Request, Result}
+import play.api.mvc.{AnyContent, MessagesControllerComponents, Request}
 import play.twirl.api.Html
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
@@ -72,16 +72,16 @@ class SubCompanyDetailsOverseasController @Inject()(val mcc: MessagesControllerC
       if (edit) {
         Future.successful(Redirect(controllers.routes.GroupSchemeController.editCompany(index)))
       } else {
-        Future.successful(Redirect(controllers.subsidiaries.routes.CompanyAddressOverseasController.questionPage()))
+        Future.successful(Redirect(controllers.subsidiaries.routes.SubCompanyAddressOverseasController.questionPage()))
       }
     }
   }
 
   def form(implicit request: Request[AnyContent]): Form[CompanyName] = RsFormMappings.companyNameForm()
 
-  def view(requestObject: RequestObject, groupSchemeActivity: String, index: Int, companyNameOverseasForm: Form[CompanyName])
+  def view(requestObject: RequestObject, groupSchemeActivity: String, index: Int, companyNameOverseasForm: Form[CompanyName], edit: Boolean = false)
           (implicit request: Request[AnyContent], hc: HeaderCarrier): Html = {
-    companyOverseasDetailsView(requestObject, groupSchemeActivity, index, companyNameOverseasForm)
+    companyOverseasDetailsView(requestObject, groupSchemeActivity, index, companyNameOverseasForm, edit)
   }
 
 }

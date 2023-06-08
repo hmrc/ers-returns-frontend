@@ -43,7 +43,7 @@ class SubCompanyAddressOverseasController  @Inject()(val mcc: MessagesController
                                                      implicit val appConfig: ApplicationConfig,
                                                      companyAddressOverseasView: views.html.manual_address_overseas
                                                  )
-  extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with SubsidiariesBaseController[SubCompanyAddressOverseasController] {
+  extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with SubsidiariesBaseController[CompanyAddressOverseas] {
 
   implicit val ec: ExecutionContext = mcc.executionContext
 
@@ -62,9 +62,9 @@ class SubCompanyAddressOverseasController  @Inject()(val mcc: MessagesController
 
   def form(implicit request: Request[AnyContent]): Form[CompanyAddressOverseas] = RsFormMappings.companyAddressOverseasForm()
 
-  def view(requestObject: RequestObject, groupSchemeActivity: String, index: Int, companyAddressOverseasForm: Form[CompanyAddressOverseas])
+  def view(requestObject: RequestObject, groupSchemeActivity: String, index: Int, companyAddressOverseasForm: Form[CompanyAddressOverseas], edit: Boolean = false)
           (implicit request: Request[AnyContent], hc: HeaderCarrier): Html = {
-    companyAddressOverseasView(requestObject, groupSchemeActivity, index, companyAddressOverseasForm)
+    companyAddressOverseasView(requestObject, groupSchemeActivity, index, companyAddressOverseasForm, edit)
   }
 
 }

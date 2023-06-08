@@ -43,7 +43,7 @@ class SubCompanyAddressUkController @Inject()(val mcc: MessagesControllerCompone
                                               implicit val appConfig: ApplicationConfig,
                                               trusteeAddressUkView: views.html.manual_address_uk
                                             )
-extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with SubsidiariesBaseController[SubCompanyAddressUkController] {
+extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with SubsidiariesBaseController[CompanyAddressUk] {
 
 implicit val ec: ExecutionContext = mcc.executionContext
 
@@ -62,9 +62,9 @@ def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarri
 
 def form(implicit request: Request[AnyContent]): Form[CompanyAddressUk] = RsFormMappings.companyAddressUkForm()
 
-def view(requestObject: RequestObject, groupSchemeActivity: String, index: Int, companyAddressUkForm: Form[CompanyAddressUk])
-(implicit request: Request[AnyContent], hc: HeaderCarrier): Html = {
-trusteeAddressUkView(requestObject, groupSchemeActivity, index, companyAddressUkForm)
+def view(requestObject: RequestObject, groupSchemeActivity: String, index: Int, companyAddressUkForm: Form[CompanyAddressUk], edit: Boolean = false)
+  (implicit request: Request[AnyContent], hc: HeaderCarrier): Html = {
+  trusteeAddressUkView(requestObject, groupSchemeActivity, index, companyAddressUkForm, edit)
 }
 
 }

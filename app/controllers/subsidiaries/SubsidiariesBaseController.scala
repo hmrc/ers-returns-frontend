@@ -45,7 +45,7 @@ trait SubsidiariesBaseController[A] extends FrontendController with I18nSupport 
 
   def form(implicit request: Request[AnyContent]): Form[A]
 
-  def view(requestObject: RequestObject, groupSchemeActivity: String, index: Int, form: Form[A])
+  def view(requestObject: RequestObject, groupSchemeActivity: String, index: Int, form: Form[A], edit: Boolean = false)
           (implicit request: Request[AnyContent], hc: HeaderCarrier): Html
 
 
@@ -56,7 +56,7 @@ trait SubsidiariesBaseController[A] extends FrontendController with I18nSupport 
       }
   }
 
-  def showQuestionPage(requestObject: RequestObject, index: Int)
+  def showQuestionPage(requestObject: RequestObject, index: Int, edit: Boolean = false)
                       (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
     ersUtil.fetch[GroupSchemeInfo](ersUtil.GROUP_SCHEME_CACHE_CONTROLLER, requestObject.getSchemeReference).map { groupSchemeActivity =>
       Ok(view(requestObject, groupSchemeActivity.groupScheme.getOrElse(ersUtil.DEFAULT), index, form))
@@ -74,7 +74,7 @@ trait SubsidiariesBaseController[A] extends FrontendController with I18nSupport 
       }
   }
 
-  def showQuestionSubmit(requestObject: RequestObject, index: Int)
+  def showQuestionSubmit(requestObject: RequestObject, index: Int, edit: Boolean = false)
                         (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
     form.bindFromRequest().fold(
       errors => {
@@ -82,15 +82,16 @@ trait SubsidiariesBaseController[A] extends FrontendController with I18nSupport 
           Ok(view(requestObject, groupSchemeActivity.groupScheme.getOrElse(ersUtil.DEFAULT), index, errors))
         } recover {
           case e: Exception =>
-            logger.error(s"[${this.getClass.getSimpleName}][showQuestionSubmit] Get data from cache failed with exception ${e.getMessage}, " +
+            logger.error(s"[${this.getClass.getSimpleName}][handleQuestionSubmit] Get data from cache failed with exception ${e.getMessage}, " +
               s"timestamp: ${System.currentTimeMillis()}.")
             getGlobalErrorPage
         }
       },
-      result =>
-        ersUtil.cache[A](cacheKey, result, requestObject.getSchemeReference).map { _ =>
+      result => {
+        ersUtil.cache[A](cacheKey, result, requestObject.getSchemeReference).flatMap { _ =>
           nextPageRedirect(index, edit)
         }
+      }
     )
   }
 

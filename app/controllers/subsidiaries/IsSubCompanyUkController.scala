@@ -60,7 +60,7 @@ class IsSubCompanyUkController @Inject()(val mcc: MessagesControllerComponents,
                                          implicit val appConfig: ApplicationConfig,
                                          pageView: views.html.manual_is_the_company_in_uk
                                      )
-  extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with SubsidiariesBaseController[IsSubCompanyUkController] {
+  extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with SubsidiariesBaseController[CompanyBasedInUk] {
 
   implicit val ec: ExecutionContext = mcc.executionContext
 
@@ -73,18 +73,18 @@ class IsSubCompanyUkController @Inject()(val mcc: MessagesControllerComponents,
       subsidiaryBasedInUk <- ersUtil.fetch[CompanyBasedInUk](cacheKey, requestObject.getSchemeReference)
     } yield {
       (subsidiaryBasedInUk.basedInUk, edit) match {
-        case (true, false) => Redirect(controllers.subsidiaries.routes.CompanyDetailsUkController.questionPage())
-        case (false, false)  => Redirect(controllers.subsidiaries.routes.CompanyDetailsOverseasController.questionPage())
-        //case (true, true) => Redirect(controllers.subsidiaries.routes.CompanyDetailsUkController.
+        case (true, false) => Redirect(controllers.subsidiaries.routes.SubCompanyDetailsUkController.questionPage())
+        case (false, false)  => Redirect(controllers.subsidiaries.routes.SubCompanyDetailsOverseasController.questionPage())
+        case (_, true) => Redirect(controllers.routes.GroupSchemeController.editCompany(index))
       }
     }
   }
 
   def form(implicit request: Request[AnyContent]): Form[CompanyBasedInUk] = RsFormMappings.companyBasedInUkForm()
 
-  def view(requestObject: RequestObject, groupSchemeActivity: String, index: Int, companyBasedInUkForm: Form[CompanyBasedInUk])
+  def view(requestObject: RequestObject, groupSchemeActivity: String, index: Int, companyBasedInUkForm: Form[CompanyBasedInUk], edit: Boolean = false)
           (implicit request: Request[AnyContent], hc: HeaderCarrier): Html = {
-    pageView(requestObject, groupSchemeActivity, index, companyBasedInUkForm)
+    pageView(requestObject, groupSchemeActivity, index, companyBasedInUkForm, edit)
   }
 
 }
