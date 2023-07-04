@@ -102,7 +102,7 @@ class ReportableEventsController @Inject()(val mcc: MessagesControllerComponents
       formData => {
         ersUtil.cache(ersUtil.reportableEvents, formData, requestObject.getSchemeReference).map { _ =>
           if (formData.isNilReturn.get == ersUtil.OPTION_NIL_RETURN) {
-            Redirect(routes.SchemeOrganiserController.schemeOrganiserPage())
+            Redirect(controllers.subsidiaries.routes.IsCompanyUkController.questionPage())
           } else {
             logger.info(s"[ReportableEventsController][showReportableEventsSelected] Redirecting to FileUpload controller to get Partial, timestamp: ${System.currentTimeMillis()}.")
             Redirect(routes.CheckFileTypeController.checkFileTypePage())

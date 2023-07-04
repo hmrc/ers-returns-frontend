@@ -33,17 +33,17 @@ import utils.{CountryCodes, ERSUtil}
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class SubCompanyAddressUkController @Inject()(val mcc: MessagesControllerComponents,
-                                              val authConnector: DefaultAuthConnector,
-                                              val ersConnector: ErsConnector,
-                                              val globalErrorView: views.html.global_error,
-                                              val authAction: AuthAction,
-                                              implicit val countryCodes: CountryCodes,
-                                              implicit val ersUtil: ERSUtil,
-                                              implicit val appConfig: ApplicationConfig,
-                                              trusteeAddressUkView: views.html.manual_address_uk
+class CompanyAddressUkController @Inject()(val mcc: MessagesControllerComponents,
+                                           val authConnector: DefaultAuthConnector,
+                                           val ersConnector: ErsConnector,
+                                           val globalErrorView: views.html.global_error,
+                                           val authAction: AuthAction,
+                                           implicit val countryCodes: CountryCodes,
+                                           implicit val ersUtil: ERSUtil,
+                                           implicit val appConfig: ApplicationConfig,
+                                           trusteeAddressUkView: views.html.manual_address_uk
                                             )
-extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with SubsidiariesBaseController[CompanyAddressUk] {
+extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with CompanyBaseController[CompanyAddressUk] {
 
 implicit val ec: ExecutionContext = mcc.executionContext
 
@@ -62,9 +62,9 @@ def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarri
 
 def form(implicit request: Request[AnyContent]): Form[CompanyAddressUk] = RsFormMappings.companyAddressUkForm()
 
-def view(requestObject: RequestObject, groupSchemeActivity: String, index: Int, companyAddressUkForm: Form[CompanyAddressUk], edit: Boolean = false)
+def view(requestObject: RequestObject, index: Int, companyAddressUkForm: Form[CompanyAddressUk], edit: Boolean = false)
   (implicit request: Request[AnyContent], hc: HeaderCarrier): Html = {
-  trusteeAddressUkView(requestObject, groupSchemeActivity, index, companyAddressUkForm, edit)
+  trusteeAddressUkView(requestObject, index, companyAddressUkForm, edit)
 }
 
 }

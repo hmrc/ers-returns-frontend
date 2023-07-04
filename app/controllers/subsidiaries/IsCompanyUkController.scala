@@ -50,21 +50,21 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 
-class IsSubCompanyUkController @Inject()(val mcc: MessagesControllerComponents,
-                                         val authConnector: DefaultAuthConnector,
-                                         val ersConnector: ErsConnector,
-                                         val globalErrorView: views.html.global_error,
-                                         val authAction: AuthAction,
-                                         implicit val countryCodes: CountryCodes,
-                                         implicit val ersUtil: ERSUtil,
-                                         implicit val appConfig: ApplicationConfig,
-                                         pageView: views.html.manual_is_the_company_in_uk
+class IsCompanyUkController @Inject()(val mcc: MessagesControllerComponents,
+                                      val authConnector: DefaultAuthConnector,
+                                      val ersConnector: ErsConnector,
+                                      val globalErrorView: views.html.global_error,
+                                      val authAction: AuthAction,
+                                      implicit val countryCodes: CountryCodes,
+                                      implicit val ersUtil: ERSUtil,
+                                      implicit val appConfig: ApplicationConfig,
+                                      pageView: views.html.manual_is_the_company_in_uk
                                      )
-  extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with SubsidiariesBaseController[CompanyBasedInUk] {
+  extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with CompanyBaseController[CompanyBasedInUk] {
 
   implicit val ec: ExecutionContext = mcc.executionContext
 
-  val cacheKey: String = ersUtil.SUBSIDIARY_NAME_CACHE
+  val cacheKey: String = ersUtil.SUBSIDIARY_BASED
   implicit val format: Format[CompanyBasedInUk] = CompanyBasedInUk.format
 
   def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier): Future[Result] = {
@@ -73,8 +73,8 @@ class IsSubCompanyUkController @Inject()(val mcc: MessagesControllerComponents,
       subsidiaryBasedInUk <- ersUtil.fetch[CompanyBasedInUk](cacheKey, requestObject.getSchemeReference)
     } yield {
       (subsidiaryBasedInUk.basedInUk, edit) match {
-        case (true, false) => Redirect(controllers.subsidiaries.routes.SubCompanyDetailsUkController.questionPage())
-        case (false, false)  => Redirect(controllers.subsidiaries.routes.SubCompanyDetailsOverseasController.questionPage())
+        case (true, false) => Redirect(controllers.subsidiaries.routes.CompanyDetailsUkController.questionPage())
+        case (false, false)  => Redirect(controllers.subsidiaries.routes.CompanyDetailsOverseasController.questionPage())
         case (_, true) => Redirect(controllers.routes.GroupSchemeController.editCompany(index))
       }
     }
@@ -82,9 +82,9 @@ class IsSubCompanyUkController @Inject()(val mcc: MessagesControllerComponents,
 
   def form(implicit request: Request[AnyContent]): Form[CompanyBasedInUk] = RsFormMappings.companyBasedInUkForm()
 
-  def view(requestObject: RequestObject, groupSchemeActivity: String, index: Int, companyBasedInUkForm: Form[CompanyBasedInUk], edit: Boolean = false)
+  def view(requestObject: RequestObject, index: Int, companyBasedInUkForm: Form[CompanyBasedInUk], edit: Boolean = false)
           (implicit request: Request[AnyContent], hc: HeaderCarrier): Html = {
-    pageView(requestObject, groupSchemeActivity, index, companyBasedInUkForm, edit)
+    pageView(requestObject, index, companyBasedInUkForm, edit)
   }
 
 }

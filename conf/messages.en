@@ -399,6 +399,12 @@ ers_manual_company_details.err.corporation_ref = Enter a valid Corporation Tax r
 
 ers_manual_company_details.continue = Continue
 
+ers_manual_address_uk.building = Building and street
+ers_manual_address_uk.town = Town or city
+ers_manual_address_uk.county = County
+
+ers_manual_address_overseas.title = What is the company’s address?
+
 #********************************************************************
 # Declaration messages
 #********************************************************************

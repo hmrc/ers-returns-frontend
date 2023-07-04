@@ -50,17 +50,17 @@ import utils.{CountryCodes, ERSUtil}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class SubCompanyDetailsUkController @Inject()(val mcc: MessagesControllerComponents,
-                                              val authConnector: DefaultAuthConnector,
-                                              val ersConnector: ErsConnector,
-                                              val globalErrorView: views.html.global_error,
-                                              val authAction: AuthAction,
-                                              implicit val countryCodes: CountryCodes,
-                                              implicit val ersUtil: ERSUtil,
-                                              implicit val appConfig: ApplicationConfig,
-                                              companyUKNameView: views.html.manual_company_details_uk
+class CompanyDetailsUkController @Inject()(val mcc: MessagesControllerComponents,
+                                           val authConnector: DefaultAuthConnector,
+                                           val ersConnector: ErsConnector,
+                                           val globalErrorView: views.html.global_error,
+                                           val authAction: AuthAction,
+                                           implicit val countryCodes: CountryCodes,
+                                           implicit val ersUtil: ERSUtil,
+                                           implicit val appConfig: ApplicationConfig,
+                                           companyUKNameView: views.html.manual_company_details_uk
                                           )
-  extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with SubsidiariesBaseController[CompanyName] {
+  extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with CompanyBaseController[CompanyName] {
 
   implicit val ec: ExecutionContext = mcc.executionContext
 
@@ -72,15 +72,15 @@ class SubCompanyDetailsUkController @Inject()(val mcc: MessagesControllerCompone
       if (edit) {
         Future.successful(Redirect(controllers.routes.GroupSchemeController.editCompany(index)))
       } else {
-        Future.successful(Redirect(controllers.subsidiaries.routes.SubCompanyAddressUkController.questionPage()))
+        Future.successful(Redirect(controllers.subsidiaries.routes.CompanyAddressUkController.questionPage()))
       }
     }
 
   def form(implicit request: Request[AnyContent]): Form[CompanyName] = RsFormMappings.companyNameForm()
 
-  def view(requestObject: RequestObject, groupSchemeActivity: String, index: Int, companyNameUKForm: Form[CompanyName], edit: Boolean = false)
+  def view(requestObject: RequestObject, index: Int, companyNameUKForm: Form[CompanyName], edit: Boolean = false)
           (implicit request: Request[AnyContent], hc: HeaderCarrier): Html = {
-    companyUKNameView(requestObject, groupSchemeActivity, index, companyNameUKForm, edit)
+    companyUKNameView(requestObject, index, companyNameUKForm, edit)
   }
 
 }

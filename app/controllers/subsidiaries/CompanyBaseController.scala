@@ -31,7 +31,7 @@ import utils.ERSUtil
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait SubsidiariesBaseController[A] extends FrontendController with I18nSupport with Logging {
+trait CompanyBaseController[A] extends FrontendController with I18nSupport with Logging {
 
   val ersUtil: ERSUtil
   val authAction: AuthAction
@@ -45,7 +45,7 @@ trait SubsidiariesBaseController[A] extends FrontendController with I18nSupport 
 
   def form(implicit request: Request[AnyContent]): Form[A]
 
-  def view(requestObject: RequestObject, groupSchemeActivity: String, index: Int, form: Form[A], edit: Boolean = false)
+  def view(requestObject: RequestObject, index: Int, form: Form[A], edit: Boolean = false)
           (implicit request: Request[AnyContent], hc: HeaderCarrier): Html
 
 
@@ -56,21 +56,20 @@ trait SubsidiariesBaseController[A] extends FrontendController with I18nSupport 
       }
   }
 
-  def showQuestionPage(requestObject: RequestObject, index: Int, edit: Boolean = false)
+  def showQuestionPage(requestObject: RequestObject, index: Int)
                       (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
-    ersUtil.fetch[GroupSchemeInfo](ersUtil.GROUP_SCHEME_CACHE_CONTROLLER, requestObject.getSchemeReference).map { groupSchemeActivity =>
-      Ok(view(requestObject, groupSchemeActivity.groupScheme.getOrElse(ersUtil.DEFAULT), index, form))
+      Future.successful(Ok(view(requestObject, index, form)))
     } recover {
       case e: Exception =>
         logger.error(s"[SubsidiariesController][showSubsidiariesNamePage] Get data from cache failed with exception ${e.getMessage}")
         getGlobalErrorPage
     }
-  }
 
-  def questionSubmit(index: Int): Action[AnyContent] = authAction.async {
+
+  def questionSubmit(index: Int, edit: Boolean = false): Action[AnyContent] = authAction.async {
     implicit request =>
       ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
-        showQuestionSubmit(requestObject, index)(request, hc)
+        showQuestionSubmit(requestObject, index, edit)(request, hc)
       }
   }
 
@@ -78,14 +77,7 @@ trait SubsidiariesBaseController[A] extends FrontendController with I18nSupport 
                         (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
     form.bindFromRequest().fold(
       errors => {
-        ersUtil.fetch[GroupSchemeInfo](ersUtil.GROUP_SCHEME_CACHE_CONTROLLER, requestObject.getSchemeReference).map { groupSchemeActivity =>
-          Ok(view(requestObject, groupSchemeActivity.groupScheme.getOrElse(ersUtil.DEFAULT), index, errors))
-        } recover {
-          case e: Exception =>
-            logger.error(s"[${this.getClass.getSimpleName}][handleQuestionSubmit] Get data from cache failed with exception ${e.getMessage}, " +
-              s"timestamp: ${System.currentTimeMillis()}.")
-            getGlobalErrorPage
-        }
+          Future.successful(Ok(view(requestObject, index, errors)))
       },
       result => {
         ersUtil.cache[A](cacheKey, result, requestObject.getSchemeReference).flatMap { _ =>

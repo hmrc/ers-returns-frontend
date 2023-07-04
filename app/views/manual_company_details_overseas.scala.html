@@ -35,7 +35,7 @@
 		hmrcPageHeading: HmrcPageHeading
 )
 
-@(requestObject: RequestObject, groupSchemeActivity: String, index: Int, companyDetails: Form[models.CompanyName], edit: Boolean = false)(implicit request: Request[AnyRef], flash: Flash, messages: Messages, ersUtil: ERSUtil, countryCodes: CountryCodes, appConfig: ApplicationConfig)
+@(requestObject: RequestObject, index: Int, companyDetails: Form[models.CompanyName], edit: Boolean = false)(implicit request: Request[AnyRef], flash: Flash, messages: Messages, ersUtil: ERSUtil, countryCodes: CountryCodes, appConfig: ApplicationConfig)
 
 @schemeId = @{requestObject.getSchemeId}
 
@@ -62,7 +62,7 @@
 		text = messages("ers_manual_company_details_overseas.title")
 	))
 
-	@formWithCSRF(action = routes.GroupSchemeController.manualCompanyDetailsSubmit(index)) {
+	@formWithCSRF(action = controllers.subsidiaries.routes.CompanyDetailsOverseasController.questionSubmit(index)) {
 
 		@govukInput(Input(
 			classes = "govuk-!-width-one-half",

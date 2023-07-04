@@ -33,17 +33,17 @@ import utils.{CountryCodes, ERSUtil}
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class SubCompanyAddressOverseasController  @Inject()(val mcc: MessagesControllerComponents,
-                                                     val authConnector: DefaultAuthConnector,
-                                                     val ersConnector: ErsConnector,
-                                                     val globalErrorView: views.html.global_error,
-                                                     val authAction: AuthAction,
-                                                     implicit val countryCodes: CountryCodes,
-                                                     implicit val ersUtil: ERSUtil,
-                                                     implicit val appConfig: ApplicationConfig,
-                                                     companyAddressOverseasView: views.html.manual_address_overseas
+class CompanyAddressOverseasController  @Inject()(val mcc: MessagesControllerComponents,
+                                                  val authConnector: DefaultAuthConnector,
+                                                  val ersConnector: ErsConnector,
+                                                  val globalErrorView: views.html.global_error,
+                                                  val authAction: AuthAction,
+                                                  implicit val countryCodes: CountryCodes,
+                                                  implicit val ersUtil: ERSUtil,
+                                                  implicit val appConfig: ApplicationConfig,
+                                                  companyAddressOverseasView: views.html.manual_address_overseas
                                                  )
-  extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with SubsidiariesBaseController[CompanyAddressOverseas] {
+  extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with CompanyBaseController[CompanyAddressOverseas] {
 
   implicit val ec: ExecutionContext = mcc.executionContext
 
@@ -62,9 +62,9 @@ class SubCompanyAddressOverseasController  @Inject()(val mcc: MessagesController
 
   def form(implicit request: Request[AnyContent]): Form[CompanyAddressOverseas] = RsFormMappings.companyAddressOverseasForm()
 
-  def view(requestObject: RequestObject, groupSchemeActivity: String, index: Int, companyAddressOverseasForm: Form[CompanyAddressOverseas], edit: Boolean = false)
+  def view(requestObject: RequestObject, index: Int, companyAddressOverseasForm: Form[CompanyAddressOverseas], edit: Boolean = false)
           (implicit request: Request[AnyContent], hc: HeaderCarrier): Html = {
-    companyAddressOverseasView(requestObject, groupSchemeActivity, index, companyAddressOverseasForm, edit)
+    companyAddressOverseasView(requestObject, index, companyAddressOverseasForm, edit)
   }
 
 }
