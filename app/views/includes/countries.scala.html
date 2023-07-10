@@ -24,12 +24,12 @@
     id = "country",
     name = "country",
     classes = "govuk-!-width-one-half",
-    items = Seq(SelectItem(value = Some(""), text = "Select...")) ++
+    items = Seq(SelectItem(value = countryVal, text = "Select...")) ++
             countryCodes.countriesMap.sortBy(_.country).map { country =>
                 SelectItem(
                     value = Some(country.countryCode),
                     text = country.country,
-                    selected = countryVal.getOrElse("") == country.country
+                    selected = countryVal.getOrElse("") == country.countryCode
                 )
             },
     label = Label(

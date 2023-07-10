@@ -35,7 +35,7 @@
     hmrcPageHeading: HmrcPageHeading
 )
 
-@(requestObject: RequestObject, groupSchemeActivity: String, index: Int, trusteeDetails: Form[models.TrusteeBasedInUk], edit: Boolean = false)(implicit request: Request[AnyRef], messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
+@(requestObject: RequestObject, groupSchemeActivity: String, index: Int, trusteeBasedInUkForm: Form[models.TrusteeBasedInUk], edit: Boolean = false)(implicit request: Request[AnyRef], messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 
 @schemeId = @{requestObject.getSchemeId}
 
@@ -47,10 +47,10 @@
     attributes = Map("id" -> "back-link"), classes="js-enabled", content = HtmlContent(messages("ers.back"))
 ))
 
-@if(trusteeDetails.hasErrors) {
+@if(trusteeBasedInUkForm.hasErrors) {
     @govukErrorSummary(ErrorSummary(
         title = Text(messages("validation.summary.heading")),
-        errorList = trusteeDetails.errors.asTextErrorLinks
+        errorList = trusteeBasedInUkForm.errors.asTextErrorLinks
     ))
 }
 
@@ -68,13 +68,13 @@
     name = "basedInUk",
     items = Seq(
         RadioItem(
-            checked = trusteeDetails(trusteeDetailsFields.country).value.contains(ersUtil.DEFAULT_COUNTRY) || trusteeDetails(trusteeDetailsFields.country).value.isEmpty,
+            checked = trusteeBasedInUkForm(trusteeBasedInUkFields.basedInUk).value.contains("0") || trusteeBasedInUkForm(trusteeBasedInUkFields.basedInUk).value.isEmpty,
             id = Some("uk-radio-button"),
             value = Some("0"),
             content = Text(messages("ers_trustee_details.uk"))
         ),
         RadioItem(
-            checked = !trusteeDetails(trusteeDetailsFields.country).value.contains(ersUtil.DEFAULT_COUNTRY) && trusteeDetails(trusteeDetailsFields.country).value.isDefined,
+            checked = !trusteeBasedInUkForm(trusteeBasedInUkFields.basedInUk).value.contains("0"),
             id = Some("overseas-radio-button"),
             value = Some("1"),
             content = Text(messages("ers_trustee_details.overseas"))
