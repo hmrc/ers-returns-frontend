@@ -32,12 +32,20 @@ class TrusteeService @Inject()(
       requestObject <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
       schemeRef = requestObject.getSchemeReference
       name <- ersUtil.fetch[TrusteeName](ersUtil.TRUSTEE_NAME_CACHE, schemeRef)
-      address <- ersUtil.fetch[TrusteeAddressOverseas](ersUtil.TRUSTEE_ADDRESS_CACHE, schemeRef) //TODO this maybe is an issue?? that it is either overseas or UK?
+      basedInUk <- ersUtil.fetch[TrusteeBasedInUk](ersUtil.TRUSTEE_BASED_CACHE, schemeRef)
       cachedTrustees <- ersUtil.fetchTrusteesOptionally(ersUtil.TRUSTEES_CACHE, schemeRef)
-      trusteeDetailsList = TrusteeDetailsList(replaceTrustee(cachedTrustees.trustees, index, TrusteeDetails(name, address)))
+      trusteeDetailsList <- if (basedInUk.basedInUk) {
+        ersUtil.fetch[TrusteeAddressUk](ersUtil.TRUSTEE_ADDRESS_UK_CACHE, schemeRef).map( address =>
+        TrusteeDetailsList(replaceTrustee(cachedTrustees.trustees, index, TrusteeDetails(name, address)))
+        )
+      } else {
+        ersUtil.fetch[TrusteeAddressOverseas](ersUtil.TRUSTEE_ADDRESS_OVERSEAS_CACHE, schemeRef).map( address =>
+        TrusteeDetailsList(replaceTrustee(cachedTrustees.trustees, index, TrusteeDetails(name, address)))
+        )
+      }
       _ <- ersUtil.cache[TrusteeDetailsList](ersUtil.TRUSTEES_CACHE, trusteeDetailsList, schemeRef)
     } yield {
-      println(s"\n Cached stuff: $name \n $address \n\n")
+      println(s"\n Cached stuff: $name \n ${trusteeDetailsList.trustees.head.country} \n\n")
       Unit
     }
   }

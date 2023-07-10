@@ -49,7 +49,7 @@ class TrusteeAddressUkController @Inject()(val mcc: MessagesControllerComponents
 
   implicit val ec: ExecutionContext = mcc.executionContext
 
-  val cacheKey: String = ersUtil.TRUSTEE_ADDRESS_CACHE
+  val cacheKey: String = ersUtil.TRUSTEE_ADDRESS_UK_CACHE
   implicit val format: Format[TrusteeAddressUk] = TrusteeAddressUk.format
 
   def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier): Future[Result] = {

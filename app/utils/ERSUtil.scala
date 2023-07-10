@@ -76,7 +76,8 @@ class ERSUtil @Inject() (
 	val TRUSTEES_CACHE: String = "trustees"
 	val TRUSTEE_NAME_CACHE: String = "trustee-name"
 	val TRUSTEE_BASED_CACHE: String = "trustee-based"
-	val TRUSTEE_ADDRESS_CACHE: String = "trustee-address"
+	val TRUSTEE_ADDRESS_UK_CACHE: String = "trustee-address-uk"
+	val TRUSTEE_ADDRESS_OVERSEAS_CACHE: String = "trustee-address-overseas"
 	val ERROR_REPORT_DATETIME: String = "error-report-datetime"
 
   // Params

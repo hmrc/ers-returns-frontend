@@ -203,7 +203,7 @@ object RsFormMappings {
   )
 
   def trusteeBasedInUkForm()(implicit messages: Messages): Form[TrusteeBasedInUk] = Form(mapping(
-    trusteeBasedInUkFields.basedinUk -> number
+    trusteeBasedInUkFields.basedInUk -> number
       .transform(int => if (int == 0) true else false, (bool: Boolean) => if (bool) 0 else 1)
   )(TrusteeBasedInUk.apply)(TrusteeBasedInUk.unapply))
 
@@ -414,7 +414,7 @@ object trusteeDetailsFields {
 }
 
 object trusteeBasedInUkFields {
-  val basedinUk = "basedInUk"
+  val basedInUk = "basedInUk"
 }
 
 object trusteeNameFields {

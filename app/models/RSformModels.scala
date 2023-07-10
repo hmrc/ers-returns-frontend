@@ -179,7 +179,6 @@ object TrusteeAddressUk {
   implicit val format: OFormat[TrusteeAddressUk] = Json.format[TrusteeAddressUk]
 }
 
-
 case class TrusteeDetailsList(trustees: List[TrusteeDetails])
 object TrusteeDetailsList {
   implicit val format: OFormat[TrusteeDetailsList] = Json.format[TrusteeDetailsList]
