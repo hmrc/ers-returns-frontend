@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -122,7 +122,7 @@ class CheckFileTypeControllerSpec extends AnyWordSpecLike
                                             cache: Future[CacheMap] = Future.successful(mock[CacheMap]),
                                            requestObject: Future[RequestObject] = Future.successful(ersRequestObject)): CheckFileTypeController =
 			new CheckFileTypeController(mockMCC, mockAuthConnector, mockErsUtil, mockAppConfig, globalErrorView, checkFileTypeView, testAuthActionGov){
-      when(mockErsUtil.cache(matches("check-file-type"), any(), any())(any(), any(), any())).thenReturn(cache)
+      when(mockErsUtil.cache(matches("check-file-type"), any(), any())(any(), any())).thenReturn(cache)
       when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any())).thenReturn(requestObject)
     }
 

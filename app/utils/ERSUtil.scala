@@ -149,6 +149,7 @@ class ERSUtil @Inject()(val sessionService: SessionService,
 		}
 	}
 
+	//TODO Yo why is this called "fetchOption" if it thows an expection when there's no data?? It can only return Some[T] or throw exception -.-
 	def fetchOption[T](key: String, cacheId: String)(implicit hc: HeaderCarrier, formats: json.Format[T]): Future[Option[T]] = {
 		val startTime = System.currentTimeMillis()
 		shortLivedCache.fetchAndGetEntry[T](cacheId, key).map { res =>
@@ -184,13 +185,20 @@ class ERSUtil @Inject()(val sessionService: SessionService,
 	def getAltAmmendsData(schemeRef: String)(implicit hc: HeaderCarrier,
 																					 ec: ExecutionContext,
 																					 request: Request[AnyRef]
-																					): Future[(Option[AltAmendsActivity], Option[AlterationAmends])] = {
-		//TODO this change may mess with tests, think it should be good tho
-		for {
-			altAmends <- fetchOption[AltAmendsActivity](altAmendsActivity, schemeRef)
-			amc <- fetchOption[AlterationAmends](ALT_AMENDS_CACHE_CONTROLLER, schemeRef)
-		} yield {
-			(altAmends, amc)
+	): Future[(Option[AltAmendsActivity], Option[AlterationAmends])] = {
+		fetchOption[AltAmendsActivity](altAmendsActivity, schemeRef).flatMap {
+			altamends =>
+				if(altamends.getOrElse(AltAmendsActivity("")).altActivity == OPTION_YES) {
+					fetchOption[AlterationAmends](ALT_AMENDS_CACHE_CONTROLLER, schemeRef).map {
+						amc =>
+							(altamends, amc)
+					}
+				}
+				else {
+					Future{
+						(altamends, None)
+					}
+				}
 		}
 	}
 
@@ -198,12 +206,17 @@ class ERSUtil @Inject()(val sessionService: SessionService,
 												(implicit hc: HeaderCarrier,
 												 ec: ExecutionContext,
 												 request: Request[AnyRef]): Future[(Option[GroupSchemeInfo], Option[CompanyDetailsList])] = {
-		//TODO this change may mess with tests, think it should be good tho
-		for {
-			gsc <- fetchOption[GroupSchemeInfo](GROUP_SCHEME_CACHE_CONTROLLER, schemeRef)
-			comp <- fetchOption[CompanyDetailsList](GROUP_SCHEME_COMPANIES, schemeRef)
-		} yield {
-			(gsc, comp)
+		fetchOption[GroupSchemeInfo](GROUP_SCHEME_CACHE_CONTROLLER, schemeRef).flatMap { gsc =>
+			if (gsc.getOrElse(GroupSchemeInfo(None, None)).groupScheme.getOrElse("") == OPTION_YES) {
+				fetchOption[CompanyDetailsList](GROUP_SCHEME_COMPANIES, schemeRef).map { comp =>
+					(gsc, comp)
+				}
+			}
+			else {
+				Future {
+					(gsc, None)
+				}
+			}
 		}
 	}
 
@@ -249,7 +262,12 @@ class ERSUtil @Inject()(val sessionService: SessionService,
 	}
 
 	final def concatAddress(optionalAddressLines: List[Option[String]], existingAddressLines: String): String = {
-		val definedStrings = optionalAddressLines.filter(_.isDefined).map(_.get)
+		println(optionalAddressLines)
+		val definedStrings = optionalAddressLines.filter {
+			x =>
+				println(x)
+				x.isDefined
+		}.map(_.get)
 		existingAddressLines ++ definedStrings.map(addressLine => ", " + addressLine).mkString("")
 	}
 

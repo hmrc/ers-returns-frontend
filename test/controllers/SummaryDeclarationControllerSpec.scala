@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,7 +86,7 @@ class SummaryDeclarationControllerSpec extends AnyWordSpecLike
 	val fileTypeCSV: CheckFileType = new CheckFileType(Some("csv"))
 	val fileTypeODS: CheckFileType = new CheckFileType(Some("ods"))
 	val csvFilesCallbackList: UpscanCsvFilesCallbackList = incompleteCsvList
-	val trustees: TrusteeDetails = new TrusteeDetails("T Name", "T Add 1", None, None, None, None, None)
+	val trustees: TrusteeDetails = new TrusteeDetails("T Name", "T Add 1", None, None, None, None, None, false)
 	val trusteesList: TrusteeDetailsList = new TrusteeDetailsList(List(trustees))
 	val fileNameODS: String = "test.osd"
 
@@ -105,7 +105,7 @@ class SummaryDeclarationControllerSpec extends AnyWordSpecLike
 	class TestErsUtil(fetchAllMapVal: String) extends ERSUtil(mockSessionCache, mockShortLivedCache, mockAppConfig){
 
 		override def cache[T](key: String, body: T, cacheId: String)
-												 (implicit hc: HeaderCarrier, formats: json.Format[T], request: Request[AnyRef]): Future[CacheMap] = {
+												 (implicit hc: HeaderCarrier, formats: json.Format[T]): Future[CacheMap] = {
 			Future.successful(CacheMap("fakeId", Map()))
 		}
 

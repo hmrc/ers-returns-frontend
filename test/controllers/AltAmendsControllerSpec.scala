@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -235,7 +235,7 @@ class AltAmendsControllerSpec extends AnyWordSpecLike
 				.thenReturn(requestObject)
       when(mockErsUtil.fetchOption[AltAmends](refEq("alt-amends-cache-controller"), any())(any(), any()))
 				.thenReturn(altAmends)
-      when(mockErsUtil.cache(refEq("alt-amends-cache-controller"), any(), any())(any(), any(), any()))
+      when(mockErsUtil.cache(refEq("alt-amends-cache-controller"), any(), any())(any(), any()))
 				.thenReturn(cache)
 			when(mockErsUtil.getPageElement(any(), any(),any(), any())(any())).thenReturn("")
     }

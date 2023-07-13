@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,6 +93,7 @@ trait ErsTestHelper extends MockitoSugar with AuthHelper with ERSFakeApplication
 
 
 	when(mockCountryCodes.countriesMap).thenReturn(List(Country("United Kingdom", "UK"), Country("South Africa", "ZA")))
+	when(mockCountryCodes.getCountry("UK")).thenReturn(Some("United Kingdom"))
 
 	when(mockAppConfig.ggSignInUrl).thenReturn("http://localhost:9949/gg/sign-in")
 	when(mockAppConfig.appName).thenReturn("ers-returns-frontend")

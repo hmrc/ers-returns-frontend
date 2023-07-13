@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -503,7 +503,7 @@ class ErsUtilSpec extends AnyWordSpecLike
          companyReg = Some("ABC"),
          corporationRef = Some("DEF")
       )
-      val expected = "ADDRESS1, ADDRESS2, AB123CD"
+      val expected = "ADDRESS1, ADDRESS2, AB123CD, United Kingdom"
       val addressSummary = ersUtil.buildAddressSummary(companyDetails)
       assert(addressSummary == expected)
     }
@@ -516,9 +516,10 @@ class ErsUtilSpec extends AnyWordSpecLike
         addressLine3 = None,
         addressLine4 = None,
         country = Some("UK"),
-        postcode = Some("AB123CD")
+        postcode = Some("AB123CD"),
+        basedInUk = true
       )
-      val expected = "ADDRESS1, ADDRESS2, AB123CD"
+      val expected = "ADDRESS1, ADDRESS2, AB123CD, United Kingdom"
       val addressSummary = ersUtil.buildAddressSummary(companyDetails)
       assert(addressSummary == expected)
     }

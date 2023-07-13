@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -150,7 +150,7 @@ class FileUploadControllerSpec extends PlaySpec
           .thenReturn(Future.successful(ersRequestObject))
         when(mockSessionService.getCallbackRecord(any[Request[_]], any[HeaderCarrier]))
           .thenReturn(Future.successful(Some(uploadedSuccessfully)))
-        when(mockErsUtil.cache(meq("file-name"), meq(uploadedSuccessfully.name), any())(any[HeaderCarrier], any(), any[Request[AnyRef]]))
+        when(mockErsUtil.cache(meq("file-name"), meq(uploadedSuccessfully.name), any())(any[HeaderCarrier], any()))
           .thenReturn(Future.successful(mock[CacheMap]))
 
         setAuthMocks()
@@ -165,7 +165,7 @@ class FileUploadControllerSpec extends PlaySpec
       "caching file name fails" in {
         when(mockSessionService.getCallbackRecord(any[Request[_]], any[HeaderCarrier]))
           .thenReturn(Future.successful(Some(uploadedSuccessfully)))
-        when(mockErsUtil.cache(meq("file-name"), meq(uploadedSuccessfully.name), any())(any[HeaderCarrier], any(), any[Request[AnyRef]]))
+        when(mockErsUtil.cache(meq("file-name"), meq(uploadedSuccessfully.name), any())(any[HeaderCarrier], any()))
           .thenReturn(Future.failed(new Exception))
 
         setAuthMocks()
@@ -180,7 +180,7 @@ class FileUploadControllerSpec extends PlaySpec
           .thenReturn(Future.successful(ersRequestObject))
         when(mockSessionService.getCallbackRecord(any[Request[_]], any[HeaderCarrier]))
           .thenReturn(Future.successful(Some(uploadedSuccessfullyCsv)))
-        when(mockErsUtil.cache(meq("file-name"), meq(uploadedSuccessfullyCsv.name), any())(any[HeaderCarrier], any(), any[Request[AnyRef]]))
+        when(mockErsUtil.cache(meq("file-name"), meq(uploadedSuccessfullyCsv.name), any())(any[HeaderCarrier], any()))
           .thenReturn(Future.successful(mock[CacheMap]))
 
         setAuthMocks()

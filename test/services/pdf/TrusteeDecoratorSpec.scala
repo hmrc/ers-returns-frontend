@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ class TrusteeDecoratorSpec extends AnyWordSpecLike
   "Trusstees Decorator" should {
 
     "add title and trustee's name to section" in {
-      val trusteeList = new TrusteeDetailsList(List(new TrusteeDetails("trustee name", "address", None, None, None, None, None)))
+      val trusteeList = new TrusteeDetailsList(List(new TrusteeDetails("trustee name", "address", None, None, None, None, None, false)))
       val decorator = new TrusteesDecorator(Some(trusteeList))
       val output = decorator.decorate
 
