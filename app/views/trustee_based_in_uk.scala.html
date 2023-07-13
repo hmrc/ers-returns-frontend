@@ -62,19 +62,19 @@
     controllers.trustees.routes.TrusteeBasedInUkController.editQuestionSubmit(index)
 } else {
     controllers.trustees.routes.TrusteeBasedInUkController.questionSubmit(index)
-}) { @*//TODO Update this with new controller method *@
+}) {
 
 @govukRadios(Radios(
     name = "basedInUk",
     items = Seq(
         RadioItem(
-            checked = trusteeBasedInUkForm(trusteeBasedInUkFields.basedInUk).value.contains("0") || trusteeBasedInUkForm(trusteeBasedInUkFields.basedInUk).value.isEmpty,
+            checked = trusteeBasedInUkForm(trusteeBasedInUkFields.basedInUk).value.contains("0"),
             id = Some("uk-radio-button"),
             value = Some("0"),
             content = Text(messages("ers_trustee_details.uk"))
         ),
         RadioItem(
-            checked = !trusteeBasedInUkForm(trusteeBasedInUkFields.basedInUk).value.contains("0"),
+            checked = trusteeBasedInUkForm(trusteeBasedInUkFields.basedInUk).value.contains("1"),
             id = Some("overseas-radio-button"),
             value = Some("1"),
             content = Text(messages("ers_trustee_details.overseas"))

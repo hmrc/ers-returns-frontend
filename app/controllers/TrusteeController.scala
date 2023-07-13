@@ -48,6 +48,7 @@ class TrusteeController @Inject()(val mcc: MessagesControllerComponents,
 
   implicit val ec: ExecutionContext = mcc.executionContext
 
+/*
   def trusteeDetailsPage(index: Int): Action[AnyContent] = authAction.async {
       implicit request =>
         ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
@@ -65,7 +66,6 @@ class TrusteeController @Inject()(val mcc: MessagesControllerComponents,
 				getGlobalErrorPage
 		}
   }
-
   def trusteeDetailsSubmit(index: Int): Action[AnyContent] = authAction.async {
       implicit request =>
         ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
@@ -110,6 +110,8 @@ class TrusteeController @Inject()(val mcc: MessagesControllerComponents,
     )
   }
 
+ */
+
   def replaceTrustee(trustees: List[TrusteeDetails], index: Int, formData: TrusteeDetails): List[TrusteeDetails] =
 
     (if (index == 10000) {
@@ -120,11 +122,11 @@ class TrusteeController @Inject()(val mcc: MessagesControllerComponents,
       }
     }).distinct
 
+
   def deleteTrustee(id: Int): Action[AnyContent] = authAction.async {
       implicit request =>
         showDeleteTrustee(id)(request, hc)
   }
-
   def showDeleteTrustee(id: Int)(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
 
     (for {
@@ -140,14 +142,16 @@ class TrusteeController @Inject()(val mcc: MessagesControllerComponents,
     }
   }
 
+
+
   private def filterDeletedTrustee(trusteeDetailsList: TrusteeDetailsList, id: Int): List[TrusteeDetails] =
     trusteeDetailsList.trustees.zipWithIndex.filterNot(_._2 == id).map(_._1)
 
+/*
   def editTrustee(id: Int): Action[AnyContent] = authAction.async {
       implicit request =>
           showEditTrustee(id)(request, hc)
   }
-
   def showEditTrustee(id: Int)(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
     (for {
       requestObject       <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
@@ -164,6 +168,8 @@ class TrusteeController @Inject()(val mcc: MessagesControllerComponents,
         getGlobalErrorPage
     }
   }
+
+ */
 
   def trusteeSummaryPage(): Action[AnyContent] = authAction.async {
       implicit request =>

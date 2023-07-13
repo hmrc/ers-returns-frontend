@@ -45,10 +45,10 @@ POST        /alterations-or-a-variation			            controllers.AltAmendsContr
 GET         /select-alterations-or-a-variation              controllers.AltAmendsController.altAmendsPage()
 POST        /select-alterations-or-a-variation              controllers.AltAmendsController.altAmendsSelected()
 
-GET         /add-trustee       				                controllers.TrusteeController.trusteeDetailsPage(index: Int = 10000)
-POST        /add-trustee      					            controllers.TrusteeController.trusteeDetailsSubmit(index: Int)
+#GET         /add-trustee       				                controllers.TrusteeController.trusteeDetailsPage(index: Int = 10000)
+#POST        /add-trustee      					            controllers.TrusteeController.trusteeDetailsSubmit(index: Int)
 POST        /add-trustee/:index/delete                      controllers.TrusteeController.deleteTrustee(index: Int)
-GET         /add-trustee/:index/edit     	                controllers.TrusteeController.editTrustee(index: Int)
+#GET         /add-trustee/:index/edit     	                controllers.TrusteeController.editTrustee(index: Int)
 
 GET         /trustee-name                                   controllers.trustees.TrusteeNameController.questionPage(index: Int = 10000)
 POST        /trustee-name                                   controllers.trustees.TrusteeNameController.questionSubmit(index: Int)

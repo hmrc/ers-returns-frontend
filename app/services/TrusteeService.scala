@@ -45,7 +45,7 @@ class TrusteeService @Inject()(
       }
       _ <- ersUtil.cache[TrusteeDetailsList](ersUtil.TRUSTEES_CACHE, trusteeDetailsList, schemeRef)
     } yield {
-      println(s"\n Cached stuff: $name \n ${trusteeDetailsList.trustees.head.country} \n\n")
+      println(s"\n Cached stuff: $name \n ${trusteeDetailsList.trustees.mkString("\n", "\n", "\n")} \n\n")
       Unit
     }
   }
