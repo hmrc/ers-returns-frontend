@@ -23,7 +23,7 @@ import org.joda.time.DateTime
 import play.api.Logging
 import play.api.i18n.Messages
 import play.api.libs.json
-import play.api.libs.json.JsValue
+import play.api.libs.json.{JsArray, JsValue, Json}
 import play.api.mvc.Request
 import services.SessionService
 import uk.gov.hmrc.http.cache.client.CacheMap
@@ -112,21 +112,18 @@ class ERSUtil @Inject() (
   def remove(cacheId: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] =
     shortLivedCache.remove(cacheId)
 
-  def fetch[T](key: String)(implicit hc: HeaderCarrier, ec: ExecutionContext, formats: json.Format[T]): Future[T] =
-    shortLivedCache.fetchAndGetEntry[JsValue](getCacheId, key).map { res =>
-      res.get.as[T]
-    } recover {
-      case e: NoSuchElementException =>
-        logger.warn(
-          s"[ERSUtil][fetch] fetch failed to get key $key with exception $e, timestamp: ${System.currentTimeMillis()}."
-        )
-        throw new NoSuchElementException
-      case _: Throwable              =>
-        logger.error(
-          s"[ERSUtil][fetch] fetch failed to get key $key for $getCacheId with exception, timestamp: ${System.currentTimeMillis()}."
-        )
-        throw new Exception
-    }
+	def fetch[T](key: String)(implicit hc:HeaderCarrier, ec: ExecutionContext, formats: json.Format[T]): Future[T] = {
+		shortLivedCache.fetchAndGetEntry[JsValue](getCacheId, key).map{ res =>
+			res.get.as[T]
+		} recover {
+			case e: NoSuchElementException =>
+				logger.warn(s"[ERSUtil][fetch] fetch failed to get key $key with exception $e, timestamp: ${System.currentTimeMillis()}.")
+				throw new NoSuchElementException
+			case _ : Throwable =>
+				logger.error(s"[ERSUtil][fetch] fetch failed to get key $key for $getCacheId with exception, timestamp: ${System.currentTimeMillis()}.")
+				throw new Exception
+		}
+	}
 
 	def fetch[T](key: String, cacheId: String)(implicit hc: HeaderCarrier, formats: json.Format[T]): Future[T] = { //TODO fix this so that we don't get the warn log when the question page is loaded for hte first time
 		val startTime = System.currentTimeMillis()
@@ -147,6 +144,14 @@ class ERSUtil @Inject() (
 	def fetchTrusteesOptionally(key: String, cacheId: String)(implicit hc: HeaderCarrier, formats: json.Format[TrusteeDetailsList]): Future[TrusteeDetailsList] = {
 		fetch[TrusteeDetailsList](key, cacheId).recover {
 			case _: NoSuchElementException => TrusteeDetailsList(List.empty[TrusteeDetails])
+		}
+	}
+
+	def fetchPartFromTrusteeDetailsList[A](index: Int, cacheId: String)(implicit hc: HeaderCarrier, formats: json.Format[A]): Future[Option[A]] = {
+		shortLivedCache.fetchAndGetEntry[JsValue](cacheId, TRUSTEES_CACHE).map {
+			_.map(_.\(TRUSTEES_CACHE).as[JsArray].\(index).getOrElse(Json.obj()).as[A])
+		} recover {
+			case _ => None
 		}
 	}
 

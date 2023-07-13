@@ -59,7 +59,7 @@
     @hmrcPageHeading(PageHeading(
         text = messages("ers_trustee_details.title")
     ))
-
+@*
     @formWithCSRF(action = routes.TrusteeController.trusteeDetailsSubmit(index)) {
 
         @govukRadios(Radios(
@@ -167,4 +167,5 @@
             attributes = Map("id" -> "continue"),
         ))
     }
+*@
 }

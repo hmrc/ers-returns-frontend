@@ -254,7 +254,7 @@ class GroupSchemeController @Inject() (
         Future(Redirect(routes.SummaryDeclarationController.summaryDeclarationPage()))
 
       case ersUtil.SCHEME_SIP =>
-        Future(Redirect(routes.TrusteeController.trusteeDetailsPage()))
+        Future(Redirect(trustees.routes.TrusteeNameController.questionPage()))
 
     }
 

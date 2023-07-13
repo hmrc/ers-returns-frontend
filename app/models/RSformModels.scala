@@ -95,7 +95,8 @@ case class TrusteeDetails(
                               addressLine3: Option[String],
                               addressLine4: Option[String],
                               country: Option[String],
-                              postcode: Option[String]
+                              postcode: Option[String],
+                              basedInUk: Boolean
                               )
 
 object TrusteeDetails {
@@ -108,7 +109,8 @@ object TrusteeDetails {
       addressUk.addressLine3,
       addressUk.addressLine4,
       Some("UK"),
-      addressUk.addressLine5
+      addressUk.addressLine5,
+      true
     )
   }
 
@@ -120,7 +122,8 @@ object TrusteeDetails {
       addressOverseas.addressLine3,
       addressOverseas.addressLine4,
       addressOverseas.country,
-      addressOverseas.addressLine5
+      addressOverseas.addressLine5,
+      false
     )
   }
 

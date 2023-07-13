@@ -52,37 +52,29 @@ class TrusteeController @Inject() (
 
   implicit val ec: ExecutionContext = mcc.executionContext
 
-  def trusteeDetailsPage(index: Int): Action[AnyContent] = authAction.async { implicit request =>
-    ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
-      showTrusteeDetailsPage(requestObject, index)(request, hc)
-    }
+/*
+  def trusteeDetailsPage(index: Int): Action[AnyContent] = authAction.async {
+      implicit request =>
+        ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
+          showTrusteeDetailsPage(requestObject, index)(request, hc)
+        }
   }
 
-  def showTrusteeDetailsPage(requestObject: RequestObject, index: Int)(implicit
-    request: RequestWithOptionalAuthContext[AnyContent],
-    hc: HeaderCarrier
-  ): Future[Result] =
-    ersUtil.fetch[GroupSchemeInfo](ersUtil.GROUP_SCHEME_CACHE_CONTROLLER, requestObject.getSchemeReference).map {
-      groupSchemeActivity =>
-        Ok(
-          trusteeDetailsView(
-            requestObject,
-            groupSchemeActivity.groupScheme.getOrElse(ersUtil.DEFAULT),
-            index,
-            RsFormMappings.trusteeDetailsForm()
-          )
-        )
-    } recover { case e: Exception =>
-      logger.error(
-        s"[TrusteeController][showTrusteeDetailsPage] Get data from cache failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}."
-      )
-      getGlobalErrorPage
-    }
-
-  def trusteeDetailsSubmit(index: Int): Action[AnyContent] = authAction.async { implicit request =>
-    ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
-      showTrusteeDetailsSubmit(requestObject, index)(request, hc)
-    }
+  def showTrusteeDetailsPage(requestObject: RequestObject, index: Int)
+														(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
+    ersUtil.fetch[GroupSchemeInfo](ersUtil.GROUP_SCHEME_CACHE_CONTROLLER, requestObject.getSchemeReference).map { groupSchemeActivity =>
+      Ok(trusteeDetailsView(requestObject, groupSchemeActivity.groupScheme.getOrElse(ersUtil.DEFAULT), index, RsFormMappings.trusteeDetailsForm))
+    } recover {
+      case e: Exception =>
+				logger.error(s"[TrusteeController][showTrusteeDetailsPage] Get data from cache failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
+				getGlobalErrorPage
+		}
+  }
+  def trusteeDetailsSubmit(index: Int): Action[AnyContent] = authAction.async {
+      implicit request =>
+        ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
+          showTrusteeDetailsSubmit(requestObject, index)(request, hc)
+        }
   }
 
   def showTrusteeDetailsSubmit(requestObject: RequestObject, index: Int)(implicit
@@ -133,6 +125,8 @@ class TrusteeController @Inject() (
           }
       )
 
+ */
+
   def replaceTrustee(trustees: List[TrusteeDetails], index: Int, formData: TrusteeDetails): List[TrusteeDetails] =
     (if (index == 10000) {
        trustees :+ formData
@@ -145,10 +139,8 @@ class TrusteeController @Inject() (
   def deleteTrustee(id: Int): Action[AnyContent] = authAction.async { implicit request =>
     showDeleteTrustee(id)(request, hc)
   }
+  def showDeleteTrustee(id: Int)(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
 
-  def showDeleteTrustee(
-    id: Int
-  )(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] =
     (for {
       requestObject     <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
       cachedTrusteeList <- ersUtil.fetch[TrusteeDetailsList](ersUtil.TRUSTEES_CACHE, requestObject.getSchemeReference)
@@ -157,17 +149,17 @@ class TrusteeController @Inject() (
     } yield Redirect(routes.TrusteeController.trusteeSummaryPage())) recover { case _: Exception =>
       getGlobalErrorPage
     }
+  }
 
   private def filterDeletedTrustee(trusteeDetailsList: TrusteeDetailsList, id: Int): List[TrusteeDetails] =
     trusteeDetailsList.trustees.zipWithIndex.filterNot(_._2 == id).map(_._1)
 
-  def editTrustee(id: Int): Action[AnyContent] = authAction.async { implicit request =>
-    showEditTrustee(id)(request, hc)
+/*
+  def editTrustee(id: Int): Action[AnyContent] = authAction.async {
+      implicit request =>
+          showEditTrustee(id)(request, hc)
   }
-
-  def showEditTrustee(
-    id: Int
-  )(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] =
+  def showEditTrustee(id: Int)(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
     (for {
       requestObject       <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
       groupSchemeActivity <-
@@ -188,8 +180,11 @@ class TrusteeController @Inject() (
       getGlobalErrorPage
     }
 
-  def trusteeSummaryPage(): Action[AnyContent] = authAction.async { implicit request =>
-    showTrusteeSummaryPage()(request, hc)
+ */
+
+  def trusteeSummaryPage(): Action[AnyContent] = authAction.async {
+      implicit request =>
+          showTrusteeSummaryPage()(request, hc)
   }
 
   def showTrusteeSummaryPage()(implicit

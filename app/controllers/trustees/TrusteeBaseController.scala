@@ -63,8 +63,8 @@ trait TrusteeBaseController[A] extends FrontendController with I18nSupport with 
 
     (for {
         groupSchemeActivity <- ersUtil.fetch[GroupSchemeInfo](ersUtil.GROUP_SCHEME_CACHE_CONTROLLER, requestObject.getSchemeReference)
-        previousAnswer <- ersUtil.fetchOption[A](cacheKey, requestObject.getSchemeReference) //TODO Look at previous logic for storing name address etc. as the answer is being carried over between trustees - index not being used anymore??
-      } yield {
+        previousAnswer <- ersUtil.fetchPartFromTrusteeDetailsList(index, requestObject.getSchemeReference)
+    } yield {
         val preparedForm = if (previousAnswer.isDefined) form.fill(previousAnswer.get) else form
         if (previousAnswer.isDefined) {
           logger.error(s"\n\n[${this.getClass.getSimpleName}][showQuestionPage] Here's the answers we pulled from the cache innit: \n\n ${previousAnswer.get}\n\n ${preparedForm}\n\n")
