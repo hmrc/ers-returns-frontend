@@ -503,7 +503,7 @@ class ErsUtilSpec
         companyReg = Some("ABC"),
         corporationRef = Some("DEF")
       )
-      val expected       = "ADDRESS1, ADDRESS2, AB123CD"
+      val expected = "ADDRESS1, ADDRESS2, AB123CD, United Kingdom"
       val addressSummary = ersUtil.buildAddressSummary(companyDetails)
       assert(addressSummary == expected)
     }
@@ -516,9 +516,10 @@ class ErsUtilSpec
         addressLine3 = None,
         addressLine4 = None,
         country = Some("UK"),
-        postcode = Some("AB123CD")
+        postcode = Some("AB123CD"),
+        basedInUk = true
       )
-      val expected       = "ADDRESS1, ADDRESS2, AB123CD"
+      val expected = "ADDRESS1, ADDRESS2, AB123CD, United Kingdom"
       val addressSummary = ersUtil.buildAddressSummary(companyDetails)
       assert(addressSummary == expected)
     }

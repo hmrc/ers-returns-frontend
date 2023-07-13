@@ -136,21 +136,12 @@ class CheckFileTypeControllerSpec
   "Check File Type Page POST" should {
 
     def buildFakeCheckingServiceController(
-      cache: Future[CacheMap] = Future.successful(mock[CacheMap]),
-      requestObject: Future[RequestObject] = Future.successful(ersRequestObject)
-    ): CheckFileTypeController =
-      new CheckFileTypeController(
-        mockMCC,
-        mockAuthConnector,
-        mockErsUtil,
-        mockAppConfig,
-        globalErrorView,
-        checkFileTypeView,
-        testAuthActionGov
-      ) {
-        when(mockErsUtil.cache(matches("check-file-type"), any(), any())(any(), any())).thenReturn(cache)
-        when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any())).thenReturn(requestObject)
-      }
+                                            cache: Future[CacheMap] = Future.successful(mock[CacheMap]),
+                                           requestObject: Future[RequestObject] = Future.successful(ersRequestObject)): CheckFileTypeController =
+			new CheckFileTypeController(mockMCC, mockAuthConnector, mockErsUtil, mockAppConfig, globalErrorView, checkFileTypeView, testAuthActionGov){
+      when(mockErsUtil.cache(matches("check-file-type"), any(), any())(any(), any())).thenReturn(cache)
+      when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any())).thenReturn(requestObject)
+    }
 
     "give a redirect status (to company authentication frontend) on GET if user is not authenticated" in {
       setUnauthorisedMocks()

@@ -103,8 +103,8 @@ class ReportableEventsControllerSpec
       when(mockErsUtil.fetch[ErsMetaData](refEq(mockErsUtil.ersMetaData), anyString())(any(), any()))
         .thenReturn(if (ersMetaDataRes) Future.successful(ersMetaData) else Future.failed(new NoSuchElementException))
 
-      when(mockErsUtil.cache(refEq(mockErsUtil.ersMetaData), any(), any())(any(), any()))
-        .thenReturn(if (ersMetaDataCachedOk) Future.successful(null) else Future.failed(new Exception))
+			when(mockErsUtil.cache(refEq(mockErsUtil.ersMetaData), any(), any())(any(), any()))
+				.thenReturn(if (ersMetaDataCachedOk) Future.successful(null) else Future.failed(new Exception))
 
       when(
         mockErsUtil.fetch[SchemeOrganiserDetails](refEq(mockErsUtil.SCHEME_ORGANISER_CACHE), anyString())(any(), any())
@@ -221,7 +221,7 @@ class ReportableEventsControllerSpec
         .thenReturn(if (ersMetaDataRes) Future.successful(ersMetaData) else Future.failed(new NoSuchElementException))
 
       when(mockErsUtil.cache(refEq(mockErsUtil.reportableEvents), any(), any())(any(), any()))
-        .thenReturn(if (ersMetaDataCachedOk) Future.successful(null) else Future.failed(new Exception))
+				.thenReturn(if (ersMetaDataCachedOk) Future.successful(null) else Future.failed(new Exception))
 
       when(mockErsUtil.fetch[SchemeOrganiserDetails](refEq(mockErsUtil.SCHEME_ORGANISER_CACHE), any())(any(), any()))
         .thenReturn(

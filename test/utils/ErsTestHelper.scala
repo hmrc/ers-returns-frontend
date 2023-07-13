@@ -93,7 +93,9 @@ trait ErsTestHelper extends MockitoSugar with AuthHelper with ERSFakeApplication
   val testAuthAction    = new AuthAction(mockAuthConnector, mockAppConfig, mockErsUtil, defaultParser)(ec)
   val testAuthActionGov = new AuthActionGovGateway(mockAuthConnector, mockAppConfig, mockErsUtil, defaultParser)(ec)
 
-  when(mockCountryCodes.countriesMap).thenReturn(List(Country("United Kingdom", "UK"), Country("South Africa", "ZA")))
+
+	when(mockCountryCodes.countriesMap).thenReturn(List(Country("United Kingdom", "UK"), Country("South Africa", "ZA")))
+	when(mockCountryCodes.getCountry("UK")).thenReturn(Some("United Kingdom"))
 
   when(mockAppConfig.ggSignInUrl).thenReturn("http://localhost:9949/gg/sign-in")
   when(mockAppConfig.appName).thenReturn("ers-returns-frontend")

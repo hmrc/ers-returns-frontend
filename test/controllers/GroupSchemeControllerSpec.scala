@@ -180,8 +180,7 @@ class GroupSchemeControllerSpec
         Future.successful(companyDetailsList)
       )
       when(
-        mockErsUtil
-          .cache(refEq(mockErsUtil.GROUP_SCHEME_COMPANIES), any[CompanyDetailsList](), anyString())(any(), any())
+        mockErsUtil.cache(refEq(mockErsUtil.GROUP_SCHEME_COMPANIES), any[CompanyDetailsList](), anyString())(any(), any())
       ) thenReturn Future.successful(mock[CacheMap])
       val authRequest = buildRequestWithAuth(buildCompanyDetailsRequest(isValid = true))
       val result      = testGroupSchemeController.showManualCompanyDetailsSubmit(ersRequestObject, 10000)(authRequest)
@@ -196,8 +195,7 @@ class GroupSchemeControllerSpec
         Future.successful(companyDetailsList)
       )
       when(
-        mockErsUtil
-          .cache(refEq(mockErsUtil.GROUP_SCHEME_COMPANIES), any[CompanyDetailsList](), anyString())(any(), any())
+        mockErsUtil.cache(refEq(mockErsUtil.GROUP_SCHEME_COMPANIES), any[CompanyDetailsList](), anyString())(any(), any())
       ).thenReturn(
         Future.successful(mock[CacheMap])
       )
@@ -215,8 +213,7 @@ class GroupSchemeControllerSpec
         Future.successful(companyDetailsList)
       )
       when(
-        mockErsUtil
-          .cache(refEq(mockErsUtil.GROUP_SCHEME_COMPANIES), any[CompanyDetailsList](), anyString())(any(), any())
+        mockErsUtil.cache(refEq(mockErsUtil.GROUP_SCHEME_COMPANIES), any[CompanyDetailsList](), anyString())(any(), any())
       ).thenReturn(
         Future.successful(mock[CacheMap])
       )
@@ -234,8 +231,7 @@ class GroupSchemeControllerSpec
         Future.failed(new NoSuchElementException("Nothing in cache"))
       )
       when(
-        mockErsUtil
-          .cache(refEq(mockErsUtil.GROUP_SCHEME_COMPANIES), any[CompanyDetailsList](), anyString())(any(), any())
+        mockErsUtil.cache(refEq(mockErsUtil.GROUP_SCHEME_COMPANIES), any[CompanyDetailsList](), anyString())(any(), any())
       ).thenReturn(
         Future.successful(mock[CacheMap])
       )
@@ -390,8 +386,7 @@ class GroupSchemeControllerSpec
       ) thenReturn Future.successful(ersRequestObject)
 
       when(
-        mockErsUtil
-          .cache(refEq(mockErsUtil.GROUP_SCHEME_COMPANIES), any[CompanyDetailsList](), anyString())(any(), any())
+        mockErsUtil.cache(refEq(mockErsUtil.GROUP_SCHEME_COMPANIES), any[CompanyDetailsList](), anyString())(any(), any())
       ) thenReturn Future(mock[CacheMap])
 
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
@@ -415,8 +410,7 @@ class GroupSchemeControllerSpec
       ) thenReturn Future.successful(ersRequestObject)
 
       when(
-        mockErsUtil
-          .cache(refEq(mockErsUtil.GROUP_SCHEME_COMPANIES), any[CompanyDetailsList](), anyString())(any(), any())
+        mockErsUtil.cache(refEq(mockErsUtil.GROUP_SCHEME_COMPANIES), any[CompanyDetailsList](), anyString())(any(), any())
       ) thenReturn Future(mock[CacheMap])
 
       val expected = CompanyDetailsList(List(company))
@@ -425,8 +419,7 @@ class GroupSchemeControllerSpec
       val result      = testGroupSchemeController.showDeleteCompany(0)(authRequest, hc)
       status(result) shouldBe SEE_OTHER
 
-      verify(mockErsUtil, times(1))
-        .cache(refEq(GROUP_SCHEME_COMPANIES), refEq(expected), refEq(ersRequestObject.getSchemeReference))(any(), any())
+      verify(mockErsUtil, times(1)).cache(refEq(GROUP_SCHEME_COMPANIES), refEq(expected), refEq(ersRequestObject.getSchemeReference))(any(), any())
     }
   }
 
@@ -593,8 +586,7 @@ class GroupSchemeControllerSpec
 
     "redirect to company details page if user select yes for CSOP" in {
       when(
-        mockErsUtil
-          .cache(refEq(mockErsUtil.GROUP_SCHEME_CACHE_CONTROLLER), any[GroupSchemeInfo](), anyString())(any(), any())
+        mockErsUtil.cache(refEq(mockErsUtil.GROUP_SCHEME_CACHE_CONTROLLER), any[GroupSchemeInfo](), anyString())(any(), any())
       ).thenReturn(
         Future.successful(mock[CacheMap])
       )
@@ -608,8 +600,7 @@ class GroupSchemeControllerSpec
 
     "redirect to alterations page if user select no for CSOP" in {
       when(
-        mockErsUtil
-          .cache(refEq(mockErsUtil.GROUP_SCHEME_CACHE_CONTROLLER), any[GroupSchemeInfo](), anyString())(any(), any())
+        mockErsUtil.cache(refEq(mockErsUtil.GROUP_SCHEME_CACHE_CONTROLLER), any[GroupSchemeInfo](), anyString())(any(), any())
       ).thenReturn(
         Future.successful(mock[CacheMap])
       )
@@ -623,8 +614,7 @@ class GroupSchemeControllerSpec
 
     "redirect to company details page if user select yes for SAYE" in {
       when(
-        mockErsUtil
-          .cache(refEq(mockErsUtil.GROUP_SCHEME_CACHE_CONTROLLER), any[GroupSchemeInfo](), anyString())(any(), any())
+        mockErsUtil.cache(refEq(mockErsUtil.GROUP_SCHEME_CACHE_CONTROLLER), any[GroupSchemeInfo](), anyString())(any(), any())
       ).thenReturn(
         Future.successful(mock[CacheMap])
       )
@@ -639,8 +629,7 @@ class GroupSchemeControllerSpec
 
     "redirect to alterations page if user select no for SAYE" in {
       when(
-        mockErsUtil
-          .cache(refEq(mockErsUtil.GROUP_SCHEME_CACHE_CONTROLLER), any[GroupSchemeInfo](), anyString())(any(), any())
+        mockErsUtil.cache(refEq(mockErsUtil.GROUP_SCHEME_CACHE_CONTROLLER), any[GroupSchemeInfo](), anyString())(any(), any())
       ).thenReturn(
         Future.successful(mock[CacheMap])
       )
@@ -655,8 +644,7 @@ class GroupSchemeControllerSpec
 
     "redirect to company details page if user select yes for EMI" in {
       when(
-        mockErsUtil
-          .cache(refEq(mockErsUtil.GROUP_SCHEME_CACHE_CONTROLLER), any[GroupSchemeInfo](), anyString())(any(), any())
+        mockErsUtil.cache(refEq(mockErsUtil.GROUP_SCHEME_CACHE_CONTROLLER), any[GroupSchemeInfo](), anyString())(any(), any())
       ).thenReturn(
         Future.successful(mock[CacheMap])
       )
@@ -671,8 +659,7 @@ class GroupSchemeControllerSpec
 
     "redirect to summary page if user select no for EMI" in {
       when(
-        mockErsUtil
-          .cache(refEq(mockErsUtil.GROUP_SCHEME_CACHE_CONTROLLER), any[GroupSchemeInfo](), anyString())(any(), any())
+        mockErsUtil.cache(refEq(mockErsUtil.GROUP_SCHEME_CACHE_CONTROLLER), any[GroupSchemeInfo](), anyString())(any(), any())
       ).thenReturn(
         Future.successful(mock[CacheMap])
       )
@@ -687,8 +674,7 @@ class GroupSchemeControllerSpec
 
     "redirect to company details page if user select yes for SIP" in {
       when(
-        mockErsUtil
-          .cache(refEq(mockErsUtil.GROUP_SCHEME_CACHE_CONTROLLER), any[GroupSchemeInfo](), anyString())(any(), any())
+        mockErsUtil.cache(refEq(mockErsUtil.GROUP_SCHEME_CACHE_CONTROLLER), any[GroupSchemeInfo](), anyString())(any(), any())
       ).thenReturn(
         Future.successful(mock[CacheMap])
       )
@@ -703,8 +689,7 @@ class GroupSchemeControllerSpec
 
     "redirect to trustees page if user select no for SIP" in {
       when(
-        mockErsUtil
-          .cache(refEq(mockErsUtil.GROUP_SCHEME_CACHE_CONTROLLER), any[GroupSchemeInfo](), anyString())(any(), any())
+        mockErsUtil.cache(refEq(mockErsUtil.GROUP_SCHEME_CACHE_CONTROLLER), any[GroupSchemeInfo](), anyString())(any(), any())
       ).thenReturn(
         Future.successful(mock[CacheMap])
       )
@@ -719,8 +704,7 @@ class GroupSchemeControllerSpec
 
     "redirect to company details page if user select yes for OTHER" in {
       when(
-        mockErsUtil
-          .cache(refEq(mockErsUtil.GROUP_SCHEME_CACHE_CONTROLLER), any[GroupSchemeInfo](), anyString())(any(), any())
+        mockErsUtil.cache(refEq(mockErsUtil.GROUP_SCHEME_CACHE_CONTROLLER), any[GroupSchemeInfo](), anyString())(any(), any())
       ).thenReturn(
         Future.successful(mock[CacheMap])
       )
@@ -735,8 +719,7 @@ class GroupSchemeControllerSpec
 
     "redirect to summary page if user select no for OTHER" in {
       when(
-        mockErsUtil
-          .cache(refEq(mockErsUtil.GROUP_SCHEME_CACHE_CONTROLLER), any[GroupSchemeInfo](), anyString())(any(), any())
+        mockErsUtil.cache(refEq(mockErsUtil.GROUP_SCHEME_CACHE_CONTROLLER), any[GroupSchemeInfo](), anyString())(any(), any())
       ).thenReturn(
         Future.successful(mock[CacheMap])
       )
