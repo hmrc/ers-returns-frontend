@@ -116,8 +116,7 @@ class ERSUtil @Inject() (
 		shortLivedCache.fetchAndGetEntry[JsValue](getCacheId, key).map{ res =>
 			res.get.as[T]
 		} recover {
-			case e: NoSuchElementException =>
-				logger.warn(s"[ERSUtil][fetch] fetch failed to get key $key with exception $e, timestamp: ${System.currentTimeMillis()}.")
+			case _: NoSuchElementException =>
 				throw new NoSuchElementException
 			case _ : Throwable =>
 				logger.error(s"[ERSUtil][fetch] fetch failed to get key $key for $getCacheId with exception, timestamp: ${System.currentTimeMillis()}.")
@@ -125,14 +124,13 @@ class ERSUtil @Inject() (
 		}
 	}
 
-	def fetch[T](key: String, cacheId: String)(implicit hc: HeaderCarrier, formats: json.Format[T]): Future[T] = { //TODO fix this so that we don't get the warn log when the question page is loaded for hte first time
+	def fetch[T](key: String, cacheId: String)(implicit hc: HeaderCarrier, formats: json.Format[T]): Future[T] = {
 		val startTime = System.currentTimeMillis()
 		shortLivedCache.fetchAndGetEntry[JsValue](cacheId, key).map { res =>
 			cacheTimeFetch(System.currentTimeMillis() - startTime, TimeUnit.MILLISECONDS)
 			res.get.as[T]
 		} recover {
-			case e: NoSuchElementException =>
-				logger.warn(s"[ERSUtil][fetch] fetch(with 2 params) failed to get key [$key] for cacheId: [$cacheId] with exception $e, timestamp: ${System.currentTimeMillis()}.")
+			case _: NoSuchElementException =>
 				throw new NoSuchElementException
 			case er : Throwable =>
 				logger.error(s"[ERSUtil][fetch] fetch(with 2 params) failed to get key [$key] for cacheId: [$cacheId] with exception ${er.getMessage}, " +
@@ -149,7 +147,9 @@ class ERSUtil @Inject() (
 
 	def fetchPartFromTrusteeDetailsList[A](index: Int, cacheId: String)(implicit hc: HeaderCarrier, formats: json.Format[A]): Future[Option[A]] = {
 		shortLivedCache.fetchAndGetEntry[JsValue](cacheId, TRUSTEES_CACHE).map {
-			_.map(_.\(TRUSTEES_CACHE).as[JsArray].\(index).getOrElse(Json.obj()).as[A])
+			x =>
+				println("Json here: "+x.getOrElse(""))
+			x.map(_.\(TRUSTEES_CACHE).as[JsArray].\(index).getOrElse(Json.obj()).as[A])
 		} recover {
 			case _ => None
 		}
@@ -271,8 +271,7 @@ class ERSUtil @Inject() (
     }
 
 	final def concatAddress(optionalAddressLines: List[Option[String]], existingAddressLines: String): String = {
-		println(optionalAddressLines)
-		val definedStrings = optionalAddressLines.filter {
+		val definedStrings = optionalAddressLines.filter { //TODO get rid of prints and make 1 liner innit
 			x =>
 				println(x)
 				x.isDefined
@@ -280,28 +279,28 @@ class ERSUtil @Inject() (
 		existingAddressLines ++ definedStrings.map(addressLine => ", " + addressLine).mkString("")
 	}
 
-  def buildAddressSummary[A](entity: A): String =
-    entity match {
-      case companyDetails: CompanyDetails =>
-        val optionalAddressLines = List(
-          companyDetails.addressLine2,
-          companyDetails.addressLine3,
-          companyDetails.addressLine4,
-          companyDetails.postcode,
-          countryCodes.getCountry(companyDetails.country.getOrElse(""))
-        )
-        concatAddress(optionalAddressLines, companyDetails.addressLine1)
-      case trusteeDetails: TrusteeDetails =>
-        val optionalAddressLines = List(
-          trusteeDetails.addressLine2,
-          trusteeDetails.addressLine3,
-          trusteeDetails.addressLine4,
-          trusteeDetails.postcode,
-          countryCodes.getCountry(trusteeDetails.country.getOrElse(""))
-        )
-        concatAddress(optionalAddressLines, trusteeDetails.addressLine1)
-      case _                              => ""
-    }
+	def buildAddressSummary[A](entity: A): String = {
+		entity match {
+			case companyDetails: CompanyDetails =>
+				val optionalAddressLines = List(
+					companyDetails.addressLine2,
+					companyDetails.addressLine3,
+					companyDetails.addressLine4,
+					companyDetails.postcode,
+					countryCodes.getCountry(companyDetails.country.getOrElse(""))
+				)
+				concatAddress(optionalAddressLines, companyDetails.addressLine1)
+			case trusteeDetails: TrusteeDetails =>
+				val optionalAddressLines = List(trusteeDetails.addressLine2,
+					trusteeDetails.addressLine3,
+					trusteeDetails.addressLine4,
+					trusteeDetails.addressLine5,
+					countryCodes.getCountry(trusteeDetails.country.getOrElse(""))
+				)
+				concatAddress(optionalAddressLines, trusteeDetails.addressLine1)
+			case _ => ""
+		}
+	}
 
   final def concatEntity(optionalLines: List[Option[String]], existingEntityLines: String): String = {
     val definedStrings = optionalLines.flatten

@@ -125,33 +125,22 @@ class SchemeOrganiserController @Inject() (
     }
   }
 
-  def showSchemeOrganiserSubmit(
-    requestObject: RequestObject
-  )(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] =
-    RsFormMappings
-      .schemeOrganiserForm()
-      .bindFromRequest()
-      .fold(
-        errors => {
-          val correctOrder                                     = errors.errors.map(_.key).distinct
-          val incorrectOrderGrouped                            = errors.errors.groupBy(_.key).map(_._2.head).toSeq
-          val correctOrderGrouped                              = correctOrder.flatMap(x => incorrectOrderGrouped.find(_.key == x))
-          val firstErrors: Form[models.SchemeOrganiserDetails] =
-            new Form[SchemeOrganiserDetails](errors.mapping, errors.data, correctOrderGrouped, errors.value)
-          Future.successful(Ok(schemeOrganiserView(requestObject, "", firstErrors)))
-        },
-        successful => {
-
-          logger.warn(
-            s"[SchemeOrganiserController][showSchemeOrganiserSubmit] schemeRef: ${requestObject.getSchemeReference}."
-          )
-
-          ersUtil.cache(ersUtil.SCHEME_ORGANISER_CACHE, successful, requestObject.getSchemeReference).map { _ =>
-            Redirect(routes.GroupSchemeController.groupSchemePage())
-          } recover { case e: Exception =>
-            logger.error(
-              s"[SchemeOrganiserController][showSchemeOrganiserSubmit] Save scheme organiser details failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}."
-            )
+  def showSchemeOrganiserSubmit(requestObject: RequestObject)
+															 (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
+    RsFormMappings.schemeOrganiserForm.bindFromRequest.fold(
+      errors => {
+        val correctOrder = errors.errors.map(_.key).distinct
+        val incorrectOrderGrouped = errors.errors.groupBy(_.key).map(_._2.head).toSeq
+        val correctOrderGrouped = correctOrder.flatMap(x => incorrectOrderGrouped.find(_.key == x))
+        val firstErrors: Form[models.SchemeOrganiserDetails] = new Form[SchemeOrganiserDetails](errors.mapping, errors.data, correctOrderGrouped, errors.value)
+        Future.successful(Ok(schemeOrganiserView(requestObject, "", firstErrors)))
+      },
+      successful => {
+        ersUtil.cache(ersUtil.SCHEME_ORGANISER_CACHE, successful, requestObject.getSchemeReference).map {
+          _ => Redirect(routes.GroupSchemeController.groupSchemePage())
+        } recover {
+          case e: Exception =>
+            logger.error(s"[SchemeOrganiserController][showSchemeOrganiserSubmit] Save scheme organiser details failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
             getGlobalErrorPage
           }
         }

@@ -67,7 +67,7 @@ trait TrusteeBaseController[A] extends FrontendController with I18nSupport with 
     } yield {
         val preparedForm = if (previousAnswer.isDefined) form.fill(previousAnswer.get) else form
         if (previousAnswer.isDefined) {
-          logger.error(s"\n\n[${this.getClass.getSimpleName}][showQuestionPage] Here's the answers we pulled from the cache innit: \n\n ${previousAnswer.get}\n\n ${preparedForm}\n\n")
+          logger.error(s"\n\n[${this.getClass.getSimpleName}][showQuestionPage] Here's the answers we pulled from the cache innit: \n\n Prev answer: ${previousAnswer.get}\n")
         }
         Ok(view(requestObject, groupSchemeActivity.groupScheme.getOrElse(ersUtil.DEFAULT), index, preparedForm, edit))
       }

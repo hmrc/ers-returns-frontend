@@ -208,7 +208,7 @@ object RsFormMappings {
       .verifying(Messages("ers_trustee_details.err.address_line4"), so => checkAddressLength(so, "trusteeDetailsFields.addressLine4"))
       .verifying(Messages("ers_trustee_details.err.invalidChars.address_line4"), so => validInputCharacters(so, addresssRegx))),
     trusteeAddressFields.addressLine5 -> optional(text)
-      .transform((x: Option[String]) => x.map(_.toUpperCase()), (z: Option[String]) => z.map(_.toUpperCase()))
+      //.transform((x: Option[String]) => x.map(_.toUpperCase()), (z: Option[String]) => z.map(_.toUpperCase()))
       .verifying(Messages("ers_trustee_details.err.postcode"), so => isValidPostcode(so)),
     trusteeAddressFields.country -> optional(text
       .verifying(pattern(addresssRegx.r, error = Messages("ers_scheme_organiser.err.summary.invalid_country"))))
@@ -308,14 +308,13 @@ object RsFormMappings {
   def validInputCharacters(field: String, regXValue: String): Boolean = field.matches(regXValue)
 
   def isValidPostcode(input: Option[String]): Boolean = input match {
-    case Some(postcode) =>
-      postcode.matches(postCodeRegx) && isValidLengthIfPopulated(postcode, postcodeMinLength, postcodeMaxLength)
-    case None           => true //Postcode is assumed to be optional so return true if missing
+    case Some(postcode) => postcode.toUpperCase.matches(postCodeRegx) && isValidLengthIfPopulated(postcode, postcodeMinLength, postcodeMaxLength)
+    case None => true //Postcode is assumed to be optional so return true if missing
   }
 
   def isValidPostcodeSchemeOrganiser(input: Option[String]): Boolean = input match {
-    case Some(postcode) => postcode.replaceAll(" ", "").matches(fieldValidationPatterns.onlyCharsAndDigitsRegex)
-    case None           => true //Postcode is assumed to be optional so return true if missing
+    case Some(postcode) => postcode.toUpperCase.replaceAll(" ","").matches(fieldValidationPatterns.onlyCharsAndDigitsRegex)
+    case None => true //Postcode is assumed to be optional so return true if missing
   }
 
   def isValidLengthPostcode(input: Option[String]): Boolean = input match {
@@ -324,8 +323,8 @@ object RsFormMappings {
   }
 
   def isValidFormatPostcodeSchemeOrganiser(input: Option[String]): Boolean = input match {
-    case Some(postcode) => postcode.matches(fieldValidationPatterns.postCodeRegx)
-    case None           => true //Postcode is assumed to be optional so return true if missing
+    case Some(postcode) => postcode.toUpperCase.matches(fieldValidationPatterns.postCodeRegx)
+    case None => true //Postcode is assumed to be optional so return true if missing
   }
 
   def isValidLengthIfPopulated(input: String, minSize: Int, maxSize: Int): Boolean =

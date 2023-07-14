@@ -95,7 +95,7 @@ case class TrusteeDetails(
                               addressLine3: Option[String],
                               addressLine4: Option[String],
                               country: Option[String],
-                              postcode: Option[String],
+                              addressLine5: Option[String], // Postcode for UK address
                               basedInUk: Boolean
                               )
 
