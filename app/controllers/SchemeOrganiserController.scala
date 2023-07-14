@@ -104,9 +104,6 @@ class SchemeOrganiserController @Inject()(val mcc: MessagesControllerComponents,
         Future.successful(Ok(schemeOrganiserView(requestObject, "", firstErrors)))
       },
       successful => {
-
-        logger.warn(s"[SchemeOrganiserController][showSchemeOrganiserSubmit] schemeRef: ${requestObject.getSchemeReference}.")
-
         ersUtil.cache(ersUtil.SCHEME_ORGANISER_CACHE, successful, requestObject.getSchemeReference).map {
           _ => Redirect(routes.GroupSchemeController.groupSchemePage())
         } recover {
