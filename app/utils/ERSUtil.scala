@@ -141,9 +141,7 @@ class ERSUtil @Inject()(val sessionService: SessionService,
 
 	def fetchPartFromTrusteeDetailsList[A](index: Int, cacheId: String)(implicit hc: HeaderCarrier, formats: json.Format[A]): Future[Option[A]] = {
 		shortLivedCache.fetchAndGetEntry[JsValue](cacheId, TRUSTEES_CACHE).map {
-			x =>
-				println("Json here: "+x.getOrElse(""))
-			x.map(_.\(TRUSTEES_CACHE).as[JsArray].\(index).getOrElse(Json.obj()).as[A])
+			_.map(_.\(TRUSTEES_CACHE).as[JsArray].\(index).getOrElse(Json.obj()).as[A])
 		} recover {
 			case _ => None
 		}
@@ -262,11 +260,7 @@ class ERSUtil @Inject()(val sessionService: SessionService,
 	}
 
 	final def concatAddress(optionalAddressLines: List[Option[String]], existingAddressLines: String): String = {
-		val definedStrings = optionalAddressLines.filter { //TODO get rid of prints and make 1 liner innit
-			x =>
-				println(x)
-				x.isDefined
-		}.map(_.get)
+		val definedStrings = optionalAddressLines.filter(_.isDefined).map(_.get)
 		existingAddressLines ++ definedStrings.map(addressLine => ", " + addressLine).mkString("")
 	}
 

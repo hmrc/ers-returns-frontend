@@ -44,7 +44,6 @@ class TrusteeService @Inject()(
         )
       }
       _ <- ersUtil.cache[TrusteeDetailsList](ersUtil.TRUSTEES_CACHE, trusteeDetailsList, schemeRef)
-      _ = println(s"We cached: \n ${trusteeDetailsList.trustees.mkString("\n","\n","\n")}")
     } yield {
       Unit
     }

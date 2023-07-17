@@ -268,7 +268,7 @@ trait PageBuilder {
 								}
 							case OPTION_NIL_RETURN => routes.ReportableEventsController.reportableEventsPage().toString
 						}
-					case PAGE_ALT_ACTIVITY => routes.TrusteeController.trusteeSummaryPage().toString
+					case PAGE_ALT_ACTIVITY => controllers.trustees.routes.TrusteeSummaryController.trusteeSummaryPage().toString
 					case PAGE_ALT_AMENDS => routes.AltAmendsController.altActivityPage().toString
 					case PAGE_GROUP_SUMMARY =>
 						routes.GroupSchemeController.manualCompanyDetailsPage().toString

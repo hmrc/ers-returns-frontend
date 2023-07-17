@@ -138,7 +138,7 @@ trait TrusteeBaseController[A] extends FrontendController with I18nSupport with 
           _ <- ersUtil.cache[A](cacheKey, result, requestObject.getSchemeReference)
           _ <- trusteeService.updateTrusteeCache(index)
         } yield {
-          Redirect(controllers.routes.TrusteeController.trusteeSummaryPage())
+          Redirect(controllers.trustees.routes.TrusteeSummaryController.trusteeSummaryPage())
         }
       }
     )

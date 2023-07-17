@@ -54,7 +54,7 @@ class TrusteeAddressUkController @Inject()(val mcc: MessagesControllerComponents
 
   def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier): Future[Result] = {
     trusteeService.updateTrusteeCache(index).map { _ =>
-      Redirect(controllers.routes.TrusteeController.trusteeSummaryPage())
+      Redirect(controllers.trustees.routes.TrusteeSummaryController.trusteeSummaryPage())
       //TODO Update this to the next page in the journey innit (might be right now, until I move stuff to new summary controller or whatever)
     }
   }

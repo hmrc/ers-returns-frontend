@@ -110,7 +110,7 @@ class TrusteeController @Inject()(val mcc: MessagesControllerComponents,
     )
   }
 
- */
+
 
   def replaceTrustee(trustees: List[TrusteeDetails], index: Int, formData: TrusteeDetails): List[TrusteeDetails] =
 
@@ -146,7 +146,7 @@ class TrusteeController @Inject()(val mcc: MessagesControllerComponents,
 
   private def filterDeletedTrustee(trusteeDetailsList: TrusteeDetailsList, id: Int): List[TrusteeDetails] =
     trusteeDetailsList.trustees.zipWithIndex.filterNot(_._2 == id).map(_._1)
-
+ */
 /*
   def editTrustee(id: Int): Action[AnyContent] = authAction.async {
       implicit request =>
@@ -169,7 +169,7 @@ class TrusteeController @Inject()(val mcc: MessagesControllerComponents,
     }
   }
 
- */
+
 
   def trusteeSummaryPage(): Action[AnyContent] = authAction.async {
       implicit request =>
@@ -207,5 +207,5 @@ class TrusteeController @Inject()(val mcc: MessagesControllerComponents,
 			"ers.global_errors.message"
 		)(request, messages, appConfig))
 	}
-
+ */
 }
