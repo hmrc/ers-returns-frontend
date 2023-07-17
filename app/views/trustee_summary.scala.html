@@ -115,7 +115,7 @@
         text = messages("ers_trustee_summary.title")
     ))
 
-    @formWithCSRF(action = routes.TrusteeController.trusteeSummaryContinue()) {
+    @formWithCSRF(action = controllers.trustees.routes.TrusteeSummaryController.trusteeSummaryContinue()) {
 
         @for((trustee, index) <- trustees.trustees.zipWithIndex) {
             @govukSummaryList(SummaryList(
@@ -124,7 +124,7 @@
 
             <p class="govuk-body govuk-!-margin-bottom-8 govuk-link">
                <a class="govuk-link" href="">
-                 <input class="govuk-link link_button" type="submit" formaction="@routes.TrusteeController.deleteTrustee(index)" value='@{messages("ers.delete") + " " + trustee.name}'>
+                 <input class="govuk-link link_button" type="submit" formaction="@controllers.trustees.routes.TrusteeSummaryController.deleteTrustee(index)" value='@{messages("ers.delete") + " " + trustee.name}'>
                </a>
             </p>
 

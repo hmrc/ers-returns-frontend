@@ -55,7 +55,7 @@ class TrusteeAddressOverseasController @Inject()(val mcc: MessagesControllerComp
 
   def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier): Future[Result] = {
     trusteeService.updateTrusteeCache(index).map { _ =>
-      Redirect(controllers.routes.TrusteeController.trusteeSummaryPage())
+      Redirect(controllers.trustees.routes.TrusteeSummaryController.trusteeSummaryPage())
     }
   }
 

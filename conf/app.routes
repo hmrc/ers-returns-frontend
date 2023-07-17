@@ -45,11 +45,6 @@ POST        /alterations-or-a-variation			            controllers.AltAmendsContr
 GET         /select-alterations-or-a-variation              controllers.AltAmendsController.altAmendsPage()
 POST        /select-alterations-or-a-variation              controllers.AltAmendsController.altAmendsSelected()
 
-#GET         /add-trustee       				                controllers.TrusteeController.trusteeDetailsPage(index: Int = 10000)
-#POST        /add-trustee      					            controllers.TrusteeController.trusteeDetailsSubmit(index: Int)
-POST        /add-trustee/:index/delete                      controllers.TrusteeController.deleteTrustee(index: Int)
-#GET         /add-trustee/:index/edit     	                controllers.TrusteeController.editTrustee(index: Int)
-
 GET         /trustee-name                                   controllers.trustees.TrusteeNameController.questionPage(index: Int = 10000)
 POST        /trustee-name                                   controllers.trustees.TrusteeNameController.questionSubmit(index: Int)
 GET         /trustee-name/:index/edit                       controllers.trustees.TrusteeNameController.editQuestion(index: Int)
@@ -67,11 +62,13 @@ POST        /uk-trustee-address/:index/edit                 controllers.trustees
 
 GET         /overseas-trustee-address                       controllers.trustees.TrusteeAddressOverseasController.questionPage(index: Int = 10000)
 POST        /overseas-trustee-address                       controllers.trustees.TrusteeAddressOverseasController.questionSubmit(index: Int)
-GET        /overseas-trustee-address/:index/edit           controllers.trustees.TrusteeAddressOverseasController.editQuestion(index: Int)
+GET         /overseas-trustee-address/:index/edit           controllers.trustees.TrusteeAddressOverseasController.editQuestion(index: Int)
 POST        /overseas-trustee-address/:index/edit           controllers.trustees.TrusteeAddressOverseasController.editQuestionSubmit(index: Int)
 
-GET         /trustees       				                controllers.TrusteeController.trusteeSummaryPage()
-POST        /trustees       				                controllers.TrusteeController.trusteeSummaryContinue()
+GET         /trustees       				                controllers.trustees.TrusteeSummaryController.trusteeSummaryPage()
+POST        /trustees       				                controllers.trustees.TrusteeSummaryController.trusteeSummaryContinue()
+
+POST        /delete-trustee/:index/                         controllers.trustees.TrusteeSummaryController.deleteTrustee(index: Int)
 
 GET 		/add-subsidiary-company   		        		controllers.GroupSchemeController.manualCompanyDetailsPage(index: Int = 10000)
 POST 		/add-subsidiary-company       					controllers.GroupSchemeController.manualCompanyDetailsSubmit(index: Int)

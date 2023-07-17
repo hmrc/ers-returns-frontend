@@ -125,7 +125,7 @@ class TrusteeController @Inject() (
           }
       )
 
- */
+
 
   def replaceTrustee(trustees: List[TrusteeDetails], index: Int, formData: TrusteeDetails): List[TrusteeDetails] =
     (if (index == 10000) {
@@ -153,7 +153,7 @@ class TrusteeController @Inject() (
 
   private def filterDeletedTrustee(trusteeDetailsList: TrusteeDetailsList, id: Int): List[TrusteeDetails] =
     trusteeDetailsList.trustees.zipWithIndex.filterNot(_._2 == id).map(_._1)
-
+ */
 /*
   def editTrustee(id: Int): Action[AnyContent] = authAction.async {
       implicit request =>
@@ -180,7 +180,7 @@ class TrusteeController @Inject() (
       getGlobalErrorPage
     }
 
- */
+
 
   def trusteeSummaryPage(): Action[AnyContent] = authAction.async {
       implicit request =>
@@ -208,13 +208,12 @@ class TrusteeController @Inject() (
   def continueFromTrusteeSummaryPage(): Future[Result] =
     Future(Redirect(routes.AltAmendsController.altActivityPage()))
 
-  def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result =
-    Ok(
-      globalErrorView(
-        "ers.global_errors.title",
-        "ers.global_errors.heading",
-        "ers.global_errors.message"
-      )(request, messages, appConfig)
-    )
-
+	def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result = {
+		Ok(globalErrorView(
+			"ers.global_errors.title",
+			"ers.global_errors.heading",
+			"ers.global_errors.message"
+		)(request, messages, appConfig))
+	}
+ */
 }
