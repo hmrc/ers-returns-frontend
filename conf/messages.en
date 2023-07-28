@@ -345,6 +345,12 @@ ers_manual_company_details_overseas.title = What is the company name?
 ers_manual_address_uk.title = What is the company?s address?
 ers_manual_company_details.itciu.title = Where is the company registered?
 
+ers_company_summary.company_name = Company name
+ers_company_summary.company_location = Where the company is registered
+ers_company_summary.page_title = Companies in this group plan
+ers_company_summary.add_company = Do you need to add another company?
+
+
 #********************************************************************
 # Address messages
 #********************************************************************

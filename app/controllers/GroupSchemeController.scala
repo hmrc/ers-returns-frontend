@@ -21,12 +21,14 @@ import controllers.auth.{AuthAction, RequestWithOptionalAuthContext}
 import models._
 import play.api.Logging
 import play.api.data.Form
+import play.api.http.Writeable.wByteArray
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.mvc._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils._
+
 import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 
@@ -40,55 +42,71 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
 																			implicit val appConfig: ApplicationConfig,
                                       globalErrorView: views.html.global_error,
                                       groupView: views.html.group,
-                                      manualCompanyDetailsView: views.html.manual_company_details,
+                                      manualCompanyDetailsView: views.html.manual_company_details_summary,
                                       groupPlanSummaryView: views.html.group_plan_summary,
                                       authAction: AuthAction
 																		 ) extends FrontendController(mcc) with I18nSupport with WithUnsafeDefaultFormBinding with Logging {
 
   implicit val ec: ExecutionContext = mcc.executionContext
 
-  def manualCompanyDetailsPage(index: Int): Action[AnyContent] = authAction.async {
-      implicit request =>
-        showManualCompanyDetailsPage(index)(request)
-  }
 
-  def showManualCompanyDetailsPage(index: Int)(implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] = {
-    ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).map { requestObject =>
-      Ok(manualCompanyDetailsView(requestObject, index, RsFormMappings.companyDetailsForm))
+  def manualCompanyDetailsPage(index: Int): Action[AnyContent] = authAction.async {
+    implicit request =>
+      showManualCompanyDetailsPage(index)(request, hc)
+  }
+  def showManualCompanyDetailsPage(index: Int)(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
+    (for {
+      requestObject      <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
+      companyDetailsList <- ersUtil.fetch[CompanyDetailsList](ersUtil.GROUP_SCHEME_COMPANIES, requestObject.getSchemeReference)
+    } yield {
+      Ok(manualCompanyDetailsView(requestObject, index, companyDetailsList))
+    }) recover {
+      case e: Exception =>
+        logger.error(s"[GroupSchemeController][showManualCompanyDetailsPage] Get data from cache failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
+        getGlobalErrorPage
     }
   }
-
-  def manualCompanyDetailsSubmit(index: Int): Action[AnyContent] = authAction.async {
-      implicit request =>
-        ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
-          showManualCompanyDetailsSubmit(requestObject, index)(request)
-        }
+  def companySummaryContinue(): Action[AnyContent] = authAction.async {
+    implicit request =>
+      continueFromCompanySummaryPage()(request, hc)
+  }
+  def continueFromCompanySummaryPage()(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
+    Future(Redirect(controllers.routes.GroupSchemeController.groupSchemePage()))
   }
 
-  def showManualCompanyDetailsSubmit(requestObject: RequestObject, index: Int)
-                                    (implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] = {
-    RsFormMappings.companyDetailsForm.bindFromRequest.fold(
-      errors => {
-        Future(Ok(manualCompanyDetailsView(requestObject, index, errors)))
-      },
-      successful => {
-        ersUtil.fetch[CompanyDetailsList](ersUtil.GROUP_SCHEME_COMPANIES, requestObject.getSchemeReference).flatMap { cachedCompaniesList =>
 
-          val processedFormData = CompanyDetailsList(replaceCompany(cachedCompaniesList.companies, index, successful))
 
-          ersUtil.cache(ersUtil.GROUP_SCHEME_COMPANIES, processedFormData, requestObject.getSchemeReference).map { _ =>
-            Redirect(routes.GroupSchemeController.groupPlanSummaryPage())
-          }
-        } recoverWith {
-          case _: NoSuchElementException =>
-						val companiesList = CompanyDetailsList(List(successful))
-						ersUtil.cache(ersUtil.GROUP_SCHEME_COMPANIES, companiesList, requestObject.getSchemeReference).map { _ =>
-							Redirect(routes.GroupSchemeController.groupPlanSummaryPage())
-						}
-				}
-      }
-    )
-  }
+//  def manualCompanyDetailsSubmit(index: Int): Action[AnyContent] = authAction.async {
+//      implicit request =>
+//        ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
+//          showManualCompanyDetailsSubmit(requestObject, index)(request)
+//        }
+//  }
+//
+//  def showManualCompanyDetailsSubmit(requestObject: RequestObject, index: Int)
+//                                    (implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] = {
+//    RsFormMappings.companyDetailsForm.bindFromRequest.fold(
+//      errors => {
+//        Future(Ok(manualCompanyDetailsView(requestObject, index, errors)))
+//      },
+//      successful => {
+//        ersUtil.fetch[CompanyDetailsList](ersUtil.GROUP_SCHEME_COMPANIES, requestObject.getSchemeReference).flatMap { cachedCompaniesList =>
+//
+//          val processedFormData = CompanyDetailsList(replaceCompany(cachedCompaniesList.companies, index, successful))
+//
+//          ersUtil.cache(ersUtil.GROUP_SCHEME_COMPANIES, processedFormData, requestObject.getSchemeReference).map { _ =>
+//            Redirect(routes.GroupSchemeController.groupPlanSummaryPage())
+//          }
+//        } recoverWith {
+//          case _: NoSuchElementException =>
+//						val companiesList = CompanyDetailsList(List(successful))
+//						ersUtil.cache(ersUtil.GROUP_SCHEME_COMPANIES, companiesList, requestObject.getSchemeReference).map { _ =>
+//							Redirect(routes.GroupSchemeController.groupPlanSummaryPage())
+//						}
+//				}
+//      }
+//    )
+//  }
 
   def replaceCompany(companies: List[CompanyDetails], index: Int, formData: CompanyDetails): List[CompanyDetails] =
 
@@ -129,23 +147,23 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
   private def filterDeletedCompany(companyList: CompanyDetailsList, id: Int): List[CompanyDetails] =
     companyList.companies.zipWithIndex.filterNot(_._2 == id).map(_._1)
 
-  def editCompany(id: Int): Action[AnyContent] = authAction.async {
+  def editCompany(index: Int): Action[AnyContent] = authAction.async {
       implicit request =>
-          showEditCompany(id)(request, hc)
+          showEditCompany(index)(request, hc)
   }
 
-  def showEditCompany(id: Int)(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
+  def showEditCompany(index: Int)(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
 
     (for {
       requestObject <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
       all           <- ersUtil.fetchAll(requestObject.getSchemeReference)
 
       companies =  all.getEntry[CompanyDetailsList](ersUtil.GROUP_SCHEME_COMPANIES).getOrElse(CompanyDetailsList(Nil))
-      companyDetails = companies.companies(id)
+      companyDetails = companies.companies(index)
 
     } yield {
 
-      Ok(manualCompanyDetailsView(requestObject, id, RsFormMappings.companyDetailsForm.fill(companyDetails)))
+      Ok(manualCompanyDetailsView(requestObject, index, RsFormMappings.companyDetailsForm.fill(companyDetails)))
 
     }) recover {
       case e: Exception =>
@@ -153,6 +171,21 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
         getGlobalErrorPage
     }
   }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   def groupSchemePage(): Action[AnyContent] = authAction.async {
       implicit request =>

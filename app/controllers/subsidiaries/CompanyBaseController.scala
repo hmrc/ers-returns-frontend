@@ -18,7 +18,7 @@ package controllers.subsidiaries
 
 import config.ApplicationConfig
 import controllers.auth.{AuthAction, RequestWithOptionalAuthContext}
-import models.{GroupSchemeInfo, RequestObject}
+import models.RequestObject
 import play.api.Logging
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, Messages}
@@ -29,6 +29,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.ERSUtil
 
+import scala.concurrent.Future.never.recover
 import scala.concurrent.{ExecutionContext, Future}
 
 trait CompanyBaseController[A] extends FrontendController with I18nSupport with Logging {
@@ -56,14 +57,24 @@ trait CompanyBaseController[A] extends FrontendController with I18nSupport with 
       }
   }
 
-  def showQuestionPage(requestObject: RequestObject, index: Int)
+  def showQuestionPage(requestObject: RequestObject, index: Int, edit: Boolean = false)
                       (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
-      Future.successful(Ok(view(requestObject, index, form)))
-    } recover {
+    (for {
+      oldData <- ersUtil.fetchPartFromCompanyDetailsList(index, requestObject.getSchemeReference)
+    } yield {
+      val preparedForm = if (oldData.isDefined) form.fill(oldData.get) else form
+      if (oldData.isDefined) {
+        logger.error(s"\n\n[${this.getClass.getSimpleName}][showQuestionPage] previous data that was present in the form: \n\n ${oldData.get}\n\n ${preparedForm}\n\n")
+      }
+      Ok(view(requestObject, index, preparedForm, edit))
+
+    } )
+    recover {
       case e: Exception =>
         logger.error(s"[SubsidiariesController][showSubsidiariesNamePage] Get data from cache failed with exception ${e.getMessage}")
         getGlobalErrorPage
     }
+  }
 
 
   def questionSubmit(index: Int, edit: Boolean = false): Action[AnyContent] = authAction.async {
@@ -76,7 +87,7 @@ trait CompanyBaseController[A] extends FrontendController with I18nSupport with 
   def showQuestionSubmit(requestObject: RequestObject, index: Int, edit: Boolean = false)
                         (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
     form.bindFromRequest().fold(
-      errors => {
+      errors => {logger.error(errors.errors.mkString)
           Future.successful(Ok(view(requestObject, index, errors)))
       },
       result => {
@@ -85,6 +96,14 @@ trait CompanyBaseController[A] extends FrontendController with I18nSupport with 
         }
       }
     )
+  }
+
+  def editCompany(index: Int, edit: Boolean = true): Action[AnyContent] = authAction.async {
+    implicit  request =>
+      ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
+        showQuestionPage(requestObject, index, edit)(request, hc)
+
+      }
   }
 
   def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result = {

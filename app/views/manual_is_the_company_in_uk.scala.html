@@ -63,7 +63,7 @@
         text = messages("ers_manual_is_the_company_in_uk.title")
     ))
 
-    @formWithCSRF(action = controllers.subsidiaries.routes.IsCompanyUkController.questionSubmit(index)) {
+    @formWithCSRF(action = controllers.subsidiaries.IsCompanyUkController.questionSubmit(index)) {
 
         @govukRadios(Radios(
             name = "basedInUk",

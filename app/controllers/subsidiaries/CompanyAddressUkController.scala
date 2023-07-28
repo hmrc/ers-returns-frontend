@@ -53,9 +53,9 @@ implicit val format: Format[CompanyAddressUk] = CompanyAddressUk.format
 def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier): Future[Result] = {
   {
     if (edit) {
-      Future.successful(Redirect(controllers.routes.GroupSchemeController.editCompany(index)))
+      Future.successful(Redirect(controllers.routes.GroupSchemeController.manualCompanyDetailsPage()))
     } else {
-      Future.successful(Redirect(controllers.routes.GroupSchemeController.groupSchemePage()))
+      Future.successful(Redirect(controllers.routes.GroupSchemeController.manualCompanyDetailsPage()))
     }
   }
 }

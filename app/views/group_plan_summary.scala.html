@@ -17,6 +17,8 @@
 @import _root_.utils.ERSUtil
 @import config.ApplicationConfig
 @import _root_.utils.CountryCodes
+@import views.html.templates.reference
+@import views.html.helper.CSPNonce
 
 @import views.html.templates.reference
 
@@ -64,7 +66,11 @@
 							classes = "govuk-!-width-one-quarter",
 							items = Seq(
 								ActionItem(
-									href = routes.GroupSchemeController.editCompany(index).url,
+									href = if(company.country.getOrElse("") == "UK"){
+										controllers.subsidiaries.CompanyDetailsUkController.editCompany(index).url
+									} else {
+										controllers.subsidiaries.CompanyDetailsOverseasController.editCompany(index).url
+									},
 									content = Text(messages("ers.change_this")),
 									visuallyHiddenText = Some(company.companyName)
 								)
@@ -84,7 +90,7 @@
 							classes = "govuk-!-width-one- quarter",
 							items = Seq(
 								ActionItem(
-									href = routes.GroupSchemeController.editCompany(index).url,
+									href = controllers.subsidiaries.IsCompanyUkController.editCompany(index).url,
 									content = Text(messages("ers.change_this")),
 									visuallyHiddenText = Some(company.companyName)
 								)
@@ -104,7 +110,11 @@
 							classes = "govuk-!-width-one-quarter",
 							items = Seq(
 								ActionItem(
-									href = routes.GroupSchemeController.editCompany(index).url,
+									href = if(company.country.getOrElse("") == "UK"){
+											controllers.subsidiaries.CompanyAddressUkController.editCompany(index).url
+										} else {
+											controllers.subsidiaries.CompanyAddressOverseasController.editCompany(index).url
+										},
 									content = Text(messages("ers.change_this")),
 									visuallyHiddenText = Some(company.companyName)
 								)
@@ -124,7 +134,7 @@
 							classes = "govuk-!-width-one-quarter",
 							items = Seq(
 								ActionItem(
-									href = routes.GroupSchemeController.editCompany(index).url,
+									href = controllers.subsidiaries.CompanyDetailsUkController.editCompany(index).url,
 									content = Text(messages("ers.change_this")),
 									visuallyHiddenText = Some(company.companyName)
 								)
@@ -144,7 +154,7 @@
 							classes = "govuk-!-width-one-quarter",
 							items = Seq(
 								ActionItem(
-									href = routes.GroupSchemeController.editCompany(index).url,
+									href = controllers.subsidiaries.CompanyDetailsUkController.editCompany(index).url,
 									content = Text(messages("ers.change_this")),
 									visuallyHiddenText = Some(company.companyName)
 								)

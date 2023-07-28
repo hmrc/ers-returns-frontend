@@ -23,7 +23,7 @@ import org.joda.time.DateTime
 import play.api.Logging
 import play.api.i18n.Messages
 import play.api.libs.json
-import play.api.libs.json.JsValue
+import play.api.libs.json.{JsArray, JsValue, Json}
 import play.api.mvc.Request
 import services.SessionService
 import uk.gov.hmrc.http.cache.client.CacheMap
@@ -94,6 +94,7 @@ class ERSUtil @Inject()(val sessionService: SessionService,
 	val SUBSIDIARY_NAME_CACHE: String = "subsidiary-name"
 	val SUBSIDIARY_ADDRESS_CACHE: String = "subsidiary-address-uk"
 	val SUBSIDIARY_BASED:  String = "subsidiary-based"
+	val COMPANIES_CACHE: String = "companies"
 
 	def cache[T](key:String, body:T)(implicit hc:HeaderCarrier, ec:ExecutionContext, formats: json.Format[T], request: Request[AnyRef]): Future[CacheMap] =
 		shortLivedCache.cache[T](getCacheId, key, body)
@@ -340,5 +341,13 @@ class ERSUtil @Inject()(val sessionService: SessionService,
 	def replaceAmpersand(input: String): String = {
 		appConfig.ampersandRegex
 			.replaceAllIn(input, "&amp;")
+	}
+
+	def fetchPartFromCompanyDetailsList[A](index: Int, cacheId: String)(implicit hc: HeaderCarrier, formats: json.Format[A]): Future[Option[A]] = {
+		shortLivedCache.fetchAndGetEntry[JsValue](cacheId, COMPANIES_CACHE).map {
+			_.map(_.\( COMPANIES_CACHE).as[JsArray].\(index).getOrElse(Json.obj()).as[A])
+		} recover {
+			case _ => None
+		}
 	}
 }
