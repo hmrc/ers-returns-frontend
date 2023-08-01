@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-package controllers
-
+import controllers.trustees.TrusteeSummaryController
 import models._
 import org.mockito.ArgumentMatchers.{eq => meq, _}
 import org.mockito.Mockito._
@@ -24,7 +23,6 @@ import org.scalatest.OptionValues
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-
 import play.api.http.Status
 import play.api.i18n
 import play.api.i18n.{MessagesApi, MessagesImpl}
@@ -35,11 +33,11 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.http.cache.client.CacheMap
 import utils.Fixtures.ersRequestObject
 import utils.{ErsTestHelper, _}
-import views.html.{global_error, trustee_details, trustee_summary}
+import views.html.{global_error, trustee_summary}
 
 import scala.concurrent.{ExecutionContext, Future}
-/*
-class TrusteeControllerSpec extends AnyWordSpecLike
+
+class TrusteeSummaryControllerSpec extends AnyWordSpecLike
   with Matchers
   with OptionValues
   with ERSFakeApplicationConfig
@@ -59,33 +57,22 @@ class TrusteeControllerSpec extends AnyWordSpecLike
 
   implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
 
-  val tenThousand: Int                    = 10000
-  val globalErrorView: global_error       = app.injector.instanceOf[global_error]
-  val trusteeDetailsView: trustee_details = app.injector.instanceOf[trustee_details]
+	val tenThousand: Int = 10000
+  val globalErrorView: global_error = app.injector.instanceOf[global_error]
   val trusteeSummaryView: trustee_summary = app.injector.instanceOf[trustee_summary]
 
+    /* TODO These tests should be maybe in like the base controller spec or replicated in each individual controller spec??
   "calling Trustee Details Page" should {
 
-    val trusteeList              = List(TrusteeDetails("Name", "1 The Street", None, None, None, Some("UK"), None))
-    val groupScheme              = GroupSchemeInfo(Some(mockErsUtil.OPTION_NO), Some(""))
+    val trusteeList = List(TrusteeDetails("Name", "1 The Street", None, None, None, Some("UK"), None, true))
+		val groupScheme = GroupSchemeInfo(Some(mockErsUtil.OPTION_NO), Some(""))
     val failure: Future[Nothing] = Future.failed(new Exception)
 
-    def buildFakeTrusteePageController(
-      groupSchemeActivityRes: Future[GroupSchemeInfo] = Future.successful(groupScheme),
-      trusteeDetailsRes: Future[TrusteeDetailsList] = Future.successful(TrusteeDetailsList(trusteeList)),
-      cacheRes: Future[CacheMap] = Future.successful(mock[CacheMap])
-    ): TrusteeController = new TrusteeController(
-      mockMCC,
-      mockAuthConnector,
-      mockErsConnector,
-      mockCountryCodes,
-      mockErsUtil,
-      mockAppConfig,
-      globalErrorView,
-      trusteeDetailsView,
-      trusteeSummaryView,
-      testAuthAction
-    ) {
+    def buildFakeTrusteePageController(groupSchemeActivityRes: Future[GroupSchemeInfo] = Future.successful(groupScheme),
+                                       trusteeDetailsRes: Future[TrusteeDetailsList] = Future.successful(TrusteeDetailsList(trusteeList)),
+                                       cacheRes: Future[CacheMap] = Future.successful(mock[CacheMap])
+																			): TrusteeSummaryController = new TrusteeSummaryController(mockMCC, mockAuthConnector, mockErsConnector, mockCountryCodes,
+      mockErsUtil, mockAppConfig, globalErrorView, trusteeSummaryView, testAuthAction) {
 
       when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any())).thenReturn(Future.successful(ersRequestObject))
 
@@ -100,6 +87,7 @@ class TrusteeControllerSpec extends AnyWordSpecLike
       when(mockErsUtil.cache(matches(mockErsUtil.TRUSTEES_CACHE), any(), any())(any(), any())
       ) thenReturn cacheRes
     }
+
 
     "give a redirect status (to company authentication frontend) on GET if user is not authenticated" in {
       setUnauthorisedMocks()
@@ -253,11 +241,13 @@ class TrusteeControllerSpec extends AnyWordSpecLike
 
   }
 
+     */
+
   "calling Delete Trustee" should {
 
-    val firstTrustee  = TrusteeDetails("First Trustee", "1 The Street", None, None, None, Some("UK"), None)
-    val secondTrustee = TrusteeDetails("Second Trustee", "34 Some Road", None, None, None, Some("UK"), None)
-    val thirdTrustee  = TrusteeDetails("Third Trustee", "60 Window Close", None, None, None, Some("UK"), None)
+    val firstTrustee = TrusteeDetails("First Trustee", "1 The Street", None, None, None, Some("UK"), None, true)
+    val secondTrustee = TrusteeDetails("Second Trustee", "34 Some Road", None, None, None, Some("UK"), None, true)
+    val thirdTrustee = TrusteeDetails("Third Trustee", "60 Window Close", None, None, None, Some("UK"), None, true)
 
     val trusteeList = List(
       firstTrustee,
@@ -267,23 +257,12 @@ class TrusteeControllerSpec extends AnyWordSpecLike
 
     val failure: Future[Nothing] = Future.failed(new Exception)
 
-    def buildFakeTrusteeController(
-      trusteeDetailsRes: Future[TrusteeDetailsList] = Future.successful(TrusteeDetailsList(trusteeList)),
-      cacheRes: Future[CacheMap] = Future.successful(mock[CacheMap]),
-      requestObjectRes: Future[RequestObject] = Future.successful(ersRequestObject)
-    ): TrusteeController = new TrusteeController(
-      mockMCC,
-      mockAuthConnector,
-      mockErsConnector,
-      mockCountryCodes,
-      mockErsUtil,
-      mockAppConfig,
-      globalErrorView,
-      trusteeDetailsView,
-      trusteeSummaryView,
-      testAuthAction
-    ) {
-      when(
+    def buildFakeTrusteeController(trusteeDetailsRes: Future[TrusteeDetailsList] = Future.successful(TrusteeDetailsList(trusteeList)),
+																	 cacheRes: Future[CacheMap] = Future.successful(mock[CacheMap]),
+																	 requestObjectRes: Future[RequestObject] = Future.successful(ersRequestObject)
+																	): TrusteeSummaryController = new TrusteeSummaryController(mockMCC, mockAuthConnector, mockErsConnector, mockCountryCodes, mockErsUtil,
+      mockAppConfig, globalErrorView, trusteeSummaryView, testAuthAction) {
+			when(
         mockErsUtil.fetch[TrusteeDetailsList](refEq(mockErsUtil.TRUSTEES_CACHE), any())(any(), any())
       ) thenReturn trusteeDetailsRes
 
@@ -350,37 +329,24 @@ class TrusteeControllerSpec extends AnyWordSpecLike
       status(result) shouldBe Status.SEE_OTHER
 
       verify(mockErsUtil, times(1))
-        .cache(meq("trustees"), meq(TrusteeDetailsList(expected)), meq(ersRequestObject.getSchemeReference))(
-          any(),
-          any()
-        )
+        .cache(meq("trustees"), meq(TrusteeDetailsList(expected)), meq(ersRequestObject.getSchemeReference))(any(), any())
     }
 
   }
 
+    /* TODO Again maybe these go into base or individual controllers?
   "calling Edit Trustee" should {
 
-    val trusteeList = List(TrusteeDetails("Name", "1 The Street", None, None, None, Some("UK"), None))
+    val trusteeList = List(TrusteeDetails("Name", "1 The Street", None, None, None, Some("UK"), None, true))
 
     val failure: Future[Nothing] = Future.failed(new Exception)
 
-    def buildFakeTrusteeController(
-      groupSchemeActivityRes: Future[GroupSchemeInfo] = Future(GroupSchemeInfo(Some(mockErsUtil.OPTION_NO), Some(""))),
-      trusteeDetailsRes: Future[TrusteeDetailsList] = Future.successful(TrusteeDetailsList(trusteeList)),
-      cacheRes: Future[CacheMap] = Future.successful(mock[CacheMap]),
-      requestObjectRes: Future[RequestObject] = Future.successful(ersRequestObject)
-    ): TrusteeController = new TrusteeController(
-      mockMCC,
-      mockAuthConnector,
-      mockErsConnector,
-      mockCountryCodes,
-      mockErsUtil,
-      mockAppConfig,
-      globalErrorView,
-      trusteeDetailsView,
-      trusteeSummaryView,
-      testAuthAction
-    ) {
+    def buildFakeTrusteeController(groupSchemeActivityRes: Future[GroupSchemeInfo] = Future(GroupSchemeInfo(Some(mockErsUtil.OPTION_NO), Some(""))),
+																	 trusteeDetailsRes: Future[TrusteeDetailsList] = Future.successful(TrusteeDetailsList(trusteeList)),
+																	 cacheRes: Future[CacheMap] = Future.successful(mock[CacheMap]),
+																	 requestObjectRes: Future[RequestObject] = Future.successful(ersRequestObject)
+                                  ): TrusteeSummaryController = new TrusteeSummaryController(mockMCC, mockAuthConnector, mockErsConnector, mockCountryCodes,
+      mockErsUtil, mockAppConfig, globalErrorView, trusteeSummaryView, testAuthAction) {
 
       when(
         mockErsUtil.fetch[GroupSchemeInfo](refEq(mockErsUtil.GROUP_SCHEME_CACHE_CONTROLLER), anyString())(any(), any())
@@ -455,20 +421,11 @@ class TrusteeControllerSpec extends AnyWordSpecLike
     }
 
   }
+    */
 
   "calling replace trustee" should {
-    def controllerUnderTest: TrusteeController = new TrusteeController(
-      mockMCC,
-      mockAuthConnector,
-      mockErsConnector,
-      mockCountryCodes,
-      mockErsUtil,
-      mockAppConfig,
-      globalErrorView,
-      trusteeDetailsView,
-      trusteeSummaryView,
-      testAuthAction
-    )
+    def controllerUnderTest: TrusteeSummaryController = new TrusteeSummaryController(mockMCC, mockAuthConnector, mockErsConnector, mockCountryCodes,
+      mockErsUtil, mockAppConfig, globalErrorView, trusteeSummaryView, testAuthAction)
 
     "replace a trustee and keep the other trustees" when {
 
@@ -476,14 +433,14 @@ class TrusteeControllerSpec extends AnyWordSpecLike
 
         val index = 2
 
-        val formData = TrusteeDetails("Replacement Trustee", "1 Some Place", None, None, None, None, None)
-        val target   = TrusteeDetails("Target Trustee", "3 Window Close", None, None, None, None, None)
+        val formData = TrusteeDetails("Replacement Trustee", "1 Some Place", None, None, None, None, None, false)
+        val target = TrusteeDetails("Target Trustee", "3 Window Close", None, None, None, None, None, false)
 
         val trusteeDetailsList = List(
-          TrusteeDetails("First Trustee", "20 Garden View", None, None, None, None, None),
-          TrusteeDetails("Third Trustee", "72 Big Avenue", None, None, None, None, None),
+          TrusteeDetails("First Trustee", "20 Garden View", None, None, None, None, None, false),
+          TrusteeDetails("Third Trustee", "72 Big Avenue", None, None, None, None, None, false),
           target,
-          TrusteeDetails("Fourth Trustee", "21 Brick Lane", None, None, None, None, None)
+          TrusteeDetails("Fourth Trustee", "21 Brick Lane", None, None, None, None, None, false)
         )
 
         val result = controllerUnderTest.replaceTrustee(trusteeDetailsList, index, formData)
@@ -500,14 +457,14 @@ class TrusteeControllerSpec extends AnyWordSpecLike
 
         val index = 100
 
-        val formData = TrusteeDetails("Replacement Trustee", "1 Some Place", None, None, None, None, None)
-        val target   = TrusteeDetails("Target Trustee", "3 Window Close", None, None, None, None, None)
+        val formData = TrusteeDetails("Replacement Trustee", "1 Some Place", None, None, None, None, None, false)
+        val target = TrusteeDetails("Target Trustee", "3 Window Close", None, None, None, None, None, false)
 
         val trusteeDetailsList = List(
-          TrusteeDetails("First Trustee", "20 Garden View", None, None, None, None, None),
-          TrusteeDetails("Third Trustee", "72 Big Avenue", None, None, None, None, None),
+          TrusteeDetails("First Trustee", "20 Garden View", None, None, None, None, None, false),
+          TrusteeDetails("Third Trustee", "72 Big Avenue", None, None, None, None, None, false),
           target,
-          TrusteeDetails("Fourth Trustee", "21 Brick Lane", None, None, None, None, None)
+          TrusteeDetails("Fourth Trustee", "21 Brick Lane", None, None, None, None, None, false)
         )
 
         val result = controllerUnderTest.replaceTrustee(trusteeDetailsList, index, formData)
@@ -524,7 +481,7 @@ class TrusteeControllerSpec extends AnyWordSpecLike
 
         val index = 1
 
-        val target = TrusteeDetails("Target Company", "3 Window Close", None, None, None, None, None)
+        val target = TrusteeDetails("Target Company", "3 Window Close", None, None, None, None, None, false)
 
         val trusteeDetailsList = List(
           target,
@@ -543,26 +500,15 @@ class TrusteeControllerSpec extends AnyWordSpecLike
 
   "calling trustee summary page" should {
 
-    val trusteeList = List(TrusteeDetails("Name", "1 The Street", None, None, None, Some("UK"), None))
+    val trusteeList = List(TrusteeDetails("Name", "1 The Street", None, None, None, Some("UK"), None, true))
 
     val failure: Future[Nothing] = Future.failed(new Exception)
 
-    def buildFakeTrusteeController(
-      trusteeDetailsRes: Future[TrusteeDetailsList] = Future.successful(TrusteeDetailsList(trusteeList)),
-      cacheRes: Future[CacheMap] = Future.successful(mock[CacheMap]),
-      requestObjectRes: Future[RequestObject] = Future.successful(ersRequestObject)
-    ): TrusteeController = new TrusteeController(
-      mockMCC,
-      mockAuthConnector,
-      mockErsConnector,
-      mockCountryCodes,
-      mockErsUtil,
-      mockAppConfig,
-      globalErrorView,
-      trusteeDetailsView,
-      trusteeSummaryView,
-      testAuthAction
-    ) {
+    def buildFakeTrusteeController(trusteeDetailsRes: Future[TrusteeDetailsList] = Future.successful(TrusteeDetailsList(trusteeList)),
+																	 cacheRes: Future[CacheMap] = Future.successful(mock[CacheMap]),
+																	 requestObjectRes: Future[RequestObject] = Future.successful(ersRequestObject)
+                                  ): TrusteeSummaryController = new TrusteeSummaryController(mockMCC, mockAuthConnector, mockErsConnector, mockCountryCodes, mockErsUtil,
+      mockAppConfig, globalErrorView, trusteeSummaryView, testAuthAction) {
 
       when(
         mockErsUtil.fetch[TrusteeDetailsList](refEq(mockErsUtil.TRUSTEES_CACHE), anyString())(any(), any())
@@ -638,4 +584,3 @@ class TrusteeControllerSpec extends AnyWordSpecLike
   }
 }
 
- */

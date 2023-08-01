@@ -516,7 +516,7 @@ class ErsUtilSpec
         addressLine3 = None,
         addressLine4 = None,
         country = Some("UK"),
-        postcode = Some("AB123CD"),
+        addressLine5 = Some("AB123CD"),
         basedInUk = true
       )
       val expected = "ADDRESS1, ADDRESS2, AB123CD, United Kingdom"
