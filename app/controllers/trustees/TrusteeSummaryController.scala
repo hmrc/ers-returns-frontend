@@ -77,8 +77,6 @@ class TrusteeSummaryController @Inject()(val mcc: MessagesControllerComponents,
     }
   }
 
-
-
   private def filterDeletedTrustee(trusteeDetailsList: TrusteeDetailsList, id: Int): List[TrusteeDetails] =
     trusteeDetailsList.trustees.zipWithIndex.filterNot(_._2 == id).map(_._1)
 

@@ -23,7 +23,7 @@ import play.api.Logging
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.libs.json.Format
-import play.api.mvc.{Action, AnyContent, Request, Result}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request, Result}
 import play.twirl.api.Html
 import services.TrusteeService
 import uk.gov.hmrc.http.HeaderCarrier
@@ -60,14 +60,14 @@ trait TrusteeBaseController[A] extends FrontendController with I18nSupport with 
 
   def showQuestionPage(requestObject: RequestObject, index: Int, edit: Boolean = false)
                       (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
-
+// TODO
     (for {
         groupSchemeActivity <- ersUtil.fetch[GroupSchemeInfo](ersUtil.GROUP_SCHEME_CACHE_CONTROLLER, requestObject.getSchemeReference)
-        previousAnswer <- ersUtil.fetchPartFromTrusteeDetailsList(index, requestObject.getSchemeReference)
+        previousAnswer <- ersUtil.fetchPartFromTrusteeDetailsList[A](index, requestObject.getSchemeReference)
     } yield {
         val preparedForm = if (previousAnswer.isDefined) form.fill(previousAnswer.get) else form
         if (previousAnswer.isDefined) {
-          logger.error(s"\n\n[${this.getClass.getSimpleName}][showQuestionPage] Here's the answers we pulled from the cache innit: \n\n Prev answer: ${previousAnswer.get}\n")
+          logger.error(s"\n\n[${this.getClass.getSimpleName}][showQuestionPage] Here's the answers we pulled from the cache innit: \n\n Prev answer: ${previousAnswer.get}\n")// TODO Remove before merge innit
         }
         Ok(view(requestObject, groupSchemeActivity.groupScheme.getOrElse(ersUtil.DEFAULT), index, preparedForm, edit))
       }
@@ -118,30 +118,6 @@ trait TrusteeBaseController[A] extends FrontendController with I18nSupport with 
       ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
         handleQuestionSubmit(requestObject, index, edit = true)(request, hc)
       }
-  }
-
-  def handleEditQuestionSubmit(requestObject: RequestObject, index: Int)
-                          (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
-    form.bindFromRequest().fold(
-      errors => {
-        ersUtil.fetch[GroupSchemeInfo](ersUtil.GROUP_SCHEME_CACHE_CONTROLLER, requestObject.getSchemeReference).map { groupSchemeActivity =>
-          Ok(view(requestObject, groupSchemeActivity.groupScheme.getOrElse(ersUtil.DEFAULT), index, errors))
-        } recover {
-          case e: Exception =>
-            logger.error(s"[${this.getClass.getSimpleName}][handleEditQuestionSubmit] Get data from cache failed with exception ${e.getMessage}, " +
-              s"timestamp: ${System.currentTimeMillis()}.")
-            getGlobalErrorPage
-        }
-      },
-      result => {
-        for {
-          _ <- ersUtil.cache[A](cacheKey, result, requestObject.getSchemeReference)
-          _ <- trusteeService.updateTrusteeCache(index)
-        } yield {
-          Redirect(controllers.trustees.routes.TrusteeSummaryController.trusteeSummaryPage())
-        }
-      }
-    )
   }
 
   def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result = {

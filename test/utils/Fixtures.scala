@@ -146,4 +146,13 @@ object Fixtures extends AuthHelper {
       Some("ts"),
       Some("hmac")
     )
+
+  val trusteeAddressOverseas: TrusteeAddressOverseas = TrusteeAddressOverseas(
+    "Overseas line 1",
+    Some("Overseas line 2"),
+    Some("Overseas line 3"),
+    Some("Overseas line 4"),
+    Some("Overseas line 5"),
+    Some("Overseas country")
+  )
 }

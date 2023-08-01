@@ -18,10 +18,9 @@ package controllers.trustees
 
 import config.ApplicationConfig
 import connectors.ErsConnector
-import controllers.TrusteeController
 import controllers.auth.AuthAction
 import javax.inject.Inject
-import models.{RequestObject, RsFormMappings, TrusteeAddressOverseas, TrusteeAddressUk, TrusteeDetails, TrusteeDetailsList, TrusteeName}
+import models.{RequestObject, RsFormMappings, TrusteeAddressOverseas}
 import play.api.data.Form
 import play.api.libs.json.Format
 import play.api.mvc.{AnyContent, MessagesControllerComponents, Request, Result}
