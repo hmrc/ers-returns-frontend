@@ -16,7 +16,7 @@
 
 package controllers.trustees
 
-import models.{GroupSchemeInfo, TrusteeAddressOverseas}
+import models.{GroupSchemeInfo, RsFormMappings, TrusteeAddressOverseas}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatest.OptionValues
@@ -105,8 +105,15 @@ class TrusteeAddressOverseasSpec  extends AnyWordSpecLike
 
   "calling handleQuestionSubmit" should {
     "show the trustee address overseas form page with errors if the form is incorrectly filled" in {
-      when(mockErsUtil.fetch[GroupSchemeInfo](any(), any())(any(), any())).thenReturn(Future.successful(GroupSchemeInfo(None, None)))
+      val trusteeAddressOverseasData = Map("addressLine1" -> "")
+      val form = RsFormMappings.trusteeAddressOverseasForm().bind(trusteeAddressOverseasData)
+      println(form.data.toSeq)
+      implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*))
+      val result = testController.handleQuestionSubmit(ersRequestObject, 1)
 
+      status(result) shouldBe Status.BAD_REQUEST
+      contentAsString(result) should include(testMessages("ers_trustee_address.title"))
+      contentAsString(result) should include(testMessages("ers_trustee_details.err.summary.address_line1_required"))
     }
   }
 }
