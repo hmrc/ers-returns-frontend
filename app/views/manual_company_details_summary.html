@@ -13,7 +13,7 @@
     hmrcPageHeading: HmrcPageHeading
 )
 
-    @(requestObject: RequestObject, companies: CompanyDetailsList)(implicit request: Request[AnyRef], flash: Flash,
+    @(requestObject: RequestObject, index: Int, companies: CompanyDetailsList)(implicit request: Request[AnyRef], flash: Flash,
     messages: Messages, countryCodes: CountryCodes, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 
     @schemeId = @{requestObject.getSchemeId}
