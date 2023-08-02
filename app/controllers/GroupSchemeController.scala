@@ -147,30 +147,30 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
   private def filterDeletedCompany(companyList: CompanyDetailsList, id: Int): List[CompanyDetails] =
     companyList.companies.zipWithIndex.filterNot(_._2 == id).map(_._1)
 
-  def editCompany(index: Int): Action[AnyContent] = authAction.async {
-      implicit request =>
-          showEditCompany(index)(request, hc)
-  }
-
-  def showEditCompany(index: Int)(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
-
-    (for {
-      requestObject <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
-      all           <- ersUtil.fetchAll(requestObject.getSchemeReference)
-
-      companies =  all.getEntry[CompanyDetailsList](ersUtil.GROUP_SCHEME_COMPANIES).getOrElse(CompanyDetailsList(Nil))
-      companyDetails = companies.companies(index)
-
-    } yield {
-
-      Ok(manualCompanyDetailsView(requestObject, index, RsFormMappings.companyDetailsForm.fill(companyDetails)))
-
-    }) recover {
-      case e: Exception =>
-        logger.error(s"[GroupSchemeController][showEditCompany] Fetch group scheme companies for edit failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
-        getGlobalErrorPage
-    }
-  }
+//  def editCompany(index: Int): Action[AnyContent] = authAction.async {
+//      implicit request =>
+//          showEditCompany(index)(request, hc)
+//  }
+//
+//  def showEditCompany(index: Int)(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
+//
+//    (for {
+//      requestObject <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
+//      all           <- ersUtil.fetchAll(requestObject.getSchemeReference)
+//
+//      companies =  all.getEntry[CompanyDetailsList](ersUtil.GROUP_SCHEME_COMPANIES).getOrElse(CompanyDetailsList(Nil))
+//      companyDetails = companies.companies(index)
+//
+//    } yield {
+//
+//      Ok(manualCompanyDetailsView(requestObject, index, RsFormMappings.companyDetailsForm.fill(companyDetails)))
+//
+//    }) recover {
+//      case e: Exception =>
+//        logger.error(s"[GroupSchemeController][showEditCompany] Fetch group scheme companies for edit failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
+//        getGlobalErrorPage
+//    }
+//  }
 
 
 
