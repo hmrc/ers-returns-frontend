@@ -55,10 +55,11 @@ class TrusteeAddressOverseasSpec  extends AnyWordSpecLike
   )
 
   "calling showQuestionPage" should {
+    implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+
     "show the empty trustee address overseas question page when there is nothing to prefill" in {
       when(mockErsUtil.fetch[GroupSchemeInfo](any(), any())(any(), any())).thenReturn(Future.successful(GroupSchemeInfo(None, None)))
       when(mockErsUtil.fetchPartFromTrusteeDetailsList[TrusteeAddressOverseas](any(), any())(any(), any())).thenReturn(Future.successful(None))
-      implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
       val result = testController.showQuestionPage(ersRequestObject, 1)
 
       status(result) shouldBe Status.OK
@@ -69,13 +70,29 @@ class TrusteeAddressOverseasSpec  extends AnyWordSpecLike
     "show the prefilled trustee address overseas question page when there is data to prefill" in {
       when(mockErsUtil.fetch[GroupSchemeInfo](any(), any())(any(), any())).thenReturn(Future.successful(GroupSchemeInfo(None, None)))
       when(mockErsUtil.fetchPartFromTrusteeDetailsList[TrusteeAddressOverseas](any(), any())(any(), any())).thenReturn(Future.successful(Some(trusteeAddressOverseas)))
-      implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
       val result = testController.showQuestionPage(ersRequestObject, 1)
 
       status(result) shouldBe Status.OK
       contentAsString(result) should include(testMessages("ers_trustee_address.title"))
       contentAsString(result) should include(testMessages("ers_trustee_address.line1"))
       contentAsString(result) should include("Overseas line 1")
+    }
+
+    "show the global error page if an exception occurs while retrieving cached data" in {
+      when(mockErsUtil.fetch[GroupSchemeInfo](any(), any())(any(), any())).thenThrow(new RuntimeException("oh no"))
+      val result = testController.showQuestionPage(ersRequestObject, 1)
+
+      status(result) shouldBe Status.OK
+      contentAsString(result) should include(testMessages("ers.global_errors.title"))
+      contentAsString(result) should include(testMessages("ers.global_errors.heading"))
+      contentAsString(result) should include(testMessages("ers.global_errors.message"))
+    }
+  }
+
+  "calling handleQuestionSubmit" should {
+    "show the trustee address overseas form page with errors if the form is incorrectly filled" in {
+      when(mockErsUtil.fetch[GroupSchemeInfo](any(), any())(any(), any())).thenReturn(Future.successful(GroupSchemeInfo(None, None)))
+
     }
   }
 }

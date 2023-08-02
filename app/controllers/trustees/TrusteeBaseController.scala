@@ -31,6 +31,7 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.ERSUtil
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success, Try}
 
 trait TrusteeBaseController[A] extends FrontendController with I18nSupport with Logging {
 
@@ -60,8 +61,7 @@ trait TrusteeBaseController[A] extends FrontendController with I18nSupport with 
 
   def showQuestionPage(requestObject: RequestObject, index: Int, edit: Boolean = false)
                       (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
-// TODO
-    (for {
+    Try(for {
         groupSchemeActivity <- ersUtil.fetch[GroupSchemeInfo](ersUtil.GROUP_SCHEME_CACHE_CONTROLLER, requestObject.getSchemeReference)
         previousAnswer <- ersUtil.fetchPartFromTrusteeDetailsList[A](index, requestObject.getSchemeReference)
     } yield {
@@ -71,10 +71,11 @@ trait TrusteeBaseController[A] extends FrontendController with I18nSupport with 
         }
         Ok(view(requestObject, groupSchemeActivity.groupScheme.getOrElse(ersUtil.DEFAULT), index, preparedForm, edit))
       }
-    ) recover {
-      case e: Exception =>
+    ) match {
+      case Success(res) => res
+      case Failure(e) =>
         logger.error(s"[${this.getClass.getSimpleName}][showQuestionPage] Get data from cache failed with exception ${e.getMessage}")
-        getGlobalErrorPage
+        Future.successful(getGlobalErrorPage)
     }
   }
 
