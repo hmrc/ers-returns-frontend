@@ -31,7 +31,6 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.ERSUtil
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success, Try}
 
 trait TrusteeBaseController[A] extends FrontendController with I18nSupport with Logging {
 
@@ -48,7 +47,7 @@ trait TrusteeBaseController[A] extends FrontendController with I18nSupport with 
 
   def form(implicit request: Request[AnyContent]): Form[A]
 
-  def view(requestObject: RequestObject, groupSchemeActivity: String, index: Int, form: Form[A], edit: Boolean = false)
+  def view(requestObject: RequestObject, index: Int, form: Form[A], edit: Boolean = false)
           (implicit request: Request[AnyContent], hc: HeaderCarrier): Html
 
 
@@ -61,21 +60,16 @@ trait TrusteeBaseController[A] extends FrontendController with I18nSupport with 
 
   def showQuestionPage(requestObject: RequestObject, index: Int, edit: Boolean = false)
                       (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
-    Try(for {
-        groupSchemeActivity <- ersUtil.fetch[GroupSchemeInfo](ersUtil.GROUP_SCHEME_CACHE_CONTROLLER, requestObject.getSchemeReference)
-        previousAnswer <- ersUtil.fetchPartFromTrusteeDetailsList[A](index, requestObject.getSchemeReference)
-    } yield {
-        val preparedForm = if (previousAnswer.isDefined) form.fill(previousAnswer.get) else form
-        if (previousAnswer.isDefined) {
-          logger.error(s"\n\n[${this.getClass.getSimpleName}][showQuestionPage] Here's the answers we pulled from the cache innit: \n\n Prev answer: ${previousAnswer.get}\n")// TODO Remove before merge innit
-        }
-        Ok(view(requestObject, groupSchemeActivity.groupScheme.getOrElse(ersUtil.DEFAULT), index, preparedForm, edit))
+    ersUtil.fetchPartFromTrusteeDetailsList[A](index, requestObject.getSchemeReference).map { previousAnswer: Option[A] =>
+      val preparedForm = if (previousAnswer.isDefined) form.fill(previousAnswer.get) else form
+      if (previousAnswer.isDefined) {
+        logger.error(s"\n\n[${this.getClass.getSimpleName}][showQuestionPage] Here's the answers we pulled from the cache innit: \n\n Prev answer: ${previousAnswer.get}\n") // TODO Remove before merge innit
       }
-    ) match {
-      case Success(res) => res
-      case Failure(e) =>
+      Ok(view(requestObject, index, preparedForm, edit))
+    } recover {
+      case e: Throwable =>
         logger.error(s"[${this.getClass.getSimpleName}][showQuestionPage] Get data from cache failed with exception ${e.getMessage}")
-        Future.successful(getGlobalErrorPage)
+        getGlobalErrorPage
     }
   }
 
@@ -90,14 +84,7 @@ trait TrusteeBaseController[A] extends FrontendController with I18nSupport with 
                           (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
     form.bindFromRequest().fold(
       errors => {
-        ersUtil.fetch[GroupSchemeInfo](ersUtil.GROUP_SCHEME_CACHE_CONTROLLER, requestObject.getSchemeReference).map { groupSchemeActivity =>
-          Ok(view(requestObject, groupSchemeActivity.groupScheme.getOrElse(ersUtil.DEFAULT), index, errors))
-        } recover {
-          case e: Exception =>
-            logger.error(s"[${this.getClass.getSimpleName}][handleQuestionSubmit] Get data from cache failed with exception ${e.getMessage}, " +
-              s"timestamp: ${System.currentTimeMillis()}.")
-            getGlobalErrorPage
-        }
+          Future.successful(Ok(view(requestObject, index, errors)))
       },
       result => {
         ersUtil.cache[A](cacheKey, result, requestObject.getSchemeReference).flatMap { _ =>
