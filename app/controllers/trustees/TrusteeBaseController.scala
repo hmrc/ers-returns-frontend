@@ -84,7 +84,7 @@ trait TrusteeBaseController[A] extends FrontendController with I18nSupport with 
                           (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
     form.bindFromRequest().fold(
       errors => {
-          Future.successful(Ok(view(requestObject, index, errors)))
+          Future.successful(BadRequest(view(requestObject, index, errors)))
       },
       result => {
         ersUtil.cache[A](cacheKey, result, requestObject.getSchemeReference).flatMap { _ =>

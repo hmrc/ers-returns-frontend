@@ -175,7 +175,8 @@ object RsFormMappings {
  */
 
   def trusteeAddressOverseasForm()(implicit messages: Messages): Form[TrusteeAddressOverseas] = Form(mapping(
-    trusteeAddressOverseasFields.addressLine1 -> text.verifying(Messages("ers_trustee_details.err.summary.address_line1_required"), _.nonEmpty)
+    trusteeAddressOverseasFields.addressLine1 -> text
+      .verifying(Messages("ers_trustee_details.err.summary.address_line1_required"), _.nonEmpty)
       .verifying(Messages("ers_trustee_details.err.address_line1"), so => checkAddressLength(so, "trusteeDetailsFields.addressLine1"))
       .verifying(Messages("ers_trustee_details.err.invalidChars.address_line1"), so => validInputCharacters(so, addresssRegx)),
     trusteeAddressOverseasFields.addressLine2 -> optional(text
@@ -195,7 +196,8 @@ object RsFormMappings {
   )(TrusteeAddressOverseas.apply)(TrusteeAddressOverseas.unapply))
 
   def trusteeAddressUkForm()(implicit messages: Messages): Form[TrusteeAddressUk] = Form(mapping(
-    trusteeAddressFields.addressLine1 -> text.verifying(Messages("ers_trustee_details.err.summary.address_line1_required"), _.nonEmpty)
+    trusteeAddressFields.addressLine1 -> text
+      .verifying(Messages("ers_trustee_details.err.summary.address_line1_required"), _.nonEmpty)
       .verifying(Messages("ers_trustee_details.err.address_line1"), so => checkAddressLength(so, "trusteeDetailsFields.addressLine1"))
       .verifying(Messages("ers_trustee_details.err.invalidChars.address_line1"), so => validInputCharacters(so, addresssRegx)),
     trusteeAddressFields.addressLine2 -> optional(text
