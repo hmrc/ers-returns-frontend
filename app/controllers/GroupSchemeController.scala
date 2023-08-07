@@ -42,7 +42,7 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
 																			implicit val appConfig: ApplicationConfig,
                                       globalErrorView: views.html.global_error,
                                       groupView: views.html.group,
-                                      manualCompanyDetailsView: views.html.manual_company_details_summary,
+                                      manualCompanyDetailsView: views.html.manual_company_details_summary_page,
                                       groupPlanSummaryView: views.html.group_plan_summary,
                                       authAction: AuthAction
 																		 ) extends FrontendController(mcc) with I18nSupport with WithUnsafeDefaultFormBinding with Logging {
