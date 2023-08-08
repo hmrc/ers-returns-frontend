@@ -4,13 +4,13 @@ import sbt.*
 
 object AppDependencies {
 
-  val pdfboxVersion = "2.0.28"
+  val pdfboxVersion = "2.0.29"
   val openHtmlVersion = "1.0.10"
-  val bootstrapVersion = "7.15.0"
+  val bootstrapVersion = "7.21.0"
 
   val compile: Seq[ModuleID] = Seq(guice, ws,
     "uk.gov.hmrc"                   %% "bootstrap-frontend-play-28" % bootstrapVersion,
-    "uk.gov.hmrc"                   %% "play-frontend-hmrc"         % "6.6.0-play-28",
+    "uk.gov.hmrc"                   %% "play-frontend-hmrc"         % "7.17.0-play-28",
     "uk.gov.hmrc"                   %% "play-partials"              % "8.4.0-play-28",
     "uk.gov.hmrc"                   %% "domain"                     % "8.3.0-play-28",
     "uk.gov.hmrc"                   %% "http-caching-client"        % "10.0.0-play-28",

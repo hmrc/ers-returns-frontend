@@ -71,6 +71,5 @@
     serviceUrl = Some(controllers.routes.ReturnServiceController.startPage().url),
     signOutUrl = if(!disableSignOut) Some(applicationConfig.signOut) else None,
     userResearchBannerUrl = if(isUserResearchBannerVisible) Some(applicationConfig.urBannerLink) else None,
-    additionalScriptsBlock = Some(hmrcScripts(nonce = CSPNonce.get, scriptsBlock = Some(scripts))),
-    nonce = CSPNonce.get
+    additionalScriptsBlock = Some(hmrcScripts(scriptsBlock = Some(scripts)))
 )(content)
