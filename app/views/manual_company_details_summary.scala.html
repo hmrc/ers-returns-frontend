@@ -76,7 +76,7 @@
   classes = "govuk-!-width-one-quarter",
    items = Seq(
     ActionItem(
-       href = controllers.subsidiaries.routes.IsCompanyUkController.editCompany(index).url
+       href = controllers.subsidiaries.routes.IsCompanyUkController.editCompany(index).url,
        content = Text(messages("ers.change_this")),
        visuallyHiddenText = Some(messages("ers.change_this"))
       )
@@ -85,28 +85,28 @@
    )
  )
  val addressSummary = Seq(
- SummaryListRow(
- key = Key(
- content = Text(messages("ers_group_summary.address"))
- ),
- value = Value(
- content = Text(ersUtil.buildAddressSummary(company))
- ),
- actions = Some(Actions(
- classes = "govuk-!-width-one-quarter",
- items = Seq(
- ActionItem(
- href = if(company.country.getOrElse("") == "UK"){
- controllers.subsidiaries.routes.CompanyAddressUkController.editCompany(index).url
- } else {
- controllers.subsidiaries.routes.CompanyAddressOverseasController.editCompany(index).url
- },
- content = Text(messages("ers.change_this")),
- visuallyHiddenText = Some(messages("ers.change_this"))
- )
- )
- ))
- )
+   SummaryListRow(
+    key = Key(
+      content = Text(messages("ers_group_summary.address"))
+     ),
+      value = Value(
+      content = Text(ersUtil.buildAddressSummary(company))
+     ),
+    actions = Some(Actions(
+     classes = "govuk-!-width-one-quarter",
+      items = Seq(
+       ActionItem(
+        href = if(company.country.getOrElse("") == "UK"){
+         controllers.subsidiaries.routes.CompanyAddressUkController.editCompany(index).url
+        } else {
+         controllers.subsidiaries.routes.CompanyAddressOverseasController.editCompany(index).url
+        },
+        content = Text(messages("ers.change_this")),
+        visuallyHiddenText = Some(messages("ers.change_this"))
+       )
+      )
+     ))
+   )
  )
 
  companyNameSummary ++ companyLocationSummary ++ addressSummary
@@ -118,11 +118,11 @@
  @reference(requestObject.getPageTitle)
 
  @govukBackLink(BackLink(
- attributes = Map("id" -> "back-link"), classes="js-enabled", content = HtmlContent(messages("ers.back"))
+  attributes = Map("id" -> "back-link"), classes="js-enabled", content = HtmlContent(messages("ers.back"))
  ))
 
  @hmrcPageHeading(PageHeading(
- text = messages("ers_company_summary.page_title")
+  text = messages("ers_company_summary.page_title")
  ))
 
  @formWithCSRF(action = routes.GroupSchemeController.companySummaryContinue()) {
@@ -130,25 +130,25 @@
  @for((company, index) <- companies.companies.zipWithIndex) {
 
  @govukSummaryList(SummaryList(
- rows = summaryBuilder(company, index)
+  rows = summaryBuilder(company, index)
  ))
 
  <p class="govuk-body govuk-!-margin-bottom-8 govuk-link">
      <a class="govuk-link" href="">
-         <input class="govuk-link link_button" type="submit" formaction="@routes.GroupSchemeController.deleteCompany(id)"
+         <input class="govuk-link link_button" type="submit" formaction="@routes.GroupSchemeController.deleteCompany(index)"
                 value='@{messages("ers.delete") + " " + company.companyName}'>
      </a>
  </p>
  }
 
  <a class="govuk-link govuk-inset-text govuk-!-display-inline-block govuk-!-margin-top-0 govuk-!-width-full"
-    href="@controllers.subsidiaries.routes.IsCompanyUKController.questionPage(int)">@Html(messages("ers_company_summary.add_company"))</a>
+    href="@controllers.subsidiaries.routes.IsCompanyUkController.questionPage()">@Html(messages("ers_company_summary.add_company"))</a>
 
  @govukButton(Button(
- inputType = Some("submit"),
- content = Text(messages("ers.continue")),
- attributes = Map("id" -> "continue"),
- disabled = companies.companies.isEmpty
- ))
- }
+   inputType = Some("submit"),
+   content = Text(messages("ers.continue")),
+   attributes = Map("id" -> "continue"),
+   disabled = companies.companies.isEmpty
+   ))
+  }
  }
