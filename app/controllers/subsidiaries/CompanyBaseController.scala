@@ -80,11 +80,11 @@ trait CompanyBaseController[A] extends FrontendController with I18nSupport with 
   def questionSubmit(index: Int, edit: Boolean = false): Action[AnyContent] = authAction.async {
     implicit request =>
       ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
-        showQuestionSubmit(requestObject, index, edit)(request, hc)
+        submissionHandler(requestObject, index, edit)(request, hc)
       }
   }
 
-  def showQuestionSubmit(requestObject: RequestObject, index: Int, edit: Boolean = false)
+  def submissionHandler(requestObject: RequestObject, index: Int, edit: Boolean = false)
                         (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
     form.bindFromRequest().fold(
       errors => {logger.error(errors.errors.mkString)
@@ -103,6 +103,13 @@ trait CompanyBaseController[A] extends FrontendController with I18nSupport with 
       ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
         showQuestionPage(requestObject, index, edit)(request, hc)
 
+      }
+  }
+
+  def editQuestionSubmit(index: Int): Action[AnyContent] = authAction.async {
+    implicit request =>
+      ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
+        submissionHandler(requestObject, index, edit = true)(request, hc)
       }
   }
 
