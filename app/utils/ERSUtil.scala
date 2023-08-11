@@ -96,10 +96,10 @@ class ERSUtil @Inject()(val sessionService: SessionService,
 	val SUBSIDIARY_BASED:  String = "subsidiary-based"
 	val COMPANIES_CACHE: String = "companies"
 
-	def cache[T](key:String, body:T)(implicit hc:HeaderCarrier, ec:ExecutionContext, formats: json.Format[T], request: Request[AnyRef]): Future[CacheMap] =
+	def cache[T](key: String, body: T)(implicit hc: HeaderCarrier, ec: ExecutionContext, formats: json.Format[T]): Future[CacheMap] =
 		shortLivedCache.cache[T](getCacheId, key, body)
 
-	def cache[T](key: String, body: T, cacheId: String)(implicit hc: HeaderCarrier, formats: json.Format[T], request: Request[AnyRef]): Future[CacheMap] = {
+	def cache[T](key: String, body: T, cacheId: String)(implicit hc: HeaderCarrier, formats: json.Format[T]): Future[CacheMap] = {
 		logger.info(s"[ERSUtil][cache]cache saving key:$key, cacheId:$cacheId")
 		shortLivedCache.cache[T](cacheId, key, body)
 	}
@@ -111,8 +111,7 @@ class ERSUtil @Inject()(val sessionService: SessionService,
 		shortLivedCache.fetchAndGetEntry[JsValue](getCacheId, key).map{ res =>
 			res.get.as[T]
 		}recover{
-			case e: NoSuchElementException =>
-				logger.warn(s"[ERSUtil][fetch] fetch failed to get key $key with exception $e, timestamp: ${System.currentTimeMillis()}.")
+			case _: NoSuchElementException =>
 				throw new NoSuchElementException
 			case _ : Throwable =>
 				logger.error(s"[ERSUtil][fetch] fetch failed to get key $key for $getCacheId with exception, timestamp: ${System.currentTimeMillis()}.")
@@ -126,8 +125,7 @@ class ERSUtil @Inject()(val sessionService: SessionService,
 			cacheTimeFetch(System.currentTimeMillis() - startTime, TimeUnit.MILLISECONDS)
 			res.get.as[T]
 		} recover {
-			case e: NoSuchElementException =>
-				logger.warn(s"[ERSUtil][fetch] fetch(with 2 params) failed to get key [$key] for cacheId: [$cacheId] with exception $e, timestamp: ${System.currentTimeMillis()}.")
+			case _: NoSuchElementException =>
 				throw new NoSuchElementException
 			case er : Throwable =>
 				logger.error(s"[ERSUtil][fetch] fetch(with 2 params) failed to get key [$key] for cacheId: [$cacheId] with exception ${er.getMessage}, " +
