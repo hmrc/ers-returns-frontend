@@ -83,8 +83,8 @@ class ReturnServiceControllerSpec extends AnyWordSpecLike
 
     when(mockHttp.POST[ValidatorData, HttpResponse](any(), any(), any())(any(), any(), any(), any()))
 			.thenReturn(Future.successful(HttpResponse(OK, "")))
-		when(mockErsUtil.cache(any(), any())(any(), any(), any(), any())).thenReturn(cacheResponse)
-		when(mockErsUtil.cache(any(), any(),any())(any(), any(), any())).thenReturn(cacheResponse)
+		when(mockErsUtil.cache(any(), any())(any(), any(), any())).thenReturn(cacheResponse)
+		when(mockErsUtil.cache(any(), any(),any())(any(), any())).thenReturn(cacheResponse)
 		when(mockErsUtil.fetch[RequestObject](any(), any())(any(), any())).thenReturn(Future.successful(rscAsRequestObject))
   }
 

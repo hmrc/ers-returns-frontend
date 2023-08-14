@@ -201,7 +201,7 @@ class SchemeOrganiserControllerSpec extends AnyWordSpecLike
           Future.failed(new NoSuchElementException)
         }
       )
-      when(mockErsUtil.cache(refEq(SCHEME_ORGANISER_CACHE), any(), any())(any(), any(), any())).thenReturn(
+      when(mockErsUtil.cache(refEq(SCHEME_ORGANISER_CACHE), any(), any())(any(), any())).thenReturn(
         if (schemeOrganiserDataCachedOk) {
           Future.successful(null)
         } else {

@@ -104,7 +104,7 @@ class SummaryDeclarationControllerSpec extends AnyWordSpecLike
 
 	class TestErsUtil(fetchAllMapVal: String) extends ERSUtil(mockSessionCache, mockShortLivedCache, mockAppConfig){
 
-		override def cache[T](key: String, body: T, cacheId: String)
+		def cache[T](key: String, body: T, cacheId: String)
 												 (implicit hc: HeaderCarrier, formats: json.Format[T], request: Request[AnyRef]): Future[CacheMap] = {
 			Future.successful(CacheMap("fakeId", Map()))
 		}

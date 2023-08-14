@@ -203,7 +203,7 @@ class CheckCsvFilesControllerSpec extends AnyWordSpecLike
       ) thenReturn Future.successful(ersRequestObject)
 
       when(
-        mockErsUtil.cache(anyString(), any[UpscanCsvFilesCallbackList](), anyString())(any(), any(), any())
+        mockErsUtil.cache(anyString(), any[UpscanCsvFilesCallbackList](), anyString())(any(), any())
       ) thenReturn Future.successful(mock[CacheMap])
 
 			when(mockErsUtil.ersRequestObject).thenReturn("ErsRequestObject")
@@ -222,7 +222,7 @@ class CheckCsvFilesControllerSpec extends AnyWordSpecLike
       ) thenReturn Future.successful(ersRequestObject)
 
       when(
-        mockErsUtil.cache(anyString(), any[UpscanCsvFilesCallbackList](), anyString())(any(), any(), any())
+        mockErsUtil.cache(anyString(), any[UpscanCsvFilesCallbackList](), anyString())(any(), any())
       ) thenReturn Future.failed(new RuntimeException)
 
 			when(mockErsUtil.ersRequestObject).thenReturn("ErsRequestObject")
@@ -240,7 +240,7 @@ class CheckCsvFilesControllerSpec extends AnyWordSpecLike
       ) thenReturn Future.failed(new Exception)
 
       when(
-        mockErsUtil.cache(anyString(), any[UpscanCsvFilesCallbackList](), anyString())(any(), any(), any())
+        mockErsUtil.cache(anyString(), any[UpscanCsvFilesCallbackList](), anyString())(any(), any())
       ) thenReturn Future.successful(mock[CacheMap])
 
 			when(mockErsUtil.ersRequestObject).thenReturn("ErsRequestObject")

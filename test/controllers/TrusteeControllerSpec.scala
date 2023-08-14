@@ -84,7 +84,7 @@ class TrusteeControllerSpec extends AnyWordSpecLike
       when(mockErsUtil.fetch[TrusteeDetailsList](matches(mockErsUtil.TRUSTEES_CACHE), any())(any(), any())
 			) thenReturn trusteeDetailsRes
 
-      when(mockErsUtil.cache(matches(mockErsUtil.TRUSTEES_CACHE), any(), any())(any(), any(), any())
+      when(mockErsUtil.cache(matches(mockErsUtil.TRUSTEES_CACHE), any(), any())(any(), any())
       ) thenReturn cacheRes
     }
 
@@ -254,7 +254,7 @@ class TrusteeControllerSpec extends AnyWordSpecLike
       ) thenReturn trusteeDetailsRes
 
       when(
-        mockErsUtil.cache(refEq(mockErsUtil.TRUSTEES_CACHE), any(), any())(any(), any(), any())
+        mockErsUtil.cache(refEq(mockErsUtil.TRUSTEES_CACHE), any(), any())(any(), any())
       ) thenReturn cacheRes
 
       when(
@@ -309,7 +309,7 @@ class TrusteeControllerSpec extends AnyWordSpecLike
       status(result) shouldBe Status.SEE_OTHER
 
       verify(mockErsUtil, times(1))
-        .cache(meq("trustees"), meq(TrusteeDetailsList(expected)), meq(ersRequestObject.getSchemeReference))(any(), any(), any())
+        .cache(meq("trustees"), meq(TrusteeDetailsList(expected)), meq(ersRequestObject.getSchemeReference))(any(), any())
     }
 
   }
@@ -334,7 +334,7 @@ class TrusteeControllerSpec extends AnyWordSpecLike
         mockErsUtil.fetch[TrusteeDetailsList](refEq(mockErsUtil.TRUSTEES_CACHE), anyString())(any(), any())
       ) thenReturn trusteeDetailsRes
       when(
-        mockErsUtil.cache(refEq(mockErsUtil.TRUSTEES_CACHE), anyString(), anyString())(any(), any(), any())
+        mockErsUtil.cache(refEq(mockErsUtil.TRUSTEES_CACHE), anyString(), anyString())(any(), any())
       ) thenReturn cacheRes
 
       when(
@@ -487,7 +487,7 @@ class TrusteeControllerSpec extends AnyWordSpecLike
       ) thenReturn trusteeDetailsRes
 
       when(
-        mockErsUtil.cache(refEq(mockErsUtil.TRUSTEES_CACHE), anyString(), anyString())(any(), any(), any())
+        mockErsUtil.cache(refEq(mockErsUtil.TRUSTEES_CACHE), anyString(), anyString())(any(), any())
       ) thenReturn cacheRes
 
       when(

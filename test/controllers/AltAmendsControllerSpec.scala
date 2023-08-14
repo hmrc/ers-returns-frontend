@@ -84,7 +84,7 @@ class AltAmendsControllerSpec extends AnyWordSpecLike
 
       when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any())).thenReturn(requestObject)
 
-      when(mockErsUtil.cache(ArgumentMatchers.eq("alt-activity"), any(), any())(any(), any(), any()))
+      when(mockErsUtil.cache(ArgumentMatchers.eq("alt-activity"), any(), any())(any(), any()))
 				.thenReturn(cache)
 
       when(mockErsUtil.getPageElement(any(), any(), any(), any())(any())).thenCallRealMethod()
@@ -235,7 +235,7 @@ class AltAmendsControllerSpec extends AnyWordSpecLike
 				.thenReturn(requestObject)
       when(mockErsUtil.fetchOption[AltAmends](refEq("alt-amends-cache-controller"), any())(any(), any()))
 				.thenReturn(altAmends)
-      when(mockErsUtil.cache(refEq("alt-amends-cache-controller"), any(), any())(any(), any(), any()))
+      when(mockErsUtil.cache(refEq("alt-amends-cache-controller"), any(), any())(any(), any()))
 				.thenReturn(cache)
 			when(mockErsUtil.getPageElement(any(), any(),any(), any())(any())).thenReturn("")
     }
