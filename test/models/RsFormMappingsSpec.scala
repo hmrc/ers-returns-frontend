@@ -172,7 +172,7 @@ class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPer
         companyDetailsFields.addressLine1 -> "Address Line 1",
         companyDetailsFields.addressLine2 -> "Address Line 2",
         companyDetailsFields.addressLine3 -> "Address Line 3",
-        companyDetailsFields.addressLine4 -> randomString(19)
+        companyDetailsFields.addressLine4 -> randomString(30)
       )
       val validatedForm = companyDetailsForm.bind(postData, Form.FromJsonMaxChars)
       assert(validatedForm.errors.head.key == companyDetailsFields.addressLine4)
