@@ -31,37 +31,52 @@ import scala.concurrent.Future
 
 trait AuthHelper extends MockitoSugar {
 
-	type RetrievalType = Enrolments ~ Option[AffinityGroup]
-	lazy val mockAuthConnector: DefaultAuthConnector = mock[DefaultAuthConnector]
-	val agentOnlyEnrolmentSet: Set[Enrolment] = Set(Enrolment("HMRC-AGENT-AGENT", Seq(EnrolmentIdentifier("AgentRefNumber", "JARN1234567")), "activated"))
-	val invalidEnrolmentSet: Set[Enrolment] = Set(Enrolment("HMRC-TEST-ORG", Seq(EnrolmentIdentifier("TestRefNumber", "XN1200000100001")), "activated"))
-	val ersEnrolmentSet: Set[Enrolment] = Set(Enrolment("IR-PAYE", Seq(EnrolmentIdentifier("TaxOfficeNumber", "123"), EnrolmentIdentifier("TaxOfficeReference", "4567890")), "activated"))
+  type RetrievalType = Enrolments ~ Option[AffinityGroup]
+  lazy val mockAuthConnector: DefaultAuthConnector = mock[DefaultAuthConnector]
+  val agentOnlyEnrolmentSet: Set[Enrolment]        = Set(
+    Enrolment("HMRC-AGENT-AGENT", Seq(EnrolmentIdentifier("AgentRefNumber", "JARN1234567")), "activated")
+  )
+  val invalidEnrolmentSet: Set[Enrolment]          = Set(
+    Enrolment("HMRC-TEST-ORG", Seq(EnrolmentIdentifier("TestRefNumber", "XN1200000100001")), "activated")
+  )
+  val ersEnrolmentSet: Set[Enrolment]              = Set(
+    Enrolment(
+      "IR-PAYE",
+      Seq(EnrolmentIdentifier("TaxOfficeNumber", "123"), EnrolmentIdentifier("TaxOfficeReference", "4567890")),
+      "activated"
+    )
+  )
 
-	def buildERSAuthData(enrolmentSet: Set[Enrolment],
-											 affGroup: Option[AffinityGroup] = None,
-											 testEmpRef: EmpRef = EmpRef("", "")
-											): ERSAuthData =  {
-		ERSAuthData(enrolments = enrolmentSet, affinityGroup = affGroup, empRef = testEmpRef)
-	}
+  def buildERSAuthData(
+    enrolmentSet: Set[Enrolment],
+    affGroup: Option[AffinityGroup] = None,
+    testEmpRef: EmpRef = EmpRef("", "")
+  ): ERSAuthData =
+    ERSAuthData(enrolments = enrolmentSet, affinityGroup = affGroup, empRef = testEmpRef)
 
-	def buildRetrieval(ersAuthData: ERSAuthData): RetrievalType = {
-		new ~(
-			Enrolments(ersAuthData.enrolments),
-			ersAuthData.affinityGroup
-		)
-	}
+  def buildRetrieval(ersAuthData: ERSAuthData): RetrievalType =
+    new ~(
+      Enrolments(ersAuthData.enrolments),
+      ersAuthData.affinityGroup
+    )
 
-	val defaultErsAuthData: ERSAuthData = buildERSAuthData(ersEnrolmentSet, Some(Organisation), EmpRef("123", "ABCDE"))
+  val defaultErsAuthData: ERSAuthData = buildERSAuthData(ersEnrolmentSet, Some(Organisation), EmpRef("123", "ABCDE"))
 
-	def setAuthMocks(): OngoingStubbing[Future[RetrievalType]] = {
-		when(mockAuthConnector
-			.authorise[RetrievalType](ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any())
-		) thenReturn Future.successful(buildRetrieval(defaultErsAuthData))
-	}
+  def setAuthMocks(): OngoingStubbing[Future[RetrievalType]] =
+    when(
+      mockAuthConnector
+        .authorise[RetrievalType](ArgumentMatchers.any(), ArgumentMatchers.any())(
+          ArgumentMatchers.any(),
+          ArgumentMatchers.any()
+        )
+    ) thenReturn Future.successful(buildRetrieval(defaultErsAuthData))
 
-	def setUnauthorisedMocks(): OngoingStubbing[Future[RetrievalType]] = {
-		when(mockAuthConnector
-			.authorise[RetrievalType](ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any())
-		) thenReturn Future.failed(MissingBearerToken("No authenticated bearer token"))
-	}
+  def setUnauthorisedMocks(): OngoingStubbing[Future[RetrievalType]] =
+    when(
+      mockAuthConnector
+        .authorise[RetrievalType](ArgumentMatchers.any(), ArgumentMatchers.any())(
+          ArgumentMatchers.any(),
+          ArgumentMatchers.any()
+        )
+    ) thenReturn Future.failed(MissingBearerToken("No authenticated bearer token"))
 }

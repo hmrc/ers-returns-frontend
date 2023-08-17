@@ -23,7 +23,7 @@ import org.scalatestplus.mockito.MockitoSugar
 import play.api.i18n.Messages
 import utils.Fixtures
 
-class GroupSummaryDecoratorSpec extends AnyWordSpecLike with Matchers with OptionValues with MockitoSugar  {
+class GroupSummaryDecoratorSpec extends AnyWordSpecLike with Matchers with OptionValues with MockitoSugar {
 
   implicit val messages: Messages = mock[Messages]
 
@@ -42,9 +42,9 @@ class GroupSummaryDecoratorSpec extends AnyWordSpecLike with Matchers with Optio
 
       val output = decorator.decorate
 
-      output.contains("title") shouldBe true
+      output.contains("title")       shouldBe true
       output.contains("testCompany") shouldBe true
-      output.contains("<hr/>") shouldBe true
-     }
-   }
+      output.contains("<hr/>")       shouldBe true
+    }
+  }
 }

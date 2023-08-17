@@ -32,7 +32,7 @@ import views.html.{not_authorised, signedOut, unauthorised}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class ApplicationControllerSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPerSuite{
+class ApplicationControllerSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPerSuite {
 
   val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
     messagesActionBuilder,
@@ -46,18 +46,30 @@ class ApplicationControllerSpec extends PlaySpec with ErsTestHelper with GuiceOn
 
   implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
 
-  implicit lazy val materializer: Materializer = app.materializer
-  val unauthorisedView: unauthorised = app.injector.instanceOf[unauthorised]
-  val signedOutView: signedOut = app.injector.instanceOf[signedOut]
+  implicit lazy val materializer: Materializer     = app.materializer
+  val unauthorisedView: unauthorised               = app.injector.instanceOf[unauthorised]
+  val signedOutView: signedOut                     = app.injector.instanceOf[signedOut]
   val notAuthorisedView: views.html.not_authorised = app.injector.instanceOf[not_authorised]
 
-  override val testAuthActionGov: AuthActionGovGateway = new AuthActionGovGateway(mockAuthConnector, mockAppConfig, mockErsUtil, defaultParser)(ec) {
-    override def invokeBlock[A](request: Request[A], block: RequestWithOptionalAuthContext[A] => Future[Result]): Future[Result] = {
-      block(RequestWithOptionalAuthContext(request, defaultErsAuthData))
+  override val testAuthActionGov: AuthActionGovGateway =
+    new AuthActionGovGateway(mockAuthConnector, mockAppConfig, mockErsUtil, defaultParser)(ec) {
+      override def invokeBlock[A](
+        request: Request[A],
+        block: RequestWithOptionalAuthContext[A] => Future[Result]
+      ): Future[Result] =
+        block(RequestWithOptionalAuthContext(request, defaultErsAuthData))
     }
-  }
 
-	val testController = new ApplicationController(mockMCC, mockAuthConnector, mockErsUtil, mockAppConfig, unauthorisedView, signedOutView, notAuthorisedView, testAuthActionGov)
+  val testController = new ApplicationController(
+    mockMCC,
+    mockAuthConnector,
+    mockErsUtil,
+    mockAppConfig,
+    unauthorisedView,
+    signedOutView,
+    notAuthorisedView,
+    testAuthActionGov
+  )
 
   "ApplicationController" must {
 

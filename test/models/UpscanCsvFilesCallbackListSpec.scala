@@ -24,7 +24,7 @@ import utils.UpscanData
 class UpscanCsvFilesCallbackListSpec extends AnyWordSpecLike with Matchers with OptionValues with UpscanData {
   "areAllFilesComplete" should {
     "return true for failed or successful uploads" in {
-      failedCsvList.areAllFilesComplete() shouldBe true
+      failedCsvList.areAllFilesComplete()     shouldBe true
       successfulCsvList.areAllFilesComplete() shouldBe true
     }
 

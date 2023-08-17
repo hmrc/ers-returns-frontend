@@ -32,20 +32,25 @@ import uk.gov.hmrc.http.{HeaderCarrier, SessionId}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class SessionServiceSpec extends PlaySpec with GuiceOneAppPerSuite with ScalaFutures with MockitoSugar  {
+class SessionServiceSpec extends PlaySpec with GuiceOneAppPerSuite with ScalaFutures with MockitoSugar {
 
   val mockSessionCache: ERSFileValidatorSessionCache = mock[ERSFileValidatorSessionCache]
-	val testSessionService = new SessionService(mockSessionCache)
+  val testSessionService                             = new SessionService(mockSessionCache)
 
-  val sessionId = "sessionId"
+  val sessionId                             = "sessionId"
   implicit val request: Request[AnyContent] = FakeRequest()
-  implicit val hc: HeaderCarrier = HeaderCarrier().copy(sessionId = Some(SessionId(sessionId)))
+  implicit val hc: HeaderCarrier            = HeaderCarrier().copy(sessionId = Some(SessionId(sessionId)))
 
   "createCallbackRecord" must {
     "return Unit value" when {
       "cache is successfull" in {
-        when(mockSessionCache.cache[UploadStatus](meq(testSessionService.CALLBACK_DATA_KEY), meq(NotStarted))
-          (any(), any[HeaderCarrier], any()))
+        when(
+          mockSessionCache.cache[UploadStatus](meq(testSessionService.CALLBACK_DATA_KEY), meq(NotStarted))(
+            any(),
+            any[HeaderCarrier],
+            any()
+          )
+        )
           .thenReturn(Future.successful(CacheMap("sessionValue", Map())))
         noException should be thrownBy testSessionService.createCallbackRecord.futureValue
       }
@@ -53,10 +58,15 @@ class SessionServiceSpec extends PlaySpec with GuiceOneAppPerSuite with ScalaFut
 
     "throw an exception" when {
       "caching fails" in {
-        when(mockSessionCache.cache[UploadStatus](meq(testSessionService.CALLBACK_DATA_KEY), meq(NotStarted))
-          (any(), any[HeaderCarrier], any()))
+        when(
+          mockSessionCache.cache[UploadStatus](meq(testSessionService.CALLBACK_DATA_KEY), meq(NotStarted))(
+            any(),
+            any[HeaderCarrier],
+            any()
+          )
+        )
           .thenReturn(Future.failed(new Exception("Expected exception")))
-        an [Exception] should be thrownBy testSessionService.createCallbackRecord.futureValue
+        an[Exception] should be thrownBy testSessionService.createCallbackRecord.futureValue
       }
     }
   }
@@ -65,12 +75,17 @@ class SessionServiceSpec extends PlaySpec with GuiceOneAppPerSuite with ScalaFut
     "return successful future" when {
       "cache is successful" in {
         val defaultSource = "defaultSource"
-        val sessionId = "SessionId"
-        val uploadStatus = InProgress
+        val sessionId     = "SessionId"
+        val uploadStatus  = InProgress
         when(mockSessionCache.defaultSource).thenReturn(defaultSource)
-        when(mockSessionCache.cache(meq(defaultSource), meq(sessionId), meq(testSessionService.CALLBACK_DATA_KEY), meq(uploadStatus))(
-          any(), any(), any()
-        )).thenReturn(Future.successful(CacheMap("sessionValue", Map())))
+        when(
+          mockSessionCache
+            .cache(meq(defaultSource), meq(sessionId), meq(testSessionService.CALLBACK_DATA_KEY), meq(uploadStatus))(
+              any(),
+              any(),
+              any()
+            )
+        ).thenReturn(Future.successful(CacheMap("sessionValue", Map())))
         noException should be thrownBy testSessionService.updateCallbackRecord(sessionId, uploadStatus).futureValue
       }
     }
@@ -78,13 +93,18 @@ class SessionServiceSpec extends PlaySpec with GuiceOneAppPerSuite with ScalaFut
     "throw an exception" when {
       "cache fails" in {
         val defaultSource = "defaultSource"
-        val sessionId = "SessionId"
-        val uploadStatus = Failed
+        val sessionId     = "SessionId"
+        val uploadStatus  = Failed
         when(mockSessionCache.defaultSource).thenReturn(defaultSource)
-        when(mockSessionCache.cache(meq(defaultSource), meq(sessionId), meq(testSessionService.CALLBACK_DATA_KEY), meq(uploadStatus))(
-          any(), any(), any()
-        )).thenReturn(Future.failed(new Exception("Expected Exception")))
-        an [Exception] should be thrownBy testSessionService.updateCallbackRecord(sessionId, uploadStatus).futureValue
+        when(
+          mockSessionCache
+            .cache(meq(defaultSource), meq(sessionId), meq(testSessionService.CALLBACK_DATA_KEY), meq(uploadStatus))(
+              any(),
+              any(),
+              any()
+            )
+        ).thenReturn(Future.failed(new Exception("Expected Exception")))
+        an[Exception] should be thrownBy testSessionService.updateCallbackRecord(sessionId, uploadStatus).futureValue
       }
     }
   }

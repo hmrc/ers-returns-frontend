@@ -33,15 +33,23 @@ import utils.WireMockHelper
 
 import scala.concurrent.duration.SECONDS
 
-class UpscanConnectorSpec extends AnyWordSpecLike with Matchers with OptionValues with GuiceOneAppPerSuite with MockitoSugar with WireMockHelper {
+class UpscanConnectorSpec
+    extends AnyWordSpecLike
+    with Matchers
+    with OptionValues
+    with GuiceOneAppPerSuite
+    with MockitoSugar
+    with WireMockHelper {
 
-	lazy val connector: UpscanConnector = app.injector.instanceOf[UpscanConnector]
-	implicit val hc: HeaderCarrier = HeaderCarrier()
-	val request: UpscanInitiateRequest = UpscanInitiateRequest("callbackUrl", "successRedirectUrl", "errorRedirectUrl", 1, 104857600)
-	override def fakeApplication(): Application = new GuiceApplicationBuilder()
-		.configure(
-			"microservice.services.upscan.port" -> server.port()
-		).build()
+  lazy val connector: UpscanConnector         = app.injector.instanceOf[UpscanConnector]
+  implicit val hc: HeaderCarrier              = HeaderCarrier()
+  val request: UpscanInitiateRequest          =
+    UpscanInitiateRequest("callbackUrl", "successRedirectUrl", "errorRedirectUrl", 1, 104857600)
+  override def fakeApplication(): Application = new GuiceApplicationBuilder()
+    .configure(
+      "microservice.services.upscan.port" -> server.port()
+    )
+    .build()
 
   "getUpscanFormData" should {
     "return a UpscanInitiateResponse" when {

@@ -27,49 +27,55 @@ import scala.collection.mutable.ListBuffer
 import scala.concurrent.duration._
 
 object Fixtures extends AuthHelper {
-	val firstName = "FirstName"
-	val middleName = "MiddleName"
-	val surname = "Surname"
-	val nino: String = new Generator().nextNino.nino
-	val companyName = "Company Name"
+  val firstName    = "FirstName"
+  val middleName   = "MiddleName"
+  val surname      = "Surname"
+  val nino: String = new Generator().nextNino.nino
+  val companyName  = "Company Name"
 
-	def getAwaitDuration: Duration = 60.seconds
+  def getAwaitDuration: Duration = 60.seconds
 
-	val buildFakeUser: ERSAuthData = defaultErsAuthData
+  val buildFakeUser: ERSAuthData = defaultErsAuthData
 
-	def buildFakeRequestWithSessionId(method: String): FakeRequest[AnyContentAsEmpty.type] = {
-		FakeRequest().withSession(("sessionId" -> "FAKE_SESSION_ID"), ("screenSchemeInfo" -> "2 - EMI - MYScheme - XX12345678 - 2016"))
-	}
+  def buildFakeRequestWithSessionId(method: String): FakeRequest[AnyContentAsEmpty.type]     =
+    FakeRequest()
+      .withSession(("sessionId" -> "FAKE_SESSION_ID"), ("screenSchemeInfo" -> "2 - EMI - MYScheme - XX12345678 - 2016"))
 
-	def buildFakeRequestWithSessionIdCSOP(method: String): FakeRequest[AnyContentAsEmpty.type] = {
-	 FakeRequest ().withSession(("sessionId" -> "FAKE_SESSION_ID"), ("screenSchemeInfo" -> "1 - CSOP - MYScheme - XX12345678 - 2016"))
-	}
+  def buildFakeRequestWithSessionIdCSOP(method: String): FakeRequest[AnyContentAsEmpty.type] =
+    FakeRequest().withSession(
+      ("sessionId"        -> "FAKE_SESSION_ID"),
+      ("screenSchemeInfo" -> "1 - CSOP - MYScheme - XX12345678 - 2016")
+    )
 
-  def buildFakeRequestWithSessionIdSAYE(method: String): FakeRequest[AnyContentAsEmpty.type] = {
-	 FakeRequest().withSession(("sessionId" -> "FAKE_SESSION_ID"),("screenSchemeInfo" -> "4 - SAYE - MYScheme - XX12345678 - 2016"))
-	}
+  def buildFakeRequestWithSessionIdSAYE(method: String): FakeRequest[AnyContentAsEmpty.type] =
+    FakeRequest().withSession(
+      ("sessionId"        -> "FAKE_SESSION_ID"),
+      ("screenSchemeInfo" -> "4 - SAYE - MYScheme - XX12345678 - 2016")
+    )
 
-  def buildFakeRequestWithSessionIdSIP(method: String): FakeRequest[AnyContentAsEmpty.type] = {
-	 FakeRequest().withSession(("sessionId" -> "FAKE_SESSION_ID"),("screenSchemeInfo" -> "5 - SIP - MYScheme - XX12345678 - 2016"))
-	}
+  def buildFakeRequestWithSessionIdSIP(method: String): FakeRequest[AnyContentAsEmpty.type]   =
+    FakeRequest()
+      .withSession(("sessionId" -> "FAKE_SESSION_ID"), ("screenSchemeInfo" -> "5 - SIP - MYScheme - XX12345678 - 2016"))
 
-  def buildFakeRequestWithSessionIdEMI(method: String): FakeRequest[AnyContentAsEmpty.type] = {
-	 FakeRequest().withSession(("sessionId" -> "FAKE_SESSION_ID"),("screenSchemeInfo" -> "2 - EMI - MYScheme - XX12345678 - 2016"))
-	}
+  def buildFakeRequestWithSessionIdEMI(method: String): FakeRequest[AnyContentAsEmpty.type]   =
+    FakeRequest()
+      .withSession(("sessionId" -> "FAKE_SESSION_ID"), ("screenSchemeInfo" -> "2 - EMI - MYScheme - XX12345678 - 2016"))
 
-  def buildFakeRequestWithSessionIdOTHER(method: String): FakeRequest[AnyContentAsEmpty.type] = {
-	 FakeRequest().withSession(("sessionId" -> "FAKE_SESSION_ID"),("screenSchemeInfo" -> "3 - OTHER - MYScheme - XX12345678 - 2016"))
-	}
+  def buildFakeRequestWithSessionIdOTHER(method: String): FakeRequest[AnyContentAsEmpty.type] =
+    FakeRequest().withSession(
+      ("sessionId"        -> "FAKE_SESSION_ID"),
+      ("screenSchemeInfo" -> "3 - OTHER - MYScheme - XX12345678 - 2016")
+    )
 
   def buildFakeRequest(method: String) = FakeRequest()
 
-  def schemeRef : String = {"XYZ12345"}
+  def schemeRef: String = "XYZ12345"
 
   val timestamp: DateTime = DateTime.now
 
   val schemeType = "EMI"
 
-  val EMISchemeInfo: SchemeInfo = SchemeInfo (
+  val EMISchemeInfo: SchemeInfo = SchemeInfo(
     schemeRef = "XA1100000000000",
     timestamp = timestamp,
     schemeId = "123AA12345678",
@@ -87,12 +93,57 @@ object Fixtures extends AuthHelper {
     sapNumber = Some("sap-123456")
   )
 
-  val scheetName: String = "EMI40_Adjustments_V4"
+  val scheetName: String                    = "EMI40_Adjustments_V4"
   val data: Option[ListBuffer[Seq[String]]] = Some(
     ListBuffer(
-      Seq("no", "no", "yes", "3", "2015-12-09", firstName, "", surname, nino, "123/XZ55555555", "10.1234", "100.12", "10.1234", "10.1234"),
-      Seq("no", "no", "no", "", "2015-12-09", firstName, "", surname, nino, "123/XZ55555555", "10.1234", "100.12", "10.1234", "10.1234"),
-      Seq("yes", "", "", "", "2015-12-09", firstName, middleName, surname, nino, "123/XZ55555555", "10.1234", "100.12", "10.1234", "10.1234")
+      Seq(
+        "no",
+        "no",
+        "yes",
+        "3",
+        "2015-12-09",
+        firstName,
+        "",
+        surname,
+        nino,
+        "123/XZ55555555",
+        "10.1234",
+        "100.12",
+        "10.1234",
+        "10.1234"
+      ),
+      Seq(
+        "no",
+        "no",
+        "no",
+        "",
+        "2015-12-09",
+        firstName,
+        "",
+        surname,
+        nino,
+        "123/XZ55555555",
+        "10.1234",
+        "100.12",
+        "10.1234",
+        "10.1234"
+      ),
+      Seq(
+        "yes",
+        "",
+        "",
+        "",
+        "2015-12-09",
+        firstName,
+        middleName,
+        surname,
+        nino,
+        "123/XZ55555555",
+        "10.1234",
+        "100.12",
+        "10.1234",
+        "10.1234"
+      )
     )
   )
 
@@ -126,11 +177,24 @@ object Fixtures extends AuthHelper {
     Some("1234567890")
   )
 
-  val groupScheme  = GroupSchemeInfo(Some("1"), Some("emi"))
+  val groupScheme = GroupSchemeInfo(Some("1"), Some("emi"))
 
   val companiesList = CompanyDetailsList(List(companyDetails))
-  val ersSummary = ErsSummary("testbundle", "1", None, new DateTime(2016,6,8,11,5), metaData = EMIMetaData, None, None, Some(groupScheme), Some(schemeOrganiserDetails),
-    Some(companiesList), None,None,None)
+  val ersSummary    = ErsSummary(
+    "testbundle",
+    "1",
+    None,
+    new DateTime(2016, 6, 8, 11, 5),
+    metaData = EMIMetaData,
+    None,
+    None,
+    Some(groupScheme),
+    Some(schemeOrganiserDetails),
+    Some(companiesList),
+    None,
+    None,
+    None
+  )
 
   val metadataJson: JsObject = Json.toJson(EMIMetaData).as[JsObject]
 

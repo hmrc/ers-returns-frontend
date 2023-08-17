@@ -28,13 +28,14 @@ import play.api.test.Helpers.stubBodyParser
 
 import scala.concurrent.ExecutionContext
 
-class ContentUtilTest extends AnyWordSpecLike
-  with Matchers
-  with OptionValues
-  with ERSFakeApplicationConfig
-  with MockitoSugar
-  with ErsTestHelper
-  with GuiceOneAppPerSuite {
+class ContentUtilTest
+    extends AnyWordSpecLike
+    with Matchers
+    with OptionValues
+    with ERSFakeApplicationConfig
+    with MockitoSugar
+    with ErsTestHelper
+    with GuiceOneAppPerSuite {
 
   val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
     messagesActionBuilder,
@@ -51,7 +52,7 @@ class ContentUtilTest extends AnyWordSpecLike
   "getSchemeName" should {
     "return CSOP scheme name for CSOP scheme type \"1\"" in {
       val schemeType = "1"
-      val result = ContentUtil.getSchemeName(schemeType)
+      val result     = ContentUtil.getSchemeName(schemeType)
       result shouldBe Messages("ers_pdf_error_report.csop")
     }
   }
@@ -59,35 +60,35 @@ class ContentUtilTest extends AnyWordSpecLike
   "getSchemeName" should {
     "return EMI scheme name for EMI scheme type \"2\"" in {
       val schemeType = "2"
-      val result = ContentUtil.getSchemeName(schemeType)
+      val result     = ContentUtil.getSchemeName(schemeType)
       result shouldBe Messages("ers_pdf_error_report.emi")
     }
   }
   "getSchemeName" should {
     "return SAYE scheme name for SAYE scheme type \"4\"" in {
       val schemeType = "4"
-      val result = ContentUtil.getSchemeName(schemeType)
+      val result     = ContentUtil.getSchemeName(schemeType)
       result shouldBe Messages("ers_pdf_error_report.saye")
     }
   }
   "getSchemeName" should {
     "return SIP scheme name for SIP scheme type \"5\"" in {
       val schemeType = "5"
-      val result = ContentUtil.getSchemeName(schemeType)
+      val result     = ContentUtil.getSchemeName(schemeType)
       result shouldBe Messages("ers_pdf_error_report.sip")
     }
   }
   "getSchemeName" should {
     "return OTHER scheme name for OTHER scheme type \"3\"" in {
       val schemeType = "3"
-      val result = ContentUtil.getSchemeName(schemeType)
+      val result     = ContentUtil.getSchemeName(schemeType)
       result shouldBe Messages("ers_pdf_error_report.other")
     }
   }
   "getSchemeName" should {
     "return \"\" scheme name for any other scheme type e.g. \"9\"" in {
       val schemeType = "9"
-      val result = ContentUtil.getSchemeName(schemeType)
+      val result     = ContentUtil.getSchemeName(schemeType)
       result shouldBe ""
     }
   }
@@ -95,7 +96,7 @@ class ContentUtilTest extends AnyWordSpecLike
   "getSchemeAbbreviation" should {
     "return CSOP scheme abbreviation for CSOP scheme type \"1\"" in {
       val schemeType = "1"
-      val result = ContentUtil.getSchemeAbbreviation(schemeType)
+      val result     = ContentUtil.getSchemeAbbreviation(schemeType)
       result shouldBe Messages("ers.csop")
     }
   }
@@ -103,46 +104,45 @@ class ContentUtilTest extends AnyWordSpecLike
   "getSchemeAbbreviation" should {
     "return EMI scheme abbreviation for EMI scheme type \"2\"" in {
       val schemeType = "2"
-      val result = ContentUtil.getSchemeAbbreviation(schemeType)
+      val result     = ContentUtil.getSchemeAbbreviation(schemeType)
       result shouldBe Messages("ers.emi")
     }
   }
   "getSchemeAbbreviation" should {
     "return SAYE scheme abbreviation for SAYE scheme type \"4\"" in {
       val schemeType = "4"
-      val result = ContentUtil.getSchemeAbbreviation(schemeType)
+      val result     = ContentUtil.getSchemeAbbreviation(schemeType)
       result shouldBe Messages("ers.saye")
     }
   }
   "getSchemeAbbreviation" should {
     "return SIP scheme abbreviation for SIP scheme type \"5\"" in {
       val schemeType = "5"
-      val result = ContentUtil.getSchemeAbbreviation(schemeType)
+      val result     = ContentUtil.getSchemeAbbreviation(schemeType)
       result shouldBe Messages("ers.sip")
     }
   }
   "getSchemeAbbreviation" should {
     "return OTHER scheme abbreviation for OTHER scheme type \"3\"" in {
       val schemeType = "3"
-      val result = ContentUtil.getSchemeAbbreviation(schemeType)
+      val result     = ContentUtil.getSchemeAbbreviation(schemeType)
       result shouldBe Messages("ers.other")
     }
   }
   "getSchemeAbbreviation" should {
     "return \"\" scheme abbreviation for any other scheme type e.g. \"9\"" in {
       val schemeType = "9"
-      val result = ContentUtil.getSchemeAbbreviation(schemeType)
+      val result     = ContentUtil.getSchemeAbbreviation(schemeType)
       result shouldBe ""
     }
   }
 
-  for (scheme <- List("csop", "emi", "saye", "sip", "other")) {
+  for (scheme <- List("csop", "emi", "saye", "sip", "other"))
     "getSchemeAbbreviation" should {
       s"return scheme abbreviation given $scheme" in {
         val result = ContentUtil.getSchemeAbbreviation(scheme)
         result shouldBe Messages(s"ers.$scheme")
       }
     }
-  }
 
 }

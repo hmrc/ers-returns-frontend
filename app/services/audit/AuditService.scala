@@ -28,20 +28,20 @@ trait AuditService {
   val auditSource = "ers-returns-frontend"
   val auditConnector: DefaultAuditConnector
 
-  def sendEvent(transactionName : String, details: Map[String, String])(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[AuditResult] = {
+  def sendEvent(transactionName: String, details: Map[String, String])(implicit
+    hc: HeaderCarrier,
+    ec: ExecutionContext
+  ): Future[AuditResult] =
     auditConnector.sendEvent(buildEvent(transactionName, details))
-	}
 
-	private[audit] def buildEvent( transactionName: String,  details: Map[String, String])(implicit hc: HeaderCarrier) = {
+  private[audit] def buildEvent(transactionName: String, details: Map[String, String])(implicit hc: HeaderCarrier) =
     DataEvent(
       auditSource = auditSource,
       auditType = transactionName,
       tags = generateTags(hc),
       detail = details
     )
-	}
 
-	private[audit] def generateTags(hc: HeaderCarrier): Map[String, String] = {
-      hc.otherHeaders.toMap ++ Map("dateTime" ->  new DateTime().toString)
-	}
+  private[audit] def generateTags(hc: HeaderCarrier): Map[String, String] =
+    hc.otherHeaders.toMap ++ Map("dateTime" -> new DateTime().toString)
 }

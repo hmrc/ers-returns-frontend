@@ -24,26 +24,26 @@ import play.api.libs.json.{JsObject, JsString, JsValue, Json, OWrites}
 
 trait UpscanData {
 
-  val testUploadId: UploadId = UploadId("TestUploadId")
+  val testUploadId: UploadId                     = UploadId("TestUploadId")
   val notStartedCallback: UpscanCsvFilesCallback = UpscanCsvFilesCallback(testUploadId, "file4", NotStarted)
-  val uploadedSuccessfully = UploadedSuccessfully("fileName.ods", "https://downloadUrl.com")
-  val uploadedSuccessfullyCsv = UploadedSuccessfully("fileName.csv", "https://downloadUrl.com")
+  val uploadedSuccessfully                       = UploadedSuccessfully("fileName.ods", "https://downloadUrl.com")
+  val uploadedSuccessfullyCsv                    = UploadedSuccessfully("fileName.csv", "https://downloadUrl.com")
 
   /**
-   * Provides an upcast of UploadStatus ADT members.<p/>
-   * The upcast is needed due to the Play Reads and Writes typeclasses becoming invariant in v. 2.8.<p/>
-   * @param status An UploadStatus value
-   * @return an UplaodStatus reference
-   */
+    * Provides an upcast of UploadStatus ADT members.<p/>
+    * The upcast is needed due to the Play Reads and Writes typeclasses becoming invariant in v. 2.8.<p/>
+    * @param status An UploadStatus value
+    * @return an UplaodStatus reference
+    */
   def asUploadStatus(status: UploadStatus): UploadStatus = status
 
-  val incompleteCsvList = UpscanCsvFilesCallbackList(
+  val incompleteCsvList  = UpscanCsvFilesCallbackList(
     List(
       UpscanCsvFilesCallback(UploadId("ID1"), "file1", InProgress),
       notStartedCallback
     )
   )
-  val notStartedCsvList = UpscanCsvFilesCallbackList(
+  val notStartedCsvList  = UpscanCsvFilesCallbackList(
     List(
       UpscanCsvFilesCallback(testUploadId, "file1", NotStarted),
       UpscanCsvFilesCallback(UploadId("ID2"), "file4", NotStarted)
@@ -62,7 +62,7 @@ trait UpscanData {
       UpscanCsvFilesCallback(UploadId("ID2"), "file4", NotStarted)
     )
   )
-  val failedCsvList = UpscanCsvFilesCallbackList(
+  val failedCsvList      = UpscanCsvFilesCallbackList(
     List(
       UpscanCsvFilesCallback(testUploadId, "file1", Failed),
       UpscanCsvFilesCallback(UploadId("ID2"), "file4", Failed)
@@ -75,19 +75,18 @@ trait UpscanData {
     )
   )
 
-
-  val uploadDetails = UploadDetails(Instant.now(), "checksum", "fileMimeType", "fileName")
-  val readyCallback = UpscanReadyCallback(Reference("Reference"), new URL("https://callbackUrl.com"), uploadDetails)
+  val uploadDetails  = UploadDetails(Instant.now(), "checksum", "fileMimeType", "fileName")
+  val readyCallback  = UpscanReadyCallback(Reference("Reference"), new URL("https://callbackUrl.com"), uploadDetails)
   val failedCallback = UpscanFailedCallback(Reference("Reference"), ErrorDetails("failureReason", "message"))
 
   import models.upscan.UpscanCallback._
-  implicit val failedWrites: OWrites[UpscanFailedCallback] = Json.writes[UpscanFailedCallback]
+  implicit val failedWrites: OWrites[UpscanFailedCallback] = Json
+    .writes[UpscanFailedCallback]
     .transform((js: JsValue) => js.as[JsObject] + ("fileStatus" -> JsString("FAILED")))
-  implicit val readWrites: OWrites[UpscanReadyCallback] =
+  implicit val readWrites: OWrites[UpscanReadyCallback]    =
     Json.writes[UpscanReadyCallback].transform((js: JsValue) => js.as[JsObject] + ("fileStatus" -> JsString("READY")))
 
-
-  val upscanInitiateResponse: UpscanInitiateResponse =
+  val upscanInitiateResponse: UpscanInitiateResponse       =
     UpscanInitiateResponse(Reference("reference"), "postTarget", formFields = Map.empty[String, String])
 
   val inProgressUpscanCsvFilesList = UpscanCsvFilesList(

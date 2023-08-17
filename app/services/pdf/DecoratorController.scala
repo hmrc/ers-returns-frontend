@@ -23,40 +23,39 @@ import utils.{CountryCodes, ERSUtil}
 
 import scala.collection.mutable.ListBuffer
 
-class DecoratorController@Inject()(val decorators: Array[Decorator])(implicit ERSUtil: ERSUtil) {
+class DecoratorController @Inject() (val decorators: Array[Decorator])(implicit ERSUtil: ERSUtil) {
 
-	def addDecorator(decorator: Decorator): DecoratorController = new DecoratorController(decorators :+ decorator)
+  def addDecorator(decorator: Decorator): DecoratorController = new DecoratorController(decorators :+ decorator)
 
-	def decorate(implicit messages: Messages): String = {
-		ERSUtil.replaceAmpersand(
-			decorators.map(decorator => decorator.decorate).mkString
-		)
-	}
+  def decorate(implicit messages: Messages): String =
+    ERSUtil.replaceAmpersand(
+      decorators.map(decorator => decorator.decorate).mkString
+    )
 
-	def addFileNamesDecorator(filesUploaded: Option[ListBuffer[String]], ersSummary: ErsSummary): DecoratorController = {
-		addDecorator(new FileNamesDecorator(ersSummary.isNilReturn, filesUploaded))
-	}
+  def addFileNamesDecorator(filesUploaded: Option[ListBuffer[String]], ersSummary: ErsSummary): DecoratorController =
+    addDecorator(new FileNamesDecorator(ersSummary.isNilReturn, filesUploaded))
 
-	def addTrusteesDecorator(trusteesList: Option[TrusteeDetailsList]): DecoratorController = {
-		addDecorator(new TrusteesDecorator(trusteesList))
-	}
+  def addTrusteesDecorator(trusteesList: Option[TrusteeDetailsList]): DecoratorController =
+    addDecorator(new TrusteesDecorator(trusteesList))
 
-	def addAlterationsAmendsDecorator(altAmendsMap: Map[String, String]): DecoratorController = {
-		addDecorator(new AlterationsAmendsDecorator(altAmendsMap))
-	}
+  def addAlterationsAmendsDecorator(altAmendsMap: Map[String, String]): DecoratorController =
+    addDecorator(new AlterationsAmendsDecorator(altAmendsMap))
 
-	def addYesNoDecorator(msgKey: String, ersSummaryValue: String)(implicit messages: Messages): DecoratorController = {
-		addDecorator(new YesNoDecorator(Messages(msgKey), ersSummaryValue))
-	}
+  def addYesNoDecorator(msgKey: String, ersSummaryValue: String)(implicit messages: Messages): DecoratorController =
+    addDecorator(new YesNoDecorator(Messages(msgKey), ersSummaryValue))
 
+  def addGroupSummaryDecorator(key: String, ersSummary: ErsSummary)(implicit messages: Messages): DecoratorController =
+    addDecorator(new GroupSummaryDecorator(Messages(s"ers_group_summary.$key.title"), ersSummary.companies))
 
-	def addGroupSummaryDecorator(key: String, ersSummary: ErsSummary)(implicit messages: Messages): DecoratorController = {
-		addDecorator(new GroupSummaryDecorator(Messages(s"ers_group_summary.$key.title"), ersSummary.companies))
-	}
-
-	def addSchemeOrganiserDetailsDecorator(key: String, ersSummary: ErsSummary, countryCodes: CountryCodes)
-																				(implicit messages: Messages): DecoratorController = {
-		addDecorator(new SchemeOrganiserDetailsDecorator(Messages(s"ers_summary_declaration.$key.organiser"), ersSummary.schemeOrganiser.get, countryCodes))
-	}
+  def addSchemeOrganiserDetailsDecorator(key: String, ersSummary: ErsSummary, countryCodes: CountryCodes)(implicit
+    messages: Messages
+  ): DecoratorController =
+    addDecorator(
+      new SchemeOrganiserDetailsDecorator(
+        Messages(s"ers_summary_declaration.$key.organiser"),
+        ersSummary.schemeOrganiser.get,
+        countryCodes
+      )
+    )
 
 }

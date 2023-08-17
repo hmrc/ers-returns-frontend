@@ -26,24 +26,26 @@ import play.api.i18n.Messages
 
 import utils.{ERSFakeApplicationConfig, ErsTestHelper}
 
-class TrusteeDecoratorSpec extends AnyWordSpecLike
-  with Matchers
-  with OptionValues
-  with MockitoSugar
-  with ERSFakeApplicationConfig
-  with ErsTestHelper
-  with GuiceOneAppPerSuite {
+class TrusteeDecoratorSpec
+    extends AnyWordSpecLike
+    with Matchers
+    with OptionValues
+    with MockitoSugar
+    with ERSFakeApplicationConfig
+    with ErsTestHelper
+    with GuiceOneAppPerSuite {
 
   "Trusstees Decorator" should {
 
     "add title and trustee's name to section" in {
-      val trusteeList = new TrusteeDetailsList(List(new TrusteeDetails("trustee name", "address", None, None, None, None, None)))
-      val decorator = new TrusteesDecorator(Some(trusteeList))
-      val output = decorator.decorate
+      val trusteeList =
+        new TrusteeDetailsList(List(new TrusteeDetails("trustee name", "address", None, None, None, None, None)))
+      val decorator   = new TrusteesDecorator(Some(trusteeList))
+      val output      = decorator.decorate
 
       output.contains(Messages("ers_trustee_summary.title")) shouldBe true
-      output.contains("trustee name") shouldBe true
-      output.contains("<hr/>") shouldBe true
+      output.contains("trustee name")                        shouldBe true
+      output.contains("<hr/>")                               shouldBe true
     }
 
     "not add trustee names if list is empty" in {

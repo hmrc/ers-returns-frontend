@@ -27,25 +27,27 @@ sealed trait UpscanCallback {
 }
 
 case class UpscanReadyCallback(
-                              reference: Reference,
-                              downloadUrl: URL,
-                              uploadDetails: UploadDetails
-                            ) extends UpscanCallback
+  reference: Reference,
+  downloadUrl: URL,
+  uploadDetails: UploadDetails
+) extends UpscanCallback
 
 case class UpscanFailedCallback(
-                               reference: Reference,
-                               failureDetails: ErrorDetails
-                             ) extends UpscanCallback
+  reference: Reference,
+  failureDetails: ErrorDetails
+) extends UpscanCallback
 
 object UpscanCallback {
 
   implicit val uploadDetailsFormat: Format[UploadDetails] = Json.format[UploadDetails]
-  implicit val errorDetailsFormat: Format[ErrorDetails] = Json.format[ErrorDetails]
-  implicit val formatURL: Format[URL] = new Format[URL] {
+  implicit val errorDetailsFormat: Format[ErrorDetails]   = Json.format[ErrorDetails]
+  implicit val formatURL: Format[URL]                     = new Format[URL] {
     override def reads(json: JsValue): JsResult[URL] = json match {
       case JsString(s) =>
-        parseUrl(s).map(JsSuccess(_)).getOrElse(JsError(Seq(JsPath() -> Seq(JsonValidationError("error.expected.url")))))
-      case _ => JsError(Seq(JsPath() -> Seq(JsonValidationError("error.expected.url"))))
+        parseUrl(s)
+          .map(JsSuccess(_))
+          .getOrElse(JsError(Seq(JsPath() -> Seq(JsonValidationError("error.expected.url")))))
+      case _           => JsError(Seq(JsPath() -> Seq(JsonValidationError("error.expected.url"))))
     }
 
     private def parseUrl(s: String): Option[URL] = Try(new URL(s)).toOption
@@ -53,15 +55,16 @@ object UpscanCallback {
     override def writes(o: URL): JsValue = JsString(o.toString)
   }
 
-  implicit val readyCallbackBodyFormat: Reads[UpscanReadyCallback] = Json.reads[UpscanReadyCallback]
+  implicit val readyCallbackBodyFormat: Reads[UpscanReadyCallback]  = Json.reads[UpscanReadyCallback]
   implicit val failedCallbackBodyReads: Reads[UpscanFailedCallback] = Json.reads[UpscanFailedCallback]
 
-  implicit val reads: Reads[UpscanCallback] = (json: JsValue) => json \ "fileStatus" match {
-    case JsDefined(JsString("READY")) => implicitly[Reads[UpscanReadyCallback]].reads(json)
-    case JsDefined(JsString("FAILED")) => implicitly[Reads[UpscanFailedCallback]].reads(json)
-    case JsDefined(value) => JsError(s"Invalid type distriminator: $value")
-    case JsUndefined() => JsError("Missing type distriminator")
-  }
+  implicit val reads: Reads[UpscanCallback] = (json: JsValue) =>
+    json \ "fileStatus" match {
+      case JsDefined(JsString("READY"))  => implicitly[Reads[UpscanReadyCallback]].reads(json)
+      case JsDefined(JsString("FAILED")) => implicitly[Reads[UpscanFailedCallback]].reads(json)
+      case JsDefined(value)              => JsError(s"Invalid type distriminator: $value")
+      case JsUndefined()                 => JsError("Missing type distriminator")
+    }
 }
 
 case class UploadDetails(uploadTimestamp: Instant, checksum: String, fileMimeType: String, fileName: String)
