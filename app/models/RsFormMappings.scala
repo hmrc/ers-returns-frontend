@@ -171,7 +171,7 @@ object RsFormMappings {
       .verifying(Messages("ers_manual_company_details.err.address_line1"), so => checkAddressLength(so, "addressLine1"))
       .verifying(Messages("ers_manual_company_details.err.invalidChars.address_line1"), so => validInputCharacters(so, addresssRegx)),
     companyAddressFields.addressLine2 -> optional(text
-      .verifying(Messages("ers_manual_company_details.err.address_line2"), so => checkAddressLength(so, "addressLine12"))
+      .verifying(Messages("ers_manual_company_details.err.address_line2"), so => checkAddressLength(so, "addressLine2"))
       .verifying(Messages("ers_manual_company_details.err.invalidChars.address_line2"), so => validInputCharacters(so, addresssRegx))),
     companyAddressFields.addressLine3 -> optional(text
       .verifying(Messages("ers_manual_company_details.err.address_line3"), so => checkAddressLength(so, "addressLine3"))

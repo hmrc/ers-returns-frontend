@@ -57,7 +57,7 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
   def showManualCompanyDetailsPage(index: Int)(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
     (for {
       requestObject      <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
-      companyDetailsList <- ersUtil.fetch[CompanyDetailsList](ersUtil.GROUP_SCHEME_COMPANIES, requestObject.getSchemeReference)
+      companyDetailsList <- ersUtil.fetch[CompanyDetailsList](ersUtil.COMPANIES_CACHE, requestObject.getSchemeReference)
     } yield {
       Ok(manualCompanyDetailsView(requestObject, index, companyDetailsList))
     }) recover {
@@ -108,15 +108,6 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
 //    )
 //  }
 
-  def replaceCompany(companies: List[CompanyDetails], index: Int, formData: CompanyDetails): List[CompanyDetails] =
-
-    (if (index == 10000) {
-      companies :+ formData
-    } else {
-      companies.zipWithIndex.map{
-        case (a, b) => if (b == index) formData else a
-      }
-    }).distinct
 
   def deleteCompany(id: Int): Action[AnyContent] = authAction.async {
       implicit request =>

@@ -126,7 +126,7 @@ class ERSUtil @Inject()(val sessionService: SessionService,
 			res.get.as[T]
 		} recover {
 			case _: NoSuchElementException =>
-				throw new NoSuchElementException
+				throw new NoSuchElementException ("GIMME A CASHE")
 			case er : Throwable =>
 				logger.error(s"[ERSUtil][fetch] fetch(with 2 params) failed to get key [$key] for cacheId: [$cacheId] with exception ${er.getMessage}, " +
 					s"timestamp: ${System.currentTimeMillis()}.")
@@ -343,9 +343,17 @@ class ERSUtil @Inject()(val sessionService: SessionService,
 
 	def fetchPartFromCompanyDetailsList[A](index: Int, cacheId: String)(implicit hc: HeaderCarrier, formats: json.Format[A]): Future[Option[A]] = {
 		shortLivedCache.fetchAndGetEntry[JsValue](cacheId, COMPANIES_CACHE).map {
-			_.map(_.\( COMPANIES_CACHE).as[JsArray].\(index).getOrElse(Json.obj()).as[A])
+			x =>
+				println("Json here: "+x.getOrElse(""))
+				x.map(_.\(COMPANIES_CACHE).as[JsArray].\(index).getOrElse(Json.obj()).as[A])
 		} recover {
 			case _ => None
+		}
+	}
+
+	def fetchCompaniesOptionally(key: String, cacheId: String)(implicit hc: HeaderCarrier, formats: json.Format[CompanyDetailsList]): Future[CompanyDetailsList] = {
+		fetch[CompanyDetailsList](key, cacheId).recover {
+			case _: NoSuchElementException => CompanyDetailsList(List.empty[CompanyDetails])
 		}
 	}
 }
