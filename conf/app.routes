@@ -47,23 +47,15 @@ POST        /select-alterations-or-a-variation              controllers.AltAmend
 
 GET         /trustee-name                                   controllers.trustees.TrusteeNameController.questionPage(index: Int = 10000)
 POST        /trustee-name                                   controllers.trustees.TrusteeNameController.questionSubmit(index: Int)
-GET         /trustee-name/:index/edit                       controllers.trustees.TrusteeNameController.editQuestion(index: Int)
-POST        /trustee-name/:index/edit                       controllers.trustees.TrusteeNameController.editQuestionSubmit(index: Int)
 
 GET         /where-trustee-based                            controllers.trustees.TrusteeBasedInUkController.questionPage(index: Int = 10000)
 POST        /where-trustee-based                            controllers.trustees.TrusteeBasedInUkController.questionSubmit(index: Int)
-GET         /where-trustee-based/:index/edit                controllers.trustees.TrusteeBasedInUkController.editQuestion(index: Int)
-POST        /where-trustee-based/:index/edit                controllers.trustees.TrusteeBasedInUkController.editQuestionSubmit(index: Int)
 
 GET         /uk-trustee-address                             controllers.trustees.TrusteeAddressUkController.questionPage(index: Int = 10000)
 POST        /uk-trustee-address                             controllers.trustees.TrusteeAddressUkController.questionSubmit(index: Int)
-GET         /uk-trustee-address/:index/edit                 controllers.trustees.TrusteeAddressUkController.editQuestion(index: Int)
-POST        /uk-trustee-address/:index/edit                 controllers.trustees.TrusteeAddressUkController.editQuestionSubmit(index: Int)
 
 GET         /overseas-trustee-address                       controllers.trustees.TrusteeAddressOverseasController.questionPage(index: Int = 10000)
 POST        /overseas-trustee-address                       controllers.trustees.TrusteeAddressOverseasController.questionSubmit(index: Int)
-GET         /overseas-trustee-address/:index/edit           controllers.trustees.TrusteeAddressOverseasController.editQuestion(index: Int)
-POST        /overseas-trustee-address/:index/edit           controllers.trustees.TrusteeAddressOverseasController.editQuestionSubmit(index: Int)
 
 GET         /trustees       				                controllers.trustees.TrusteeSummaryController.trusteeSummaryPage()
 POST        /trustees       				                controllers.trustees.TrusteeSummaryController.trusteeSummaryContinue()

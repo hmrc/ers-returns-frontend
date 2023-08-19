@@ -16,7 +16,7 @@
 
 package controllers.trustees
 
-import models.{GroupSchemeInfo, RequestObject, RsFormMappings, TrusteeAddressOverseas, TrusteeName}
+import models.{RequestObject, RsFormMappings, TrusteeName}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatest.OptionValues
@@ -30,15 +30,14 @@ import play.api.i18n.{MessagesApi, MessagesImpl}
 import play.api.libs.json.Json
 import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents}
 import play.api.test.Helpers.{contentAsString, defaultAwaitTimeout, redirectLocation, status, stubBodyParser}
-import services.TrusteeService
 import uk.gov.hmrc.http.cache.client.CacheMap
-import utils.Fixtures.{ersRequestObject, trusteeAddressOverseas}
+import utils.Fixtures.ersRequestObject
 import utils.{ERSFakeApplicationConfig, ErsTestHelper, Fixtures}
-import views.html.{global_error, trustee_address_overseas}
+import views.html.{global_error, trustee_name}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class TrusteeAddressOverseasSpec  extends AnyWordSpecLike
+class TrusteeNameControllerSpec extends AnyWordSpecLike
   with Matchers
   with OptionValues
   with ERSFakeApplicationConfig
@@ -59,7 +58,7 @@ class TrusteeAddressOverseasSpec  extends AnyWordSpecLike
   implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
 
 
-  val testController = new TrusteeAddressOverseasController(
+  val testController = new TrusteeNameController(
     mockMCC,
     mockAuthConnector,
     mockErsConnector,
@@ -69,7 +68,7 @@ class TrusteeAddressOverseasSpec  extends AnyWordSpecLike
     mockCountryCodes,
     mockErsUtil,
     mockAppConfig,
-    app.injector.instanceOf[trustee_address_overseas]
+    app.injector.instanceOf[trustee_name]
   )
 
   "calling showQuestionPage" should {
@@ -77,28 +76,28 @@ class TrusteeAddressOverseasSpec  extends AnyWordSpecLike
     setAuthMocks()
     when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any())).thenReturn(Future.successful(ersRequestObject))
 
-    "show the empty trustee address overseas question page when there is nothing to prefill" in {
-      when(mockErsUtil.fetchPartFromTrusteeDetailsList[TrusteeAddressOverseas](any(), any())(any(), any())).thenReturn(Future.successful(None))
-      val result = testController.questionPage(1).apply(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
-
-      status(result) shouldBe Status.OK
-      contentAsString(result) should include(testMessages("ers_trustee_address.title"))
-      contentAsString(result) should include(testMessages("ers_trustee_address.line1"))
-    }
-
-    "show the prefilled trustee address overseas question page when there is data to prefill" in {
-      when(mockErsUtil.fetchPartFromTrusteeDetailsList[TrusteeAddressOverseas](any(), any())(any(), any())).thenReturn(Future.successful(Some(trusteeAddressOverseas)))
+    "show the empty trustee name question page when there is nothing to prefill" in {
+      when(mockErsUtil.fetchPartFromTrusteeDetailsList[TrusteeName](any(), any())(any(), any())).thenReturn(Future.successful(None))
 
       val result = testController.questionPage(1).apply(authRequest)
 
       status(result) shouldBe Status.OK
-      contentAsString(result) should include(testMessages("ers_trustee_address.title"))
-      contentAsString(result) should include(testMessages("ers_trustee_address.line1"))
-      contentAsString(result) should include("Overseas line 1")
+      contentAsString(result) should include(testMessages("ers_trustee_name.title"))
+    }
+
+    "show the prefilled trustee name question page when there is data to prefill" in {
+      when(mockErsUtil.fetchPartFromTrusteeDetailsList[TrusteeName](any(), any())(any(), any())).thenReturn(Future.successful(Some(TrusteeName("Test person"))))
+
+      val result = testController.questionPage(1).apply(authRequest)
+
+      status(result) shouldBe Status.OK
+      contentAsString(result) should include(testMessages("ers_trustee_name.title"))
+      contentAsString(result) should include("Test person")
+
     }
 
     "show the global error page if an exception occurs while retrieving cached data" in {
-      when(mockErsUtil.fetchPartFromTrusteeDetailsList[TrusteeAddressOverseas](any(), any())(any(), any())).thenReturn(Future.failed(new RuntimeException("Failure scenario")))
+      when(mockErsUtil.fetchPartFromTrusteeDetailsList[TrusteeName](any(), any())(any(), any())).thenReturn(Future.failed(new RuntimeException("Failure scenario")))
 
       val result = testController.questionPage(1).apply(authRequest)
 
@@ -109,30 +108,31 @@ class TrusteeAddressOverseasSpec  extends AnyWordSpecLike
     }
   }
 
-  "calling questionSubmit" should {
-    "show the trustee address overseas form page with errors if the form is incorrectly filled" in {
-      val trusteeAddressOverseasData = Map("addressLine1" -> "")
-      val form = RsFormMappings.trusteeAddressOverseasForm().bind(trusteeAddressOverseasData)
+  "calling handleQuestionSubmit" should {
+    "show the trustee name form page with errors if the form is incorrectly filled" in {
+      val trusteeBasedData = Map("bool" -> "")
+      val form = RsFormMappings.trusteeBasedInUkForm().bind(trusteeBasedData)
       implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*))
       val result = testController.questionSubmit(1).apply(authRequest)
 
       status(result) shouldBe Status.BAD_REQUEST
-      contentAsString(result) should include(testMessages("ers_trustee_address.title"))
-      contentAsString(result) should include(testMessages("ers_trustee_details.err.summary.address_line1_required"))
+      contentAsString(result) should include(testMessages("ers_trustee_name.title"))
+      contentAsString(result) should include(testMessages("error.required"))
     }
 
-    "successfully bind the form and redirect to the trustee summary page" in {
+    "successfully bind the form and go to the trustee based in UK page if the form is filled correctly" in {
       val emptyCacheMap = CacheMap("", Map("" -> Json.obj()))
-      when(mockErsUtil.cache[TrusteeAddressOverseas](any(), any(), any())(any(), any())).thenReturn(Future.successful(emptyCacheMap))
+      when(mockErsUtil.cache[TrusteeName](any(), any(), any())(any(), any())).thenReturn(Future.successful(emptyCacheMap))
       when(mockTrusteeService.updateTrusteeCache(any())(any())).thenReturn(Future.successful(Unit), Future.successful(Unit))
 
-      val trusteeAddressOverseasData = Map("addressLine1" -> "123 Fake Street")
-      val form = RsFormMappings.trusteeAddressOverseasForm().bind(trusteeAddressOverseasData)
+      val trusteeBasedData = Map("name" -> "Test person")
+      val form = RsFormMappings.trusteeBasedInUkForm().bind(trusteeBasedData)
       implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*))
       val result = testController.questionSubmit(1).apply(authRequest)
 
       status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result).get shouldBe routes.TrusteeSummaryController.trusteeSummaryPage().url
+      redirectLocation(result).get shouldBe routes.TrusteeBasedInUkController.questionPage().url
+
     }
   }
 }

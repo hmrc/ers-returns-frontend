@@ -46,7 +46,7 @@
                 classes = "govuk-!-width-one-quarter",
                 items = Seq(
                     ActionItem(
-                        href = controllers.trustees.routes.TrusteeNameController.editQuestion(index).url,
+                        href = controllers.trustees.routes.TrusteeNameController.questionPage().url,
                         content = Text(messages("ers.change_this")),
                         visuallyHiddenText = Some(messages("ers.change_this"))
                     )
@@ -68,7 +68,7 @@
                 classes = "govuk-!-width-one-quarter",
                 items = Seq(
                     ActionItem(
-                        href = controllers.trustees.routes.TrusteeBasedInUkController.editQuestion(index).url,
+                        href = controllers.trustees.routes.TrusteeBasedInUkController.questionPage().url,
                         content = Text(messages("ers.change_this")),
                         visuallyHiddenText = Some(messages("ers.change_this"))
                     )
@@ -89,9 +89,9 @@
                 items = Seq(
                     ActionItem(
                         href = if(trustee.country.getOrElse("") == "UK"){
-                            controllers.trustees.routes.TrusteeAddressUkController.editQuestion(index).url
+                            controllers.trustees.routes.TrusteeAddressUkController.questionPage().url
                         } else {
-                            controllers.trustees.routes.TrusteeAddressOverseasController.editQuestion(index).url
+                            controllers.trustees.routes.TrusteeAddressOverseasController.questionPage().url
                         },
                         content = Text(messages("ers.change_this")),
                         visuallyHiddenText = Some(messages("ers.change_this"))

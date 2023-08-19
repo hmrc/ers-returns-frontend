@@ -693,6 +693,8 @@ ers_alt_amends.continue = Accept and continue
 ers_trustee_name.title = What is the trustee’s name?
 
 ers_trustee_based.title = Where is the trustee based?
+ers_trustee_based.uk = UK
+ers_trustee_based.overseas = Overseas
 
 ers_trustee_address.title = What is the trustee’s address?
 ers_trustee_address.buildingAndStreet = Building and street
@@ -707,7 +709,7 @@ ers_trustee_address.line4 = Address line 4 (optional)
 ers_trustee_address.line5 = Address line 5 (optional)
 ers_trustee_address.country = Country (optional)
 
-
+#TODO probs delete these as shouldn't be used
 ers_trustee_details.title = Add trustee details
 ers_trustee_details.question = Where is the trustee based?
 ers_trustee_details.uk = UK
