@@ -43,11 +43,11 @@ trait TrusteeBaseController[A] extends FrontendController with I18nSupport with 
   implicit val ec: ExecutionContext
   implicit val format: Format[A]
 
-  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier): Future[Result]
+  def nextPageRedirect(index: Int)(implicit hc: HeaderCarrier): Future[Result]
 
   def form(implicit request: Request[AnyContent]): Form[A]
 
-  def view(requestObject: RequestObject, index: Int, form: Form[A], edit: Boolean = false)
+  def view(requestObject: RequestObject, index: Int, form: Form[A])
           (implicit request: Request[AnyContent], hc: HeaderCarrier): Html
 
 
@@ -58,14 +58,14 @@ trait TrusteeBaseController[A] extends FrontendController with I18nSupport with 
       }
   }
 
-  def showQuestionPage(requestObject: RequestObject, index: Int, edit: Boolean = false)
+  def showQuestionPage(requestObject: RequestObject, index: Int)
                       (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
     ersUtil.fetchPartFromTrusteeDetailsList[A](index, requestObject.getSchemeReference).map { previousAnswer: Option[A] =>
       val preparedForm = if (previousAnswer.isDefined) form.fill(previousAnswer.get) else form
       if (previousAnswer.isDefined) {
         logger.error(s"\n\n[${this.getClass.getSimpleName}][showQuestionPage] Here's the answers we pulled from the cache innit: \n\n Prev answer: ${previousAnswer.get}\n") // TODO Remove before merge innit
       }
-      Ok(view(requestObject, index, preparedForm, edit))
+      Ok(view(requestObject, index, preparedForm))
     } recover {
       case e: Throwable =>
         logger.error(s"[${this.getClass.getSimpleName}][showQuestionPage] Get data from cache failed with exception ${e.getMessage}")
@@ -80,7 +80,7 @@ trait TrusteeBaseController[A] extends FrontendController with I18nSupport with 
       }
   }
 
-  def handleQuestionSubmit(requestObject: RequestObject, index: Int, edit: Boolean = false)
+  def handleQuestionSubmit(requestObject: RequestObject, index: Int)
                           (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
     form.bindFromRequest().fold(
       errors => {
@@ -88,24 +88,10 @@ trait TrusteeBaseController[A] extends FrontendController with I18nSupport with 
       },
       result => {
         ersUtil.cache[A](cacheKey, result, requestObject.getSchemeReference).flatMap { _ =>
-          nextPageRedirect(index, edit)
+          nextPageRedirect(index)
         }
       }
     )
-  }
-
-  def editQuestion(index: Int): Action[AnyContent] = authAction.async {
-    implicit request =>
-      ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
-        showQuestionPage(requestObject, index, edit = true)(request, hc)
-      }
-  }
-
-  def editQuestionSubmit(index: Int): Action[AnyContent] = authAction.async {
-    implicit request =>
-      ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
-        handleQuestionSubmit(requestObject, index, edit = true)(request, hc)
-      }
   }
 
   def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result = {

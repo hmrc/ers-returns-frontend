@@ -52,18 +52,17 @@ class TrusteeAddressUkController @Inject()(val mcc: MessagesControllerComponents
   val cacheKey: String = ersUtil.TRUSTEE_ADDRESS_UK_CACHE
   implicit val format: Format[TrusteeAddressUk] = TrusteeAddressUk.format
 
-  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier): Future[Result] = {
+  def nextPageRedirect(index: Int)(implicit hc: HeaderCarrier): Future[Result] = {
     trusteeService.updateTrusteeCache(index).map { _ =>
       Redirect(controllers.trustees.routes.TrusteeSummaryController.trusteeSummaryPage())
-      //TODO Update this to the next page in the journey innit (might be right now, until I move stuff to new summary controller or whatever)
     }
   }
 
   def form(implicit request: Request[AnyContent]): Form[TrusteeAddressUk] = RsFormMappings.trusteeAddressUkForm()
 
-  def view(requestObject: RequestObject, index: Int, trusteeAddressUkForm: Form[TrusteeAddressUk], edit: Boolean = false)
+  def view(requestObject: RequestObject, index: Int, trusteeAddressUkForm: Form[TrusteeAddressUk])
           (implicit request: Request[AnyContent], hc: HeaderCarrier): Html = {
-    trusteeAddressUkView(requestObject, index, trusteeAddressUkForm, edit)
+    trusteeAddressUkView(requestObject, index, trusteeAddressUkForm)
   }
 
 }

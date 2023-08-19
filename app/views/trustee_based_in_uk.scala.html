@@ -35,7 +35,7 @@
     hmrcPageHeading: HmrcPageHeading
 )
 
-@(requestObject: RequestObject, index: Int, trusteeBasedInUkForm: Form[models.TrusteeBasedInUk], edit: Boolean = false)(implicit request: Request[AnyRef], messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
+@(requestObject: RequestObject, index: Int, trusteeBasedInUkForm: Form[models.TrusteeBasedInUk])(implicit request: Request[AnyRef], messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 
 @schemeId = @{requestObject.getSchemeId}
 
@@ -58,11 +58,7 @@
     text = messages("ers_trustee_based.title")
 ))
 
-@formWithCSRF(action = if(edit) {
-    controllers.trustees.routes.TrusteeBasedInUkController.editQuestionSubmit(index)
-} else {
-    controllers.trustees.routes.TrusteeBasedInUkController.questionSubmit(index)
-}) {
+@formWithCSRF(action = controllers.trustees.routes.TrusteeBasedInUkController.questionSubmit(index)) {
 
 @govukRadios(Radios(
     name = "basedInUk",
@@ -71,13 +67,13 @@
             checked = trusteeBasedInUkForm(trusteeBasedInUkFields.basedInUk).value.contains("0"),
             id = Some("uk-radio-button"),
             value = Some("0"),
-            content = Text(messages("ers_trustee_details.uk"))
+            content = Text(messages("ers_trustee_based.uk"))
         ),
         RadioItem(
             checked = trusteeBasedInUkForm(trusteeBasedInUkFields.basedInUk).value.contains("1"),
             id = Some("overseas-radio-button"),
             value = Some("1"),
-            content = Text(messages("ers_trustee_details.overseas"))
+            content = Text(messages("ers_trustee_based.overseas"))
             )
         ),
     classes = "govuk-radios--inline"
