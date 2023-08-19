@@ -42,7 +42,7 @@ object Fixtures extends AuthHelper {
 	}
 
 	def buildFakeRequestWithSessionIdCSOP(method: String): FakeRequest[AnyContentAsEmpty.type] = {
-	 FakeRequest ().withSession(("sessionId" -> "FAKE_SESSION_ID"), ("screenSchemeInfo" -> "1 - CSOP - MYScheme - XX12345678 - 2016"))
+	 FakeRequest().withSession(("sessionId" -> "FAKE_SESSION_ID"), ("screenSchemeInfo" -> "1 - CSOP - MYScheme - XX12345678 - 2016"))
 	}
 
   def buildFakeRequestWithSessionIdSAYE(method: String): FakeRequest[AnyContentAsEmpty.type] = {
@@ -154,5 +154,14 @@ object Fixtures extends AuthHelper {
     Some("Overseas line 4"),
     Some("Overseas line 5"),
     Some("Overseas country")
+  )
+
+  val trusteeAddressUk: TrusteeAddressUk = TrusteeAddressUk(
+    "UK line 1",
+    Some("UK line 2"),
+    Some("UK line 3"),
+    Some("UK line 4"),
+    Some("UK line 5"),
+    Some("UK country")
   )
 }
