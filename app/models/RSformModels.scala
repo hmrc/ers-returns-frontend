@@ -162,7 +162,7 @@ case class TrusteeAddressOverseas(
                                    addressLine3: Option[String],
                                    addressLine4: Option[String],
                                    addressLine5: Option[String],
-                                   country: Option[String],
+                                   country: Option[String]
                                  )
 
 object TrusteeAddressOverseas {
@@ -175,7 +175,7 @@ case class TrusteeAddressUk(
                                    addressLine3: Option[String],
                                    addressLine4: Option[String],
                                    addressLine5: Option[String],
-                                   country: Option[String] = Some("UK"),
+                                   country: Option[String] = Some("UK")
                                  )
 
 object TrusteeAddressUk {
@@ -274,6 +274,7 @@ case class RequestObject(
   private def getNVPair(paramName: String, value: Option[String]): String =
     value.map(paramName + "=" + _ + ";").getOrElse("")
 }
+
 object RequestObject {
   implicit val formatRequestObject: OFormat[RequestObject] = Json.format[RequestObject]
 }
