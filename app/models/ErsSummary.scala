@@ -70,7 +70,8 @@ case class CompanyDetails(
                               country: Option[String],
                               postcode: Option[String],
                               companyReg: Option[String],
-                              corporationRef: Option[String]
+                              corporationRef: Option[String],
+                              basedInUk: Boolean
                               )
 object CompanyDetails {
 
@@ -84,7 +85,8 @@ object CompanyDetails {
       Some("UK"),
       addressUk.addressLine5,
       name.companyReg,
-      name.companyRef
+      name.companyRef,
+      true
     )
   }
 
@@ -98,7 +100,8 @@ object CompanyDetails {
       addressOverseas.country,
       addressOverseas.addressLine5,
       None,
-      None
+      None,
+      false
     )
   }
 

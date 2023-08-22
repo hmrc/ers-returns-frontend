@@ -69,13 +69,13 @@
             name = "basedInUk",
             items = Seq(
                 RadioItem(
-                    checked = companyDetails(companyDetailsFields.country).value.contains(ersUtil.DEFAULT_COUNTRY) || companyDetails(companyDetailsFields.country).value.isEmpty,
-                    id = Some("uk-radio-button"),
+                    checked = companyDetails(companyBasedInUkFields.basedInUk).value.contains("0")
+                     id = Some("uk-radio-button"),
                     value = Some("0"),
                     content = Text(messages("ers_manual_company_details.uk"))
                 ),
                 RadioItem(
-                    checked = !companyDetails(companyDetailsFields.country).value.contains(ersUtil.DEFAULT_COUNTRY) && companyDetails(companyDetailsFields.country).value.isDefined,
+                    checked = companyDetails(companyBasedInUkFields.basedInUk).value.contains("1"),
                     id = Some("overseas-radio-button"),
                     value = Some("1"),
                     content = Text(messages("ers_manual_company_details.overseas"))

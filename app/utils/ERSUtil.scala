@@ -351,7 +351,7 @@ class ERSUtil @Inject()(val sessionService: SessionService,
 		}
 	}
 
-	def fetchCompaniesOptionally(key: String, cacheId: String)(implicit hc: HeaderCarrier, formats: json.Format[CompanyDetailsList]): Future[CompanyDetailsList] = {
+def fetchCompaniesOptionally(key: String, cacheId: String)(implicit hc: HeaderCarrier, formats: json.Format[CompanyDetailsList]): Future[CompanyDetailsList] = {
 		fetch[CompanyDetailsList](key, cacheId).recover {
 			case _: NoSuchElementException => CompanyDetailsList(List.empty[CompanyDetails])
 		}

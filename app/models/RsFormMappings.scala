@@ -245,13 +245,13 @@ object RsFormMappings {
    */
 
   def companyBasedInUkForm()(implicit messages: Messages): Form[CompanyBasedInUk] = Form(mapping(
-    companyBasedInUkFields.basedinUk -> number
+    companyBasedInUkFields.basedInUk -> number
       .transform(int => if (int == 0 ) true else false, (bool : Boolean) => if (bool) 0  else 1)
   )(CompanyBasedInUk.apply)(CompanyBasedInUk.unapply))
 
 
   object companyBasedInUkFields {
-    val basedinUk = "basedInUk"
+    val basedInUk = "basedInUk"
   }
 
 
@@ -346,6 +346,7 @@ object companyDetailsFields {
   val postcode = "postcode"
   val companyReg = "companyReg"
   val corporationRef = "corporationRef"
+
 }
 
 object companyAddressUkFields {
