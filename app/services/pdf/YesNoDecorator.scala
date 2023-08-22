@@ -19,14 +19,12 @@ package services.pdf
 import play.api.i18n.Messages
 import utils.PageBuilder
 
-class YesNoDecorator(headingTitle: String,
-										 isNilReturn: String
-										) extends Decorator with PageBuilder {
+class YesNoDecorator(headingTitle: String, isNilReturn: String) extends Decorator with PageBuilder {
 
   def decorate(implicit messages: Messages): String = {
     val content = isNilReturn match {
       case OPTION_YES => Messages("ers.yes")
-      case OPTION_NO => Messages("ers.no")
+      case OPTION_NO  => Messages("ers.no")
     }
     buildEntry(headingTitle, content)
   }

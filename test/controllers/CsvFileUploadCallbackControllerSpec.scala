@@ -41,8 +41,16 @@ import controllers.internal.CsvFileUploadCallbackController
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class CsvFileUploadCallbackControllerSpec extends AnyWordSpecLike with Matchers with OptionValues
-	with ERSFakeApplicationConfig with MockitoSugar with BeforeAndAfterEach with UpscanData with ErsTestHelper with GuiceOneAppPerSuite {
+class CsvFileUploadCallbackControllerSpec
+    extends AnyWordSpecLike
+    with Matchers
+    with OptionValues
+    with ERSFakeApplicationConfig
+    with MockitoSugar
+    with BeforeAndAfterEach
+    with UpscanData
+    with ErsTestHelper
+    with GuiceOneAppPerSuite {
 
   val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
     messagesActionBuilder,
@@ -57,22 +65,22 @@ class CsvFileUploadCallbackControllerSpec extends AnyWordSpecLike with Matchers 
   implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
 
   implicit lazy val materializer: Materializer = app.materializer
-  lazy val environment: Environment = app.injector.instanceOf[Environment]
+  lazy val environment: Environment            = app.injector.instanceOf[Environment]
 
   def request(body: JsValue): FakeRequest[JsValue] = FakeRequest().withBody(body)
-  val scRef = "scRef"
-  val url: URL = new URL("http://localhost:9000/myUrl")
+  val scRef                                        = "scRef"
+  val url: URL                                     = new URL("http://localhost:9000/myUrl")
 
   lazy val csvFileUploadCallbackController: CsvFileUploadCallbackController =
-		new CsvFileUploadCallbackController(mockMCC, mockErsConnector, mockAuthConnector, mockErsUtil, mockAppConfig) {
-		import scala.concurrent.duration._
-    when(mockAppConfig.retryDelay).thenReturn(1.millisecond)
-  }
+    new CsvFileUploadCallbackController(mockMCC, mockErsConnector, mockAuthConnector, mockErsUtil, mockAppConfig) {
+      import scala.concurrent.duration._
+      when(mockAppConfig.retryDelay).thenReturn(1.millisecond)
+    }
 
   override def beforeEach(): Unit = {
     reset(mockErsUtil)
-		when(mockErsUtil.CHECK_CSV_FILES).thenReturn("check-csv-files")
-		super.beforeEach()
+    when(mockErsUtil.CHECK_CSV_FILES).thenReturn("check-csv-files")
+    super.beforeEach()
   }
 
   "callback" should {
@@ -80,26 +88,38 @@ class CsvFileUploadCallbackControllerSpec extends AnyWordSpecLike with Matchers 
     "update upload status to Uploaded Successfully" when {
       "callback is UpscanReadyCallback" in {
         val callbackCaptor = ArgumentCaptor.forClass(classOf[UploadStatus])
-        val body = UpscanReadyCallback(Reference("Reference"), url, UploadDetails(Instant.now(), "checkSum", "fileMimeType", "fileName"))
-        val jsonBody = Json.toJson(body)
-        when(mockErsUtil.cache(meq(s"check-csv-files-${uploadId.value}"), callbackCaptor.capture, meq(scRef))(any(), any()))
+        val body           = UpscanReadyCallback(
+          Reference("Reference"),
+          url,
+          UploadDetails(Instant.now(), "checkSum", "fileMimeType", "fileName")
+        )
+        val jsonBody       = Json.toJson(body)
+        when(
+          mockErsUtil.cache(meq(s"check-csv-files-${uploadId.value}"), callbackCaptor.capture, meq(scRef))(any(), any())
+        )
           .thenReturn(Future.successful(mock[CacheMap]))
-        val result = csvFileUploadCallbackController.callback(uploadId, scRef)(request(jsonBody))
-        status(result) shouldBe OK
+        val result         = csvFileUploadCallbackController.callback(uploadId, scRef)(request(jsonBody))
+        status(result)                                             shouldBe OK
         callbackCaptor.getValue.isInstanceOf[UploadedSuccessfully] shouldBe true
         verify(mockErsUtil, times(1))
-          .cache(meq(s"check-csv-files-${uploadId.value}"), meq(callbackCaptor.getValue.asInstanceOf[UploadedSuccessfully]), meq(scRef))(any(), any())
+          .cache(
+            meq(s"check-csv-files-${uploadId.value}"),
+            meq(callbackCaptor.getValue.asInstanceOf[UploadedSuccessfully]),
+            meq(scRef)
+          )(any(), any())
       }
     }
 
     "update upload status to Failed" when {
       "callback is UpscanFailedCallback and upload is InProgress" in {
         val callbackCaptor = ArgumentCaptor.forClass(classOf[UploadStatus])
-        val body = UpscanFailedCallback(Reference("ref"), ErrorDetails("failed", "message"))
-        val jsonBody = Json.toJson(body)
-        when(mockErsUtil.cache(meq(s"check-csv-files-${uploadId.value}"), callbackCaptor.capture, meq(scRef))(any(), any()))
+        val body           = UpscanFailedCallback(Reference("ref"), ErrorDetails("failed", "message"))
+        val jsonBody       = Json.toJson(body)
+        when(
+          mockErsUtil.cache(meq(s"check-csv-files-${uploadId.value}"), callbackCaptor.capture, meq(scRef))(any(), any())
+        )
           .thenReturn(Future.successful(mock[CacheMap]))
-        val result = csvFileUploadCallbackController.callback(uploadId, scRef)(request(jsonBody))
+        val result         = csvFileUploadCallbackController.callback(uploadId, scRef)(request(jsonBody))
         status(result) shouldBe OK
         assert(callbackCaptor.getValue equals Failed)
         verify(mockErsUtil, times(1))
@@ -109,7 +129,7 @@ class CsvFileUploadCallbackControllerSpec extends AnyWordSpecLike with Matchers 
 
     "return InternalServerError" when {
       "updating the cache fails" in {
-        val body = UpscanFailedCallback(Reference("ref"), ErrorDetails("failed", "message"))
+        val body     = UpscanFailedCallback(Reference("ref"), ErrorDetails("failed", "message"))
         val jsonBody = Json.toJson(body)
         when(mockErsUtil.cache(meq(s"check-csv-files-${uploadId.value}"), any[UploadStatus], meq(scRef))(any(), any()))
           .thenReturn(Future.failed(new Exception("Test exception")))
@@ -123,7 +143,7 @@ class CsvFileUploadCallbackControllerSpec extends AnyWordSpecLike with Matchers 
 
       "callback data is not in the correct format" in {
         val jsonBody = Json.parse("""{"key":"value"}""")
-        val result = csvFileUploadCallbackController.callback(uploadId, scRef)(request(jsonBody))
+        val result   = csvFileUploadCallbackController.callback(uploadId, scRef)(request(jsonBody))
         status(result) shouldBe BAD_REQUEST
         verify(mockErsUtil, never())
           .cache(any(), any(), meq(scRef))(any(), any())

@@ -36,8 +36,13 @@ import uk.gov.hmrc.http.{HeaderCarrier, SessionId}
 
 import scala.concurrent.Future
 
-
-class UpscanServiceSpec extends AnyWordSpecLike with Matchers with OptionValues with GuiceOneAppPerSuite with MockitoSugar with ScalaFutures {
+class UpscanServiceSpec
+    extends AnyWordSpecLike
+    with Matchers
+    with OptionValues
+    with GuiceOneAppPerSuite
+    with MockitoSugar
+    with ScalaFutures {
 
   override def fakeApplication(): Application = new GuiceApplicationBuilder()
     .overrides(bind[UpscanConnector].toInstance(mockUpscanConnector))
@@ -48,14 +53,16 @@ class UpscanServiceSpec extends AnyWordSpecLike with Matchers with OptionValues 
   "getUpscanFormDataOds" must {
     "get form data from Upscan Connector with an initiate request" in {
       implicit val request: Request[_] = FakeRequest("GET", "http://localhost:9290/")
-      val hc = HeaderCarrier(sessionId = Some(SessionId("sessionid")))
-      val callback = controllers.internal.routes.FileUploadCallbackController.callback(hc.sessionId.get.value).absoluteURL()
-      val success = controllers.routes.FileUploadController.success().absoluteURL()
-      val failure = controllers.routes.FileUploadController.failure().absoluteURL()
-      val expectedInitiateRequest = UpscanInitiateRequest(callback, success, failure, 1, 10485760)
+      val hc                           = HeaderCarrier(sessionId = Some(SessionId("sessionid")))
+      val callback                     =
+        controllers.internal.routes.FileUploadCallbackController.callback(hc.sessionId.get.value).absoluteURL()
+      val success                      = controllers.routes.FileUploadController.success().absoluteURL()
+      val failure                      = controllers.routes.FileUploadController.failure().absoluteURL()
+      val expectedInitiateRequest      = UpscanInitiateRequest(callback, success, failure, 1, 10485760)
 
-      val upscanInitiateResponse = UpscanInitiateResponse(Reference("reference"), "postTarget", formFields = Map.empty[String, String])
-      val initiateRequestCaptor = ArgumentCaptor.forClass(classOf[UpscanInitiateRequest])
+      val upscanInitiateResponse =
+        UpscanInitiateResponse(Reference("reference"), "postTarget", formFields = Map.empty[String, String])
+      val initiateRequestCaptor  = ArgumentCaptor.forClass(classOf[UpscanInitiateRequest])
 
       when(mockUpscanConnector.getUpscanFormData(initiateRequestCaptor.capture())(any[HeaderCarrier]))
         .thenReturn(Future.successful(upscanInitiateResponse))
@@ -69,16 +76,17 @@ class UpscanServiceSpec extends AnyWordSpecLike with Matchers with OptionValues 
   "getUpscanFormDataCsv" must {
     "get form data from Upscan Connector with an initiate and uploadId" in {
       implicit val request: Request[_] = FakeRequest("GET", "http://localhost:9290/")
-      val uploadId = UploadId("TestUploadId")
-      val scRef = "ScRef"
-      val hc = HeaderCarrier(sessionId = Some(SessionId("sessionid")))
-      val callback = controllers.internal.routes.CsvFileUploadCallbackController.callback(uploadId, scRef).absoluteURL()
-      val success = controllers.routes.CsvFileUploadController.success(uploadId).absoluteURL()
-      val failure = controllers.routes.CsvFileUploadController.failure().absoluteURL()
-      val expectedInitiateRequest = UpscanInitiateRequest(callback, success, failure, 1, 104857600)
+      val uploadId                     = UploadId("TestUploadId")
+      val scRef                        = "ScRef"
+      val hc                           = HeaderCarrier(sessionId = Some(SessionId("sessionid")))
+      val callback                     = controllers.internal.routes.CsvFileUploadCallbackController.callback(uploadId, scRef).absoluteURL()
+      val success                      = controllers.routes.CsvFileUploadController.success(uploadId).absoluteURL()
+      val failure                      = controllers.routes.CsvFileUploadController.failure().absoluteURL()
+      val expectedInitiateRequest      = UpscanInitiateRequest(callback, success, failure, 1, 104857600)
 
-      val upscanInitiateResponse = UpscanInitiateResponse(Reference("reference"), "postTarget", formFields = Map.empty[String, String])
-      val initiateRequestCaptor = ArgumentCaptor.forClass(classOf[UpscanInitiateRequest])
+      val upscanInitiateResponse =
+        UpscanInitiateResponse(Reference("reference"), "postTarget", formFields = Map.empty[String, String])
+      val initiateRequestCaptor  = ArgumentCaptor.forClass(classOf[UpscanInitiateRequest])
 
       when(mockUpscanConnector.getUpscanFormData(initiateRequestCaptor.capture())(any[HeaderCarrier]))
         .thenReturn(Future.successful(upscanInitiateResponse))

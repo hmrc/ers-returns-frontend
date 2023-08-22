@@ -31,25 +31,24 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 
 import utils.ERSFakeApplicationConfig
 
+class ErsPdfReaderSpec
+    extends AnyWordSpecLike
+    with Matchers
+    with OptionValues
+    with MockitoSugar
+    with ERSFakeApplicationConfig
+    with GuiceOneAppPerSuite {
 
-
-class ErsPdfReaderSpec extends AnyWordSpecLike
-  with Matchers
-  with OptionValues
-  with MockitoSugar
-  with ERSFakeApplicationConfig
-  with GuiceOneAppPerSuite {
-
-  var pdfStripper: PDFTextStripper = mock[PDFTextStripper]
-  var pdDoc: PDDocument = mock[PDDocument]
+  var pdfStripper: PDFTextStripper   = mock[PDFTextStripper]
+  var pdDoc: PDDocument              = mock[PDDocument]
   var cosDocCOSDocument: COSDocument = mock[COSDocument]
-  var file: File = new File("test/resources/pdfFiles/confirmation.pdf")
-  var parsedText: String = ""
+  var file: File                     = new File("test/resources/pdfFiles/confirmation.pdf")
+  var parsedText: String             = ""
 
   try {
-    val parser: PDFParser = new PDFParser(new RandomAccessFile(file,"r"))
+    val parser: PDFParser = new PDFParser(new RandomAccessFile(file, "r"))
     parser.parse()
-    val cosDoc = parser.getDocument
+    val cosDoc            = parser.getDocument
     pdfStripper = new PDFTextStripper()
     pdDoc = new PDDocument(cosDoc)
     parsedText = pdfStripper.getText(pdDoc)
@@ -65,23 +64,23 @@ class ErsPdfReaderSpec extends AnyWordSpecLike
     }
 
     "contain Scheme name" in {
-      parsedText should include ("Scheme name")
-      parsedText should include ("EMI")
+      parsedText should include("Scheme name")
+      parsedText should include("EMI")
     }
 
     "contain scheme reference" in {
-      parsedText should include ("Unique scheme reference")
-      parsedText should include ("XA1100000000000")
+      parsedText should include("Unique scheme reference")
+      parsedText should include("XA1100000000000")
     }
 
     "contain tax year" in {
-      parsedText should include ("Tax year")
-      parsedText should include ("2021/22")
+      parsedText should include("Tax year")
+      parsedText should include("2021/22")
     }
 
     "contain data and time information" in {
-      parsedText should include ("Time and date of submission")
-      parsedText should include ("12:08PM on Tue 25 January 2022")
+      parsedText should include("Time and date of submission")
+      parsedText should include("12:08PM on Tue 25 January 2022")
     }
   }
 }

@@ -33,14 +33,15 @@ import utils.{ContentUtil, ERSFakeApplicationConfig, ERSUtil, ErsTestHelper, Fix
 
 import scala.concurrent.ExecutionContext
 
-class ErsReceiptPdfBuilderServiceSpec extends AnyWordSpecLike
-  with Matchers
-  with OptionValues
-  with MockitoSugar
-  with BeforeAndAfterEach
-  with ERSFakeApplicationConfig
-  with ErsTestHelper
-  with GuiceOneAppPerSuite {
+class ErsReceiptPdfBuilderServiceSpec
+    extends AnyWordSpecLike
+    with Matchers
+    with OptionValues
+    with MockitoSugar
+    with BeforeAndAfterEach
+    with ERSFakeApplicationConfig
+    with ErsTestHelper
+    with GuiceOneAppPerSuite {
 
   val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
     messagesActionBuilder,
@@ -52,23 +53,24 @@ class ErsReceiptPdfBuilderServiceSpec extends AnyWordSpecLike
     ExecutionContext.global
   )
 
-  implicit lazy val mat: Materializer = app.materializer
-  implicit val ersUtil: ERSUtil = mockErsUtil
-	val testErsReceiptPdfBuilderService = new ErsReceiptPdfBuilderService(mockCountryCodes)
+  implicit lazy val mat: Materializer          = app.materializer
+  implicit val ersUtil: ERSUtil                = mockErsUtil
+  val testErsReceiptPdfBuilderService          = new ErsReceiptPdfBuilderService(mockCountryCodes)
   implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
 
   "ErsReceiptPdfBuilderService" should {
     "generate the ERS summary metdata" in {
       when(mockErsUtil.replaceAmpersand(any[String])).thenAnswer(_.getArgument(0))
-			val output = testErsReceiptPdfBuilderService.addMetaData(Fixtures.ersSummary, "12 August 2016, 4:28pm")
+      val output = testErsReceiptPdfBuilderService.addMetaData(Fixtures.ersSummary, "12 August 2016, 4:28pm")
 
-      val expectedConfirmationMessage = s"Your ${ContentUtil.getSchemeAbbreviation("emi")} annual return has been submitted."
+      val expectedConfirmationMessage =
+        s"Your ${ContentUtil.getSchemeAbbreviation("emi")} annual return has been submitted."
 
-      output.contains(expectedConfirmationMessage) shouldBe true
-      output.contains("Scheme name") shouldBe true
-      output.contains("My scheme") shouldBe true
-      output.contains("testbundle") shouldBe true
-      output.contains("Time and date of submission") shouldBe true
+      output.contains(expectedConfirmationMessage)    shouldBe true
+      output.contains("Scheme name")                  shouldBe true
+      output.contains("My scheme")                    shouldBe true
+      output.contains("testbundle")                   shouldBe true
+      output.contains("Time and date of submission")  shouldBe true
       output.contains("4:28PM on Fri 12 August 2016") shouldBe true
     }
   }

@@ -33,95 +33,109 @@ import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class ReportableEventsController @Inject()(val mcc: MessagesControllerComponents,
-																					 val authConnector: DefaultAuthConnector,
-																					 val ersConnector: ErsConnector,
-																					 implicit val ersUtil: ERSUtil,
-																					 implicit val appConfig: ApplicationConfig,
-                                           globalErrorView: views.html.global_error,
-                                           reportableEventsView: views.html.reportable_events,
-                                           authAction: AuthAction
-																					) extends FrontendController(mcc) with I18nSupport with WithUnsafeDefaultFormBinding with Logging {
+class ReportableEventsController @Inject() (
+  val mcc: MessagesControllerComponents,
+  val authConnector: DefaultAuthConnector,
+  val ersConnector: ErsConnector,
+  implicit val ersUtil: ERSUtil,
+  implicit val appConfig: ApplicationConfig,
+  globalErrorView: views.html.global_error,
+  reportableEventsView: views.html.reportable_events,
+  authAction: AuthAction
+) extends FrontendController(mcc)
+    with I18nSupport
+    with WithUnsafeDefaultFormBinding
+    with Logging {
 
   implicit val ec: ExecutionContext = mcc.executionContext
 
-  def reportableEventsPage(): Action[AnyContent] = authAction.async {
-      implicit request =>
-        ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObj =>
-          updateErsMetaData(requestObj)(request, hc)
-          showReportableEventsPage(requestObj)(request, hc)
-        }
+  def reportableEventsPage(): Action[AnyContent] = authAction.async { implicit request =>
+    ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObj =>
+      updateErsMetaData(requestObj)(request, hc)
+      showReportableEventsPage(requestObj)(request, hc)
+    }
   }
 
-  def updateErsMetaData(requestObject: RequestObject)(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Object] = {
-		ersConnector.connectToEtmpSapRequest(requestObject.getSchemeReference).flatMap { sapNumber =>
+  def updateErsMetaData(
+    requestObject: RequestObject
+  )(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Object] =
+    ersConnector.connectToEtmpSapRequest(requestObject.getSchemeReference).flatMap { sapNumber =>
       ersUtil.fetch[ErsMetaData](ersUtil.ersMetaData, requestObject.getSchemeReference).map { metaData =>
         val ersMetaData = ErsMetaData(
-          metaData.schemeInfo, metaData.ipRef, metaData.aoRef, metaData.empRef, metaData.agentRef, Some(sapNumber))
-        ersUtil.cache(ersUtil.ersMetaData, ersMetaData, requestObject.getSchemeReference).recover {
-          case e: Exception =>
-						logger.error(s"[ReportableEventsController][updateErsMetaData] save failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
-						getGlobalErrorPage
-				}
-      } recover {
-        case e: NoSuchElementException =>
-					logger.error(s"[ReportableEventsController][updateErsMetaData] fetch failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
-					getGlobalErrorPage
-			}
+          metaData.schemeInfo,
+          metaData.ipRef,
+          metaData.aoRef,
+          metaData.empRef,
+          metaData.agentRef,
+          Some(sapNumber)
+        )
+        ersUtil.cache(ersUtil.ersMetaData, ersMetaData, requestObject.getSchemeReference).recover { case e: Exception =>
+          logger.error(
+            s"[ReportableEventsController][updateErsMetaData] save failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}."
+          )
+          getGlobalErrorPage
+        }
+      } recover { case e: NoSuchElementException =>
+        logger.error(
+          s"[ReportableEventsController][updateErsMetaData] fetch failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}."
+        )
+        getGlobalErrorPage
+      }
     }
-  }
 
-  def showReportableEventsPage(requestObject: RequestObject)
-                              (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
+  def showReportableEventsPage(
+    requestObject: RequestObject
+  )(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] =
     ersUtil.fetch[ReportableEvents](ersUtil.reportableEvents, requestObject.getSchemeReference).map { activity =>
       Ok(reportableEventsView(requestObject, activity.isNilReturn, RsFormMappings.chooseForm().fill(activity)))
-    } recover {
-      case _: NoSuchElementException =>
-        val form = ReportableEvents(Some(""))
-        Ok(reportableEventsView(requestObject, Some(""), RsFormMappings.chooseForm().fill(form)))
+    } recover { case _: NoSuchElementException =>
+      val form = ReportableEvents(Some(""))
+      Ok(reportableEventsView(requestObject, Some(""), RsFormMappings.chooseForm().fill(form)))
+    }
+
+  def reportableEventsSelected(): Action[AnyContent] = authAction.async { implicit request =>
+    ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObj =>
+      showReportableEventsSelected(requestObj)(request) recover { case e: Exception =>
+        logger.error(
+          s"[ReportableEventsController][reportableEventsSelected] failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}."
+        )
+        getGlobalErrorPage
+      }
     }
   }
 
-  def reportableEventsSelected(): Action[AnyContent] = authAction.async {
-      implicit request =>
-        ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObj =>
-          showReportableEventsSelected(requestObj)(request) recover {
-            case e: Exception =>
-              logger.error(s"[ReportableEventsController][reportableEventsSelected] failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
-              getGlobalErrorPage
-          }
-        }
-  }
-
-  def showReportableEventsSelected(requestObject: RequestObject)
-                                  (implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] = {
-    RsFormMappings.chooseForm().bindFromRequest().fold(
-      errors => {
-        Future.successful(Ok(reportableEventsView(requestObject, Some(""), errors)))
-      },
-      formData => {
-        ersUtil.cache(ersUtil.reportableEvents, formData, requestObject.getSchemeReference).map { _ =>
-          if (formData.isNilReturn.get == ersUtil.OPTION_NIL_RETURN) {
-            Redirect(routes.SchemeOrganiserController.schemeOrganiserPage())
-          } else {
-            logger.info(s"[ReportableEventsController][showReportableEventsSelected] Redirecting to FileUpload controller to get Partial, timestamp: ${System.currentTimeMillis()}.")
-            Redirect(routes.CheckFileTypeController.checkFileTypePage())
-          }
-        } recover {
-          case e: Exception =>
-            logger.error(s"[ReportableEventsController][showReportableEventsSelected] Save reportable event failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
+  def showReportableEventsSelected(
+    requestObject: RequestObject
+  )(implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
+    RsFormMappings
+      .chooseForm()
+      .bindFromRequest()
+      .fold(
+        errors => Future.successful(Ok(reportableEventsView(requestObject, Some(""), errors))),
+        formData =>
+          ersUtil.cache(ersUtil.reportableEvents, formData, requestObject.getSchemeReference).map { _ =>
+            if (formData.isNilReturn.get == ersUtil.OPTION_NIL_RETURN) {
+              Redirect(routes.SchemeOrganiserController.schemeOrganiserPage())
+            } else {
+              logger.info(
+                s"[ReportableEventsController][showReportableEventsSelected] Redirecting to FileUpload controller to get Partial, timestamp: ${System.currentTimeMillis()}."
+              )
+              Redirect(routes.CheckFileTypeController.checkFileTypePage())
+            }
+          } recover { case e: Exception =>
+            logger.error(
+              s"[ReportableEventsController][showReportableEventsSelected] Save reportable event failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}."
+            )
             getGlobalErrorPage
-        }
+          }
+      )
 
-      }
+  def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result =
+    InternalServerError(
+      globalErrorView(
+        "ers.global_errors.title",
+        "ers.global_errors.heading",
+        "ers.global_errors.message"
+      )(request, messages, appConfig)
     )
-  }
-
-	def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result = {
-		InternalServerError(globalErrorView(
-			"ers.global_errors.title",
-			"ers.global_errors.heading",
-			"ers.global_errors.message"
-		)(request, messages, appConfig))
-	}
 }

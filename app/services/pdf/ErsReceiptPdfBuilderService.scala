@@ -33,16 +33,18 @@ import scala.collection.mutable.ListBuffer
 import scala.io.Source
 
 @Singleton
-class ErsReceiptPdfBuilderService @Inject()(val countryCodes: CountryCodes)(implicit val ERSUtil: ERSUtil) extends PdfDecoratorControllerFactory with Logging {
+class ErsReceiptPdfBuilderService @Inject() (val countryCodes: CountryCodes)(implicit val ERSUtil: ERSUtil)
+    extends PdfDecoratorControllerFactory
+    with Logging {
 
   XRLog.listRegisteredLoggers.forEach((logger: String) => XRLog.setLevel(logger, java.util.logging.Level.WARNING))
 
-  def createPdf(ersSummary: ErsSummary,
-                filesUploaded: Option[ListBuffer[String]],
-                dateSubmitted: String)
-               (implicit messages: Messages): ByteArrayOutputStream = {
+  def createPdf(ersSummary: ErsSummary, filesUploaded: Option[ListBuffer[String]], dateSubmitted: String)(implicit
+    messages: Messages
+  ): ByteArrayOutputStream = {
 
-    implicit val decorator: DecoratorController = createPdfDecoratorControllerForScheme(ersSummary.metaData.schemeInfo.schemeType, ersSummary, filesUploaded)
+    implicit val decorator: DecoratorController =
+      createPdfDecoratorControllerForScheme(ersSummary.metaData.schemeInfo.schemeType, ersSummary, filesUploaded)
 
     val startBoilerplate =
       s"""
@@ -61,20 +63,23 @@ class ErsReceiptPdfBuilderService @Inject()(val countryCodes: CountryCodes)(impl
          |</style>
          |</head>
          |<body>
-         |${pdfHeader}
+         |$pdfHeader
          |""".stripMargin
 
     val endBoilerplate = "</body></html>"
-    val html = startBoilerplate + addMetaData(ersSummary, dateSubmitted) + addSummary() + endBoilerplate
+    val html           = startBoilerplate + addMetaData(ersSummary, dateSubmitted) + addSummary() + endBoilerplate
     buildPdf(html)
   }
 
-  def addMetaData(ersSummary: ErsSummary, dateSubmitted: String)(implicit messages: Messages): String = {
+  def addMetaData(ersSummary: ErsSummary, dateSubmitted: String)(implicit messages: Messages): String =
     ERSUtil.replaceAmpersand(
       s"""
        |<h1 style="padding-top: 3em;">${messages("ers.pdf.title")}</h1>
        |
-       |<p style="padding-bottom: 1em; font-size: 14pt;">${messages("ers.pdf.confirmation.submitted", ContentUtil.getSchemeAbbreviation(ersSummary.metaData.schemeInfo.schemeType))}</p>
+       |<p style="padding-bottom: 1em; font-size: 14pt;">${messages(
+        "ers.pdf.confirmation.submitted",
+        ContentUtil.getSchemeAbbreviation(ersSummary.metaData.schemeInfo.schemeType)
+      )}</p>
        |<div style="display: block;">
        |
        |<h2 style="margin-bottom: 0em;">${messages("ers.pdf.scheme")}</h2>
@@ -99,32 +104,32 @@ class ErsReceiptPdfBuilderService @Inject()(val countryCodes: CountryCodes)(impl
        |</footer>
        |""".stripMargin
     )
-  }
 
   def pdfHeader(implicit messages: Messages): String = {
-    val crownIcon = Source.fromFile(getClass.getResource("/resources/crown.svg").toURI)
-    val startHtml = s"""<div style="padding-bottom: 0.3em; margin-top: -1em;">"""
-    val endHtml =
-      s"""<p style="padding-left: 0.5em; display: inline-block; font-size: 16pt; vertical-align: middle;">${messages("ers.pdf.header")}</p>
+    val crownIcon   = Source.fromFile(getClass.getResource("/resources/crown.svg").toURI)
+    val startHtml   = s"""<div style="padding-bottom: 0.3em; margin-top: -1em;">"""
+    val endHtml     =
+      s"""<p style="padding-left: 0.5em; display: inline-block; font-size: 16pt; vertical-align: middle;">${messages(
+        "ers.pdf.header"
+      )}</p>
             </div><hr/>"""
     val headingHtml = startHtml ++ crownIcon.getLines().mkString ++ endHtml
     crownIcon.close()
     headingHtml
   }
 
-  def addSummary()(implicit decorator: DecoratorController, messages: Messages): String = {
+  def addSummary()(implicit decorator: DecoratorController, messages: Messages): String =
     decorator.decorate
-  }
 
   def buildPdf(html: String): ByteArrayOutputStream = {
-    val os = new ByteArrayOutputStream()
+    val os      = new ByteArrayOutputStream()
     val builder = new PdfRendererBuilder
     builder
       .useColorProfile(IOUtils.toByteArray(getClass.getResourceAsStream("/resources/sRGB-Color-Space-Profile.icm")))
       .useFont(new File(getClass.getResource("/resources/ArialMT.ttf").toURI), "arial")
       .usePdfUaAccessbility(true)
       .usePdfAConformance(PdfRendererBuilder.PdfAConformance.PDFA_2_B)
-      .withHtmlContent(html , "/")
+      .withHtmlContent(html, "/")
       .useFastMode
       .useSVGDrawer(new BatikSVGDrawer())
       .toStream(os)

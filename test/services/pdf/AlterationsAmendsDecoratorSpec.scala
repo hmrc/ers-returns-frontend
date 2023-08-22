@@ -30,13 +30,14 @@ import utils.{ERSFakeApplicationConfig, ErsTestHelper}
 
 import scala.concurrent.ExecutionContext
 
-class AlterationsAmendsDecoratorSpec extends AnyWordSpecLike
-  with Matchers
-  with OptionValues
-  with MockitoSugar
-  with ERSFakeApplicationConfig
-  with ErsTestHelper
-  with GuiceOneAppPerSuite {
+class AlterationsAmendsDecoratorSpec
+    extends AnyWordSpecLike
+    with Matchers
+    with OptionValues
+    with MockitoSugar
+    with ERSFakeApplicationConfig
+    with ErsTestHelper
+    with GuiceOneAppPerSuite {
 
   val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
     messagesActionBuilder,
@@ -50,7 +51,8 @@ class AlterationsAmendsDecoratorSpec extends AnyWordSpecLike
 
   implicit lazy val mat: Materializer = app.materializer
 
-  lazy val altAmends: AlterationAmends = AlterationAmends(altAmendsTerms = Some("1"),
+  lazy val altAmends: AlterationAmends = AlterationAmends(
+    altAmendsTerms = Some("1"),
     altAmendsEligibility = None,
     altAmendsExchange = Some("1"),
     altAmendsVariations = None,
@@ -63,7 +65,6 @@ class AlterationsAmendsDecoratorSpec extends AnyWordSpecLike
     ("option3", Messages("ers_alt_amends.csop.option_3")),
     ("option5", Messages("ers_alt_amends.csop.option_5"))
   )
-
 
   "alterations amends decorator" should {
 
@@ -83,11 +84,11 @@ class AlterationsAmendsDecoratorSpec extends AnyWordSpecLike
       val output = decorator.decorate
 
       output.contains(Messages("ers_trustee_summary.altamends.section")) shouldBe true
-      output.contains(Messages("ers_alt_amends.csop.option_1")) shouldBe true
-      output.contains(Messages("ers_alt_amends.csop.option_2")) shouldBe false
-      output.contains(Messages("ers_alt_amends.csop.option_3")) shouldBe true
-      output.contains(Messages("ers_alt_amends.csop.option_4")) shouldBe false
-      output.contains(Messages("ers_alt_amends.csop.option_5")) shouldBe true
+      output.contains(Messages("ers_alt_amends.csop.option_1"))          shouldBe true
+      output.contains(Messages("ers_alt_amends.csop.option_2"))          shouldBe false
+      output.contains(Messages("ers_alt_amends.csop.option_3"))          shouldBe true
+      output.contains(Messages("ers_alt_amends.csop.option_4"))          shouldBe false
+      output.contains(Messages("ers_alt_amends.csop.option_5"))          shouldBe true
     }
   }
 }

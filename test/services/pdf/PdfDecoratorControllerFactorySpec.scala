@@ -31,13 +31,14 @@ import utils.{CountryCodes, ERSFakeApplicationConfig, ERSUtil, ErsTestHelper, Fi
 
 import scala.concurrent.ExecutionContext
 
-class PdfDecoratorControllerFactorySpec extends AnyWordSpecLike
-  with Matchers
-  with OptionValues
-  with ERSFakeApplicationConfig
-  with MockitoSugar
-  with ErsTestHelper
-  with GuiceOneAppPerSuite {
+class PdfDecoratorControllerFactorySpec
+    extends AnyWordSpecLike
+    with Matchers
+    with OptionValues
+    with ERSFakeApplicationConfig
+    with MockitoSugar
+    with ErsTestHelper
+    with GuiceOneAppPerSuite {
 
   val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
     messagesActionBuilder,
@@ -52,12 +53,14 @@ class PdfDecoratorControllerFactorySpec extends AnyWordSpecLike
   implicit lazy val mat: Materializer = app.materializer
 
   class TestPdfDecoratorControllerFactory extends PdfDecoratorControllerFactory {
-    val mockCountryCodes: CountryCodes = mock[CountryCodes]
+    val mockCountryCodes: CountryCodes      = mock[CountryCodes]
     override val countryCodes: CountryCodes = mockCountryCodes
-    override val ERSUtil: ERSUtil = new ERSUtil(mockSessionCache, mockShortLivedCache, mockAppConfig)(ec, mockCountryCodes)
+    override val ERSUtil: ERSUtil           =
+      new ERSUtil(mockSessionCache, mockShortLivedCache, mockAppConfig)(ec, mockCountryCodes)
   }
 
-  lazy val altAmends: AlterationAmends = AlterationAmends(altAmendsTerms = Some("1"),
+  lazy val altAmends: AlterationAmends = AlterationAmends(
+    altAmendsTerms = Some("1"),
     altAmendsEligibility = Some("1"),
     altAmendsExchange = Some("1"),
     altAmendsVariations = Some("1"),
@@ -97,7 +100,8 @@ class PdfDecoratorControllerFactorySpec extends AnyWordSpecLike
 
     "add 5 decorators" in new TestPdfDecoratorControllerFactory {
 
-      val ersSummary: ErsSummary = ErsSummary("testbundle",
+      val ersSummary: ErsSummary = ErsSummary(
+        "testbundle",
         "1",
         None,
         new DateTime(2016, 6, 8, 11, 45),
@@ -113,14 +117,14 @@ class PdfDecoratorControllerFactorySpec extends AnyWordSpecLike
       )
 
       val decoratorController: DecoratorController = createPdfDecoratorControllerForScheme("emi", ersSummary, None)
-      val decorators: Array[Decorator] = decoratorController.decorators
+      val decorators: Array[Decorator]             = decoratorController.decorators
 
       decoratorController.decorators.size shouldEqual 5
-      decorators(0).getClass should be(classOf[YesNoDecorator])
-      decorators(1).getClass should be(classOf[FileNamesDecorator])
-      decorators(2).getClass should be(classOf[SchemeOrganiserDetailsDecorator])
-      decorators(3).getClass should be(classOf[YesNoDecorator])
-      decorators(4).getClass should be(classOf[GroupSummaryDecorator])
+      decorators(0).getClass                   should be(classOf[YesNoDecorator])
+      decorators(1).getClass                   should be(classOf[FileNamesDecorator])
+      decorators(2).getClass                   should be(classOf[SchemeOrganiserDetailsDecorator])
+      decorators(3).getClass                   should be(classOf[YesNoDecorator])
+      decorators(4).getClass                   should be(classOf[GroupSummaryDecorator])
     }
   }
 
@@ -129,16 +133,16 @@ class PdfDecoratorControllerFactorySpec extends AnyWordSpecLike
     "add 7 decorators" in new TestPdfDecoratorControllerFactory {
 
       val decoratorController: DecoratorController = createPdfDecoratorControllerForScheme("csop", ersSummary, None)
-      val decorators: Array[Decorator] = decoratorController.decorators
+      val decorators: Array[Decorator]             = decoratorController.decorators
 
       decoratorController.decorators.length shouldEqual 7
-      decorators(0).getClass should be(classOf[YesNoDecorator])
-      decorators(1).getClass should be(classOf[FileNamesDecorator])
-      decorators(2).getClass should be(classOf[SchemeOrganiserDetailsDecorator])
-      decorators(3).getClass should be(classOf[YesNoDecorator])
-      decorators(4).getClass should be(classOf[GroupSummaryDecorator])
-      decorators(5).getClass should be(classOf[YesNoDecorator])
-      decorators(6).getClass should be(classOf[AlterationsAmendsDecorator])
+      decorators(0).getClass                     should be(classOf[YesNoDecorator])
+      decorators(1).getClass                     should be(classOf[FileNamesDecorator])
+      decorators(2).getClass                     should be(classOf[SchemeOrganiserDetailsDecorator])
+      decorators(3).getClass                     should be(classOf[YesNoDecorator])
+      decorators(4).getClass                     should be(classOf[GroupSummaryDecorator])
+      decorators(5).getClass                     should be(classOf[YesNoDecorator])
+      decorators(6).getClass                     should be(classOf[AlterationsAmendsDecorator])
     }
   }
 
@@ -147,17 +151,17 @@ class PdfDecoratorControllerFactorySpec extends AnyWordSpecLike
     "add 8 decorators" in new TestPdfDecoratorControllerFactory {
 
       val decoratorController: DecoratorController = createPdfDecoratorControllerForScheme("sip", ersSummary, None)
-      val decorators: Array[Decorator] = decoratorController.decorators
+      val decorators: Array[Decorator]             = decoratorController.decorators
 
       decoratorController.decorators.length shouldEqual 8
-      decorators(0).getClass should be(classOf[YesNoDecorator])
-      decorators(1).getClass should be(classOf[FileNamesDecorator])
-      decorators(2).getClass should be(classOf[SchemeOrganiserDetailsDecorator])
-      decorators(3).getClass should be(classOf[YesNoDecorator])
-      decorators(4).getClass should be(classOf[GroupSummaryDecorator])
-      decorators(5).getClass should be(classOf[TrusteesDecorator])
-      decorators(6).getClass should be(classOf[YesNoDecorator])
-      decorators(7).getClass should be(classOf[AlterationsAmendsDecorator])
+      decorators(0).getClass                     should be(classOf[YesNoDecorator])
+      decorators(1).getClass                     should be(classOf[FileNamesDecorator])
+      decorators(2).getClass                     should be(classOf[SchemeOrganiserDetailsDecorator])
+      decorators(3).getClass                     should be(classOf[YesNoDecorator])
+      decorators(4).getClass                     should be(classOf[GroupSummaryDecorator])
+      decorators(5).getClass                     should be(classOf[TrusteesDecorator])
+      decorators(6).getClass                     should be(classOf[YesNoDecorator])
+      decorators(7).getClass                     should be(classOf[AlterationsAmendsDecorator])
     }
   }
 
@@ -166,15 +170,15 @@ class PdfDecoratorControllerFactorySpec extends AnyWordSpecLike
     "add 6 decorators" in new TestPdfDecoratorControllerFactory {
 
       val decoratorController: DecoratorController = createPdfDecoratorControllerForScheme("saye", ersSummary, None)
-      val decorators: Array[Decorator] = decoratorController.decorators
+      val decorators: Array[Decorator]             = decoratorController.decorators
 
       decoratorController.decorators.length shouldEqual 6
-      decorators(0).getClass should be(classOf[YesNoDecorator])
-      decorators(1).getClass should be(classOf[FileNamesDecorator])
-      decorators(2).getClass should be(classOf[SchemeOrganiserDetailsDecorator])
-      decorators(3).getClass should be(classOf[YesNoDecorator])
-      decorators(4).getClass should be(classOf[YesNoDecorator])
-      decorators(5).getClass should be(classOf[AlterationsAmendsDecorator])
+      decorators(0).getClass                     should be(classOf[YesNoDecorator])
+      decorators(1).getClass                     should be(classOf[FileNamesDecorator])
+      decorators(2).getClass                     should be(classOf[SchemeOrganiserDetailsDecorator])
+      decorators(3).getClass                     should be(classOf[YesNoDecorator])
+      decorators(4).getClass                     should be(classOf[YesNoDecorator])
+      decorators(5).getClass                     should be(classOf[AlterationsAmendsDecorator])
     }
   }
 
@@ -183,14 +187,14 @@ class PdfDecoratorControllerFactorySpec extends AnyWordSpecLike
     "add 5 decorators" in new TestPdfDecoratorControllerFactory {
 
       val decoratorController: DecoratorController = createPdfDecoratorControllerForScheme("other", ersSummary, None)
-      val decorators: Array[Decorator] = decoratorController.decorators
+      val decorators: Array[Decorator]             = decoratorController.decorators
 
       decoratorController.decorators.length shouldEqual 5
-      decorators(0).getClass should be(classOf[YesNoDecorator])
-      decorators(1).getClass should be(classOf[FileNamesDecorator])
-      decorators(2).getClass should be(classOf[SchemeOrganiserDetailsDecorator])
-      decorators(3).getClass should be(classOf[YesNoDecorator])
-      decorators(4).getClass should be(classOf[GroupSummaryDecorator])
+      decorators(0).getClass                     should be(classOf[YesNoDecorator])
+      decorators(1).getClass                     should be(classOf[FileNamesDecorator])
+      decorators(2).getClass                     should be(classOf[SchemeOrganiserDetailsDecorator])
+      decorators(3).getClass                     should be(classOf[YesNoDecorator])
+      decorators(4).getClass                     should be(classOf[GroupSummaryDecorator])
     }
   }
 
@@ -200,7 +204,7 @@ class PdfDecoratorControllerFactorySpec extends AnyWordSpecLike
       Array("csop", "sip", "saye").map { scheme =>
         val mappedAltAmends = createAltAmendOptionsFor(ersSummary, scheme)
 
-        mappedAltAmends("title") shouldEqual Messages("ers_trustee_summary.altamends.section")
+        mappedAltAmends("title")   shouldEqual Messages("ers_trustee_summary.altamends.section")
         mappedAltAmends("option1") shouldEqual Messages(s"ers_alt_amends.$scheme.option_1")
         mappedAltAmends("option2") shouldEqual Messages(s"ers_alt_amends.$scheme.option_2")
         mappedAltAmends("option3") shouldEqual Messages(s"ers_alt_amends.$scheme.option_3")

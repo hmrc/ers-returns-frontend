@@ -30,12 +30,12 @@ import utils.ErsTestHelper
 import scala.concurrent.ExecutionContext
 
 class LanguageSwitchControllerSpec
-  extends AnyWordSpecLike
-  with Matchers
-  with OptionValues
-  with ErsTestHelper
-  with GuiceOneAppPerSuite
-  with PrivateMethodTester {
+    extends AnyWordSpecLike
+    with Matchers
+    with OptionValues
+    with ErsTestHelper
+    with GuiceOneAppPerSuite
+    with PrivateMethodTester {
 
   override implicit val ec: ExecutionContext = app.injector.instanceOf[ExecutionContext]
 
@@ -49,32 +49,32 @@ class LanguageSwitchControllerSpec
     ExecutionContext.global
   )
 
-	lazy val langMap: Map[String, Lang] = Map(
-		"english" -> Lang("en"),
-		"cymraeg" -> Lang("cy")
-	)
+  lazy val langMap: Map[String, Lang] = Map(
+    "english" -> Lang("en"),
+    "cymraeg" -> Lang("cy")
+  )
 
-	when(mockAppConfig.languageTranslationEnabled).thenReturn(true)
-	when(mockAppConfig.languageMap).thenReturn(langMap)
+  when(mockAppConfig.languageTranslationEnabled).thenReturn(true)
+  when(mockAppConfig.languageMap).thenReturn(langMap)
 
   "Hitting language selection endpoint" must {
     "redirect to Welsh translated start page if Welsh language is selected" in {
-      val request = FakeRequest()
-      val result = new LanguageSwitchController(appConfig = mockAppConfig, mockMCC).switchToLanguage("cymraeg")(request)
+      val request                = FakeRequest()
+      val result                 = new LanguageSwitchController(appConfig = mockAppConfig, mockMCC).switchToLanguage("cymraeg")(request)
       val resultCookies: Cookies = cookies(result)
       resultCookies.size shouldBe 1
       val cookie: Cookie = resultCookies.head
-      cookie.name shouldBe "PLAY_LANG"
+      cookie.name  shouldBe "PLAY_LANG"
       cookie.value shouldBe "cy"
     }
 
     "redirect to English translated start page if English language is selected" in {
-      val request = FakeRequest()
-      val result = new LanguageSwitchController(appConfig = mockAppConfig, mockMCC).switchToLanguage("english")(request)
+      val request                = FakeRequest()
+      val result                 = new LanguageSwitchController(appConfig = mockAppConfig, mockMCC).switchToLanguage("english")(request)
       val resultCookies: Cookies = cookies(result)
       resultCookies.size shouldBe 1
       val cookie: Cookie = resultCookies.head
-      cookie.name shouldBe "PLAY_LANG"
+      cookie.name  shouldBe "PLAY_LANG"
       cookie.value shouldBe "en"
     }
   }
@@ -82,9 +82,9 @@ class LanguageSwitchControllerSpec
   "asRelativeUrl method" should {
 
     "build the relative url given valid input" in {
-      val controller = new LanguageSwitchController(mockAppConfig, mockMCC)
+      val controller    = new LanguageSwitchController(mockAppConfig, mockMCC)
       val privateMethod = PrivateMethod[Option[String]](Symbol("asRelativeUrl"))
-      val result = controller.invokePrivate(privateMethod("http://localhost:9000/test?testing#testerino"))
+      val result        = controller.invokePrivate(privateMethod("http://localhost:9000/test?testing#testerino"))
 
       result.get shouldBe "/test?testing#testerino"
     }

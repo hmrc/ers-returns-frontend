@@ -28,33 +28,32 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class ApplicationController @Inject()(val mcc: MessagesControllerComponents,
-                                      val authConnector: DefaultAuthConnector,
-                                      implicit val ersUtil: ERSUtil,
-                                      implicit val appConfig: ApplicationConfig,
-                                      unauthorisedView: views.html.unauthorised,
-                                      signedOutView: views.html.signedOut,
-                                      notAuthorisedView: views.html.not_authorised,
-                                      authAction: AuthActionGovGateway
-                                     ) extends FrontendController(mcc) with I18nSupport {
+class ApplicationController @Inject() (
+  val mcc: MessagesControllerComponents,
+  val authConnector: DefaultAuthConnector,
+  implicit val ersUtil: ERSUtil,
+  implicit val appConfig: ApplicationConfig,
+  unauthorisedView: views.html.unauthorised,
+  signedOutView: views.html.signedOut,
+  notAuthorisedView: views.html.not_authorised,
+  authAction: AuthActionGovGateway
+) extends FrontendController(mcc)
+    with I18nSupport {
 
   implicit val ec: ExecutionContext = mcc.executionContext
 
-  def unauthorised(): Action[AnyContent] = Action {
-    implicit request =>
-      Unauthorized(unauthorisedView())
+  def unauthorised(): Action[AnyContent] = Action { implicit request =>
+    Unauthorized(unauthorisedView())
   }
 
   //TODO investigate why both of these are needed
-  def notAuthorised(): Action[AnyContent] = authAction.async {
-      implicit request =>
-        //TODO the content of this page references ERS Checking - needs investigation
-        Future.successful(Unauthorized(notAuthorisedView.render(request, request2Messages, appConfig)))
+  def notAuthorised(): Action[AnyContent] = authAction.async { implicit request =>
+    //TODO the content of this page references ERS Checking - needs investigation
+    Future.successful(Unauthorized(notAuthorisedView.render(request, request2Messages, appConfig)))
   }
 
-  def timedOut(): Action[AnyContent] = Action {
-    implicit request =>
-      val loginScreenUrl = appConfig.portalDomain
-      Ok(signedOutView(loginScreenUrl))
+  def timedOut(): Action[AnyContent] = Action { implicit request =>
+    val loginScreenUrl = appConfig.portalDomain
+    Ok(signedOutView(loginScreenUrl))
   }
 }

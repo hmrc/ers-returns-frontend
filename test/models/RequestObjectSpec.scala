@@ -28,14 +28,16 @@ import utils.Fixtures.ersRequestObject
 
 class RequestObjectSpec extends AnyWordSpecLike with Matchers with GuiceOneAppPerSuite with PrivateMethodTester {
 
-  def messagesApi: MessagesApi = app.injector.instanceOf[MessagesApi]
+  def messagesApi: MessagesApi    = app.injector.instanceOf[MessagesApi]
   implicit val messages: Messages = messagesApi.preferred(Seq(Lang.get("en").get))
 
   "RequestObject" should {
 
     "return a page title with the correct format" in {
 
-      val expected = s"${messages(s"ers.scheme.${ersRequestObject.getSchemeType}")} - ${messages(s"ers.scheme.title", "Other")} - ${ersRequestObject.getSchemeReference} - ${DateUtils.getFullTaxYear(ersRequestObject.getTaxYear)}"
+      val expected =
+        s"${messages(s"ers.scheme.${ersRequestObject.getSchemeType}")} - ${messages(s"ers.scheme.title", "Other")} - ${ersRequestObject.getSchemeReference} - ${DateUtils
+          .getFullTaxYear(ersRequestObject.getTaxYear)}"
 
       ersRequestObject.getPageTitle mustBe expected
     }
@@ -43,7 +45,9 @@ class RequestObjectSpec extends AnyWordSpecLike with Matchers with GuiceOneAppPe
     "return a page title in Welsh with the correct format for scheme Other" in {
       implicit val messages: Messages = messagesApi.preferred(Seq(Lang.get("cy").get))
 
-      val expected = s"${messages(s"ers.scheme.${ersRequestObject.getSchemeType}")} - ${messages(s"ers.scheme.title", "Arall")} - ${ersRequestObject.getSchemeReference} - ${DateUtils.getFullTaxYear(ersRequestObject.getTaxYear)}"
+      val expected =
+        s"${messages(s"ers.scheme.${ersRequestObject.getSchemeType}")} - ${messages(s"ers.scheme.title", "Arall")} - ${ersRequestObject.getSchemeReference} - ${DateUtils
+          .getFullTaxYear(ersRequestObject.getTaxYear)}"
 
       ersRequestObject.getPageTitle mustBe expected
     }
@@ -63,7 +67,7 @@ class RequestObjectSpec extends AnyWordSpecLike with Matchers with GuiceOneAppPe
 
     "return an instance of SchemeInfo with the correct field" in {
 
-      val requestObject =
+      val requestObject       =
         RequestObject(
           None,
           Some("2016/17"),
@@ -76,7 +80,7 @@ class RequestObjectSpec extends AnyWordSpecLike with Matchers with GuiceOneAppPe
           None
         )
       val privateToSchemeInfo = PrivateMethod[SchemeInfo](Symbol("toSchemeInfo"))
-      val result = requestObject invokePrivate privateToSchemeInfo()
+      val result              = requestObject invokePrivate privateToSchemeInfo()
 
       result.schemeName mustBe "MyScheme"
       result.schemeId mustBe "1"
@@ -112,10 +116,10 @@ class RequestObjectSpec extends AnyWordSpecLike with Matchers with GuiceOneAppPe
           "CSOP"
         )
 
-      val result = requestObject.toErsMetaData
-      val resultTimestamp = result.schemeInfo.timestamp
+      val result             = requestObject.toErsMetaData
+      val resultTimestamp    = result.schemeInfo.timestamp
       val adjustedSchemeInfo = result.schemeInfo.copy(timestamp = null)
-      val diff = new Period(resultTimestamp, DateTime.now, PeriodType.millis)
+      val diff               = new Period(resultTimestamp, DateTime.now, PeriodType.millis)
 
       diff.getMillis must be < 100
       adjustedSchemeInfo mustBe expectedSchemeInfo

@@ -20,58 +20,58 @@ import org.joda.time.DateTime
 import play.api.libs.json.JodaWrites._
 import play.api.libs.json._
 
-case class SchemeInfo (
-                        schemeRef: String,
-                        timestamp: DateTime = DateTime.now,
-                        schemeId: String,
-                        taxYear: String,
-                        schemeName: String,
-                        schemeType: String
-                      )
+case class SchemeInfo(
+  schemeRef: String,
+  timestamp: DateTime = DateTime.now,
+  schemeId: String,
+  taxYear: String,
+  schemeName: String,
+  schemeType: String
+)
 
 object SchemeInfo {
   // Overriding the default play 2.6 DateTime format to allow backwards compatibility with play 2.5 services (ers-submissions)
   implicit val dateFormatDefault: Format[DateTime] = new Format[DateTime] {
     override def reads(json: JsValue): JsResult[DateTime] = JodaReads.DefaultJodaDateTimeReads.reads(json)
-    override def writes(o: DateTime): JsValue = JodaDateTimeNumberWrites.writes(o)
+    override def writes(o: DateTime): JsValue             = JodaDateTimeNumberWrites.writes(o)
   }
-  implicit val format: OFormat[SchemeInfo] = Json.format[SchemeInfo]
+  implicit val format: OFormat[SchemeInfo]         = Json.format[SchemeInfo]
 }
 case class ErsMetaData(
-                              schemeInfo:SchemeInfo,
-                               ipRef: String,
-                               aoRef: Option[String],
-                               empRef: String,
-                               agentRef: Option[String],
-                               sapNumber: Option[String]
-                               )
+  schemeInfo: SchemeInfo,
+  ipRef: String,
+  aoRef: Option[String],
+  empRef: String,
+  agentRef: Option[String],
+  sapNumber: Option[String]
+)
 
 object ErsMetaData {
   implicit val format: OFormat[ErsMetaData] = Json.format[ErsMetaData]
 }
 
 case class AlterationAmends(
-                           altAmendsTerms: Option[String],
-                           altAmendsEligibility: Option[String],
-                           altAmendsExchange: Option[String],
-                           altAmendsVariations: Option[String],
-                           altAmendsOther: Option[String]
-                           )
+  altAmendsTerms: Option[String],
+  altAmendsEligibility: Option[String],
+  altAmendsExchange: Option[String],
+  altAmendsVariations: Option[String],
+  altAmendsOther: Option[String]
+)
 
 object AlterationAmends {
   implicit val format: OFormat[AlterationAmends] = Json.format[AlterationAmends]
 }
 case class CompanyDetails(
-                              companyName: String,
-                              addressLine1: String,
-                              addressLine2: Option[String],
-                              addressLine3: Option[String],
-                              addressLine4: Option[String],
-                              country: Option[String],
-                              postcode: Option[String],
-                              companyReg: Option[String],
-                              corporationRef: Option[String]
-                              )
+  companyName: String,
+  addressLine1: String,
+  addressLine2: Option[String],
+  addressLine3: Option[String],
+  addressLine4: Option[String],
+  country: Option[String],
+  postcode: Option[String],
+  companyReg: Option[String],
+  corporationRef: Option[String]
+)
 object CompanyDetails {
   implicit val format: OFormat[CompanyDetails] = Json.format[CompanyDetails]
 }
@@ -81,34 +81,33 @@ object CompanyDetailsList {
   implicit val format: OFormat[CompanyDetailsList] = Json.format[CompanyDetailsList]
 }
 case class GroupSchemeInfo(
-                             groupScheme: Option[String],
-                             groupSchemeType: Option[String]
-
+  groupScheme: Option[String],
+  groupSchemeType: Option[String]
 )
 object GroupSchemeInfo {
   implicit val format: OFormat[GroupSchemeInfo] = Json.format[GroupSchemeInfo]
 }
 
 case class ErsSummary(
-                        bundleRef: String,
-                        isNilReturn: String,
-                        fileType: Option[String],
-                        confirmationDateTime: DateTime,
-                        metaData: ErsMetaData,
-                        altAmendsActivity: Option[AltAmendsActivity],
-                        alterationAmends: Option[AlterationAmends],
-                        groupService: Option[GroupSchemeInfo],
-                        schemeOrganiser: Option[SchemeOrganiserDetails],
-                        companies: Option[CompanyDetailsList],
-                        trustees: Option[TrusteeDetailsList],
-                        nofOfRows: Option[Int],
-                        transferStatus: Option[String]
-                        )
+  bundleRef: String,
+  isNilReturn: String,
+  fileType: Option[String],
+  confirmationDateTime: DateTime,
+  metaData: ErsMetaData,
+  altAmendsActivity: Option[AltAmendsActivity],
+  alterationAmends: Option[AlterationAmends],
+  groupService: Option[GroupSchemeInfo],
+  schemeOrganiser: Option[SchemeOrganiserDetails],
+  companies: Option[CompanyDetailsList],
+  trustees: Option[TrusteeDetailsList],
+  nofOfRows: Option[Int],
+  transferStatus: Option[String]
+)
 object ErsSummary {
   // Overriding the default play 2.6 DateTime format to allow backwards compatibility with play 2.5 services (ers-submissions)
   implicit val dateFormatDefault: Format[DateTime] = new Format[DateTime] {
     override def reads(json: JsValue): JsResult[DateTime] = JodaReads.DefaultJodaDateTimeReads.reads(json)
-    override def writes(o: DateTime): JsValue = JodaDateTimeNumberWrites.writes(o)
+    override def writes(o: DateTime): JsValue             = JodaDateTimeNumberWrites.writes(o)
   }
-  implicit val format: OFormat[ErsSummary] = Json.format[ErsSummary]
+  implicit val format: OFormat[ErsSummary]         = Json.format[ErsSummary]
 }

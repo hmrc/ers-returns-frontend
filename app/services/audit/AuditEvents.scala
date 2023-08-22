@@ -26,33 +26,36 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class AuditEvents @Inject()(val auditConnector: DefaultAuditConnector)(implicit val ec: ExecutionContext) extends AuditService {
+class AuditEvents @Inject() (val auditConnector: DefaultAuditConnector)(implicit val ec: ExecutionContext)
+    extends AuditService {
 
-  def auditRunTimeError(exception : Throwable, contextInfo : String, rsc: ErsMetaData, bundle : String)
-											 (implicit hc: HeaderCarrier) : Unit = {
-    sendEvent("RunTimeError",
-      Map("ErrorMessage" -> exception.getMessage,
-        "Context" -> contextInfo,
+  def auditRunTimeError(exception: Throwable, contextInfo: String, rsc: ErsMetaData, bundle: String)(implicit
+    hc: HeaderCarrier
+  ): Unit =
+    sendEvent(
+      "RunTimeError",
+      Map(
+        "ErrorMessage"       -> exception.getMessage,
+        "Context"            -> contextInfo,
         "ReturnServiceCache" -> eventMap(rsc, bundle).toString,
-        "StackTrace" -> ExceptionUtils.getStackTrace(exception)))
-  }
+        "StackTrace"         -> ExceptionUtils.getStackTrace(exception)
+      )
+    )
 
-	def ersSubmissionAuditEvent(rsc: ErsMetaData, bundle: String)(implicit hc: HeaderCarrier): Future[AuditResult] = {
-		sendEvent("ErsReturnsFrontendSubmission", eventMap(rsc, bundle))
-	}
+  def ersSubmissionAuditEvent(rsc: ErsMetaData, bundle: String)(implicit hc: HeaderCarrier): Future[AuditResult] =
+    sendEvent("ErsReturnsFrontendSubmission", eventMap(rsc, bundle))
 
-  def eventMap(rsc : ErsMetaData, bundle : String): Map[String,String] = {
+  def eventMap(rsc: ErsMetaData, bundle: String): Map[String, String] =
     Map(
-      "schemeRef" -> rsc.schemeInfo.schemeRef,
-      "schemeId" -> rsc.schemeInfo.schemeId,
-      "taxYear" -> rsc.schemeInfo.taxYear,
+      "schemeRef"  -> rsc.schemeInfo.schemeRef,
+      "schemeId"   -> rsc.schemeInfo.schemeId,
+      "taxYear"    -> rsc.schemeInfo.taxYear,
       "schemeName" -> rsc.schemeInfo.schemeName,
       "schemeType" -> rsc.schemeInfo.schemeType,
-      "aoRef" -> rsc.aoRef.getOrElse(""),
-      "empRef" -> rsc.empRef,
-      "agentRef" -> rsc.agentRef.getOrElse(""),
-      "sapNumber" -> rsc.sapNumber.getOrElse(""),
-      "bundleRed" -> bundle
+      "aoRef"      -> rsc.aoRef.getOrElse(""),
+      "empRef"     -> rsc.empRef,
+      "agentRef"   -> rsc.agentRef.getOrElse(""),
+      "sapNumber"  -> rsc.sapNumber.getOrElse(""),
+      "bundleRed"  -> bundle
     )
-  }
 }

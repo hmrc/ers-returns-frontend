@@ -38,13 +38,14 @@ import views.html.{global_error, scheme_organiser}
 import java.util.NoSuchElementException
 import scala.concurrent.{ExecutionContext, Future}
 
-class SchemeOrganiserControllerSpec extends AnyWordSpecLike
-  with Matchers
-  with OptionValues
-  with ERSFakeApplicationConfig
-  with ErsTestHelper
-  with GuiceOneAppPerSuite
-  with ScalaFutures {
+class SchemeOrganiserControllerSpec
+    extends AnyWordSpecLike
+    with Matchers
+    with OptionValues
+    with ERSFakeApplicationConfig
+    with ErsTestHelper
+    with GuiceOneAppPerSuite
+    with ScalaFutures {
 
   val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
     messagesActionBuilder,
@@ -57,21 +58,30 @@ class SchemeOrganiserControllerSpec extends AnyWordSpecLike
   )
 
   implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
-  val globalErrorView: global_error = app.injector.instanceOf[global_error]
-  val schemeOrganiserView: scheme_organiser = app.injector.instanceOf[scheme_organiser]
+  val globalErrorView: global_error            = app.injector.instanceOf[global_error]
+  val schemeOrganiserView: scheme_organiser    = app.injector.instanceOf[scheme_organiser]
 
   "calling Scheme Organiser Page" should {
 
-    def buildFakeSchemeOrganiserController(schemeOrganiserDetailsRes: Boolean = true,
-																					 schemeOrganiserDataCached: Boolean = false,
-																					 reportableEventsRes: Boolean = true,
-																					 fileTypeRes: Boolean = true
-																					): SchemeOrganiserController = new SchemeOrganiserController(mockMCC, mockAuthConnector, mockCountryCodes,
-      mockErsUtil, mockAppConfig, globalErrorView, schemeOrganiserView, testAuthAction) {
+    def buildFakeSchemeOrganiserController(
+      schemeOrganiserDetailsRes: Boolean = true,
+      schemeOrganiserDataCached: Boolean = false,
+      reportableEventsRes: Boolean = true,
+      fileTypeRes: Boolean = true
+    ): SchemeOrganiserController = new SchemeOrganiserController(
+      mockMCC,
+      mockAuthConnector,
+      mockCountryCodes,
+      mockErsUtil,
+      mockAppConfig,
+      globalErrorView,
+      schemeOrganiserView,
+      testAuthAction
+    ) {
 
-			when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any())).thenReturn(Future.successful(ersRequestObject))
+      when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any())).thenReturn(Future.successful(ersRequestObject))
 
-			when(
+      when(
         mockErsUtil.fetch[ReportableEvents](refEq(REPORTABLE_EVENTS), any())(any(), any())
       ).thenReturn(
         if (reportableEventsRes) {
@@ -94,7 +104,9 @@ class SchemeOrganiserControllerSpec extends AnyWordSpecLike
       ).thenReturn(
         if (schemeOrganiserDetailsRes) {
           if (schemeOrganiserDataCached) {
-            Future.successful(SchemeOrganiserDetails("Name", Fixtures.companyName, None, None, None, None, None, None, None))
+            Future.successful(
+              SchemeOrganiserDetails("Name", Fixtures.companyName, None, None, None, None, None, None, None)
+            )
           } else {
             Future.successful(SchemeOrganiserDetails("", "", None, None, None, None, None, None, None))
           }
@@ -105,78 +117,88 @@ class SchemeOrganiserControllerSpec extends AnyWordSpecLike
     }
 
     "give a redirect status (to company authentication frontend) on GET if user is not authenticated" in {
-			setUnauthorisedMocks()
+      setUnauthorisedMocks()
       val controllerUnderTest = buildFakeSchemeOrganiserController()
-      val result = controllerUnderTest.schemeOrganiserPage().apply(FakeRequest("GET", ""))
+      val result              = controllerUnderTest.schemeOrganiserPage().apply(FakeRequest("GET", ""))
       status(result) shouldBe Status.SEE_OTHER
     }
 
     "give a status OK on GET if user is authenticated" in {
-			setAuthMocks()
+      setAuthMocks()
       val controllerUnderTest = buildFakeSchemeOrganiserController()
-      val result = controllerUnderTest.schemeOrganiserPage().apply(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+      val result              = controllerUnderTest.schemeOrganiserPage().apply(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
       status(result) shouldBe Status.OK
     }
 
     "direct to ers errors page if fetching reportableEvents throws exception" in {
       val controllerUnderTest = buildFakeSchemeOrganiserController(reportableEventsRes = false)
-			val req = Fixtures.buildFakeRequestWithSessionIdCSOP("GET")
-      val authRequest = buildRequestWithAuth(req)
+      val req                 = Fixtures.buildFakeRequestWithSessionIdCSOP("GET")
+      val authRequest         = buildRequestWithAuth(req)
 
       val result = controllerUnderTest.showSchemeOrganiserPage(ersRequestObject)(authRequest, hc)
-      contentAsString(result) should include(testMessages("ers.global_errors.message"))
-      contentAsString(result) shouldBe contentAsString(Future(buildFakeSchemeOrganiserController().getGlobalErrorPage(req, testMessages)))
+      contentAsString(result)   should include(testMessages("ers.global_errors.message"))
+      contentAsString(result) shouldBe contentAsString(
+        Future(buildFakeSchemeOrganiserController().getGlobalErrorPage(req, testMessages))
+      )
     }
 
     "show blank scheme organiser page if fetching file type from cache fails" in {
       val controllerUnderTest = buildFakeSchemeOrganiserController(fileTypeRes = false)
-      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+      val authRequest         = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
 
       val result = controllerUnderTest.showSchemeOrganiserPage(ersRequestObject)(authRequest, hc)
       status(result) shouldBe Status.OK
       val document = Jsoup.parse(contentAsString(result))
-      document.select("input[id=company-name]").hasText shouldEqual false
+      document.select("input[id=company-name]").hasText   shouldEqual false
       document.select("input[id=address-line-1]").hasText shouldEqual false
     }
 
     "show blank scheme organiser page if fetching scheme organiser details from cache fails" in {
       val controllerUnderTest = buildFakeSchemeOrganiserController(schemeOrganiserDetailsRes = false)
-      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+      val authRequest         = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
 
       val result = controllerUnderTest.showSchemeOrganiserPage(ersRequestObject)(authRequest, hc)
       status(result) shouldBe Status.OK
       val document = Jsoup.parse(contentAsString(result))
-      document.select("input[id=company-name]").hasText shouldEqual false
+      document.select("input[id=company-name]").hasText   shouldEqual false
       document.select("input[id=address-line-1]").hasText shouldEqual false
     }
 
     "show filled out scheme organiser page if fetching scheme organiser details from cache is successful" in {
       val controllerUnderTest = buildFakeSchemeOrganiserController(schemeOrganiserDataCached = true)
-      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+      val authRequest         = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
 
       val result = controllerUnderTest.showSchemeOrganiserPage(ersRequestObject)(authRequest, hc)
       status(result) shouldBe Status.OK
       val document = Jsoup.parse(contentAsString(result))
-      document.select("input[id=companyName]").`val`() shouldEqual "Name"
+      document.select("input[id=companyName]").`val`()  shouldEqual "Name"
       document.select("input[id=addressLine1]").`val`() shouldEqual Fixtures.companyName
     }
 
   }
 
-
   "calling Scheme Organiser Submit Page" should {
 
-    def buildFakeSchemeOrganiserController(schemeOrganiserDetailsRes: Boolean = true,
-																					 schemeOrganiserDataCached: Boolean = false,
-																					 reportableEventsRes: Boolean = true,
-																					 fileTypeRes: Boolean = true,
-																					 schemeOrganiserDataCachedOk: Boolean = true
-																					): SchemeOrganiserController = new SchemeOrganiserController(mockMCC, mockAuthConnector, mockCountryCodes, mockErsUtil,
-      mockAppConfig, globalErrorView, schemeOrganiserView, testAuthAction) {
+    def buildFakeSchemeOrganiserController(
+      schemeOrganiserDetailsRes: Boolean = true,
+      schemeOrganiserDataCached: Boolean = false,
+      reportableEventsRes: Boolean = true,
+      fileTypeRes: Boolean = true,
+      schemeOrganiserDataCachedOk: Boolean = true
+    ): SchemeOrganiserController = new SchemeOrganiserController(
+      mockMCC,
+      mockAuthConnector,
+      mockCountryCodes,
+      mockErsUtil,
+      mockAppConfig,
+      globalErrorView,
+      schemeOrganiserView,
+      testAuthAction
+    ) {
 
-			when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any())).thenReturn(Future.successful(ersRequestObject))
+      when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any())).thenReturn(Future.successful(ersRequestObject))
 
-			when(mockErsUtil.fetch[ReportableEvents](refEq(REPORTABLE_EVENTS), any())(any(), any())).thenReturn(
+      when(mockErsUtil.fetch[ReportableEvents](refEq(REPORTABLE_EVENTS), any())(any(), any())).thenReturn(
         if (reportableEventsRes) {
           Future.successful(ReportableEvents(Some(OPTION_NO)))
         } else {
@@ -193,7 +215,9 @@ class SchemeOrganiserControllerSpec extends AnyWordSpecLike
       when(mockErsUtil.fetch[SchemeOrganiserDetails](refEq(SCHEME_ORGANISER_CACHE), any())(any(), any())).thenReturn(
         if (schemeOrganiserDetailsRes) {
           if (schemeOrganiserDataCached) {
-            Future.successful(SchemeOrganiserDetails("Name", Fixtures.companyName, None, None, None, None, None, None, None))
+            Future.successful(
+              SchemeOrganiserDetails("Name", Fixtures.companyName, None, None, None, None, None, None, None)
+            )
           } else {
             Future.successful(SchemeOrganiserDetails("", "", None, None, None, None, None, None, None))
           }
@@ -212,25 +236,25 @@ class SchemeOrganiserControllerSpec extends AnyWordSpecLike
     }
 
     "give a redirect status (to company authentication frontend) on GET if user is not authenticated" in {
-			setUnauthorisedMocks()
+      setUnauthorisedMocks()
       val controllerUnderTest = buildFakeSchemeOrganiserController()
-      val result = controllerUnderTest.schemeOrganiserSubmit().apply(FakeRequest("GET", ""))
+      val result              = controllerUnderTest.schemeOrganiserSubmit().apply(FakeRequest("GET", ""))
       status(result) shouldBe Status.SEE_OTHER
     }
 
     "give a status OK on GET if user is authenticated" in {
-			setAuthMocks()
+      setAuthMocks()
       val controllerUnderTest = buildFakeSchemeOrganiserController()
-      val result = controllerUnderTest.schemeOrganiserSubmit().apply(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+      val result              = controllerUnderTest.schemeOrganiserSubmit().apply(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
       status(result) shouldBe Status.OK
     }
 
     "give a Ok status and stay on the same page if form errors and display the error" in {
       val controllerUnderTest = buildFakeSchemeOrganiserController()
       val schemeOrganiserData = Map("" -> "")
-      val form = RsFormMappings.schemeOrganiserForm().bind(schemeOrganiserData)
-      val request = Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-      val authRequest = buildRequestWithAuth(request)
+      val form                = RsFormMappings.schemeOrganiserForm().bind(schemeOrganiserData)
+      val request             = Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
+      val authRequest         = buildRequestWithAuth(request)
 
       val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(authRequest, hc)
       status(result) shouldBe Status.OK
@@ -238,80 +262,86 @@ class SchemeOrganiserControllerSpec extends AnyWordSpecLike
 
     "give a redirect status on POST if no form errors" in {
       val controllerUnderTest = buildFakeSchemeOrganiserController()
-      val schemeOrganiserData = Map("companyName" -> Fixtures.companyName,
-				"addressLine1" -> "Add1",
-				"addressLine" -> "Add2",
-				"addressLine3" -> "Add3",
-				"addressLine1" -> "Add4",
-				"postcode" -> "AA11 1AA",
-				"country" -> "United Kingdom",
-				"companyReg" -> "AB123456",
-				"corporationRef" -> "1234567890"
-			)
-      val form = _root_.models.RsFormMappings.schemeOrganiserForm().bind(schemeOrganiserData)
-      val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-      val authRequest = buildRequestWithAuth(request)
+      val schemeOrganiserData = Map(
+        "companyName"    -> Fixtures.companyName,
+        "addressLine1"   -> "Add1",
+        "addressLine"    -> "Add2",
+        "addressLine3"   -> "Add3",
+        "addressLine1"   -> "Add4",
+        "postcode"       -> "AA11 1AA",
+        "country"        -> "United Kingdom",
+        "companyReg"     -> "AB123456",
+        "corporationRef" -> "1234567890"
+      )
+      val form                = _root_.models.RsFormMappings.schemeOrganiserForm().bind(schemeOrganiserData)
+      val request             = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
+      val authRequest         = buildRequestWithAuth(request)
 
       val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(authRequest, hc)
-      status(result) shouldBe Status.SEE_OTHER
+      status(result)                                shouldBe Status.SEE_OTHER
       result.futureValue.header.headers("Location") shouldBe routes.GroupSchemeController.groupSchemePage().toString
     }
 
     "direct to ers errors page if saving scheme organiser data throws exception" in {
       val controllerUnderTest = buildFakeSchemeOrganiserController(schemeOrganiserDataCachedOk = false)
-      val schemeOrganiserData = Map("companyName" -> Fixtures.companyName,
-				"addressLine1" -> "Add1",
-				"addressLine" -> "Add2",
-				"addressLine3" -> "Add3",
-				"addressLine1" -> "Add4",
-				"postcode" -> "AA11 1AA",
-				"country" -> "United Kingdom",
-				"companyReg" -> "AB123456",
-				"corporationRef" -> "1234567890"
-			)
-      val form = _root_.models.RsFormMappings.schemeOrganiserForm().bind(schemeOrganiserData)
-      val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-      val authRequest = buildRequestWithAuth(request)
+      val schemeOrganiserData = Map(
+        "companyName"    -> Fixtures.companyName,
+        "addressLine1"   -> "Add1",
+        "addressLine"    -> "Add2",
+        "addressLine3"   -> "Add3",
+        "addressLine1"   -> "Add4",
+        "postcode"       -> "AA11 1AA",
+        "country"        -> "United Kingdom",
+        "companyReg"     -> "AB123456",
+        "corporationRef" -> "1234567890"
+      )
+      val form                = _root_.models.RsFormMappings.schemeOrganiserForm().bind(schemeOrganiserData)
+      val request             = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
+      val authRequest         = buildRequestWithAuth(request)
 
       val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(authRequest, hc)
-      contentAsString(result) should include(testMessages("ers.global_errors.message"))
-      contentAsString(result) shouldBe contentAsString(Future(buildFakeSchemeOrganiserController().getGlobalErrorPage(request, testMessages)))
+      contentAsString(result)   should include(testMessages("ers.global_errors.message"))
+      contentAsString(result) shouldBe contentAsString(
+        Future(buildFakeSchemeOrganiserController().getGlobalErrorPage(request, testMessages))
+      )
     }
 
     "check error for empty company name" in {
       val controllerUnderTest = buildFakeSchemeOrganiserController(schemeOrganiserDataCachedOk = false)
-      val schemeOrganiserData = Map("companyName" -> "",
-        "addressLine1" -> "Add1",
-        "addressLine2" -> "Add2",
-        "addressLine3" -> "Add3",
-        "addressLine4" -> "Add4",
-        "postcode" -> "AA11 1AA",
-        "country" -> "United Kingdom",
-        "companyReg" -> "AB123456",
+      val schemeOrganiserData = Map(
+        "companyName"    -> "",
+        "addressLine1"   -> "Add1",
+        "addressLine2"   -> "Add2",
+        "addressLine3"   -> "Add3",
+        "addressLine4"   -> "Add4",
+        "postcode"       -> "AA11 1AA",
+        "country"        -> "United Kingdom",
+        "companyReg"     -> "AB123456",
         "corporationRef" -> "1234567890"
       )
-      val form = _root_.models.RsFormMappings.schemeOrganiserForm().bind(schemeOrganiserData)
-      val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-      val authRequest = buildRequestWithAuth(request)
+      val form                = _root_.models.RsFormMappings.schemeOrganiserForm().bind(schemeOrganiserData)
+      val request             = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
+      val authRequest         = buildRequestWithAuth(request)
 
       val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(authRequest, hc)
       contentAsString(result) should include(testMessages("ers_scheme_organiser.err.summary.company_name_required"))
     }
     "check error for company name more than 36 characters" in {
       val controllerUnderTest = buildFakeSchemeOrganiserController(schemeOrganiserDataCachedOk = false)
-      val schemeOrganiserData = Map("companyName" -> "Company Name more than thirty six characters",
-        "addressLine1" -> "Add1",
-        "addressLine2" -> "Add2",
-        "addressLine3" -> "Add3",
-        "addressLine4" -> "Add4",
-        "postcode" -> "AA11 1AA",
-        "country" -> "United Kingdom",
-        "companyReg" -> "AB123456",
+      val schemeOrganiserData = Map(
+        "companyName"    -> "Company Name more than thirty six characters",
+        "addressLine1"   -> "Add1",
+        "addressLine2"   -> "Add2",
+        "addressLine3"   -> "Add3",
+        "addressLine4"   -> "Add4",
+        "postcode"       -> "AA11 1AA",
+        "country"        -> "United Kingdom",
+        "companyReg"     -> "AB123456",
         "corporationRef" -> "1234567890"
       )
-      val form = _root_.models.RsFormMappings.schemeOrganiserForm().bind(schemeOrganiserData)
-      val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-      val authRequest = buildRequestWithAuth(request)
+      val form                = _root_.models.RsFormMappings.schemeOrganiserForm().bind(schemeOrganiserData)
+      val request             = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
+      val authRequest         = buildRequestWithAuth(request)
 
       val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(authRequest, hc)
       contentAsString(result) should include(testMessages("ers_scheme_organiser.err.company_name"))
@@ -319,19 +349,20 @@ class SchemeOrganiserControllerSpec extends AnyWordSpecLike
 
     "check error for invalid company name" in {
       val controllerUnderTest = buildFakeSchemeOrganiserController(schemeOrganiserDataCachedOk = false)
-      val schemeOrganiserData = Map("companyName" -> "Inv@lid Company name",
-        "addressLine1" -> "Add1",
-        "addressLine2" -> "Add2",
-        "addressLine3" -> "Add3",
-        "addressLine4" -> "Add4",
-        "postcode" -> "AA11 1AA",
-        "country" -> "United Kingdom",
-        "companyReg" -> "AB123456",
+      val schemeOrganiserData = Map(
+        "companyName"    -> "Inv@lid Company name",
+        "addressLine1"   -> "Add1",
+        "addressLine2"   -> "Add2",
+        "addressLine3"   -> "Add3",
+        "addressLine4"   -> "Add4",
+        "postcode"       -> "AA11 1AA",
+        "country"        -> "United Kingdom",
+        "companyReg"     -> "AB123456",
         "corporationRef" -> "1234567890"
       )
-      val form = _root_.models.RsFormMappings.schemeOrganiserForm().bind(schemeOrganiserData)
-      val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-      val authRequest = buildRequestWithAuth(request)
+      val form                = _root_.models.RsFormMappings.schemeOrganiserForm().bind(schemeOrganiserData)
+      val request             = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
+      val authRequest         = buildRequestWithAuth(request)
 
       val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(authRequest, hc)
       contentAsString(result) should include(testMessages("ers_scheme_organiser.err.invalidChars.company_name"))
@@ -339,19 +370,20 @@ class SchemeOrganiserControllerSpec extends AnyWordSpecLike
 
     "check error for empty Address" in {
       val controllerUnderTest = buildFakeSchemeOrganiserController(schemeOrganiserDataCachedOk = false)
-      val schemeOrganiserData = Map("companyName" -> Fixtures.companyName,
-        "addressLine1" -> "",
-        "addressLine2" -> "Add2",
-        "addressLine3" -> "Add3",
-        "addressLine4" -> "Add4",
-        "postcode" -> "AA11 1AA",
-        "country" -> "United Kingdom",
-        "companyReg" -> "AB123456",
+      val schemeOrganiserData = Map(
+        "companyName"    -> Fixtures.companyName,
+        "addressLine1"   -> "",
+        "addressLine2"   -> "Add2",
+        "addressLine3"   -> "Add3",
+        "addressLine4"   -> "Add4",
+        "postcode"       -> "AA11 1AA",
+        "country"        -> "United Kingdom",
+        "companyReg"     -> "AB123456",
         "corporationRef" -> "1234567890"
       )
-      val form = _root_.models.RsFormMappings.schemeOrganiserForm().bind(schemeOrganiserData)
-      val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-      val authRequest = buildRequestWithAuth(request)
+      val form                = _root_.models.RsFormMappings.schemeOrganiserForm().bind(schemeOrganiserData)
+      val request             = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
+      val authRequest         = buildRequestWithAuth(request)
 
       val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(authRequest, hc)
       contentAsString(result) should include(testMessages("ers_scheme_organiser.err.summary.address_line1_required"))
@@ -359,19 +391,20 @@ class SchemeOrganiserControllerSpec extends AnyWordSpecLike
 
     "check error for address more than 28 characters" in {
       val controllerUnderTest = buildFakeSchemeOrganiserController(schemeOrganiserDataCachedOk = false)
-      val schemeOrganiserData = Map("companyName" -> Fixtures.companyName,
-        "addressLine1" -> "Add1 more than Twenty Eight characters",
-        "addressLine2" -> "Add2",
-        "addressLine3" -> "Add3",
-        "addressLine4" -> "Add4",
-        "postcode" -> "AA11 1AA",
-        "country" -> "United Kingdom",
-        "companyReg" -> "AB123456",
+      val schemeOrganiserData = Map(
+        "companyName"    -> Fixtures.companyName,
+        "addressLine1"   -> "Add1 more than Twenty Eight characters",
+        "addressLine2"   -> "Add2",
+        "addressLine3"   -> "Add3",
+        "addressLine4"   -> "Add4",
+        "postcode"       -> "AA11 1AA",
+        "country"        -> "United Kingdom",
+        "companyReg"     -> "AB123456",
         "corporationRef" -> "1234567890"
       )
-      val form = _root_.models.RsFormMappings.schemeOrganiserForm().bind(schemeOrganiserData)
-      val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-      val authRequest = buildRequestWithAuth(request)
+      val form                = _root_.models.RsFormMappings.schemeOrganiserForm().bind(schemeOrganiserData)
+      val request             = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
+      val authRequest         = buildRequestWithAuth(request)
 
       val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(authRequest, hc)
       contentAsString(result) should include(testMessages("ers_scheme_organiser.err.address_line1"))
@@ -379,19 +412,20 @@ class SchemeOrganiserControllerSpec extends AnyWordSpecLike
 
     "check error for invalid address" in {
       val controllerUnderTest = buildFakeSchemeOrganiserController(schemeOrganiserDataCachedOk = false)
-      val schemeOrganiserData = Map("companyName" -> Fixtures.companyName,
-        "addressLine1" -> "Add1 Inv@lid",
-        "addressLine2" -> "Add2",
-        "addressLine3" -> "Add3",
-        "addressLine4" -> "Add4",
-        "postcode" -> "AA11 1AA",
-        "country" -> "United Kingdom",
-        "companyReg" -> "AB123456",
+      val schemeOrganiserData = Map(
+        "companyName"    -> Fixtures.companyName,
+        "addressLine1"   -> "Add1 Inv@lid",
+        "addressLine2"   -> "Add2",
+        "addressLine3"   -> "Add3",
+        "addressLine4"   -> "Add4",
+        "postcode"       -> "AA11 1AA",
+        "country"        -> "United Kingdom",
+        "companyReg"     -> "AB123456",
         "corporationRef" -> "1234567890"
       )
-      val form = _root_.models.RsFormMappings.schemeOrganiserForm().bind(schemeOrganiserData)
-      val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-      val authRequest = buildRequestWithAuth(request)
+      val form                = _root_.models.RsFormMappings.schemeOrganiserForm().bind(schemeOrganiserData)
+      val request             = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
+      val authRequest         = buildRequestWithAuth(request)
 
       val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(authRequest, hc)
       contentAsString(result) should include(testMessages("ers_scheme_organiser.err.invalidChars.address_line1"))
@@ -399,19 +433,20 @@ class SchemeOrganiserControllerSpec extends AnyWordSpecLike
 
     "check error for postcode more than 8 characters" in {
       val controllerUnderTest = buildFakeSchemeOrganiserController(schemeOrganiserDataCachedOk = false)
-      val schemeOrganiserData = Map("companyName" -> Fixtures.companyName,
-        "addressLine1" -> "Add1",
-        "addressLine2" -> "Add2",
-        "addressLine3" -> "Add3",
-        "addressLine4" -> "Add4",
-        "postcode" -> "AA11 1AAAA",
-        "country" -> "United Kingdom",
-        "companyReg" -> "AB123456",
+      val schemeOrganiserData = Map(
+        "companyName"    -> Fixtures.companyName,
+        "addressLine1"   -> "Add1",
+        "addressLine2"   -> "Add2",
+        "addressLine3"   -> "Add3",
+        "addressLine4"   -> "Add4",
+        "postcode"       -> "AA11 1AAAA",
+        "country"        -> "United Kingdom",
+        "companyReg"     -> "AB123456",
         "corporationRef" -> "1234567890"
       )
-      val form = _root_.models.RsFormMappings.schemeOrganiserForm().bind(schemeOrganiserData)
-      val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-      val authRequest = buildRequestWithAuth(request)
+      val form                = _root_.models.RsFormMappings.schemeOrganiserForm().bind(schemeOrganiserData)
+      val request             = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
+      val authRequest         = buildRequestWithAuth(request)
 
       val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(authRequest, hc)
       contentAsString(result) should include(testMessages("ers_scheme_organiser.err.postcode"))
@@ -419,19 +454,20 @@ class SchemeOrganiserControllerSpec extends AnyWordSpecLike
 
     "check error for invalid postcode" in {
       val controllerUnderTest = buildFakeSchemeOrganiserController(schemeOrganiserDataCachedOk = false)
-      val schemeOrganiserData = Map("companyName" -> Fixtures.companyName,
-        "addressLine1" -> "Add1",
-        "addressLine2" -> "Add2",
-        "addressLine3" -> "Add3",
-        "addressLine4" -> "Add4",
-        "postcode" -> "AA11*1A",
-        "country" -> "United Kingdom",
-        "companyReg" -> "AB123456",
+      val schemeOrganiserData = Map(
+        "companyName"    -> Fixtures.companyName,
+        "addressLine1"   -> "Add1",
+        "addressLine2"   -> "Add2",
+        "addressLine3"   -> "Add3",
+        "addressLine4"   -> "Add4",
+        "postcode"       -> "AA11*1A",
+        "country"        -> "United Kingdom",
+        "companyReg"     -> "AB123456",
         "corporationRef" -> "1234567890"
       )
-      val form = _root_.models.RsFormMappings.schemeOrganiserForm().bind(schemeOrganiserData)
-      val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-      val authRequest = buildRequestWithAuth(request)
+      val form                = _root_.models.RsFormMappings.schemeOrganiserForm().bind(schemeOrganiserData)
+      val request             = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
+      val authRequest         = buildRequestWithAuth(request)
 
       val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(authRequest, hc)
       contentAsString(result) should include(testMessages("ers_scheme_organiser.err.invalidChars.postcode"))
@@ -439,19 +475,20 @@ class SchemeOrganiserControllerSpec extends AnyWordSpecLike
 
     "check error for CRN more than 8 characters" in {
       val controllerUnderTest = buildFakeSchemeOrganiserController(schemeOrganiserDataCachedOk = false)
-      val schemeOrganiserData = Map("companyName" -> Fixtures.companyName,
-        "addressLine1" -> "Add1",
-        "addressLine2" -> "Add2",
-        "addressLine3" -> "Add3",
-        "addressLine4" -> "Add4",
-        "postcode" -> "AA11 1AA",
-        "country" -> "United Kingdom",
-        "companyReg" -> "AB12345612",
+      val schemeOrganiserData = Map(
+        "companyName"    -> Fixtures.companyName,
+        "addressLine1"   -> "Add1",
+        "addressLine2"   -> "Add2",
+        "addressLine3"   -> "Add3",
+        "addressLine4"   -> "Add4",
+        "postcode"       -> "AA11 1AA",
+        "country"        -> "United Kingdom",
+        "companyReg"     -> "AB12345612",
         "corporationRef" -> "1234567890"
       )
-      val form = _root_.models.RsFormMappings.schemeOrganiserForm().bind(schemeOrganiserData)
-      val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-      val authRequest = buildRequestWithAuth(request)
+      val form                = _root_.models.RsFormMappings.schemeOrganiserForm().bind(schemeOrganiserData)
+      val request             = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
+      val authRequest         = buildRequestWithAuth(request)
 
       val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(authRequest, hc)
       contentAsString(result) should include(testMessages("ers_scheme_organiser.err.summary.company_reg"))
@@ -459,19 +496,20 @@ class SchemeOrganiserControllerSpec extends AnyWordSpecLike
 
     "check error for invalid CRN" in {
       val controllerUnderTest = buildFakeSchemeOrganiserController(schemeOrganiserDataCachedOk = false)
-      val schemeOrganiserData = Map("companyName" -> Fixtures.companyName,
-        "addressLine1" -> "Add1",
-        "addressLine2" -> "Add2",
-        "addressLine3" -> "Add3",
-        "addressLine4" -> "Add4",
-        "postcode" -> "AA11 1AA",
-        "country" -> "United Kingdom",
-        "companyReg" -> "AB12345)",
+      val schemeOrganiserData = Map(
+        "companyName"    -> Fixtures.companyName,
+        "addressLine1"   -> "Add1",
+        "addressLine2"   -> "Add2",
+        "addressLine3"   -> "Add3",
+        "addressLine4"   -> "Add4",
+        "postcode"       -> "AA11 1AA",
+        "country"        -> "United Kingdom",
+        "companyReg"     -> "AB12345)",
         "corporationRef" -> "1234567890"
       )
-      val form = _root_.models.RsFormMappings.schemeOrganiserForm().bind(schemeOrganiserData)
-      val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-      val authRequest = buildRequestWithAuth(request)
+      val form                = _root_.models.RsFormMappings.schemeOrganiserForm().bind(schemeOrganiserData)
+      val request             = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
+      val authRequest         = buildRequestWithAuth(request)
 
       val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(authRequest, hc)
       contentAsString(result) should include(testMessages("ers_scheme_organiser.err.summary.company_reg"))
@@ -479,19 +517,20 @@ class SchemeOrganiserControllerSpec extends AnyWordSpecLike
 
     "check error for corporation number more than 10 digits" in {
       val controllerUnderTest = buildFakeSchemeOrganiserController(schemeOrganiserDataCachedOk = false)
-      val schemeOrganiserData = Map("companyName" -> Fixtures.companyName,
-        "addressLine1" -> "Add1",
-        "addressLine2" -> "Add2",
-        "addressLine3" -> "Add3",
-        "addressLine4" -> "Add4",
-        "postcode" -> "AA11 1AA",
-        "country" -> "United Kingdom",
-        "companyReg" -> "AB123456",
+      val schemeOrganiserData = Map(
+        "companyName"    -> Fixtures.companyName,
+        "addressLine1"   -> "Add1",
+        "addressLine2"   -> "Add2",
+        "addressLine3"   -> "Add3",
+        "addressLine4"   -> "Add4",
+        "postcode"       -> "AA11 1AA",
+        "country"        -> "United Kingdom",
+        "companyReg"     -> "AB123456",
         "corporationRef" -> "12345678901"
       )
-      val form = _root_.models.RsFormMappings.schemeOrganiserForm().bind(schemeOrganiserData)
-      val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-      val authRequest = buildRequestWithAuth(request)
+      val form                = _root_.models.RsFormMappings.schemeOrganiserForm().bind(schemeOrganiserData)
+      val request             = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
+      val authRequest         = buildRequestWithAuth(request)
 
       val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(authRequest, hc)
       contentAsString(result) should include(testMessages("ers_scheme_organiser.err.summary.corporation_ref"))
@@ -499,39 +538,43 @@ class SchemeOrganiserControllerSpec extends AnyWordSpecLike
 
     "check error for invalid corporation number" in {
       val controllerUnderTest = buildFakeSchemeOrganiserController(schemeOrganiserDataCachedOk = false)
-      val schemeOrganiserData = Map("companyName" -> Fixtures.companyName,
-        "addressLine1" -> "Add1",
-        "addressLine2" -> "Add2",
-        "addressLine3" -> "Add3",
-        "addressLine4" -> "Add4",
-        "postcode" -> "AA11 1AA",
-        "country" -> "United Kingdom",
-        "companyReg" -> "AB123456",
+      val schemeOrganiserData = Map(
+        "companyName"    -> Fixtures.companyName,
+        "addressLine1"   -> "Add1",
+        "addressLine2"   -> "Add2",
+        "addressLine3"   -> "Add3",
+        "addressLine4"   -> "Add4",
+        "postcode"       -> "AA11 1AA",
+        "country"        -> "United Kingdom",
+        "companyReg"     -> "AB123456",
         "corporationRef" -> "1234567-89"
       )
-      val form = _root_.models.RsFormMappings.schemeOrganiserForm().bind(schemeOrganiserData)
-      val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-      val authRequest = buildRequestWithAuth(request)
+      val form                = _root_.models.RsFormMappings.schemeOrganiserForm().bind(schemeOrganiserData)
+      val request             = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
+      val authRequest         = buildRequestWithAuth(request)
 
       val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(authRequest, hc)
-      contentAsString(result) should include(testMessages("ers_scheme_organiser.err.summary.invalidChars.corporation_ref_pattern"))
+      contentAsString(result) should include(
+        testMessages("ers_scheme_organiser.err.summary.invalidChars.corporation_ref_pattern")
+      )
     }
 
     "check error for invalid format of postcode" in {
       val controllerUnderTest = buildFakeSchemeOrganiserController(schemeOrganiserDataCachedOk = false)
-      val schemeOrganiserData = Map("companyName" -> Fixtures.companyName,
-        "addressLine1" -> "Add1",
-        "addressLine2" -> "Add2",
-        "addressLine3" -> "Add3",
-        "addressLine4" -> "Add4",
-        "postcode" -> "123456",
-        "country" -> "United Kingdom",
-        "companyReg" -> "AB123456",
+      val schemeOrganiserData = Map(
+        "companyName"    -> Fixtures.companyName,
+        "addressLine1"   -> "Add1",
+        "addressLine2"   -> "Add2",
+        "addressLine3"   -> "Add3",
+        "addressLine4"   -> "Add4",
+        "postcode"       -> "123456",
+        "country"        -> "United Kingdom",
+        "companyReg"     -> "AB123456",
         "corporationRef" -> "1234567890"
       )
-      val form = _root_.models.RsFormMappings.schemeOrganiserForm().bind(schemeOrganiserData)
-      val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-      val authRequest = buildRequestWithAuth(request)
+      val form                = _root_.models.RsFormMappings.schemeOrganiserForm().bind(schemeOrganiserData)
+      val request             = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
+      val authRequest         = buildRequestWithAuth(request)
 
       val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(authRequest, hc)
       contentAsString(result) should include(testMessages("ers_scheme_organiser.err.invalidFormat.postcode"))

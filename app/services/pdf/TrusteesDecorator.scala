@@ -19,14 +19,12 @@ package services.pdf
 import models.TrusteeDetailsList
 import play.api.i18n.Messages
 
-class TrusteesDecorator(trusteesList: Option[TrusteeDetailsList]
-											 ) extends Decorator {
+class TrusteesDecorator(trusteesList: Option[TrusteeDetailsList]) extends Decorator {
 
-	def decorate(implicit messages: Messages): String = {
-		if (trusteesList.isDefined) {
-			buildEntryMultiple(messages("ers_trustee_summary.title"), trusteesList.get.trustees.map(_.name).toArray)
-		} else {
-			""
-		}
-	}
+  def decorate(implicit messages: Messages): String =
+    if (trusteesList.isDefined) {
+      buildEntryMultiple(messages("ers_trustee_summary.title"), trusteesList.get.trustees.map(_.name).toArray)
+    } else {
+      ""
+    }
 }

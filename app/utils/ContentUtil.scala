@@ -22,29 +22,26 @@ object ContentUtil extends ContentUtil
 
 trait ContentUtil {
 
-  def getSchemeName(schemeType: String)(implicit messages: Messages): String = {
+  def getSchemeName(schemeType: String)(implicit messages: Messages): String =
     schemeType match {
       case "1" => Messages("ers_pdf_error_report.csop")
       case "2" => Messages("ers_pdf_error_report.emi")
       case "4" => Messages("ers_pdf_error_report.saye")
       case "5" => Messages("ers_pdf_error_report.sip")
       case "3" => Messages("ers_pdf_error_report.other")
-      case _ => ""
+      case _   => ""
     }
-  }
 
-  def getSchemeAbbreviation(schemeType: String)(implicit messages: Messages): String = {
+  def getSchemeAbbreviation(schemeType: String)(implicit messages: Messages): String =
     schemeType.toLowerCase match {
-      case "1"|"csop" => Messages("ers.csop")
-      case "2"|"emi" => Messages("ers.emi")
-      case "4"|"saye" => Messages("ers.saye")
-      case "5"|"sip" => Messages("ers.sip")
-      case "3"|"other" => Messages("ers.other")
-      case _ => ""
+      case "1" | "csop"  => Messages("ers.csop")
+      case "2" | "emi"   => Messages("ers.emi")
+      case "4" | "saye"  => Messages("ers.saye")
+      case "5" | "sip"   => Messages("ers.sip")
+      case "3" | "other" => Messages("ers.other")
+      case _             => ""
     }
-  }
 
-  def getAcknowledgementRef: String = {
+  def getAcknowledgementRef: String =
     System.currentTimeMillis().toString
-  }
 }

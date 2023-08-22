@@ -25,31 +25,37 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
 
-class UpscanService @Inject()(
-                             applicationConfig: ApplicationConfig,
-                             upscanConnector: UpscanConnector
-                             ) {
+class UpscanService @Inject() (
+  applicationConfig: ApplicationConfig,
+  upscanConnector: UpscanConnector
+) {
 
-  val isSecure: Boolean = applicationConfig.upscanProtocol == "https"
-  lazy val redirectUrlBase: String = applicationConfig.upscanRedirectBase
+  val isSecure: Boolean                    = applicationConfig.upscanProtocol == "https"
+  lazy val redirectUrlBase: String         = applicationConfig.upscanRedirectBase
   private def urlToString(c: Call): String = redirectUrlBase + c.url
 
-  def getUpscanFormDataCsv(uploadId: UploadId, scRef: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[UpscanInitiateResponse] = {
-    val callback = controllers.internal.routes.CsvFileUploadCallbackController.callback(uploadId, scRef)
+  def getUpscanFormDataCsv(uploadId: UploadId, scRef: String)(implicit
+    hc: HeaderCarrier,
+    request: Request[_]
+  ): Future[UpscanInitiateResponse] = {
+    val callback = controllers.internal.routes.CsvFileUploadCallbackController
+      .callback(uploadId, scRef)
       .absoluteURL(isSecure)
 
-    val success = controllers.routes.CsvFileUploadController.success(uploadId)
-    val failure = controllers.routes.CsvFileUploadController.failure()
-    val upscanInitiateRequest = UpscanInitiateRequest(callback, urlToString(success), urlToString(failure), 1, 104857600)
+    val success               = controllers.routes.CsvFileUploadController.success(uploadId)
+    val failure               = controllers.routes.CsvFileUploadController.failure()
+    val upscanInitiateRequest =
+      UpscanInitiateRequest(callback, urlToString(success), urlToString(failure), 1, 104857600)
     upscanConnector.getUpscanFormData(upscanInitiateRequest)
   }
 
   def getUpscanFormDataOds()(implicit hc: HeaderCarrier, request: Request[_]): Future[UpscanInitiateResponse] = {
-    val callback = controllers.internal.routes.FileUploadCallbackController.callback(hc.sessionId.get.value)
+    val callback = controllers.internal.routes.FileUploadCallbackController
+      .callback(hc.sessionId.get.value)
       .absoluteURL(isSecure)
 
-    val success = controllers.routes.FileUploadController.success()
-    val failure = controllers.routes.FileUploadController.failure()
+    val success               = controllers.routes.FileUploadController.success()
+    val failure               = controllers.routes.FileUploadController.failure()
     val upscanInitiateRequest = UpscanInitiateRequest(callback, urlToString(success), urlToString(failure), 1, 10485760)
     upscanConnector.getUpscanFormData(upscanInitiateRequest)
   }

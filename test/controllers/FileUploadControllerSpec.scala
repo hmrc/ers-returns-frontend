@@ -41,9 +41,14 @@ import views.html.{file_upload_errors, file_upload_problem, global_error, upscan
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class FileUploadControllerSpec extends PlaySpec
-  with MockitoSugar with LegacyI18nSupport
-  with ERSFakeApplicationConfig with UpscanData with ErsTestHelper with GuiceOneAppPerSuite {
+class FileUploadControllerSpec
+    extends PlaySpec
+    with MockitoSugar
+    with LegacyI18nSupport
+    with ERSFakeApplicationConfig
+    with UpscanData
+    with ErsTestHelper
+    with GuiceOneAppPerSuite {
 
   val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
     messagesActionBuilder,
@@ -57,48 +62,75 @@ class FileUploadControllerSpec extends PlaySpec
 
   implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
 
-	val testOptString: Option[String] = Some("test")
-	val schemeInfo: SchemeInfo = SchemeInfo(testOptString.get, DateTime.now, testOptString.get, testOptString.get, testOptString.get, testOptString.get)
-	val validErsMetaData: ErsMetaData = ErsMetaData(schemeInfo, "ipRef", Some("aoRef"), "empRef", Some("agentRef"), Some("sapNumber"))
-	val ersRequestObject: RequestObject = RequestObject(testOptString, testOptString, testOptString, Some("CSOP"), Some("CSOP"),
-		testOptString, testOptString, testOptString, testOptString)
+  val testOptString: Option[String]   = Some("test")
+  val schemeInfo: SchemeInfo          = SchemeInfo(
+    testOptString.get,
+    DateTime.now,
+    testOptString.get,
+    testOptString.get,
+    testOptString.get,
+    testOptString.get
+  )
+  val validErsMetaData: ErsMetaData   =
+    ErsMetaData(schemeInfo, "ipRef", Some("aoRef"), "empRef", Some("agentRef"), Some("sapNumber"))
+  val ersRequestObject: RequestObject = RequestObject(
+    testOptString,
+    testOptString,
+    testOptString,
+    Some("CSOP"),
+    Some("CSOP"),
+    testOptString,
+    testOptString,
+    testOptString,
+    testOptString
+  )
 
-	lazy val mockSessionService: SessionService = mock[SessionService]
-	lazy val mockUpscanService: UpscanService = mock[UpscanService]
-  val mockActorSystem: ActorSystem = app.injector.instanceOf[ActorSystem]
-  val globalErrorView: global_error = app.injector.instanceOf[global_error]
-  val fileUploadErrorsView: file_upload_errors = app.injector.instanceOf[file_upload_errors]
+  lazy val mockSessionService: SessionService         = mock[SessionService]
+  lazy val mockUpscanService: UpscanService           = mock[UpscanService]
+  val mockActorSystem: ActorSystem                    = app.injector.instanceOf[ActorSystem]
+  val globalErrorView: global_error                   = app.injector.instanceOf[global_error]
+  val fileUploadErrorsView: file_upload_errors        = app.injector.instanceOf[file_upload_errors]
   val upscanOdsFileUploadView: upscan_ods_file_upload = app.injector.instanceOf[upscan_ods_file_upload]
-  val fileUploadProblemView: file_upload_problem = app.injector.instanceOf[file_upload_problem]
-
+  val fileUploadProblemView: file_upload_problem      = app.injector.instanceOf[file_upload_problem]
 
   implicit lazy val materializer: Materializer = app.materializer
 
-	object TestFileUploadController extends FileUploadController(
-		mockMCC, mockErsConnector, mockAuthConnector, mockSessionService, mockUpscanService, mockErsUtil, mockAppConfig, mockActorSystem,
-    globalErrorView, fileUploadErrorsView, upscanOdsFileUploadView, fileUploadProblemView, testAuthAction
-	)
+  object TestFileUploadController
+      extends FileUploadController(
+        mockMCC,
+        mockErsConnector,
+        mockAuthConnector,
+        mockSessionService,
+        mockUpscanService,
+        mockErsUtil,
+        mockAppConfig,
+        mockActorSystem,
+        globalErrorView,
+        fileUploadErrorsView,
+        upscanOdsFileUploadView,
+        fileUploadProblemView,
+        testAuthAction
+      )
 
-	when(mockErsUtil.fetch[CheckFileType](refEq("check-file-type"), any[String]())(any(), any()))
+  when(mockErsUtil.fetch[CheckFileType](refEq("check-file-type"), any[String]())(any(), any()))
     .thenReturn(Future.successful(CheckFileType(Some("csv"))))
 
+  def failure(request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest())(handler: Future[Result] => Any): Unit =
+    handler(TestFileUploadController.failure().apply(request))
 
-	def failure(request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest())(handler: Future[Result] => Any): Unit = {
-		handler(TestFileUploadController.failure().apply(request))
-	}
+  def validationFailure(request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest())(
+    handler: Future[Result] => Any
+  ): Unit =
+    handler(TestFileUploadController.validationFailure().apply(request))
 
-	def validationFailure(request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest())(handler: Future[Result] => Any): Unit = {
-		handler(TestFileUploadController.validationFailure().apply(request))
-	}
-
-	def checkGlobalErrorPage(result: Future[Result]): Assertion = {
-		status(result) mustBe INTERNAL_SERVER_ERROR
-		contentAsString(result) must include (testMessages("ers.global_errors.title"))
-	}
+  def checkGlobalErrorPage(result: Future[Result]): Assertion = {
+    status(result) mustBe INTERNAL_SERVER_ERROR
+    contentAsString(result) must include(testMessages("ers.global_errors.title"))
+  }
 
   def checkFileUploadProblemPage(result: Future[Result]): Assertion = {
     status(result) mustBe BAD_REQUEST
-    contentAsString(result) must include (testMessages("ers.file_problem.heading"))
+    contentAsString(result) must include(testMessages("ers.file_problem.heading"))
   }
 
   "uploadFilePage" must {
@@ -129,12 +161,11 @@ class FileUploadControllerSpec extends PlaySpec
         verify(mockSessionService, never()).createCallbackRecord(any())
       }
 
-
       "Session service returns an exception creating callback record" in {
         when(mockUpscanService.getUpscanFormDataOds()(any[HeaderCarrier], any[Request[_]]))
           .thenReturn(Future.successful(upscanInitiateResponse))
         when(mockSessionService.createCallbackRecord(any[HeaderCarrier]))
-            .thenReturn(Future.failed(new Exception("Expected exception")))
+          .thenReturn(Future.failed(new Exception("Expected exception")))
 
         setAuthMocks()
         val result = TestFileUploadController.uploadFilePage()(testFakeRequest)
@@ -197,11 +228,19 @@ class FileUploadControllerSpec extends PlaySpec
           .thenReturn(Future.successful(ersRequestObject))
         when(mockSessionService.getCallbackRecord(any[HeaderCarrier]))
           .thenReturn(Future.successful(Some(uploadedSuccessfully)))
-        when(mockErsConnector.removePresubmissionData(any())(any[RequestWithOptionalAuthContext[AnyContent]], any[HeaderCarrier]))
+        when(
+          mockErsConnector
+            .removePresubmissionData(any())(any[RequestWithOptionalAuthContext[AnyContent]], any[HeaderCarrier])
+        )
           .thenReturn(Future.successful(HttpResponse(OK, "")))
         when(mockErsUtil.fetch[ErsMetaData](any(), any())(any(), any()))
           .thenReturn(Future.successful(validErsMetaData))
-        when(mockErsConnector.validateFileData(meq(uploadedSuccessfully), any[SchemeInfo])(any[RequestWithOptionalAuthContext[AnyContent]], any[HeaderCarrier]))
+        when(
+          mockErsConnector.validateFileData(meq(uploadedSuccessfully), any[SchemeInfo])(
+            any[RequestWithOptionalAuthContext[AnyContent]],
+            any[HeaderCarrier]
+          )
+        )
           .thenReturn(Future.successful(HttpResponse(OK, "")))
 
         setAuthMocks()
@@ -215,11 +254,19 @@ class FileUploadControllerSpec extends PlaySpec
           .thenReturn(Future.successful(ersRequestObject))
         when(mockSessionService.getCallbackRecord(any[HeaderCarrier]))
           .thenReturn(Future.successful(Some(uploadedSuccessfully)))
-        when(mockErsConnector.removePresubmissionData(any())(any[RequestWithOptionalAuthContext[AnyContent]], any[HeaderCarrier]))
+        when(
+          mockErsConnector
+            .removePresubmissionData(any())(any[RequestWithOptionalAuthContext[AnyContent]], any[HeaderCarrier])
+        )
           .thenReturn(Future.successful(HttpResponse(OK, "")))
         when(mockErsUtil.fetch[ErsMetaData](any(), any())(any(), any()))
           .thenReturn(Future.successful(validErsMetaData))
-        when(mockErsConnector.validateFileData(meq(uploadedSuccessfully), any[SchemeInfo])(any[RequestWithOptionalAuthContext[AnyContent]], any[HeaderCarrier]))
+        when(
+          mockErsConnector.validateFileData(meq(uploadedSuccessfully), any[SchemeInfo])(
+            any[RequestWithOptionalAuthContext[AnyContent]],
+            any[HeaderCarrier]
+          )
+        )
           .thenReturn(Future.successful(HttpResponse(ACCEPTED, "")))
 
         setAuthMocks()
@@ -230,7 +277,12 @@ class FileUploadControllerSpec extends PlaySpec
     }
     "return global error page" when {
       "validate file returns status code other than 200 OR 202" in {
-        when(mockErsConnector.validateFileData(meq(uploadedSuccessfully), any[SchemeInfo])(any[RequestWithOptionalAuthContext[AnyContent]], any[HeaderCarrier]))
+        when(
+          mockErsConnector.validateFileData(meq(uploadedSuccessfully), any[SchemeInfo])(
+            any[RequestWithOptionalAuthContext[AnyContent]],
+            any[HeaderCarrier]
+          )
+        )
           .thenReturn(Future.successful(HttpResponse(NO_CONTENT, "")))
 
         setAuthMocks()
@@ -239,11 +291,16 @@ class FileUploadControllerSpec extends PlaySpec
       }
 
       "remove presubmission data returns status code other than 200" in {
-        when(mockErsConnector.removePresubmissionData(meq(validErsMetaData.schemeInfo))(any[RequestWithOptionalAuthContext[AnyContent]], any[HeaderCarrier]))
+        when(
+          mockErsConnector.removePresubmissionData(meq(validErsMetaData.schemeInfo))(
+            any[RequestWithOptionalAuthContext[AnyContent]],
+            any[HeaderCarrier]
+          )
+        )
           .thenReturn(Future.successful(HttpResponse(SERVICE_UNAVAILABLE, "")))
         setAuthMocks()
         val result = TestFileUploadController.validationResults()(testFakeRequest)
-          checkGlobalErrorPage(result)
+        checkGlobalErrorPage(result)
       }
 
       "session service throws an exception retrieving callback data" in {
@@ -259,7 +316,7 @@ class FileUploadControllerSpec extends PlaySpec
           .thenReturn(Future.successful(Some(Failed)))
         setAuthMocks()
         val result = TestFileUploadController.validationResults()(testFakeRequest)
-          checkGlobalErrorPage(result)
+        checkGlobalErrorPage(result)
       }
 
       "cacheUtil fails to fetch metadata and returns an exception" in {
@@ -274,29 +331,29 @@ class FileUploadControllerSpec extends PlaySpec
 
   "failure" must {
     "be authorised" in {
-			setUnauthorisedMocks()
+      setUnauthorisedMocks()
       failure() { result =>
-        status(result) must equal(SEE_OTHER)
+        status(result)               must equal(SEE_OTHER)
         redirectLocation(result).get must include("/gg/sign-in")
       }
     }
 
     "authorised users" must {
       "redirect to the file upload problem page" in {
-				setAuthMocks()
-          failure() { result =>
-            status(result) must equal(BAD_REQUEST)
-            contentAsString(result) must include(testMessages("ers.file_problem.heading"))
-          }
+        setAuthMocks()
+        failure() { result =>
+          status(result)          must equal(BAD_REQUEST)
+          contentAsString(result) must include(testMessages("ers.file_problem.heading"))
+        }
       }
     }
   }
 
   "Validation failure" must {
     "be authorised" in {
-			setUnauthorisedMocks()
+      setUnauthorisedMocks()
       validationFailure() { result =>
-        status(result) must equal(SEE_OTHER)
+        status(result)               must equal(SEE_OTHER)
         redirectLocation(result).get must include("/gg/sign-in")
       }
     }
@@ -310,9 +367,9 @@ class FileUploadControllerSpec extends PlaySpec
         )
         when(mockErsUtil.fetch[CheckFileType](refEq("check-file-type"), any[String]())(any(), any()))
           .thenReturn(Future.successful(CheckFileType(Some("csv"))))
-				setAuthMocks()
+        setAuthMocks()
         validationFailure() { result =>
-          status(result) must be(OK)
+          status(result)          must be(OK)
           contentAsString(result) must include(testMessages("file_upload_errors.title"))
         }
       }

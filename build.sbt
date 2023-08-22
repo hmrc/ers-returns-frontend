@@ -1,4 +1,3 @@
-
 import uk.gov.hmrc.*
 import DefaultBuildSettings.*
 import scoverage.ScoverageKeys
@@ -13,8 +12,8 @@ lazy val microservice = Project(appName, file("."))
     scoverageSettings,
     scalaSettings,
     defaultSettings(),
-    scalaVersion := "2.13.10",
-    libraryDependencies ++= AppDependencies.all,
+    scalaVersion := "2.13.11",
+    libraryDependencies ++= AppDependencies(),
     dependencyOverrides ++= AppDependencies.overrides,
     libraryDependencySchemes ++= Seq("org.scala-lang.modules" %% "scala-xml" % VersionScheme.Always),
     Test / parallelExecution := false,
@@ -30,7 +29,8 @@ lazy val microservice = Project(appName, file("."))
   )
 
 scalacOptions ++= Seq(
-  "-Wconf:src=routes/.*:s", "-Wconf:cat=unused-imports&src=html/.*:s"
+  "-Wconf:src=routes/.*:s",
+  "-Wconf:cat=unused-imports&src=html/.*:s"
 )
 
 TwirlKeys.templateImports ++= Seq(
@@ -39,17 +39,12 @@ TwirlKeys.templateImports ++= Seq(
   "uk.gov.hmrc.hmrcfrontend.views.html.helpers._"
 )
 
-lazy val scoverageSettings = {
+lazy val scoverageSettings =
   Seq(
     ScoverageKeys.coverageExcludedPackages := "<empty>;Reverse.*;.*Service.*;models/.data/..*;prod.*;app.*;.*BuildInfo.*;view.*;.*Connector.*;.*Metrics;.*config;.*Global;prod.Routes;internal.Routes;testOnlyDoNotUseInAppConf.Routes;.*Configuration;config.AuditFilter;config.LoggingFilter;.*config.WSHttp;utils.HMACUtil;models.RequestObject;models.fileDataTracking;controllers.ERSGovernmentGateway;controllers.ERSReturnBaseController;",
     ScoverageKeys.coverageMinimumStmtTotal := 89,
     ScoverageKeys.coverageFailOnMinimum := true,
     ScoverageKeys.coverageHighlighting := true
   )
-}
 
-dependencyOverrides ++= Seq(
-  "com.fasterxml.jackson.module" %% "jackson-module-scala"  % "2.12.0" force(),
-)
-
-addCommandAlias("scalastyleAll", "all scalastyle test:scalastyle")
+addCommandAlias("scalastyleAll", "all scalastyle Test/scalastyle")

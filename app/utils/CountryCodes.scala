@@ -26,29 +26,28 @@ import scala.io.Source
 case class Country(country: String, countryCode: String)
 
 object Country {
-	implicit val formats: OFormat[Country] = Json.format[Country]
+  implicit val formats: OFormat[Country] = Json.format[Country]
 }
 
-class CountryCodesImpl @Inject()(val environment: Environment) extends CountryCodes
+class CountryCodesImpl @Inject() (val environment: Environment) extends CountryCodes
 
 trait CountryCodes extends Logging {
 
-	def environment: Environment
+  def environment: Environment
 
   val jsonInputStream: Option[InputStream] = environment.resourceAsStream("country-codes.json")
 
   private val json: JsValue = {
     jsonInputStream match {
       case Some(inputStream) => Json.parse(Source.fromInputStream(inputStream, "UTF-8").mkString)
-      case _ =>
-				logger.error(s"Country codes file not found, timestamp: ${System.currentTimeMillis()}.")
-				throw new Exception
-		}
+      case _                 =>
+        logger.error(s"Country codes file not found, timestamp: ${System.currentTimeMillis()}.")
+        throw new Exception
+    }
   }
 
-  val countries: String = {
+  val countries: String =
     Json.toJson(json.\\("country").toList.map(x => x.toString().replaceAll("\"", ""))).toString()
-  }
 
   val countriesMap: List[Country] = {
     val countryList = json.validate[List[Country]].get
@@ -60,7 +59,6 @@ trait CountryCodes extends Logging {
     countryCodeList.map(country => (country.countryCode, country.country)).toMap
   }
 
-  def getCountry(countryCode: String): Option[String] = {
+  def getCountry(countryCode: String): Option[String] =
     countryCodesMap.get(countryCode)
-  }
 }

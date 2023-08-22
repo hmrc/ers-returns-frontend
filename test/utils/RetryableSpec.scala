@@ -29,19 +29,25 @@ import play.api.test.Helpers.await
 import scala.concurrent.Future
 import scala.concurrent.duration.SECONDS
 
-class RetryableSpec extends AnyWordSpecLike with Matchers with OptionValues with MockitoSugar with GuiceOneAppPerSuite with ErsTestHelper {
+class RetryableSpec
+    extends AnyWordSpecLike
+    with Matchers
+    with OptionValues
+    with MockitoSugar
+    with GuiceOneAppPerSuite
+    with ErsTestHelper {
 
   class RetryTest extends Retryable {
-		import scala.concurrent.duration._
-		val mockAppConfig: ApplicationConfig = mock[ApplicationConfig]
-		when(mockAppConfig.retryDelay).thenReturn(1.millisecond)
+    import scala.concurrent.duration._
+    val mockAppConfig: ApplicationConfig = mock[ApplicationConfig]
+    when(mockAppConfig.retryDelay).thenReturn(1.millisecond)
 
-		implicit lazy val actorSystem: ActorSystem = app.actorSystem
-    override val appConfig: ApplicationConfig = mockAppConfig
+    implicit lazy val actorSystem: ActorSystem = app.actorSystem
+    override val appConfig: ApplicationConfig  = mockAppConfig
     trait RetryTestUtil {
       def f: Future[Boolean]
     }
-    val retryMock: RetryTestUtil = mock[RetryTestUtil]
+    val retryMock: RetryTestUtil               = mock[RetryTestUtil]
   }
 
   "withRetry" should {
@@ -81,8 +87,8 @@ class RetryableSpec extends AnyWordSpecLike with Matchers with OptionValues with
         await(retryMock.f.withRetry(1)(b => b), 1, SECONDS)
       }
       exception.finalFutureData shouldBe Some(false)
-      exception.retryNumber shouldBe 1
-      exception.getMessage shouldBe s"Failed to meet predicate after retrying ${exception.retryNumber} times."
+      exception.retryNumber     shouldBe 1
+      exception.getMessage      shouldBe s"Failed to meet predicate after retrying ${exception.retryNumber} times."
       verify(retryMock, times(1)).f
     }
   }

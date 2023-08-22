@@ -30,13 +30,14 @@ import utils.{ERSFakeApplicationConfig, ErsTestHelper}
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.ExecutionContext
 
-class FileNamesDecoratorSpec extends AnyWordSpecLike
-  with Matchers
-  with OptionValues
-  with MockitoSugar
-  with ERSFakeApplicationConfig
-  with ErsTestHelper
-  with GuiceOneAppPerSuite {
+class FileNamesDecoratorSpec
+    extends AnyWordSpecLike
+    with Matchers
+    with OptionValues
+    with MockitoSugar
+    with ERSFakeApplicationConfig
+    with ErsTestHelper
+    with GuiceOneAppPerSuite {
 
   val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
     messagesActionBuilder,
@@ -65,8 +66,8 @@ class FileNamesDecoratorSpec extends AnyWordSpecLike
       val output = decorator.decorate
 
       output.contains(Messages("ers_summary_declaration.file_name")) shouldBe true
-      output.contains("odsFile") shouldBe true
-      output.contains("<hr/>") shouldBe true
+      output.contains("odsFile")                                     shouldBe true
+      output.contains("<hr/>")                                       shouldBe true
     }
 
     "show csv files names when nil return is true" in {
@@ -75,9 +76,9 @@ class FileNamesDecoratorSpec extends AnyWordSpecLike
       val output = decorator.decorate
 
       output.contains(Messages("ers_summary_declaration.file_name")) shouldBe true
-      output.contains("csvFile0") shouldBe true
-      output.contains("csvFile1") shouldBe true
-      output.contains("<hr/>") shouldBe true
+      output.contains("csvFile0")                                    shouldBe true
+      output.contains("csvFile1")                                    shouldBe true
+      output.contains("<hr/>")                                       shouldBe true
 
     }
   }

@@ -29,12 +29,13 @@ import play.api.test.Helpers.stubBodyParser
 import java.io.InputStream
 import scala.concurrent.ExecutionContext
 
-class CountryCodesSpec extends AnyWordSpecLike
-  with Matchers
-  with OptionValues
-  with ERSFakeApplicationConfig
-  with ErsTestHelper
-  with GuiceOneAppPerSuite {
+class CountryCodesSpec
+    extends AnyWordSpecLike
+    with Matchers
+    with OptionValues
+    with ERSFakeApplicationConfig
+    with ErsTestHelper
+    with GuiceOneAppPerSuite {
 
   val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
     messagesActionBuilder,
@@ -47,20 +48,20 @@ class CountryCodesSpec extends AnyWordSpecLike
   )
 
   lazy val appEnvironment: Environment = app.injector.instanceOf[Environment]
-	implicit lazy val mat: Materializer = app.materializer
+  implicit lazy val mat: Materializer  = app.materializer
 
   object TestCountryCodes extends CountryCodes {
-		override def environment: Environment = appEnvironment
+    override def environment: Environment             = appEnvironment
     override val jsonInputStream: Option[InputStream] = appEnvironment.resourceAsStream("country-code-test.json")
   }
 
-	trait Setup {
-		val countryCodes = new CountryCodesImpl(appEnvironment)
-	}
+  trait Setup {
+    val countryCodes = new CountryCodesImpl(appEnvironment)
+  }
 
   "CountryCode countries" should {
     "return a string of countries" in new Setup {
-			val countries: String = countryCodes.countries
+      val countries: String = countryCodes.countries
       countries should include("Andorra")
       countries should include("Germany")
       countries should include("France")

@@ -27,22 +27,20 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class UpscanConnector @Inject()(appConfig: ApplicationConfig,
-																httpClient: DefaultHttpClient
-                               )(implicit ec: ExecutionContext) {
+class UpscanConnector @Inject() (appConfig: ApplicationConfig, httpClient: DefaultHttpClient)(implicit
+  ec: ExecutionContext
+) {
 
   private val headers = Map(
     HeaderNames.CONTENT_TYPE -> "application/json"
   )
 
-  private val upscanInitiateHost: String = appConfig.upscanInitiateHost
+  private val upscanInitiateHost: String             = appConfig.upscanInitiateHost
   private[connectors] val upscanInitiatePath: String = "/upscan/v2/initiate"
-  private val upscanInitiateUrl: String = upscanInitiateHost + upscanInitiatePath
+  private val upscanInitiateUrl: String              = upscanInitiateHost + upscanInitiatePath
 
-  def getUpscanFormData(body: UpscanInitiateRequest)
-                       (implicit hc: HeaderCarrier): Future[UpscanInitiateResponse] = {
+  def getUpscanFormData(body: UpscanInitiateRequest)(implicit hc: HeaderCarrier): Future[UpscanInitiateResponse] =
     httpClient.POST[UpscanInitiateRequest, PreparedUpload](upscanInitiateUrl, body, headers.toSeq).map {
       _.toUpscanInitiateResponse
     }
-  }
 }

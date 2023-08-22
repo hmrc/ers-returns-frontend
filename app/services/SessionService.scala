@@ -23,16 +23,14 @@ import uk.gov.hmrc.http.HeaderCarrier
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-
-class SessionService @Inject()(sessionCache: ERSFileValidatorSessionCache)(implicit ec: ExecutionContext) {
+class SessionService @Inject() (sessionCache: ERSFileValidatorSessionCache)(implicit ec: ExecutionContext) {
 
   val CALCULATION_RESULTS_KEY: String = "calculation_results_key"
-  val CALLBACK_DATA_KEY = "callback_data_key"
-  val SCENARIO_KEY = "scenario"
+  val CALLBACK_DATA_KEY               = "callback_data_key"
+  val SCENARIO_KEY                    = "scenario"
 
-  def createCallbackRecord(implicit hc: HeaderCarrier): Future[Any] = {
+  def createCallbackRecord(implicit hc: HeaderCarrier): Future[Any] =
     sessionCache.cache[UploadStatus](CALLBACK_DATA_KEY, NotStarted)
-  }
 
   def updateCallbackRecord(sessionId: String, uploadStatus: UploadStatus)(implicit hc: HeaderCarrier): Future[Any] =
     sessionCache.cache(sessionCache.defaultSource, sessionId, CALLBACK_DATA_KEY, uploadStatus)
@@ -44,7 +42,7 @@ class SessionService @Inject()(sessionCache: ERSFileValidatorSessionCache)(impli
     getCallbackRecord.map {
       _.flatMap {
         case upload: UploadedSuccessfully => Some(upload)
-        case _ => None
+        case _                            => None
       }
     }
 }

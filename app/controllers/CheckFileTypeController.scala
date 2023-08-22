@@ -32,70 +32,82 @@ import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class CheckFileTypeController @Inject()(val mcc: MessagesControllerComponents,
-																				val authConnector: DefaultAuthConnector,
-																				implicit val ersUtil: ERSUtil,
-																				implicit val appConfig: ApplicationConfig,
-                                        globalErrorView: views.html.global_error,
-                                        checkFileTypeView: views.html.check_file_type,
-                                        authActionGovGateway: AuthActionGovGateway
-                                       ) extends FrontendController(mcc) with I18nSupport with WithUnsafeDefaultFormBinding with Logging {
+class CheckFileTypeController @Inject() (
+  val mcc: MessagesControllerComponents,
+  val authConnector: DefaultAuthConnector,
+  implicit val ersUtil: ERSUtil,
+  implicit val appConfig: ApplicationConfig,
+  globalErrorView: views.html.global_error,
+  checkFileTypeView: views.html.check_file_type,
+  authActionGovGateway: AuthActionGovGateway
+) extends FrontendController(mcc)
+    with I18nSupport
+    with WithUnsafeDefaultFormBinding
+    with Logging {
 
   implicit val ec: ExecutionContext = mcc.executionContext
 
-  def checkFileTypePage(): Action[AnyContent] = authActionGovGateway.async {
-      implicit request =>
-          showCheckFileTypePage()(request, hc)
+  def checkFileTypePage(): Action[AnyContent] = authActionGovGateway.async { implicit request =>
+    showCheckFileTypePage()(request, hc)
   }
 
-  def showCheckFileTypePage()(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
+  def showCheckFileTypePage()(implicit
+    request: RequestWithOptionalAuthContext[AnyContent],
+    hc: HeaderCarrier
+  ): Future[Result] =
     (for {
       requestObject <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
-      fileType      <- ersUtil.fetch[CheckFileType](ersUtil.FILE_TYPE_CACHE, requestObject.getSchemeReference).recover{
-        case _: NoSuchElementException => CheckFileType(Some(""))
-      }
-    } yield {
-      Ok(checkFileTypeView(requestObject, fileType.checkFileType, RsFormMappings.checkFileTypeForm().fill(fileType)))
-    }).recover{
-      case e: Throwable =>
-        logger.error(s"[CheckFileTypeController][showCheckFileTypePage] Rendering CheckFileType view failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
-        getGlobalErrorPage
-    }
-  }
-
-  def checkFileTypeSelected(): Action[AnyContent] = authActionGovGateway.async {
-      implicit request =>
-          showCheckFileTypeSelected()(request, hc)
-  }
-
-  def showCheckFileTypeSelected()(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
-    ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
-      RsFormMappings.checkFileTypeForm().bindFromRequest().fold(
-        errors => {
-          Future.successful(Ok(checkFileTypeView(requestObject, Some(""), errors)))
-        },
-        formData => {
-          ersUtil.cache(ersUtil.FILE_TYPE_CACHE, formData, requestObject.getSchemeReference).map { _ =>
-            if (formData.checkFileType.contains(ersUtil.OPTION_ODS)) {
-              Redirect(routes.FileUploadController.uploadFilePage())
-            } else {
-              Redirect(routes.CheckCsvFilesController.checkCsvFilesPage())
-            }
-          }.recover {
-            case e: Exception =>
-              logger.error("[CheckFileTypeController][showCheckFileTypeSelected] Unable to save file type. Error: " + e.getMessage)
-              getGlobalErrorPage
-          }
-        }
+      fileType      <- ersUtil.fetch[CheckFileType](ersUtil.FILE_TYPE_CACHE, requestObject.getSchemeReference).recover {
+                         case _: NoSuchElementException => CheckFileType(Some(""))
+                       }
+    } yield Ok(
+      checkFileTypeView(requestObject, fileType.checkFileType, RsFormMappings.checkFileTypeForm().fill(fileType))
+    )).recover { case e: Throwable =>
+      logger.error(
+        s"[CheckFileTypeController][showCheckFileTypePage] Rendering CheckFileType view failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}."
       )
+      getGlobalErrorPage
     }
+
+  def checkFileTypeSelected(): Action[AnyContent] = authActionGovGateway.async { implicit request =>
+    showCheckFileTypeSelected()(request, hc)
   }
 
-	def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result = {
-		Ok(globalErrorView(
-			"ers.global_errors.title",
-			"ers.global_errors.heading",
-			"ers.global_errors.message"
-		)(request, messages, appConfig))
-	}
+  def showCheckFileTypeSelected()(implicit
+    request: RequestWithOptionalAuthContext[AnyContent],
+    hc: HeaderCarrier
+  ): Future[Result] =
+    ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
+      RsFormMappings
+        .checkFileTypeForm()
+        .bindFromRequest()
+        .fold(
+          errors => Future.successful(Ok(checkFileTypeView(requestObject, Some(""), errors))),
+          formData =>
+            ersUtil
+              .cache(ersUtil.FILE_TYPE_CACHE, formData, requestObject.getSchemeReference)
+              .map { _ =>
+                if (formData.checkFileType.contains(ersUtil.OPTION_ODS)) {
+                  Redirect(routes.FileUploadController.uploadFilePage())
+                } else {
+                  Redirect(routes.CheckCsvFilesController.checkCsvFilesPage())
+                }
+              }
+              .recover { case e: Exception =>
+                logger.error(
+                  "[CheckFileTypeController][showCheckFileTypeSelected] Unable to save file type. Error: " + e.getMessage
+                )
+                getGlobalErrorPage
+              }
+        )
+    }
+
+  def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result =
+    Ok(
+      globalErrorView(
+        "ers.global_errors.title",
+        "ers.global_errors.heading",
+        "ers.global_errors.message"
+      )(request, messages, appConfig)
+    )
 }

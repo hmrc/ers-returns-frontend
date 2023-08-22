@@ -16,6 +16,5 @@
 
 package models
 
-case class ERSFileProcessingException(message: String,
-                                      context: String,
-                                      jsonSize: Option[Int] = None) extends Exception(message)
+case class ERSFileProcessingException(message: String, context: String, jsonSize: Option[Int] = None)
+    extends Exception(message)

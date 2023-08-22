@@ -21,20 +21,19 @@ import utils.PageBuilder
 
 import scala.collection.mutable.ListBuffer
 
-class FileNamesDecorator(reportableEvents: String,
-												 filesUploaded: Option[ListBuffer[String]]
-												) extends Decorator with PageBuilder {
+class FileNamesDecorator(reportableEvents: String, filesUploaded: Option[ListBuffer[String]])
+    extends Decorator
+    with PageBuilder {
 
-  def decorate(implicit messages: Messages): String = {
-		if (reportableEvents != OPTION_NIL_RETURN) {
-			val heading = if (filesUploaded.get.length == 1) {
-				messages("ers_summary_declaration.file_name")
-			} else {
-				messages("ers_summary_declaration.file_names")
-			}
-			buildEntryMultiple(heading, filesUploaded.get.toArray)
-		} else {
-			""
-		}
-	}
+  def decorate(implicit messages: Messages): String =
+    if (reportableEvents != OPTION_NIL_RETURN) {
+      val heading = if (filesUploaded.get.length == 1) {
+        messages("ers_summary_declaration.file_name")
+      } else {
+        messages("ers_summary_declaration.file_names")
+      }
+      buildEntryMultiple(heading, filesUploaded.get.toArray)
+    } else {
+      ""
+    }
 }
