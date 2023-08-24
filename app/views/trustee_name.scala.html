@@ -35,7 +35,7 @@
     hmrcPageHeading: HmrcPageHeading
 )
 
-@(requestObject: RequestObject, index: Int, trusteeNameForm: Form[models.TrusteeName])(implicit request: Request[AnyRef], messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
+@(requestObject: RequestObject, index: Int, trusteeNameForm: Form[models.TrusteeName], edit: Boolean = false)(implicit request: Request[AnyRef], messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 
 @schemeId = @{requestObject.getSchemeId}
 
@@ -58,7 +58,7 @@
     text = messages("ers_trustee_name.title")
 ))
 
-@formWithCSRF(action = controllers.trustees.routes.TrusteeNameController.questionSubmit(index)) {
+@formWithCSRF(action = if(edit){controllers.trustees.routes.TrusteeNameController.editQuestionSubmit(index)}else{controllers.trustees.routes.TrusteeNameController.questionSubmit(index)}) {
 
 @govukInput(Input(
     classes = "govuk-!-width-one-half",
