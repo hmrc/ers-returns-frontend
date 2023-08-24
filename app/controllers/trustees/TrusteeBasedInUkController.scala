@@ -52,23 +52,24 @@ class TrusteeBasedInUkController @Inject()(val mcc: MessagesControllerComponents
   val cacheKey: String = ersUtil.TRUSTEE_BASED_CACHE
   implicit val format: Format[TrusteeBasedInUk] = TrusteeBasedInUk.format
 
-  def nextPageRedirect(index: Int)(implicit hc: HeaderCarrier): Future[Result] = {
+  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier): Future[Result] = {
     for {
       requestObject <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
       trusteeBasedInUk <- ersUtil.fetch[TrusteeBasedInUk](cacheKey, requestObject.getSchemeReference)
     } yield {
-      if (trusteeBasedInUk.basedInUk) {
-        Redirect(controllers.trustees.routes.TrusteeAddressUkController.questionPage())
-      } else {
-        Redirect(controllers.trustees.routes.TrusteeAddressOverseasController.questionPage())
+      (trusteeBasedInUk.basedInUk, edit) match {
+        case (true, true)    => Redirect(controllers.trustees.routes.TrusteeAddressUkController.editQuestion(index))
+        case (true, false)   => Redirect(controllers.trustees.routes.TrusteeAddressUkController.questionPage())
+        case (false, true)   => Redirect(controllers.trustees.routes.TrusteeAddressOverseasController.editQuestion(index))
+        case (false, false)  => Redirect(controllers.trustees.routes.TrusteeAddressOverseasController.questionPage())
       }
     }
   }
 
   def form(implicit request: Request[AnyContent]): Form[TrusteeBasedInUk] = RsFormMappings.trusteeBasedInUkForm()
 
-  def view(requestObject: RequestObject, index: Int, trusteeBasedInUkForm: Form[TrusteeBasedInUk])
+  def view(requestObject: RequestObject, index: Int, trusteeBasedInUkForm: Form[TrusteeBasedInUk], edit: Boolean = false)
                    (implicit request: Request[AnyContent], hc: HeaderCarrier): Html = {
-    trusteeBasedInUkView(requestObject, index, trusteeBasedInUkForm)
+    trusteeBasedInUkView(requestObject, index, trusteeBasedInUkForm, edit)
   }
 }

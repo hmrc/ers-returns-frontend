@@ -52,15 +52,19 @@ class TrusteeNameController @Inject()(val mcc: MessagesControllerComponents,
   val cacheKey: String = ersUtil.TRUSTEE_NAME_CACHE
   implicit val format: Format[TrusteeName] = TrusteeName.format
 
-  def nextPageRedirect(index: Int)(implicit hc: HeaderCarrier): Future[Result] = {
+  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier): Future[Result] = {
+    if (edit) {
+      Future.successful(Redirect(controllers.trustees.routes.TrusteeBasedInUkController.editQuestion(index)))
+    } else {
       Future.successful(Redirect(controllers.trustees.routes.TrusteeBasedInUkController.questionPage()))
+    }
   }
 
   def form(implicit request: Request[AnyContent]): Form[TrusteeName] = RsFormMappings.trusteeNameForm()
 
-  def view(requestObject: RequestObject, index: Int, trusteeNameForm: Form[TrusteeName])
+  def view(requestObject: RequestObject, index: Int, trusteeNameForm: Form[TrusteeName], edit: Boolean = false)
                    (implicit request: Request[AnyContent], hc: HeaderCarrier): Html = {
-    trusteeNameView(requestObject, index, trusteeNameForm)
+    trusteeNameView(requestObject, index, trusteeNameForm, edit)
   }
 
 }

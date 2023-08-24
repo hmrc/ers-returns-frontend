@@ -149,11 +149,14 @@ class ERSUtil @Inject() (
 		shortLivedCache.fetchAndGetEntry[JsValue](cacheId, TRUSTEES_CACHE).map {
 			_.map(_.\(TRUSTEES_CACHE).as[JsArray].\(index).getOrElse(Json.obj()).as[A])
 		} recover {
-			case _ => None
+			case x: Throwable => {
+				println(x.getMessage)
+				None
+			}
 		}
 	}
 
-	//TODO Yo why is this called "fetchOption" if it thows an expection when there's no data?? It can only return Some[T] or throw exception -.-
+	//TODO Yo why is this called "fetchOption" if it throws an expection when there's no data?? It can only return Some[T] or throw exception -.-
 	def fetchOption[T](key: String, cacheId: String)(implicit hc: HeaderCarrier, formats: json.Format[T]): Future[Option[T]] = {
 		val startTime = System.currentTimeMillis()
 		shortLivedCache.fetchAndGetEntry[T](cacheId, key).map { res =>

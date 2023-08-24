@@ -35,7 +35,7 @@
     hmrcPageHeading: HmrcPageHeading
 )
 
-@(requestObject: RequestObject, index: Int, trusteeDetails: Form[models.TrusteeAddressOverseas])(implicit request: Request[AnyRef], messages: Messages, ersUtil: ERSUtil, countryCodes: CountryCodes, appConfig: ApplicationConfig)
+@(requestObject: RequestObject, index: Int, trusteeDetails: Form[models.TrusteeAddressOverseas], edit: Boolean = false)(implicit request: Request[AnyRef], messages: Messages, ersUtil: ERSUtil, countryCodes: CountryCodes, appConfig: ApplicationConfig)
 
 @schemeId = @{requestObject.getSchemeId}
 
@@ -58,15 +58,19 @@
     text = messages("ers_trustee_address.title")
 ))
 
-@formWithCSRF(action = controllers.trustees.routes.TrusteeAddressOverseasController.questionSubmit(index)) { @*//TODO Update this with new controller method *@
+@formWithCSRF(action = if(edit) {
+controllers.trustees.routes.TrusteeAddressOverseasController.editQuestionSubmit(index)
+} else {
+controllers.trustees.routes.TrusteeAddressOverseasController.questionSubmit(index)
+}) {
 
 @govukInput(Input(
     classes = "govuk-!-width-full",
     id = "addressLine1",
     name = "addressLine1",
     autocomplete = Some("address-line1"),
-    value = trusteeDetails(trusteeAddressOverseasFields.addressLine1).value,
-    errorMessage = trusteeDetails.error(trusteeAddressOverseasFields.addressLine1).map { addressLine1 =>
+    value = trusteeDetails(trusteeAddressFields.addressLine1).value,
+    errorMessage = trusteeDetails.error(trusteeAddressFields.addressLine1).map { addressLine1 =>
         ErrorMessage(content = Text(addressLine1.messages.head))
     },
     label = Label(
@@ -79,7 +83,7 @@
     id = "addressLine2",
     name = "addressLine2",
     autocomplete = Some("address-line2"),
-    value = trusteeDetails(trusteeAddressOverseasFields.addressLine2).value,
+    value = trusteeDetails(trusteeAddressFields.addressLine2).value,
     label = Label(
         content = Text(messages("ers_trustee_address.line2")),
     )
@@ -90,7 +94,7 @@
     id = "addressLine3",
     name = "addressLine3",
     autocomplete = Some("address-line3"),
-    value = trusteeDetails(trusteeAddressOverseasFields.addressLine3).value,
+    value = trusteeDetails(trusteeAddressFields.addressLine3).value,
     label = Label(
         content = Text(messages("ers_trustee_address.line3")),
     )
@@ -101,7 +105,7 @@
     id = "addressLine4",
     name = "addressLine4",
     autocomplete = Some("address-line4"),
-    value = trusteeDetails(trusteeAddressOverseasFields.addressLine4).value,
+    value = trusteeDetails(trusteeAddressFields.addressLine4).value,
     label = Label(
         content = Text(messages("ers_trustee_address.line4")),
     )
@@ -112,13 +116,13 @@
     id = "addressLine5",
     name = "addressLine5",
     autocomplete = Some("address-line5"),
-    value = trusteeDetails(trusteeAddressOverseasFields.addressLine5).value,
+    value = trusteeDetails(trusteeAddressFields.addressLine5).value,
     label = Label(
         content = Text(messages("ers_trustee_address.line5")),
     )
 ))
 
-@countriesSelect(trusteeDetails(trusteeAddressOverseasFields.country).value)
+@countriesSelect(trusteeDetails(trusteeAddressFields.country).value)
 
 @govukButton(Button(
     inputType = Some("submit"),

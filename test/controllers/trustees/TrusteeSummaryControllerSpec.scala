@@ -427,6 +427,25 @@ class TrusteeSummaryControllerSpec extends AnyWordSpecLike
     def controllerUnderTest: TrusteeSummaryController = new TrusteeSummaryController(mockMCC, mockAuthConnector, mockErsConnector, mockCountryCodes,
       mockErsUtil, mockAppConfig, globalErrorView, trusteeSummaryView, testAuthAction)
 
+    "add a trustee and keep other trustees" when {
+      "given an index of 10000" in {
+        val index = 10000
+
+        val newTrustee = TrusteeDetails("Fourth Trustee", "1 Some Place", None, None, None, None, None, false)
+
+        val trusteeDetailsList = List(
+          TrusteeDetails("First Trustee", "20 Garden View", None, None, None, None, None, false),
+          TrusteeDetails("Second Trustee", "72 Big Avenue", None, None, None, None, None, false),
+          TrusteeDetails("Third Trustee", "21 Brick Lane", None, None, None, None, None, false)
+        )
+
+        val result = controllerUnderTest.replaceTrustee(trusteeDetailsList, index, newTrustee)
+
+        result should contain(newTrustee)
+        result.length shouldBe 4
+      }
+    }
+
     "replace a trustee and keep the other trustees" when {
 
       "given an index that matches a trustee in the list" in {

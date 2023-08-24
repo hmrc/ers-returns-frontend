@@ -35,7 +35,7 @@
     hmrcPageHeading: HmrcPageHeading
 )
 
-@(requestObject: RequestObject, index: Int, trusteeBasedInUkForm: Form[models.TrusteeBasedInUk])(implicit request: Request[AnyRef], messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
+@(requestObject: RequestObject, index: Int, trusteeBasedInUkForm: Form[models.TrusteeBasedInUk], edit: Boolean = false)(implicit request: Request[AnyRef], messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 
 @schemeId = @{requestObject.getSchemeId}
 
@@ -58,7 +58,11 @@
     text = messages("ers_trustee_based.title")
 ))
 
-@formWithCSRF(action = controllers.trustees.routes.TrusteeBasedInUkController.questionSubmit(index)) {
+@formWithCSRF(action = if(edit) {
+    controllers.trustees.routes.TrusteeBasedInUkController.editQuestionSubmit(index)
+} else {
+    controllers.trustees.routes.TrusteeBasedInUkController.questionSubmit(index)
+}) {
 
 @govukRadios(Radios(
     name = "basedInUk",
