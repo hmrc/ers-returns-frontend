@@ -62,7 +62,6 @@ trait CompanyBaseController[A] extends FrontendController with I18nSupport with 
     (for {
       oldData <- ersUtil.fetchPartFromCompanyDetailsList[A](index, requestObject.getSchemeReference)
     } yield {
-      println("AAAAAAAAA")
       val preparedForm = if (oldData.isDefined) form.fill(oldData.get) else form
       if (oldData.isDefined) {
         logger.error(s"\n\n[${this.getClass.getSimpleName}][showQuestionPage] Here's the data we pulled from the cache: " +
@@ -101,6 +100,7 @@ trait CompanyBaseController[A] extends FrontendController with I18nSupport with 
 
   def editCompany(index: Int, edit: Boolean = true): Action[AnyContent] = authAction.async {
     implicit  request =>
+      println(s"\n\n[${this.getClass.getSimpleName}] index is $index ")
       ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
         showQuestionPage(requestObject, index, edit)(request, hc)
 

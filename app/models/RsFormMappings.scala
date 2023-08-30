@@ -133,34 +133,6 @@ object RsFormMappings {
   /*
    * Manual Company Details Form definition
    */
-  def companyDetailsForm()(implicit messages: Messages): Form[CompanyDetails] = Form(mapping(
-    companyDetailsFields.companyName -> text
-			.verifying(Messages("ers_manual_company_details.err.summary.company_name_required"), _.nonEmpty)
-			.verifying(Messages("ers_manual_company_details.err.company_name"), so => checkLength(so, "companyDetailsFields.companyName"))
-			.verifying(Messages("ers_manual_company_details.err.invalidChars.company_name"), so => validInputCharacters(so, addresssRegx)),
-    companyDetailsFields.addressLine1 -> text
-			.verifying(Messages("ers_manual_company_details.err.summary.address_line1_required"), _.nonEmpty)
-			.verifying(Messages("ers_manual_company_details.err.address_line1"), so => checkAddressLength(so, "companyDetailsFields.addressLine1"))
-			.verifying(Messages("ers_manual_company_details.err.invalidChars.address_line1"), so => validInputCharacters(so, addresssRegx)),
-    companyDetailsFields.addressLine2 -> optional(text
-			.verifying(Messages("ers_manual_company_details.err.address_line2"), so => checkAddressLength(so, "companyDetailsFields.addressLine2"))
-			.verifying(Messages("ers_manual_company_details.err.invalidChars.address_line2"), so => validInputCharacters(so, addresssRegx))),
-    companyDetailsFields.addressLine3 -> optional(text
-			.verifying(Messages("ers_manual_company_details.err.address_line3"), so => checkAddressLength(so, "companyDetailsFields.addressLine3"))
-			.verifying(Messages("ers_manual_company_details.err.invalidChars.address_line3"), so => validInputCharacters(so, addresssRegx))),
-    companyDetailsFields.addressLine4 -> optional(text
-			.verifying(Messages("ers_manual_company_details.err.address_line4"), so => checkAddressLength(so, "companyDetailsFields.addressLine4"))
-			.verifying(Messages("ers_manual_company_details.err.invalidChars.address_line4"), so => validInputCharacters(so, addresssRegx))),
-    companyDetailsFields.country -> optional(text
-			verifying pattern(addresssRegx.r, error = Messages("ers_scheme_organiser.err.summary.invalid_country"))),
-    companyDetailsFields.postcode -> optional(text)
-      .transform((x: Option[String]) => x.map(_.toUpperCase()), (z: Option[String]) => z.map(_.toUpperCase()))
-			.verifying(Messages("ers_manual_company_details.err.postcode"), so => isValidPostcode(so)),
-    companyDetailsFields.companyReg -> optional(text
-      .verifying(pattern(fieldValidationPatterns.companyRegPattern.r, error = Messages("ers_manual_company_details.err.summary.company_reg_pattern")))),
-    companyDetailsFields.corporationRef -> optional(text
-			verifying pattern(corporationRefPattern.r, error = Messages("ers_manual_company_details.err.summary.corporation_ref_pattern")))
-  )(CompanyDetails.apply)(CompanyDetails.unapply))
 
   /*
    * Manual Company Details UK Address definition

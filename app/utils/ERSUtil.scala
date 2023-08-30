@@ -347,7 +347,10 @@ class ERSUtil @Inject()(val sessionService: SessionService,
 				println("Json here: "+x.getOrElse(""))
 				x.map(_.\(COMPANIES_CACHE).as[JsArray].\(index).getOrElse(Json.obj()).as[A])
 		} recover {
-			case _ => None
+			case x:Throwable => {
+				println(x.getMessage)
+				None
+			}
 		}
 	}
 

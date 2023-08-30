@@ -74,94 +74,29 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
     Future(Redirect(controllers.routes.GroupSchemeController.groupSchemePage()))
   }
 
-
-
-//  def manualCompanyDetailsSubmit(index: Int): Action[AnyContent] = authAction.async {
-//      implicit request =>
-//        ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
-//          showManualCompanyDetailsSubmit(requestObject, index)(request)
-//        }
-//  }
-//
-//  def showManualCompanyDetailsSubmit(requestObject: RequestObject, index: Int)
-//                                    (implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] = {
-//    RsFormMappings.companyDetailsForm.bindFromRequest.fold(
-//      errors => {
-//        Future(Ok(manualCompanyDetailsView(requestObject, index, errors)))
-//      },
-//      successful => {
-//        ersUtil.fetch[CompanyDetailsList](ersUtil.GROUP_SCHEME_COMPANIES, requestObject.getSchemeReference).flatMap { cachedCompaniesList =>
-//
-//          val processedFormData = CompanyDetailsList(replaceCompany(cachedCompaniesList.companies, index, successful))
-//
-//          ersUtil.cache(ersUtil.GROUP_SCHEME_COMPANIES, processedFormData, requestObject.getSchemeReference).map { _ =>
-//            Redirect(routes.GroupSchemeController.groupPlanSummaryPage())
-//          }
-//        } recoverWith {
-//          case _: NoSuchElementException =>
-//						val companiesList = CompanyDetailsList(List(successful))
-//						ersUtil.cache(ersUtil.GROUP_SCHEME_COMPANIES, companiesList, requestObject.getSchemeReference).map { _ =>
-//							Redirect(routes.GroupSchemeController.groupPlanSummaryPage())
-//						}
-//				}
-//      }
-//    )
-//  }
-
-
   def deleteCompany(id: Int): Action[AnyContent] = authAction.async {
-      implicit request =>
-        showDeleteCompany(id)(request, hc)
+    implicit request =>
+      showDeleteCompany(id)(request, hc)
   }
 
   def showDeleteCompany(id: Int)(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
 
     (for {
-      requestObject <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
-      all           <- ersUtil.fetchAll(requestObject.getSchemeReference)
-
-      companies =  all.getEntry[CompanyDetailsList](ersUtil.GROUP_SCHEME_COMPANIES).getOrElse(CompanyDetailsList(Nil))
-      companyDetailsList = CompanyDetailsList(filterDeletedCompany(companies, id))
-
-      _ <- ersUtil.cache(ersUtil.GROUP_SCHEME_COMPANIES, companyDetailsList, requestObject.getSchemeReference)
+      requestObject      <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
+      cachedCompanyList  <- ersUtil.fetch[CompanyDetailsList](ersUtil.COMPANIES_CACHE, requestObject.getSchemeReference)
+      companyDetailsList = CompanyDetailsList(filterDeletedCompany(cachedCompanyList, id))
+      _                  <- ersUtil.cache(ersUtil.COMPANIES_CACHE, companyDetailsList, requestObject.getSchemeReference)
     } yield {
-
-        Redirect(routes.GroupSchemeController.groupPlanSummaryPage())
+      Redirect(controllers.routes.GroupSchemeController.manualCompanyDetailsPage())
 
     }) recover {
-      case e: Exception =>
-        logger.error(s"[GroupSchemeController][showDeleteCompany] Fetch all data failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
-        getGlobalErrorPage
+      case _: Exception => getGlobalErrorPage
     }
   }
 
   private def filterDeletedCompany(companyList: CompanyDetailsList, id: Int): List[CompanyDetails] =
     companyList.companies.zipWithIndex.filterNot(_._2 == id).map(_._1)
 
-//  def editCompany(index: Int): Action[AnyContent] = authAction.async {
-//      implicit request =>
-//          showEditCompany(index)(request, hc)
-//  }
-//
-//  def showEditCompany(index: Int)(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
-//
-//    (for {
-//      requestObject <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
-//      all           <- ersUtil.fetchAll(requestObject.getSchemeReference)
-//
-//      companies =  all.getEntry[CompanyDetailsList](ersUtil.GROUP_SCHEME_COMPANIES).getOrElse(CompanyDetailsList(Nil))
-//      companyDetails = companies.companies(index)
-//
-//    } yield {
-//
-//      Ok(manualCompanyDetailsView(requestObject, index, RsFormMappings.companyDetailsForm.fill(companyDetails)))
-//
-//    }) recover {
-//      case e: Exception =>
-//        logger.error(s"[GroupSchemeController][showEditCompany] Fetch group scheme companies for edit failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
-//        getGlobalErrorPage
-//    }
-//  }
 
 
 
