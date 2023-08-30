@@ -62,7 +62,10 @@
 		text = ersUtil.getPageElement(schemeId, ersUtil.PAGE_MANUAL_COMPANY_DETAILS, "title")
 	))
 
-	@formWithCSRF(action = controllers.subsidiaries.routes.CompanyDetailsUkController.questionSubmit(index)) {
+	@formWithCSRF(action = = if(edit) {
+		controllers.subsidiaries.routes.CompanyDetailsUkController.editQuestionSubmit(index)
+	} else {
+		controllers.subsidiaries.routes.CompanyDetailsUkController.questionSubmit(index)}) {
 
 		@govukInput(Input(
 			classes = "govuk-!-width-one-half",

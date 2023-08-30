@@ -61,7 +61,11 @@
 		text = messages("ers_manual_address_overseas.title")
 	))
 
-	@formWithCSRF(action = controllers.subsidiaries.routes.CompanyAddressOverseasController.questionSubmit(index)) {
+	@formWithCSRF(action = = if(edit) {
+				controllers.subsidiaries.routes.CompanyAddressOverseasController.editQuestionSubmit(index)
+				} else {
+				controllers.subsidiaries.routes.CompanyAddressOverseasController.questionSubmit(index)}) {
+
 
 		@govukInput(Input(
 			id = "addressLine1",

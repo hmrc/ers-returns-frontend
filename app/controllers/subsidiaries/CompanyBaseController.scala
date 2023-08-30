@@ -107,7 +107,7 @@ trait CompanyBaseController[A] extends FrontendController with I18nSupport with 
       }
   }
 
-  def editQuestionSubmit(index: Int): Action[AnyContent] = authAction.async {
+  def editQuestionSubmit(index: Int, edit: Boolean = true): Action[AnyContent] = authAction.async {
     implicit request =>
       ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
         submissionHandler(requestObject, index, edit = true)(request, hc)

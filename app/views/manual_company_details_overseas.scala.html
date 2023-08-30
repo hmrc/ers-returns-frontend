@@ -62,9 +62,13 @@
 		text = messages("ers_manual_company_details_overseas.title")
 	))
 
-	@formWithCSRF(action = controllers.subsidiaries.routes.CompanyDetailsOverseasController.questionSubmit(index)) {
+	@formWithCSRF(action = = if(edit) {
+					controllers.subsidiaries.routes.CompanyDetailsOverseasController.editQuestionSubmit(index)
+				} else {
+					controllers.subsidiaries.routes.CompanyDetailsOverseasController.questionSubmit(index)}) {
 
-		@govukInput(Input(
+
+@govukInput(Input(
 			classes = "govuk-!-width-one-half",
 			id = "companyName",
 			name = "companyName",
