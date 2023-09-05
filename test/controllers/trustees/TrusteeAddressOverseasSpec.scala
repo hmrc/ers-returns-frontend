@@ -135,4 +135,22 @@ class TrusteeAddressOverseasSpec  extends AnyWordSpecLike
       redirectLocation(result).get shouldBe routes.TrusteeSummaryController.trusteeSummaryPage().url
     }
   }
+
+  "calling editQuestion" should {
+    implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+    setAuthMocks()
+    when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any())).thenReturn(Future.successful(ersRequestObject))
+
+    "be the same as showQuestion for a specific index" in {
+      when(mockErsUtil.fetchPartFromTrusteeDetailsList[TrusteeAddressOverseas](any(), any())(any(), any())).thenReturn(Future.successful(Some(trusteeAddressOverseas)))
+
+      val result = testController.editQuestion(1).apply(authRequest)
+
+      status(result) shouldBe Status.OK
+      contentAsString(result) should include(testMessages("ers_trustee_address.title"))
+      contentAsString(result) should include(testMessages("ers_trustee_address.line1"))
+      contentAsString(result) should include("Overseas line 1")
+
+    }
+  }
 }

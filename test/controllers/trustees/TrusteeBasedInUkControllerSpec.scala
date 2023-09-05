@@ -125,7 +125,7 @@ class TrusteeBasedInUkControllerSpec  extends AnyWordSpecLike
     }
   }
 
-  "successfully bind the form and go to the trustee address UK page if yes" in {
+  "successfully bind the form and go to the trustee address UK page if true" in {
     val emptyCacheMap = CacheMap("", Map("" -> Json.obj()))
     when(mockErsUtil.cache[TrusteeBasedInUk](any(), any(), any())(any(), any())).thenReturn(Future.successful(emptyCacheMap))
     when(mockErsUtil.fetch[TrusteeBasedInUk](any(), any())(any(), any())).thenReturn(Future.successful(TrusteeBasedInUk(true)))
@@ -140,7 +140,7 @@ class TrusteeBasedInUkControllerSpec  extends AnyWordSpecLike
     redirectLocation(result).get shouldBe routes.TrusteeAddressUkController.questionPage().url
   }
 
-  "successfully bind the form and go to the trustee address overseas page if no" in {
+  "successfully bind the form and go to the trustee address overseas page if false" in {
     val emptyCacheMap = CacheMap("", Map("" -> Json.obj()))
     when(mockErsUtil.cache[TrusteeBasedInUk](any(), any(), any())(any(), any())).thenReturn(Future.successful(emptyCacheMap))
     when(mockErsUtil.fetch[TrusteeBasedInUk](any(), any())(any(), any())).thenReturn(Future.successful(TrusteeBasedInUk(false)))
@@ -153,5 +153,57 @@ class TrusteeBasedInUkControllerSpec  extends AnyWordSpecLike
 
     status(result) shouldBe Status.SEE_OTHER
     redirectLocation(result).get shouldBe routes.TrusteeAddressOverseasController.questionPage().url
+  }
+
+
+  "calling editQuestion" should {
+    implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+    setAuthMocks()
+    when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any())).thenReturn(Future.successful(ersRequestObject))
+
+    "be the same as showQuestion for a specific index" in {
+      when(mockErsUtil.fetchPartFromTrusteeDetailsList[TrusteeBasedInUk](any(), any())(any(), any())).thenReturn(Future.successful(Some(TrusteeBasedInUk(false))))
+
+      val result = testController.editQuestion(1).apply(authRequest)
+
+      status(result) shouldBe Status.OK
+      contentAsString(result) should include(testMessages("ers_trustee_based.title"))
+    }
+  }
+
+  "calling editQuestionSubmit" should {
+    implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+    setAuthMocks()
+    when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any())).thenReturn(Future.successful(ersRequestObject))
+
+    "successfully bind the form and go to the edit version of the trustee address UK page with the index preserved if the answer is true" in {
+      val emptyCacheMap = CacheMap("", Map("" -> Json.obj()))
+      when(mockErsUtil.cache[TrusteeBasedInUk](any(), any(), any())(any(), any())).thenReturn(Future.successful(emptyCacheMap))
+      when(mockErsUtil.fetch[TrusteeBasedInUk](any(), any())(any(), any())).thenReturn(Future.successful(TrusteeBasedInUk(true)))
+      when(mockTrusteeService.updateTrusteeCache(any())(any())).thenReturn(Future.successful(Unit), Future.successful(Unit))
+
+      val trusteeBasedData = Map("basedInUk" -> "0")
+      val form = RsFormMappings.trusteeBasedInUkForm().bind(trusteeBasedData)
+      implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*))
+      val result = testController.editQuestionSubmit(1).apply(authRequest)
+
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result).get shouldBe routes.TrusteeAddressUkController.editQuestion(1).url
+    }
+
+    "successfully bind the form and go to the edit version of the trustee address overseas page with the index preserved if the answer is false" in {
+      val emptyCacheMap = CacheMap("", Map("" -> Json.obj()))
+      when(mockErsUtil.cache[TrusteeBasedInUk](any(), any(), any())(any(), any())).thenReturn(Future.successful(emptyCacheMap))
+      when(mockErsUtil.fetch[TrusteeBasedInUk](any(), any())(any(), any())).thenReturn(Future.successful(TrusteeBasedInUk(false)))
+      when(mockTrusteeService.updateTrusteeCache(any())(any())).thenReturn(Future.successful(Unit), Future.successful(Unit))
+
+      val trusteeBasedData = Map("basedInUk" -> "1")
+      val form = RsFormMappings.trusteeBasedInUkForm().bind(trusteeBasedData)
+      implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*))
+      val result = testController.editQuestionSubmit(1).apply(authRequest)
+
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result).get shouldBe routes.TrusteeAddressOverseasController.editQuestion(1).url
+    }
   }
 }
