@@ -59,12 +59,15 @@ class AuthFunctionalitySpec
       ExecutionContext.global
     )
 
-    class TestController(authAction: AuthAction, val mcc: MessagesControllerComponents)
-        extends FrontendController(mcc) {
-      def onPageLoad(): Action[AnyContent] = authAction(_ => Ok)
-    }
+		class TestController(authAction: AuthAction, val mcc: MessagesControllerComponents) extends FrontendController(mcc){
+			def onPageLoad(): Action[AnyContent] = authAction { _ => Ok }
+		}
+		class TestControllerGov(authAction: AuthActionGovGateway, val mcc: MessagesControllerComponents) extends FrontendController(mcc){
+			def onPageLoad(): Action[AnyContent] = authAction { _ => Ok }
+		}
 
     val controllerHarness = new TestController(testAuthAction, mockMCC)
+    val controllerHarnessGov = new TestControllerGov(testAuthActionGov, mockMCC)
 
     val ersAuthData: ERSAuthData = ERSAuthData(
       enrolments = enrolmentSet,
@@ -148,9 +151,64 @@ class AuthFunctionalitySpec
 
         val res: Future[Result] = controllerHarness.onPageLoad()(requestWithAuth)
 
-        status(res)           shouldBe 303
-        redirectLocation(res) shouldBe Some("/submit-your-ers-annual-return/unauthorised")
+				status(res) shouldBe 303
+				redirectLocation(res) shouldBe Some("/submit-your-ers-annual-return/unauthorised")
+			}
+		}
+	}
+
+  "authoriseFor govGateway" should {
+    "authorise a user" when {
+      "they have a valid enrolment" in new Setup(ersEnrolmentSet, Some(Agent)) {
+        when(mockAuthConnector.authorise[RetrievalType](ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+          .thenReturn(Future.successful(buildRetrieval(ersAuthData)))
+
+        val res: Future[Result] = controllerHarnessGov.onPageLoad()(requestWithAuth)
+        status(res) shouldBe 200
       }
     }
-  }
+
+		"redirect and fail to authorise" when {
+			"it receives a NoActiveSessionException" in new Setup(invalidEnrolmentSet) {
+				setUnauthorisedMocks()
+
+				val res: Future[Result] = controllerHarnessGov.onPageLoad()(requestWithAuth)
+
+				status(res) shouldBe 303
+				redirectLocation(res) shouldBe Some("http://localhost:9949/gg/sign-in?continue=http%3A%2F%2Flocalhost%3A9290%2Fsubmit-your-ers-annual-return&origin=ers-returns-frontend")
+			}
+
+			"it receives a NoActiveSessionException and preserves query parameters" in new Setup(invalidEnrolmentSet) {
+				setUnauthorisedMocks()
+
+				implicit val testFakeRequest: FakeRequest[AnyContent] = FakeRequest("GET", "/my-resources?a=1&b=2&c=3")
+				val requestWithAuth: RequestWithOptionalAuthContext[AnyContent] = RequestWithOptionalAuthContext(testFakeRequest, defaultErsAuthData)
+
+				val res: Future[Result] = controllerHarnessGov.onPageLoad()(requestWithAuth)
+
+				status(res) shouldBe 303
+				redirectLocation(res) shouldBe Some("http://localhost:9949/gg/sign-in?continue=http%3A%2F%2Flocalhost%3A9290%2Fsubmit-your-ers-annual-return%3Fa%3D1%26b%3D2%26c%3D3&origin=ers-returns-frontend")
+			}
+
+			"it receives an AuthorisationException" in new Setup(invalidEnrolmentSet) {
+				when(mockAuthConnector.authorise[RetrievalType](ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+					.thenReturn(Future.failed(UnsupportedAuthProvider("Not GGW")))
+
+				val res: Future[Result] = controllerHarnessGov.onPageLoad()(requestWithAuth)
+
+				status(res) shouldBe 303
+				redirectLocation(res) shouldBe Some("/submit-your-ers-annual-return/unauthorised")
+			}
+		}
+	}
+
+	"delegationUserModel method" should {
+		"return an ERSAuthData with the empRef updated" in new Setup(ersEnrolmentSet, Some(Agent)) {
+			val metadata = ErsMetaData(schemeInfo, "ipRef", Some("aoRef"), "1234/5678", Some("agentRef"), Some("sapNumber"))
+			val authdata = defaultErsAuthData
+			val result = testAuthActionGov.delegationModelUser(metadata, authdata)
+
+			result.empRef shouldBe EmpRef("1234", "5678")
+		}
+	}
 }

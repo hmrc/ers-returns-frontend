@@ -135,4 +135,40 @@ class TrusteeNameControllerSpec extends AnyWordSpecLike
 
     }
   }
+
+  "calling editQuestion" should {
+    implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+    setAuthMocks()
+    when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any())).thenReturn(Future.successful(ersRequestObject))
+
+    "be the same as showQuestion for a specific index" in {
+      when(mockErsUtil.fetchPartFromTrusteeDetailsList[TrusteeName](any(), any())(any(), any())).thenReturn(Future.successful(Some(TrusteeName("Test person"))))
+
+      val result = testController.editQuestion(1).apply(authRequest)
+
+      status(result) shouldBe Status.OK
+      contentAsString(result) should include(testMessages("ers_trustee_name.title"))
+      contentAsString(result) should include("Test person")
+    }
+  }
+
+  "calling editQuestionSubmit" should {
+    implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+    setAuthMocks()
+    when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any())).thenReturn(Future.successful(ersRequestObject))
+
+    "successfully bind the form and go to the edit version of the trustee based in UK page with the index preserved if the form is filled correctly" in {
+      val emptyCacheMap = CacheMap("", Map("" -> Json.obj()))
+      when(mockErsUtil.cache[TrusteeName](any(), any(), any())(any(), any())).thenReturn(Future.successful(emptyCacheMap))
+      when(mockTrusteeService.updateTrusteeCache(any())(any())).thenReturn(Future.successful(Unit), Future.successful(Unit))
+
+      val trusteeBasedData = Map("name" -> "Test person")
+      val form = RsFormMappings.trusteeBasedInUkForm().bind(trusteeBasedData)
+      implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*))
+      val result = testController.editQuestionSubmit(1).apply(authRequest)
+
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result).get shouldBe routes.TrusteeBasedInUkController.editQuestion(1).url
+    }
+  }
 }
