@@ -35,7 +35,7 @@
 		hmrcPageHeading: HmrcPageHeading
 )
 
-@(requestObject: RequestObject, index: Int, companyDetails: Form[models.CompanyName], edit: Boolean = false)(implicit request: Request[AnyRef], flash: Flash, messages: Messages, ersUtil: ERSUtil, countryCodes: CountryCodes, appConfig: ApplicationConfig)
+@(requestObject: RequestObject, index: Int, companyDetails: Form[models.CompanyName], edit: Boolean)(implicit request: Request[AnyRef], flash: Flash, messages: Messages, ersUtil: ERSUtil, countryCodes: CountryCodes, appConfig: ApplicationConfig)
 
 @schemeId = @{requestObject.getSchemeId}
 
@@ -62,7 +62,7 @@
 		text = ersUtil.getPageElement(schemeId, ersUtil.PAGE_MANUAL_COMPANY_DETAILS, "title")
 	))
 
-	@formWithCSRF(action = = if(edit) {
+	@formWithCSRF(action = if(edit) {
 		controllers.subsidiaries.routes.CompanyDetailsUkController.editQuestionSubmit(index)
 	} else {
 		controllers.subsidiaries.routes.CompanyDetailsUkController.questionSubmit(index)}) {
@@ -115,3 +115,4 @@
 		))
 	}
 }
+

@@ -40,6 +40,7 @@ import play.api.data.Form
 import play.api.libs.json.Format
 import play.api.mvc.{AnyContent, MessagesControllerComponents, Request, Result}
 import play.twirl.api.Html
+import services.CompanyDetailsService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
@@ -58,6 +59,7 @@ class IsCompanyUkController @Inject()(val mcc: MessagesControllerComponents,
                                       implicit val countryCodes: CountryCodes,
                                       implicit val ersUtil: ERSUtil,
                                       implicit val appConfig: ApplicationConfig,
+                                      companyDetailsService: CompanyDetailsService,
                                       pageView: views.html.manual_is_the_company_in_uk
                                      )
   extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with CompanyBaseController[CompanyBasedInUk] {
@@ -71,14 +73,15 @@ class IsCompanyUkController @Inject()(val mcc: MessagesControllerComponents,
     for {
       requestObject <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
       subsidiaryBasedInUk <- ersUtil.fetch[CompanyBasedInUk](cacheKey, requestObject.getSchemeReference)
+      _ <- companyDetailsService.updateCompanyCache(index)
     } yield {
-      (subsidiaryBasedInUk.basedInUk, edit) match {
-        case (true, false) => Redirect(controllers.subsidiaries.routes.CompanyDetailsUkController.questionPage())
-        case (false, false)  => Redirect(controllers.subsidiaries.routes.CompanyDetailsOverseasController.questionPage())
-        case (_, true) => Redirect(controllers.routes.GroupSchemeController.manualCompanyDetailsPage())
+        (subsidiaryBasedInUk.basedInUk, edit) match {
+          case (true, false) => Redirect(controllers.subsidiaries.routes.CompanyDetailsUkController.questionPage())
+          case (false, false) => Redirect(controllers.subsidiaries.routes.CompanyDetailsOverseasController.questionPage())
+          case (_, true) => Redirect(controllers.routes.GroupSchemeController.manualCompanyDetailsPage())
+        }
       }
     }
-  }
 
   def form(implicit request: Request[AnyContent]): Form[CompanyBasedInUk] = RsFormMappings.companyBasedInUkForm()
 

@@ -38,8 +38,9 @@ import controllers.auth.AuthAction
 import models.{CompanyName, RequestObject, RsFormMappings}
 import play.api.data.Form
 import play.api.libs.json.Format
-import play.api.mvc.{AnyContent, MessagesControllerComponents, Request}
+import play.api.mvc.{AnyContent, MessagesControllerComponents, Request, Result}
 import play.twirl.api.Html
+import services.CompanyDetailsService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
@@ -57,6 +58,7 @@ class CompanyDetailsOverseasController @Inject()(val mcc: MessagesControllerComp
                                                  implicit val countryCodes: CountryCodes,
                                                  implicit val ersUtil: ERSUtil,
                                                  implicit val appConfig: ApplicationConfig,
+                                                 companyDetailsService: CompanyDetailsService,
                                                  companyOverseasDetailsView: views.html.manual_company_details_overseas
                                                 )
   extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with CompanyBaseController[CompanyName] {
@@ -67,15 +69,15 @@ class CompanyDetailsOverseasController @Inject()(val mcc: MessagesControllerComp
 
   implicit val format: Format[CompanyName] = CompanyName.format
 
-  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier)= {
-    {
-      if (edit) {
-        Future.successful(Redirect(controllers.routes.GroupSchemeController.manualCompanyDetailsPage()))
+  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier): Future[Result] = {
+    if (edit) {
+        companyDetailsService.updateCompanyCache(index).map { _ =>
+          Redirect(controllers.routes.GroupSchemeController.manualCompanyDetailsPage())
+        }
       } else {
         Future.successful(Redirect(controllers.subsidiaries.routes.CompanyAddressOverseasController.questionPage()))
       }
     }
-  }
 
   def form(implicit request: Request[AnyContent]): Form[CompanyName] = RsFormMappings.companyNameForm()
 

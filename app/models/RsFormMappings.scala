@@ -229,14 +229,14 @@ object RsFormMappings {
 
   def companyNameForm()(implicit messages: Messages): Form[CompanyName] = Form(mapping(
     companyNameFields.companyName -> text
-      .verifying(Messages("ers_manual_company_details.err.summary.name_required"), _.nonEmpty)
+      .verifying(Messages("ers_manual_company_details.err.summary.company_name_required"), _.nonEmpty)
       .verifying(Messages("ers_manual_company_details.err.company_name"), so => checkLength(so, "companyDetailsFields.companyName"))
       .verifying(Messages("ers_manual_company_details.err.invalidChars.company_name"), so => validInputCharacters(so, addresssRegx)),
     companyNameFields.companyReg -> optional(text
       .verifying(Messages("ers_manual_company_details.err.company_reg"), so => checkLength(so, "companyDetailsFields.companyReg"))
       .verifying(pattern(fieldValidationPatterns.companyRegPattern.r, error = Messages("ers_scheme_organiser.err.company_ref")))),
     companyNameFields.corporationRef -> optional(text
-      verifying pattern(corporationRefPattern.r, error = Messages("ers_manual_company_details.err.corporation_ref_pattern")))
+      verifying pattern(corporationRefPattern.r, error = Messages("ers_manual_company_details.err.corporation_ref")))
   )(CompanyName.apply)(CompanyName.unapply(_)))
 
   /*

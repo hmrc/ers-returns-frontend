@@ -35,7 +35,7 @@
 		hmrcPageHeading: HmrcPageHeading
 )
 
-@(requestObject: RequestObject, index: Int, companyDetails: Form[models.CompanyAddressUk] , edit: Boolean = false)(implicit request: Request[AnyRef], flash: Flash, messages: Messages, ersUtil: ERSUtil, countryCodes: CountryCodes, appConfig: ApplicationConfig)
+@(requestObject: RequestObject, index: Int, companyDetails: Form[models.CompanyAddressUk] , edit: Boolean)(implicit request: Request[AnyRef], flash: Flash, messages: Messages, ersUtil: ERSUtil, countryCodes: CountryCodes, appConfig: ApplicationConfig)
 
 @schemeId = @{requestObject.getSchemeId}
 
@@ -62,13 +62,10 @@
 		text = messages("ers_manual_address_uk.title")
 	))
 
-	@formWithCSRF((action = = if(edit) {
+	@formWithCSRF(action = if(edit) {
 						controllers.subsidiaries.routes.CompanyAddressUkController.editQuestionSubmit(index)
 						} else {
 						controllers.subsidiaries.routes.CompanyAddressUkController.questionSubmit(index)}) {
-
-
-
 
 		@govukInput(Input(
 				id = "addressLine1",

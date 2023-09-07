@@ -107,10 +107,59 @@
       )
      ))
    )
- )
+)
 
+
+     val corporationRegSummary = Seq (
+       SummaryListRow (
+           key = Key(
+              content = Text(messages("ers_group_summary.crn"))
+       ),
+       value = Value(
+            content = Text(company.companyReg.getOrElse(""))
+       ),
+      actions = Some(Actions(
+      classes = "govuk-!-width-one-quarter",
+      items = Seq(
+       ActionItem(
+             href = controllers.subsidiaries.routes.CompanyDetailsUkController.editCompany(index).url,
+             content = Text(messages("ers.change_this")),
+             visuallyHiddenText = Some(messages("ers.change_this"))
+             )
+          )
+       )
+)))
+
+       val corporationRefSummary = Seq (
+          SummaryListRow (
+              key = Key(
+              content = Text(messages("ers_group_summary.ctr"))
+          ),
+             value = Value(
+             content = Text(company.corporationRef.getOrElse(""))
+          ),
+          actions = Some(Actions(
+          classes = "govuk-!-width-one-quarter",
+          items = Seq(
+          ActionItem(
+             href = controllers.subsidiaries.routes.CompanyDetailsUkController.editCompany(index).url,
+             content = Text(messages("ers.change_this")),
+             visuallyHiddenText = Some(messages("ers.change_this"))
+             )
+          )
+       )
+)))
+
+
+
+
+if(company.country.getOrElse("") == "UK") {
+ companyNameSummary ++ companyLocationSummary ++ addressSummary ++ corporationRegSummary ++ corporationRefSummary
+} else {
  companyNameSummary ++ companyLocationSummary ++ addressSummary
- }
+}
+
+}
 
 
  @govuk_wrapper(title = messages("ers_company_summary.page_title"), None) {

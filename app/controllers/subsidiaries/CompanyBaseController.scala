@@ -53,11 +53,11 @@ trait CompanyBaseController[A] extends FrontendController with I18nSupport with 
   def questionPage(index: Int): Action[AnyContent] = authAction.async {
     implicit request =>
       ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
-        showQuestionPage(requestObject, index)
+        showQuestionPage(requestObject, index, edit = false)
       }
   }
 
-  def showQuestionPage(requestObject: RequestObject, index: Int, edit: Boolean = false)
+  def showQuestionPage(requestObject: RequestObject, index: Int, edit: Boolean)
                       (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
     (for {
       oldData <- ersUtil.fetchPartFromCompanyDetailsList[A](index, requestObject.getSchemeReference)
@@ -84,11 +84,11 @@ trait CompanyBaseController[A] extends FrontendController with I18nSupport with 
       }
   }
 
-  def submissionHandler(requestObject: RequestObject, index: Int, edit: Boolean = false)
+  def submissionHandler(requestObject: RequestObject, index: Int, edit: Boolean)
                         (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
     form.bindFromRequest().fold(
       errors => {logger.error(errors.errors.mkString)
-          Future.successful(Ok(view(requestObject, index, errors)))
+          Future.successful(Ok(view(requestObject, index, errors, edit)))
       },
       result => {
         ersUtil.cache[A](cacheKey, result, requestObject.getSchemeReference).flatMap { _ =>
@@ -102,12 +102,12 @@ trait CompanyBaseController[A] extends FrontendController with I18nSupport with 
     implicit  request =>
       println(s"\n\n[${this.getClass.getSimpleName}] index is $index ")
       ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
-        showQuestionPage(requestObject, index, edit)(request, hc)
+        showQuestionPage(requestObject, index, edit = true)(request, hc)
 
       }
   }
 
-  def editQuestionSubmit(index: Int, edit: Boolean = true): Action[AnyContent] = authAction.async {
+  def editQuestionSubmit(index: Int): Action[AnyContent] = authAction.async {
     implicit request =>
       ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
         submissionHandler(requestObject, index, edit = true)(request, hc)

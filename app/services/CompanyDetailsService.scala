@@ -52,7 +52,7 @@ class CompanyDetailsService @Inject()(
 
   def replaceCompany(companies: List[CompanyDetails], index: Int, formData: CompanyDetails): List[CompanyDetails] =
     (if (index == 10000) {
-      println(s"\n\n[${this.getClass.getSimpleName}] index is $index BUT INDEX IS 10000 SOMEHOW? ")
+      println(s"\n\n[${this.getClass.getSimpleName}] index is $index ")
       companies :+ formData
     } else {
       println(s"\n\n[${this.getClass.getSimpleName}] index is $index")

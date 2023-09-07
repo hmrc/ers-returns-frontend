@@ -35,7 +35,7 @@
         hmrcPageHeading: HmrcPageHeading
 )
 
-@(requestObject: RequestObject, index: Int, companyDetails: Form[models.CompanyBasedInUk], edit: Boolean = false)(implicit request: Request[AnyRef], flash: Flash, messages: Messages, ersUtil: ERSUtil, countryCodes: CountryCodes, appConfig: ApplicationConfig)
+@(requestObject: RequestObject, index: Int, companyDetails: Form[models.CompanyBasedInUk], edit: Boolean)(implicit request: Request[AnyRef], flash: Flash, messages: Messages, ersUtil: ERSUtil, countryCodes: CountryCodes, appConfig: ApplicationConfig)
 
 @schemeId = @{requestObject.getSchemeId}
 
@@ -63,7 +63,7 @@
         text = messages("ers_manual_is_the_company_in_uk.title")
     ))
 
-    @formWithCSRF(action = = if(edit) {
+    @formWithCSRF(action = if(edit) {
                     controllers.subsidiaries.routes.IsCompanyUkController.editQuestionSubmit(index)
                     } else {
                     controllers.subsidiaries.routes.IsCompanyUkController.questionSubmit(index)}) {

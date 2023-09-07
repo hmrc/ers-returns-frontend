@@ -42,6 +42,7 @@ import play.api.data.Form
 import play.api.libs.json.Format
 import play.api.mvc.{AnyContent, MessagesControllerComponents, Request, Result}
 import play.twirl.api.Html
+import services.CompanyDetailsService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
@@ -58,6 +59,7 @@ class CompanyDetailsUkController @Inject()(val mcc: MessagesControllerComponents
                                            implicit val countryCodes: CountryCodes,
                                            implicit val ersUtil: ERSUtil,
                                            implicit val appConfig: ApplicationConfig,
+                                           companyDetailsService: CompanyDetailsService,
                                            companyUKNameView: views.html.manual_company_details_uk
                                           )
   extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with CompanyBaseController[CompanyName] {
@@ -70,7 +72,9 @@ class CompanyDetailsUkController @Inject()(val mcc: MessagesControllerComponents
 
     def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier) = {
       if (edit) {
-        Future.successful(Redirect(controllers.routes.GroupSchemeController.manualCompanyDetailsPage()))
+        companyDetailsService.updateCompanyCache(index).map { _ =>
+          Redirect(controllers.routes.GroupSchemeController.manualCompanyDetailsPage())
+        }
       } else {
         Future.successful(Redirect(controllers.subsidiaries.routes.CompanyAddressUkController.questionPage()))
       }
