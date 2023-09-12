@@ -33,7 +33,7 @@ import play.api.mvc._
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentAsString, defaultAwaitTimeout, stubBodyParser, stubControllerComponents, stubMessages, stubMessagesApi}
 import play.twirl.api.Html
-import services.SessionService
+import services.{CompanyDetailsService, SessionService}
 import services.audit.AuditEvents
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
@@ -86,6 +86,7 @@ trait ErsTestHelper extends MockitoSugar with AuthHelper with ERSFakeApplication
 	val mockShortLivedCache: ERSShortLivedCache = mock[ERSShortLivedCache]
 	val mockSessionCache: SessionService = mock[SessionService]
 	val mockCountryCodes: CountryCodes = mock[CountryCodes]
+	val mockCompanyDetailsService: CompanyDetailsService = mock[CompanyDetailsService]
 
 
 	val testAuthAction = new AuthAction(mockAuthConnector, mockAppConfig, mockErsUtil, defaultParser)(ec)
