@@ -146,4 +146,22 @@ object Fixtures extends AuthHelper {
       Some("ts"),
       Some("hmac")
     )
+
+  val companyAddressOverseas: CompanyAddressOverseas = CompanyAddressOverseas(
+    "Overseas 1",
+    Some("2"),
+    Some("3"),
+    Some("4"),
+    Some("5"),
+    Some("country")
+  )
+
+  val companyAddressUK: CompanyAddressUk = CompanyAddressUk(
+    "UK 1",
+    Some("2"),
+    Some("3"),
+    Some("4"),
+    Some("5"),
+    Some("UK")
+  )
 }

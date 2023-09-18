@@ -16,7 +16,7 @@
 
 package controllers.subsidiaries
 
-import models.{CompanyAddressOverseas, CompanyDetailsList, RequestObject, RsFormMappings}
+import models.{CompanyAddressUk, CompanyDetailsList, RequestObject, RsFormMappings}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatest.OptionValues
@@ -31,13 +31,13 @@ import play.api.libs.json.Json
 import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents}
 import play.api.test.Helpers.{contentAsString, defaultAwaitTimeout, redirectLocation, status, stubBodyParser}
 import uk.gov.hmrc.http.cache.client.CacheMap
-import utils.Fixtures.{companyAddressOverseas, ersRequestObject}
 import utils.{ERSFakeApplicationConfig, ErsTestHelper, Fixtures}
-import views.html.{global_error, manual_address_overseas}
+import utils.Fixtures.{companyAddressUK, ersRequestObject}
+import views.html.{global_error, manual_address_uk}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class CompanyAddressOverseasControllerSpec extends AnyWordSpecLike
+class CompanyAddressUKControllerSpec extends AnyWordSpecLike
 
   with Matchers
   with OptionValues
@@ -59,7 +59,7 @@ class CompanyAddressOverseasControllerSpec extends AnyWordSpecLike
   implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
 
 
-  val testController = new CompanyAddressOverseasController(
+  val testController = new CompanyAddressUkController (
     mockMCC,
     mockAuthConnector,
     mockErsConnector,
@@ -69,7 +69,7 @@ class CompanyAddressOverseasControllerSpec extends AnyWordSpecLike
     mockErsUtil,
     mockAppConfig,
     mockCompanyDetailsService,
-    app.injector.instanceOf[manual_address_overseas]
+    app.injector.instanceOf[manual_address_uk]
   )
 
   "calling showQuestionPage" should {
@@ -77,7 +77,7 @@ class CompanyAddressOverseasControllerSpec extends AnyWordSpecLike
     setAuthMocks()
     when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any())).thenReturn(Future.successful(ersRequestObject))
 
-    "show the empty company address overseas question page when there is nothing to prefill" in {
+    "show the empty company address UK question page when there is nothing to prefill" in {
       when(mockErsUtil.fetchPartFromCompanyDetailsList[CompanyDetailsList](any(), any())(any(), any())).thenReturn(Future.successful(None))
       val result = testController.questionPage(1).apply(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
 
@@ -86,18 +86,18 @@ class CompanyAddressOverseasControllerSpec extends AnyWordSpecLike
       contentAsString(result) should include(testMessages("ers_company_address.line1"))
     }
 
-    "show the prefilled company address overseas question page when there is data to prefill" in {
-      when(mockErsUtil.fetchPartFromCompanyDetailsList[CompanyAddressOverseas](any(), any())(any(), any())).thenReturn(Future.successful(Some(companyAddressOverseas)))
+    "show the prefilled company address UK question page when there is data to prefill" in {
+      when(mockErsUtil.fetchPartFromCompanyDetailsList[CompanyAddressUk](any(), any())(any(), any())).thenReturn(Future.successful(Some(companyAddressUK)))
 
       val result = testController.questionPage(1).apply(authRequest)
 
       status(result) shouldBe Status.OK
       contentAsString(result) should include(testMessages("ers_company_address.title"))
       contentAsString(result) should include(testMessages("ers_company_address.line1"))
-      contentAsString(result) should include("Overseas line 1")
+      contentAsString(result) should include("UK line 1")
     }
     "show the global error page if an exception occurs while retrieving cached data" in {
-      when(mockErsUtil.fetchPartFromCompanyDetailsList[CompanyAddressOverseas](any(), any())(any(), any())).thenReturn(Future.failed(new RuntimeException("Failure scenario")))
+      when(mockErsUtil.fetchPartFromCompanyDetailsList[CompanyAddressUk](any(), any())(any(), any())).thenReturn(Future.failed(new RuntimeException("Failure scenario")))
 
       val result = testController.questionPage(1).apply(authRequest)
 
@@ -109,9 +109,9 @@ class CompanyAddressOverseasControllerSpec extends AnyWordSpecLike
   }
 
   "calling questionSubmit" should {
-    "show company address overseas form page with errors if the form is incorrectly filled" in {
-      val companyAddressOverseasData = Map("addressLine1" -> "")
-      val form = RsFormMappings.companyAddressOverseasForm().bind(companyAddressOverseasData)
+    "show company address UK form page with errors if the form is incorrectly filled" in {
+      val companyAddressUkData = Map("addressLine1" -> "")
+      val form = RsFormMappings.companyAddressUkForm().bind(companyAddressUkData)
       implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*))
       val result = testController.questionSubmit(1).apply(authRequest)
 
@@ -122,11 +122,11 @@ class CompanyAddressOverseasControllerSpec extends AnyWordSpecLike
 
     "successfully bind the form and redirect to the company summary page" in {
       val emptyCacheMap = CacheMap("", Map("" -> Json.obj()))
-      when(mockErsUtil.cache[CompanyAddressOverseas](any(), any(), any())(any(), any())).thenReturn(Future.successful(emptyCacheMap))
+      when(mockErsUtil.cache[CompanyAddressUk](any(), any(), any())(any(), any())).thenReturn(Future.successful(emptyCacheMap))
       when(mockCompanyDetailsService.updateCompanyCache(any())(any())).thenReturn(Future.successful(()), Future.successful(()))
 
-      val companyAddressOverseasData = Map("addressLine1" -> "123 Fake Street")
-      val form = RsFormMappings.companyAddressOverseasForm().bind(companyAddressOverseasData)
+      val companyAddressUkData = Map("addressLine1" -> "123 Fake Street")
+      val form = RsFormMappings.companyAddressUkForm().bind(companyAddressUkData)
       implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*))
       val result = testController.questionSubmit(1).apply(authRequest)
 
@@ -141,7 +141,7 @@ class CompanyAddressOverseasControllerSpec extends AnyWordSpecLike
     when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any())).thenReturn(Future.successful(ersRequestObject))
 
     "be the same as showQuestion for a specific index" in {
-      when(mockErsUtil.fetchPartFromCompanyDetailsList[CompanyAddressOverseas](any(), any())(any(), any())).thenReturn(Future.successful(Some(companyAddressOverseas)))
+      when(mockErsUtil.fetchPartFromCompanyDetailsList[CompanyAddressUk](any(), any())(any(), any())).thenReturn(Future.successful(Some(companyAddressUK)))
 
       val result = testController.editCompany(1).apply(authRequest)
 
@@ -153,4 +153,4 @@ class CompanyAddressOverseasControllerSpec extends AnyWordSpecLike
     }
   }
 
-  }
+}
