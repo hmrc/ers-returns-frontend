@@ -173,7 +173,7 @@ object RsFormMappings {
       .verifying(Messages("ers_manual_company_details.err.invalidChars.address_line4"), so => validInputCharacters(so, addresssRegx))),
     companyAddressUkFields.addressLine5 -> optional(text)
       .transform((x: Option[String]) => x.map(_.toUpperCase()), (z: Option[String]) => z.map(_.toUpperCase()))
-      .verifying(Messages("ers_manual_company_details.err.err.postcode"), so => isValidPostcode(so)),
+      .verifying(Messages("ers_manual_company_details.err.postcode"), so => isValidPostcode(so)),
     companyAddressFields.country -> optional(text
       .verifying(pattern(addresssRegx.r, error = Messages("ers_scheme_organiser.err.summary.invalid_country"))))
   )(CompanyAddressOverseas.apply)(CompanyAddressOverseas.unapply))
@@ -234,7 +234,7 @@ object RsFormMappings {
       .verifying(Messages("ers_manual_company_details.err.invalidChars.company_name"), so => validInputCharacters(so, addresssRegx)),
     companyNameFields.companyReg -> optional(text
       .verifying(Messages("ers_manual_company_details.err.company_reg"), so => checkLength(so, "companyDetailsFields.companyReg"))
-      .verifying(pattern(fieldValidationPatterns.companyRegPattern.r, error = Messages("ers_scheme_organiser.err.company_ref")))),
+      .verifying(pattern(fieldValidationPatterns.companyRegPattern.r, error = Messages("ers_manual_company_details.err.company_reg")))),
     companyNameFields.corporationRef -> optional(text
       verifying pattern(corporationRefPattern.r, error = Messages("ers_manual_company_details.err.corporation_ref")))
   )(CompanyName.apply)(CompanyName.unapply(_)))

@@ -70,13 +70,14 @@ case class CompanyDetails(
                               country: Option[String],
                               postcode: Option[String],
                               companyReg: Option[String],
-                              corporationRef: Option[String]
+                              corporationRef: Option[String],
+                              basedInUk: Boolean
                               )
 object CompanyDetails {
 
   def apply(name: CompanyName, addressUk: CompanyAddressUk): CompanyDetails = {
     CompanyDetails(
-      name.name,
+      name.companyName,
       addressUk.addressLine1,
       addressUk.addressLine2,
       addressUk.addressLine3,
@@ -84,13 +85,14 @@ object CompanyDetails {
       Some("UK"),
       addressUk.addressLine5,
       name.companyReg,
-      name.companyRef
+      name.corporationRef,
+      basedInUk = true
     )
   }
 
   def apply(name: CompanyName, addressOverseas: CompanyAddressOverseas): CompanyDetails = {
     CompanyDetails(
-      name.name,
+      name.companyName,
       addressOverseas.addressLine1,
       addressOverseas.addressLine2,
       addressOverseas.addressLine3,
@@ -98,7 +100,8 @@ object CompanyDetails {
       addressOverseas.country,
       addressOverseas.addressLine5,
       None,
-      None
+      None,
+      basedInUk = false
     )
   }
 
@@ -112,9 +115,9 @@ object CompanyBasedInUk {
 }
 
 case class CompanyName(
-                        name: String,
+                        companyName: String,
                         companyReg: Option[String],
-                        companyRef: Option[String]
+                        corporationRef: Option[String]
                       )
 
 object CompanyName {

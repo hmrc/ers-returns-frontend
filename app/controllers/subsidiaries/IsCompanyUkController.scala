@@ -78,7 +78,9 @@ class IsCompanyUkController @Inject()(val mcc: MessagesControllerComponents,
         (subsidiaryBasedInUk.basedInUk, edit) match {
           case (true, false) => Redirect(controllers.subsidiaries.routes.CompanyDetailsUkController.questionPage())
           case (false, false) => Redirect(controllers.subsidiaries.routes.CompanyDetailsOverseasController.questionPage())
-          case (_, true) => Redirect(controllers.routes.GroupSchemeController.manualCompanyDetailsPage())
+
+          case (true, true) => Redirect(controllers.subsidiaries.routes.CompanyDetailsUkController.editCompany(index))
+          case (false, true) => Redirect(controllers.subsidiaries.routes.CompanyDetailsOverseasController.editCompany(index))
         }
       }
     }

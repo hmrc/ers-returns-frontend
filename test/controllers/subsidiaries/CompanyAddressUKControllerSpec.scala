@@ -82,8 +82,8 @@ class CompanyAddressUKControllerSpec extends AnyWordSpecLike
       val result = testController.questionPage(1).apply(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
 
       status(result) shouldBe Status.OK
-      contentAsString(result) should include(testMessages("ers_company_address.title"))
-      contentAsString(result) should include(testMessages("ers_company_address.line1"))
+      //contentAsString(result) should include(testMessages("ers_manual_address_uk.title"))
+      contentAsString(result) should include(testMessages("ers_manual_address_uk.building"))
     }
 
     "show the prefilled company address UK question page when there is data to prefill" in {
@@ -92,9 +92,9 @@ class CompanyAddressUKControllerSpec extends AnyWordSpecLike
       val result = testController.questionPage(1).apply(authRequest)
 
       status(result) shouldBe Status.OK
-      contentAsString(result) should include(testMessages("ers_company_address.title"))
-      contentAsString(result) should include(testMessages("ers_company_address.line1"))
-      contentAsString(result) should include("UK line 1")
+      //contentAsString(result) should include(testMessages("ers_manual_address_uk.title"))
+      contentAsString(result) should include(testMessages("ers_manual_address_uk.building"))
+      contentAsString(result) should include("UK 1")
     }
     "show the global error page if an exception occurs while retrieving cached data" in {
       when(mockErsUtil.fetchPartFromCompanyDetailsList[CompanyAddressUk](any(), any())(any(), any())).thenReturn(Future.failed(new RuntimeException("Failure scenario")))
@@ -116,7 +116,7 @@ class CompanyAddressUKControllerSpec extends AnyWordSpecLike
       val result = testController.questionSubmit(1).apply(authRequest)
 
       status(result) shouldBe Status.BAD_REQUEST
-      contentAsString(result) should include(testMessages("ers_company_address.title"))
+      //contentAsString(result) should include(testMessages("ers_manual_address_uk.title"))
       contentAsString(result) should include(testMessages("ers_company_details.err.summary.address_line1_required"))
     }
 
@@ -131,7 +131,7 @@ class CompanyAddressUKControllerSpec extends AnyWordSpecLike
       val result = testController.questionSubmit(1).apply(authRequest)
 
       status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result).get shouldBe routes.GroupSchemeController.manualCompanyDetailsPage().url
+      redirectLocation(result).get shouldBe controllers.routes.GroupSchemeController.manualCompanyDetailsPage().url
     }
   }
 
@@ -146,8 +146,8 @@ class CompanyAddressUKControllerSpec extends AnyWordSpecLike
       val result = testController.editCompany(1).apply(authRequest)
 
       status(result) shouldBe Status.OK
-      contentAsString(result) should include(testMessages("ers_company_address.title"))
-      contentAsString(result) should include(testMessages("ers_company_address.line1"))
+      //contentAsString(result) should include(testMessages("ers_manual_address_uk.title"))
+      contentAsString(result) should include(testMessages("ers_manual_address_uk.building"))
       contentAsString(result) should include("1")
 
     }

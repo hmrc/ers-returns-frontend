@@ -16,7 +16,8 @@
 
 package controllers.subsidiaries
 
-import models.{CompanyAddressOverseas, CompanyDetailsList, RequestObject, RsFormMappings}
+import org.scalatest.wordspec.AnyWordSpecLike
+import models.{CompanyName, RequestObject, RsFormMappings}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatest.OptionValues
@@ -31,14 +32,13 @@ import play.api.libs.json.Json
 import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents}
 import play.api.test.Helpers.{contentAsString, defaultAwaitTimeout, redirectLocation, status, stubBodyParser}
 import uk.gov.hmrc.http.cache.client.CacheMap
-import utils.Fixtures.{companyAddressOverseas, ersRequestObject}
+import utils.Fixtures.ersRequestObject
 import utils.{ERSFakeApplicationConfig, ErsTestHelper, Fixtures}
-import views.html.{global_error, manual_address_overseas}
+import views.html.{global_error, manual_company_details_overseas}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class CompanyAddressOverseasControllerSpec extends AnyWordSpecLike
-
+class CompanyDetailsOverseasControllerSpec extends AnyWordSpecLike
   with Matchers
   with OptionValues
   with ERSFakeApplicationConfig
@@ -59,7 +59,7 @@ class CompanyAddressOverseasControllerSpec extends AnyWordSpecLike
   implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
 
 
-  val testController = new CompanyAddressOverseasController(
+  val testController = new CompanyDetailsOverseasController(
     mockMCC,
     mockAuthConnector,
     mockErsConnector,
@@ -69,35 +69,35 @@ class CompanyAddressOverseasControllerSpec extends AnyWordSpecLike
     mockErsUtil,
     mockAppConfig,
     mockCompanyDetailsService,
-    app.injector.instanceOf[manual_address_overseas]
+    app.injector.instanceOf[manual_company_details_overseas]
   )
-
   "calling showQuestionPage" should {
     implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
     setAuthMocks()
     when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any())).thenReturn(Future.successful(ersRequestObject))
 
-    "show the empty company address overseas question page when there is nothing to prefill" in {
-      when(mockErsUtil.fetchPartFromCompanyDetailsList[CompanyDetailsList](any(), any())(any(), any())).thenReturn(Future.successful(None))
-      val result = testController.questionPage(1).apply(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
-
-      status(result) shouldBe Status.OK
-      contentAsString(result) should include(testMessages("ers_manual_address_overseas.title"))
-      contentAsString(result) should include(testMessages("ers_manual_company_details_overseas.addressLine1"))
-    }
-
-    "show the prefilled company address overseas question page when there is data to prefill" in {
-      when(mockErsUtil.fetchPartFromCompanyDetailsList[CompanyAddressOverseas](any(), any())(any(), any())).thenReturn(Future.successful(Some(companyAddressOverseas)))
+    "show the empty company name question page when there is nothing to prefill" in {
+      when(mockErsUtil.fetchPartFromCompanyDetailsList[CompanyName](any(), any())(any(), any())).thenReturn(Future.successful(None))
 
       val result = testController.questionPage(1).apply(authRequest)
 
       status(result) shouldBe Status.OK
-      contentAsString(result) should include(testMessages("ers_manual_address_overseas.title"))
-      contentAsString(result) should include(testMessages("ers_manual_company_details_overseas.addressLine1"))
-      contentAsString(result) should include("Overseas 1")
+      contentAsString(result) should include(testMessages("ers_manual_company_details_overseas.title"))
     }
+
+    "show the prefilled company name question page when there is data to prefill" in {
+      when(mockErsUtil.fetchPartFromCompanyDetailsList[CompanyName](any(), any())(any(), any())).thenReturn(Future.successful(Some(CompanyName("Test Company", None, None))))
+
+      val result = testController.questionPage(1).apply(authRequest)
+
+      status(result) shouldBe Status.OK
+      contentAsString(result) should include(testMessages("ers_manual_company_details_overseas.title"))
+      contentAsString(result) should include("Test company")
+
+    }
+
     "show the global error page if an exception occurs while retrieving cached data" in {
-      when(mockErsUtil.fetchPartFromCompanyDetailsList[CompanyAddressOverseas](any(), any())(any(), any())).thenReturn(Future.failed(new RuntimeException("Failure scenario")))
+      when(mockErsUtil.fetchPartFromCompanyDetailsList[CompanyName](any(), any())(any(), any())).thenReturn(Future.failed(new RuntimeException("Failure scenario")))
 
       val result = testController.questionPage(1).apply(authRequest)
 
@@ -108,49 +108,31 @@ class CompanyAddressOverseasControllerSpec extends AnyWordSpecLike
     }
   }
 
-  "calling questionSubmit" should {
-    "show company address overseas form page with errors if the form is incorrectly filled" in {
-      val companyAddressOverseasData = Map("addressLine1" -> "")
-      val form = RsFormMappings.companyAddressOverseasForm().bind(companyAddressOverseasData)
+  "calling handleQuestionSubmit" should {
+    "show the company name form page with errors if the form is incorrectly filled" in {
+      val companyData = Map("bool" -> "")
+      val form = RsFormMappings.companyNameForm().bind( companyData)
       implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*))
       val result = testController.questionSubmit(1).apply(authRequest)
 
-      status(result) shouldBe Status.OK
-      contentAsString(result) should include(testMessages("ers_manual_address_overseas.title"))
-      contentAsString(result) should include(testMessages("ers_manual_company_details_overseas.addressLine1"))
+      status(result) shouldBe Status.BAD_REQUEST
+      contentAsString(result) should include(testMessages("ers_manual_company_details_overseas.title"))
+      contentAsString(result) should include(testMessages("error.required"))
     }
 
-    "successfully bind the form and redirect to the company summary page" in {
+    "successfully bind the form and go to the company overseas address page if the form is filled correctly" in {
       val emptyCacheMap = CacheMap("", Map("" -> Json.obj()))
-      when(mockErsUtil.cache[CompanyAddressOverseas](any(), any(), any())(any(), any())).thenReturn(Future.successful(emptyCacheMap))
+      when(mockErsUtil.cache[CompanyName](any(), any(), any())(any(), any())).thenReturn(Future.successful(emptyCacheMap))
       when(mockCompanyDetailsService.updateCompanyCache(any())(any())).thenReturn(Future.successful(()), Future.successful(()))
 
-      val companyAddressOverseasData = Map("addressLine1" -> "123 Fake Street")
-      val form = RsFormMappings.companyAddressOverseasForm().bind(companyAddressOverseasData)
+      val companyData = Map("name" -> "Test person")
+      val form = RsFormMappings.companyAddressOverseasForm().bind(companyData)
       implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*))
       val result = testController.questionSubmit(1).apply(authRequest)
 
       status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result).get shouldBe controllers.routes.GroupSchemeController.manualCompanyDetailsPage().url
-    }
-  }
-
-  "calling editCompany" should {
-    implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
-    setAuthMocks()
-    when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any())).thenReturn(Future.successful(ersRequestObject))
-
-    "be the same as showQuestion for a specific index" in {
-      when(mockErsUtil.fetchPartFromCompanyDetailsList[CompanyAddressOverseas](any(), any())(any(), any())).thenReturn(Future.successful(Some(companyAddressOverseas)))
-
-      val result = testController.editCompany(1).apply(authRequest)
-
-      status(result) shouldBe Status.OK
-      contentAsString(result) should include(testMessages("ers_manual_address_overseas.title"))
-      contentAsString(result) should include(testMessages("ers_manual_company_details_overseas.addressLine1"))
-      contentAsString(result) should include("Overseas 1")
+      redirectLocation(result).get shouldBe routes.CompanyAddressOverseasController.questionPage().url
 
     }
   }
-
-  }
+}

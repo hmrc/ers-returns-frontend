@@ -364,7 +364,7 @@ class ErsUtilSpec extends AnyWordSpecLike
 
     val schemeCompanies = CompanyDetailsList(
       List(
-        CompanyDetails("Company name", "Company address", None, None, None, None, None, None, None)
+        CompanyDetails("Company name", "Company address", None, None, None, None, None, None, None, true)
       )
     )
 
@@ -501,7 +501,8 @@ class ErsUtilSpec extends AnyWordSpecLike
          postcode = Some("AB123CD"),
          country = Some("UK"),
          companyReg = Some("ABC"),
-         corporationRef = Some("DEF")
+         corporationRef = Some("DEF"),
+        basedInUk = true
       )
       val expected = "ADDRESS1, ADDRESS2, AB123CD"
       val addressSummary = ersUtil.buildAddressSummary(companyDetails)

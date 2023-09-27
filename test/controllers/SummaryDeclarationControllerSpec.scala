@@ -79,7 +79,7 @@ class SummaryDeclarationControllerSpec extends AnyWordSpecLike
 		"Add1", Option("Add2"), Option("Add3"), Option("Add4"),
 		Option("UK"), Option("AA111AA"), Option("AB123456"), Option("1234567890"))
 	val groupSchemeInfo: GroupSchemeInfo = new GroupSchemeInfo(Option("1"), None)
-	val gscomp: CompanyDetails = new CompanyDetails(Fixtures.companyName, "Adress Line 1", None, None, None, None, None, None, None)
+	val gscomp: CompanyDetails = new CompanyDetails(Fixtures.companyName, "Address Line 1", None, None, None, None, None, None, None, false)
 	val gscomps: CompanyDetailsList = new CompanyDetailsList(List(gscomp))
 
 	val reportableEvents: ReportableEvents = new ReportableEvents(Some("1"))

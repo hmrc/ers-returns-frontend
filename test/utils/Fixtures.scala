@@ -123,7 +123,8 @@ object Fixtures extends AuthHelper {
     Some("AA1 1AA"),
     Some("United Kingdom"),
     Some("1234567890"),
-    Some("1234567890")
+    Some("1234567890"),
+    true
   )
 
   val groupScheme  = GroupSchemeInfo(Some("1"), Some("emi"))
