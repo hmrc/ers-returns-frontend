@@ -75,7 +75,7 @@ case class CompanyDetails(
                               )
 object CompanyDetails {
 
-  def apply(name: CompanyName, addressUk: CompanyAddressUk): CompanyDetails = {
+  def apply(name: CompanyName, addressUk: CompanyAddressUk, basedInUk: CompanyBasedInUk): CompanyDetails = {
     CompanyDetails(
       name.companyName,
       addressUk.addressLine1,
@@ -86,11 +86,11 @@ object CompanyDetails {
       addressUk.addressLine5,
       name.companyReg,
       name.corporationRef,
-      basedInUk = true
+      basedInUk.basedInUk
     )
   }
 
-  def apply(name: CompanyName, addressOverseas: CompanyAddressOverseas): CompanyDetails = {
+  def apply(name: CompanyName, addressOverseas: CompanyAddressOverseas, basedInUk: CompanyBasedInUk): CompanyDetails = {
     CompanyDetails(
       name.companyName,
       addressOverseas.addressLine1,
@@ -101,7 +101,7 @@ object CompanyDetails {
       addressOverseas.addressLine5,
       None,
       None,
-      basedInUk = false
+      basedInUk.basedInUk
     )
   }
 

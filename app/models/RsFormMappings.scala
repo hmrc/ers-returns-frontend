@@ -16,8 +16,9 @@
 
 package models
 
-import play.api.data.Forms._
+import play.api.data.Forms.{number, _}
 import play.api.data._
+import play.api.data.validation.Constraints
 import play.api.data.validation.Constraints._
 import play.api.i18n.Messages
 
@@ -139,27 +140,7 @@ object RsFormMappings {
    */
 
   def companyAddressUkForm()(implicit messages: Messages): Form[CompanyAddressUk] = Form(mapping(
-    companyAddressFields.addressLine1 -> text.verifying(Messages("ers_manual_company_details.err.summary.address_line1_required"), _.nonEmpty)
-      .verifying(Messages("ers_manual_company_details.err.address_line1"), so => checkAddressLength(so, "addressLine1"))
-      .verifying(Messages("ers_manual_company_details.err.invalidChars.address_line1"), so => validInputCharacters(so, addresssRegx)),
-    companyAddressFields.addressLine2 -> optional(text
-      .verifying(Messages("ers_manual_company_details.err.address_line2"), so => checkAddressLength(so, "addressLine2"))
-      .verifying(Messages("ers_manual_company_details.err.invalidChars.address_line2"), so => validInputCharacters(so, addresssRegx))),
-    companyAddressFields.addressLine3 -> optional(text
-      .verifying(Messages("ers_manual_company_details.err.address_line3"), so => checkAddressLength(so, "addressLine3"))
-      .verifying(Messages("ers_manual_company_details.err.invalidChars.address_line3"), so => validInputCharacters(so, addresssRegx))),
-    companyAddressFields.addressLine4 -> optional(text
-      .verifying(Messages("ers_manual_company_details.err.address_line4"), so => checkAddressLength(so, "addressLine4"))
-      .verifying(Messages("ers_manual_company_details.err.invalidChars.address_line4"), so => validInputCharacters(so, addresssRegx))),
-    companyAddressFields.addressLine5 -> optional(text)
-      .transform((x: Option[String]) => x.map(_.toUpperCase()), (z: Option[String]) => z.map(_.toUpperCase()))
-      .verifying(Messages("ers_manual_company_details.err.postcode"), so => isValidPostcode(so)),
-    companyAddressFields.country -> optional(text
-      .verifying(pattern(addresssRegx.r, error = Messages("ers_scheme_organiser.err.summary.invalid_country"))))
-  )(CompanyAddressUk.apply)(CompanyAddressUk.unapply))
-
-  def companyAddressOverseasForm()(implicit messages: Messages): Form[CompanyAddressOverseas] = Form(mapping(
-    companyAddressUkFields.addressLine1 -> text.verifying(Messages("ers_manual_company_details.err.address_line1_required"), _.nonEmpty)
+    companyAddressUkFields.addressLine1 -> text.verifying(Messages("ers_manual_company_details.err.summary.address_line1_required"), _.nonEmpty)
       .verifying(Messages("ers_manual_company_details.err.address_line1"), so => checkAddressLength(so, "addressLine1"))
       .verifying(Messages("ers_manual_company_details.err.invalidChars.address_line1"), so => validInputCharacters(so, addresssRegx)),
     companyAddressUkFields.addressLine2 -> optional(text
@@ -174,7 +155,27 @@ object RsFormMappings {
     companyAddressUkFields.addressLine5 -> optional(text)
       .transform((x: Option[String]) => x.map(_.toUpperCase()), (z: Option[String]) => z.map(_.toUpperCase()))
       .verifying(Messages("ers_manual_company_details.err.postcode"), so => isValidPostcode(so)),
-    companyAddressFields.country -> optional(text
+    companyAddressUkFields.country -> optional(text
+      .verifying(pattern(addresssRegx.r, error = Messages("ers_scheme_organiser.err.summary.invalid_country"))))
+  )(CompanyAddressUk.apply)(CompanyAddressUk.unapply))
+
+  def companyAddressOverseasForm()(implicit messages: Messages): Form[CompanyAddressOverseas] = Form(mapping(
+    companyAddressOverseasFields.addressLine1 -> text.verifying(Messages("ers_manual_company_details.err.address_line1_required"), _.nonEmpty)
+      .verifying(Messages("ers_manual_company_details.err.address_line1"), so => checkAddressLength(so, "addressLine1"))
+      .verifying(Messages("ers_manual_company_details.err.invalidChars.address_line1"), so => validInputCharacters(so, addresssRegx)),
+    companyAddressOverseasFields.addressLine2 -> optional(text
+      .verifying(Messages("ers_manual_company_details.err.address_line2"), so => checkAddressLength(so, "addressLine2"))
+      .verifying(Messages("ers_manual_company_details.err.invalidChars.address_line2"), so => validInputCharacters(so, addresssRegx))),
+    companyAddressOverseasFields.addressLine3 -> optional(text
+      .verifying(Messages("ers_manual_company_details.err.address_line3"), so => checkAddressLength(so, "addressLine3"))
+      .verifying(Messages("ers_manual_company_details.err.invalidChars.address_line3"), so => validInputCharacters(so, addresssRegx))),
+    companyAddressOverseasFields.addressLine4 -> optional(text
+      .verifying(Messages("ers_manual_company_details.err.address_line4"), so => checkAddressLength(so, "addressLine4"))
+      .verifying(Messages("ers_manual_company_details.err.invalidChars.address_line4"), so => validInputCharacters(so, addresssRegx))),
+    companyAddressOverseasFields.addressLine5 -> optional(text)
+      .transform((x: Option[String]) => x.map(_.toUpperCase()), (z: Option[String]) => z.map(_.toUpperCase()))
+      .verifying(Messages("ers_manual_company_details.err.postcode"), so => isValidPostcode(so)),
+    companyAddressOverseasFields.country -> optional(text
       .verifying(pattern(addresssRegx.r, error = Messages("ers_scheme_organiser.err.summary.invalid_country"))))
   )(CompanyAddressOverseas.apply)(CompanyAddressOverseas.unapply))
 
@@ -217,8 +218,10 @@ object RsFormMappings {
    */
 
   def companyBasedInUkForm()(implicit messages: Messages): Form[CompanyBasedInUk] = Form(mapping(
-    companyBasedInUkFields.basedInUk -> number
-      .transform(int => if (int == 0 ) true else false, (bool : Boolean) => if (bool) 0  else 1)
+    companyBasedInUkFields.basedInUk -> text
+      .verifying(Constraints.nonEmpty(errorMessage = "problem with companyBasedInUkForm"))
+      .verifying(Messages("ers_trustee_details.err.summary.name_required"), _.nonEmpty)
+      .transform(int => if (int == "0") true else false, (bool: Boolean) => if (bool) "0" else "1")
   )(CompanyBasedInUk.apply)(CompanyBasedInUk.unapply))
 
 
