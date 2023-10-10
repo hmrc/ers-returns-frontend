@@ -16,7 +16,7 @@
 
 package controllers.trustees
 
-import models.{RequestObject, RsFormMappings, TrusteeAddressUk}
+import models.{RequestObject, RsFormMappings, TrusteeAddress}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatest.OptionValues
@@ -60,7 +60,6 @@ class TrusteeAddressUkSpec  extends AnyWordSpecLike
 
   val testController = new TrusteeAddressUkController(
     mockMCC,
-    mockAuthConnector,
     mockErsConnector,
     app.injector.instanceOf[global_error],
     testAuthAction,
@@ -77,7 +76,7 @@ class TrusteeAddressUkSpec  extends AnyWordSpecLike
     when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any())).thenReturn(Future.successful(ersRequestObject))
 
     "show the empty trustee address UK question page when there is nothing to prefill" in {
-      when(mockErsUtil.fetchPartFromTrusteeDetailsList[TrusteeAddressUk](any(), any())(any(), any())).thenReturn(Future.successful(None))
+      when(mockErsUtil.fetchPartFromTrusteeDetailsList[TrusteeAddress](any(), any())(any(), any())).thenReturn(Future.successful(None))
 
       val result = testController.questionPage(1).apply(authRequest)
 
@@ -87,7 +86,7 @@ class TrusteeAddressUkSpec  extends AnyWordSpecLike
     }
 
     "show the prefilled trustee address UK question page when there is data to prefill" in {
-      when(mockErsUtil.fetchPartFromTrusteeDetailsList[TrusteeAddressUk](any(), any())(any(), any())).thenReturn(Future.successful(Some(trusteeAddressUk)))
+      when(mockErsUtil.fetchPartFromTrusteeDetailsList[TrusteeAddress](any(), any())(any(), any())).thenReturn(Future.successful(Some(trusteeAddressUk)))
 
       val result = testController.questionPage(1).apply(authRequest)
 
@@ -98,7 +97,7 @@ class TrusteeAddressUkSpec  extends AnyWordSpecLike
     }
 
     "show the global error page if an exception occurs while retrieving cached data" in {
-      when(mockErsUtil.fetchPartFromTrusteeDetailsList[TrusteeAddressUk](any(), any())(any(), any())).thenReturn(Future.failed(new RuntimeException("Failure scenario")))
+      when(mockErsUtil.fetchPartFromTrusteeDetailsList[TrusteeAddress](any(), any())(any(), any())).thenReturn(Future.failed(new RuntimeException("Failure scenario")))
 
       val result = testController.questionPage(1).apply(authRequest)
 
@@ -124,7 +123,7 @@ class TrusteeAddressUkSpec  extends AnyWordSpecLike
 
   "successfully bind the form and go to the trustee summary page" in {
     val emptyCacheMap = CacheMap("", Map("" -> Json.obj()))
-    when(mockErsUtil.cache[TrusteeAddressUk](any(), any(), any())(any(), any())).thenReturn(Future.successful(emptyCacheMap))
+    when(mockErsUtil.cache[TrusteeAddress](any(), any(), any())(any(), any())).thenReturn(Future.successful(emptyCacheMap))
     when(mockTrusteeService.updateTrusteeCache(any())(any())).thenReturn(Future.successful(()), Future.successful(()))
 
     val trusteeAddressUkData = Map("addressLine1" -> "123 Fake Street")

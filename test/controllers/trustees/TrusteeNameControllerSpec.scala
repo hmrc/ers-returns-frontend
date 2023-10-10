@@ -60,7 +60,6 @@ class TrusteeNameControllerSpec extends AnyWordSpecLike
 
   val testController = new TrusteeNameController(
     mockMCC,
-    mockAuthConnector,
     mockErsConnector,
     app.injector.instanceOf[global_error],
     testAuthAction,
@@ -153,13 +152,13 @@ class TrusteeNameControllerSpec extends AnyWordSpecLike
   }
 
   "calling editQuestionSubmit" should {
-    implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
     setAuthMocks()
     when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any())).thenReturn(Future.successful(ersRequestObject))
 
     "successfully bind the form and go to the edit version of the trustee based in UK page with the index preserved if the form is filled correctly" in {
       val emptyCacheMap = CacheMap("", Map("" -> Json.obj()))
       when(mockErsUtil.cache[TrusteeName](any(), any(), any())(any(), any())).thenReturn(Future.successful(emptyCacheMap))
+      when(mockErsUtil.fetchTrusteesOptionally(any())(any(), any())).thenReturn(Future.successful(Fixtures.exampleTrustees))
       when(mockTrusteeService.updateTrusteeCache(any())(any())).thenReturn(Future.successful(()), Future.successful(()))
 
       val trusteeBasedData = Map("name" -> "Test person")

@@ -17,7 +17,7 @@
 package services
 
 import javax.inject.Inject
-import models.{RequestObject, TrusteeAddressOverseas, TrusteeAddressUk, TrusteeBasedInUk, TrusteeDetails, TrusteeDetailsList, TrusteeName}
+import models.{RequestObject, TrusteeAddress, TrusteeDetails, TrusteeDetailsList, TrusteeName}
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.ERSUtil
 
@@ -32,16 +32,10 @@ class TrusteeService @Inject()(
       requestObject <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
       schemeRef = requestObject.getSchemeReference
       name <- ersUtil.fetch[TrusteeName](ersUtil.TRUSTEE_NAME_CACHE, schemeRef)
-      basedInUk <- ersUtil.fetch[TrusteeBasedInUk](ersUtil.TRUSTEE_BASED_CACHE, schemeRef)
-      cachedTrustees <- ersUtil.fetchTrusteesOptionally(ersUtil.TRUSTEES_CACHE, schemeRef)
-      trusteeDetailsList <- if (basedInUk.basedInUk) {
-        ersUtil.fetch[TrusteeAddressUk](ersUtil.TRUSTEE_ADDRESS_UK_CACHE, schemeRef).map( address =>
-        TrusteeDetailsList(replaceTrustee(cachedTrustees.trustees, index, TrusteeDetails(name, address)))
-        )
-      } else {
-        ersUtil.fetch[TrusteeAddressOverseas](ersUtil.TRUSTEE_ADDRESS_OVERSEAS_CACHE, schemeRef).map( address =>
-        TrusteeDetailsList(replaceTrustee(cachedTrustees.trustees, index, TrusteeDetails(name, address)))
-        )
+      cachedTrustees <- ersUtil.fetchTrusteesOptionally(schemeRef)
+      trusteeDetailsList <- {
+        ersUtil.fetch[TrusteeAddress](ersUtil.TRUSTEE_ADDRESS_CACHE, schemeRef).map( address =>
+        TrusteeDetailsList(replaceTrustee(cachedTrustees.trustees, index, TrusteeDetails(name, address))))
       }
       _ <- ersUtil.cache[TrusteeDetailsList](ersUtil.TRUSTEES_CACHE, trusteeDetailsList, schemeRef)
     } yield {

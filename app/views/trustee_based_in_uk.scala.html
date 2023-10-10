@@ -66,6 +66,9 @@
 
 @govukRadios(Radios(
     name = "basedInUk",
+    errorMessage = trusteeBasedInUkForm.error(trusteeBasedInUkFields.basedInUk).map { errors =>
+        ErrorMessage(content = Text(errors.messages.toString))
+    },
     items = Seq(
         RadioItem(
             checked = trusteeBasedInUkForm(trusteeBasedInUkFields.basedInUk).value.contains("0"),

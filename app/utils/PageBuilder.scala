@@ -85,6 +85,7 @@ trait PageBuilder {
   val PAGE_MANUAL_COMPANY_DETAILS = "ers_manual_company_details"
   val PAGE_SCHEME_ORGANISER       = "ers_scheme_organiser"
   val PAGE_TRUSTEE_DETAILS        = "ers_trustee_details"
+	val PAGE_TRUSTEE_BASED					= "ers_trustee_based"
   val PAGE_TRUSTEE_SUMMARY        = "ers_trustee_summary"
   val PAGE_FILE_UPLOAD            = "file_upload"
   val PAGE_SUCCESS                = "ers.bulk.success"

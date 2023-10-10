@@ -97,33 +97,49 @@ case class TrusteeDetails(
                               country: Option[String],
                               addressLine5: Option[String], // Postcode for UK address
                               basedInUk: Boolean
-                              )
+                              ) {
 
-object TrusteeDetails {
+  def replaceName(trusteeName: TrusteeName): TrusteeDetails = {
+    this.copy(name = trusteeName.name)
+  }
 
-  def apply(name: TrusteeName, addressUk: TrusteeAddressUk): TrusteeDetails = {
-    TrusteeDetails(
-      name.name,
-      addressUk.addressLine1,
-      addressUk.addressLine2,
-      addressUk.addressLine3,
-      addressUk.addressLine4,
-      Some("UK"),
-      addressUk.addressLine5,
-      true
+  def replaceBasedInUk(trusteeBasedInUk: TrusteeBasedInUk): TrusteeDetails = {
+    this.copy(basedInUk = trusteeBasedInUk.basedInUk)
+  }
+
+  def replaceAddress(trusteeAddress: TrusteeAddress): TrusteeDetails = {
+    this.copy(
+      addressLine1 = trusteeAddress.addressLine1,
+      addressLine2 = trusteeAddress.addressLine2,
+      addressLine3 = trusteeAddress.addressLine3,
+      addressLine4 = trusteeAddress.addressLine4,
+      country      = trusteeAddress.country,
+      addressLine5 = trusteeAddress.addressLine5
     )
   }
 
-  def apply(name: TrusteeName, addressOverseas: TrusteeAddressOverseas): TrusteeDetails = {
+  def updatePart[A](part: A): TrusteeDetails = {
+    part match {
+      case name: TrusteeName => replaceName(name)
+      case basedInUk: TrusteeBasedInUk => replaceBasedInUk(basedInUk)
+      case address: TrusteeAddress => replaceAddress(address)
+      case _ => this
+    }
+  }
+}
+
+object TrusteeDetails {
+
+  def apply(name: TrusteeName, address: TrusteeAddress): TrusteeDetails = {
     TrusteeDetails(
       name.name,
-      addressOverseas.addressLine1,
-      addressOverseas.addressLine2,
-      addressOverseas.addressLine3,
-      addressOverseas.addressLine4,
-      addressOverseas.country,
-      addressOverseas.addressLine5,
-      false
+      address.addressLine1,
+      address.addressLine2,
+      address.addressLine3,
+      address.addressLine4,
+      address.country,
+      address.addressLine5,
+      address.country.fold(false)(_.equals("UK"))
     )
   }
 
@@ -141,22 +157,8 @@ case class TrusteeName(name: String)
 object TrusteeName {
   implicit val format: OFormat[TrusteeName] = Json.format[TrusteeName]
 }
-/*
-case class TrusteeAddressUk(
-                           buildingAndStreetLine1: String,
-                           buildingAndStreetLine2: Option[String],
-                           townOrCity: Option[String],
-                           county: Option[String],
-                           postcode: Option[String]
-                           )
 
-object TrusteeAddressUk {
-  implicit val format: OFormat[TrusteeAddressUk] = Json.format[TrusteeAddressUk]
-}
-
- */
-
-case class TrusteeAddressOverseas(
+case class TrusteeAddress(
                                    addressLine1: String,
                                    addressLine2: Option[String],
                                    addressLine3: Option[String],
@@ -165,21 +167,8 @@ case class TrusteeAddressOverseas(
                                    country: Option[String]
                                  )
 
-object TrusteeAddressOverseas {
-  implicit val format: OFormat[TrusteeAddressOverseas] = Json.format[TrusteeAddressOverseas]
-}
-
-case class TrusteeAddressUk(
-                                   addressLine1: String,
-                                   addressLine2: Option[String],
-                                   addressLine3: Option[String],
-                                   addressLine4: Option[String],
-                                   addressLine5: Option[String],
-                                   country: Option[String] = Some("UK")
-                                 )
-
-object TrusteeAddressUk {
-  implicit val format: OFormat[TrusteeAddressUk] = Json.format[TrusteeAddressUk]
+object TrusteeAddress {
+  implicit val format: OFormat[TrusteeAddress] = Json.format[TrusteeAddress]
 }
 
 case class TrusteeDetailsList(trustees: List[TrusteeDetails])

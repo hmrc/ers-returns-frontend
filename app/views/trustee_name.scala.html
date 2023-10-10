@@ -59,7 +59,6 @@
 ))
 
 @formWithCSRF(action = if(edit){controllers.trustees.routes.TrusteeNameController.editQuestionSubmit(index)}else{controllers.trustees.routes.TrusteeNameController.questionSubmit(index)}) {
-
 @govukInput(Input(
     classes = "govuk-!-width-one-half",
     id = "name",

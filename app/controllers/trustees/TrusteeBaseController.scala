@@ -18,12 +18,12 @@ package controllers.trustees
 
 import config.ApplicationConfig
 import controllers.auth.{AuthAction, RequestWithOptionalAuthContext}
-import models.{GroupSchemeInfo, RequestObject}
+import models.{RequestObject, TrusteeDetailsList}
 import play.api.Logging
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.libs.json.Format
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request, Result}
+import play.api.mvc.{Action, AnyContent, Request, Result}
 import play.twirl.api.Html
 import services.TrusteeService
 import uk.gov.hmrc.http.HeaderCarrier
@@ -84,11 +84,21 @@ trait TrusteeBaseController[A] extends FrontendController with I18nSupport with 
                           (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
     form.bindFromRequest().fold(
       errors => {
-          Future.successful(BadRequest(view(requestObject, index, errors, edit)))
+        Future.successful(BadRequest(view(requestObject, index, errors, edit)))
       },
       result => {
-        ersUtil.cache[A](cacheKey, result, requestObject.getSchemeReference).flatMap { _ =>
-          nextPageRedirect(index, edit)
+        if (edit) {
+          ersUtil.fetchTrusteesOptionally(requestObject.getSchemeReference).flatMap { trustees =>
+            val updatedTrustee = trustees.trustees(index).updatePart(result)
+            val updatedTrustees = TrusteeDetailsList(trustees.trustees.updated(index, updatedTrustee))
+            ersUtil.cache[TrusteeDetailsList](ersUtil.TRUSTEES_CACHE, updatedTrustees, requestObject.getSchemeReference).flatMap{ _ =>
+              nextPageRedirect(index, edit)
+            }
+          }
+        } else {
+          ersUtil.cache[A](cacheKey, result, requestObject.getSchemeReference).flatMap { _ =>
+            nextPageRedirect(index, edit)
+          }
         }
       }
     )

@@ -61,188 +61,6 @@ class TrusteeSummaryControllerSpec extends AnyWordSpecLike
   val globalErrorView: global_error = app.injector.instanceOf[global_error]
   val trusteeSummaryView: trustee_summary = app.injector.instanceOf[trustee_summary]
 
-    /* TODO These tests should be maybe in like the base controller spec or replicated in each individual controller spec??
-  "calling Trustee Details Page" should {
-
-    val trusteeList = List(TrusteeDetails("Name", "1 The Street", None, None, None, Some("UK"), None, true))
-		val groupScheme = GroupSchemeInfo(Some(mockErsUtil.OPTION_NO), Some(""))
-    val failure: Future[Nothing] = Future.failed(new Exception)
-
-    def buildFakeTrusteePageController(groupSchemeActivityRes: Future[GroupSchemeInfo] = Future.successful(groupScheme),
-                                       trusteeDetailsRes: Future[TrusteeDetailsList] = Future.successful(TrusteeDetailsList(trusteeList)),
-                                       cacheRes: Future[CacheMap] = Future.successful(mock[CacheMap])
-																			): TrusteeSummaryController = new TrusteeSummaryController(mockMCC, mockAuthConnector, mockErsConnector, mockCountryCodes,
-      mockErsUtil, mockAppConfig, globalErrorView, trusteeSummaryView, testAuthAction) {
-
-      when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any())).thenReturn(Future.successful(ersRequestObject))
-
-      when(
-        mockErsUtil.fetch[GroupSchemeInfo](matches(mockErsUtil.GROUP_SCHEME_CACHE_CONTROLLER), any())(any(), any())
-      ) thenReturn groupSchemeActivityRes
-
-      when(
-        mockErsUtil.fetch[TrusteeDetailsList](matches(mockErsUtil.TRUSTEES_CACHE), any())(any(), any())
-      ) thenReturn trusteeDetailsRes
-
-      when(mockErsUtil.cache(matches(mockErsUtil.TRUSTEES_CACHE), any(), any())(any(), any())
-      ) thenReturn cacheRes
-    }
-
-
-    "give a redirect status (to company authentication frontend) on GET if user is not authenticated" in {
-      setUnauthorisedMocks()
-      val controllerUnderTest = buildFakeTrusteePageController()
-      val result              = controllerUnderTest.trusteeDetailsPage(tenThousand).apply(FakeRequest("GET", ""))
-      status(result) shouldBe Status.SEE_OTHER
-    }
-
-    "give a status OK on GET if user is authenticated" in {
-      setAuthMocks()
-      val controllerUnderTest = buildFakeTrusteePageController()
-      val result              =
-        controllerUnderTest.trusteeDetailsPage(tenThousand).apply(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
-      status(result) shouldBe Status.OK
-    }
-
-    "direct to ers errors page if fetching groupSchemeActivity throws exception" in {
-      val controllerUnderTest = buildFakeTrusteePageController(groupSchemeActivityRes = failure)
-      val authRequest         = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
-
-      contentAsString(
-        controllerUnderTest.showTrusteeDetailsPage(ersRequestObject, tenThousand)(authRequest, hc)
-      ) shouldBe contentAsString(Future(controllerUnderTest.getGlobalErrorPage(testFakeRequest, testMessages)))
-    }
-
-    "show alterations trustee details page with no data pre-filled" in {
-      val controllerUnderTest = buildFakeTrusteePageController()
-      val authRequest         = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
-
-      val result = controllerUnderTest.showTrusteeDetailsPage(ersRequestObject, tenThousand)(authRequest, hc)
-      status(result) shouldBe Status.OK
-    }
-
-    "give a redirect status (to company authentication frontend) on POST if user is not authenticated" in {
-      setUnauthorisedMocks()
-      val controllerUnderTest = buildFakeTrusteePageController()
-      val result              = controllerUnderTest.trusteeDetailsSubmit(tenThousand) apply FakeRequest("GET", "")
-      status(result) shouldBe Status.SEE_OTHER
-    }
-
-    "give a status OK on POST if user is authenticated" in {
-      setAuthMocks()
-      val controllerUnderTest = buildFakeTrusteePageController()
-      val result              =
-        controllerUnderTest.trusteeDetailsSubmit(tenThousand) apply Fixtures.buildFakeRequestWithSessionIdCSOP("GET")
-      status(result) shouldBe Status.OK
-    }
-
-    "give a OK status and stay on the same page if form errors" in {
-      val controllerUnderTest = buildFakeTrusteePageController()
-      val trusteeData         = Map("" -> "")
-      val form                = RsFormMappings.trusteeDetailsForm().bind(trusteeData)
-      val request             = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-      val authRequest         = buildRequestWithAuth(request)
-
-      val result = controllerUnderTest.showTrusteeDetailsSubmit(ersRequestObject, tenThousand)(authRequest, hc)
-      status(result) shouldBe Status.OK
-    }
-
-    "if form errors and if fetching groupSchemeActivity fails direct to ers errors page" in {
-      val controllerUnderTest = buildFakeTrusteePageController(groupSchemeActivityRes = failure)
-      val trusteeData         = Map("" -> "")
-      val form                = RsFormMappings.trusteeDetailsForm().bind(trusteeData)
-      val req                 = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-      val authRequest         = buildRequestWithAuth(req)
-
-      contentAsString(
-        controllerUnderTest.showTrusteeDetailsSubmit(ersRequestObject, tenThousand)(authRequest, hc)
-      ) shouldBe contentAsString(Future(controllerUnderTest.getGlobalErrorPage(req, testMessages)))
-    }
-
-    "if no form errors with new trustee (index tenThousand) and fetch trustee details success" in {
-      val controllerUnderTest = buildFakeTrusteePageController()
-      val trusteeData         = Map(
-        "name"         -> "Name",
-        "addressLine1" -> "1 The Street",
-        "addressLine2" -> "",
-        "addressLine3" -> "",
-        "addressLine4" -> "",
-        "country"      -> "UK",
-        "postcode"     -> ""
-      )
-      val form                = RsFormMappings.trusteeDetailsForm().bind(trusteeData)
-      val request             = Fixtures.buildFakeRequestWithSessionIdSIP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-      val authRequest         = buildRequestWithAuth(request)
-
-      val result = controllerUnderTest.showTrusteeDetailsSubmit(ersRequestObject, tenThousand)(authRequest, hc)
-      status(result)                                shouldBe Status.SEE_OTHER
-      result.futureValue.header.headers("Location") shouldBe routes.TrusteeController.trusteeSummaryPage().toString
-    }
-
-    "if no form errors with new trustee (index 10000) and fetch trustee details fails" in {
-      val controllerUnderTest = buildFakeTrusteePageController(trusteeDetailsRes = failure)
-      val trusteeData         = Map(
-        "name"         -> "Name",
-        "addressLine1" -> "1 The Street",
-        "addressLine2" -> "",
-        "addressLine3" -> "",
-        "addressLine4" -> "",
-        "country"      -> "UK",
-        "postcode"     -> ""
-      )
-      val form                = RsFormMappings.trusteeDetailsForm().bind(trusteeData)
-      val request             = Fixtures.buildFakeRequestWithSessionIdSIP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-      val authRequest         = buildRequestWithAuth(request)
-
-      val result = controllerUnderTest.showTrusteeDetailsSubmit(ersRequestObject, tenThousand)(authRequest, hc)
-      status(result)                                shouldBe Status.SEE_OTHER
-      result.futureValue.header.headers("Location") shouldBe routes.TrusteeController.trusteeSummaryPage().toString
-    }
-
-    "if no form errors and fetch trustee details success for not updating an existing trustee (index 1) " in {
-      val controllerUnderTest = buildFakeTrusteePageController()
-      val trusteeData         = Map(
-        "name"         -> "Name",
-        "addressLine1" -> "1 The Street",
-        "addressLine2" -> "",
-        "addressLine3" -> "",
-        "addressLine4" -> "",
-        "country"      -> "UK",
-        "postcode"     -> ""
-      )
-      val form                = RsFormMappings.trusteeDetailsForm().bind(trusteeData)
-      val request             = Fixtures.buildFakeRequestWithSessionIdSIP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-      val authRequest         = buildRequestWithAuth(request)
-
-      val result = controllerUnderTest.showTrusteeDetailsSubmit(ersRequestObject, 1)(authRequest, hc)
-      status(result)                                shouldBe Status.SEE_OTHER
-      result.futureValue.header.headers("Location") shouldBe routes.TrusteeController.trusteeSummaryPage().toString
-    }
-
-    "if no form errors and fetch trustee details success for updating a trustee (index 0) " in {
-      val controllerUnderTest = buildFakeTrusteePageController()
-      val trusteeData         = Map(
-        "name"         -> "Name",
-        "addressLine1" -> "1 The Street",
-        "addressLine2" -> "",
-        "addressLine3" -> "",
-        "addressLine4" -> "",
-        "country"      -> "UK",
-        "postcode"     -> ""
-      )
-      val form                = RsFormMappings.trusteeDetailsForm().bind(trusteeData)
-      val request             = Fixtures.buildFakeRequestWithSessionIdSIP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-      val authRequest         = buildRequestWithAuth(request)
-
-      val result = controllerUnderTest.showTrusteeDetailsSubmit(ersRequestObject, 0)(authRequest, hc)
-      status(result)                                shouldBe Status.SEE_OTHER
-      result.futureValue.header.headers("Location") shouldBe routes.TrusteeController.trusteeSummaryPage().toString
-    }
-
-  }
-
-     */
-
   "calling Delete Trustee" should {
 
     val firstTrustee = TrusteeDetails("First Trustee", "1 The Street", None, None, None, Some("UK"), None, true)
@@ -260,7 +78,7 @@ class TrusteeSummaryControllerSpec extends AnyWordSpecLike
     def buildFakeTrusteeController(trusteeDetailsRes: Future[TrusteeDetailsList] = Future.successful(TrusteeDetailsList(trusteeList)),
 																	 cacheRes: Future[CacheMap] = Future.successful(mock[CacheMap]),
 																	 requestObjectRes: Future[RequestObject] = Future.successful(ersRequestObject)
-																	): TrusteeSummaryController = new TrusteeSummaryController(mockMCC, mockAuthConnector, mockErsConnector, mockCountryCodes, mockErsUtil,
+																	): TrusteeSummaryController = new TrusteeSummaryController(mockMCC, mockErsConnector, mockCountryCodes, mockErsUtil,
       mockAppConfig, globalErrorView, trusteeSummaryView, testAuthAction) {
 			when(
         mockErsUtil.fetch[TrusteeDetailsList](refEq(mockErsUtil.TRUSTEES_CACHE), any())(any(), any())
@@ -335,7 +153,7 @@ class TrusteeSummaryControllerSpec extends AnyWordSpecLike
   }
 
   "calling replace trustee" should {
-    def controllerUnderTest: TrusteeSummaryController = new TrusteeSummaryController(mockMCC, mockAuthConnector, mockErsConnector, mockCountryCodes,
+    def controllerUnderTest: TrusteeSummaryController = new TrusteeSummaryController(mockMCC, mockErsConnector, mockCountryCodes,
       mockErsUtil, mockAppConfig, globalErrorView, trusteeSummaryView, testAuthAction)
 
     "add a trustee and keep other trustees" when {
@@ -437,7 +255,7 @@ class TrusteeSummaryControllerSpec extends AnyWordSpecLike
     def buildFakeTrusteeController(trusteeDetailsRes: Future[TrusteeDetailsList] = Future.successful(TrusteeDetailsList(trusteeList)),
 																	 cacheRes: Future[CacheMap] = Future.successful(mock[CacheMap]),
 																	 requestObjectRes: Future[RequestObject] = Future.successful(ersRequestObject)
-                                  ): TrusteeSummaryController = new TrusteeSummaryController(mockMCC, mockAuthConnector, mockErsConnector, mockCountryCodes, mockErsUtil,
+                                  ): TrusteeSummaryController = new TrusteeSummaryController(mockMCC, mockErsConnector, mockCountryCodes, mockErsUtil,
       mockAppConfig, globalErrorView, trusteeSummaryView, testAuthAction) {
 
       when(

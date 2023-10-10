@@ -76,6 +76,7 @@ class ERSUtil @Inject() (
 	val TRUSTEES_CACHE: String = "trustees"
 	val TRUSTEE_NAME_CACHE: String = "trustee-name"
 	val TRUSTEE_BASED_CACHE: String = "trustee-based"
+	val TRUSTEE_ADDRESS_CACHE: String = "trustee-address"
 	val TRUSTEE_ADDRESS_UK_CACHE: String = "trustee-address-uk"
 	val TRUSTEE_ADDRESS_OVERSEAS_CACHE: String = "trustee-address-overseas"
 	val ERROR_REPORT_DATETIME: String = "error-report-datetime"
@@ -112,7 +113,7 @@ class ERSUtil @Inject() (
   def remove(cacheId: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] =
     shortLivedCache.remove(cacheId)
 
-	def fetch[T](key: String)(implicit hc:HeaderCarrier, ec: ExecutionContext, formats: json.Format[T]): Future[T] = {
+	def fetch[T](key: String)(implicit hc: HeaderCarrier, ec: ExecutionContext, formats: json.Format[T]): Future[T] = {
 		shortLivedCache.fetchAndGetEntry[JsValue](getCacheId, key).map{ res =>
 			res.get.as[T]
 		} recover {
@@ -139,9 +140,9 @@ class ERSUtil @Inject() (
 		}
 	}
 
-	def fetchTrusteesOptionally(key: String, cacheId: String)(implicit hc: HeaderCarrier, formats: json.Format[TrusteeDetailsList]): Future[TrusteeDetailsList] = {
-		fetch[TrusteeDetailsList](key, cacheId).recover {
-			case _: NoSuchElementException => TrusteeDetailsList(List.empty[TrusteeDetails])
+	def fetchTrusteesOptionally(cacheId: String)(implicit hc: HeaderCarrier, formats: json.Format[TrusteeDetailsList]): Future[TrusteeDetailsList] = {
+		fetch[TrusteeDetailsList](TRUSTEES_CACHE, cacheId).recover {
+			case _ => TrusteeDetailsList(List.empty[TrusteeDetails])
 		}
 	}
 
@@ -150,7 +151,7 @@ class ERSUtil @Inject() (
 			_.map(_.\(TRUSTEES_CACHE).as[JsArray].\(index).getOrElse(Json.obj()).as[A])
 		} recover {
 			case x: Throwable => {
-				println(x.getMessage)
+				println("[ERSUtil][fetchPartFromTrusteeDetailsList] Nothing found in cache, expected if this is not an edit journey: " + x.getMessage)
 				None
 			}
 		}
@@ -346,13 +347,8 @@ class ERSUtil @Inject() (
       }
       .getOrElse(DEFAULT)
 
-  def trusteeLocation(trustee: TrusteeDetails): String =
-    trustee.country
-      .collect {
-        case c if c != DEFAULT_COUNTRY => OVERSEAS
-        case c                         => c
-      }
-      .getOrElse(DEFAULT)
+  def trusteeLocation(trustee: TrusteeDetails): String = if (trustee.basedInUk) DEFAULT_COUNTRY else OVERSEAS
+
 
   def addCompanyMessage(messages: Messages, schemeOpt: Option[String]): String =
     messages.apply(s"ers_group_summary.${schemeOpt.getOrElse("").toLowerCase}.add_company")

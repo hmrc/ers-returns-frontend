@@ -27,7 +27,6 @@ import play.api.mvc.{AnyContent, MessagesControllerComponents, Request, Result}
 import play.twirl.api.Html
 import services.TrusteeService
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.{CountryCodes, ERSUtil}
@@ -35,7 +34,6 @@ import utils.{CountryCodes, ERSUtil}
 import scala.concurrent.{ExecutionContext, Future}
 
 class TrusteeNameController @Inject()(val mcc: MessagesControllerComponents,
-                                      val authConnector: DefaultAuthConnector,
                                       val ersConnector: ErsConnector,
                                       val globalErrorView: views.html.global_error,
                                       val authAction: AuthAction,

@@ -209,7 +209,7 @@ object Fixtures extends AuthHelper {
       Some("hmac")
     )
 
-  val trusteeAddressOverseas: TrusteeAddressOverseas = TrusteeAddressOverseas(
+  val trusteeAddressOverseas: TrusteeAddress = TrusteeAddress(
     "Overseas line 1",
     Some("Overseas line 2"),
     Some("Overseas line 3"),
@@ -218,12 +218,17 @@ object Fixtures extends AuthHelper {
     Some("Overseas country")
   )
 
-  val trusteeAddressUk: TrusteeAddressUk = TrusteeAddressUk(
+  val trusteeAddressUk: TrusteeAddress = TrusteeAddress(
     "UK line 1",
     Some("UK line 2"),
     Some("UK line 3"),
     Some("UK line 4"),
     Some("UK line 5"),
-    Some("UK country")
+    Some("UK")
   )
+
+  val exampleTrustees = TrusteeDetailsList(List(
+    TrusteeDetails(TrusteeName("John Bonson"), trusteeAddressUk),
+    TrusteeDetails(TrusteeName("Dave Daveson"), trusteeAddressOverseas)
+  ))
 }

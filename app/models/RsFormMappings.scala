@@ -18,6 +18,8 @@ package models
 
 import play.api.data.Forms._
 import play.api.data._
+import play.api.data.format.Formats.stringFormat
+import play.api.data.validation.Constraints
 import play.api.data.validation.Constraints._
 import play.api.i18n.Messages
 
@@ -135,10 +137,20 @@ object RsFormMappings {
   )
 
   def trusteeBasedInUkForm()(implicit messages: Messages): Form[TrusteeBasedInUk] = Form(mapping(
-    trusteeBasedInUkFields.basedInUk -> number
-      .transform(int => if (int == 0) true else false, (bool: Boolean) => if (bool) 0 else 1)
+    trusteeBasedInUkFields.basedInUk -> text
+      .verifying(Constraints.nonEmpty(errorMessage = "oh no")) //TODO Update this
+      .verifying(Messages("ers_trustee_details.err.summary.name_required"), _.nonEmpty)
+      .transform(int => if (int == "0") true else false, (bool: Boolean) => if (bool) "0" else "1")
   )(TrusteeBasedInUk.apply)(TrusteeBasedInUk.unapply))
 
+  def groupForm2()(implicit messages: Messages): Form[RS_groupScheme] = Form(
+    mapping(
+      "groupScheme" ->
+        optional(text)
+          .verifying("required field", _.nonEmpty)
+          .verifying(Messages("ers.invalidCharacters"), so => validInputCharacters(so.getOrElse("1"), yesNoRegPattern))
+    )(RS_groupScheme.apply)(RS_groupScheme.unapply)
+  )
 
   def trusteeNameForm()(implicit messages: Messages): Form[TrusteeName] = Form(mapping(
     trusteeNameFields.name -> text
@@ -147,7 +159,7 @@ object RsFormMappings {
       .verifying(Messages("ers_trustee_details.err.invalidChars.name"), so => validInputCharacters(so, addresssRegx))
   )(TrusteeName.apply)(TrusteeName.unapply))
 
-  def trusteeAddressOverseasForm()(implicit messages: Messages): Form[TrusteeAddressOverseas] = Form(mapping(
+  def trusteeAddressOverseasForm()(implicit messages: Messages): Form[TrusteeAddress] = Form(mapping(
     trusteeAddressFields.addressLine1 -> text
       .verifying(Messages("ers_trustee_details.err.summary.address_line1_required"), _.nonEmpty)
       .verifying(Messages("ers_trustee_details.err.address_line1"), so => checkAddressLength(so, "trusteeAddressFields.addressLine1"))
@@ -166,9 +178,9 @@ object RsFormMappings {
       .verifying(Messages("ers_trustee_details.err.invalidChars.address_line5"), so => validInputCharacters(so, addresssRegx))),
     trusteeAddressFields.country -> optional(text
       verifying pattern(addresssRegx.r, error = Messages("ers_scheme_organiser.err.summary.invalid_country")))
-  )(TrusteeAddressOverseas.apply)(TrusteeAddressOverseas.unapply))
+  )(TrusteeAddress.apply)(TrusteeAddress.unapply))
 
-  def trusteeAddressUkForm()(implicit messages: Messages): Form[TrusteeAddressUk] = Form(mapping(
+  def trusteeAddressUkForm()(implicit messages: Messages): Form[TrusteeAddress] = Form(mapping(
     trusteeAddressFields.addressLine1 -> text
       .verifying(Messages("ers_trustee_details.err.summary.address_line1_required"), _.nonEmpty)
       .verifying(Messages("ers_trustee_details.err.address_line1"), so => checkAddressLength(so, "trusteeAddressFields.addressLine1"))
@@ -187,8 +199,7 @@ object RsFormMappings {
       .verifying(Messages("ers_trustee_details.err.postcode"), so => isValidPostcode(so)),
     trusteeAddressFields.country -> optional(text
       .verifying(pattern(addresssRegx.r, error = Messages("ers_scheme_organiser.err.summary.invalid_country"))))
-  )(TrusteeAddressUk.apply)(TrusteeAddressUk.unapply))
-
+  )(TrusteeAddress.apply)(TrusteeAddress.unapply))
   /*
    * Manual Company Details Form definition
    */

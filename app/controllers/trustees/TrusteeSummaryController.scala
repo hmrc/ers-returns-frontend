@@ -19,14 +19,12 @@ package controllers.trustees
 import config.ApplicationConfig
 import connectors.ErsConnector
 import controllers.auth.{AuthAction, RequestWithOptionalAuthContext}
-import controllers.routes
 import javax.inject.Inject
 import models.{RequestObject, TrusteeDetails, TrusteeDetailsList}
 import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request, Result}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.{CountryCodes, ERSUtil}
@@ -34,7 +32,6 @@ import utils.{CountryCodes, ERSUtil}
 import scala.concurrent.{ExecutionContext, Future}
 
 class TrusteeSummaryController @Inject()(val mcc: MessagesControllerComponents,
-                                         val authConnector: DefaultAuthConnector,
                                          val ersConnector: ErsConnector,
                                          implicit val countryCodes: CountryCodes,
                                          implicit val ersUtil: ERSUtil,

@@ -16,7 +16,7 @@
 
 package controllers.trustees
 
-import models.{RequestObject, RsFormMappings, TrusteeBasedInUk}
+import models.{RequestObject, RsFormMappings, TrusteeBasedInUk, TrusteeDetailsList}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatest.OptionValues
@@ -60,7 +60,6 @@ class TrusteeBasedInUkControllerSpec  extends AnyWordSpecLike
 
   val testController = new TrusteeBasedInUkController(
     mockMCC,
-    mockAuthConnector,
     mockErsConnector,
     app.injector.instanceOf[global_error],
     testAuthAction,
@@ -172,7 +171,6 @@ class TrusteeBasedInUkControllerSpec  extends AnyWordSpecLike
   }
 
   "calling editQuestionSubmit" should {
-    implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
     setAuthMocks()
     when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any())).thenReturn(Future.successful(ersRequestObject))
 
@@ -180,21 +178,23 @@ class TrusteeBasedInUkControllerSpec  extends AnyWordSpecLike
       val emptyCacheMap = CacheMap("", Map("" -> Json.obj()))
       when(mockErsUtil.cache[TrusteeBasedInUk](any(), any(), any())(any(), any())).thenReturn(Future.successful(emptyCacheMap))
       when(mockErsUtil.fetch[TrusteeBasedInUk](any(), any())(any(), any())).thenReturn(Future.successful(TrusteeBasedInUk(true)))
+      when(mockErsUtil.fetchTrusteesOptionally(any())(any(), any())).thenReturn(Future.successful(Fixtures.exampleTrustees))
       when(mockTrusteeService.updateTrusteeCache(any())(any())).thenReturn(Future.successful(()), Future.successful(()))
 
       val trusteeBasedData = Map("basedInUk" -> "0")
       val form = RsFormMappings.trusteeBasedInUkForm().bind(trusteeBasedData)
       implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*))
-      val result = testController.editQuestionSubmit(1).apply(authRequest)
+      val result = testController.editQuestionSubmit(0).apply(authRequest)
 
       status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result).get shouldBe routes.TrusteeAddressUkController.editQuestion(1).url
+      redirectLocation(result).get shouldBe routes.TrusteeAddressUkController.editQuestion(0).url
     }
 
     "successfully bind the form and go to the edit version of the trustee address overseas page with the index preserved if the answer is false" in {
       val emptyCacheMap = CacheMap("", Map("" -> Json.obj()))
       when(mockErsUtil.cache[TrusteeBasedInUk](any(), any(), any())(any(), any())).thenReturn(Future.successful(emptyCacheMap))
       when(mockErsUtil.fetch[TrusteeBasedInUk](any(), any())(any(), any())).thenReturn(Future.successful(TrusteeBasedInUk(false)))
+      when(mockErsUtil.fetchTrusteesOptionally(any())(any(), any())).thenReturn(Future.successful(Fixtures.exampleTrustees))
       when(mockTrusteeService.updateTrusteeCache(any())(any())).thenReturn(Future.successful(()), Future.successful(()))
 
       val trusteeBasedData = Map("basedInUk" -> "1")

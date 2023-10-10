@@ -709,22 +709,6 @@ ers_trustee_address.line4 = Address line 4 (optional)
 ers_trustee_address.line5 = Address line 5 (optional)
 ers_trustee_address.country = Country (optional)
 
-#TODO probs delete these as shouldn't be used
-ers_trustee_details.title = Add trustee details
-ers_trustee_details.question = Where is the trustee based?
-ers_trustee_details.uk = UK
-ers_trustee_details.overseas = Overseas
-ers_trustee_details.name = Name
-ers_trustee_details.address = Address
-ers_trustee_details.addressLine1 = First line of address
-ers_trustee_details.addressLine2 = Second line of address
-ers_trustee_details.addressLine3 = Third line of address
-ers_trustee_details.addressLine4 = Fourth line of address
-ers_trustee_details.postcode = Postcode (optional)
-ers_trustee_details.postcode.hint = For example, AA1 1AA
-ers_trustee_details.postcode_zipcode = Postcode/ZIP code
-ers_trustee_details.country = Country (optional)
-
 ers_trustee_details.err.summary.name_required = Enter the trustee’s name
 ers_trustee_details.err.summary.name_size = Reduce the number of characters entered for the trustee’s name
 ers_trustee_details.err.summary.address_line1_required = Enter the first line of the address
@@ -745,7 +729,7 @@ ers_trustee_details.err.invalidChars.address_line3 = Check the third line of the
 ers_trustee_details.err.address_line4 = Check the fourth line of the address (it must be less than 19 characters)
 ers_trustee_details.err.invalidChars.address_line4 = Check the fourth line of the address (it contains invalid characters)
 ers_trustee_details.err.address_line5 = Check the fifth line of the address (it must be less than 19 characters)
-ers_trustee_details.err.invalidChars.address_line4 = Check the fourth line of the address (it contains invalid characters)
+ers_trustee_details.err.invalidChars.address_line5 = Check the fifth line of the address (it contains invalid characters)
 ers_trustee_details.err.postcode = Check the postcode (it must be valid and less than 9 characters)
 
 ers_trustee_summary.title = Trustees of this Share Incentive Plan
