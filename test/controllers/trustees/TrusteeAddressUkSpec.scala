@@ -125,7 +125,7 @@ class TrusteeAddressUkSpec  extends AnyWordSpecLike
   "successfully bind the form and go to the trustee summary page" in {
     val emptyCacheMap = CacheMap("", Map("" -> Json.obj()))
     when(mockErsUtil.cache[TrusteeAddressUk](any(), any(), any())(any(), any())).thenReturn(Future.successful(emptyCacheMap))
-    when(mockTrusteeService.updateTrusteeCache(any())(any())).thenReturn(Future.successful(Unit), Future.successful(Unit))
+    when(mockTrusteeService.updateTrusteeCache(any())(any())).thenReturn(Future.successful(()), Future.successful(()))
 
     val trusteeAddressUkData = Map("addressLine1" -> "123 Fake Street")
     val form = RsFormMappings.trusteeAddressUkForm().bind(trusteeAddressUkData)

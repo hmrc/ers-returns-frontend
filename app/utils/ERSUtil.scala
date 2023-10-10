@@ -194,8 +194,7 @@ class ERSUtil @Inject() (
   }
 
 	def getAltAmmendsData(schemeRef: String)(implicit hc: HeaderCarrier,
-																					 ec: ExecutionContext,
-																					 request: Request[AnyRef]
+																					 ec: ExecutionContext
 	): Future[(Option[AltAmendsActivity], Option[AlterationAmends])] = {
 		fetchOption[AltAmendsActivity](altAmendsActivity, schemeRef).flatMap {
 			altamends =>
@@ -215,8 +214,7 @@ class ERSUtil @Inject() (
 
 	def getGroupSchemeData(schemeRef: String)
 												(implicit hc: HeaderCarrier,
-												 ec: ExecutionContext,
-												 request: Request[AnyRef]): Future[(Option[GroupSchemeInfo], Option[CompanyDetailsList])] = {
+												 ec: ExecutionContext): Future[(Option[GroupSchemeInfo], Option[CompanyDetailsList])] = {
 		fetchOption[GroupSchemeInfo](GROUP_SCHEME_CACHE_CONTROLLER, schemeRef).flatMap { gsc =>
 			if (gsc.getOrElse(GroupSchemeInfo(None, None)).groupScheme.getOrElse("") == OPTION_YES) {
 				fetchOption[CompanyDetailsList](GROUP_SCHEME_COMPANIES, schemeRef).map { comp =>
@@ -233,7 +231,7 @@ class ERSUtil @Inject() (
 
 
 	def getAllData(bundleRef: String, ersMetaData: ErsMetaData)
-								(implicit hc: HeaderCarrier, ec: ExecutionContext, request: Request[AnyRef]): Future[ErsSummary] = {
+								(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[ErsSummary] = {
 		val schemeRef = ersMetaData.schemeInfo.schemeRef
 		(for {
 			repEvents <- fetchOption[ReportableEvents](reportableEvents, schemeRef)

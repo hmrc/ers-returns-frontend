@@ -129,7 +129,7 @@ class TrusteeBasedInUkControllerSpec  extends AnyWordSpecLike
     val emptyCacheMap = CacheMap("", Map("" -> Json.obj()))
     when(mockErsUtil.cache[TrusteeBasedInUk](any(), any(), any())(any(), any())).thenReturn(Future.successful(emptyCacheMap))
     when(mockErsUtil.fetch[TrusteeBasedInUk](any(), any())(any(), any())).thenReturn(Future.successful(TrusteeBasedInUk(true)))
-    when(mockTrusteeService.updateTrusteeCache(any())(any())).thenReturn(Future.successful(Unit), Future.successful(Unit))
+    when(mockTrusteeService.updateTrusteeCache(any())(any())).thenReturn(Future.successful(()), Future.successful(()))
 
     val trusteeBasedData = Map("basedInUk" -> "0")
     val form = RsFormMappings.trusteeBasedInUkForm().bind(trusteeBasedData)
@@ -144,7 +144,7 @@ class TrusteeBasedInUkControllerSpec  extends AnyWordSpecLike
     val emptyCacheMap = CacheMap("", Map("" -> Json.obj()))
     when(mockErsUtil.cache[TrusteeBasedInUk](any(), any(), any())(any(), any())).thenReturn(Future.successful(emptyCacheMap))
     when(mockErsUtil.fetch[TrusteeBasedInUk](any(), any())(any(), any())).thenReturn(Future.successful(TrusteeBasedInUk(false)))
-    when(mockTrusteeService.updateTrusteeCache(any())(any())).thenReturn(Future.successful(Unit), Future.successful(Unit))
+    when(mockTrusteeService.updateTrusteeCache(any())(any())).thenReturn(Future.successful(()), Future.successful(()))
 
     val trusteeBasedData = Map("basedInUk" -> "1")
     val form = RsFormMappings.trusteeBasedInUkForm().bind(trusteeBasedData)
@@ -180,7 +180,7 @@ class TrusteeBasedInUkControllerSpec  extends AnyWordSpecLike
       val emptyCacheMap = CacheMap("", Map("" -> Json.obj()))
       when(mockErsUtil.cache[TrusteeBasedInUk](any(), any(), any())(any(), any())).thenReturn(Future.successful(emptyCacheMap))
       when(mockErsUtil.fetch[TrusteeBasedInUk](any(), any())(any(), any())).thenReturn(Future.successful(TrusteeBasedInUk(true)))
-      when(mockTrusteeService.updateTrusteeCache(any())(any())).thenReturn(Future.successful(Unit), Future.successful(Unit))
+      when(mockTrusteeService.updateTrusteeCache(any())(any())).thenReturn(Future.successful(()), Future.successful(()))
 
       val trusteeBasedData = Map("basedInUk" -> "0")
       val form = RsFormMappings.trusteeBasedInUkForm().bind(trusteeBasedData)
@@ -195,7 +195,7 @@ class TrusteeBasedInUkControllerSpec  extends AnyWordSpecLike
       val emptyCacheMap = CacheMap("", Map("" -> Json.obj()))
       when(mockErsUtil.cache[TrusteeBasedInUk](any(), any(), any())(any(), any())).thenReturn(Future.successful(emptyCacheMap))
       when(mockErsUtil.fetch[TrusteeBasedInUk](any(), any())(any(), any())).thenReturn(Future.successful(TrusteeBasedInUk(false)))
-      when(mockTrusteeService.updateTrusteeCache(any())(any())).thenReturn(Future.successful(Unit), Future.successful(Unit))
+      when(mockTrusteeService.updateTrusteeCache(any())(any())).thenReturn(Future.successful(()), Future.successful(()))
 
       val trusteeBasedData = Map("basedInUk" -> "1")
       val form = RsFormMappings.trusteeBasedInUkForm().bind(trusteeBasedData)

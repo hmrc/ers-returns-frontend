@@ -123,7 +123,7 @@ class TrusteeNameControllerSpec extends AnyWordSpecLike
     "successfully bind the form and go to the trustee based in UK page if the form is filled correctly" in {
       val emptyCacheMap = CacheMap("", Map("" -> Json.obj()))
       when(mockErsUtil.cache[TrusteeName](any(), any(), any())(any(), any())).thenReturn(Future.successful(emptyCacheMap))
-      when(mockTrusteeService.updateTrusteeCache(any())(any())).thenReturn(Future.successful(Unit), Future.successful(Unit))
+      when(mockTrusteeService.updateTrusteeCache(any())(any())).thenReturn(Future.successful(()), Future.successful(()))
 
       val trusteeBasedData = Map("name" -> "Test person")
       val form = RsFormMappings.trusteeBasedInUkForm().bind(trusteeBasedData)
@@ -160,7 +160,7 @@ class TrusteeNameControllerSpec extends AnyWordSpecLike
     "successfully bind the form and go to the edit version of the trustee based in UK page with the index preserved if the form is filled correctly" in {
       val emptyCacheMap = CacheMap("", Map("" -> Json.obj()))
       when(mockErsUtil.cache[TrusteeName](any(), any(), any())(any(), any())).thenReturn(Future.successful(emptyCacheMap))
-      when(mockTrusteeService.updateTrusteeCache(any())(any())).thenReturn(Future.successful(Unit), Future.successful(Unit))
+      when(mockTrusteeService.updateTrusteeCache(any())(any())).thenReturn(Future.successful(()), Future.successful(()))
 
       val trusteeBasedData = Map("name" -> "Test person")
       val form = RsFormMappings.trusteeBasedInUkForm().bind(trusteeBasedData)

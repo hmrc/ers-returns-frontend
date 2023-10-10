@@ -45,7 +45,7 @@ class TrusteeService @Inject()(
       }
       _ <- ersUtil.cache[TrusteeDetailsList](ersUtil.TRUSTEES_CACHE, trusteeDetailsList, schemeRef)
     } yield {
-      Unit
+      ()
     }
   }
 

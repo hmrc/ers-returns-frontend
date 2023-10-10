@@ -82,8 +82,8 @@ case class SchemeOrganiserDetails(
       companyReg.getOrElse(""),
       corporationRef.getOrElse("")
     ).filter(_.nonEmpty)
-  }
 }
+
 object SchemeOrganiserDetails {
   implicit val format: OFormat[SchemeOrganiserDetails] = Json.format[SchemeOrganiserDetails]
 }

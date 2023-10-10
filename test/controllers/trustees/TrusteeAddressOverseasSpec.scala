@@ -124,7 +124,7 @@ class TrusteeAddressOverseasSpec  extends AnyWordSpecLike
     "successfully bind the form and redirect to the trustee summary page" in {
       val emptyCacheMap = CacheMap("", Map("" -> Json.obj()))
       when(mockErsUtil.cache[TrusteeAddressOverseas](any(), any(), any())(any(), any())).thenReturn(Future.successful(emptyCacheMap))
-      when(mockTrusteeService.updateTrusteeCache(any())(any())).thenReturn(Future.successful(Unit), Future.successful(Unit))
+      when(mockTrusteeService.updateTrusteeCache(any())(any())).thenReturn(Future.successful(()), Future.successful(()))
 
       val trusteeAddressOverseasData = Map("addressLine1" -> "123 Fake Street")
       val form = RsFormMappings.trusteeAddressOverseasForm().bind(trusteeAddressOverseasData)
