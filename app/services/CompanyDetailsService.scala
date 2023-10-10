@@ -36,11 +36,11 @@ class CompanyDetailsService @Inject()(
       cachedCompanies <- ersUtil.fetchCompaniesOptionally(ersUtil.COMPANIES_CACHE, schemeRef)
       companyDetailsList <- if (basedInUk.basedInUk) {
         ersUtil.fetch[CompanyAddressUk](ersUtil.SUBSIDIARY_ADDRESS_CACHE, schemeRef).map(address =>
-          CompanyDetailsList(replaceCompany(cachedCompanies.companies, index, CompanyDetails(name, address, basedInUk)))
+          CompanyDetailsList(replaceCompany(cachedCompanies.companies, index, CompanyDetails(name, address)))
         )
       } else {
         ersUtil.fetch[CompanyAddressOverseas](ersUtil.SUBSIDIARY_ADDRESS_CACHE, schemeRef).map( address =>
-          CompanyDetailsList(replaceCompany(cachedCompanies.companies, index, CompanyDetails(name, address, basedInUk)))
+          CompanyDetailsList(replaceCompany(cachedCompanies.companies, index, CompanyDetails(name, address)))
         )
       }
       _ <- ersUtil.cache[CompanyDetailsList](ersUtil.COMPANIES_CACHE, companyDetailsList, schemeRef)

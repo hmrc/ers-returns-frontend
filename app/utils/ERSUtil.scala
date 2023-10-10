@@ -348,7 +348,7 @@ class ERSUtil @Inject()(val sessionService: SessionService,
 				x.map(_.\(COMPANIES_CACHE).as[JsArray].\(index).getOrElse(Json.obj()).as[A])
 		} recover {
 			case x:Throwable => {
-				println(x.getMessage)
+				println("banarama" + x.getMessage)
 				None
 			}
 		}

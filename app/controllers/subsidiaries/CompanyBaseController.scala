@@ -53,11 +53,11 @@ trait CompanyBaseController[A] extends FrontendController with I18nSupport with 
   def questionPage(index: Int): Action[AnyContent] = authAction.async {
     implicit request =>
       ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
-        showQuestionPage(requestObject, index, edit = false)
+        showQuestionPage(requestObject, index)
       }
   }
 
-  def showQuestionPage(requestObject: RequestObject, index: Int, edit: Boolean)
+  def showQuestionPage(requestObject: RequestObject, index: Int, edit: Boolean = false)
                       (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
     ersUtil.fetchPartFromCompanyDetailsList[A](index, requestObject.getSchemeReference).map { oldData: Option[A] =>
       val preparedForm = if (oldData.isDefined) form.fill(oldData.get) else form

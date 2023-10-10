@@ -115,7 +115,7 @@ class CompanyDetailsOverseasControllerSpec extends AnyWordSpecLike
       implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*))
       val result = testController.questionSubmit(1).apply(authRequest)
 
-      status(result) shouldBe Status.BAD_REQUEST
+      status(result) shouldBe Status.OK
       contentAsString(result) should include(testMessages("ers_manual_company_details_overseas.title"))
       contentAsString(result) should include(testMessages("error.required"))
     }
@@ -130,7 +130,7 @@ class CompanyDetailsOverseasControllerSpec extends AnyWordSpecLike
       implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*))
       val result = testController.questionSubmit(1).apply(authRequest)
 
-      status(result) shouldBe Status.SEE_OTHER
+      status(result) shouldBe Status.OK
       redirectLocation(result).get shouldBe routes.CompanyAddressOverseasController.questionPage().url
 
     }

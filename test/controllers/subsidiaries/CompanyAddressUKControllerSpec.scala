@@ -82,7 +82,7 @@ class CompanyAddressUKControllerSpec extends AnyWordSpecLike
       val result = testController.questionPage(1).apply(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
 
       status(result) shouldBe Status.OK
-      //contentAsString(result) should include(testMessages("ers_manual_address_uk.title"))
+      contentAsString(result) should include(testMessages("ers_manual_address_uk.title"))
       contentAsString(result) should include(testMessages("ers_manual_address_uk.building"))
     }
 
@@ -92,7 +92,7 @@ class CompanyAddressUKControllerSpec extends AnyWordSpecLike
       val result = testController.questionPage(1).apply(authRequest)
 
       status(result) shouldBe Status.OK
-      //contentAsString(result) should include(testMessages("ers_manual_address_uk.title"))
+      contentAsString(result) should include(testMessages("ers_manual_address_uk.title"))
       contentAsString(result) should include(testMessages("ers_manual_address_uk.building"))
       contentAsString(result) should include("UK 1")
     }
@@ -146,7 +146,7 @@ class CompanyAddressUKControllerSpec extends AnyWordSpecLike
       val result = testController.editCompany(1).apply(authRequest)
 
       status(result) shouldBe Status.OK
-      //contentAsString(result) should include(testMessages("ers_manual_address_uk.title"))
+      contentAsString(result) should include(testMessages("ers_manual_address_uk.title"))
       contentAsString(result) should include(testMessages("ers_manual_address_uk.building"))
       contentAsString(result) should include("1")
 
