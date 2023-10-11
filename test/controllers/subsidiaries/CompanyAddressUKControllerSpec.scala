@@ -115,8 +115,8 @@ class CompanyAddressUKControllerSpec extends AnyWordSpecLike
       implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*))
       val result = testController.questionSubmit(1).apply(authRequest)
 
-      status(result) shouldBe Status.BAD_REQUEST
-      //contentAsString(result) should include(testMessages("ers_manual_address_uk.title"))
+      status(result) shouldBe Status.OK
+      contentAsString(result) should include(testMessages("ers_manual_address_uk.title"))
       contentAsString(result) should include(testMessages("ers_company_details.err.summary.address_line1_required"))
     }
 

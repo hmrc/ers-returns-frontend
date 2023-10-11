@@ -59,7 +59,9 @@ trait CompanyBaseController[A] extends FrontendController with I18nSupport with 
 
   def showQuestionPage(requestObject: RequestObject, index: Int, edit: Boolean = false)
                       (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
-    ersUtil.fetchPartFromCompanyDetailsList[A](index, requestObject.getSchemeReference).map { oldData: Option[A] =>
+    (for {
+      oldData <- ersUtil.fetchPartFromCompanyDetailsList[A](index, requestObject.getSchemeReference)
+    } yield {
       val preparedForm = if (oldData.isDefined) form.fill(oldData.get) else form
       if (oldData.isDefined) {
         logger.error(s"\n\n[${this.getClass.getSimpleName}][showQuestionPage] Here's the data we pulled from the cache: " +
@@ -67,7 +69,7 @@ trait CompanyBaseController[A] extends FrontendController with I18nSupport with 
       }
       Ok(view(requestObject, index, preparedForm, edit))
     }
-      recover {
+      )recover {
       case e: Exception =>
         logger.error(s"[SubsidiariesController][showSubsidiariesNamePage] Get data from cache failed with exception ${e.getMessage}")
         getGlobalErrorPage

@@ -92,7 +92,7 @@ class CompanyDetailsOverseasControllerSpec extends AnyWordSpecLike
 
       status(result) shouldBe Status.OK
       contentAsString(result) should include(testMessages("ers_manual_company_details_overseas.title"))
-      contentAsString(result) should include("Test company")
+      contentAsString(result) should include("Test Company")
 
     }
 

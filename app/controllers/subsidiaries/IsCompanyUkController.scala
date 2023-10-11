@@ -73,7 +73,6 @@ class IsCompanyUkController @Inject()(val mcc: MessagesControllerComponents,
     for {
       requestObject <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
       subsidiaryBasedInUk <- ersUtil.fetch[CompanyBasedInUk](cacheKey, requestObject.getSchemeReference)
-      _ <- companyDetailsService.updateCompanyCache(index)
     } yield {
         (subsidiaryBasedInUk.basedInUk, edit) match {
           case (true, false) => Redirect(controllers.subsidiaries.routes.CompanyDetailsUkController.questionPage())
