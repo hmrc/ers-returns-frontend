@@ -16,7 +16,7 @@
 
 package controllers.trustees
 
-import models.{RequestObject, RsFormMappings, TrusteeBasedInUk, TrusteeDetailsList}
+import models.{RequestObject, RsFormMappings, TrusteeBasedInUk}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatest.OptionValues

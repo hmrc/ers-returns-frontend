@@ -704,7 +704,7 @@ class GroupSchemeControllerSpec
       headers(result).get("Location").get.contains("/add-subsidiary-company") shouldBe true
     }
 
-    "redirect to trustee name page if user select no for SIP" in {
+    "redirect to trustee summary page if user select no for SIP" in {
       when(
         mockErsUtil.cache(refEq(mockErsUtil.GROUP_SCHEME_CACHE_CONTROLLER), any[GroupSchemeInfo](), anyString())(any(), any())
       ).thenReturn(
@@ -717,7 +717,7 @@ class GroupSchemeControllerSpec
       status(result) shouldBe SEE_OTHER
       println("headers innit " + headers(result).get("Location"))
 
-      headers(result).get("Location").get.contains("/trustee-name") shouldBe true
+      headers(result).get("Location").get.contains("/trustees") shouldBe true
     }
 
     "redirect to company details page if user select yes for OTHER" in {

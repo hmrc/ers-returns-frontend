@@ -82,7 +82,7 @@ class TrusteeAddressUkSpec  extends AnyWordSpecLike
 
       status(result) shouldBe Status.OK
       contentAsString(result) should include(testMessages("ers_trustee_address.title"))
-      contentAsString(result) should include(testMessages("ers_trustee_address.buildingAndStreet"))
+      contentAsString(result) should include(testMessages("ers_trustee_address.line1"))
     }
 
     "show the prefilled trustee address UK question page when there is data to prefill" in {
@@ -92,7 +92,7 @@ class TrusteeAddressUkSpec  extends AnyWordSpecLike
 
       status(result) shouldBe Status.OK
       contentAsString(result) should include(testMessages("ers_trustee_address.title"))
-      contentAsString(result) should include(testMessages("ers_trustee_address.buildingAndStreet"))
+      contentAsString(result) should include(testMessages("ers_trustee_address.line1"))
       contentAsString(result) should include("UK line 1")
     }
 
