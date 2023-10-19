@@ -169,8 +169,7 @@ class GroupSchemeController @Inject() (
             RsFormMappings.groupForm().fill(RS_groupScheme(groupSchemeInfo.groupScheme))
           )
         )
-    } recover { case e: Exception =>
-      logger.warn(s"[GroupSchemeController][showGroupSchemePage] Fetching GroupSchemeInfo from the cache failed: $e")
+    } recover { case _: Exception =>
       val form = RS_groupScheme(Some(ersUtil.DEFAULT))
       Ok(groupView(requestObject, Some(ersUtil.DEFAULT), RsFormMappings.groupForm().fill(form)))
     }
@@ -214,7 +213,7 @@ class GroupSchemeController @Inject() (
               case (ersUtil.SCHEME_EMI | ersUtil.SCHEME_OTHER, _) =>
                 Redirect(routes.SummaryDeclarationController.summaryDeclarationPage())
 
-            case (ersUtil.SCHEME_SIP, _) => Redirect(controllers.trustees.routes.TrusteeNameController.questionPage())
+            case (ersUtil.SCHEME_SIP, _) => Redirect(controllers.trustees.routes.TrusteeSummaryController.trusteeSummaryPage())
 
               case (_, _) => getGlobalErrorPage
             }
@@ -254,7 +253,7 @@ class GroupSchemeController @Inject() (
         Future(Redirect(routes.SummaryDeclarationController.summaryDeclarationPage()))
 
       case ersUtil.SCHEME_SIP =>
-        Future(Redirect(trustees.routes.TrusteeNameController.questionPage()))
+        Future(Redirect(trustees.routes.TrusteeSummaryController.trusteeSummaryPage()))
 
     }
 

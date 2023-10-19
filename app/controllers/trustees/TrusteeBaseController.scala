@@ -62,9 +62,6 @@ trait TrusteeBaseController[A] extends FrontendController with I18nSupport with 
                       (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
     ersUtil.fetchPartFromTrusteeDetailsList[A](index, requestObject.getSchemeReference).map { previousAnswer: Option[A] =>
       val preparedForm = if (previousAnswer.isDefined) form.fill(previousAnswer.get) else form
-      if (previousAnswer.isDefined) {
-        logger.error(s"\n\n[${this.getClass.getSimpleName}][showQuestionPage] Here's the answers we pulled from the cache innit: \n\n Prev answer: ${previousAnswer.get}\n") // TODO Remove before merge innit
-      }
       Ok(view(requestObject, index, preparedForm, edit))
     } recover {
       case e: Throwable =>

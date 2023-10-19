@@ -74,7 +74,7 @@
         ErrorMessage(content = Text(addressLine1.messages.head))
     },
     label = Label(
-        content = Text(messages("ers_trustee_address.buildingAndStreet")),
+        content = Text(messages("ers_trustee_address.line1")),
     )
 ))
 
@@ -85,8 +85,7 @@
     autocomplete = Some("address-line2"),
     value = trusteeDetails(trusteeAddressFields.addressLine2).value,
     label = Label(
-        content = Text(messages("ers_trustee_address.buildingAndStreet")),
-        classes = "govuk-visually-hidden"
+        content = Text(messages("ers_trustee_address.line2")),
     )
 ))
 

@@ -137,20 +137,9 @@ object RsFormMappings {
   )
 
   def trusteeBasedInUkForm()(implicit messages: Messages): Form[TrusteeBasedInUk] = Form(mapping(
-    trusteeBasedInUkFields.basedInUk -> text
-      .verifying(Constraints.nonEmpty(errorMessage = "oh no")) //TODO Update this
-      .verifying(Messages("ers_trustee_details.err.summary.name_required"), _.nonEmpty)
+    trusteeBasedInUkFields.basedInUk -> nonEmptyText
       .transform(int => if (int == "0") true else false, (bool: Boolean) => if (bool) "0" else "1")
   )(TrusteeBasedInUk.apply)(TrusteeBasedInUk.unapply))
-
-  def groupForm2()(implicit messages: Messages): Form[RS_groupScheme] = Form(
-    mapping(
-      "groupScheme" ->
-        optional(text)
-          .verifying("required field", _.nonEmpty)
-          .verifying(Messages("ers.invalidCharacters"), so => validInputCharacters(so.getOrElse("1"), yesNoRegPattern))
-    )(RS_groupScheme.apply)(RS_groupScheme.unapply)
-  )
 
   def trusteeNameForm()(implicit messages: Messages): Form[TrusteeName] = Form(mapping(
     trusteeNameFields.name -> text

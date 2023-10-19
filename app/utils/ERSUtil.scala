@@ -32,7 +32,6 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import java.util.concurrent.TimeUnit
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success, Try}
 
 @Singleton
 class ERSUtil @Inject() (
@@ -134,7 +133,7 @@ class ERSUtil @Inject() (
 			case _: NoSuchElementException =>
 				throw new NoSuchElementException
 			case er : Throwable =>
-				logger.error(s"[ERSUtil][fetch] fetch(with 2 params) failed to get key [$key] for cacheId: [$cacheId] with exception ${er.getMessage}, " +
+				logger.warn(s"[ERSUtil][fetch] fetch(with 2 params) failed to get key [$key] for cacheId: [$cacheId] with exception ${er.getMessage}, " +
 					s"timestamp: ${System.currentTimeMillis()}.")
 				throw new Exception
 		}
@@ -151,13 +150,13 @@ class ERSUtil @Inject() (
 			_.map(_.\(TRUSTEES_CACHE).as[JsArray].\(index).getOrElse(Json.obj()).as[A])
 		} recover {
 			case x: Throwable => {
-				println("[ERSUtil][fetchPartFromTrusteeDetailsList] Nothing found in cache, expected if this is not an edit journey: " + x.getMessage)
+				logger.info("[ERSUtil][fetchPartFromTrusteeDetailsList] Nothing found in cache, expected if this is not an edit journey: " + x.getMessage)
 				None
 			}
 		}
 	}
 
-	//TODO Yo why is this called "fetchOption" if it throws an expection when there's no data?? It can only return Some[T] or throw exception -.-
+	//TODO Why is this called "fetchOption" if it throws an expection when there's no data?? It can only return Some[T] or throw exception which I would not describe as "optional" behaviour -.-
 	def fetchOption[T](key: String, cacheId: String)(implicit hc: HeaderCarrier, formats: json.Format[T]): Future[Option[T]] = {
 		val startTime = System.currentTimeMillis()
 		shortLivedCache.fetchAndGetEntry[T](cacheId, key).map { res =>
@@ -250,9 +249,10 @@ class ERSUtil @Inject() (
 			)
 		}
 		).recover {
+					//TODO I don't like this. Pick up in tech debt review
 			case e: NoSuchElementException =>
-				logger.error(s"CacheUtil: Get all data from cache failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.", e)
-				throw new Exception
+				logger.error(s"[ERSUtil][getAllData]: Get all data from cache failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.", e)
+				throw e
 		}
 	}
 

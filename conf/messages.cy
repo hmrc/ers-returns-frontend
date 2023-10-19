@@ -556,6 +556,7 @@ ers_trustee_name.title = Beth yw enw’r ymddiriedolwr?
 ers_trustee_based.title = Ymhle y mae’r ymddiriedolwr wedi’i leoli?
 ers_trustee_based.uk = Y DU
 ers_trustee_based.overseas = Tramor
+ers_trustee_based.sip.err.message = Dewiswch a yw'r ymddiriedolwr wedi'i leoli yn y DU neu dramor
 
 ers_trustee_address.title = Beth yw cyfeiriad yr ymddiriedolwr?
 ers_trustee_address.buildingAndStreet = Adeilad a stryd

@@ -95,7 +95,6 @@ class TrusteeBasedInUkControllerSpec  extends AnyWordSpecLike
       contentAsString(result) should include(testMessages("ers_trustee_based.title"))
       contentAsString(result) should include(testMessages("ers_trustee_based.uk"))
       contentAsString(result) should include("value=\"0\"")
-      //contentAsString(result) should include("value=\"0\" checked") TODO would be good if this worked as we know checked is with value 0 for UK
       contentAsString(result) should include("checked")
     }
 

@@ -50,7 +50,10 @@
 @if(trusteeBasedInUkForm.hasErrors) {
     @govukErrorSummary(ErrorSummary(
         title = Text(messages("validation.summary.heading")),
-        errorList = trusteeBasedInUkForm.errors.asTextErrorLinks
+        errorList = Seq(ErrorLink(
+        href = Some("#yes"),
+        content = Text(ersUtil.getPageElement(schemeId, ersUtil.PAGE_TRUSTEE_BASED, "err.message"))
+        ))
     ))
 }
 
@@ -66,9 +69,7 @@
 
 @govukRadios(Radios(
     name = "basedInUk",
-    errorMessage = trusteeBasedInUkForm.error(trusteeBasedInUkFields.basedInUk).map { errors =>
-        ErrorMessage(content = Text(errors.messages.toString))
-    },
+    errorMessage = if(trusteeBasedInUkForm.hasErrors) Some(ErrorMessage(content = Text(ersUtil.getPageElement(schemeId, ersUtil.PAGE_TRUSTEE_BASED, "err.message")))) else None,
     items = Seq(
         RadioItem(
             checked = trusteeBasedInUkForm(trusteeBasedInUkFields.basedInUk).value.contains("0"),

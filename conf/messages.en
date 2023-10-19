@@ -695,9 +695,9 @@ ers_trustee_name.title = What is the trustee’s name?
 ers_trustee_based.title = Where is the trustee based?
 ers_trustee_based.uk = UK
 ers_trustee_based.overseas = Overseas
+ers_trustee_based.sip.err.message = Select if the trustee is based in the UK or overseas
 
 ers_trustee_address.title = What is the trustee’s address?
-ers_trustee_address.buildingAndStreet = Building and street
 ers_trustee_address.townOrCity = Town or City (optional)
 ers_trustee_address.county = County (optional)
 ers_trustee_address.postcode = Postcode (optional)
