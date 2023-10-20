@@ -112,7 +112,7 @@ class TrusteeBasedInUkControllerSpec  extends AnyWordSpecLike
 
   "calling handleQuestionSubmit" should {
     "show the trustee based in UK form page with errors if the form is incorrectly filled" in {
-      when(mockErsUtil.getPageElement(any(), any(), any(), any())(any())).thenReturn("")
+      when(mockErsUtil.getPageElement(any(), any(), any(), any())(any())).thenReturn("test error message")
       val trusteeBasedData = Map("bool" -> "")
       val form = RsFormMappings.trusteeBasedInUkForm().bind(trusteeBasedData)
       implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*))
@@ -120,7 +120,7 @@ class TrusteeBasedInUkControllerSpec  extends AnyWordSpecLike
 
       status(result) shouldBe Status.BAD_REQUEST
       contentAsString(result) should include(testMessages("ers_trustee_based.title"))
-      contentAsString(result) should include(testMessages("error.required"))
+      contentAsString(result) should include("test error message")
     }
   }
 
