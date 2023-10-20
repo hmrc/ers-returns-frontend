@@ -46,10 +46,10 @@ class TrusteeAddressOverseasController @Inject()(val mcc: MessagesControllerComp
                                           )
   extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with TrusteeBaseController[TrusteeAddress] {
 
-  implicit val ec: ExecutionContext = mcc.executionContext
+  implicit val ec: ExecutionContext           = mcc.executionContext
+  implicit val format: Format[TrusteeAddress] = TrusteeAddress.format
 
   val cacheKey: String = ersUtil.TRUSTEE_ADDRESS_CACHE
-  implicit val format: Format[TrusteeAddress] = TrusteeAddress.format
 
   def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier): Future[Result] = {
     if (edit) {

@@ -45,10 +45,10 @@ class TrusteeNameController @Inject()(val mcc: MessagesControllerComponents,
                                      )
   extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with TrusteeBaseController[TrusteeName] {
 
-  implicit val ec: ExecutionContext = mcc.executionContext
+  implicit val ec: ExecutionContext        = mcc.executionContext
+  implicit val format: Format[TrusteeName] = TrusteeName.format
 
   val cacheKey: String = ersUtil.TRUSTEE_NAME_CACHE
-  implicit val format: Format[TrusteeName] = TrusteeName.format
 
   def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier): Future[Result] = {
     if (edit) {

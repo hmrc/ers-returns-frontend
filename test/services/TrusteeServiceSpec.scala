@@ -22,11 +22,42 @@ import org.scalatest.matchers.should.Matchers.not.contain
 import org.scalatest.wordspec.AnyWordSpecLike
 import utils.ErsTestHelper
 
-//TODO Write me
 class TrusteeServiceSpec extends AnyWordSpecLike with ErsTestHelper {
 
   "calling replace trustee" must {
     val trusteeService: TrusteeService = new TrusteeService(mockErsUtil)
+
+    val trusteeOne   = TrusteeDetails("First Trustee", "20 Garden View", None, None, None, None, None, true)
+    val trusteeTwo   = TrusteeDetails("Second Trustee", "72 Big Avenue", None, None, None, None, None, true)
+    val trusteeThree = TrusteeDetails("Third Trustee", "21 Brick Lane", None, None, None, None, None, true)
+    val trusteeFour  = TrusteeDetails("Fourth Trustee", "21 Brick Lane", None, None, None, None, None, true)
+    val replacement  = TrusteeDetails("Replacement Trustee", "1 Some Place", None, None, None, None, None, true)
+
+    val trusteeDetailsList = List(
+      trusteeOne,
+      trusteeTwo,
+      trusteeThree,
+      trusteeFour
+    )
+
+    "add a new trustee to the list" when {
+      "the index is 10000" in {
+
+        val index = 10000
+
+        val expectedOutput = List(
+          trusteeOne,
+          trusteeTwo,
+          trusteeThree,
+          trusteeFour,
+          replacement
+        )
+
+        val result = trusteeService.replaceTrustee(trusteeDetailsList, index, replacement)
+
+        result shouldBe expectedOutput
+      }
+    }
 
     "replace a trustee and keep the other trustees" when {
 
@@ -34,21 +65,16 @@ class TrusteeServiceSpec extends AnyWordSpecLike with ErsTestHelper {
 
         val index = 2
 
-        val formData = new TrusteeDetails("Replacement Trustee", "1 Some Place", None, None, None, None, None, true)
-        val target = new TrusteeDetails("Target Trustee", "3 Window Close", None, None, None, None, None, true)
-
-        val trusteeDetailsList = List(
-          new TrusteeDetails("First Trustee", "20 Garden View", None, None, None, None, None, true),
-          new TrusteeDetails("Third Trustee", "72 Big Avenue", None, None, None, None, None, true),
-          target,
-          new TrusteeDetails("Fourth Trustee", "21 Brick Lane", None, None, None, None, None, true)
+        val expectedOutput = List(
+          trusteeOne,
+          trusteeTwo,
+          replacement,
+          trusteeFour
         )
 
-        val result = trusteeService.replaceTrustee(trusteeDetailsList, index, formData)
+        val result = trusteeService.replaceTrustee(trusteeDetailsList, index, replacement)
 
-        result should contain(formData)
-        result shouldNot contain(target)
-        result.length shouldBe 4
+        result shouldBe expectedOutput
       }
     }
 
@@ -58,21 +84,9 @@ class TrusteeServiceSpec extends AnyWordSpecLike with ErsTestHelper {
 
         val index = 100
 
-        val formData = new TrusteeDetails("Replacement Trustee", "1 Some Place", None, None, None, None, None, true)
-        val target = new TrusteeDetails("Target Trustee", "3 Window Close", None, None, None, None, None, true)
+        val result = trusteeService.replaceTrustee(trusteeDetailsList, index, replacement)
 
-        val trusteeDetailsList = List(
-          new TrusteeDetails("First Trustee", "20 Garden View", None, None, None, None, None, true),
-          new TrusteeDetails("Third Trustee", "72 Big Avenue", None, None, None, None, None, true),
-          target,
-          new TrusteeDetails("Fourth Trustee", "21 Brick Lane", None, None, None, None, None, true)
-        )
-
-        val result = trusteeService.replaceTrustee(trusteeDetailsList, index, formData)
-
-        result shouldNot contain(formData)
-        result should contain(target)
-        result.length shouldBe 4
+        result shouldBe trusteeDetailsList
       }
     }
 
@@ -84,17 +98,21 @@ class TrusteeServiceSpec extends AnyWordSpecLike with ErsTestHelper {
 
         val target = new TrusteeDetails("Target Company", "3 Window Close", None, None, None, None, None, true)
 
-        val trusteeDetailsList = List(
-          target,
+        val duplicateTrusteeDetailsList = List(
+          trusteeOne,
           target,
           target,
           target
         )
 
-        val result = trusteeService.replaceTrustee(trusteeDetailsList, index, target)
+        val expectedOutput = List(
+          trusteeOne,
+          target
+        )
 
-        result should contain(target)
-        result.length shouldBe 1
+        val result = trusteeService.replaceTrustee(duplicateTrusteeDetailsList, index, target)
+
+        result shouldBe expectedOutput
       }
     }
   }

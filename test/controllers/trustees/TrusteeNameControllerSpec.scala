@@ -57,7 +57,6 @@ class TrusteeNameControllerSpec extends AnyWordSpecLike
 
   implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
 
-
   val testController = new TrusteeNameController(
     mockMCC,
     mockErsConnector,

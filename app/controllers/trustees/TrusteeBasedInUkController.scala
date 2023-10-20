@@ -46,10 +46,10 @@ class TrusteeBasedInUkController @Inject()(val mcc: MessagesControllerComponents
                                       )
   extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with TrusteeBaseController[TrusteeBasedInUk] {
 
-  implicit val ec: ExecutionContext = mcc.executionContext
+  implicit val ec: ExecutionContext             = mcc.executionContext
+  implicit val format: Format[TrusteeBasedInUk] = TrusteeBasedInUk.format
 
   val cacheKey: String = ersUtil.TRUSTEE_BASED_CACHE
-  implicit val format: Format[TrusteeBasedInUk] = TrusteeBasedInUk.format
 
   def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier): Future[Result] = {
     for {

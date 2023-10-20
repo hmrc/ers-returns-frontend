@@ -49,8 +49,7 @@ trait TrusteeBaseController[A] extends FrontendController with I18nSupport with 
 
   def view(requestObject: RequestObject, index: Int, form: Form[A], edit: Boolean = false)
           (implicit request: Request[AnyContent], hc: HeaderCarrier): Html
-
-
+  
   def questionPage(index: Int): Action[AnyContent] = authAction.async {
     implicit request =>
       ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>

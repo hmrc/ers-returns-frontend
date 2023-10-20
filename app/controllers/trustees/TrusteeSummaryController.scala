@@ -43,18 +43,6 @@ class TrusteeSummaryController @Inject()(val mcc: MessagesControllerComponents,
 
   implicit val ec: ExecutionContext = mcc.executionContext
 
-
-  def replaceTrustee(trustees: List[TrusteeDetails], index: Int, formData: TrusteeDetails): List[TrusteeDetails] =
-
-    (if (index == 10000) {
-      trustees :+ formData
-    } else {
-      trustees.zipWithIndex.map{
-        case (a, b) => if (b == index) formData else a
-      }
-    }).distinct
-
-
   def deleteTrustee(id: Int): Action[AnyContent] = authAction.async {
     implicit request =>
       showDeleteTrustee(id)(request, hc)
@@ -77,7 +65,6 @@ class TrusteeSummaryController @Inject()(val mcc: MessagesControllerComponents,
   private def filterDeletedTrustee(trusteeDetailsList: TrusteeDetailsList, id: Int): List[TrusteeDetails] =
     trusteeDetailsList.trustees.zipWithIndex.filterNot(_._2 == id).map(_._1)
 
-
   def trusteeSummaryPage(): Action[AnyContent] = authAction.async {
     implicit request =>
       showTrusteeSummaryPage()(request, hc)
@@ -87,9 +74,8 @@ class TrusteeSummaryController @Inject()(val mcc: MessagesControllerComponents,
 
     (for {
       requestObject      <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
-      trusteeDetailsList <- ersUtil.fetch[TrusteeDetailsList](ersUtil.TRUSTEES_CACHE, requestObject.getSchemeReference)
+      trusteeDetailsList <- ersUtil.fetchTrusteesOptionally(requestObject.getSchemeReference)
     } yield {
-
       Ok(trusteeSummaryView(requestObject, trusteeDetailsList))
     }) recover {
       case e: Exception =>
