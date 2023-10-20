@@ -50,7 +50,10 @@
 @if(trusteeBasedInUkForm.hasErrors) {
     @govukErrorSummary(ErrorSummary(
         title = Text(messages("validation.summary.heading")),
-        errorList = trusteeBasedInUkForm.errors.asTextErrorLinks
+        errorList = Seq(ErrorLink(
+        href = Some("#basedInUk"),
+        content = Text(ersUtil.getPageElement(schemeId, ersUtil.PAGE_TRUSTEE_BASED, "err.message"))
+        ))
     ))
 }
 
