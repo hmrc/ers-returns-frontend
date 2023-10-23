@@ -139,45 +139,45 @@ object RsFormMappings {
    * Manual Company Details UK Address definition
    */
 
-  def companyAddressUkForm()(implicit messages: Messages): Form[CompanyAddressUk] = Form(mapping(
-    companyAddressUkFields.addressLine1 -> text.verifying(Messages("ers_manual_company_details.err.summary.address_line1_required"), _.nonEmpty)
+  def companyAddressUkForm()(implicit messages: Messages): Form[CompanyAddress] = Form(mapping(
+    companyAddressFields.addressLine1 -> text.verifying(Messages("ers_manual_company_details.err.summary.address_line1_required"), _.nonEmpty)
       .verifying(Messages("ers_manual_company_details.err.address_line1"), so => checkAddressLength(so, "addressLine1"))
       .verifying(Messages("ers_manual_company_details.err.invalidChars.address_line1"), so => validInputCharacters(so, addresssRegx)),
-    companyAddressUkFields.addressLine2 -> optional(text
+    companyAddressFields.addressLine2 -> optional(text
       .verifying(Messages("ers_manual_company_details.err.address_line2"), so => checkAddressLength(so, "addressLine2"))
       .verifying(Messages("ers_manual_company_details.err.invalidChars.address_line2"), so => validInputCharacters(so, addresssRegx))),
-    companyAddressUkFields.addressLine3 -> optional(text
+    companyAddressFields.addressLine3 -> optional(text
       .verifying(Messages("ers_manual_company_details.err.address_line3"), so => checkAddressLength(so, "addressLine3"))
       .verifying(Messages("ers_manual_company_details.err.invalidChars.address_line3"), so => validInputCharacters(so, addresssRegx))),
-    companyAddressUkFields.addressLine4 -> optional(text
+    companyAddressFields.addressLine4 -> optional(text
       .verifying(Messages("ers_manual_company_details.err.address_line4"), so => checkAddressLength(so, "addressLine4"))
       .verifying(Messages("ers_manual_company_details.err.invalidChars.address_line4"), so => validInputCharacters(so, addresssRegx))),
-    companyAddressUkFields.addressLine5 -> optional(text)
+    companyAddressFields.addressLine5 -> optional(text)
       .transform((x: Option[String]) => x.map(_.toUpperCase()), (z: Option[String]) => z.map(_.toUpperCase()))
       .verifying(Messages("ers_manual_company_details.err.postcode"), so => isValidPostcode(so)),
-    companyAddressUkFields.country -> optional(text
+    companyAddressFields.country -> optional(text
       .verifying(pattern(addresssRegx.r, error = Messages("ers_scheme_organiser.err.summary.invalid_country"))))
-  )(CompanyAddressUk.apply)(CompanyAddressUk.unapply))
+  )(CompanyAddress.apply)(CompanyAddress.unapply))
 
-  def companyAddressOverseasForm()(implicit messages: Messages): Form[CompanyAddressOverseas] = Form(mapping(
-    companyAddressOverseasFields.addressLine1 -> text.verifying(Messages("ers_manual_company_details.err.address_line1_required"), _.nonEmpty)
+  def companyAddressOverseasForm()(implicit messages: Messages): Form[CompanyAddress] = Form(mapping(
+    companyAddressFields.addressLine1 -> text.verifying(Messages("ers_manual_company_details.err.address_line1_required"), _.nonEmpty)
       .verifying(Messages("ers_manual_company_details.err.address_line1"), so => checkAddressLength(so, "addressLine1"))
       .verifying(Messages("ers_manual_company_details.err.invalidChars.address_line1"), so => validInputCharacters(so, addresssRegx)),
-    companyAddressOverseasFields.addressLine2 -> optional(text
+    companyAddressFields.addressLine2 -> optional(text
       .verifying(Messages("ers_manual_company_details.err.address_line2"), so => checkAddressLength(so, "addressLine2"))
       .verifying(Messages("ers_manual_company_details.err.invalidChars.address_line2"), so => validInputCharacters(so, addresssRegx))),
-    companyAddressOverseasFields.addressLine3 -> optional(text
+    companyAddressFields.addressLine3 -> optional(text
       .verifying(Messages("ers_manual_company_details.err.address_line3"), so => checkAddressLength(so, "addressLine3"))
       .verifying(Messages("ers_manual_company_details.err.invalidChars.address_line3"), so => validInputCharacters(so, addresssRegx))),
-    companyAddressOverseasFields.addressLine4 -> optional(text
+    companyAddressFields.addressLine4 -> optional(text
       .verifying(Messages("ers_manual_company_details.err.address_line4"), so => checkAddressLength(so, "addressLine4"))
       .verifying(Messages("ers_manual_company_details.err.invalidChars.address_line4"), so => validInputCharacters(so, addresssRegx))),
-    companyAddressOverseasFields.addressLine5 -> optional(text)
+    companyAddressFields.addressLine5 -> optional(text)
       .transform((x: Option[String]) => x.map(_.toUpperCase()), (z: Option[String]) => z.map(_.toUpperCase()))
       .verifying(Messages("ers_manual_company_details.err.postcode"), so => isValidPostcode(so)),
-    companyAddressOverseasFields.country -> optional(text
+    companyAddressFields.country -> optional(text
       .verifying(pattern(addresssRegx.r, error = Messages("ers_scheme_organiser.err.summary.invalid_country"))))
-  )(CompanyAddressOverseas.apply)(CompanyAddressOverseas.unapply))
+  )(CompanyAddress.apply)(CompanyAddress.unapply))
 
   /*
    * Scheme Organiser Form definition
@@ -230,7 +230,7 @@ object RsFormMappings {
   }
 
 
-  def companyNameForm()(implicit messages: Messages): Form[CompanyName] = Form(mapping(
+  def companyNameForm()(implicit messages: Messages): Form[Company] = Form(mapping(
     companyNameFields.companyName -> text
       .verifying(Messages("ers_manual_company_details.err.summary.company_name_required"), _.nonEmpty)
       .verifying(Messages("ers_manual_company_details.err.company_name"), so => checkLength(so, "companyDetailsFields.companyName"))
@@ -240,7 +240,7 @@ object RsFormMappings {
       .verifying(pattern(fieldValidationPatterns.companyRegPattern.r, error = Messages("ers_manual_company_details.err.company_reg")))),
     companyNameFields.corporationRef -> optional(text
       verifying pattern(corporationRefPattern.r, error = Messages("ers_manual_company_details.err.corporation_ref")))
-  )(CompanyName.apply)(CompanyName.unapply(_)))
+  )(Company.apply)(Company.unapply(_)))
 
   /*
 * scheme type Form definition.
@@ -322,24 +322,6 @@ object companyDetailsFields {
   val companyReg = "companyReg"
   val corporationRef = "corporationRef"
 
-}
-
-object companyAddressUkFields {
-  val addressLine1 = "addressLine1"
-  val addressLine2 = "addressLine2"
-  val addressLine3 = "addressLine3"
-  val addressLine4 = "addressLine4"
-  val addressLine5 = "addressLine5"
-  val country = "country"
-}
-
-object companyAddressOverseasFields {
-  val addressLine1 = "addressLine1"
-  val addressLine2 = "addressLine2"
-  val addressLine3 = "addressLine3"
-  val addressLine4 = "addressLine4"
-  val addressLine5 = "addressLine5"
-  val country = "country"
 }
 
 object companyAddressFields {

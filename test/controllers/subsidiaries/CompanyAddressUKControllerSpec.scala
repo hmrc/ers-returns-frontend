@@ -16,7 +16,7 @@
 
 package controllers.subsidiaries
 
-import models.{CompanyAddressUk, CompanyDetailsList, RequestObject, RsFormMappings}
+import models.{CompanyAddress, CompanyDetailsList, RequestObject, RsFormMappings}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatest.OptionValues
@@ -87,7 +87,7 @@ class CompanyAddressUKControllerSpec extends AnyWordSpecLike
     }
 
     "show the prefilled company address UK question page when there is data to prefill" in {
-      when(mockErsUtil.fetchPartFromCompanyDetailsList[CompanyAddressUk](any(), any())(any(), any())).thenReturn(Future.successful(Some(companyAddressUK)))
+      when(mockErsUtil.fetchPartFromCompanyDetailsList[CompanyAddress](any(), any())(any(), any())).thenReturn(Future.successful(Some(companyAddressUK)))
 
       val result = testController.questionPage(1).apply(authRequest)
 
@@ -97,7 +97,7 @@ class CompanyAddressUKControllerSpec extends AnyWordSpecLike
       contentAsString(result) should include("UK 1")
     }
     "show the global error page if an exception occurs while retrieving cached data" in {
-      when(mockErsUtil.fetchPartFromCompanyDetailsList[CompanyAddressUk](any(), any())(any(), any())).thenReturn(Future.failed(new RuntimeException("Failure scenario")))
+      when(mockErsUtil.fetchPartFromCompanyDetailsList[CompanyAddress](any(), any())(any(), any())).thenReturn(Future.failed(new RuntimeException("Failure scenario")))
 
       val result = testController.questionPage(1).apply(authRequest)
 
@@ -122,7 +122,7 @@ class CompanyAddressUKControllerSpec extends AnyWordSpecLike
 
     "successfully bind the form and redirect to the company summary page" in {
       val emptyCacheMap = CacheMap("", Map("" -> Json.obj()))
-      when(mockErsUtil.cache[CompanyAddressUk](any(), any(), any())(any(), any())).thenReturn(Future.successful(emptyCacheMap))
+      when(mockErsUtil.cache[CompanyAddress](any(), any(), any())(any(), any())).thenReturn(Future.successful(emptyCacheMap))
       when(mockCompanyDetailsService.updateCompanyCache(any())(any())).thenReturn(Future.successful(()), Future.successful(()))
 
       val companyAddressUkData = Map("addressLine1" -> "123 Fake Street")
@@ -141,7 +141,7 @@ class CompanyAddressUKControllerSpec extends AnyWordSpecLike
     when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any())).thenReturn(Future.successful(ersRequestObject))
 
     "be the same as showQuestion for a specific index" in {
-      when(mockErsUtil.fetchPartFromCompanyDetailsList[CompanyAddressUk](any(), any())(any(), any())).thenReturn(Future.successful(Some(companyAddressUK)))
+      when(mockErsUtil.fetchPartFromCompanyDetailsList[CompanyAddress](any(), any())(any(), any())).thenReturn(Future.successful(Some(companyAddressUK)))
 
       val result = testController.editCompany(1).apply(authRequest)
 

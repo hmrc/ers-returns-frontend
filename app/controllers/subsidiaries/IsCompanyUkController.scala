@@ -66,7 +66,7 @@ class IsCompanyUkController @Inject()(val mcc: MessagesControllerComponents,
 
   implicit val ec: ExecutionContext = mcc.executionContext
 
-  val cacheKey: String = ersUtil.SUBSIDIARY_BASED
+  val cacheKey: String = ersUtil.COMPANY_BASED
   implicit val format: Format[CompanyBasedInUk] = CompanyBasedInUk.format
 
   def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier): Future[Result] = {

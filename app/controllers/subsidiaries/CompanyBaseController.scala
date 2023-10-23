@@ -18,7 +18,7 @@ package controllers.subsidiaries
 
 import config.ApplicationConfig
 import controllers.auth.{AuthAction, RequestWithOptionalAuthContext}
-import models.RequestObject
+import models.{CompanyDetailsList, RequestObject}
 import play.api.Logging
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, Messages}
@@ -91,8 +91,18 @@ trait CompanyBaseController[A] extends FrontendController with I18nSupport with 
           Future.successful(Ok(view(requestObject, index, errors, edit)))
       },
       result => {
-        ersUtil.cache[A](cacheKey, result, requestObject.getSchemeReference).flatMap { _ =>
-          nextPageRedirect(index, edit)
+        if (edit) {
+          ersUtil.fetchCompaniesOptionally(requestObject.getSchemeReference).flatMap { companies =>
+            val updatedCompany = companies.companies(index).updatePart(result)
+            val updatedCompanies = CompanyDetailsList(companies.companies.updated(index, updatedCompany))
+            ersUtil.cache[CompanyDetailsList](ersUtil.COMPANIES_CACHE, updatedCompanies, requestObject.getSchemeReference).flatMap{ _ =>
+              nextPageRedirect(index, edit)
+            }
+          }
+        } else {
+          ersUtil.cache[A](cacheKey, result, requestObject.getSchemeReference).flatMap { _ =>
+            nextPageRedirect(index, edit)
+          }
         }
       }
     )

@@ -17,7 +17,7 @@
 package services
 
 import javax.inject.Inject
-import models.{CompanyAddressOverseas, CompanyAddressUk, CompanyBasedInUk, CompanyDetails, CompanyDetailsList, CompanyName, RequestObject}
+import models.{CompanyAddress, CompanyBasedInUk, CompanyDetails, CompanyDetailsList, Company, RequestObject}
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.ERSUtil
 
@@ -31,15 +31,10 @@ class CompanyDetailsService @Inject()(
     for {
       requestObject <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
       schemeRef = requestObject.getSchemeReference
-      name <- ersUtil.fetch[CompanyName](ersUtil.SUBSIDIARY_NAME_CACHE, schemeRef)
-      basedInUk <- ersUtil.fetch[CompanyBasedInUk](ersUtil.SUBSIDIARY_BASED, schemeRef)
-      cachedCompanies <- ersUtil.fetchCompaniesOptionally(ersUtil.COMPANIES_CACHE, schemeRef)
-      companyDetailsList <- if (basedInUk.basedInUk) {
-        ersUtil.fetch[CompanyAddressUk](ersUtil.SUBSIDIARY_ADDRESS_CACHE, schemeRef).map(address =>
-          CompanyDetailsList(replaceCompany(cachedCompanies.companies, index, CompanyDetails(name, address)))
-        )
-      } else {
-        ersUtil.fetch[CompanyAddressOverseas](ersUtil.SUBSIDIARY_ADDRESS_CACHE, schemeRef).map( address =>
+      name <- ersUtil.fetch[Company](ersUtil.COMPANY_NAME_CACHE, schemeRef)
+      cachedCompanies <- ersUtil.fetchCompaniesOptionally(schemeRef)
+      companyDetailsList <- {
+        ersUtil.fetch[CompanyAddress](ersUtil.COMPANY_ADDRESS_CACHE, schemeRef).map(address =>
           CompanyDetailsList(replaceCompany(cachedCompanies.companies, index, CompanyDetails(name, address)))
         )
       }

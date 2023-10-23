@@ -17,7 +17,7 @@
 package controllers.subsidiaries
 
 import org.scalatest.wordspec.AnyWordSpecLike
-import models.{CompanyName, RequestObject, RsFormMappings}
+import models.{Company, RequestObject, RsFormMappings}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatest.OptionValues
@@ -77,7 +77,7 @@ class CompanyDetailsOverseasControllerSpec extends AnyWordSpecLike
     when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any())).thenReturn(Future.successful(ersRequestObject))
 
     "show the empty company name question page when there is nothing to prefill" in {
-      when(mockErsUtil.fetchPartFromCompanyDetailsList[CompanyName](any(), any())(any(), any())).thenReturn(Future.successful(None))
+      when(mockErsUtil.fetchPartFromCompanyDetailsList[Company](any(), any())(any(), any())).thenReturn(Future.successful(None))
 
       val result = testController.questionPage(1).apply(authRequest)
 
@@ -86,7 +86,7 @@ class CompanyDetailsOverseasControllerSpec extends AnyWordSpecLike
     }
 
     "show the prefilled company name question page when there is data to prefill" in {
-      when(mockErsUtil.fetchPartFromCompanyDetailsList[CompanyName](any(), any())(any(), any())).thenReturn(Future.successful(Some(CompanyName("Test Company", None, None))))
+      when(mockErsUtil.fetchPartFromCompanyDetailsList[Company](any(), any())(any(), any())).thenReturn(Future.successful(Some(Company("Test Company", None, None))))
 
       val result = testController.questionPage(1).apply(authRequest)
 
@@ -97,7 +97,7 @@ class CompanyDetailsOverseasControllerSpec extends AnyWordSpecLike
     }
 
     "show the global error page if an exception occurs while retrieving cached data" in {
-      when(mockErsUtil.fetchPartFromCompanyDetailsList[CompanyName](any(), any())(any(), any())).thenReturn(Future.failed(new RuntimeException("Failure scenario")))
+      when(mockErsUtil.fetchPartFromCompanyDetailsList[Company](any(), any())(any(), any())).thenReturn(Future.failed(new RuntimeException("Failure scenario")))
 
       val result = testController.questionPage(1).apply(authRequest)
 
@@ -122,7 +122,7 @@ class CompanyDetailsOverseasControllerSpec extends AnyWordSpecLike
 
     "successfully bind the form and go to the company overseas address page if the form is filled correctly" in {
       val emptyCacheMap = CacheMap("", Map("" -> Json.obj()))
-      when(mockErsUtil.cache[CompanyName](any(), any(), any())(any(), any())).thenReturn(Future.successful(emptyCacheMap))
+      when(mockErsUtil.cache[Company](any(), any(), any())(any(), any())).thenReturn(Future.successful(emptyCacheMap))
       when(mockCompanyDetailsService.updateCompanyCache(any())(any())).thenReturn(Future.successful(()), Future.successful(()))
 
       val companyData = Map("name" -> "Test person")

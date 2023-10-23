@@ -19,7 +19,7 @@ package controllers.subsidiaries
 import config.ApplicationConfig
 import connectors.ErsConnector
 import controllers.auth.AuthAction
-import models.{CompanyAddressOverseas, CompanyAddressUk, RequestObject, RsFormMappings}
+import models.{CompanyAddress, RequestObject, RsFormMappings}
 import play.api.data.Form
 import play.api.libs.json.Format
 import play.api.mvc.{AnyContent, MessagesControllerComponents, Request, Result}
@@ -45,22 +45,25 @@ class CompanyAddressOverseasController  @Inject()(val mcc: MessagesControllerCom
                                                   companyDetailsService: CompanyDetailsService,
                                                   companyAddressOverseasView: views.html.manual_address_overseas
                                                  )
-  extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with CompanyBaseController[CompanyAddressOverseas] {
+  extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with CompanyBaseController[CompanyAddress] {
 
   implicit val ec: ExecutionContext = mcc.executionContext
 
-  val cacheKey: String = ersUtil.SUBSIDIARY_ADDRESS_CACHE
-  implicit val format: Format[CompanyAddressOverseas] = CompanyAddressOverseas.format
+  val cacheKey: String = ersUtil.COMPANY_ADDRESS_CACHE
+  implicit val format: Format[CompanyAddress] = CompanyAddress.format
 
   def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier): Future[Result] = {
+    if (edit) {
+      Redirect(controllers.routes.GroupSchemeController.manualCompanyDetailsPage())
+    }
     companyDetailsService.updateCompanyCache(index).map { _ =>
       Redirect(controllers.routes.GroupSchemeController.manualCompanyDetailsPage())
     }
   }
 
-  def form(implicit request: Request[AnyContent]): Form[CompanyAddressOverseas] = RsFormMappings.companyAddressOverseasForm()
+  def form(implicit request: Request[AnyContent]): Form[CompanyAddress] = RsFormMappings.companyAddressOverseasForm()
 
-  def view(requestObject: RequestObject, index: Int, companyAddressOverseasForm: Form[CompanyAddressOverseas], edit: Boolean = false)
+  def view(requestObject: RequestObject, index: Int, companyAddressOverseasForm: Form[CompanyAddress], edit: Boolean = false)
           (implicit request: Request[AnyContent], hc: HeaderCarrier): Html = {
     companyAddressOverseasView(requestObject, index, companyAddressOverseasForm, edit)
   }

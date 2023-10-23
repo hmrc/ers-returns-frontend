@@ -148,7 +148,7 @@ object Fixtures extends AuthHelper {
       Some("hmac")
     )
 
-  val companyAddressOverseas: CompanyAddressOverseas = CompanyAddressOverseas(
+  val companyAddressOverseas: CompanyAddress = CompanyAddress(
     "Overseas 1",
     Some("2"),
     Some("3"),
@@ -157,7 +157,7 @@ object Fixtures extends AuthHelper {
     Some("country")
   )
 
-  val companyAddressUK: CompanyAddressUk = CompanyAddressUk(
+  val companyAddressUK: CompanyAddress = CompanyAddress(
     "UK 1",
     Some("2"),
     Some("3"),

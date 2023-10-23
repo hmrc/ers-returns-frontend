@@ -19,7 +19,7 @@ package controllers.subsidiaries
 import config.ApplicationConfig
 import connectors.ErsConnector
 import controllers.auth.AuthAction
-import models.{CompanyAddressUk, RequestObject, RsFormMappings}
+import models.{CompanyAddress, RequestObject, RsFormMappings}
 import play.api.data.Form
 import play.api.libs.json.Format
 import play.api.mvc.{AnyContent, MessagesControllerComponents, Request, Result}
@@ -45,22 +45,25 @@ class CompanyAddressUkController @Inject()(val mcc: MessagesControllerComponents
                                            companyDetailsService: CompanyDetailsService,
                                            trusteeAddressUkView: views.html.manual_address_uk
                                             )
-extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with CompanyBaseController[CompanyAddressUk] {
+extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with CompanyBaseController[CompanyAddress] {
 
 implicit val ec: ExecutionContext = mcc.executionContext
 
-val cacheKey: String = ersUtil.SUBSIDIARY_ADDRESS_CACHE
-implicit val format: Format[CompanyAddressUk] = CompanyAddressUk.format
+val cacheKey: String = ersUtil.COMPANY_ADDRESS_CACHE
+implicit val format: Format[CompanyAddress] = CompanyAddress.format
 
 def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier): Future[Result] = {
+  if (edit){
+    Redirect(controllers.routes.GroupSchemeController.manualCompanyDetailsPage())
+  }
  companyDetailsService.updateCompanyCache(index).map { _ =>
    Redirect(controllers.routes.GroupSchemeController.manualCompanyDetailsPage())
     }
   }
 
-def form(implicit request: Request[AnyContent]): Form[CompanyAddressUk] = RsFormMappings.companyAddressUkForm()
+def form(implicit request: Request[AnyContent]): Form[CompanyAddress] = RsFormMappings.companyAddressUkForm()
 
-def view(requestObject: RequestObject, index: Int, companyAddressUkForm: Form[CompanyAddressUk], edit: Boolean = false)
+def view(requestObject: RequestObject, index: Int, companyAddressUkForm: Form[CompanyAddress], edit: Boolean = false)
   (implicit request: Request[AnyContent], hc: HeaderCarrier): Html = {
   trusteeAddressUkView(requestObject, index, companyAddressUkForm, edit)
 }

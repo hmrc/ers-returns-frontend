@@ -91,9 +91,9 @@ class ERSUtil @Inject()(val sessionService: SessionService,
 	val VALIDATED_SHEEETS: String = "validated-sheets"
 
 
-	val SUBSIDIARY_NAME_CACHE: String = "subsidiary-name"
-	val SUBSIDIARY_ADDRESS_CACHE: String = "subsidiary-address-uk"
-	val SUBSIDIARY_BASED:  String = "subsidiary-based"
+	val COMPANY_NAME_CACHE: String = "company-name"
+	val COMPANY_ADDRESS_CACHE: String = "company-address"
+	val COMPANY_BASED:  String = "company-based"
 	val COMPANIES_CACHE: String = "companies"
 
 	def cache[T](key: String, body: T)(implicit hc: HeaderCarrier, ec: ExecutionContext, formats: json.Format[T]): Future[CacheMap] =
@@ -268,7 +268,7 @@ class ERSUtil @Inject()(val sessionService: SessionService,
 					companyDetails.addressLine2,
 					companyDetails.addressLine3,
 					companyDetails.addressLine4,
-					companyDetails.postcode,
+					companyDetails.addressLine5,
 					countryCodes.getCountry(companyDetails.country.getOrElse(""))
 				)
 				concatAddress(optionalAddressLines, companyDetails.addressLine1)
@@ -318,12 +318,7 @@ class ERSUtil @Inject()(val sessionService: SessionService,
 
 	def isNilReturn(nilReturn:String) :Boolean = nilReturn == OPTION_NIL_RETURN
 
-	def companyLocation(company: CompanyDetails): String = {
-		company.country.collect {
-			case c if c != DEFAULT_COUNTRY => OVERSEAS
-			case c => c
-		}.getOrElse(DEFAULT)
-	}
+	def companyLocation(company: CompanyDetails): String = if (company.basedInUk) DEFAULT_COUNTRY else OVERSEAS
 
 	def trusteeLocation(trustee: TrusteeDetails): String = {
 		trustee.country.collect {
@@ -348,15 +343,15 @@ class ERSUtil @Inject()(val sessionService: SessionService,
 				x.map(_.\(COMPANIES_CACHE).as[JsArray].\(index).getOrElse(Json.obj()).as[A])
 		} recover {
 			case x:Throwable => {
-				println("banarama" + x.getMessage)
+				println("[ERSUtil][fetchPartFromCompanyDetailsList] Nothing found in cache, expected if this is not an edit journey: " + x.getMessage)
 				None
 			}
 		}
 	}
 
-def fetchCompaniesOptionally(key: String, cacheId: String)(implicit hc: HeaderCarrier, formats: json.Format[CompanyDetailsList]): Future[CompanyDetailsList] = {
-		fetch[CompanyDetailsList](key, cacheId).recover {
-			case _: NoSuchElementException => CompanyDetailsList(List.empty[CompanyDetails])
+def fetchCompaniesOptionally(cacheId: String)(implicit hc: HeaderCarrier, formats: json.Format[CompanyDetailsList]): Future[CompanyDetailsList] = {
+		fetch[CompanyDetailsList](COMPANIES_CACHE, cacheId).recover {
+			case _ => CompanyDetailsList(List.empty[CompanyDetails])
 		}
 	}
 }

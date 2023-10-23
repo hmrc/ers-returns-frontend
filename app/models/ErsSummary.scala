@@ -16,6 +16,7 @@
 
 package models
 
+import models.companyAddressFields.addressLine5
 import org.joda.time.DateTime
 import play.api.libs.json.JodaWrites._
 import play.api.libs.json._
@@ -67,41 +68,57 @@ case class CompanyDetails(
                               addressLine2: Option[String],
                               addressLine3: Option[String],
                               addressLine4: Option[String],
+                              addressLine5: Option[String],
                               country: Option[String],
-                              postcode: Option[String],
                               companyReg: Option[String],
                               corporationRef: Option[String],
                               basedInUk: Boolean
-                              )
-object CompanyDetails {
+                              ){
 
-  def apply(name: CompanyName, addressUk: CompanyAddressUk): CompanyDetails = {
-    CompanyDetails(
-      name.companyName,
-      addressUk.addressLine1,
-      addressUk.addressLine2,
-      addressUk.addressLine3,
-      addressUk.addressLine4,
-      Some("UK"),
-      addressUk.addressLine5,
-      name.companyReg,
-      name.corporationRef,
-      true
+  def replaceName(company: Company): CompanyDetails = {
+    this.copy(companyName = company.companyName, companyReg = company.companyReg, corporationRef = company.corporationRef)
+  }
+
+  def replaceBasedInUk(companyBasedInUk: CompanyBasedInUk): CompanyDetails = {
+    this.copy(basedInUk = companyBasedInUk.basedInUk)
+  }
+
+  def replaceAddress(companyAddress: CompanyAddress): CompanyDetails = {
+    this.copy(
+      addressLine1 = companyAddress.addressLine1,
+      addressLine2 = companyAddress.addressLine2,
+      addressLine3 = companyAddress.addressLine3,
+      addressLine4 = companyAddress.addressLine4,
+      addressLine5 = companyAddress.addressLine5,
+      country      = companyAddress.country
     )
   }
 
-  def apply(name: CompanyName, addressOverseas: CompanyAddressOverseas): CompanyDetails = {
+  def updatePart[A](part: A): CompanyDetails = {
+    part match {
+      case name: Company => replaceName(name)
+      case basedInUk: CompanyBasedInUk => replaceBasedInUk(basedInUk)
+      case address: CompanyAddress => replaceAddress(address)
+      case _ => this
+    }
+  }
+}
+
+
+object CompanyDetails {
+
+  def apply(name: Company, address: CompanyAddress): CompanyDetails = {
     CompanyDetails(
       name.companyName,
-      addressOverseas.addressLine1,
-      addressOverseas.addressLine2,
-      addressOverseas.addressLine3,
-      addressOverseas.addressLine4,
-      addressOverseas.country,
-      addressOverseas.addressLine5,
-      None,
-      None,
-      false
+      address.addressLine1,
+      address.addressLine2,
+      address.addressLine3,
+      address.addressLine4,
+      address.addressLine5,
+      address.country,
+      name.companyReg,
+      name.corporationRef,
+      address.country.fold(false)(_.equals("UK"))
     )
   }
 
@@ -114,18 +131,18 @@ object CompanyBasedInUk {
   implicit val format: OFormat[CompanyBasedInUk] = Json.format[CompanyBasedInUk]
 }
 
-case class CompanyName(
+case class Company(
                         companyName: String,
                         companyReg: Option[String],
                         corporationRef: Option[String]
                       )
 
-object CompanyName {
-  implicit val format: OFormat[CompanyName] = Json.format[CompanyName]
+object Company {
+  implicit val format: OFormat[Company] = Json.format[Company]
 }
 
 
-case class CompanyAddressOverseas(
+case class CompanyAddress(
                                    addressLine1: String,
                                    addressLine2: Option[String],
                                    addressLine3: Option[String],
@@ -134,21 +151,8 @@ case class CompanyAddressOverseas(
                                    country: Option[String]
                                  )
 
-object CompanyAddressOverseas {
-  implicit val format: OFormat[CompanyAddressOverseas] = Json.format[CompanyAddressOverseas]
-}
-
-case class CompanyAddressUk(
-                             addressLine1: String,
-                             addressLine2: Option[String],
-                             addressLine3: Option[String],
-                             addressLine4: Option[String],
-                             addressLine5: Option[String],
-                             country: Option[String] = Some("UK")
-                           )
-
-object CompanyAddressUk {
-  implicit val format: OFormat[CompanyAddressUk] = Json.format[CompanyAddressUk]
+object CompanyAddress {
+  implicit val format: OFormat[CompanyAddress] = Json.format[CompanyAddress]
 }
 
 case class CompanyDetailsList(companies: List[CompanyDetails])

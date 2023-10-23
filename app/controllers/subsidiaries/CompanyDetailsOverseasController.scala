@@ -35,7 +35,7 @@ package controllers.subsidiaries
 import config.ApplicationConfig
 import connectors.ErsConnector
 import controllers.auth.AuthAction
-import models.{CompanyName, RequestObject, RsFormMappings}
+import models.{Company, RequestObject, RsFormMappings}
 import play.api.data.Form
 import play.api.libs.json.Format
 import play.api.mvc.{AnyContent, MessagesControllerComponents, Request, Result}
@@ -61,13 +61,13 @@ class CompanyDetailsOverseasController @Inject()(val mcc: MessagesControllerComp
                                                  companyDetailsService: CompanyDetailsService,
                                                  companyOverseasDetailsView: views.html.manual_company_details_overseas
                                                 )
-  extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with CompanyBaseController[CompanyName] {
+  extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with CompanyBaseController[Company] {
 
   implicit val ec: ExecutionContext = mcc.executionContext
 
-  val cacheKey: String = ersUtil.SUBSIDIARY_NAME_CACHE
+  val cacheKey: String = ersUtil.COMPANY_NAME_CACHE
 
-  implicit val format: Format[CompanyName] = CompanyName.format
+  implicit val format: Format[Company] = Company.format
 
   def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier): Future[Result] = {
     if (edit) {
@@ -77,9 +77,9 @@ class CompanyDetailsOverseasController @Inject()(val mcc: MessagesControllerComp
       }
     }
 
-  def form(implicit request: Request[AnyContent]): Form[CompanyName] = RsFormMappings.companyNameForm()
+  def form(implicit request: Request[AnyContent]): Form[Company] = RsFormMappings.companyNameForm()
 
-  def view(requestObject: RequestObject, index: Int, companyNameOverseasForm: Form[CompanyName], edit: Boolean = false)
+  def view(requestObject: RequestObject, index: Int, companyNameOverseasForm: Form[Company], edit: Boolean = false)
           (implicit request: Request[AnyContent], hc: HeaderCarrier): Html = {
     companyOverseasDetailsView(requestObject, index, companyNameOverseasForm, edit)
   }
