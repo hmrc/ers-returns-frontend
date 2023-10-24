@@ -54,7 +54,7 @@ class CompanyAddressOverseasController  @Inject()(val mcc: MessagesControllerCom
 
   def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier): Future[Result] = {
     if (edit) {
-      Redirect(controllers.routes.GroupSchemeController.manualCompanyDetailsPage())
+      Future.successful(Redirect(controllers.routes.GroupSchemeController.manualCompanyDetailsPage()))
     }
     companyDetailsService.updateCompanyCache(index).map { _ =>
       Redirect(controllers.routes.GroupSchemeController.manualCompanyDetailsPage())

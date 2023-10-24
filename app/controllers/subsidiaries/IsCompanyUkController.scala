@@ -72,7 +72,11 @@ class IsCompanyUkController @Inject()(val mcc: MessagesControllerComponents,
   def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier): Future[Result] = {
     for {
       requestObject <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
-      subsidiaryBasedInUk <- ersUtil.fetch[CompanyBasedInUk](cacheKey, requestObject.getSchemeReference)
+      subsidiaryBasedInUk <-  if (edit) {
+        ersUtil.fetchCompaniesOptionally(requestObject.getSchemeReference).map {
+          companyDetailsList => CompanyBasedInUk(companyDetailsList.companies(index).basedInUk)
+        }
+      } else {ersUtil.fetch[CompanyBasedInUk](cacheKey, requestObject.getSchemeReference)}
     } yield {
         (subsidiaryBasedInUk.basedInUk, edit) match {
           case (true, false) => Redirect(controllers.subsidiaries.routes.CompanyDetailsUkController.questionPage())

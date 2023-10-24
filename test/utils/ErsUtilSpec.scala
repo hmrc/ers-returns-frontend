@@ -498,7 +498,7 @@ class ErsUtilSpec extends AnyWordSpecLike
          addressLine2 = Some("ADDRESS2"),
          addressLine3 = None,
          addressLine4 = None,
-         postcode = Some("AB123CD"),
+         addressLine5 = Some("AB123CD"),
          country = Some("UK"),
          companyReg = Some("ABC"),
          corporationRef = Some("DEF"),

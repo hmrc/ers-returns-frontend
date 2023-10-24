@@ -316,6 +316,15 @@ ers_summary_declaration.saye.organiser = Trefnydd y cynllun
 ers_summary_declaration.emi.organiser = Manylion cwmni’r cyflogwr
 ers_summary_declaration.sip.organiser =Manylion y cwmni sefydlu
 ers_summary_declaration.other.organiser = Manylion y cwmni
+ers_manual_is_the_company_in_uk.title = Ymhle y mae’r cwmni wedi’i gofrestru?
+ers_manual_address_uk.title = Beth yw cyfeiriad y cwmni?
+ers_manual_address_uk.building = Adeilad a stryd
+ers_manual_address_uk.town = Tref neu Ddinas
+ers_manual_address_uk.county = Gwlad
+ers_company_summary.page_title = Cwmnïau yn y cynllun grŵp hwn
+ers_company_summary.company_name = Enw’r cwmni
+ers_company_summary.company_location = Ymhle y mae’r cwmni wedi’i gofrestru?
+ers_company_summary.add_company = A oes angen i chi ychwanegu cwmni arall?
 
 ers_confirmation.page_title = Cadarnhad
 ers_confirmation.submitted = Mae eich Datganiad Blynyddol ar gyfer {0} wedi’i gyflwyno
