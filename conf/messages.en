@@ -690,6 +690,9 @@ ers_alt_amends.continue = Accept and continue
 # trustee messages
 #********************************************************************
 
+ers_trustee.add = Do you need to add another trustee?
+ers_trustee.add.err = Select yes if you need to add another trustee
+
 ers_trustee_name.title = What is the trustee’s name?
 
 ers_trustee_based.title = Where is the trustee based?

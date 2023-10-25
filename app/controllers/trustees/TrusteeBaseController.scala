@@ -97,7 +97,11 @@ trait TrusteeBaseController[A] extends FrontendController with I18nSupport with 
           }
         }
       }
-    )
+    ).recover {
+      case _ =>
+        logger.error(s"[${this.getClass.getSimpleName}][handleQuestionSubmit] Error occurred while updating trustee cache")
+      getGlobalErrorPage
+    }
   }
 
   def editQuestion(index: Int): Action[AnyContent] = authAction.async {

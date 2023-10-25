@@ -19,8 +19,9 @@ package controllers.trustees
 import config.ApplicationConfig
 import connectors.ErsConnector
 import controllers.auth.{AuthAction, RequestWithOptionalAuthContext}
+
 import javax.inject.Inject
-import models.{RequestObject, TrusteeDetails, TrusteeDetailsList}
+import models.{RequestObject, RsFormMappings, TrusteeDetails, TrusteeDetailsList}
 import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request, Result}
@@ -71,12 +72,15 @@ class TrusteeSummaryController @Inject()(val mcc: MessagesControllerComponents,
   }
 
   def showTrusteeSummaryPage()(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
-
     (for {
       requestObject      <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
       trusteeDetailsList <- ersUtil.fetchTrusteesOptionally(requestObject.getSchemeReference)
     } yield {
-      Ok(trusteeSummaryView(requestObject, trusteeDetailsList))
+      if (trusteeDetailsList.trustees.isEmpty) {
+        Redirect(controllers.trustees.routes.TrusteeNameController.questionPage())
+      } else {
+        Ok(trusteeSummaryView(requestObject, trusteeDetailsList))
+      }
     }) recover {
       case e: Exception =>
         logger.error(s"[TrusteeController][showTrusteeSummaryPage] Get data from cache failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
@@ -90,7 +94,26 @@ class TrusteeSummaryController @Inject()(val mcc: MessagesControllerComponents,
   }
 
   def continueFromTrusteeSummaryPage()(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
-    Future(Redirect(controllers.routes.AltAmendsController.altActivityPage()))
+    RsFormMappings.addTrusteeForm().bindFromRequest().fold(
+      _ => {
+        for {
+          requestObject <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
+          trusteeDetailsList <- ersUtil.fetchTrusteesOptionally(requestObject.getSchemeReference)
+        } yield {
+          BadRequest(trusteeSummaryView(requestObject, trusteeDetailsList, formHasError = true)) //TODO make this show errors too
+        }
+      },
+      addTrustee => {
+        if (addTrustee.addTrustee) {
+          Future.successful(Redirect(controllers.trustees.routes.TrusteeNameController.questionPage()))
+        } else {
+          Future.successful(Redirect(controllers.routes.AltAmendsController.altActivityPage()))
+        }
+      }
+    ).recover {
+      _ =>
+        getGlobalErrorPage
+    }
   }
 
   def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result = {

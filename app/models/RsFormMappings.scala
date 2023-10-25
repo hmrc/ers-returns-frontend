@@ -136,6 +136,11 @@ object RsFormMappings {
     )(CsvFilesList.apply)(CsvFilesList.unapply)
   )
 
+  def addTrusteeForm()(implicit messages: Messages): Form[AddTrustee] = Form(mapping(
+    "value" -> nonEmptyText
+      .transform(int => if (int == "0") true else false, (bool: Boolean) => if (bool) "0" else "1")
+  )(AddTrustee.apply)(AddTrustee.unapply))
+
   def trusteeBasedInUkForm()(implicit messages: Messages): Form[TrusteeBasedInUk] = Form(mapping(
     trusteeBasedInUkFields.basedInUk -> nonEmptyText
       .transform(int => if (int == "0") true else false, (bool: Boolean) => if (bool) "0" else "1")

@@ -24,12 +24,14 @@
         govuk_wrapper: govuk_wrapper,
         formWithCSRF: FormWithCSRF,
         govukBackLink: GovukBackLink,
+        govukErrorSummary: GovukErrorSummary,
         govukSummaryList: GovukSummaryList,
         govukButton: GovukButton,
+        govukRadios: GovukRadios,
         hmrcPageHeading: HmrcPageHeading
 )
 
-@(requestObject: RequestObject, trustees: TrusteeDetailsList)(implicit request: Request[_], messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
+@(requestObject: RequestObject, trustees: TrusteeDetailsList, formHasError: Boolean = false)(implicit request: Request[_], messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 
 @summaryBuilder(trustee: TrusteeDetails, index: Int) = @{
     val trusteeNameSummary = Seq(
@@ -111,6 +113,16 @@
         attributes = Map("id" -> "back-link"), classes="js-enabled", content = HtmlContent(messages("ers.back"))
     ))
 
+    @if(formHasError) {
+        @govukErrorSummary(ErrorSummary(
+            title = Text(messages("validation.summary.heading")),
+            errorList = Seq(ErrorLink(
+                href = Some("#addTrustee"),
+                content = Text(messages("ers_trustee.add.err"))
+            ))
+        ))
+    }
+
     @hmrcPageHeading(PageHeading(
         text = messages("ers_trustee_summary.title")
     ))
@@ -127,16 +139,37 @@
                  <input class="govuk-link link_button" type="submit" formaction="@controllers.trustees.routes.TrusteeSummaryController.deleteTrustee(index)" value='@{messages("ers.delete") + " " + trustee.name}'>
                </a>
             </p>
-
         }
 
-        <a id="add-trustee" class="govuk-link govuk-inset-text govuk-!-display-inline-block govuk-!-margin-top-0 govuk-!-width-full" href="@controllers.trustees.routes.TrusteeNameController.questionPage()">@Html(messages("ers_trustee_summary.add_trustee"))</a>
+        @govukRadios(Radios(
+            name = "addTrustee",
+            attributes = Map("id" -> "addTrustee"),
+            errorMessage = if(formHasError) Some(ErrorMessage(content = Text(messages("ers_trustee.add.err")))) else None,
+            fieldset = Some(Fieldset(
+                legend = Some(Legend(
+                    content = Text(messages("ers_trustee.add")),
+                    classes = "govuk-fieldset__legend govuk-fieldset__legend govuk-fieldset__legend--m"
+                )),
+            )),
+            items = Seq(
+                RadioItem(
+                    id = Some("yes-radio-button"),
+                    value = Some("0"),
+                    content = Text(messages("ers.yes"))
+                ),
+                RadioItem(
+                    id = Some("no-radio-button"),
+                    value = Some("1"),
+                    content = Text(messages("ers.no"))
+                )
+            ),
+            classes = "govuk-radios--inline"
+        ))
 
         @govukButton(Button(
             inputType = Some("submit"),
             content = Text(messages("ers.continue")),
             attributes = Map("id" -> "continue"),
-            disabled = trustees.trustees.isEmpty
         ))
     }
 }

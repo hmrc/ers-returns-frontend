@@ -551,6 +551,9 @@ ers_alt_amends.continue = Derbyn a mynd yn eich blaen
 # trustee messages
 #********************************************************************
 
+ers_trustee.add = A oes angen i chi ychwanegu ymddiriedolwr arall?
+ers_trustee.add.err = Dewiswch ie os oes angen i chi ychwanegu ymddiriedolwr arall
+
 ers_trustee_name.title = Beth yw enw’r ymddiriedolwr?
 
 ers_trustee_based.title = Ymhle y mae’r ymddiriedolwr wedi’i leoli?
