@@ -104,13 +104,13 @@ class TrusteeSummaryControllerSpec extends AnyWordSpecLike
       setAuthMocks()
       val controllerUnderTest = buildFakeTrusteeController()
       val result              =
-        controllerUnderTest.deleteTrustee(tenThousand).apply(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+        controllerUnderTest.deleteTrustee(tenThousand).apply(Fixtures.buildFakeRequestWithSessionIdSIP("GET"))
       status(result) shouldBe Status.SEE_OTHER
     }
 
     "throws exception if fetching trustee details direct to ers errors page" in {
       val controllerUnderTest = buildFakeTrusteeController(trusteeDetailsRes = failure)
-      val authRequest         = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+      val authRequest         = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdSIP("GET"))
 
       contentAsString(controllerUnderTest.showDeleteTrustee(tenThousand)(authRequest, hc)) shouldBe contentAsString(
         Future(controllerUnderTest.getGlobalErrorPage(testFakeRequest, testMessages))
@@ -119,7 +119,7 @@ class TrusteeSummaryControllerSpec extends AnyWordSpecLike
 
     "throws exception if fetching request object direct to ers errors page" in {
       val controllerUnderTest = buildFakeTrusteeController(requestObjectRes = failure)
-      val authRequest         = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+      val authRequest         = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdSIP("GET"))
 
       contentAsString(controllerUnderTest.showDeleteTrustee(tenThousand)(authRequest, hc)) shouldBe contentAsString(
         Future(controllerUnderTest.getGlobalErrorPage(testFakeRequest, testMessages))
@@ -128,7 +128,7 @@ class TrusteeSummaryControllerSpec extends AnyWordSpecLike
 
     "throws exception if cache fails direct to ers errors page" in {
       val controllerUnderTest = buildFakeTrusteeController(cacheRes = failure)
-      val authRequest         = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+      val authRequest         = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdSIP("GET"))
 
       contentAsString(controllerUnderTest.showDeleteTrustee(tenThousand)(authRequest, hc)) shouldBe contentAsString(
         Future(controllerUnderTest.getGlobalErrorPage(testFakeRequest, testMessages))
@@ -141,7 +141,7 @@ class TrusteeSummaryControllerSpec extends AnyWordSpecLike
       val cacheMap = CacheMap("_id", Map(mockErsUtil.TRUSTEES_CACHE -> Json.toJson(trusteeList)))
 
       val controllerUnderTest = buildFakeTrusteeController(cacheRes = Future.successful(cacheMap))
-      val authRequest         = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+      val authRequest         = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdSIP("GET"))
 
       val result = controllerUnderTest.showDeleteTrustee(1)(authRequest, hc)
       status(result) shouldBe Status.SEE_OTHER
@@ -155,8 +155,7 @@ class TrusteeSummaryControllerSpec extends AnyWordSpecLike
   "calling trustee summary page" should {
 
     val trusteeList = List(TrusteeDetails("Name", "1 The Street", None, None, None, Some("UK"), None, true))
-
-    val failure: Future[Nothing] = Future.failed(new Exception)
+    val failure: Future[Nothing] = Future.failed(new Exception("failure innit"))
 
     def buildFakeTrusteeController(trusteeDetailsRes: Future[TrusteeDetailsList] = Future.successful(TrusteeDetailsList(trusteeList)),
 																	 cacheRes: Future[CacheMap] = Future.successful(mock[CacheMap]),
@@ -175,6 +174,10 @@ class TrusteeSummaryControllerSpec extends AnyWordSpecLike
       when(
         mockErsUtil.fetch[RequestObject](any())(any(), any(), any())
       ) thenReturn requestObjectRes
+
+      when(
+        mockErsUtil.fetchTrusteesOptionally(any())(any(), any())
+      ) thenReturn trusteeDetailsRes
     }
 
     "give a redirect status (to company authentication frontend) on GET if user is not authenticated" in {
@@ -187,13 +190,13 @@ class TrusteeSummaryControllerSpec extends AnyWordSpecLike
     "give a status OK on GET if user is authenticated" in {
       setAuthMocks()
       val controllerUnderTest = buildFakeTrusteeController()
-      val result              = controllerUnderTest.trusteeSummaryPage().apply(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+      val result              = controllerUnderTest.trusteeSummaryPage().apply(Fixtures.buildFakeRequestWithSessionIdSIP("GET"))
       status(result) shouldBe Status.OK
     }
 
     "direct to ers errors page if fetching trustee details list fails" in {
       val controllerUnderTest = buildFakeTrusteeController(trusteeDetailsRes = failure)
-      val authRequest         = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+      val authRequest         = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdSIP("GET"))
 
       contentAsString(controllerUnderTest.showTrusteeSummaryPage()(authRequest, hc)) shouldBe contentAsString(
         Future(controllerUnderTest.getGlobalErrorPage(testFakeRequest, testMessages))
@@ -202,7 +205,7 @@ class TrusteeSummaryControllerSpec extends AnyWordSpecLike
 
     "direct to ers errors page if fetching request object fails" in {
       val controllerUnderTest = buildFakeTrusteeController(requestObjectRes = failure)
-      val authRequest         = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+      val authRequest         = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdSIP("GET"))
 
       contentAsString(controllerUnderTest.showTrusteeSummaryPage()(authRequest, hc)) shouldBe contentAsString(
         Future(controllerUnderTest.getGlobalErrorPage(testFakeRequest, testMessages))
@@ -210,23 +213,27 @@ class TrusteeSummaryControllerSpec extends AnyWordSpecLike
     }
 
     "display trustee summary page pre-filled" in {
+      setAuthMocks()
       val controllerUnderTest = buildFakeTrusteeController()
-      val authRequest         = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+      val authRequest         = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdSIP("GET"))
 
       val result = controllerUnderTest.showTrusteeSummaryPage()(authRequest, hc)
       status(result) shouldBe Status.OK
     }
 
     "continue button gives a redirect status (to company authentication frontend) on GET if user is not authenticated" in {
+      setUnauthorisedMocks()
       val controllerUnderTest = buildFakeTrusteeController()
       val result              = controllerUnderTest.trusteeSummaryContinue().apply(FakeRequest("GET", ""))
       status(result) shouldBe Status.SEE_OTHER
+      headers(result) should contain(Map("Location" -> "http://localhost:9949/gg/sign-in?continue=http%3A%2F%2Flocalhost%3A9290%2Fsubmit-your-ers-annual-return&origin=ers-returns-frontend"))
     }
 
     "continue button give a status OK on GET if user is authenticated" in {
+      setAuthMocks()
       val controllerUnderTest = buildFakeTrusteeController()
-      val result              = controllerUnderTest.trusteeSummaryContinue().apply(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
-      status(result) shouldBe Status.SEE_OTHER
+      val result              = controllerUnderTest.trusteeSummaryContinue().apply(Fixtures.buildFakeRequestWithSessionIdSIP("GET"))
+      status(result) shouldBe Status.OK
     }
   }
 }

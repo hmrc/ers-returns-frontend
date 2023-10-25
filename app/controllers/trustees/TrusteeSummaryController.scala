@@ -79,6 +79,7 @@ class TrusteeSummaryController @Inject()(val mcc: MessagesControllerComponents,
       if (trusteeDetailsList.trustees.isEmpty) {
         Redirect(controllers.trustees.routes.TrusteeNameController.questionPage())
       } else {
+        println("beep boop")
         Ok(trusteeSummaryView(requestObject, trusteeDetailsList))
       }
     }) recover {
@@ -117,7 +118,7 @@ class TrusteeSummaryController @Inject()(val mcc: MessagesControllerComponents,
   }
 
   def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result = {
-    Ok(globalErrorView(
+    ImATeapot(globalErrorView(
       "ers.global_errors.title",
       "ers.global_errors.heading",
       "ers.global_errors.message"
