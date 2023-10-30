@@ -16,12 +16,13 @@
 
 @import config.ApplicationConfig
 
-@import uk.gov.hmrc.hmrcfrontend.views.html.helpers.{HmrcStandardFooter, HmrcStandardHeader, HmrcHead, HmrcScripts, HmrcLayout}
+@import uk.gov.hmrc.hmrcfrontend.views.html.helpers.{HmrcStandardFooter, HmrcStandardHeader, HmrcHead, HmrcScripts, HmrcStandardPage}
+@import uk.gov.hmrc.hmrcfrontend.views.viewmodels.hmrcstandardpage._
 @import views.html.helper.CSPNonce
 
 
 @this(
-        hmrcLayout: HmrcLayout,
+        hmrcStandardPage: HmrcStandardPage,
         hmrcHead: HmrcHead,
         hmrcStandardHeader: HmrcStandardHeader,
         hmrcStandardFooter: HmrcStandardFooter,
@@ -63,13 +64,18 @@
     @scriptElement.getOrElse("")
 }
 
-@hmrcLayout(
-    pageTitle = Some(title),
-    additionalHeadBlock = Some(head),
-    isWelshTranslationAvailable = applicationConfig.languageTranslationEnabled,
-    serviceName = Some(messages("service.name")),
-    serviceUrl = Some(controllers.routes.ReturnServiceController.startPage().url),
-    signOutUrl = if(!disableSignOut) Some(applicationConfig.signOut) else None,
-    userResearchBannerUrl = if(isUserResearchBannerVisible) Some(applicationConfig.urBannerLink) else None,
-    additionalScriptsBlock = Some(hmrcScripts(scriptsBlock = Some(scripts)))
+@hmrcStandardPage(
+    HmrcStandardPageParams(
+        serviceURLs = ServiceURLs(
+            serviceUrl = Some(controllers.routes.ReturnServiceController.startPage().url),
+            signOutUrl = if(!disableSignOut) Some(applicationConfig.signOut) else None,
+        ),
+        templateOverrides = TemplateOverrides(
+            additionalHeadBlock = Some(head),
+            additionalScriptsBlock = Some(hmrcScripts(scriptsBlock = Some(scripts))),
+        ),
+        serviceName = Some(messages("service.name")),
+        pageTitle = Some(title),
+        isWelshTranslationAvailable = applicationConfig.languageTranslationEnabled,
+    )
 )(content)
