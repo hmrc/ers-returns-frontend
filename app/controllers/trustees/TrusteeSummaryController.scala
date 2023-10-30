@@ -118,7 +118,7 @@ class TrusteeSummaryController @Inject()(val mcc: MessagesControllerComponents,
   }
 
   def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result = {
-    ImATeapot(globalErrorView(
+    Ok(globalErrorView(
       "ers.global_errors.title",
       "ers.global_errors.heading",
       "ers.global_errors.message"

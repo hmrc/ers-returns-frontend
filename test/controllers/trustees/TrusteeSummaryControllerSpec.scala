@@ -187,6 +187,8 @@ class TrusteeSummaryControllerSpec extends AnyWordSpecLike
       status(result) shouldBe Status.SEE_OTHER
     }
 
+    // These tests are going to the error page. It succeeds because the only check is that a 200 is returned and global error page is returning a 200 -.-
+    // Raised https://jira.tools.tax.service.gov.uk/browse/DDCE-4841 to fix
     "give a status OK on GET if user is authenticated" in {
       setAuthMocks()
       val controllerUnderTest = buildFakeTrusteeController()
@@ -212,6 +214,8 @@ class TrusteeSummaryControllerSpec extends AnyWordSpecLike
       )
     }
 
+    // These tests are going to the error page. It succeeds because the only check is that a 200 is returned and global error page is returning a 200 -.-
+    // Raised https://jira.tools.tax.service.gov.uk/browse/DDCE-4841 to fix
     "display trustee summary page pre-filled" in {
       setAuthMocks()
       val controllerUnderTest = buildFakeTrusteeController()
@@ -226,9 +230,11 @@ class TrusteeSummaryControllerSpec extends AnyWordSpecLike
       val controllerUnderTest = buildFakeTrusteeController()
       val result              = controllerUnderTest.trusteeSummaryContinue().apply(FakeRequest("GET", ""))
       status(result) shouldBe Status.SEE_OTHER
-      headers(result) should contain(Map("Location" -> "http://localhost:9949/gg/sign-in?continue=http%3A%2F%2Flocalhost%3A9290%2Fsubmit-your-ers-annual-return&origin=ers-returns-frontend"))
+      headers(result) should contain(("Location" -> "http://localhost:9949/gg/sign-in?continue=http%3A%2F%2Flocalhost%3A9290%2Fsubmit-your-ers-annual-return&origin=ers-returns-frontend"))
     }
 
+    // These tests are going to the error page. It succeeds because the only check is that a 200 is returned and global error page is returning a 200 -.-
+    // Raised https://jira.tools.tax.service.gov.uk/browse/DDCE-4841 to fix
     "continue button give a status OK on GET if user is authenticated" in {
       setAuthMocks()
       val controllerUnderTest = buildFakeTrusteeController()
