@@ -33,7 +33,7 @@ object AppDependencies {
     "com.vladsch.flexmark"     %  "flexmark-all"            % "0.64.8",
     "org.pegdown"             %  "pegdown"                % "1.6.0",
     "org.jsoup"               %  "jsoup"                  % "1.16.2",
-    "com.github.tomakehurst"  %  "wiremock-standalone"    % "3.0.1"
+    "com.github.tomakehurst"  %  "wiremock-standalone"    % "2.27.2"
   ).map(_ % Test)
 
   val overrides: Seq[ModuleID] = Seq(
