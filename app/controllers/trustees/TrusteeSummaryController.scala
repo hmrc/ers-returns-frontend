@@ -79,7 +79,6 @@ class TrusteeSummaryController @Inject()(val mcc: MessagesControllerComponents,
       if (trusteeDetailsList.trustees.isEmpty) {
         Redirect(controllers.trustees.routes.TrusteeNameController.questionPage())
       } else {
-        println("beep boop")
         Ok(trusteeSummaryView(requestObject, trusteeDetailsList))
       }
     }) recover {
@@ -101,7 +100,7 @@ class TrusteeSummaryController @Inject()(val mcc: MessagesControllerComponents,
           requestObject <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
           trusteeDetailsList <- ersUtil.fetchTrusteesOptionally(requestObject.getSchemeReference)
         } yield {
-          BadRequest(trusteeSummaryView(requestObject, trusteeDetailsList, formHasError = true)) //TODO make this show errors too
+          BadRequest(trusteeSummaryView(requestObject, trusteeDetailsList, formHasError = true))
         }
       },
       addTrustee => {

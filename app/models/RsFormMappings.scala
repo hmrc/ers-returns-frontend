@@ -137,7 +137,7 @@ object RsFormMappings {
   )
 
   def addTrusteeForm()(implicit messages: Messages): Form[AddTrustee] = Form(mapping(
-    "value" -> nonEmptyText
+    "addTrustee" -> nonEmptyText
       .transform(int => if (int == "0") true else false, (bool: Boolean) => if (bool) "0" else "1")
   )(AddTrustee.apply)(AddTrustee.unapply))
 

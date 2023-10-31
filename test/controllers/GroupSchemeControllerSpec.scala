@@ -715,7 +715,6 @@ class GroupSchemeControllerSpec
 
       val result = testGroupSchemeController.showGroupSchemeSelected(ersRequestObject.copy(schemeType = Some("SIP")), mockErsUtil.SCHEME_SIP)(authRequest)
       status(result) shouldBe SEE_OTHER
-      println("headers innit " + headers(result).get("Location"))
 
       headers(result).get("Location").get.contains("/trustees") shouldBe true
     }
