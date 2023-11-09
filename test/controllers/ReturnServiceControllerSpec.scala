@@ -104,6 +104,7 @@ class ReturnServiceControllerSpec
 			.thenReturn(Future.successful(HttpResponse(OK, "")))
 		when(mockErsUtil.cache(any(), any())(any(), any(), any())).thenReturn(cacheResponse)
 		when(mockErsUtil.cache(any(), any(),any())(any(), any())).thenReturn(cacheResponse)
+		when(mockErsUtil.remove(any())(any(), any())).thenReturn(Future.successful(HttpResponse.apply(200, "")))
 		when(mockErsUtil.fetch[RequestObject](any(), any())(any(), any())).thenReturn(Future.successful(rscAsRequestObject))
   }
 
