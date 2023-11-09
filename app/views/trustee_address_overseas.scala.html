@@ -35,9 +35,7 @@
     hmrcPageHeading: HmrcPageHeading
 )
 
-@(requestObject: RequestObject, index: Int, trusteeDetails: Form[models.TrusteeAddress], edit: Boolean = false)(implicit request: Request[AnyRef], messages: Messages, ersUtil: ERSUtil, countryCodes: CountryCodes, appConfig: ApplicationConfig)
-
-@schemeId = @{requestObject.getSchemeId}
+@(requestObject: RequestObject, index: Int, trusteeDetails: Form[models.TrusteeAddress], edit: Boolean = false)(implicit request: Request[AnyRef], messages: Messages, countryCodes: CountryCodes, appConfig: ApplicationConfig)
 
 @govuk_wrapper(title = messages("ers_trustee_address.title")) {
 

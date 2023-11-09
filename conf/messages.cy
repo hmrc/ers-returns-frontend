@@ -562,10 +562,9 @@ ers_trustee_based.overseas = Tramor
 ers_trustee_based.sip.err.message = Dewiswch a yw'r ymddiriedolwr wedi'i leoli yn y DU neu dramor
 
 ers_trustee_address.title = Beth yw cyfeiriad yr ymddiriedolwr?
-ers_trustee_address.buildingAndStreet = Adeilad a stryd
-ers_trustee_address.townOrCity = Tref neu Ddinas
-ers_trustee_address.county = Sir
-ers_trustee_address.postcode = Cod post
+ers_trustee_address.townOrCity = Tref neu Ddinas (dewisol)
+ers_trustee_address.county = Sir (dewisol)
+ers_trustee_address.postcode = Cod post (dewisol)
 
 ers_trustee_address.line1 = Cyfeiriad – llinell 1
 ers_trustee_address.line2 = Cyfeiriad – llinell 2 (dewisol)

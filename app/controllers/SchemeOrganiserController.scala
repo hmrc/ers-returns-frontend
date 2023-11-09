@@ -127,7 +127,7 @@ class SchemeOrganiserController @Inject()(
 
   def showSchemeOrganiserSubmit(requestObject: RequestObject)
                                (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
-    RsFormMappings.schemeOrganiserForm.bindFromRequest.fold(
+    RsFormMappings.schemeOrganiserForm().bindFromRequest().fold(
       errors => {
         val correctOrder = errors.errors.map(_.key).distinct
         val incorrectOrderGrouped = errors.errors.groupBy(_.key).map(_._2.head).toSeq

@@ -90,7 +90,7 @@
                 classes = "govuk-!-width-one-quarter",
                 items = Seq(
                     ActionItem(
-                        href = if(trustee.country.getOrElse("") == "UK"){
+                        href = if(trustee.basedInUk){
                             controllers.trustees.routes.TrusteeAddressUkController.editQuestion(index).url
                         } else {
                             controllers.trustees.routes.TrusteeAddressOverseasController.editQuestion(index).url

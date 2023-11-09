@@ -21,7 +21,7 @@ import connectors.ErsConnector
 import controllers.auth.AuthAction
 
 import javax.inject.Inject
-import models.{RequestObject, RsFormMappings, TrusteeBasedInUk, TrusteeDetailsList}
+import models.{RequestObject, RsFormMappings, TrusteeBasedInUk}
 import play.api.data.Form
 import play.api.libs.json.Format
 import play.api.mvc.{AnyContent, MessagesControllerComponents, Request, Result}

@@ -18,8 +18,6 @@ package models
 
 import play.api.data.Forms._
 import play.api.data._
-import play.api.data.format.Formats.stringFormat
-import play.api.data.validation.Constraints
 import play.api.data.validation.Constraints._
 import play.api.i18n.Messages
 
@@ -136,12 +134,12 @@ object RsFormMappings {
     )(CsvFilesList.apply)(CsvFilesList.unapply)
   )
 
-  def addTrusteeForm()(implicit messages: Messages): Form[AddTrustee] = Form(mapping(
+  def addTrusteeForm(): Form[AddTrustee] = Form(mapping(
     "addTrustee" -> nonEmptyText
       .transform(int => if (int == "0") true else false, (bool: Boolean) => if (bool) "0" else "1")
   )(AddTrustee.apply)(AddTrustee.unapply))
 
-  def trusteeBasedInUkForm()(implicit messages: Messages): Form[TrusteeBasedInUk] = Form(mapping(
+  def trusteeBasedInUkForm(): Form[TrusteeBasedInUk] = Form(mapping(
     trusteeBasedInUkFields.basedInUk -> nonEmptyText
       .transform(int => if (int == "0") true else false, (bool: Boolean) => if (bool) "0" else "1")
   )(TrusteeBasedInUk.apply)(TrusteeBasedInUk.unapply))
@@ -257,13 +255,15 @@ object RsFormMappings {
     schemeOrganiserFields.companyReg -> optional(text
 			.verifying(Messages("ers_scheme_organiser.err.summary.company_reg"), so => checkLength(so, "schemeOrganiserFields.companyRegistrationNum"))
 			.verifying(pattern(fieldValidationPatterns.companyRegPattern.r, error = Messages("ers_scheme_organiser.err.summary.company_reg")))),
-    schemeOrganiserFields.corporationRef -> optional(text verifying(Messages("ers_scheme_organiser.err.summary.corporation_ref"), so => checkLength(so, "schemeOrganiserFields.corporationTaxReference")) verifying pattern(fieldValidationPatterns.corporationRefPatternSchemeOrg.r, error = Messages("ers_scheme_organiser.err.summary.invalidChars.corporation_ref_pattern")))
+    schemeOrganiserFields.corporationRef -> optional(text
+      .verifying(Messages("ers_scheme_organiser.err.summary.corporation_ref"), so => checkLength(so, "schemeOrganiserFields.corporationTaxReference"))
+      .verifying(pattern(fieldValidationPatterns.corporationRefPatternSchemeOrg.r, error = Messages("ers_scheme_organiser.err.summary.invalidChars.corporation_ref_pattern"))))
   )(SchemeOrganiserDetails.apply)(SchemeOrganiserDetails.unapply))
 
   /*
 * scheme type Form definition.
 */
-  def schemeTypeForm()(implicit messages: Messages): Form[RS_schemeType] = Form(
+  def schemeTypeForm(): Form[RS_schemeType] = Form(
     mapping("schemeType" -> text)(RS_schemeType.apply)(RS_schemeType.unapply)
   )
 
