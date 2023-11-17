@@ -347,8 +347,7 @@ class ERSUtil @Inject() (
       }
       .getOrElse(DEFAULT)
 
-  def trusteeLocation(trustee: TrusteeDetails): String = if (trustee.basedInUk) DEFAULT_COUNTRY else OVERSEAS
-
+  def trusteeLocationMessage(trustee: TrusteeDetails): String = if (trustee.basedInUk) "ers_trustee_based.uk" else "ers_trustee_based.overseas"
 
   def addCompanyMessage(messages: Messages, schemeOpt: Option[String]): String =
     messages.apply(s"ers_group_summary.${schemeOpt.getOrElse("").toLowerCase}.add_company")

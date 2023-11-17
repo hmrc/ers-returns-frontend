@@ -552,14 +552,14 @@ ers_alt_amends.continue = Derbyn a mynd yn eich blaen
 #********************************************************************
 
 ers_trustee.add = A oes angen i chi ychwanegu ymddiriedolwr arall?
-ers_trustee.add.err = Dewiswch ie os oes angen i chi ychwanegu ymddiriedolwr arall
+ers_trustee.add.err = Dewiswch Iawn os oes angen i chi ychwanegu ymddiriedolwr arall
 
 ers_trustee_name.title = Beth yw enw’r ymddiriedolwr?
 
 ers_trustee_based.title = Ymhle y mae’r ymddiriedolwr wedi’i leoli?
 ers_trustee_based.uk = Y DU
 ers_trustee_based.overseas = Tramor
-ers_trustee_based.sip.err.message = Dewiswch a yw'r ymddiriedolwr wedi'i leoli yn y DU neu dramor
+ers_trustee_based.sip.err.message = Dewiswch a yw’r ymddiriedolwr wedi’i leoli yn y DU neu dramor
 
 ers_trustee_address.title = Beth yw cyfeiriad yr ymddiriedolwr?
 ers_trustee_address.townOrCity = Tref neu Ddinas (dewisol)
