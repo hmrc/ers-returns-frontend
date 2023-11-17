@@ -20,6 +20,7 @@
 @import views.html.includes.countries
 @import views.html.templates.reference
 @import views.html.helper.CSPNonce
+@import models.RsFormMappings.companyBasedInUkFields
 
 @import uk.gov.hmrc.govukfrontend.views.html.components.implicits._
 
@@ -52,10 +53,10 @@
         attributes = Map("id" -> "back-link"), classes="js-enabled", content = HtmlContent(messages("ers.back"))
     ))
 
-    @if(companyDetails.hasErrors) {
+    @if(companyBasedInUkForm.hasErrors) {
         @govukErrorSummary(ErrorSummary(
             title = Text(messages("validation.summary.heading")),
-            errorList = companyDetails.errors.asTextErrorLinks
+            errorList = companyBasedInUkForm.errors.asTextErrorLinks
         ))
     }
 

@@ -59,7 +59,6 @@ class IsCompanyUkController @Inject()(val mcc: MessagesControllerComponents,
                                       implicit val countryCodes: CountryCodes,
                                       implicit val ersUtil: ERSUtil,
                                       implicit val appConfig: ApplicationConfig,
-                                      companyDetailsService: CompanyDetailsService,
                                       pageView: views.html.manual_is_the_company_in_uk
                                      )
   extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with CompanyBaseController[CompanyBasedInUk] {

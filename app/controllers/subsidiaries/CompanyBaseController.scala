@@ -59,17 +59,10 @@ trait CompanyBaseController[A] extends FrontendController with I18nSupport with 
 
   def showQuestionPage(requestObject: RequestObject, index: Int, edit: Boolean = false)
                       (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
-    (for {
-      oldData <- ersUtil.fetchPartFromCompanyDetailsList[A](index, requestObject.getSchemeReference)
-    } yield {
+    ersUtil.fetchPartFromCompanyDetailsList[A](index, requestObject.getSchemeReference).map { oldData: Option[A] =>
       val preparedForm = if (oldData.isDefined) form.fill(oldData.get) else form
-      if (oldData.isDefined) {
-        logger.error(s"\n\n[${this.getClass.getSimpleName}][showQuestionPage] Here's the data we pulled from the cache: " +
-          s"\n\n Prev data: ${oldData.get}\n")
-      }
       Ok(view(requestObject, index, preparedForm, edit))
-    }
-      )recover {
+    } recover {
       case e: Exception =>
         logger.error(s"[SubsidiariesController][showSubsidiariesNamePage] Get data from cache failed with exception ${e.getMessage}")
         getGlobalErrorPage
@@ -77,18 +70,18 @@ trait CompanyBaseController[A] extends FrontendController with I18nSupport with 
   }
 
 
-  def questionSubmit(index: Int, edit: Boolean = false): Action[AnyContent] = authAction.async {
+  def questionSubmit(index: Int): Action[AnyContent] = authAction.async {
     implicit request =>
       ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
-        submissionHandler(requestObject, index, edit)(request, hc)
+        submissionHandler(requestObject, index)(request, hc)
       }
   }
 
-  def submissionHandler(requestObject: RequestObject, index: Int, edit: Boolean)
+  def submissionHandler(requestObject: RequestObject, index: Int, edit: Boolean = false)
                         (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
     form.bindFromRequest().fold(
       errors => {logger.error(errors.errors.mkString)
-          Future.successful(Ok(view(requestObject, index, errors, edit)))
+          Future.successful(BadRequest(view(requestObject, index, errors, edit)))
       },
       result => {
         if (edit) {
@@ -105,15 +98,18 @@ trait CompanyBaseController[A] extends FrontendController with I18nSupport with 
           }
         }
       }
-    )
+    ).recover {
+      case _ =>
+        logger.error(s"[${this.getClass.getSimpleName}][submissionHandler] Error occurred while updating company cache")
+        getGlobalErrorPage
+    }
   }
 
-  def editCompany(index: Int, edit: Boolean = true): Action[AnyContent] = authAction.async {
+  def editCompany(index: Int): Action[AnyContent] = authAction.async {
     implicit  request =>
       println(s"\n\n[${this.getClass.getSimpleName}] index is $index ")
       ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
         showQuestionPage(requestObject, index, edit = true)(request, hc)
-
       }
   }
 

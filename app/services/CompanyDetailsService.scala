@@ -17,7 +17,7 @@
 package services
 
 import javax.inject.Inject
-import models.{CompanyAddress, CompanyBasedInUk, CompanyDetails, CompanyDetailsList, Company, RequestObject}
+import models.{CompanyAddress, CompanyDetails, CompanyDetailsList, Company, RequestObject}
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.ERSUtil
 
@@ -40,19 +40,19 @@ class CompanyDetailsService @Inject()(
       }
       _ <- ersUtil.cache[CompanyDetailsList](ersUtil.COMPANIES_CACHE, companyDetailsList, schemeRef)
     } yield {
-      Unit
+      ()
     }
+    }
+
+
+    def replaceCompany(companies: List[CompanyDetails], index: Int, formData: CompanyDetails): List[CompanyDetails] =
+      (if (index == 10000) {
+        println(s"\n\n[${this.getClass.getSimpleName}] index is $index ")
+        companies :+ formData
+      } else {
+        println(s"\n\n[${this.getClass.getSimpleName}] index is $index")
+        companies.zipWithIndex.map {
+          case (a, b) => if (b == index) formData else a
+        }
+      }).distinct
   }
-
-
-  def replaceCompany(companies: List[CompanyDetails], index: Int, formData: CompanyDetails): List[CompanyDetails] =
-    (if (index == 10000) {
-      println(s"\n\n[${this.getClass.getSimpleName}] index is $index ")
-      companies :+ formData
-    } else {
-      println(s"\n\n[${this.getClass.getSimpleName}] index is $index")
-      companies.zipWithIndex.map{
-        case (a, b) => if (b == index) formData else a
-      }
-    }).distinct
-}

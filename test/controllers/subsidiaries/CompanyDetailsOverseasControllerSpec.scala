@@ -115,7 +115,7 @@ class CompanyDetailsOverseasControllerSpec extends AnyWordSpecLike
       implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*))
       val result = testController.questionSubmit(1).apply(authRequest)
 
-      status(result) shouldBe Status.OK
+      status(result) shouldBe Status.BAD_REQUEST
       contentAsString(result) should include(testMessages("ers_manual_company_details_overseas.title"))
       contentAsString(result) should include(testMessages("error.required"))
     }
@@ -125,12 +125,12 @@ class CompanyDetailsOverseasControllerSpec extends AnyWordSpecLike
       when(mockErsUtil.cache[Company](any(), any(), any())(any(), any())).thenReturn(Future.successful(emptyCacheMap))
       when(mockCompanyDetailsService.updateCompanyCache(any())(any())).thenReturn(Future.successful(()), Future.successful(()))
 
-      val companyData = Map("name" -> "Test person")
-      val form = RsFormMappings.companyAddressOverseasForm().bind(companyData)
+      val companyData = Map("name" -> "Test company")
+      val form = RsFormMappings.companyNameForm().bind(companyData)
       implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*))
       val result = testController.questionSubmit(1).apply(authRequest)
 
-      status(result) shouldBe Status.OK
+      status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result).get shouldBe routes.CompanyAddressOverseasController.questionPage().url
 
     }
