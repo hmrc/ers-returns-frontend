@@ -173,10 +173,7 @@ class CsvFileUploadControllerSpec
         ArgumentCaptor.forClass(classOf[UpscanCsvFilesCallbackList])
       when(mockErsUtil.fetch[UpscanCsvFilesList](meq("csv-files-upload"), any[String])(any[HeaderCarrier], any()))
         .thenReturn(Future.successful(notStartedUpscanCsvFilesList))
-      when(
-        mockErsUtil
-          .cache(meq("csv-files-upload"), updatedCallbackCaptor.capture(), any[String])(any[HeaderCarrier], any())
-      )
+      when(mockErsUtil.cache(meq("csv-files-upload"), updatedCallbackCaptor.capture(), any[String])(any[HeaderCarrier], any()))
         .thenReturn(Future.successful(mock[CacheMap]))
 
       await(csvFileUploadController.success(testUploadId)(testFakeRequest))
@@ -187,9 +184,7 @@ class CsvFileUploadControllerSpec
       "no file in the cache has UploadStatus of NotStarted after update" in {
         when(mockErsUtil.fetch[UpscanCsvFilesList](meq("csv-files-upload"), any[String])(any[HeaderCarrier], any()))
           .thenReturn(Future.successful(notStartedUpscanCsvFilesList))
-        when(
-          mockErsUtil.cache(meq("csv-files-upload"), any[UpscanCsvFilesList], any[String])(any[HeaderCarrier], any())
-        )
+        when(mockErsUtil.cache(meq("csv-files-upload"), any[UpscanCsvFilesList], any[String])(any[HeaderCarrier], any()))
           .thenReturn(Future.successful(mock[CacheMap]))
 
         val result = csvFileUploadController.success(testUploadId)(testFakeRequest)
@@ -225,10 +220,7 @@ class CsvFileUploadControllerSpec
     "saving the cache fails" in {
       when(mockErsUtil.fetch[UpscanCsvFilesList](meq("csv-files-upload"), any[String])(any[HeaderCarrier], any()))
         .thenReturn(Future.successful(multipleNotStartedUpscanCsvFilesList))
-      when(
-        mockErsUtil
-          .cache(meq("csv-files-upload"), any[UpscanCsvFilesCallbackList], any[String])(any[HeaderCarrier], any())
-      )
+      when(mockErsUtil.cache(meq("csv-files-upload"), any[UpscanCsvFilesCallbackList], any[String])(any[HeaderCarrier], any()))
         .thenReturn(Future.failed(new Exception("Expected Exception")))
 
       val result = csvFileUploadController.success(testUploadId)(testFakeRequest)

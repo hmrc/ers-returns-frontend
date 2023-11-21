@@ -23,7 +23,7 @@ import org.joda.time.DateTime
 import play.api.Logging
 import play.api.i18n.Messages
 import play.api.libs.json
-import play.api.libs.json.JsValue
+import play.api.libs.json.{JsArray, JsValue, Json}
 import play.api.mvc.Request
 import services.SessionService
 import uk.gov.hmrc.http.cache.client.CacheMap
@@ -71,9 +71,14 @@ class ERSUtil @Inject() (
 
   val FILE_NAME_CACHE: String = "file-name"
 
-  val SCHEME_ORGANISER_CACHE: String = "scheme-organiser"
-  val TRUSTEES_CACHE: String         = "trustees"
-  val ERROR_REPORT_DATETIME: String  = "error-report-datetime"
+	val SCHEME_ORGANISER_CACHE: String = "scheme-organiser"
+	val TRUSTEES_CACHE: String = "trustees"
+	val TRUSTEE_NAME_CACHE: String = "trustee-name"
+	val TRUSTEE_BASED_CACHE: String = "trustee-based"
+	val TRUSTEE_ADDRESS_CACHE: String = "trustee-address"
+	val TRUSTEE_ADDRESS_UK_CACHE: String = "trustee-address-uk"
+	val TRUSTEE_ADDRESS_OVERSEAS_CACHE: String = "trustee-address-overseas"
+	val ERROR_REPORT_DATETIME: String = "error-report-datetime"
 
   // Params
   val PORTAL_AOREF_CACHE: String          = "portal-ao-ref"
@@ -96,82 +101,76 @@ class ERSUtil @Inject() (
 
   val VALIDATED_SHEEETS: String = "validated-sheets"
 
-  def cache[T](key: String, body: T)(implicit
-    hc: HeaderCarrier,
-    ec: ExecutionContext,
-    formats: json.Format[T]
-  ): Future[CacheMap] =
-    shortLivedCache.cache[T](getCacheId, key, body)
+	def cache[T](key: String, body: T)(implicit hc: HeaderCarrier, ec: ExecutionContext, formats: json.Format[T]): Future[CacheMap] =
+		shortLivedCache.cache[T](getCacheId, key, body)
 
-  def cache[T](key: String, body: T, cacheId: String)(implicit
-    hc: HeaderCarrier,
-    formats: json.Format[T]
-  ): Future[CacheMap] = {
-    logger.info(s"[ERSUtil][cache]cache saving key:$key, cacheId:$cacheId")
-    shortLivedCache.cache[T](cacheId, key, body)
-  }
+	def cache[T](key: String, body: T, cacheId: String)(implicit hc: HeaderCarrier, formats: json.Format[T]): Future[CacheMap] = {
+		logger.info(s"[ERSUtil][cache]cache saving key:$key, cacheId:$cacheId")
+		shortLivedCache.cache[T](cacheId, key, body)
+	}
 
   def remove(cacheId: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] =
     shortLivedCache.remove(cacheId)
 
-  def fetch[T](key: String)(implicit hc: HeaderCarrier, ec: ExecutionContext, formats: json.Format[T]): Future[T] =
-    shortLivedCache.fetchAndGetEntry[JsValue](getCacheId, key).map { res =>
-      res.get.as[T]
-    } recover {
-      case e: NoSuchElementException =>
-        logger.warn(
-          s"[ERSUtil][fetch] fetch failed to get key $key with exception $e, timestamp: ${System.currentTimeMillis()}."
-        )
-        throw new NoSuchElementException
-      case _: Throwable              =>
-        logger.error(
-          s"[ERSUtil][fetch] fetch failed to get key $key for $getCacheId with exception, timestamp: ${System.currentTimeMillis()}."
-        )
-        throw new Exception
-    }
+	def fetch[T](key: String)(implicit hc: HeaderCarrier, ec: ExecutionContext, formats: json.Format[T]): Future[T] = {
+		shortLivedCache.fetchAndGetEntry[JsValue](getCacheId, key).map{ res =>
+			res.get.as[T]
+		} recover {
+			case _: NoSuchElementException =>
+				throw new NoSuchElementException
+			case _ : Throwable =>
+				logger.error(s"[ERSUtil][fetch] fetch failed to get key $key for $getCacheId with exception, timestamp: ${System.currentTimeMillis()}.")
+				throw new Exception
+		}
+	}
 
-  def fetch[T](key: String, cacheId: String)(implicit hc: HeaderCarrier, formats: json.Format[T]): Future[T] = {
-    val startTime = System.currentTimeMillis()
-    shortLivedCache.fetchAndGetEntry[JsValue](cacheId, key).map { res =>
-      cacheTimeFetch(System.currentTimeMillis() - startTime, TimeUnit.MILLISECONDS)
-      res.get.as[T]
-    } recover {
-      case e: NoSuchElementException =>
-        logger.warn(
-          s"[ERSUtil][fetch] fetch(with 2 params) failed to get key [$key] for cacheId: [$cacheId] with exception $e, timestamp: ${System.currentTimeMillis()}."
-        )
-        throw new NoSuchElementException
-      case er: Throwable             =>
-        logger.error(
-          s"[ERSUtil][fetch] fetch(with 2 params) failed to get key [$key] for cacheId: [$cacheId] with exception ${er.getMessage}, " +
-            s"timestamp: ${System.currentTimeMillis()}."
-        )
-        throw new Exception
-    }
-  }
+	def fetch[T](key: String, cacheId: String)(implicit hc: HeaderCarrier, formats: json.Format[T]): Future[T] = {
+		val startTime = System.currentTimeMillis()
+		shortLivedCache.fetchAndGetEntry[JsValue](cacheId, key).map { res =>
+			cacheTimeFetch(System.currentTimeMillis() - startTime, TimeUnit.MILLISECONDS)
+			res.get.as[T]
+		} recover {
+			case _: NoSuchElementException =>
+				throw new NoSuchElementException
+			case er : Throwable =>
+				logger.warn(s"[ERSUtil][fetch] fetch(with 2 params) failed to get key [$key] for cacheId: [$cacheId] with exception ${er.getMessage}, " +
+					s"timestamp: ${System.currentTimeMillis()}.")
+				throw new Exception
+		}
+	}
 
-  def fetchOption[T](key: String, cacheId: String)(implicit
-    hc: HeaderCarrier,
-    formats: json.Format[T]
-  ): Future[Option[T]] = {
-    val startTime = System.currentTimeMillis()
-    shortLivedCache.fetchAndGetEntry[T](cacheId, key).map { res =>
-      cacheTimeFetch(System.currentTimeMillis() - startTime, TimeUnit.MILLISECONDS)
-      res
-    } recover {
-      case e: NoSuchElementException =>
-        logger.warn(
-          s"[ERSUtil][fetchOption] fetch with 2 params failed to get key $key for $cacheId with exception \n $e \n timestamp: ${System.currentTimeMillis()}."
-        )
-        throw e
-      case e: Throwable              =>
-        logger.error(
-          s"[ERSUtil][fetchOption] fetch with 2 params failed to get key $key for $cacheId, timestamp: ${System.currentTimeMillis()}.",
-          e
-        )
-        throw new Exception
-    }
-  }
+	def fetchTrusteesOptionally(cacheId: String)(implicit hc: HeaderCarrier, formats: json.Format[TrusteeDetailsList]): Future[TrusteeDetailsList] = {
+		fetch[TrusteeDetailsList](TRUSTEES_CACHE, cacheId).recover {
+			case _ => TrusteeDetailsList(List.empty[TrusteeDetails])
+		}
+	}
+
+	def fetchPartFromTrusteeDetailsList[A](index: Int, cacheId: String)(implicit hc: HeaderCarrier, formats: json.Format[A]): Future[Option[A]] = {
+		shortLivedCache.fetchAndGetEntry[JsValue](cacheId, TRUSTEES_CACHE).map {
+			_.map(_.\(TRUSTEES_CACHE).as[JsArray].\(index).getOrElse(Json.obj()).as[A])
+		} recover {
+			case x: Throwable => {
+				logger.info("[ERSUtil][fetchPartFromTrusteeDetailsList] Nothing found in cache, expected if this is not an edit journey: " + x.getMessage)
+				None
+			}
+		}
+	}
+
+	//TODO Why is this called "fetchOption" if it throws an expection when there's no data?? It can only return Some[T] or throw exception which I would not describe as "optional" behaviour -.-
+	def fetchOption[T](key: String, cacheId: String)(implicit hc: HeaderCarrier, formats: json.Format[T]): Future[Option[T]] = {
+		val startTime = System.currentTimeMillis()
+		shortLivedCache.fetchAndGetEntry[T](cacheId, key).map { res =>
+			cacheTimeFetch(System.currentTimeMillis() - startTime, TimeUnit.MILLISECONDS)
+			res
+		} recover {
+			case e: NoSuchElementException =>
+				logger.warn(s"[ERSUtil][fetchOption] fetch with 2 params failed to get key $key for $cacheId with exception \n $e \n timestamp: ${System.currentTimeMillis()}.")
+				throw e
+			case e: Throwable =>
+				logger.error(s"[ERSUtil][fetchOption] fetch with 2 params failed to get key $key for $cacheId, timestamp: ${System.currentTimeMillis()}.", e)
+				throw new Exception
+		}
+	}
 
   def fetchAll(sr: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[CacheMap] = {
     val startTime = System.currentTimeMillis()
@@ -194,84 +193,68 @@ class ERSUtil @Inject() (
     }
   }
 
-  def getAltAmmendsData(
-    schemeRef: String
-  )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[(Option[AltAmendsActivity], Option[AlterationAmends])] =
-    fetchOption[AltAmendsActivity](altAmendsActivity, schemeRef).flatMap { altamends =>
-      if (altamends.getOrElse(AltAmendsActivity("")).altActivity == OPTION_YES) {
-        fetchOption[AlterationAmends](ALT_AMENDS_CACHE_CONTROLLER, schemeRef).map { amc =>
-          (altamends, amc)
-        }
-      } else {
-        Future {
-          (altamends, None)
-        }
-      }
-    }
+	def getAltAmmendsData(schemeRef: String)(implicit hc: HeaderCarrier,
+																					 ec: ExecutionContext
+	): Future[(Option[AltAmendsActivity], Option[AlterationAmends])] = {
+		fetchOption[AltAmendsActivity](altAmendsActivity, schemeRef).flatMap {
+			altamends =>
+				if(altamends.getOrElse(AltAmendsActivity("")).altActivity == OPTION_YES) {
+					fetchOption[AlterationAmends](ALT_AMENDS_CACHE_CONTROLLER, schemeRef).map {
+						amc =>
+							(altamends, amc)
+					}
+				}
+				else {
+					Future{
+						(altamends, None)
+					}
+				}
+		}
+	}
 
-  def getGroupSchemeData(
-    schemeRef: String
-  )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[(Option[GroupSchemeInfo], Option[CompanyDetailsList])] =
-    fetchOption[GroupSchemeInfo](GROUP_SCHEME_CACHE_CONTROLLER, schemeRef).flatMap { gsc =>
-      if (gsc.getOrElse(GroupSchemeInfo(None, None)).groupScheme.getOrElse("") == OPTION_YES) {
-        fetchOption[CompanyDetailsList](GROUP_SCHEME_COMPANIES, schemeRef).map { comp =>
-          (gsc, comp)
-        }
-      } else {
-        Future {
-          (gsc, None)
-        }
-      }
-    }
+	def getGroupSchemeData(schemeRef: String)
+												(implicit hc: HeaderCarrier,
+												 ec: ExecutionContext): Future[(Option[GroupSchemeInfo], Option[CompanyDetailsList])] = {
+		fetchOption[GroupSchemeInfo](GROUP_SCHEME_CACHE_CONTROLLER, schemeRef).flatMap { gsc =>
+			if (gsc.getOrElse(GroupSchemeInfo(None, None)).groupScheme.getOrElse("") == OPTION_YES) {
+				fetchOption[CompanyDetailsList](GROUP_SCHEME_COMPANIES, schemeRef).map { comp =>
+					(gsc, comp)
+				}
+			}
+			else {
+				Future {
+					(gsc, None)
+				}
+			}
+		}
+	}
 
-  def getAllData(bundleRef: String, ersMetaData: ErsMetaData)(implicit
-    hc: HeaderCarrier,
-    ec: ExecutionContext
-  ): Future[ErsSummary] = {
-    val schemeRef = ersMetaData.schemeInfo.schemeRef
-    fetchOption[ReportableEvents](reportableEvents, schemeRef)
-      .flatMap { repEvents =>
-        fetchOption[CheckFileType](FILE_TYPE_CACHE, schemeRef).flatMap { checkFileType =>
-          fetchOption[SchemeOrganiserDetails](SCHEME_ORGANISER_CACHE, schemeRef).flatMap { soc =>
-            fetchOption[TrusteeDetailsList](TRUSTEES_CACHE, schemeRef).flatMap { td =>
-              getGroupSchemeData(schemeRef).flatMap { gc =>
-                getAltAmmendsData(schemeRef).flatMap { altData =>
-                  getNoOfRows(repEvents.get.isNilReturn.get).map { trows =>
-                    val fileType = if (checkFileType.isDefined) {
-                      Some(checkFileType.get.checkFileType.get)
-                    } else {
-                      None
-                    }
-                    new ErsSummary(
-                      bundleRef,
-                      repEvents.get.isNilReturn.get,
-                      fileType,
-                      DateTime.now,
-                      metaData = ersMetaData,
-                      altAmendsActivity = altData._1,
-                      alterationAmends = altData._2,
-                      groupService = gc._1,
-                      schemeOrganiser = soc,
-                      companies = gc._2,
-                      trustees = td,
-                      nofOfRows = trows,
-                      transferStatus = getStatus(trows)
-                    )
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-      .recover { case e: NoSuchElementException =>
-        logger.error(
-          s"CacheUtil: Get all data from cache failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.",
-          e
-        )
-        throw new Exception
-      }
-  }
+
+	def getAllData(bundleRef: String, ersMetaData: ErsMetaData)
+								(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[ErsSummary] = {
+		val schemeRef = ersMetaData.schemeInfo.schemeRef
+		(for {
+			repEvents <- fetchOption[ReportableEvents](reportableEvents, schemeRef)
+			checkFileType <- fetchOption[CheckFileType](FILE_TYPE_CACHE, schemeRef)
+			soc <- fetchOption[SchemeOrganiserDetails](SCHEME_ORGANISER_CACHE, schemeRef)
+			td <- fetchOption[TrusteeDetailsList](TRUSTEES_CACHE, schemeRef)
+			gc <- getGroupSchemeData(schemeRef)
+			altData <- getAltAmmendsData(schemeRef)
+			trows <- getNoOfRows(repEvents.get.isNilReturn.get)
+		} yield {
+			val fileType = checkFileType.map(_.checkFileType.get)
+			ErsSummary(bundleRef, repEvents.get.isNilReturn.get, fileType, DateTime.now, metaData = ersMetaData,
+				altAmendsActivity = altData._1, alterationAmends = altData._2, groupService = gc._1,
+				schemeOrganiser = soc, companies = gc._2, trustees = td, nofOfRows = trows, transferStatus = getStatus(trows)
+			)
+		}
+		).recover {
+					//TODO I don't like this. Pick up in tech debt review
+			case e: NoSuchElementException =>
+				logger.error(s"[ERSUtil][getAllData]: Get all data from cache failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.", e)
+				throw e
+		}
+	}
 
   def getStatus(tRows: Option[Int]): Some[String] =
     if (tRows.isDefined && tRows.get > appConfig.sentViaSchedulerNoOfRowsLimit) {
@@ -287,37 +270,33 @@ class ERSUtil @Inject() (
       sessionService.getSuccessfulCallbackRecord.map(res => res.flatMap(_.noOfRows))
     }
 
-  final def concatAddress(optionalAddressLines: List[Option[String]], existingAddressLines: String): String = {
-    var definedStrings: List[String] = Nil
-    try definedStrings = optionalAddressLines.collect { case Some(s) => s } catch {
-      case x: Throwable =>
-        logger.warn(x.getMessage())
-    }
-    existingAddressLines ++ definedStrings.map(addressLine => ", " + addressLine).mkString("")
-  }
+	final def concatAddress(optionalAddressLines: List[Option[String]], existingAddressLines: String): String = {
+		val definedStrings = optionalAddressLines.filter(_.isDefined).map(_.get)
+		existingAddressLines ++ definedStrings.map(addressLine => ", " + addressLine).mkString("")
+	}
 
-  def buildAddressSummary[A](entity: A): String =
-    entity match {
-      case companyDetails: CompanyDetails =>
-        val optionalAddressLines = List(
-          companyDetails.addressLine2,
-          companyDetails.addressLine3,
-          companyDetails.addressLine4,
-          companyDetails.postcode,
-          countryCodes.getCountry(companyDetails.country.getOrElse(""))
-        )
-        concatAddress(optionalAddressLines, companyDetails.addressLine1)
-      case trusteeDetails: TrusteeDetails =>
-        val optionalAddressLines = List(
-          trusteeDetails.addressLine2,
-          trusteeDetails.addressLine3,
-          trusteeDetails.addressLine4,
-          trusteeDetails.postcode,
-          countryCodes.getCountry(trusteeDetails.country.getOrElse(""))
-        )
-        concatAddress(optionalAddressLines, trusteeDetails.addressLine1)
-      case _                              => ""
-    }
+	def buildAddressSummary[A](entity: A): String = {
+		entity match {
+			case companyDetails: CompanyDetails =>
+				val optionalAddressLines = List(
+					companyDetails.addressLine2,
+					companyDetails.addressLine3,
+					companyDetails.addressLine4,
+					companyDetails.postcode,
+					countryCodes.getCountry(companyDetails.country.getOrElse(""))
+				)
+				concatAddress(optionalAddressLines, companyDetails.addressLine1)
+			case trusteeDetails: TrusteeDetails =>
+				val optionalAddressLines = List(trusteeDetails.addressLine2,
+					trusteeDetails.addressLine3,
+					trusteeDetails.addressLine4,
+					trusteeDetails.addressLine5,
+					countryCodes.getCountry(trusteeDetails.country.getOrElse(""))
+				)
+				concatAddress(optionalAddressLines, trusteeDetails.addressLine1)
+			case _ => ""
+		}
+	}
 
   final def concatEntity(optionalLines: List[Option[String]], existingEntityLines: String): String = {
     val definedStrings = optionalLines.flatten
@@ -368,13 +347,7 @@ class ERSUtil @Inject() (
       }
       .getOrElse(DEFAULT)
 
-  def trusteeLocation(trustee: TrusteeDetails): String =
-    trustee.country
-      .collect {
-        case c if c != DEFAULT_COUNTRY => OVERSEAS
-        case c                         => c
-      }
-      .getOrElse(DEFAULT)
+  def trusteeLocationMessage(trustee: TrusteeDetails): String = if (trustee.basedInUk) "ers_trustee_based.uk" else "ers_trustee_based.overseas"
 
   def addCompanyMessage(messages: Messages, schemeOpt: Option[String]): String =
     messages.apply(s"ers_group_summary.${schemeOpt.getOrElse("").toLowerCase}.add_company")

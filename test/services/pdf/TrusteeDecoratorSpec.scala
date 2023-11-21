@@ -38,10 +38,9 @@ class TrusteeDecoratorSpec
   "Trusstees Decorator" should {
 
     "add title and trustee's name to section" in {
-      val trusteeList =
-        new TrusteeDetailsList(List(new TrusteeDetails("trustee name", "address", None, None, None, None, None)))
-      val decorator   = new TrusteesDecorator(Some(trusteeList))
-      val output      = decorator.decorate
+      val trusteeList = new TrusteeDetailsList(List(new TrusteeDetails("trustee name", "address", None, None, None, None, None, false)))
+      val decorator = new TrusteesDecorator(Some(trusteeList))
+      val output = decorator.decorate
 
       output.contains(Messages("ers_trustee_summary.title")) shouldBe true
       output.contains("trustee name")                        shouldBe true

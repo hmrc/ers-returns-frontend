@@ -136,7 +136,7 @@ ers_scheme_organiser.addressLine3.label = Tref neu ddinas (dewisol)
 ers_scheme_organiser.addressLine4.label = Sir (dewisol)
 ers_scheme_organiser.postcode = Cod post (dewisol)
 ers_scheme_organiser.postcode.hint = Er enghraifft, AA1 1AA
-ers_scheme_organiser.country = Gwlad (dewisol)Cynllun Opsiwn Prynu Cyfranddaliadau Cwmni
+ers_scheme_organiser.country = Gwlad (dewisol)
 ers_scheme_organiser.company_reg_number = Rhif Cofrestru’r Cwmni (dewisol)
 ers_scheme_organiser.company_reg_number.hint = Dylai hyn fod yr un peth â’r hyn a restrir ar gofrestr Tŷ’r Cwmnïau. Mae’n naill ai 8 rhif neu 2 lythyren a 6 rhif.
 ers_scheme_organiser.corporation_tax_ref =Cyfeirnod Treth Gorfforaeth (dewisol)
@@ -547,6 +547,31 @@ ers_alt_amends.sip.alert = Mae ysgrifennydd y cwmni, neu’r person sy’n gweit
 ers_alt_amends.sip.err.message = Dewiswch yr holl addasiadau sy’n berthnasol
 ers_alt_amends.continue = Derbyn a mynd yn eich blaen
 
+#********************************************************************
+# trustee messages
+#********************************************************************
+
+ers_trustee.add = A oes angen i chi ychwanegu ymddiriedolwr arall?
+ers_trustee.add.err = Dewiswch Iawn os oes angen i chi ychwanegu ymddiriedolwr arall
+
+ers_trustee_name.title = Beth yw enw’r ymddiriedolwr?
+
+ers_trustee_based.title = Ymhle y mae’r ymddiriedolwr wedi’i leoli?
+ers_trustee_based.uk = Y DU
+ers_trustee_based.overseas = Tramor
+ers_trustee_based.sip.err.message = Dewiswch a yw’r ymddiriedolwr wedi’i leoli yn y DU neu dramor
+
+ers_trustee_address.title = Beth yw cyfeiriad yr ymddiriedolwr?
+ers_trustee_address.townOrCity = Tref neu Ddinas (dewisol)
+ers_trustee_address.county = Sir (dewisol)
+ers_trustee_address.postcode = Cod post (dewisol)
+
+ers_trustee_address.line1 = Cyfeiriad – llinell 1
+ers_trustee_address.line2 = Cyfeiriad – llinell 2 (dewisol)
+ers_trustee_address.line3 = Cyfeiriad – llinell 3 (dewisol)
+ers_trustee_address.line4 = Cyfeiriad – llinell 4 (dewisol)
+ers_trustee_address.line5 = Cyfeiriad – llinell 5 (dewisol)
+
 ers_trustee_details.title = Ychwanegu manylion yr ymddiriedolwr
 ers_trustee_details.question = Ymhle y mae’r ymddiriedolwr wedi’i leoli?
 ers_trustee_details.uk = Y DU
@@ -579,6 +604,8 @@ ers_trustee_details.err.address_line3 = Gwiriwch drydedd linell y cyfeiriad (mae
 ers_trustee_details.err.invalidChars.address_line3 = Gwiriwch drydedd linell y cyfeiriad (mae’n cynnwys cymeriadau annilys)
 ers_trustee_details.err.address_line4 = Gwiriwch bedwaredd linell y cyfeiriad (mae’n rhaid iddi gynnwys llai na 19 o gymeriadau)
 ers_trustee_details.err.invalidChars.address_line4 = Gwiriwch bedwaredd linell y cyfeiriad (mae’n cynnwys cymeriadau annilys)
+ers_trustee_details.err.address_line5 = Gwiriwch bumed linell y cyfeiriad (mae’n rhaid iddi gynnwys llai na 19 o gymeriadau)
+ers_trustee_details.err.invalidChars.address_line5 = Gwiriwch bumed linell y cyfeiriad (mae’n cynnwys cymeriadau annilys)
 ers_trustee_details.err.postcode =Gwiriwch y cod post (mae’n rhaid iddo fod yn ddilys ac yn cynnwys llai na 9 cymeriad)
 ers_trustee_summary.title = Ymddiriedolwyr y Cynllun Cymell Cyfranddaliadau hwn
 ers_trustee_summary.add_trustee = Ychwanegu ymddiriedolwr

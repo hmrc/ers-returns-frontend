@@ -33,19 +33,19 @@ import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class SchemeOrganiserController @Inject() (
-  val mcc: MessagesControllerComponents,
-  val authConnector: DefaultAuthConnector,
-  implicit val countryCodes: CountryCodes,
-  implicit val ersUtil: ERSUtil,
-  implicit val appConfig: ApplicationConfig,
-  globalErrorView: views.html.global_error,
-  schemeOrganiserView: views.html.scheme_organiser,
-  authAction: AuthAction
-) extends FrontendController(mcc)
-    with I18nSupport
-    with WithUnsafeDefaultFormBinding
-    with Logging {
+class SchemeOrganiserController @Inject()(
+                                           val mcc: MessagesControllerComponents,
+                                           val authConnector: DefaultAuthConnector,
+                                           implicit val countryCodes: CountryCodes,
+                                           implicit val ersUtil: ERSUtil,
+                                           implicit val appConfig: ApplicationConfig,
+                                           globalErrorView: views.html.global_error,
+                                           schemeOrganiserView: views.html.scheme_organiser,
+                                           authAction: AuthAction
+                                         ) extends FrontendController(mcc)
+  with I18nSupport
+  with WithUnsafeDefaultFormBinding
+  with Logging {
 
   implicit val ec: ExecutionContext = mcc.executionContext
 
@@ -56,8 +56,8 @@ class SchemeOrganiserController @Inject() (
   }
 
   def showSchemeOrganiserPage(
-    requestObject: RequestObject
-  )(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
+                               requestObject: RequestObject
+                             )(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
     logger.info(s"[SchemeOrganiserController][showSchemeOrganiserPage] schemeRef: ${requestObject.getSchemeReference}.")
     lazy val form = SchemeOrganiserDetails(
       "",
@@ -125,37 +125,27 @@ class SchemeOrganiserController @Inject() (
     }
   }
 
-  def showSchemeOrganiserSubmit(
-    requestObject: RequestObject
-  )(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] =
-    RsFormMappings
-      .schemeOrganiserForm()
-      .bindFromRequest()
-      .fold(
-        errors => {
-          val correctOrder                                     = errors.errors.map(_.key).distinct
-          val incorrectOrderGrouped                            = errors.errors.groupBy(_.key).map(_._2.head).toSeq
-          val correctOrderGrouped                              = correctOrder.flatMap(x => incorrectOrderGrouped.find(_.key == x))
-          val firstErrors: Form[models.SchemeOrganiserDetails] =
-            new Form[SchemeOrganiserDetails](errors.mapping, errors.data, correctOrderGrouped, errors.value)
-          Future.successful(Ok(schemeOrganiserView(requestObject, "", firstErrors)))
-        },
-        successful => {
-
-          logger.warn(
-            s"[SchemeOrganiserController][showSchemeOrganiserSubmit] schemeRef: ${requestObject.getSchemeReference}."
-          )
-
-          ersUtil.cache(ersUtil.SCHEME_ORGANISER_CACHE, successful, requestObject.getSchemeReference).map { _ =>
-            Redirect(routes.GroupSchemeController.groupSchemePage())
-          } recover { case e: Exception =>
-            logger.error(
-              s"[SchemeOrganiserController][showSchemeOrganiserSubmit] Save scheme organiser details failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}."
-            )
+  def showSchemeOrganiserSubmit(requestObject: RequestObject)
+                               (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
+    RsFormMappings.schemeOrganiserForm().bindFromRequest().fold(
+      errors => {
+        val correctOrder = errors.errors.map(_.key).distinct
+        val incorrectOrderGrouped = errors.errors.groupBy(_.key).map(_._2.head).toSeq
+        val correctOrderGrouped = correctOrder.flatMap(x => incorrectOrderGrouped.find(_.key == x))
+        val firstErrors: Form[models.SchemeOrganiserDetails] = new Form[SchemeOrganiserDetails](errors.mapping, errors.data, correctOrderGrouped, errors.value)
+        Future.successful(Ok(schemeOrganiserView(requestObject, "", firstErrors)))
+      },
+      successful => {
+        ersUtil.cache(ersUtil.SCHEME_ORGANISER_CACHE, successful, requestObject.getSchemeReference).map {
+          _ => Redirect(routes.GroupSchemeController.groupSchemePage())
+        } recover {
+          case e: Exception =>
+            logger.error(s"[SchemeOrganiserController][showSchemeOrganiserSubmit] Save scheme organiser details failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
             getGlobalErrorPage
-          }
         }
-      )
+      }
+    )
+  }
 
   def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result =
     Ok(
@@ -165,5 +155,4 @@ class SchemeOrganiserController @Inject() (
         "ers.global_errors.message"
       )(request, messages, appConfig)
     )
-
 }

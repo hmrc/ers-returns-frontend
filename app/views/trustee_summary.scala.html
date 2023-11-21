@@ -24,12 +24,14 @@
         govuk_wrapper: govuk_wrapper,
         formWithCSRF: FormWithCSRF,
         govukBackLink: GovukBackLink,
+        govukErrorSummary: GovukErrorSummary,
         govukSummaryList: GovukSummaryList,
         govukButton: GovukButton,
+        govukRadios: GovukRadios,
         hmrcPageHeading: HmrcPageHeading
 )
 
-@(requestObject: RequestObject, trustees: TrusteeDetailsList)(implicit request: Request[_], messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
+@(requestObject: RequestObject, trustees: TrusteeDetailsList, formHasError: Boolean = false)(implicit request: Request[_], messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 
 @summaryBuilder(trustee: TrusteeDetails, index: Int) = @{
     val trusteeNameSummary = Seq(
@@ -46,7 +48,7 @@
                 classes = "govuk-!-width-one-quarter",
                 items = Seq(
                     ActionItem(
-                        href = routes.TrusteeController.editTrustee(index).url,
+                        href = controllers.trustees.routes.TrusteeNameController.editQuestion(index).url,
                         content = Text(messages("ers.change_this")),
                         visuallyHiddenText = Some(messages("ers.change_this"))
                     )
@@ -62,13 +64,13 @@
             ),
             value = Value(
                 classes = "govuk-!-width-one-half",
-                content = Text(ersUtil.trusteeLocation(trustee))
+                content = Text(messages(ersUtil.trusteeLocationMessage(trustee)))
             ),
             actions = Some(Actions(
                 classes = "govuk-!-width-one-quarter",
                 items = Seq(
                     ActionItem(
-                        href = routes.TrusteeController.editTrustee(index).url,
+                        href = controllers.trustees.routes.TrusteeBasedInUkController.editQuestion(index).url,
                         content = Text(messages("ers.change_this")),
                         visuallyHiddenText = Some(messages("ers.change_this"))
                     )
@@ -88,7 +90,11 @@
                 classes = "govuk-!-width-one-quarter",
                 items = Seq(
                     ActionItem(
-                        href = routes.TrusteeController.editTrustee(index).url,
+                        href = if(trustee.basedInUk){
+                            controllers.trustees.routes.TrusteeAddressUkController.editQuestion(index).url
+                        } else {
+                            controllers.trustees.routes.TrusteeAddressOverseasController.editQuestion(index).url
+                        },
                         content = Text(messages("ers.change_this")),
                         visuallyHiddenText = Some(messages("ers.change_this"))
                     )
@@ -107,11 +113,21 @@
         attributes = Map("id" -> "back-link"), classes="js-enabled", content = HtmlContent(messages("ers.back"))
     ))
 
+    @if(formHasError) {
+        @govukErrorSummary(ErrorSummary(
+            title = Text(messages("validation.summary.heading")),
+            errorList = Seq(ErrorLink(
+                href = Some("#addTrustee"),
+                content = Text(messages("ers_trustee.add.err"))
+            ))
+        ))
+    }
+
     @hmrcPageHeading(PageHeading(
         text = messages("ers_trustee_summary.title")
     ))
 
-    @formWithCSRF(action = routes.TrusteeController.trusteeSummaryContinue()) {
+    @formWithCSRF(action = controllers.trustees.routes.TrusteeSummaryController.trusteeSummaryContinue()) {
 
         @for((trustee, index) <- trustees.trustees.zipWithIndex) {
             @govukSummaryList(SummaryList(
@@ -120,19 +136,40 @@
 
             <p class="govuk-body govuk-!-margin-bottom-8 govuk-link">
                <a class="govuk-link" href="">
-                 <input class="govuk-link link_button" type="submit" formaction="@routes.TrusteeController.deleteTrustee(index)" value='@{messages("ers.delete") + " " + trustee.name}'>
+                 <input class="govuk-link link_button" type="submit" formaction="@controllers.trustees.routes.TrusteeSummaryController.deleteTrustee(index)" value='@{messages("ers.delete") + " " + trustee.name}'>
                </a>
             </p>
-
         }
 
-        <a class="govuk-link govuk-inset-text govuk-!-display-inline-block govuk-!-margin-top-0 govuk-!-width-full" href="@routes.TrusteeController.trusteeDetailsPage()">@Html(messages("ers_trustee_summary.add_trustee"))</a>
+        @govukRadios(Radios(
+            name = "addTrustee",
+            attributes = Map("id" -> "addTrustee"),
+            errorMessage = if(formHasError) Some(ErrorMessage(content = Text(messages("ers_trustee.add.err")))) else None,
+            fieldset = Some(Fieldset(
+                legend = Some(Legend(
+                    content = Text(messages("ers_trustee.add")),
+                    classes = "govuk-fieldset__legend govuk-fieldset__legend govuk-fieldset__legend--m"
+                )),
+            )),
+            items = Seq(
+                RadioItem(
+                    id = Some("yes"),
+                    value = Some("0"),
+                    content = Text(messages("ers.yes"))
+                ),
+                RadioItem(
+                    id = Some("no"),
+                    value = Some("1"),
+                    content = Text(messages("ers.no"))
+                )
+            ),
+            classes = "govuk-radios--inline"
+        ))
 
         @govukButton(Button(
             inputType = Some("submit"),
             content = Text(messages("ers.continue")),
             attributes = Map("id" -> "continue"),
-            disabled = trustees.trustees.isEmpty
         ))
     }
 }

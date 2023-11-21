@@ -219,7 +219,7 @@ class CsvFileUploadController @Inject() (
         }
         .forall(names => names._1 == names._2)
       if (uploadedWithCorrectName) {
-        validateCsv(csvCallbackData, schemeInfo)
+        validateCsv(csvCallbackData, schemeInfo) //HERE IS CALL TO FILE-VALIDATOR
       } else {
         logger.info(s"[CsvFileUploadController][checkFileNames] User uploaded the wrong file")
         Future(getFileUploadProblemPage())
@@ -240,7 +240,7 @@ class CsvFileUploadController @Inject() (
     ersConnector.validateCsvFileData(csvCallbackData, schemeInfo).map { res =>
       res.status match {
         case OK       =>
-          logger.warn(
+          logger.info(
             s"[CsvFileUploadController][validateCsv] Validation is successful for schemeRef: ${schemeInfo.schemeRef}, " +
               s"timestamp: ${System.currentTimeMillis()}."
           )
@@ -279,7 +279,9 @@ class CsvFileUploadController @Inject() (
     (for {
       requestObject <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
       fileType      <- ersUtil.fetch[CheckFileType](ersUtil.FILE_TYPE_CACHE, requestObject.getSchemeReference)
-    } yield Ok(fileUploadErrorsView(requestObject, fileType.checkFileType.getOrElse("")))).recover {
+    } yield {
+      Ok(fileUploadErrorsView(requestObject, fileType.checkFileType.getOrElse("")))
+    }).recover {
       case e: Exception =>
         logger.error(
           s"[CsvFileUploadController][processValidationFailure] failed to save callback data list with exception ${e.getMessage}, " +

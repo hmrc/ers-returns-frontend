@@ -83,21 +83,92 @@ case class SchemeOrganiserDetails(
       corporationRef.getOrElse("")
     ).filter(_.nonEmpty)
 }
+
 object SchemeOrganiserDetails {
   implicit val format: OFormat[SchemeOrganiserDetails] = Json.format[SchemeOrganiserDetails]
 }
 
 case class TrusteeDetails(
-  name: String,
-  addressLine1: String,
-  addressLine2: Option[String],
-  addressLine3: Option[String],
-  addressLine4: Option[String],
-  country: Option[String],
-  postcode: Option[String]
-)
+                              name: String,
+                              addressLine1: String,
+                              addressLine2: Option[String],
+                              addressLine3: Option[String],
+                              addressLine4: Option[String],
+                              country: Option[String],
+                              addressLine5: Option[String], // Postcode for UK address
+                              basedInUk: Boolean
+                              ) {
+
+  def replaceName(trusteeName: TrusteeName): TrusteeDetails = {
+    this.copy(name = trusteeName.name)
+  }
+
+  def replaceBasedInUk(trusteeBasedInUk: TrusteeBasedInUk): TrusteeDetails = {
+    this.copy(basedInUk = trusteeBasedInUk.basedInUk)
+  }
+
+  def replaceAddress(trusteeAddress: TrusteeAddress): TrusteeDetails = {
+    this.copy(
+      addressLine1 = trusteeAddress.addressLine1,
+      addressLine2 = trusteeAddress.addressLine2,
+      addressLine3 = trusteeAddress.addressLine3,
+      addressLine4 = trusteeAddress.addressLine4,
+      country      = trusteeAddress.country,
+      addressLine5 = trusteeAddress.addressLine5
+    )
+  }
+
+  def updatePart[A](part: A): TrusteeDetails = {
+    part match {
+      case name: TrusteeName => replaceName(name)
+      case basedInUk: TrusteeBasedInUk => replaceBasedInUk(basedInUk)
+      case address: TrusteeAddress => replaceAddress(address)
+      case _ => this
+    }
+  }
+}
+
 object TrusteeDetails {
+
+  def apply(name: TrusteeName, address: TrusteeAddress): TrusteeDetails = {
+    TrusteeDetails(
+      name.name,
+      address.addressLine1,
+      address.addressLine2,
+      address.addressLine3,
+      address.addressLine4,
+      address.country,
+      address.addressLine5,
+      address.country.fold(false)(_.equals("UK"))
+    )
+  }
+
   implicit val format: OFormat[TrusteeDetails] = Json.format[TrusteeDetails]
+}
+
+case class TrusteeBasedInUk(basedInUk: Boolean)
+
+object TrusteeBasedInUk {
+  implicit val format: OFormat[TrusteeBasedInUk] = Json.format[TrusteeBasedInUk]
+}
+
+case class TrusteeName(name: String)
+
+object TrusteeName {
+  implicit val format: OFormat[TrusteeName] = Json.format[TrusteeName]
+}
+
+case class TrusteeAddress(
+                                   addressLine1: String,
+                                   addressLine2: Option[String],
+                                   addressLine3: Option[String],
+                                   addressLine4: Option[String],
+                                   addressLine5: Option[String],
+                                   country: Option[String]
+                                 )
+
+object TrusteeAddress {
+  implicit val format: OFormat[TrusteeAddress] = Json.format[TrusteeAddress]
 }
 
 case class TrusteeDetailsList(trustees: List[TrusteeDetails])
@@ -192,6 +263,9 @@ case class RequestObject(
   private def getNVPair(paramName: String, value: Option[String]): String =
     value.map(paramName + "=" + _ + ";").getOrElse("")
 }
+
 object RequestObject {
   implicit val formatRequestObject: OFormat[RequestObject] = Json.format[RequestObject]
 }
+
+case class AddTrustee(addTrustee: Boolean)

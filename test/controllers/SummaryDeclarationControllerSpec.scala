@@ -93,13 +93,13 @@ class SummaryDeclarationControllerSpec
     new CompanyDetails(Fixtures.companyName, "Adress Line 1", None, None, None, None, None, None, None)
   val gscomps: CompanyDetailsList             = new CompanyDetailsList(List(gscomp))
 
-  val reportableEvents: ReportableEvents               = new ReportableEvents(Some("1"))
-  val fileTypeCSV: CheckFileType                       = new CheckFileType(Some("csv"))
-  val fileTypeODS: CheckFileType                       = new CheckFileType(Some("ods"))
-  val csvFilesCallbackList: UpscanCsvFilesCallbackList = incompleteCsvList
-  val trustees: TrusteeDetails                         = new TrusteeDetails("T Name", "T Add 1", None, None, None, None, None)
-  val trusteesList: TrusteeDetailsList                 = new TrusteeDetailsList(List(trustees))
-  val fileNameODS: String                              = "test.osd"
+	val reportableEvents: ReportableEvents = new ReportableEvents(Some("1"))
+	val fileTypeCSV: CheckFileType = new CheckFileType(Some("csv"))
+	val fileTypeODS: CheckFileType = new CheckFileType(Some("ods"))
+	val csvFilesCallbackList: UpscanCsvFilesCallbackList = incompleteCsvList
+	val trustees: TrusteeDetails = new TrusteeDetails("T Name", "T Add 1", None, None, None, None, None, false)
+	val trusteesList: TrusteeDetailsList = new TrusteeDetailsList(List(trustees))
+	val fileNameODS: String = "test.osd"
 
   val commonAllDataMap: Map[String, JsValue] = Map(
     "scheme-type"             -> Json.toJson("1"),
@@ -115,11 +115,10 @@ class SummaryDeclarationControllerSpec
 
   class TestErsUtil(fetchAllMapVal: String) extends ERSUtil(mockSessionCache, mockShortLivedCache, mockAppConfig) {
 
-    override def cache[T](key: String, body: T, cacheId: String)(implicit
-      hc: HeaderCarrier,
-      formats: json.Format[T]
-    ): Future[CacheMap] =
-      Future.successful(CacheMap("fakeId", Map()))
+		override def cache[T](key: String, body: T, cacheId: String)
+												 (implicit hc: HeaderCarrier, formats: json.Format[T]): Future[CacheMap] = {
+			Future.successful(CacheMap("fakeId", Map()))
+		}
 
     override def getAllData(bundleRef: String, ersMetaData: ErsMetaData)(implicit
       hc: HeaderCarrier,

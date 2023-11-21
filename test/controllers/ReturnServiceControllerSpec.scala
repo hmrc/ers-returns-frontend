@@ -100,13 +100,13 @@ class ReturnServiceControllerSpec
       override val accessDeniedUrl: String   = "/denied.html"
       val cacheResponse: Future[CacheMap]    = Future.successful(CacheMap("1", Map("key" -> JsString("result"))))
 
-      when(mockHttp.POST[ValidatorData, HttpResponse](any(), any(), any())(any(), any(), any(), any()))
-        .thenReturn(Future.successful(HttpResponse(OK, "")))
-      when(mockErsUtil.cache(any(), any())(any(), any(), any())).thenReturn(cacheResponse)
-      when(mockErsUtil.cache(any(), any(), any())(any(), any())).thenReturn(cacheResponse)
-      when(mockErsUtil.fetch[RequestObject](any(), any())(any(), any()))
-        .thenReturn(Future.successful(rscAsRequestObject))
-    }
+    when(mockHttp.POST[ValidatorData, HttpResponse](any(), any(), any())(any(), any(), any(), any()))
+			.thenReturn(Future.successful(HttpResponse(OK, "")))
+		when(mockErsUtil.cache(any(), any())(any(), any(), any())).thenReturn(cacheResponse)
+		when(mockErsUtil.cache(any(), any(),any())(any(), any())).thenReturn(cacheResponse)
+		when(mockErsUtil.remove(any())(any(), any())).thenReturn(Future.successful(HttpResponse.apply(200, "")))
+		when(mockErsUtil.fetch[RequestObject](any(), any())(any(), any())).thenReturn(Future.successful(rscAsRequestObject))
+  }
 
   "Calling ReturnServiceController.cacheParams with existing cache storage for the given schemeId and schemeRef" should {
     "retrieve the stored cache and redirect to the initial start page" in {

@@ -53,16 +53,17 @@ class ReturnServiceController @Inject() (
 
   def cacheParams(ersRequestObject: RequestObject)(implicit request: Request[_], hc: HeaderCarrier): Future[Result] = {
     implicit val formatRSParams: OFormat[RequestObject] = Json.format[RequestObject]
-
     logger.debug("Request Object created --> " + ersRequestObject)
-    ersUtil.cache(ersUtil.ersMetaData, ersRequestObject.toErsMetaData, ersRequestObject.getSchemeReference).flatMap {
-      _ =>
-        logger.info(s"[ReturnServiceController][cacheParams]Meta Data Cached --> ${ersRequestObject.toErsMetaData}")
-        ersUtil.cache(ersUtil.ersRequestObject, ersRequestObject) flatMap { _ =>
-          logger.info(s"[ReturnServiceController][cacheParams] Request Object Cached -->  $ersRequestObject")
-          Future.successful(showInitialStartPage(ersRequestObject)(request))
-        }
-    } recover { case e: Exception =>
+    val futureResult = for {
+      _ <- ersUtil.remove(ersRequestObject.getSchemeReference)
+      _ <- ersUtil.cache(ersUtil.ersMetaData, ersRequestObject.toErsMetaData, ersRequestObject.getSchemeReference)
+      _ <- ersUtil.cache(ersUtil.ersRequestObject, ersRequestObject)
+    } yield {
+      logger.info(s"[ReturnServiceController][cacheParams]Meta Data Cached --> ${ersRequestObject.toErsMetaData}")
+      logger.info(s"[ReturnServiceController][cacheParams] Request Object Cached -->  $ersRequestObject")
+      (showInitialStartPage(ersRequestObject)(request))
+    }
+    futureResult recover { case e: Exception =>
       logger.warn(s"[ReturnServiceController][cacheParams] Caught exception ${e.getMessage}", e)
       getGlobalErrorPage
     }

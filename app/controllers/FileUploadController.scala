@@ -30,8 +30,8 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils._
-
 import javax.inject.{Inject, Singleton}
+
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -159,12 +159,10 @@ class FileUploadController @Inject() (
   ): Future[Result] = {
     val schemeRef = schemeInfo.schemeRef
     ersConnector.validateFileData(callbackData, schemeInfo).map { res =>
-      logger.info(
-        s"[FileUploadController][handleValidationResponse] Response from validator: ${res.status}, timestamp: ${System.currentTimeMillis()}."
-      )
+      logger.info(s"[FileUploadController][handleValidationResponse] Response from validator: ${res.status}, timestamp: ${System.currentTimeMillis()}.")
       res.status match {
         case OK       =>
-          logger.warn(
+          logger.info(
             s"[FileUploadController][handleValidationResponse] Validation is successful for schemeRef: $schemeRef, timestamp: ${System.currentTimeMillis()}."
           )
           ersUtil.cache(ersUtil.VALIDATED_SHEEETS, res.body, schemeRef)
@@ -188,7 +186,9 @@ class FileUploadController @Inject() (
     (for {
       requestObject <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
       fileType      <- ersUtil.fetch[CheckFileType](ersUtil.FILE_TYPE_CACHE, requestObject.getSchemeReference)
-    } yield Ok(fileUploadErrorsView(requestObject, fileType.checkFileType.getOrElse("")))) recover {
+    } yield {
+      Ok(fileUploadErrorsView(requestObject, fileType.checkFileType.getOrElse("")))
+    }) recover {
       case e: Throwable =>
         logger.error(
           s"[FileUploadController][validationFailure] failed with Exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.",

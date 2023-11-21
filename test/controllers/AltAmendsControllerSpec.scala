@@ -94,8 +94,8 @@ class AltAmendsControllerSpec
 
         when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any())).thenReturn(requestObject)
 
-        when(mockErsUtil.cache(ArgumentMatchers.eq("alt-activity"), any(), any())(any(), any()))
-          .thenReturn(cache)
+      when(mockErsUtil.cache(ArgumentMatchers.eq("alt-activity"), any(), any())(any(), any()))
+				.thenReturn(cache)
 
         when(mockErsUtil.getPageElement(any(), any(), any(), any())(any())).thenCallRealMethod()
       }
@@ -261,10 +261,10 @@ class AltAmendsControllerSpec
       when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any()))
         .thenReturn(requestObject)
       when(mockErsUtil.fetchOption[AltAmends](refEq("alt-amends-cache-controller"), any())(any(), any()))
-        .thenReturn(altAmends)
+				.thenReturn(altAmends)
       when(mockErsUtil.cache(refEq("alt-amends-cache-controller"), any(), any())(any(), any()))
-        .thenReturn(cache)
-      when(mockErsUtil.getPageElement(any(), any(), any(), any())(any())).thenReturn("")
+				.thenReturn(cache)
+			when(mockErsUtil.getPageElement(any(), any(),any(), any())(any())).thenReturn("")
     }
 
     "give a redirect status (to company authentication frontend) on GET if user is not authenticated" in {

@@ -397,7 +397,7 @@ class PageBuilderTest
       val scheme: String = SCHEME_SIP
       val pageId: String = PAGE_ALT_ACTIVITY
       val result: String = getPageBackLink(scheme, pageId)
-      result shouldBe routes.TrusteeController.trusteeSummaryPage().toString
+      result shouldBe trustees.routes.TrusteeSummaryController.trusteeSummaryPage().toString
     }
 
     "return the correct back link for placement on alteration amends page" in new TestPageBuilder {

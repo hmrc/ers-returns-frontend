@@ -26,7 +26,6 @@ case class ERSAuthData(
   empRef: EmpRef = EmpRef("", "")
 ) {
 
-  def getEnrolment(key: String): Option[Enrolment] = enrolments.find(_.key.equalsIgnoreCase(key))
-  def isAgent: Boolean                             = (affinityGroup contains Agent) || getEnrolment("HMRC-AGENT-AGENT").isDefined
-  def hasEpaye: Boolean                            = getEnrolment("IR-PAYE").isDefined
+	def getEnrolment(key: String): Option[Enrolment] = enrolments.find(_.key.equalsIgnoreCase(key))
+	def isAgent: Boolean = (affinityGroup contains Agent) || getEnrolment("HMRC-AGENT-AGENT").isDefined
 }
