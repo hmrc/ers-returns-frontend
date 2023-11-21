@@ -59,6 +59,7 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
       requestObject      <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
       companyDetailsList <- ersUtil.fetch[CompanyDetailsList](ersUtil.COMPANIES_CACHE, requestObject.getSchemeReference)
     } yield {
+      println(companyDetailsList)
       Ok(manualCompanyDetailsView(requestObject, index, companyDetailsList))
     }) recover {
       case e: Exception =>

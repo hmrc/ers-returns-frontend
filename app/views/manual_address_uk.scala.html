@@ -133,6 +133,14 @@
 			)
 		))
 
+		@govukInput(Input(
+			classes = "govuk-visually-hidden",
+			id = "country",
+			name = "country",
+			autocomplete = None,
+			value = Some("UK"),
+		))
+
 		@govukButton(Button(
 			inputType = Some("submit"),
 			content = Text(messages("ers_manual_company_details.continue")),
