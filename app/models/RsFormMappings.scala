@@ -160,7 +160,7 @@ object RsFormMappings {
   )(CompanyAddress.apply)(CompanyAddress.unapply))
 
   def companyAddressOverseasForm()(implicit messages: Messages): Form[CompanyAddress] = Form(mapping(
-    companyAddressFields.addressLine1 -> text.verifying(Messages("ers_manual_company_details.err.address_line1_required"), _.nonEmpty)
+    companyAddressFields.addressLine1 -> text.verifying(Messages("ers_manual_company_details.err.summary.address_line1_required"), _.nonEmpty)
       .verifying(Messages("ers_manual_company_details.err.address_line1"), so => checkAddressLength(so, "addressLine1"))
       .verifying(Messages("ers_manual_company_details.err.invalidChars.address_line1"), so => validInputCharacters(so, addresssRegx)),
     companyAddressFields.addressLine2 -> optional(text
@@ -172,9 +172,9 @@ object RsFormMappings {
     companyAddressFields.addressLine4 -> optional(text
       .verifying(Messages("ers_manual_company_details.err.address_line4"), so => checkAddressLength(so, "addressLine4"))
       .verifying(Messages("ers_manual_company_details.err.invalidChars.address_line4"), so => validInputCharacters(so, addresssRegx))),
-    companyAddressFields.addressLine5 -> optional(text)
-      .transform((x: Option[String]) => x.map(_.toUpperCase()), (z: Option[String]) => z.map(_.toUpperCase()))
-      .verifying(Messages("ers_manual_company_details.err.postcode"), so => isValidPostcode(so)),
+    companyAddressFields.addressLine5 -> optional(text
+      .verifying(Messages("ers_manual_company_details.err.address_line5"), so => checkAddressLength(so, "addressLine5"))
+      .verifying(Messages("ers_manual_company_details.err.invalidChars.address_line5"), so => validInputCharacters(so, addresssRegx))),
     companyAddressFields.country -> optional(text
       .verifying(pattern(addresssRegx.r, error = Messages("ers_scheme_organiser.err.summary.invalid_country"))))
   )(CompanyAddress.apply)(CompanyAddress.unapply))

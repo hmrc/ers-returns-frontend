@@ -55,17 +55,17 @@ class CompanyAddressOverseasController  @Inject()(val mcc: MessagesControllerCom
   def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier): Future[Result] = {
     if (edit) {
       Future.successful(Redirect(controllers.routes.GroupSchemeController.manualCompanyDetailsPage()))
-    }
-    companyDetailsService.updateCompanyCache(index).map { _ =>
-      Redirect(controllers.routes.GroupSchemeController.manualCompanyDetailsPage())
+    } else {
+      companyDetailsService.updateCompanyCache(index).map { _ =>
+        Redirect(controllers.routes.GroupSchemeController.manualCompanyDetailsPage())
+      }
     }
   }
 
-  def form(implicit request: Request[AnyContent]): Form[CompanyAddress] = RsFormMappings.companyAddressOverseasForm()
+    def form(implicit request: Request[AnyContent]): Form[CompanyAddress] = RsFormMappings.companyAddressOverseasForm()
 
-  def view(requestObject: RequestObject, index: Int, companyAddressOverseasForm: Form[CompanyAddress], edit: Boolean = false)
-          (implicit request: Request[AnyContent], hc: HeaderCarrier): Html = {
-    companyAddressOverseasView(requestObject, index, companyAddressOverseasForm, edit)
-  }
-
+    def view(requestObject: RequestObject, index: Int, companyAddressOverseasForm: Form[CompanyAddress], edit: Boolean = false)
+            (implicit request: Request[AnyContent], hc: HeaderCarrier): Html = {
+      companyAddressOverseasView(requestObject, index, companyAddressOverseasForm, edit)
+    }
 }
