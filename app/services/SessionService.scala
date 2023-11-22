@@ -18,34 +18,31 @@ package services
 
 import config.ERSFileValidatorSessionCache
 import models.upscan.{NotStarted, UploadStatus, UploadedSuccessfully}
-import play.api.mvc.Request
 import uk.gov.hmrc.http.HeaderCarrier
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-
-class SessionService @Inject()(sessionCache: ERSFileValidatorSessionCache)(implicit ec: ExecutionContext) {
+class SessionService @Inject() (sessionCache: ERSFileValidatorSessionCache)(implicit ec: ExecutionContext) {
 
   val CALCULATION_RESULTS_KEY: String = "calculation_results_key"
-  val CALLBACK_DATA_KEY = "callback_data_key"
-  val SCENARIO_KEY = "scenario"
+  val CALLBACK_DATA_KEY               = "callback_data_key"
+  val SCENARIO_KEY                    = "scenario"
 
-  def createCallbackRecord(implicit request: Request[_], hc: HeaderCarrier): Future[Any] = {
+  def createCallbackRecord(implicit hc: HeaderCarrier): Future[Any] =
     sessionCache.cache[UploadStatus](CALLBACK_DATA_KEY, NotStarted)
-  }
 
-  def updateCallbackRecord(sessionId: String, uploadStatus: UploadStatus)(implicit request: Request[_], hc: HeaderCarrier): Future[Any] =
+  def updateCallbackRecord(sessionId: String, uploadStatus: UploadStatus)(implicit hc: HeaderCarrier): Future[Any] =
     sessionCache.cache(sessionCache.defaultSource, sessionId, CALLBACK_DATA_KEY, uploadStatus)
 
-  def getCallbackRecord(implicit request: Request[_], hc: HeaderCarrier): Future[Option[UploadStatus]] =
+  def getCallbackRecord(implicit hc: HeaderCarrier): Future[Option[UploadStatus]] =
     sessionCache.fetchAndGetEntry[UploadStatus](CALLBACK_DATA_KEY)
 
-  def getSuccessfulCallbackRecord(implicit request: Request[_], hc: HeaderCarrier): Future[Option[UploadedSuccessfully]] =
+  def getSuccessfulCallbackRecord(implicit hc: HeaderCarrier): Future[Option[UploadedSuccessfully]] =
     getCallbackRecord.map {
       _.flatMap {
         case upload: UploadedSuccessfully => Some(upload)
-        case _ => None
+        case _                            => None
       }
     }
 }

@@ -36,21 +36,21 @@ import utils.{ERSFakeApplicationConfig, ErsTestHelper, UpscanData}
 
 import controllers.internal.FileUploadCallbackController
 
-
 import scala.concurrent.{ExecutionContext, Future}
 
-class FileUploadCallbackControllerSpec extends PlaySpec
-  with MockitoSugar
-  with ERSFakeApplicationConfig
-  with UpscanData
-  with ErsTestHelper
-  with GuiceOneAppPerSuite {
+class FileUploadCallbackControllerSpec
+    extends PlaySpec
+    with MockitoSugar
+    with ERSFakeApplicationConfig
+    with UpscanData
+    with ErsTestHelper
+    with GuiceOneAppPerSuite {
 
   val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
     messagesActionBuilder,
     DefaultActionBuilder(stubBodyParser[AnyContent]()),
     cc.parsers,
-    fakeApplication.injector.instanceOf[MessagesApi],
+    fakeApplication().injector.instanceOf[MessagesApi],
     cc.langs,
     cc.fileMimeTypes,
     ExecutionContext.global
@@ -58,7 +58,7 @@ class FileUploadCallbackControllerSpec extends PlaySpec
 
   implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
 
-  implicit lazy val mat: Materializer = app.materializer
+  implicit lazy val mat: Materializer    = app.materializer
   val mockSessionService: SessionService = mock[SessionService]
 
   object TestFileUploadCallbackController extends FileUploadCallbackController(mockMCC, mockSessionService)
@@ -69,31 +69,34 @@ class FileUploadCallbackControllerSpec extends PlaySpec
     "update callback" when {
       "Upload status is UpscanReadyCallback" in {
         val uploadStatusCaptor: ArgumentCaptor[UploadStatus] = ArgumentCaptor.forClass(classOf[UploadStatus])
-        val request = FakeRequest(controllers.internal.routes.FileUploadCallbackController.callback(sessionId))
+        val request                                          = FakeRequest(controllers.internal.routes.FileUploadCallbackController.callback(sessionId))
           .withBody(Json.toJson(readyCallback))
 
-        when(mockSessionService.updateCallbackRecord(meq(sessionId), uploadStatusCaptor.capture())(any[Request[_]], any[HeaderCarrier]))
+        when(mockSessionService.updateCallbackRecord(meq(sessionId), uploadStatusCaptor.capture())(any[HeaderCarrier]))
           .thenReturn(Future.successful(()))
 
         val result = TestFileUploadCallbackController.callback(sessionId)(request)
 
         status(result) mustBe OK
-        uploadStatusCaptor.getValue mustBe UploadedSuccessfully(uploadDetails.fileName, readyCallback.downloadUrl.toExternalForm)
-        verify(mockSessionService).updateCallbackRecord(meq(sessionId), any[UploadedSuccessfully])(any[Request[_]], any[HeaderCarrier])
+        uploadStatusCaptor.getValue mustBe UploadedSuccessfully(
+          uploadDetails.fileName,
+          readyCallback.downloadUrl.toExternalForm
+        )
+        verify(mockSessionService).updateCallbackRecord(meq(sessionId), any[UploadedSuccessfully])(any[HeaderCarrier])
       }
 
       "Upload status is failed" in {
         val uploadStatusCaptor: ArgumentCaptor[UploadStatus] = ArgumentCaptor.forClass(classOf[UploadStatus])
-        val request = FakeRequest(controllers.internal.routes.FileUploadCallbackController.callback(sessionId))
+        val request                                          = FakeRequest(controllers.internal.routes.FileUploadCallbackController.callback(sessionId))
           .withBody(Json.toJson(failedCallback))
 
-        when(mockSessionService.updateCallbackRecord(meq(sessionId), uploadStatusCaptor.capture())(any[Request[_]], any[HeaderCarrier]))
+        when(mockSessionService.updateCallbackRecord(meq(sessionId), uploadStatusCaptor.capture())(any[HeaderCarrier]))
           .thenReturn(Future.successful(()))
 
         val result = TestFileUploadCallbackController.callback(sessionId)(request)
         status(result) mustBe OK
         uploadStatusCaptor.getValue mustBe Failed
-        verify(mockSessionService).updateCallbackRecord(meq(sessionId), meq(Failed))(any[Request[_]], any[HeaderCarrier])
+        verify(mockSessionService).updateCallbackRecord(meq(sessionId), meq(Failed))(any[HeaderCarrier])
       }
     }
 
@@ -102,7 +105,7 @@ class FileUploadCallbackControllerSpec extends PlaySpec
         val request = FakeRequest(controllers.internal.routes.FileUploadCallbackController.callback(sessionId))
           .withBody(Json.toJson(failedCallback))
 
-        when(mockSessionService.updateCallbackRecord(meq(sessionId), any[UploadStatus])(any[Request[_]], any[HeaderCarrier]))
+        when(mockSessionService.updateCallbackRecord(meq(sessionId), any[UploadStatus])(any[HeaderCarrier]))
           .thenReturn(Future.failed(new Exception("Mock Session Service Exception")))
         val result = TestFileUploadCallbackController.callback(sessionId)(request)
         status(result) mustBe INTERNAL_SERVER_ERROR

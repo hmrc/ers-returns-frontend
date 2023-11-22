@@ -17,32 +17,32 @@
 package config
 
 import play.api.Configuration
-import uk.gov.hmrc.crypto.{ApplicationCrypto, CryptoWithKeysFromConfig, Decrypter, Encrypter}
+import uk.gov.hmrc.crypto.{ApplicationCrypto, Decrypter, Encrypter}
+import uk.gov.hmrc.http.HttpClient
 import uk.gov.hmrc.http.cache.client.{SessionCache, ShortLivedCache, ShortLivedHttpCaching}
-import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
 
 import javax.inject.Inject
 
-class ERSFileValidatorSessionCache @Inject()(val http: DefaultHttpClient,
-																						 appConfig: ApplicationConfig
-																						) extends SessionCache {
-	lazy val defaultSource: String = appConfig.appName
-	lazy val baseUri: String = appConfig.sessionCacheBaseUri
-	lazy val domain: String = appConfig.sessionCacheDomain
+class ERSFileValidatorSessionCache @Inject() (val http: HttpClient, appConfig: ApplicationConfig) extends SessionCache {
+  lazy val defaultSource: String = appConfig.appName
+  lazy val baseUri: String       = appConfig.sessionCacheBaseUri
+  lazy val domain: String        = appConfig.sessionCacheDomain
 }
 
-class ERSShortLivedHttpCache @Inject()(val http: DefaultHttpClient,
-																			 appConfig: ApplicationConfig
-																			) extends ShortLivedHttpCaching {
-	override lazy val defaultSource: String = appConfig.appName
-	lazy val baseUri: String = appConfig.shortLivedCacheBaseUri
-	lazy val domain: String = appConfig.shortLivedCacheDomain
+class ERSShortLivedHttpCache @Inject() (val http: HttpClient, appConfig: ApplicationConfig)
+    extends ShortLivedHttpCaching {
+  override lazy val defaultSource: String = appConfig.appName
+  lazy val baseUri: String                = appConfig.shortLivedCacheBaseUri
+  lazy val domain: String                 = appConfig.shortLivedCacheDomain
 }
 
-class ERSShortLivedCache @Inject()(val http: DefaultHttpClient,
-																	appConfig: ApplicationConfig,
-																	 val configuration: Configuration
-																 ) extends ShortLivedCache {
-	def shortLiveCache: ShortLivedHttpCaching = new ERSShortLivedHttpCache(http, appConfig)
-	override implicit lazy val crypto: Encrypter with Decrypter = new ApplicationCrypto(configuration.underlying).JsonCrypto
+class ERSShortLivedCache @Inject() (
+  val http: HttpClient,
+  appConfig: ApplicationConfig,
+  val configuration: Configuration
+) extends ShortLivedCache {
+  def shortLiveCache: ShortLivedHttpCaching                   = new ERSShortLivedHttpCache(http, appConfig)
+  override implicit lazy val crypto: Encrypter with Decrypter = new ApplicationCrypto(
+    configuration.underlying
+  ).JsonCrypto
 }

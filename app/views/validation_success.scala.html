@@ -22,7 +22,7 @@
         hmrcPageHeading: HmrcPageHeading
 )
 
-@(implicit request: Request[AnyRef], messages: Messages, appConfig: ApplicationConfig)
+@(implicit request: Request[_], messages: Messages, appConfig: ApplicationConfig)
 
 @govuk_wrapper(title = messages("ers.app_title")) {
 

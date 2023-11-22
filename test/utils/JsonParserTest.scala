@@ -16,26 +16,30 @@
 
 package utils
 
-import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.OptionValues
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
-import controllers._
+import org.scalatestplus.mockito.MockitoSugar
 
-class JsonParserTest extends AnyWordSpecLike with Matchers with OptionValues with ERSFakeApplicationConfig with MockitoSugar {
-	class TestJsonParser extends JsonParser
-	val testJsonParser = new TestJsonParser
+class JsonParserTest
+    extends AnyWordSpecLike
+    with Matchers
+    with OptionValues
+    with ERSFakeApplicationConfig
+    with MockitoSugar {
+  class TestJsonParser extends JsonParser
+  val testJsonParser = new TestJsonParser
 
-	"getSubmissionJson" should {
-		"return valid json for a summary submission to ETMP" in {
-			val schemeRef = "AA0000000000000"
-			val schemeType = "CSOP"
-			val taxYear = "2014/15"
-			val submissionType = "EOY-RETURN"
-			val result = testJsonParser.getSubmissionJson(schemeRef, schemeType, taxYear, submissionType)
-			val schemeReference = (result \ "ERSSubmission" \ "schemeReference").as[String]
-			schemeReference shouldBe "AA0000000000000"
-		}
-	}
+  "getSubmissionJson" should {
+    "return valid json for a summary submission to ETMP" in {
+      val schemeRef       = "AA0000000000000"
+      val schemeType      = "CSOP"
+      val taxYear         = "2014/15"
+      val submissionType  = "EOY-RETURN"
+      val result          = testJsonParser.getSubmissionJson(schemeRef, schemeType, taxYear, submissionType)
+      val schemeReference = (result \ "ERSSubmission" \ "schemeReference").as[String]
+      schemeReference shouldBe "AA0000000000000"
+    }
+  }
 
 }

@@ -20,13 +20,12 @@ import models.SchemeOrganiserDetails
 import play.api.i18n.Messages
 import utils.CountryCodes
 
-class SchemeOrganiserDetailsDecorator(title: String,
-																			schemeOrganiser: SchemeOrganiserDetails,
-																			countryCodes: CountryCodes
-																			) extends Decorator {
+class SchemeOrganiserDetailsDecorator(
+  title: String,
+  schemeOrganiser: SchemeOrganiserDetails,
+  countryCodes: CountryCodes
+) extends Decorator {
 
-
-  def decorate(implicit messages: Messages): String = {
+  def decorate(implicit messages: Messages): String =
     buildEntryMultiple(title, schemeOrganiser.toArray(countryCodes))
-  }
 }

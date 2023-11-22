@@ -537,57 +537,57 @@ ers_check_csv_file.err.message = Select the .csv files you need to upload as par
 ers_check_csv_options.hint = Select all that apply
 
 ers_check_csv_file.csop.file0.description = Options granted
-ers_check_csv_file.csop.file0.file_name = CSOP_OptionsGranted_V3.csv
+ers_check_csv_file.csop.file0.file_name = CSOP_OptionsGranted_V4.csv
 ers_check_csv_file.csop.file1.description = Options released (including exchanges) cancelled or lapsed in year
-ers_check_csv_file.csop.file1.file_name = CSOP_OptionsRCL_V3.csv
+ers_check_csv_file.csop.file1.file_name = CSOP_OptionsRCL_V4.csv
 ers_check_csv_file.csop.file2.description = Options and replacement options exercised
-ers_check_csv_file.csop.file2.file_name = CSOP_OptionsExercised_V3.csv
+ers_check_csv_file.csop.file2.file_name = CSOP_OptionsExercised_V4.csv
 
 ers_check_csv_file.emi.file0.description = Adjustment of options
-ers_check_csv_file.emi.file0.file_name = EMI40_Adjustments_V3.csv
+ers_check_csv_file.emi.file0.file_name = EMI40_Adjustments_V4.csv
 ers_check_csv_file.emi.file1.description = Replacement of options
-ers_check_csv_file.emi.file1.file_name = EMI40_Replaced_V3.csv
+ers_check_csv_file.emi.file1.file_name = EMI40_Replaced_V4.csv
 ers_check_csv_file.emi.file2.description = Options released, lapsed or cancelled
-ers_check_csv_file.emi.file2.file_name = EMI40_RLC_V3.csv
+ers_check_csv_file.emi.file2.file_name = EMI40_RLC_V4.csv
 ers_check_csv_file.emi.file3.description = Non-taxable exercise of options
-ers_check_csv_file.emi.file3.file_name = EMI40_NonTaxable_V3.csv
+ers_check_csv_file.emi.file3.file_name = EMI40_NonTaxable_V4.csv
 ers_check_csv_file.emi.file4.description = Taxable exercise of options
-ers_check_csv_file.emi.file4.file_name = EMI40_Taxable_V3.csv
+ers_check_csv_file.emi.file4.file_name = EMI40_Taxable_V4.csv
 
 ers_check_csv_file.saye.file0.description = Options granted
-ers_check_csv_file.saye.file0.file_name = SAYE_Granted_V3.csv
+ers_check_csv_file.saye.file0.file_name = SAYE_Granted_V4.csv
 ers_check_csv_file.saye.file1.description = Options released (including exchanges), cancelled or lapsed in year
-ers_check_csv_file.saye.file1.file_name = SAYE_RCL_V3.csv
+ers_check_csv_file.saye.file1.file_name = SAYE_RCL_V4.csv
 ers_check_csv_file.saye.file2.description = Options exercised
-ers_check_csv_file.saye.file2.file_name = SAYE_Exercised_V3.csv
+ers_check_csv_file.saye.file2.file_name = SAYE_Exercised_V4.csv
 
 ers_check_csv_file.sip.file0.description = Share awards
-ers_check_csv_file.sip.file0.file_name = SIP_Awards_V3.csv
+ers_check_csv_file.sip.file0.file_name = SIP_Awards_V4.csv
 ers_check_csv_file.sip.file1.description = Shares withdrawn from the plan
-ers_check_csv_file.sip.file1.file_name = SIP_Out_V3.csv
+ers_check_csv_file.sip.file1.file_name = SIP_Out_V4.csv
 
 #********************************************************************
 # Other messages
 #********************************************************************
 
 ers_check_csv_file.other.file0.description = Grant of options
-ers_check_csv_file.other.file0.file_name = Other_Grants_V3.csv
+ers_check_csv_file.other.file0.file_name = Other_Grants_V4.csv
 ers_check_csv_file.other.file1.description = Other option events
-ers_check_csv_file.other.file1.file_name = Other_Options_V3.csv
+ers_check_csv_file.other.file1.file_name = Other_Options_V4.csv
 ers_check_csv_file.other.file2.description = Acquisition of securities
-ers_check_csv_file.other.file2.file_name = Other_Acquisition_V3.csv
+ers_check_csv_file.other.file2.file_name = Other_Acquisition_V4.csv
 ers_check_csv_file.other.file3.description = Restricted securities post-acquisition events
-ers_check_csv_file.other.file3.file_name = Other_RestrictedSecurities_V3.csv
+ers_check_csv_file.other.file3.file_name = Other_RestrictedSecurities_V4.csv
 ers_check_csv_file.other.file4.description = Receipt of other benefits from securities post-acquisition
-ers_check_csv_file.other.file4.file_name = Other_OtherBenefits_V3.csv
+ers_check_csv_file.other.file4.file_name = Other_OtherBenefits_V4.csv
 ers_check_csv_file.other.file5.description = Convertible securities post-acquisition
-ers_check_csv_file.other.file5.file_name = Other_Convertible_V3.csv
+ers_check_csv_file.other.file5.file_name = Other_Convertible_V4.csv
 ers_check_csv_file.other.file6.description = Discharge of notional loans post-acquisition
-ers_check_csv_file.other.file6.file_name = Other_Notional_V3.csv
+ers_check_csv_file.other.file6.file_name = Other_Notional_V4.csv
 ers_check_csv_file.other.file7.description = Artificial enhancement of market value. Value of securities post-acquisition
-ers_check_csv_file.other.file7.file_name = Other_Enhancement_V3.csv
+ers_check_csv_file.other.file7.file_name = Other_Enhancement_V4.csv
 ers_check_csv_file.other.file8.description = Securities sold for more than market value post-acquisition
-ers_check_csv_file.other.file8.file_name = Other_Sold_V3.csv
+ers_check_csv_file.other.file8.file_name = Other_Sold_V4.csv
 
 ers_check_file.title = Choose and check your spreadsheet
 ers_check_file.instruction = Choose the OpenDocument Spreadsheet (ODS, .ods file) that you want to check for formatting errors.
@@ -714,20 +714,27 @@ ers_alt_amends.continue = Accept and continue
 # trustee messages
 #********************************************************************
 
-ers_trustee_details.title = Add trustee details
-ers_trustee_details.question = Where is the trustee based?
-ers_trustee_details.uk = UK
-ers_trustee_details.overseas = Overseas
-ers_trustee_details.name = Name
-ers_trustee_details.address = Address
-ers_trustee_details.addressLine1 = First line of address
-ers_trustee_details.addressLine2 = Second line of address
-ers_trustee_details.addressLine3 = Third line of address
-ers_trustee_details.addressLine4 = Fourth line of address
-ers_trustee_details.postcode = Postcode (optional)
-ers_trustee_details.postcode.hint = For example, AA1 1AA
-ers_trustee_details.postcode_zipcode = Postcode/ZIP code
-ers_trustee_details.country = Country (optional)
+ers_trustee.add = Do you need to add another trustee?
+ers_trustee.add.err = Select yes if you need to add another trustee
+
+ers_trustee_name.title = What is the trustee’s name?
+
+ers_trustee_based.title = Where is the trustee based?
+ers_trustee_based.uk = UK
+ers_trustee_based.overseas = Overseas
+ers_trustee_based.sip.err.message = Select if the trustee is based in the UK or overseas
+
+ers_trustee_address.title = What is the trustee’s address?
+ers_trustee_address.townOrCity = Town or City (optional)
+ers_trustee_address.county = County (optional)
+ers_trustee_address.postcode = Postcode (optional)
+
+ers_trustee_address.line1 = Address line 1
+ers_trustee_address.line2 = Address line 2 (optional)
+ers_trustee_address.line3 = Address line 3 (optional)
+ers_trustee_address.line4 = Address line 4 (optional)
+ers_trustee_address.line5 = Address line 5 (optional)
+ers_trustee_address.country = Country (optional)
 
 ers_trustee_details.err.summary.name_required = Enter the trustee’s name
 ers_trustee_details.err.summary.name_size = Reduce the number of characters entered for the trustee’s name
@@ -748,6 +755,8 @@ ers_trustee_details.err.address_line3 = Check the third line of the address (it 
 ers_trustee_details.err.invalidChars.address_line3 = Check the third line of the address (it contains invalid characters)
 ers_trustee_details.err.address_line4 = Check the fourth line of the address (it must be less than 19 characters)
 ers_trustee_details.err.invalidChars.address_line4 = Check the fourth line of the address (it contains invalid characters)
+ers_trustee_details.err.address_line5 = Check the fifth line of the address (it must be less than 19 characters)
+ers_trustee_details.err.invalidChars.address_line5 = Check the fifth line of the address (it contains invalid characters)
 ers_trustee_details.err.postcode = Check the postcode (it must be valid and less than 9 characters)
 
 ers_trustee_summary.title = Trustees of this Share Incentive Plan

@@ -30,27 +30,27 @@ import utils.{ERSFakeApplicationConfig, ErsTestHelper}
 
 import scala.concurrent.ExecutionContext
 
-class YesNoDecoratorSpec extends AnyWordSpecLike
-  with Matchers
-  with OptionValues
-  with MockitoSugar
-  with ERSFakeApplicationConfig
-  with ErsTestHelper
-  with GuiceOneAppPerSuite {
+class YesNoDecoratorSpec
+    extends AnyWordSpecLike
+    with Matchers
+    with OptionValues
+    with MockitoSugar
+    with ERSFakeApplicationConfig
+    with ErsTestHelper
+    with GuiceOneAppPerSuite {
 
   val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
     messagesActionBuilder,
     DefaultActionBuilder(stubBodyParser[AnyContent]()),
     cc.parsers,
-    fakeApplication.injector.instanceOf[MessagesApi],
+    fakeApplication().injector.instanceOf[MessagesApi],
     cc.langs,
     cc.fileMimeTypes,
     ExecutionContext.global
   )
 
-  implicit lazy val mat: Materializer = app.materializer
+  implicit lazy val mat: Materializer          = app.materializer
   implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
-
 
   "nil returns decorator" should {
     "show Yes if there is nil return" in {
@@ -59,7 +59,7 @@ class YesNoDecoratorSpec extends AnyWordSpecLike
       val output = decorator.decorate
 
       output.contains("title") shouldBe true
-      output.contains("Yes") shouldBe true
+      output.contains("Yes")   shouldBe true
       output.contains("<hr/>") shouldBe true
     }
 
@@ -69,9 +69,9 @@ class YesNoDecoratorSpec extends AnyWordSpecLike
       val output = decorator.decorate
 
       output.contains("title") shouldBe true
-      output.contains("No") shouldBe true
+      output.contains("No")    shouldBe true
       output.contains("<hr/>") shouldBe true
     }
-   }
+  }
 
 }

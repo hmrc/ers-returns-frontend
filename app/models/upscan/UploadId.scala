@@ -29,6 +29,6 @@ object UploadId {
   implicit def queryBinder(implicit stringBinder: QueryStringBindable[String]): QueryStringBindable[UploadId] =
     stringBinder.transform(UploadId(_), _.value)
 
-  implicit def readsUploadId: Reads[UploadId] = Reads.StringReads.map(UploadId(_))
+  implicit def readsUploadId: Reads[UploadId]   = Reads.StringReads.map(UploadId(_))
   implicit def writesUploadId: Writes[UploadId] = Writes[UploadId](id => JsString(id.value))
 }

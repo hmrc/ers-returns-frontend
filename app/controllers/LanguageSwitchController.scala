@@ -25,9 +25,9 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import java.net.URI
 import scala.concurrent.ExecutionContext
 
-class LanguageSwitchController @Inject() (appConfig: ApplicationConfig,
-                                          val mcc: MessagesControllerComponents
-                                         ) extends FrontendController(mcc) with I18nSupport {
+class LanguageSwitchController @Inject() (appConfig: ApplicationConfig, val mcc: MessagesControllerComponents)
+    extends FrontendController(mcc)
+    with I18nSupport {
 
   implicit val ec: ExecutionContext = mcc.executionContext
 
@@ -36,14 +36,14 @@ class LanguageSwitchController @Inject() (appConfig: ApplicationConfig,
   private def languageMap: Map[String, Lang] = appConfig.languageMap
 
   def switchToLanguage(language: String): Action[AnyContent] = Action { implicit request =>
-
-  val enabled = appConfig.languageTranslationEnabled
-  val lang = if (enabled) {
-    languageMap.getOrElse(language, Lang.defaultLang)
-  } else {
-    Lang("en")
-  }
-    val redirectURL = request.headers.get(REFERER)
+    val enabled     = appConfig.languageTranslationEnabled
+    val lang        = if (enabled) {
+      languageMap.getOrElse(language, Lang.defaultLang)
+    } else {
+      Lang("en")
+    }
+    val redirectURL = request.headers
+      .get(REFERER)
       .flatMap(asRelativeUrl)
       .getOrElse(fallbackURL)
 
@@ -51,7 +51,6 @@ class LanguageSwitchController @Inject() (appConfig: ApplicationConfig,
   }
 
   private def asRelativeUrl(url: String): Option[String] =
-
     for {
       uri      <- Option(new URI(url))
       path     <- Option(uri.getPath).filterNot(_.isEmpty)
@@ -60,5 +59,3 @@ class LanguageSwitchController @Inject() (appConfig: ApplicationConfig,
     } yield s"$path$query$fragment"
 
 }
-
-

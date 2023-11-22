@@ -32,14 +32,17 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class SubmissionDataController @Inject()(val mcc: MessagesControllerComponents,
-																				 val authConnector: DefaultAuthConnector,
-																				 val ersConnector: ErsConnector,
-																				 implicit val ersUtil: ERSUtil,
-																				 implicit val appConfig: ApplicationConfig,
-                                         globalErrorView: views.html.global_error,
-                                         authAction: AuthAction
-																				) extends FrontendController(mcc) with I18nSupport with Logging {
+class SubmissionDataController @Inject() (
+  val mcc: MessagesControllerComponents,
+  val authConnector: DefaultAuthConnector,
+  val ersConnector: ErsConnector,
+  implicit val ersUtil: ERSUtil,
+  implicit val appConfig: ApplicationConfig,
+  globalErrorView: views.html.global_error,
+  authAction: AuthAction
+) extends FrontendController(mcc)
+    with I18nSupport
+    with Logging {
 
   implicit val ec: ExecutionContext = mcc.executionContext
 
@@ -52,22 +55,23 @@ class SubmissionDataController @Inject()(val mcc: MessagesControllerComponents,
       Some(
         Json.obj(
           "schemeRef" -> schemeRef.get,
-          "confTime" -> timestamp.get
+          "confTime"  -> timestamp.get
         )
       )
-    }
-    else {
+    } else {
       None
     }
 
   }
 
-  def retrieveSubmissionData(): Action[AnyContent] = authAction.async {
-      implicit request =>
-        getRetrieveSubmissionData()(request, hc)
+  def retrieveSubmissionData(): Action[AnyContent] = authAction.async { implicit request =>
+    getRetrieveSubmissionData()(request, hc)
   }
 
-  def getRetrieveSubmissionData()(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
+  def getRetrieveSubmissionData()(implicit
+    request: RequestWithOptionalAuthContext[AnyContent],
+    hc: HeaderCarrier
+  ): Future[Result] = {
 
     logger.debug("Retrieve Submission Data Request")
 
@@ -78,44 +82,53 @@ class SubmissionDataController @Inject()(val mcc: MessagesControllerComponents,
       val data: Option[JsObject] = createSchemeInfoFromURL(request)
       if (data.isDefined) {
 
-        ersConnector.retrieveSubmissionData(data.get).map { res =>
-          res.status match {
-            case OK => Ok(res.body)
-            case _ =>
-							logger.error(s"[SubmissionDataController][getRetrieveSubmissionData] retrieve status: ${res.status}")
-							getGlobalErrorPage
-					}
-        }.recover {
-          case ex: Exception =>
-						logger.error(s"[SubmissionDataController][getRetrieveSubmissionData] retrieve Exception: ${ex.getMessage}")
-						getGlobalErrorPage
-				}
+        ersConnector
+          .retrieveSubmissionData(data.get)
+          .map { res =>
+            res.status match {
+              case OK => Ok(res.body)
+              case _  =>
+                logger.error(s"[SubmissionDataController][getRetrieveSubmissionData] retrieve status: ${res.status}")
+                getGlobalErrorPage
+            }
+          }
+          .recover { case ex: Exception =>
+            logger.error(s"[SubmissionDataController][getRetrieveSubmissionData] retrieve Exception: ${ex.getMessage}")
+            getGlobalErrorPage
+          }
 
+      } else {
+        Future.successful(
+          NotFound(
+            globalErrorView(
+              "ers_not_found.title",
+              "ers_not_found.heading",
+              "ers_not_found.message"
+            )
+          )
+        )
       }
-      else {
-        Future.successful(NotFound(globalErrorView(
-					"ers_not_found.title",
-					"ers_not_found.heading",
-					"ers_not_found.message"
-				)))
-      }
-    }
-    else {
+    } else {
       logger.debug("Retrieve SubmissionData Disabled")
-      Future.successful(NotFound(globalErrorView(
-				"ers_not_found.title",
-				"ers_not_found.heading",
-				"ers_not_found.message"
-			)))
+      Future.successful(
+        NotFound(
+          globalErrorView(
+            "ers_not_found.title",
+            "ers_not_found.heading",
+            "ers_not_found.message"
+          )
+        )
+      )
     }
   }
 
-	def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result = {
-		Ok(globalErrorView(
-			"ers.global_errors.title",
-			"ers.global_errors.heading",
-			"ers.global_errors.message"
-		)(request, messages, appConfig))
-	}
+  def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result =
+    Ok(
+      globalErrorView(
+        "ers.global_errors.title",
+        "ers.global_errors.heading",
+        "ers.global_errors.message"
+      )(request, messages, appConfig)
+    )
 
 }

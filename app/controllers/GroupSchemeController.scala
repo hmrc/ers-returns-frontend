@@ -35,6 +35,7 @@ import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
+<<<<<<< HEAD
 class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
 																			val authConnector: DefaultAuthConnector,
 																			implicit val countryCodes: CountryCodes,
@@ -81,7 +82,6 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
   }
 
   def showDeleteCompany(id: Int)(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
-
     (for {
       requestObject      <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
       cachedCompanyList  <- ersUtil.fetch[CompanyDetailsList](ersUtil.COMPANIES_CACHE, requestObject.getSchemeReference)
@@ -121,88 +121,94 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
         }
   }
 
-  def showGroupSchemePage(requestObject: RequestObject)
-                         (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
-    ersUtil.fetch[GroupSchemeInfo](ersUtil.GROUP_SCHEME_CACHE_CONTROLLER, requestObject.getSchemeReference).map { groupSchemeInfo =>
-      Ok(groupView(requestObject, groupSchemeInfo.groupScheme, RsFormMappings.groupForm.fill(RS_groupScheme(groupSchemeInfo.groupScheme))))
-    } recover {
-      case e: Exception =>
-        logger.warn(s"[GroupSchemeController][showGroupSchemePage] Fetching GroupSchemeInfo from the cache failed: $e")
-        val form = RS_groupScheme(Some(ersUtil.DEFAULT))
-        Ok(groupView(requestObject, Some(ersUtil.DEFAULT), RsFormMappings.groupForm.fill(form)))
+  def showGroupSchemePage(
+    requestObject: RequestObject
+  )(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] =
+    ersUtil.fetch[GroupSchemeInfo](ersUtil.GROUP_SCHEME_CACHE_CONTROLLER, requestObject.getSchemeReference).map {
+      groupSchemeInfo =>
+        Ok(
+          groupView(
+            requestObject,
+            groupSchemeInfo.groupScheme,
+            RsFormMappings.groupForm().fill(RS_groupScheme(groupSchemeInfo.groupScheme))
+          )
+        )
+    } recover { case _: Exception =>
+      val form = RS_groupScheme(Some(ersUtil.DEFAULT))
+      Ok(groupView(requestObject, Some(ersUtil.DEFAULT), RsFormMappings.groupForm().fill(form)))
+    }
+
+  def groupSchemeSelected(scheme: String): Action[AnyContent] = authAction.async { implicit request =>
+    ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
+      showGroupSchemeSelected(requestObject, scheme)(request)
     }
   }
 
-  def groupSchemeSelected(scheme: String): Action[AnyContent] = authAction.async {
-      implicit request =>
-        ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
-          showGroupSchemeSelected(requestObject, scheme)(request)
-        }
-  }
+  def showGroupSchemeSelected(requestObject: RequestObject, scheme: String)(implicit
+    request: RequestWithOptionalAuthContext[AnyContent]
+  ): Future[Result] =
+    RsFormMappings
+      .groupForm()
+      .bindFromRequest()
+      .fold(
+        errors => {
+          val correctOrder                             = errors.errors.map(_.key).distinct
+          val incorrectOrderGrouped                    = errors.errors.groupBy(_.key).map(_._2.head).toSeq
+          val correctOrderGrouped                      = correctOrder.flatMap(x => incorrectOrderGrouped.find(_.key == x))
+          val firstErrors: Form[models.RS_groupScheme] =
+            new Form[RS_groupScheme](errors.mapping, errors.data, correctOrderGrouped, errors.value)
+          Future.successful(Ok(groupView(requestObject, Some(""), firstErrors)))
+        },
+        formData => {
+          val gsc: GroupSchemeInfo =
+            GroupSchemeInfo(
+              Some(formData.groupScheme.getOrElse("")),
+              if (formData.groupScheme.contains(ersUtil.OPTION_YES)) Some(ersUtil.OPTION_MANUAL) else None
+            )
 
-  def showGroupSchemeSelected(requestObject: RequestObject, scheme: String)
-                             (implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] = {
-    RsFormMappings.groupForm.bindFromRequest.fold(
-      errors => {
-        val correctOrder = errors.errors.map(_.key).distinct
-        val incorrectOrderGrouped = errors.errors.groupBy(_.key).map(_._2.head).toSeq
-        val correctOrderGrouped = correctOrder.flatMap(x => incorrectOrderGrouped.find(_.key == x))
-        val firstErrors: Form[models.RS_groupScheme] = new Form[RS_groupScheme](errors.mapping, errors.data, correctOrderGrouped, errors.value)
-        Future.successful(Ok(groupView(requestObject, Some(""), firstErrors)))
-      },
-      formData => {
-        val gsc: GroupSchemeInfo =
-          GroupSchemeInfo(
-            Some(formData.groupScheme.getOrElse("")),
-          if (formData.groupScheme.contains(ersUtil.OPTION_YES)) Some(ersUtil.OPTION_MANUAL) else None
-          )
+          ersUtil.cache(ersUtil.GROUP_SCHEME_CACHE_CONTROLLER, gsc, requestObject.getSchemeReference).map { _ =>
+            (requestObject.getSchemeId, formData.groupScheme) match {
 
-        ersUtil.cache(ersUtil.GROUP_SCHEME_CACHE_CONTROLLER, gsc, requestObject.getSchemeReference).map { _ =>
+              case (_, Some(ersUtil.OPTION_YES)) => Redirect(routes.GroupSchemeController.manualCompanyDetailsPage())
 
-          (requestObject.getSchemeId, formData.groupScheme) match {
+              case (ersUtil.SCHEME_CSOP | ersUtil.SCHEME_SAYE, _) =>
+                Redirect(routes.AltAmendsController.altActivityPage())
 
-            case (_, Some(ersUtil.OPTION_YES)) => Redirect(routes.GroupSchemeController.manualCompanyDetailsPage())
+              case (ersUtil.SCHEME_EMI | ersUtil.SCHEME_OTHER, _) =>
+                Redirect(routes.SummaryDeclarationController.summaryDeclarationPage())
 
-            case (ersUtil.SCHEME_CSOP | ersUtil.SCHEME_SAYE, _) => Redirect(routes.AltAmendsController.altActivityPage())
+            case (ersUtil.SCHEME_SIP, _) => Redirect(controllers.trustees.routes.TrusteeSummaryController.trusteeSummaryPage())
 
-            case (ersUtil.SCHEME_EMI | ersUtil.SCHEME_OTHER, _) => Redirect(routes.SummaryDeclarationController.summaryDeclarationPage())
-
-            case (ersUtil.SCHEME_SIP, _) => Redirect(routes.TrusteeController.trusteeDetailsPage())
-
-            case (_,_) => getGlobalErrorPage
+              case (_, _) => getGlobalErrorPage
+            }
           }
         }
-      }
-    )
+      )
+
+  def groupPlanSummaryPage(): Action[AnyContent] = authAction.async { implicit request =>
+    showGroupPlanSummaryPage()(request, hc)
   }
 
-
-  def groupPlanSummaryPage(): Action[AnyContent] = authAction.async {
-      implicit request =>
-          showGroupPlanSummaryPage()(request, hc)
-  }
-
-  def showGroupPlanSummaryPage()(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
-
+  def showGroupPlanSummaryPage()(implicit
+    request: RequestWithOptionalAuthContext[AnyContent],
+    hc: HeaderCarrier
+  ): Future[Result] =
     (for {
       requestObject <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
       compDetails   <- ersUtil.fetch[CompanyDetailsList](ersUtil.GROUP_SCHEME_COMPANIES, requestObject.getSchemeReference)
-    } yield {
-      Ok(groupPlanSummaryView(requestObject, ersUtil.OPTION_MANUAL, compDetails))
-    }) recover {
-      case e: Exception =>
-        logger.error(s"[GroupSchemeController][showGroupPlanSummaryPage]Fetch group scheme companies before call to group plan summary page failed with exception ${e.getMessage}, " +
-					s"timestamp: ${System.currentTimeMillis()}.")
-        getGlobalErrorPage
+    } yield Ok(groupPlanSummaryView(requestObject, ersUtil.OPTION_MANUAL, compDetails))) recover { case e: Exception =>
+      logger.error(
+        s"[GroupSchemeController][showGroupPlanSummaryPage]Fetch group scheme companies before call to group plan summary page failed with exception ${e.getMessage}, " +
+          s"timestamp: ${System.currentTimeMillis()}."
+      )
+      getGlobalErrorPage
     }
-  }
 
   def groupPlanSummaryContinue(scheme: String): Action[AnyContent] = authAction.async {
-      implicit request =>
-        continueFromGroupPlanSummaryPage(scheme)(request, hc)
+    continueFromGroupPlanSummaryPage(scheme)
   }
 
-  def continueFromGroupPlanSummaryPage(scheme: String)(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
+  def continueFromGroupPlanSummaryPage(scheme: String): Future[Result] =
     scheme match {
       case ersUtil.SCHEME_CSOP | ersUtil.SCHEME_SAYE =>
         Future(Redirect(routes.AltAmendsController.altActivityPage()))
@@ -211,16 +217,16 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
         Future(Redirect(routes.SummaryDeclarationController.summaryDeclarationPage()))
 
       case ersUtil.SCHEME_SIP =>
-        Future(Redirect(routes.TrusteeController.trusteeDetailsPage()))
+        Future(Redirect(trustees.routes.TrusteeSummaryController.trusteeSummaryPage()))
 
     }
-  }
 
-	def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result = {
-		Ok(globalErrorView(
-			"ers.global_errors.title",
-			"ers.global_errors.heading",
-			"ers.global_errors.message"
-		)(request, messages, appConfig))
-	}
+  def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result =
+    Ok(
+      globalErrorView(
+        "ers.global_errors.title",
+        "ers.global_errors.heading",
+        "ers.global_errors.message"
+      )(request, messages, appConfig)
+    )
 }

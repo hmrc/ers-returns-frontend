@@ -28,20 +28,28 @@ import play.api.http.Status._
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.test.Helpers.await
-import uk.gov.hmrc.http.{HeaderCarrier, Upstream4xxResponse, Upstream5xxResponse}
+import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import utils.WireMockHelper
 
 import scala.concurrent.duration.SECONDS
 
-class UpscanConnectorSpec extends AnyWordSpecLike with Matchers with OptionValues with GuiceOneAppPerSuite with MockitoSugar with WireMockHelper {
+class UpscanConnectorSpec
+    extends AnyWordSpecLike
+    with Matchers
+    with OptionValues
+    with GuiceOneAppPerSuite
+    with MockitoSugar
+    with WireMockHelper {
 
-	lazy val connector: UpscanConnector = app.injector.instanceOf[UpscanConnector]
-	implicit val hc: HeaderCarrier = HeaderCarrier()
-	val request: UpscanInitiateRequest = UpscanInitiateRequest("callbackUrl", "successRedirectUrl", "errorRedirectUrl", 1, 104857600)
-	override def fakeApplication(): Application = new GuiceApplicationBuilder()
-		.configure(
-			"microservice.services.upscan.port" -> server.port()
-		).build()
+  lazy val connector: UpscanConnector         = app.injector.instanceOf[UpscanConnector]
+  implicit val hc: HeaderCarrier              = HeaderCarrier()
+  val request: UpscanInitiateRequest          =
+    UpscanInitiateRequest("callbackUrl", "successRedirectUrl", "errorRedirectUrl", 1, 104857600)
+  override def fakeApplication(): Application = new GuiceApplicationBuilder()
+    .configure(
+      "microservice.services.upscan.port" -> server.port()
+    )
+    .build()
 
   "getUpscanFormData" should {
     "return a UpscanInitiateResponse" when {
@@ -70,7 +78,11 @@ class UpscanConnectorSpec extends AnyWordSpecLike with Matchers with OptionValue
                 .withStatus(BAD_REQUEST)
             )
         )
-        a[Upstream4xxResponse] should be thrownBy await(connector.getUpscanFormData(request), 1, SECONDS)
+        val exception = intercept[UpstreamErrorResponse] {
+          await(connector.getUpscanFormData(request), 1, SECONDS)
+        }
+
+        exception.statusCode shouldBe 400
       }
 
       "upscan returns 5xx response" in {
@@ -81,7 +93,12 @@ class UpscanConnectorSpec extends AnyWordSpecLike with Matchers with OptionValue
                 .withStatus(SERVICE_UNAVAILABLE)
             )
         )
-        an[Upstream5xxResponse] should be thrownBy await(connector.getUpscanFormData(request), 1, SECONDS)
+
+        val exception = intercept[UpstreamErrorResponse] {
+          await(connector.getUpscanFormData(request), 1, SECONDS)
+        }
+
+        exception.statusCode shouldBe 503
       }
     }
   }

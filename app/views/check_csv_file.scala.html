@@ -27,7 +27,7 @@
         govukButton: GovukButton
 )
 
-@(requestObject: RequestObject, csvFilesList: CsvFilesList)(implicit request: Request[AnyRef], flash: Flash, messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
+@(requestObject: RequestObject, csvFilesList: CsvFilesList)(implicit request: Request[_], flash: Flash, messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 
 @schemeId = @{requestObject.getSchemeId}
 
@@ -36,7 +36,7 @@
 
     @govukBackLink(BackLink(
         content = Text(messages("ers.back")),
-        href = routes.CheckFileTypeController.checkFileTypePage.url,
+        href = routes.CheckFileTypeController.checkFileTypePage().url,
     ))
 
     @formWithCSRF(action = routes.CheckCsvFilesController.checkCsvFilesPageSelected()) {

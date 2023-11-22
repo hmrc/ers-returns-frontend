@@ -19,17 +19,17 @@ package models.upscan
 import play.api.libs.json.{Format, Json}
 
 case class UpscanCsvFilesCallback(uploadId: UploadId, fileId: String, uploadStatus: UploadStatus = NotStarted) {
-  def isStarted: Boolean = uploadStatus != NotStarted
+  def isStarted: Boolean  = uploadStatus != NotStarted
   def isComplete: Boolean = uploadStatus match {
     case _: UploadedSuccessfully | Failed => true
-    case _ => false
+    case _                                => false
   }
 }
 object UpscanCsvFilesCallback {
   implicit val upscanCsvFileFormats: Format[UpscanCsvFilesCallback] = Json.format[UpscanCsvFilesCallback]
 }
 
-case class UpscanCsvFilesCallbackList(files: List[UpscanCsvFilesCallback]){
+case class UpscanCsvFilesCallbackList(files: List[UpscanCsvFilesCallback]) {
   def areAllFilesComplete(): Boolean = files.forall(_.isComplete)
 
   def areAllFilesSuccessful(): Boolean = files.forall {
@@ -44,11 +44,11 @@ object UpscanCsvFilesCallbackList {
 case class UpscanCsvFilesList(ids: List[UpscanIds]) {
   def updateToInProgress(uploadId: UploadId): UpscanCsvFilesList = {
     val notStartedIdExists = ids.exists(id => id.uploadId == uploadId && id.uploadStatus == NotStarted)
-    if(notStartedIdExists) {
+    if (notStartedIdExists) {
       val newIds = ids.map {
-        case ids@UpscanIds(`uploadId`, _, NotStarted) =>
+        case ids @ UpscanIds(`uploadId`, _, NotStarted) =>
           ids.copy(uploadStatus = InProgress)
-        case other => other
+        case other                                      => other
       }
       UpscanCsvFilesList(ids = newIds)
     } else {

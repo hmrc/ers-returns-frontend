@@ -24,9 +24,9 @@ import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.mockito.{ArgumentMatchers, Mockito}
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.OptionValues
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
+import org.scalatest.{BeforeAndAfterEach, OptionValues}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.i18n
 import play.api.i18n.{MessagesApi, MessagesImpl}
@@ -41,57 +41,82 @@ import views.html.{check_csv_file, global_error}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class CheckCsvFilesControllerSpec extends AnyWordSpecLike
-  with Matchers
-  with OptionValues
-  with ERSFakeApplicationConfig
-  with ErsTestHelper
-  with GuiceOneAppPerSuite
-  with ScalaFutures {
+class CheckCsvFilesControllerSpec
+    extends AnyWordSpecLike
+    with Matchers
+    with OptionValues
+    with ERSFakeApplicationConfig
+    with ErsTestHelper
+    with GuiceOneAppPerSuite
+    with BeforeAndAfterEach
+    with ScalaFutures {
 
-  val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
+  val mockListCsvFilesCallback: UpscanCsvFilesList = mock[UpscanCsvFilesList](Mockito.RETURNS_DEEP_STUBS)
+  val mockMCC: MessagesControllerComponents        = DefaultMessagesControllerComponents(
     messagesActionBuilder,
     DefaultActionBuilder(stubBodyParser[AnyContent]()),
     cc.parsers,
-    fakeApplication.injector.instanceOf[MessagesApi],
+    fakeApplication().injector.instanceOf[MessagesApi],
     cc.langs,
     cc.fileMimeTypes,
     ExecutionContext.global
   )
+  val globalErrorView: global_error                = app.injector.instanceOf[global_error]
 
   implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
 
-	implicit lazy val mat: Materializer = app.materializer
-  val globalErrorView: global_error = app.injector.instanceOf[global_error]
+  implicit lazy val mat: Materializer  = app.materializer
   val checkCsvFileView: check_csv_file = app.injector.instanceOf[check_csv_file]
+
+  override def beforeEach(): Unit = {
+    reset(mockListCsvFilesCallback)
+    reset(mockErsUtil)
+  }
 
   "calling checkCsvFilesPage" should {
 
     val checkCsvFilesController: CheckCsvFilesController =
-      new CheckCsvFilesController(mockMCC, mockAuthConnector, mockErsUtil, mockAppConfig, globalErrorView, checkCsvFileView, testAuthAction) {
-      override def showCheckCsvFilesPage()(implicit request: RequestWithOptionalAuthContext[AnyContent],
-                                           hc: HeaderCarrier): Future[Result] = Future.successful(Ok)
-    }
+      new CheckCsvFilesController(
+        mockMCC,
+        mockAuthConnector,
+        mockErsUtil,
+        mockAppConfig,
+        globalErrorView,
+        checkCsvFileView,
+        testAuthAction
+      ) {
+        override def showCheckCsvFilesPage()(implicit
+          request: RequestWithOptionalAuthContext[AnyContent],
+          hc: HeaderCarrier
+        ): Future[Result] = Future.successful(Ok)
+      }
 
     "redirect to company authentication frontend if user is not authenticated" in {
-			setUnauthorisedMocks()
+      setUnauthorisedMocks()
       val result = checkCsvFilesController.checkCsvFilesPage().apply(FakeRequest("GET", ""))
-      status(result) shouldBe SEE_OTHER
+      status(result)                                                        shouldBe SEE_OTHER
       result.futureValue.header.headers("Location").contains("/gg/sign-in") shouldBe true
     }
   }
 
   "calling showCheckCsvFilesPage" should {
 
-		val checkCsvFilesController: CheckCsvFilesController =
-      new CheckCsvFilesController(mockMCC, mockAuthConnector, mockErsUtil, mockAppConfig, globalErrorView, checkCsvFileView, testAuthAction) {
+    val checkCsvFilesController: CheckCsvFilesController =
+      new CheckCsvFilesController(
+        mockMCC,
+        mockAuthConnector,
+        mockErsUtil,
+        mockAppConfig,
+        globalErrorView,
+        checkCsvFileView,
+        testAuthAction
+      ) {
 
-      when(mockErsUtil.remove(ArgumentMatchers.eq("check-csv-files"))(any(), any()))
-        .thenReturn(Future.successful(HttpResponse(OK, "")))
-    }
+        when(mockErsUtil.remove(ArgumentMatchers.eq("check-csv-files"))(any(), any()))
+          .thenReturn(Future.successful(HttpResponse(OK, "")))
+      }
 
     "show CheckCsvFilesPage" in {
-      reset(mockErsUtil)
       when(
         mockErsUtil.fetch[RequestObject](any())(any(), any(), any())
       ) thenReturn Future.successful(ersRequestObject)
@@ -105,28 +130,47 @@ class CheckCsvFilesControllerSpec extends AnyWordSpecLike
 
   "calling checkCsvFilesPage" should {
 
-		val checkCsvFilesController: CheckCsvFilesController =
-      new CheckCsvFilesController(mockMCC, mockAuthConnector, mockErsUtil, mockAppConfig, globalErrorView, checkCsvFileView, testAuthAction) {
-      override def validateCsvFilesPageSelected()(implicit request: RequestWithOptionalAuthContext[AnyContent],
-                                                  hc: HeaderCarrier): Future[Result] = Future.successful(Ok)
-    }
+    val checkCsvFilesController: CheckCsvFilesController =
+      new CheckCsvFilesController(
+        mockMCC,
+        mockAuthConnector,
+        mockErsUtil,
+        mockAppConfig,
+        globalErrorView,
+        checkCsvFileView,
+        testAuthAction
+      ) {
+        override def validateCsvFilesPageSelected()(implicit
+          request: RequestWithOptionalAuthContext[AnyContent],
+          hc: HeaderCarrier
+        ): Future[Result] = Future.successful(Ok)
+      }
 
     "redirect to company authentication frontend if user is not authenticated to access checkCsvFilesPage" in {
-			setUnauthorisedMocks()
+      setUnauthorisedMocks()
       val result = checkCsvFilesController.checkCsvFilesPageSelected().apply(FakeRequest("GET", ""))
-      status(result) shouldBe SEE_OTHER
+      status(result)                                                        shouldBe SEE_OTHER
       result.futureValue.header.headers("Location").contains("/gg/sign-in") shouldBe true
     }
   }
 
   "calling validateCsvFilesPageSelected" should {
 
-		val checkCsvFilesController: CheckCsvFilesController =
-      new CheckCsvFilesController(mockMCC, mockAuthConnector, mockErsUtil, mockAppConfig, globalErrorView, checkCsvFileView, testAuthAction) {
-      override def performCsvFilesPageSelected(formData: CsvFilesList)
-																							(implicit request: Request[AnyRef],
-																							 hc: HeaderCarrier): Future[Result] = Future.successful(Ok)
-    }
+    val checkCsvFilesController: CheckCsvFilesController =
+      new CheckCsvFilesController(
+        mockMCC,
+        mockAuthConnector,
+        mockErsUtil,
+        mockAppConfig,
+        globalErrorView,
+        checkCsvFileView,
+        testAuthAction
+      ) {
+        override def performCsvFilesPageSelected(formData: CsvFilesList)(implicit
+          request: Request[_],
+          hc: HeaderCarrier
+        ): Future[Result] = Future.successful(Ok)
+      }
 
     "return the result of performCsvFilesPageSelected if data is valid" in {
 
@@ -138,10 +182,10 @@ class CheckCsvFilesControllerSpec extends AnyWordSpecLike
         ("files[2].fileId", "file2"),
         ("files[2].isSelected", "")
       )
-      val form = RsFormMappings.csvFileCheckForm.bind(csvFilesListData)
+      val form                                  = RsFormMappings.csvFileCheckForm().bind(csvFilesListData)
 
       val request = Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-      val result = checkCsvFilesController.validateCsvFilesPageSelected()(buildRequestWithAuth(request), hc)
+      val result  = checkCsvFilesController.validateCsvFilesPageSelected()(buildRequestWithAuth(request), hc)
       status(result) shouldBe OK
     }
 
@@ -151,11 +195,11 @@ class CheckCsvFilesControllerSpec extends AnyWordSpecLike
         ("files[0].fileId", ""),
         ("files[0].isSelected", "5")
       )
-      val form = RsFormMappings.csvFileCheckForm.bind(csvFilesListData)
+      val form                                  = RsFormMappings.csvFileCheckForm().bind(csvFilesListData)
 
       val request = Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-      val result = checkCsvFilesController.validateCsvFilesPageSelected()(buildRequestWithAuth(request), hc)
-      status(result) shouldBe SEE_OTHER
+      val result  = checkCsvFilesController.validateCsvFilesPageSelected()(buildRequestWithAuth(request), hc)
+      status(result)                                shouldBe SEE_OTHER
       result.futureValue.header.headers("Location") shouldBe "/submit-your-ers-annual-return/choose-csv-files"
     }
 
@@ -163,12 +207,18 @@ class CheckCsvFilesControllerSpec extends AnyWordSpecLike
 
   "calling performCsvFilesPageSelected" should {
 
-    val mockListCsvFilesCallback: UpscanCsvFilesList = mock[UpscanCsvFilesList](Mockito.RETURNS_DEEP_STUBS)
-
-		val checkCsvFilesController: CheckCsvFilesController =
-      new CheckCsvFilesController(mockMCC, mockAuthConnector, mockErsUtil, mockAppConfig, globalErrorView, checkCsvFileView, testAuthAction) {
-      override def createCacheData(csvFilesList: List[CsvFiles]): UpscanCsvFilesList = mockListCsvFilesCallback
-    }
+    val checkCsvFilesController: CheckCsvFilesController =
+      new CheckCsvFilesController(
+        mockMCC,
+        mockAuthConnector,
+        mockErsUtil,
+        mockAppConfig,
+        globalErrorView,
+        checkCsvFileView,
+        testAuthAction
+      ) {
+        override def createCacheData(csvFilesList: List[CsvFiles]): UpscanCsvFilesList = mockListCsvFilesCallback
+      }
 
     val formData: CsvFilesList = CsvFilesList(
       List(
@@ -181,23 +231,21 @@ class CheckCsvFilesControllerSpec extends AnyWordSpecLike
     )
 
     "return the result of reloadWithError if createCacheData returns empty list" in {
-      reset(mockListCsvFilesCallback)
-      reset(mockErsUtil)
       when(
         mockErsUtil.fetch[RequestObject](refEq("ErsRequestObject"))(any(), any(), any())
       ) thenReturn Future.successful(ersRequestObject)
-      when(
-        mockListCsvFilesCallback.ids.isEmpty
-      ).thenReturn(true)
 
-      val result = checkCsvFilesController.performCsvFilesPageSelected(formData)(Fixtures.buildFakeRequestWithSessionIdCSOP("POST"), hc)
-      status(result) shouldBe SEE_OTHER
+      when(mockListCsvFilesCallback.ids) thenReturn List()
+
+      val result = checkCsvFilesController.performCsvFilesPageSelected(formData)(
+        Fixtures.buildFakeRequestWithSessionIdCSOP("POST"),
+        hc
+      )
+      status(result)                                shouldBe SEE_OTHER
       result.futureValue.header.headers("Location") shouldBe "/submit-your-ers-annual-return/choose-csv-files"
     }
 
     "redirect to next page if createCacheData returns list with data and caching is successful" in {
-      reset(mockListCsvFilesCallback)
-      reset(mockErsUtil)
       when(
         mockErsUtil.fetch[RequestObject](refEq("ErsRequestObject"))(any(), any(), any())
       ) thenReturn Future.successful(ersRequestObject)
@@ -206,17 +254,18 @@ class CheckCsvFilesControllerSpec extends AnyWordSpecLike
         mockErsUtil.cache(anyString(), any[UpscanCsvFilesCallbackList](), anyString())(any(), any())
       ) thenReturn Future.successful(mock[CacheMap])
 
-			when(mockErsUtil.ersRequestObject).thenReturn("ErsRequestObject")
-			when(mockErsUtil.CSV_FILES_UPLOAD).thenReturn("csv-files-upload")
+      when(mockErsUtil.ersRequestObject) thenReturn "ErsRequestObject"
+      when(mockErsUtil.CSV_FILES_UPLOAD) thenReturn "csv-files-upload"
 
-			val result = checkCsvFilesController.performCsvFilesPageSelected(formData)(Fixtures.buildFakeRequestWithSessionIdCSOP("POST"), hc)
-      status(result) shouldBe SEE_OTHER
-      result.futureValue.header.headers("Location") should include ("/upload-")
+      val result = checkCsvFilesController.performCsvFilesPageSelected(formData)(
+        Fixtures.buildFakeRequestWithSessionIdCSOP("POST"),
+        hc
+      )
+      status(result)                              shouldBe SEE_OTHER
+      result.futureValue.header.headers("Location") should include("/upload-")
     }
 
     "direct to ers errors page if createCacheData returns list with data and caching fails" in {
-      reset(mockListCsvFilesCallback)
-      reset(mockErsUtil)
       when(
         mockErsUtil.fetch[RequestObject](refEq("ErsRequestObject"))(any(), any(), any())
       ) thenReturn Future.successful(ersRequestObject)
@@ -225,16 +274,19 @@ class CheckCsvFilesControllerSpec extends AnyWordSpecLike
         mockErsUtil.cache(anyString(), any[UpscanCsvFilesCallbackList](), anyString())(any(), any())
       ) thenReturn Future.failed(new RuntimeException)
 
-			when(mockErsUtil.ersRequestObject).thenReturn("ErsRequestObject")
+      when(mockErsUtil.ersRequestObject) thenReturn "ErsRequestObject"
 
-			val result = checkCsvFilesController.performCsvFilesPageSelected(formData)(Fixtures.buildFakeRequestWithSessionIdCSOP("POST"), hc)
-      contentAsString(result) shouldBe contentAsString(Future(checkCsvFilesController.getGlobalErrorPage(testFakeRequest, testMessages)))
-      contentAsString(result) should include(testMessages("ers.global_errors.message"))
+      val result = checkCsvFilesController.performCsvFilesPageSelected(formData)(
+        Fixtures.buildFakeRequestWithSessionIdCSOP("POST"),
+        hc
+      )
+      contentAsString(result) shouldBe contentAsString(
+        Future(checkCsvFilesController.getGlobalErrorPage(testFakeRequest, testMessages))
+      )
+      contentAsString(result)   should include(testMessages("ers.global_errors.message"))
     }
 
     "direct to ers errors page if fetching request object fails fails" in {
-      reset(mockListCsvFilesCallback)
-      reset(mockErsUtil)
       when(
         mockErsUtil.fetch[RequestObject](refEq("ErsRequestObject"))(any(), any(), any())
       ) thenReturn Future.failed(new Exception)
@@ -243,19 +295,32 @@ class CheckCsvFilesControllerSpec extends AnyWordSpecLike
         mockErsUtil.cache(anyString(), any[UpscanCsvFilesCallbackList](), anyString())(any(), any())
       ) thenReturn Future.successful(mock[CacheMap])
 
-			when(mockErsUtil.ersRequestObject).thenReturn("ErsRequestObject")
+      when(mockErsUtil.ersRequestObject) thenReturn "ErsRequestObject"
 
-			val result = checkCsvFilesController.performCsvFilesPageSelected(formData)(Fixtures.buildFakeRequestWithSessionIdCSOP("POST"), hc)
-      contentAsString(result) shouldBe contentAsString(Future(checkCsvFilesController.getGlobalErrorPage(testFakeRequest, testMessages)))
-      contentAsString(result) should include(testMessages("ers.global_errors.message"))
+      val result = checkCsvFilesController.performCsvFilesPageSelected(formData)(
+        Fixtures.buildFakeRequestWithSessionIdCSOP("POST"),
+        hc
+      )
+      contentAsString(result) shouldBe contentAsString(
+        Future(checkCsvFilesController.getGlobalErrorPage(testFakeRequest, testMessages))
+      )
+      contentAsString(result)   should include(testMessages("ers.global_errors.message"))
     }
 
   }
 
   "calling createCacheData" should {
 
-		val checkCsvFilesController: CheckCsvFilesController =
-      new CheckCsvFilesController(mockMCC, mockAuthConnector, mockErsUtil, mockAppConfig, globalErrorView, checkCsvFileView, testAuthAction)
+    val checkCsvFilesController: CheckCsvFilesController =
+      new CheckCsvFilesController(
+        mockMCC,
+        mockAuthConnector,
+        mockErsUtil,
+        mockAppConfig,
+        globalErrorView,
+        checkCsvFileView,
+        testAuthAction
+      )
 
     val formData: List[CsvFiles] = List(
       CsvFiles("file0"),
@@ -266,16 +331,15 @@ class CheckCsvFilesControllerSpec extends AnyWordSpecLike
     )
 
     "return only selected files" in {
-			when(mockErsUtil.OPTION_YES).thenReturn("1")
-			val result = checkCsvFilesController.createCacheData(formData)
+      when(mockErsUtil.OPTION_YES).thenReturn("1")
+      val result = checkCsvFilesController.createCacheData(formData)
       result.ids.size shouldBe 5
       result.ids.foreach {
-        _ should matchPattern {
-          case UpscanIds(UploadId(_), _: String, NotStarted) =>
+        _ should matchPattern { case UpscanIds(UploadId(_), _: String, NotStarted) =>
         }
       }
 
-      result.noOfUploads shouldBe 0
+      result.noOfUploads       shouldBe 0
       result.noOfFilesToUpload shouldBe 5
     }
 
@@ -283,12 +347,20 @@ class CheckCsvFilesControllerSpec extends AnyWordSpecLike
 
   "calling reloadWithError" should {
 
-		val checkCsvFilesController: CheckCsvFilesController =
-      new CheckCsvFilesController(mockMCC, mockAuthConnector, mockErsUtil, mockAppConfig, globalErrorView, checkCsvFileView, testAuthAction)
+    val checkCsvFilesController: CheckCsvFilesController =
+      new CheckCsvFilesController(
+        mockMCC,
+        mockAuthConnector,
+        mockErsUtil,
+        mockAppConfig,
+        globalErrorView,
+        checkCsvFileView,
+        testAuthAction
+      )
 
-		"reload same page, showing error" in {
+    "reload same page, showing error" in {
       val result = checkCsvFilesController.reloadWithError()
-      status(result) shouldBe SEE_OTHER
+      status(result)                                shouldBe SEE_OTHER
       result.futureValue.header.headers("Location") shouldBe routes.CheckCsvFilesController.checkCsvFilesPage().toString
     }
   }

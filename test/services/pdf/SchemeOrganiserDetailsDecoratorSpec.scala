@@ -25,9 +25,14 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.i18n.Messages
 import utils.CountryCodes
 
-class SchemeOrganiserDetailsDecoratorSpec extends AnyWordSpecLike with Matchers with OptionValues with MockitoSugar with GuiceOneAppPerSuite {
+class SchemeOrganiserDetailsDecoratorSpec
+    extends AnyWordSpecLike
+    with Matchers
+    with OptionValues
+    with MockitoSugar
+    with GuiceOneAppPerSuite {
 
-  implicit val messages: Messages = mock[Messages]
+  implicit val messages: Messages    = mock[Messages]
   val mockCountryCodes: CountryCodes = app.injector.instanceOf[CountryCodes]
 
   "Company details title decorator" should {
@@ -49,16 +54,16 @@ class SchemeOrganiserDetailsDecoratorSpec extends AnyWordSpecLike with Matchers 
 
       val output = decorator.decorate
 
-      output.contains("title") shouldBe true
-      output.contains("companyName") shouldBe true
-      output.contains("addressLine1") shouldBe true
-      output.contains("addressLine2") shouldBe true
-      output.contains("addressLine3") shouldBe true
-      output.contains("addressLine4") shouldBe true
-      output.contains("post code") shouldBe true
-      output.contains("company reg") shouldBe true
+      output.contains("title")          shouldBe true
+      output.contains("companyName")    shouldBe true
+      output.contains("addressLine1")   shouldBe true
+      output.contains("addressLine2")   shouldBe true
+      output.contains("addressLine3")   shouldBe true
+      output.contains("addressLine4")   shouldBe true
+      output.contains("post code")      shouldBe true
+      output.contains("company reg")    shouldBe true
       output.contains("corporationRef") shouldBe true
-      output.contains("<hr/>") shouldBe true
-     }
+      output.contains("<hr/>")          shouldBe true
+    }
   }
 }

@@ -34,7 +34,7 @@ object CheckFileType {
   implicit val format: OFormat[CheckFileType] = Json.format[CheckFileType]
 }
 
-case class RS_schemeType (schemeType: String)
+case class RS_schemeType(schemeType: String)
 
 case class RS_groupSchemeType(groupSchemeType: String)
 
@@ -49,29 +49,30 @@ object AltAmendsActivity {
 }
 
 case class AltAmends(
-                         altAmendsTerms: Option[String],
-                         altAmendsEligibility: Option[String],
-                         altAmendsExchange: Option[String],
-                         altAmendsVariations: Option[String],
-                         altAmendsOther: Option[String]
-                         )
+  altAmendsTerms: Option[String],
+  altAmendsEligibility: Option[String],
+  altAmendsExchange: Option[String],
+  altAmendsVariations: Option[String],
+  altAmendsOther: Option[String]
+)
 object AltAmends {
   implicit val format: OFormat[AltAmends] = Json.format[AltAmends]
 }
 
 case class SchemeOrganiserDetails(
-                                      companyName: String,
-                                      addressLine1: String,
-                                      addressLine2: Option[String],
-                                      addressLine3: Option[String],
-                                      addressLine4: Option[String],
-                                      country: Option[String],
-                                      postcode: Option[String],
-                                      companyReg: Option[String],
-                                      corporationRef: Option[String]
-                                      ) {
-  def toArray(countryCodes: CountryCodes): Array[String] = {
-    Array(companyName,
+  companyName: String,
+  addressLine1: String,
+  addressLine2: Option[String],
+  addressLine3: Option[String],
+  addressLine4: Option[String],
+  country: Option[String],
+  postcode: Option[String],
+  companyReg: Option[String],
+  corporationRef: Option[String]
+) {
+  def toArray(countryCodes: CountryCodes): Array[String] =
+    Array(
+      companyName,
       addressLine1,
       addressLine2.getOrElse(""),
       addressLine3.getOrElse(""),
@@ -81,8 +82,8 @@ case class SchemeOrganiserDetails(
       companyReg.getOrElse(""),
       corporationRef.getOrElse("")
     ).filter(_.nonEmpty)
-  }
 }
+
 object SchemeOrganiserDetails {
   implicit val format: OFormat[SchemeOrganiserDetails] = Json.format[SchemeOrganiserDetails]
 }
@@ -94,12 +95,81 @@ case class TrusteeDetails(
                               addressLine3: Option[String],
                               addressLine4: Option[String],
                               country: Option[String],
-                              postcode: Option[String]
-                              )
+                              addressLine5: Option[String], // Postcode for UK address
+                              basedInUk: Boolean
+                              ) {
+
+  def replaceName(trusteeName: TrusteeName): TrusteeDetails = {
+    this.copy(name = trusteeName.name)
+  }
+
+  def replaceBasedInUk(trusteeBasedInUk: TrusteeBasedInUk): TrusteeDetails = {
+    this.copy(basedInUk = trusteeBasedInUk.basedInUk)
+  }
+
+  def replaceAddress(trusteeAddress: TrusteeAddress): TrusteeDetails = {
+    this.copy(
+      addressLine1 = trusteeAddress.addressLine1,
+      addressLine2 = trusteeAddress.addressLine2,
+      addressLine3 = trusteeAddress.addressLine3,
+      addressLine4 = trusteeAddress.addressLine4,
+      country      = trusteeAddress.country,
+      addressLine5 = trusteeAddress.addressLine5
+    )
+  }
+
+  def updatePart[A](part: A): TrusteeDetails = {
+    part match {
+      case name: TrusteeName => replaceName(name)
+      case basedInUk: TrusteeBasedInUk => replaceBasedInUk(basedInUk)
+      case address: TrusteeAddress => replaceAddress(address)
+      case _ => this
+    }
+  }
+}
+
 object TrusteeDetails {
+
+  def apply(name: TrusteeName, address: TrusteeAddress): TrusteeDetails = {
+    TrusteeDetails(
+      name.name,
+      address.addressLine1,
+      address.addressLine2,
+      address.addressLine3,
+      address.addressLine4,
+      address.country,
+      address.addressLine5,
+      address.country.fold(false)(_.equals("UK"))
+    )
+  }
+
   implicit val format: OFormat[TrusteeDetails] = Json.format[TrusteeDetails]
 }
 
+case class TrusteeBasedInUk(basedInUk: Boolean)
+
+object TrusteeBasedInUk {
+  implicit val format: OFormat[TrusteeBasedInUk] = Json.format[TrusteeBasedInUk]
+}
+
+case class TrusteeName(name: String)
+
+object TrusteeName {
+  implicit val format: OFormat[TrusteeName] = Json.format[TrusteeName]
+}
+
+case class TrusteeAddress(
+                                   addressLine1: String,
+                                   addressLine2: Option[String],
+                                   addressLine3: Option[String],
+                                   addressLine4: Option[String],
+                                   addressLine5: Option[String],
+                                   country: Option[String]
+                                 )
+
+object TrusteeAddress {
+  implicit val format: OFormat[TrusteeAddress] = Json.format[TrusteeAddress]
+}
 
 case class TrusteeDetailsList(trustees: List[TrusteeDetails])
 object TrusteeDetailsList {
@@ -117,16 +187,16 @@ object CsvFilesList {
 }
 
 case class RequestObject(
-                          aoRef: Option[String],
-                          taxYear: Option[String],
-                          ersSchemeRef: Option[String],
-                          schemeName: Option[String],
-                          schemeType: Option[String],
-                          agentRef: Option[String],
-                          empRef: Option[String],
-                          ts: Option[String],
-                          hmac: Option[String]
-                          ) {
+  aoRef: Option[String],
+  taxYear: Option[String],
+  ersSchemeRef: Option[String],
+  schemeName: Option[String],
+  schemeType: Option[String],
+  agentRef: Option[String],
+  empRef: Option[String],
+  ts: Option[String],
+  hmac: Option[String]
+) {
 
   private def toSchemeInfo: SchemeInfo =
     SchemeInfo(
@@ -138,7 +208,7 @@ case class RequestObject(
       getSchemeType
     )
 
-  def toErsMetaData(implicit request: Request[AnyRef]): ErsMetaData = {
+  def toErsMetaData(implicit request: Request[_]): ErsMetaData =
     ErsMetaData(
       toSchemeInfo,
       request.remoteAddress,
@@ -147,14 +217,11 @@ case class RequestObject(
       agentRef,
       None
     )
-  }
 
-  def getPageTitle(implicit messages: Messages): String = {
+  def getPageTitle(implicit messages: Messages): String =
     s"${messages(s"ers.scheme.$getSchemeType")} " +
       s"- ${messages("ers.scheme.title", getSchemeNameForDisplay)} " +
       s"- $getSchemeReference - ${DateUtils.getFullTaxYear(getTaxYear)}"
-  }
-
 
   def getTaxYear: String = taxYear.getOrElse("")
 
@@ -165,7 +232,7 @@ case class RequestObject(
   def getSchemeType: String = schemeType.getOrElse("")
 
   def getSchemeNameForDisplay(implicit messages: Messages): String =
-    if(schemeName.isDefined) messages(s"ers.${getSchemeType.toLowerCase}") else ""
+    if (schemeName.isDefined) messages(s"ers.${getSchemeType.toLowerCase}") else ""
 
   def getEmpRef: String = empRef.getOrElse("")
 
@@ -173,7 +240,7 @@ case class RequestObject(
 
   def getHMAC: String = hmac.getOrElse("")
 
-  def concatenateParameters: String = {
+  def concatenateParameters: String =
     getNVPair("agentRef", agentRef) +
       getNVPair("aoRef", aoRef) +
       getNVPair("empRef", empRef) +
@@ -182,24 +249,23 @@ case class RequestObject(
       getNVPair("schemeType", schemeType) +
       getNVPair("taxYear", taxYear) +
       getNVPair("ts", ts)
-  }
 
-  def getSchemeId: String = {
+  def getSchemeId: String =
     getSchemeType.toUpperCase match {
-      case "CSOP" => "1"
-      case "EMI" => "2"
-      case "SAYE" => "4"
-      case "SIP" => "5"
+      case "CSOP"  => "1"
+      case "EMI"   => "2"
+      case "SAYE"  => "4"
+      case "SIP"   => "5"
       case "OTHER" => "3"
-      case _ => ""
+      case _       => ""
     }
-  }
 
-  private def getNVPair(paramName: String, value: Option[String]): String = {
+  private def getNVPair(paramName: String, value: Option[String]): String =
     value.map(paramName + "=" + _ + ";").getOrElse("")
-  }
 }
+
 object RequestObject {
   implicit val formatRequestObject: OFormat[RequestObject] = Json.format[RequestObject]
 }
 
+case class AddTrustee(addTrustee: Boolean)

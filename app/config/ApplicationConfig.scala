@@ -27,68 +27,70 @@ import scala.concurrent.duration._
 import scala.util.matching.Regex
 
 @Singleton
-class ApplicationConfig @Inject()(config: ServicesConfig) {
+class ApplicationConfig @Inject() (config: ServicesConfig) {
 
-	lazy val languageMap: Map[String, Lang] = Map(
-		"english" -> Lang("en"),
-		"cymraeg" -> Lang("cy")
-	)
+  lazy val languageMap: Map[String, Lang] = Map(
+    "english" -> Lang("en"),
+    "cymraeg" -> Lang("cy")
+  )
 
-	def routeToSwitchLanguage: String => Call = (lang: String) => routes.LanguageSwitchController.switchToLanguage(lang)
+  def routeToSwitchLanguage: String => Call = (lang: String) => routes.LanguageSwitchController.switchToLanguage(lang)
 
-	lazy val appName: String = config.getString("appName")
-	lazy val authBaseUrl: String = config.baseUrl("auth")
-	lazy val googleTagManagerId: String = config.getString("google-tag-manager.id")
+  lazy val appName: String            = config.getString("appName")
+  lazy val authBaseUrl: String        = config.baseUrl("auth")
+  lazy val googleTagManagerId: String = config.getString("google-tag-manager.id")
 
-	lazy val contactFormServiceIdentifier = "ers-returns"
-	lazy val contactHost: String = config.getString("contact-frontend.host")
+  lazy val contactFormServiceIdentifier = "ers-returns"
+  lazy val contactHost: String          = config.getString("contact-frontend.host")
 
-	lazy val reportAProblemPartialUrl: String = s"$contactHost/contact/problem_reports_ajax?service=$contactFormServiceIdentifier"
-	lazy val reportAProblemNonJSUrl: String = s"$contactHost/contact/problem_reports_nonjs?service=$contactFormServiceIdentifier"
+  lazy val reportAProblemPartialUrl: String =
+    s"$contactHost/contact/problem_reports_ajax?service=$contactFormServiceIdentifier"
+  lazy val reportAProblemNonJSUrl: String   =
+    s"$contactHost/contact/problem_reports_nonjs?service=$contactFormServiceIdentifier"
 
-	lazy val assetsPrefix: String = config.getString("assets.url") + config.getString("assets.version")
-	lazy val ersUrl: String = config.baseUrl("ers-returns")
-	lazy val validatorUrl: String = config.baseUrl("ers-file-validator")
+  lazy val assetsPrefix: String = config.getString("assets.url") + config.getString("assets.version")
+  lazy val ersUrl: String       = config.baseUrl("ers-returns")
+  lazy val validatorUrl: String = config.baseUrl("ers-file-validator")
 
-	lazy val upscanProtocol: String = config.getConfString("upscan.protocol","http").toLowerCase()
-	lazy val upscanInitiateHost: String = config.baseUrl("upscan")
-	lazy val upscanRedirectBase: String = config.getString("microservice.services.upscan.redirect-base")
+  lazy val upscanProtocol: String     = config.getConfString("upscan.protocol", "http").toLowerCase()
+  lazy val upscanInitiateHost: String = config.baseUrl("upscan")
+  lazy val upscanRedirectBase: String = config.getString("microservice.services.upscan.redirect-base")
 
-	lazy val urBannerToggle: Boolean = config.getBoolean("urBanner.toggle")
-	lazy val urBannerLink: String = config.getString("urBanner.link")
-	lazy val ggSignInUrl: String = config.getString("government-gateway-sign-in.host")
+  lazy val urBannerToggle: Boolean = config.getBoolean("urBanner.toggle")
+  lazy val urBannerLink: String    = config.getString("urBanner.link")
+  lazy val ggSignInUrl: String     = config.getString("government-gateway-sign-in.host")
 
-	lazy val enableRetrieveSubmissionData: Boolean = config.getBoolean("settings.enable-retrieve-submission-data")
-	lazy val languageTranslationEnabled: Boolean = config.getConfBool("features.welsh-translation", defBool = true)
+  lazy val enableRetrieveSubmissionData: Boolean = config.getBoolean("settings.enable-retrieve-submission-data")
+  lazy val languageTranslationEnabled: Boolean   = config.getConfBool("features.welsh-translation", defBool = true)
 
-	lazy val odsSuccessRetryAmount: Int = config.getInt("retry.ods-success-cache.complete-upload.amount")
-	lazy val odsValidationRetryAmount: Int = config.getInt("retry.ods-success-cache.validation.amount")
-	lazy val allCsvFilesCacheRetryAmount: Int = config.getInt("retry.csv-success-cache.all-files-complete.amount")
-	lazy val retryDelay: FiniteDuration = FiniteDuration(config.getString("retry.delay").toInt, "ms")
-	lazy val accessThreshold: Int = config.getInt("accessThreshold")
-	lazy val timeOutSeconds : Int = config.getInt("sessionTimeout.timeoutSeconds")
-	lazy val timeOutCountDownSeconds: Int = config.getInt("sessionTimeout.time-out-countdown-seconds")
-	lazy val timeOut = s"$loginCallback/signed-out"
+  lazy val odsSuccessRetryAmount: Int       = config.getInt("retry.ods-success-cache.complete-upload.amount")
+  lazy val odsValidationRetryAmount: Int    = config.getInt("retry.ods-success-cache.validation.amount")
+  lazy val allCsvFilesCacheRetryAmount: Int = config.getInt("retry.csv-success-cache.all-files-complete.amount")
+  lazy val retryDelay: FiniteDuration       = FiniteDuration(config.getString("retry.delay").toInt, "ms")
+  lazy val accessThreshold: Int             = config.getInt("accessThreshold")
+  lazy val timeOutSeconds: Int              = config.getInt("sessionTimeout.timeoutSeconds")
+  lazy val timeOutCountDownSeconds: Int     = config.getInt("sessionTimeout.time-out-countdown-seconds")
+  lazy val timeOut                          = s"$loginCallback/signed-out"
 
-	lazy val sentViaSchedulerNoOfRowsLimit: Int = 10000
+  lazy val sentViaSchedulerNoOfRowsLimit: Int = 10000
 
-	//Previous ExternalUrls Object
-	lazy val companyAuthHost: String = config.getString(s"microservice.services.auth.company-auth.host")
-	lazy val signOutCallback: String = config.getString(s"microservice.services.feedback-survey-frontend.url")
-	lazy val signOut = s"$companyAuthHost/gg/sign-out?continue=$signOutCallback"
-	lazy val loginCallback: String = config.getString(s"microservice.services.auth.login-callback.url")
-	lazy val portalDomain: String = config.getString("portal.domain")
-	lazy val hmacToken: String = config.getString("hmac.hmac_token")
-	lazy val hmacOnSwitch: Boolean = config.getBoolean("hmac.hmac_switch")
+  //Previous ExternalUrls Object
+  lazy val companyAuthHost: String = config.getString(s"microservice.services.auth.company-auth.host")
+  lazy val signOutCallback: String = config.getString(s"microservice.services.feedback-survey-frontend.url")
+  lazy val signOut                 = s"$companyAuthHost/gg/sign-out?continue=$signOutCallback"
+  lazy val loginCallback: String   = config.getString(s"microservice.services.auth.login-callback.url")
+  lazy val portalDomain: String    = config.getString("portal.domain")
+  lazy val hmacToken: String       = config.getString("hmac.hmac_token")
+  lazy val hmacOnSwitch: Boolean   = config.getBoolean("hmac.hmac_switch")
 
-	//SessionCacheWiring
-	lazy val shortLivedCacheBaseUri: String = config.baseUrl("cachable.short-lived-cache")
-	lazy val shortLivedCacheDomain: String = config.getString(s"microservice.services.cachable.short-lived-cache.domain")
-	lazy val sessionCacheBaseUri: String = config.baseUrl("cachable.session-cache")
-	lazy val sessionCacheDomain: String = config.getString(s"microservice.services.cachable.session-cache.domain")
+  //SessionCacheWiring
+  lazy val shortLivedCacheBaseUri: String = config.baseUrl("cachable.short-lived-cache")
+  lazy val shortLivedCacheDomain: String  = config.getString(s"microservice.services.cachable.short-lived-cache.domain")
+  lazy val sessionCacheBaseUri: String    = config.baseUrl("cachable.session-cache")
+  lazy val sessionCacheDomain: String     = config.getString(s"microservice.services.cachable.session-cache.domain")
 
-	lazy val useNewValidator: Boolean = config.getBoolean("feature-flag.new-validator")
+  lazy val useNewValidator: Boolean = config.getBoolean("feature-flag.new-validator")
 
-	lazy val ampersandRegex: Regex = "(?!&amp;)(?:&)".r
+  lazy val ampersandRegex: Regex = "(?!&amp;)(?:&)".r
 
 }

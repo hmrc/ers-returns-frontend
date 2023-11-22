@@ -16,7 +16,6 @@
 
 package utils
 
-
 import config.ApplicationConfig
 import models.RequestObject
 import org.apache.commons.codec.binary.Base64
@@ -27,7 +26,7 @@ import javax.crypto.{Mac, SecretKey}
 
 trait HMACUtil {
 
-	val appConfig: ApplicationConfig
+  val appConfig: ApplicationConfig
 
   val TIME_RANGE: Int = 300 // seconds
 
@@ -37,11 +36,11 @@ trait HMACUtil {
     val urlParamsHMAC: Array[Byte] = Base64.decodeBase64(urlParams.getHMAC)
 
     java.util.Arrays.equals(generatedHMAC, urlParamsHMAC)
-	}
+  }
 
   def decodeSecretKey(s: String): SecretKey = {
 
-    val encodedKey = Base64.decodeBase64(s)
+    val encodedKey             = Base64.decodeBase64(s)
     val originalKey: SecretKey = new SecretKeySpec(encodedKey, 0, encodedKey.length, "HmacSHA1")
     originalKey
   }
@@ -50,33 +49,31 @@ trait HMACUtil {
 
     val mac: Mac = Mac.getInstance("HmacSHA1")
     mac.init(decodeSecretKey(appConfig.hmacToken))
-    val bytes = mac.doFinal(s.getBytes("UTF-8"))
+    val bytes    = mac.doFinal(s.getBytes("UTF-8"))
     bytes
   }
 
   def timeIsValid(urlParams: RequestObject): Boolean = {
     try {
-      val longTime: Long = urlParams.getTS.toLong * 1000
+      val longTime: Long    = urlParams.getTS.toLong * 1000
       val urlTime: DateTime = new DateTime(longTime)
-      val now: DateTime = DateTime.now()
-      val diff: Int = Seconds.secondsBetween(urlTime, now).getSeconds
+      val now: DateTime     = DateTime.now()
+      val diff: Int         = Seconds.secondsBetween(urlTime, now).getSeconds
 
       if (diff <= TIME_RANGE) {
         return true
       }
-    }
-    catch {
+    } catch {
       case _: NumberFormatException =>
     }
 
     false
   }
 
-  def isHmacAndTimestampValid(requestObject: RequestObject): Boolean = {
+  def isHmacAndTimestampValid(requestObject: RequestObject): Boolean =
     if (appConfig.hmacOnSwitch) {
-     timeIsValid(requestObject) && verifyHMAC(requestObject)
+      timeIsValid(requestObject) && verifyHMAC(requestObject)
     } else {
       true
     }
-  }
 }

@@ -29,7 +29,7 @@
 		govukInsetText: GovukInsetText
 )
 
-@(requestObject: RequestObject, upscanInitiateResponse: UpscanInitiateResponse)(implicit request: Request[AnyRef], messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
+@(requestObject: RequestObject, upscanInitiateResponse: UpscanInitiateResponse)(implicit request: Request[_], messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 
 @schemeId = @{requestObject.getSchemeId}
 
@@ -44,7 +44,7 @@
 
 	@govukBackLink(BackLink(
 		content = Text(messages("ers.back")),
-		href = routes.CheckFileTypeController.checkFileTypePage.url,
+		href = routes.CheckFileTypeController.checkFileTypePage().url,
 	))
 
 	@govukErrorSummary(ErrorSummary(

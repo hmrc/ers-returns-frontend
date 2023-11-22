@@ -11,7 +11,9 @@ This service uses upscan
 
 ## Running the service
 
-Service Manager: ERS_RETURNS_ALL
+Service Manager: `sm2 --start ERS_RETURNS_ALL`
+
+Start local tests: `./run_all_tests.sh`
 
 |Repositories|Link|
 |------------|----|

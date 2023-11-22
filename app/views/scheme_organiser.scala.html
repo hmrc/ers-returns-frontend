@@ -36,7 +36,7 @@
 )
 
 
-@(requestObject: RequestObject, checkFileType: String, schemeOrganiser: Form[models.SchemeOrganiserDetails], reportableEvents: String = "2")(implicit request: Request[AnyRef], flash: Flash, messages: Messages, countryCodes: CountryCodes, ersUtil: ERSUtil, appConfig: ApplicationConfig)
+@(requestObject: RequestObject, checkFileType: String, schemeOrganiser: Form[models.SchemeOrganiserDetails], reportableEvents: String = "2")(implicit request: Request[_], messages: Messages, countryCodes: CountryCodes, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 
 @schemeId = @{requestObject.getSchemeId}
 
@@ -63,7 +63,7 @@
 		text = ersUtil.getPageElement(schemeId, ersUtil.PAGE_SCHEME_ORGANISER, "title")
 	))
 
-	@formWithCSRF(action = routes.SchemeOrganiserController.schemeOrganiserSubmit) {
+	@formWithCSRF(action = routes.SchemeOrganiserController.schemeOrganiserSubmit()) {
 
 		@govukRadios(Radios(
 			fieldset = Some(Fieldset(

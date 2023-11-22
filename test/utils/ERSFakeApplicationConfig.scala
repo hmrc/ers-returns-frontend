@@ -17,19 +17,20 @@
 package utils
 
 trait ERSFakeApplicationConfig {
-  val config: Map[String, Any] = Map("play.crypto.secret" -> "test",
-    "govuk-tax.Test.login-callback.url" -> "test",
-    "govuk-tax.Test.assets.url" -> "test",
-    "govuk-tax.Test.assets.version" -> "version",
-    "Test.external-url.contact-frontend.host" -> "test",
-    "Test.external-url.contact-frontend.host" -> "test",
-    "Test.external-url.tai-frontend.host" -> "test",
-    "govuk-tax.Test.login-callback.url" -> "test",
+  val config: Map[String, Any] = Map(
+    "play.crypto.secret"                            -> "test",
+    "govuk-tax.Test.login-callback.url"             -> "test",
+    "govuk-tax.Test.assets.url"                     -> "test",
+    "govuk-tax.Test.assets.version"                 -> "version",
+    "Test.external-url.contact-frontend.host"       -> "test",
+    "Test.external-url.contact-frontend.host"       -> "test",
+    "Test.external-url.tai-frontend.host"           -> "test",
+    "govuk-tax.Test.login-callback.url"             -> "test",
     "govuk-tax.Test.services.contact-frontend.host" -> "test",
     "govuk-tax.Test.services.contact-frontend.port" -> "test",
-    "metrics.enabled" -> "true",
-    "auditing.enabled" -> false,
-    "microservice.metrics.graphite.enabled" -> false,
-    "microservice.services.upscan.redirect-base" -> "http://localhost:9000"
+    "metrics.enabled"                               -> "true",
+    "auditing.enabled"                              -> false,
+    "microservice.metrics.graphite.enabled"         -> false,
+    "microservice.services.upscan.redirect-base"    -> "http://localhost:9000"
   )
 }
