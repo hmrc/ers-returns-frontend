@@ -51,14 +51,14 @@ trait ErsTestHelper extends MockitoSugar with AuthHelper with ERSFakeApplication
 
   val messagesActionBuilder: MessagesActionBuilder =
     new DefaultMessagesActionBuilderImpl(stubBodyParser[AnyContent](), stubMessagesApi())
-  val cc: ControllerComponents                     = stubControllerComponents()
-  val mockMaterializer: Materializer               = mock[Materializer]
-  val defaultParser                                = new Default()(mockMaterializer)
+  val cc: ControllerComponents = stubControllerComponents()
+  val mockMaterializer: Materializer = mock[Materializer]
+  val defaultParser = new Default()(mockMaterializer)
 
   def buildRequestWithAuth(
-    req: Request[AnyContent],
-    authData: ERSAuthData = Fixtures.buildFakeUser
-  ): RequestWithOptionalAuthContext[AnyContent] =
+                            req: Request[AnyContent],
+                            authData: ERSAuthData = Fixtures.buildFakeUser
+                          ): RequestWithOptionalAuthContext[AnyContent] =
     RequestWithOptionalAuthContext(req, authData)
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
@@ -112,8 +112,8 @@ trait ErsTestHelper extends MockitoSugar with AuthHelper with ERSFakeApplication
   val testAuthAction = new AuthAction(mockAuthConnector, mockAppConfig, mockSessionService, defaultParser)(ec)
   val testAuthActionGov = new AuthActionGovGateway(mockAuthConnector, mockAppConfig, defaultParser)(ec)
 
-	when(mockCountryCodes.countriesMap).thenReturn(List(Country("United Kingdom", "UK"), Country("South Africa", "ZA")))
-	when(mockCountryCodes.getCountry("UK")).thenReturn(Some("United Kingdom"))
+  when(mockCountryCodes.countriesMap).thenReturn(List(Country("United Kingdom", "UK"), Country("South Africa", "ZA")))
+  when(mockCountryCodes.getCountry("UK")).thenReturn(Some("United Kingdom"))
 
   when(mockAppConfig.ggSignInUrl).thenReturn("http://localhost:9949/gg/sign-in")
   when(mockAppConfig.appName).thenReturn("ers-returns-frontend")

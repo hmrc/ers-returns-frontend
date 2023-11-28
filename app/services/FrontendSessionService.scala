@@ -137,6 +137,14 @@ class FrontendSessionService @Inject()(val sessionCache: FrontendSessionsReposit
     } yield (gscOption, companyDetailsOption)
   }
 
+  def fetchCompaniesOptionally()(implicit request: Request[_], formats: json.Format[CompanyDetailsList]): Future[CompanyDetailsList] = {
+    fetch[CompanyDetailsList](GROUP_SCHEME_COMPANIES).recoverWith {
+      case ex: Exception =>
+        logger.warn(s"[FrontendSessionService][fetchCompaniesOptionally] Failed to fetch companies, returning empty list. Error: ${ex.getMessage}")
+        Future.successful(CompanyDetailsList(List.empty[CompanyDetails]))
+    }
+  }
+
   def getAllData(bundleRef: String, ersMetaData: ErsMetaData)
                 (implicit ec: ExecutionContext, request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[ErsSummary] = {
     val schemeRef = ersMetaData.schemeInfo.schemeRef

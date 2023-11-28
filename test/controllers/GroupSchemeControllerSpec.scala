@@ -698,6 +698,21 @@ class GroupSchemeControllerSpec
       contentAsString(result).contains(Messages("ers.global_errors.title")) shouldBe true
     }
 
+    "redirect to group scheme choice page if company list empty" in {
+      when(
+        mockErsUtil.fetch[CompanyDetailsList](refEq(mockErsUtil.GROUP_SCHEME_COMPANIES), anyString())(any(), any())
+      ) thenReturn Future.successful(CompanyDetailsList(List()))
+
+      when(
+        mockErsUtil.fetch[RequestObject](refEq(mockErsUtil.ersRequestObject))(any(), any(), any())
+      ) thenReturn Future.successful(ersRequestObject)
+
+      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+      val result = testGroupSchemeController.showGroupPlanSummaryPage()(authRequest, hc)
+      status(result) shouldBe SEE_OTHER
+      contentAsString(result).contains(Messages("ers.csop.is_group_scheme.page_title"))
+    }
+
     "display error page if fetch request object fails" in {
       when(mockSessionService.fetch[CompanyDetailsList](refEq(mockErsUtil.GROUP_SCHEME_COMPANIES))(any(), any()))
         .thenReturn(Future.successful(mock[CompanyDetailsList]))

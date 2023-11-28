@@ -28,6 +28,7 @@ import uk.gov.hmrc.mongo.cache.DataKey
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils._
+import forms.YesNoFormProvider
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
@@ -39,12 +40,16 @@ class GroupSchemeController @Inject() (val mcc: MessagesControllerComponents,
                                        groupView: views.html.group,
                                        manualCompanyDetailsView: views.html.manual_company_details,
                                        groupPlanSummaryView: views.html.group_plan_summary,
+                                       confirmDeleteCompanyView: views.html.confirm_delete_company,
+                                       yesNoFormProvider: YesNoFormProvider,
                                        authAction: AuthAction)
                                       (implicit val ec: ExecutionContext,
                                        val ersUtil: ERSUtil,
                                        val appConfig: ApplicationConfig,
                                        val countryCodes: CountryCodes)
   extends FrontendController(mcc) with I18nSupport with WithUnsafeDefaultFormBinding with Logging with Constants with CacheHelper {
+
+  private val form: Form[Boolean] = yesNoFormProvider.withPrefix("delete-company")
 
   def manualCompanyDetailsPage(index: Int): Action[AnyContent] = authAction.async { implicit request =>
     showManualCompanyDetailsPage(index)(request)
@@ -96,20 +101,75 @@ class GroupSchemeController @Inject() (val mcc: MessagesControllerComponents,
        }
      }).distinct
 
+  def removeCompany(index: Int)(implicit request: Request[_]): Future[Boolean] = {
+    (for {
+      companies <- sessionService.fetchCompaniesOptionally()
+      companyDetailsList = CompanyDetailsList(filterDeletedCompany(companies, index))
+      companySize = companies.companies.size
+    } yield {
+      sessionService.cache(ersUtil.GROUP_SCHEME_COMPANIES, companyDetailsList)
+      if (companySize == 1) sessionService.cache(ersUtil.GROUP_SCHEME_CACHE_CONTROLLER, GroupSchemeInfo(None, None))
+      true
+    }).recover {
+      case e: Throwable =>
+        logger.warn(s"[GroupSchemeController][deleteCompany] Deleting company failed: ${e.getMessage}")
+        false
+    }
+  }
+
   def deleteCompany(id: Int): Action[AnyContent] = authAction.async { implicit request =>
     showDeleteCompany(id)
   }
 
   def showDeleteCompany(id: Int)(implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
     (for {
-      all <- sessionService.fetchAll()
-      companies = getEntry[CompanyDetailsList](all, DataKey(ersUtil.GROUP_SCHEME_COMPANIES)).getOrElse(CompanyDetailsList(Nil))
-      companyDetailsList = CompanyDetailsList(filterDeletedCompany(companies, id))
-      _ <- sessionService.cache(ersUtil.GROUP_SCHEME_COMPANIES, companyDetailsList)
-    } yield Redirect(routes.GroupSchemeController.groupPlanSummaryPage())) recover { case e: Exception =>
-      logger.error(s"[GroupSchemeController][showDeleteCompany] Fetch all data failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
+      all             <- sessionService.fetchAll()
+      requestObject   <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
+      companies       = getEntry[CompanyDetailsList](all, DataKey(ersUtil.GROUP_SCHEME_COMPANIES)).getOrElse(CompanyDetailsList(Nil))
+      companyLength   = companies.companies.length
+    } yield {
+      Ok(confirmDeleteCompanyView(requestObject, id, form, companyLength == 1, companies.companies(id).companyName))
+    }) recover { case e: Exception =>
+      logger.error(
+        s"[GroupSchemeController][showDeleteCompany] Fetch all data failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}."
+      )
       getGlobalErrorPage()
     }
+
+  def showConfirmDeleteCompanySubmit(index: Int): Action[AnyContent] = authAction.async { implicit request =>
+    val requestObjectWithCompanyList = for {
+      requestObject <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
+      companyDetailsList <- sessionService.fetchCompaniesOptionally()
+      companySize = companyDetailsList.companies.size
+    } yield (requestObject, companySize, companyDetailsList)
+
+    requestObjectWithCompanyList.flatMap { case (requestObject, companySize, companyDetailsList) =>
+      form.bindFromRequest.fold(
+        formWithErrors => Future.successful(BadRequest(
+          confirmDeleteCompanyView(
+            requestObject,
+            index,
+            formWithErrors,
+            companySize == 1,
+            companyDetailsList.companies(index).companyName
+          )
+        )),
+        {
+          case true if companySize == 1 =>
+            removeCompany(index).map {
+              case true => Redirect(routes.GroupSchemeController.groupSchemePage())
+              case _    => getGlobalErrorPage()
+            }
+          case true =>
+            removeCompany(index).map {
+              case true => Redirect(routes.GroupSchemeController.groupPlanSummaryPage())
+              case _    => getGlobalErrorPage()
+            }
+          case _ => Future.successful(Redirect(routes.GroupSchemeController.groupPlanSummaryPage()))
+        }
+      )
+    }
+  }
 
   private def filterDeletedCompany(companyList: CompanyDetailsList, id: Int): List[CompanyDetails] =
     companyList.companies.zipWithIndex.filterNot(_._2 == id).map(_._1)
@@ -165,9 +225,9 @@ class GroupSchemeController @Inject() (val mcc: MessagesControllerComponents,
       .bindFromRequest()
       .fold(
         errors => {
-          val correctOrder = errors.errors.map(_.key).distinct
-          val incorrectOrderGrouped = errors.errors.groupBy(_.key).map(_._2.head).toSeq
-          val correctOrderGrouped = correctOrder.flatMap(x => incorrectOrderGrouped.find(_.key == x))
+          val correctOrder                             = errors.errors.map(_.key).distinct
+          val incorrectOrderGrouped                    = errors.errors.groupBy(_.key).map(_._2.head).toSeq
+          val correctOrderGrouped                      = correctOrder.flatMap(x => incorrectOrderGrouped.find(_.key == x))
           val firstErrors: Form[models.RS_groupScheme] =
             new Form[RS_groupScheme](errors.mapping, errors.data, correctOrderGrouped, errors.value)
           Future.successful(Ok(groupView(requestObject, Some(""), firstErrors)))
@@ -183,10 +243,14 @@ class GroupSchemeController @Inject() (val mcc: MessagesControllerComponents,
             (requestObject.getSchemeId, formData.groupScheme) match {
               case (_, Some(ersUtil.OPTION_YES)) => Redirect(routes.GroupSchemeController.manualCompanyDetailsPage())
               case (ersUtil.SCHEME_CSOP | ersUtil.SCHEME_SAYE, _) =>
+                sessionService.remove(ersUtil.GROUP_SCHEME_COMPANIES)
                 Redirect(routes.AltAmendsController.altActivityPage())
               case (ersUtil.SCHEME_EMI | ersUtil.SCHEME_OTHER, _) =>
+                sessionService.remove(ersUtil.GROUP_SCHEME_COMPANIES)
                 Redirect(routes.SummaryDeclarationController.summaryDeclarationPage())
-            case (ersUtil.SCHEME_SIP, _) => Redirect(controllers.trustees.routes.TrusteeSummaryController.trusteeSummaryPage())
+              case (ersUtil.SCHEME_SIP, _) =>
+                sessionService.remove(ersUtil.GROUP_SCHEME_COMPANIES)
+                Redirect(controllers.trustees.routes.TrusteeSummaryController.trusteeSummaryPage())
               case (_, _) => getGlobalErrorPage()
             }
           }
@@ -200,9 +264,15 @@ class GroupSchemeController @Inject() (val mcc: MessagesControllerComponents,
   def showGroupPlanSummaryPage()(implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
     (for {
       requestObject <- sessionService.fetch[RequestObject](ERS_REQUEST_OBJECT)
-      compDetails <- sessionService.fetch[CompanyDetailsList](GROUP_SCHEME_COMPANIES)
+      compDetails   <- sessionService.fetch[CompanyDetailsList](GROUP_SCHEME_COMPANIES)
     } yield {
-      Ok(groupPlanSummaryView(requestObject, ersUtil.OPTION_MANUAL, compDetails))
+      compDetails.companies match {
+        case Nil  =>
+          //TODO[DDCE-4967] Not 100% sure about below caching + add error handling
+          sessionService.cache(ersUtil.GROUP_SCHEME_CACHE_CONTROLLER, GroupSchemeInfo(None, None))
+          getGlobalErrorPage()
+        case _    => Ok(groupPlanSummaryView(requestObject, ersUtil.OPTION_MANUAL, compDetails))
+      }
     }) recover { case e: Exception =>
       logger.error(s"[GroupSchemeController][showGroupPlanSummaryPage] Get data from cache failed with exception", e)
       getGlobalErrorPage()
