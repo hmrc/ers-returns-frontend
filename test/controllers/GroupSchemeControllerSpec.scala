@@ -16,8 +16,9 @@
 
 package controllers
 
-import org.apache.pekko.stream.Materializer
+import forms.YesNoFormProvider
 import models._
+import org.apache.pekko.stream.Materializer
 import org.jsoup.Jsoup
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
@@ -32,7 +33,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import utils.Fixtures.ersRequestObject
 import utils.{ERSFakeApplicationConfig, ErsTestHelper, Fixtures}
-import views.html.{global_error, group, group_plan_summary, manual_company_details}
+import views.html._
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -62,14 +63,18 @@ class GroupSchemeControllerSpec
   val groupView: group = app.injector.instanceOf[group]
   val manualCompanyDetailsView: manual_company_details = app.injector.instanceOf[manual_company_details]
   val groupPlanSummaryView: group_plan_summary = app.injector.instanceOf[group_plan_summary]
+  val confirmDeleteCompanyView: confirm_delete_company = app.injector.instanceOf[confirm_delete_company]
+  val yesNoFormProvider: YesNoFormProvider = app.injector.instanceOf[YesNoFormProvider]
 
   val company: CompanyDetails =
     CompanyDetails(Fixtures.companyName, "Address Line 1", None, None, None, Some("UK"), None, None, None)
   lazy val companyDetailsList: CompanyDetailsList = CompanyDetailsList(List(company, company))
+  lazy val companyDetailsListSingle: CompanyDetailsList = CompanyDetailsList(List(company))
+  lazy val companyDetailsListEmpty: CompanyDetailsList = CompanyDetailsList(List())
 
   override def beforeEach(): Unit = {
     super.beforeEach()
-    reset(mockErsUtil, mockSessionService)
+    reset(mockErsUtil, mockSessionService, mockCompanyService)
     when(mockErsUtil.GROUP_SCHEME_COMPANIES).thenReturn("group-scheme-companies")
     when(mockErsUtil.GROUP_SCHEME_CACHE_CONTROLLER).thenReturn("group-scheme-controller")
     when(mockErsUtil.ERS_REQUEST_OBJECT).thenReturn("ers-request-object")
@@ -85,15 +90,20 @@ class GroupSchemeControllerSpec
     when(mockErsUtil.getPageElement(any(), any(), any(), any())(any())).thenCallRealMethod()
     when(mockErsUtil.companyLocation(any())).thenReturn("UK")
     when(mockErsUtil.buildAddressSummary(any())).thenReturn("addressSummary")
+    when(mockErsUtil.MSG_CSOP).thenReturn(".csop.")
+    when(mockErsUtil.PAGE_GROUP_SUMMARY).thenReturn("ers_group_summary")
   }
 
   lazy val testGroupSchemeController: GroupSchemeController = new GroupSchemeController(
     mockMCC,
     mockSessionService,
+    mockCompanyService,
     globalErrorView,
     groupView,
     manualCompanyDetailsView,
     groupPlanSummaryView,
+    confirmDeleteCompanyView,
+    yesNoFormProvider,
     testAuthAction
   )
 
@@ -116,12 +126,16 @@ class GroupSchemeControllerSpec
   "showManualCompanyDetailsPage" should {
     "display company details page for correct scheme" in {
       when(mockSessionService.fetch[RequestObject](refEq(mockErsUtil.ERS_REQUEST_OBJECT))(any(), any()))
-        .thenReturn(Future.successful(ersRequestObject))
+        .thenReturn(Future.successful(ersRequestObject.copy(
+          schemeName = Some("CSOP"),
+          schemeType = Some("CSOP")
+        )))
 
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
       val result      = testGroupSchemeController.showManualCompanyDetailsPage(1)(authRequest)
       status(result) shouldBe OK
-      contentAsString(result).contains(Messages("ers_manual_company_details.csop.title"))
+      val document = Jsoup.parse(contentAsString(result))
+      document.getElementsByTag("title").text shouldBe Messages("ers_manual_company_details.csop.title") + " " + Messages("ers.title.postfix")
     }
   }
 
@@ -171,7 +185,9 @@ class GroupSchemeControllerSpec
       val result = testGroupSchemeController.manualCompanyDetailsSubmit(1000)(authRequest)
 
       status(result) shouldBe OK
-      contentAsString(result) should include ("govuk-error-summary")
+
+      val document = Jsoup.parse(contentAsString(result))
+      document.getElementsByClass("govuk-error-summary").isEmpty shouldBe false
     }
 
     "redirect to Group Summary page if showManualCompanyDetailsSubmit is called with authentication and correct form data entered for 1st company" in {
@@ -184,7 +200,7 @@ class GroupSchemeControllerSpec
       val result = testGroupSchemeController.showManualCompanyDetailsSubmit(ersRequestObject, 10000)(authRequest)
 
       status(result) shouldBe SEE_OTHER
-      headers(result)(implicitly)("Location").contains("/group-summary")
+      headers(result)(implicitly)("Location") shouldBe "/submit-your-ers-annual-return/subsidiary-company-summary"
     }
 
     "redirect to Group Summary page if showManualCompanyDetailsSubmit is called with authentication and correct form data for additional company" in {
@@ -197,7 +213,7 @@ class GroupSchemeControllerSpec
       val result = testGroupSchemeController.showManualCompanyDetailsSubmit(ersRequestObject, 1)(authRequest)
 
       status(result) shouldBe SEE_OTHER
-      headers(result)(implicitly)("Location").contains("/group-summary")
+      headers(result)(implicitly)("Location") shouldBe "/submit-your-ers-annual-return/subsidiary-company-summary"
     }
 
     "redirect to Group Summary page if showManualCompanyDetailsSubmit is called with authentication and correct form data for updated company" in {
@@ -210,7 +226,7 @@ class GroupSchemeControllerSpec
       val result = testGroupSchemeController.showManualCompanyDetailsSubmit(ersRequestObject, 0)(authRequest)
 
       status(result) shouldBe SEE_OTHER
-      headers(result)(implicitly)("Location").contains("/group-summary")
+      headers(result)(implicitly)("Location") shouldBe "/submit-your-ers-annual-return/subsidiary-company-summary"
     }
 
     "redirect to Group Summary page if data is filled correctly and there is nothing in existing cache" in {
@@ -223,134 +239,223 @@ class GroupSchemeControllerSpec
       val result = testGroupSchemeController.showManualCompanyDetailsSubmit(ersRequestObject, 1000)(authRequest)
 
       status(result) shouldBe SEE_OTHER
-      headers(result)(implicitly)("Location").contains("/group-summary")
+      headers(result)(implicitly)("Location") shouldBe "/submit-your-ers-annual-return/subsidiary-company-summary"
     }
   }
 
-  "calling replace company" should {
-
-    lazy val controllerUnderTest: GroupSchemeController = new GroupSchemeController(
-      mockMCC,
-      mockSessionService,
-      globalErrorView,
-      groupView,
-      manualCompanyDetailsView,
-      groupPlanSummaryView,
-      testAuthAction
-    )
-
-    "replace a companies and keep the other companies" when {
-      "given an index that matches a companies in the list" in {
-        val index = 2
-        val formData = CompanyDetails("Replacement Company", "1 Some Place", None, None, None, None, None, None, None)
-        val target   = CompanyDetails("Target Company", "3 Window Close", None, None, None, None, None, None, None)
-
-        val companiesDetailsList = List(
-          CompanyDetails("First Company", "20 Garden View", None, None, None, None, None, None, None),
-          CompanyDetails("Third Company", "72 Big Avenue", None, None, None, None, None, None, None),
-          target,
-          CompanyDetails("Fourth Company", "21 Brick Lane", None, None, None, None, None, None, None)
-        )
-
-        val result = controllerUnderTest.replaceCompany(companiesDetailsList, index, formData)
-
-        result should contain(formData)
-        result shouldNot contain(target)
-        result.length shouldBe 4
-      }
-    }
-
-    "keep the existing list of companies" when {
-      "given an index that does not match any existing companies" in {
-        val index = 100
-        val formData = CompanyDetails("Replacement Company", "1 Some Place", None, None, None, None, None, None, None)
-        val target   = CompanyDetails("Target Company", "3 Window Close", None, None, None, None, None, None, None)
-
-        val companyDetailsList = List(
-          CompanyDetails("First Company", "20 Garden View", None, None, None, None, None, None, None),
-          CompanyDetails("Third Company", "72 Big Avenue", None, None, None, None, None, None, None),
-          target,
-          CompanyDetails("Fourth Company", "21 Brick Lane", None, None, None, None, None, None, None)
-        )
-
-        val result = controllerUnderTest.replaceCompany(companyDetailsList, index, formData)
-
-        result shouldNot contain(formData)
-        result should contain(target)
-        result.length shouldBe 4
-      }
-    }
-
-    "remove duplicate records" when {
-      "duplicates are present" in {
-        val index = 1
-        val target = CompanyDetails("Target Company", "3 Window Close", None, None, None, None, None, None, None)
-        val companyDetailsList = List(
-          target,
-          target,
-          target,
-          target
-        )
-
-        val result = controllerUnderTest.replaceCompany(companyDetailsList, index, target)
-
-        result should contain(target)
-        result.length shouldBe 1
-      }
-    }
-  }
-
-  "deleteCompany" should {
-    def deleteCompanyHandler(index: Int, request: FakeRequest[AnyContentAsEmpty.type])(handler: Future[Result] => Any): Unit =
-      handler(testGroupSchemeController.deleteCompany(index).apply(request))
+  "confirmDeleteCompanyPage" should {
+    def confirmDeleteCompanyHandler(index: Int, request: FakeRequest[AnyContentAsEmpty.type])(handler: Future[Result] => Any): Unit =
+      handler(testGroupSchemeController.confirmDeleteCompanyPage(index).apply(request))
 
     "redirect to sign in page if user is not authenticated" in {
       setUnauthorisedMocks()
 
-      deleteCompanyHandler(0, Fixtures.buildFakeRequestWithSessionId("GET")) { result =>
+      confirmDeleteCompanyHandler(0, Fixtures.buildFakeRequestWithSessionId("GET")) { result =>
         status(result) shouldBe SEE_OTHER
         headers(result)(implicitly)("Location").contains("/gg/sign-in") shouldBe true
       }
     }
   }
 
-  "showDeleteCompany" should {
+  "showConfirmDeleteCompany" should {
     "direct to ers errors page if fetchAll fails" in {
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
 
       when(mockSessionService.fetchAll()(any())) thenReturn Future.failed(new Exception("error"))
 
-      val result = testGroupSchemeController.showDeleteCompany(0)(authRequest)
+      val result = testGroupSchemeController.showConfirmDeleteCompany(0)(authRequest)
 
       status(result) shouldBe INTERNAL_SERVER_ERROR
-      contentAsString(result).contains(Messages("ers.global_errors.title")) shouldBe true
+      val document = Jsoup.parse(contentAsString(result))
+      document.getElementsByTag("title").text shouldBe Messages("ers.global_errors.title")
     }
 
-    "give a redirect to groupPlanSummaryPage with the selected company deleted if showDeleteCompany is called with authentication and correct cache" in {
+    "show confirmDeleteCompanyPage with the selected company if called with authentication and correct cache" in {
       val cacheItem = testCacheItem[CompanyDetailsList](GROUP_SCHEME_COMPANIES, companyDetailsList)
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
       when(mockSessionService.fetchAll()(any())).thenReturn(Future.successful(cacheItem))
-      when(mockSessionService.cache(refEq(mockErsUtil.GROUP_SCHEME_COMPANIES), any[CompanyDetailsList]())(any(), any())).thenReturn(Future(sessionPair))
+      when(mockSessionService.fetch[RequestObject](any())(any(), any()))
+        .thenReturn(Future.successful(ersRequestObject.copy(
+          schemeName = Some("CSOP"),
+          schemeType = Some("CSOP")
+        )))
 
-      val result = testGroupSchemeController.showDeleteCompany(0)(authRequest)
+      val result = testGroupSchemeController.showConfirmDeleteCompany(0)(authRequest)
 
-      status(result) shouldBe SEE_OTHER
-      headers(result)(implicitly)("Location").contains("/group-summary")
+      status(result) shouldBe OK
+      val document = Jsoup.parse(contentAsString(result))
+      document.getElementsByTag("h1").text shouldBe Messages("ers.group_confirm_delete_company.page_header", Fixtures.companyName)
+    }
+
+    "show confirmDeleteCompanyPage with no extra info if this is not the last company" in {
+      val cacheItem = testCacheItem[CompanyDetailsList](GROUP_SCHEME_COMPANIES, companyDetailsList)
+      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
+      when(mockSessionService.fetchAll()(any())).thenReturn(Future.successful(cacheItem))
+      when(mockSessionService.fetch[RequestObject](any())(any(), any()))
+        .thenReturn(Future.successful(ersRequestObject.copy(
+          schemeName = Some("CSOP"),
+          schemeType = Some("CSOP")
+        )))
+
+      val result = testGroupSchemeController.showConfirmDeleteCompany(0)(authRequest)
+
+      status(result) shouldBe OK
+      val document = Jsoup.parse(contentAsString(result))
+      document.getAllElements.text.contains(Messages("ers.group_confirm_delete_company.page_body_1")) shouldBe false
+      document.getAllElements.text.contains(Messages("ers.group_confirm_delete_company.page_body_2")) shouldBe false
+      document.getAllElements.text.contains(Messages("validation.summary.heading")) shouldBe false
+      document.getAllElements.text.contains(Messages("ers.group_confirm_delete_company.err.message")) shouldBe false
+    }
+
+    "show confirmDeleteCompanyPage with extra info if this is the last company" in {
+      val cacheItem = testCacheItem[CompanyDetailsList](GROUP_SCHEME_COMPANIES, companyDetailsListSingle)
+      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
+      when(mockSessionService.fetchAll()(any())).thenReturn(Future.successful(cacheItem))
+      when(mockSessionService.fetch[RequestObject](any())(any(), any()))
+        .thenReturn(Future.successful(ersRequestObject.copy(
+          schemeName = Some("CSOP"),
+          schemeType = Some("CSOP")
+        )))
+
+      val result = testGroupSchemeController.showConfirmDeleteCompany(0)(authRequest)
+
+      status(result) shouldBe OK
+      val document = Jsoup.parse(contentAsString(result))
+      document.getElementById("final-page-body-1").text shouldBe Messages("ers.group_confirm_delete_company.page_body_1")
+      document.getElementById("final-page-body-2").text shouldBe Messages("ers.group_confirm_delete_company.page_body_2")
+      document.getAllElements.text.contains(Messages("validation.summary.heading")) shouldBe false
+      document.getAllElements.text.contains(Messages("ers.group_confirm_delete_company.err.message")) shouldBe false
     }
 
     "filter deleted company before caching and redirecting" in {
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
       val cacheItem = testCacheItem[CompanyDetailsList](GROUP_SCHEME_COMPANIES, companyDetailsList)
-      val expected = CompanyDetailsList(List(company))
-      when(mockSessionService.fetchAll()(any())).thenReturn(Future.successful(cacheItem))
-      when(mockSessionService.cache(refEq(mockErsUtil.GROUP_SCHEME_COMPANIES), any[CompanyDetailsList]())(any(), any()))
-        .thenReturn(Future(sessionPair))
 
-      val result = testGroupSchemeController.showDeleteCompany(0)(authRequest)
+      when(mockSessionService.fetchAll()(any())).thenReturn(Future.successful(cacheItem))
+      when(mockSessionService.fetch[RequestObject](any())(any(), any()))
+        .thenReturn(Future.successful(ersRequestObject))
+
+      val result = testGroupSchemeController.showConfirmDeleteCompany(0)(authRequest)
+
+      status(result) shouldBe OK
+    }
+  }
+
+  "confirmDeleteCompanySubmit" should {
+    "give a redirect to groupPlanSummaryPage if the company is deleted but more remain" in {
+      setAuthMocks()
+      val authRequest =
+        buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(("value", "true")))
+      when(mockSessionService.fetchCompaniesOptionally()(any(), any())).thenReturn(Future.successful(companyDetailsList))
+      when(mockSessionService.fetch[RequestObject](refEq(mockErsUtil.ERS_REQUEST_OBJECT))(any(), any()))
+        .thenReturn(Future.successful(ersRequestObject.copy(
+          schemeName = Some("CSOP"),
+          schemeType = Some("CSOP")
+        )))
+      when(mockSessionService.fetch[CompanyDetailsList](refEq(mockErsUtil.GROUP_SCHEME_COMPANIES))(any(), any()))
+        .thenReturn(Future.successful(companyDetailsList))
+      when(mockCompanyService.deleteCompany(any())(any())).thenReturn(Future.successful(true))
+
+      val result = testGroupSchemeController.confirmDeleteCompanySubmit(0)(authRequest)
 
       status(result) shouldBe SEE_OTHER
+      headers(result)(implicitly)("Location") shouldBe "/submit-your-ers-annual-return/subsidiary-company-summary"
+    }
 
-      verify(mockSessionService, times(1)).cache(refEq(GROUP_SCHEME_COMPANIES), refEq(expected))(any(), any())
+    "give a redirect to groupSchemePage if the final company is deleted" in {
+      setAuthMocks()
+      val authRequest =
+        buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(("value", "true")))
+      when(mockSessionService.fetchCompaniesOptionally()(any(), any())).thenReturn(Future.successful(companyDetailsListSingle))
+      when(mockSessionService.fetch[RequestObject](refEq(mockErsUtil.ERS_REQUEST_OBJECT))(any(), any()))
+        .thenReturn(Future.successful(ersRequestObject.copy(
+          schemeName = Some("CSOP"),
+          schemeType = Some("CSOP")
+        )))
+      when(mockCompanyService.deleteCompany(any())(any())).thenReturn(Future.successful(true))
+
+      val result = testGroupSchemeController.confirmDeleteCompanySubmit(0)(authRequest)
+
+      status(result) shouldBe SEE_OTHER
+      headers(result)(implicitly)("Location") shouldBe "/submit-your-ers-annual-return/group-scheme"
+    }
+
+    "show confirmDeleteCompanyView with form errors if form is empty" in {
+      setAuthMocks()
+      val authRequest =
+        buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(("value", "")))
+      when(mockSessionService.fetchCompaniesOptionally()(any(), any())).thenReturn(Future.successful(companyDetailsList))
+      when(mockSessionService.fetch[RequestObject](refEq(mockErsUtil.ERS_REQUEST_OBJECT))(any(), any()))
+        .thenReturn(Future.successful(ersRequestObject.copy(
+          schemeName = Some("CSOP"),
+          schemeType = Some("CSOP")
+        )))
+
+      val result = testGroupSchemeController.confirmDeleteCompanySubmit(0)(authRequest)
+
+      status(result) shouldBe BAD_REQUEST
+
+      val document = Jsoup.parse(contentAsString(result))
+      document.getElementsByTag("h1").text shouldBe Messages("ers.group_confirm_delete_company.page_header", Fixtures.companyName)
+      document.getElementsByClass("govuk-error-summary__title").text shouldBe Messages("validation.summary.heading")
+      document.getElementById("value-error").text shouldBe "Error: " + Messages("ers.group_confirm_delete_company.err.message")
+    }
+
+    "give a redirect to groupSchemePage if the 'No' radio option is selected" in {
+      setAuthMocks()
+      val authRequest =
+        buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(("value", "false")))
+      when(mockSessionService.fetchCompaniesOptionally()(any(), any())).thenReturn(Future.successful(companyDetailsList))
+      when(mockSessionService.fetch[RequestObject](refEq(mockErsUtil.ERS_REQUEST_OBJECT))(any(), any()))
+        .thenReturn(Future.successful(ersRequestObject.copy(
+          schemeName = Some("CSOP"),
+          schemeType = Some("CSOP")
+        )))
+
+      val result = testGroupSchemeController.confirmDeleteCompanySubmit(0)(authRequest)
+
+      status(result) shouldBe SEE_OTHER
+      headers(result)(implicitly)("Location") shouldBe "/submit-your-ers-annual-return/subsidiary-company-summary"
+    }
+
+    "give a redirect to getGlobalErrorPage if the company is fails to delete" in {
+      setAuthMocks()
+      val authRequest =
+        buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(("value", "true")))
+      when(mockSessionService.fetchCompaniesOptionally()(any(), any())).thenReturn(Future.successful(companyDetailsList))
+      when(mockSessionService.fetch[RequestObject](refEq(mockErsUtil.ERS_REQUEST_OBJECT))(any(), any()))
+        .thenReturn(Future.successful(ersRequestObject.copy(
+          schemeName = Some("CSOP"),
+          schemeType = Some("CSOP")
+        )))
+      when(mockCompanyService.deleteCompany(any())(any())).thenReturn(Future.successful(false))
+
+      val result = testGroupSchemeController.confirmDeleteCompanySubmit(0)(authRequest)
+
+      status(result) shouldBe INTERNAL_SERVER_ERROR
+
+      val document = Jsoup.parse(contentAsString(result))
+      document.getElementsByTag("title").text shouldBe Messages("ers.global_errors.title")
+    }
+
+    "give a redirect to getGlobalErrorPage if the final company fails to delete" in {
+      setAuthMocks()
+      val authRequest =
+        buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(("value", "true")))
+      when(mockSessionService.fetchCompaniesOptionally()(any(), any())).thenReturn(Future.successful(companyDetailsListSingle))
+      when(mockSessionService.fetch[RequestObject](refEq(mockErsUtil.ERS_REQUEST_OBJECT))(any(), any()))
+        .thenReturn(Future.successful(ersRequestObject.copy(
+          schemeName = Some("CSOP"),
+          schemeType = Some("CSOP")
+        )))
+      when(mockCompanyService.deleteCompany(any())(any())).thenReturn(Future.successful(false))
+
+      val result = testGroupSchemeController.confirmDeleteCompanySubmit(0)(authRequest)
+
+      status(result) shouldBe INTERNAL_SERVER_ERROR
+
+      val document = Jsoup.parse(contentAsString(result))
+      document.getElementsByTag("title").text shouldBe Messages("ers.global_errors.title")
     }
   }
 
@@ -381,7 +486,8 @@ class GroupSchemeControllerSpec
       val result = testGroupSchemeController.showEditCompany(0)(authRequest)
 
       status(result) shouldBe INTERNAL_SERVER_ERROR
-      contentAsString(result).contains(Messages("ers.global_errors.title")) shouldBe true
+      val document = Jsoup.parse(contentAsString(result))
+      document.getElementsByTag("title").text shouldBe Messages("ers.global_errors.title")
     }
 
     "display error page if fetch request object fails" in {
@@ -394,14 +500,18 @@ class GroupSchemeControllerSpec
       val result = testGroupSchemeController.showEditCompany(0)(authRequest)
 
       status(result) shouldBe INTERNAL_SERVER_ERROR
-      contentAsString(result).contains(Messages("ers.global_errors.title")) shouldBe true
+      val document = Jsoup.parse(contentAsString(result))
+      document.getElementsByTag("title").text shouldBe Messages("ers.global_errors.title")
     }
 
     "display manualCompanyDetailsPage with the selected company details if showEditCompany is called with authentication and correct cache" in {
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
       val cacheItem = testCacheItem[CompanyDetailsList](GROUP_SCHEME_COMPANIES, companyDetailsList)
       when(mockSessionService.fetch[RequestObject](refEq(mockErsUtil.ERS_REQUEST_OBJECT))(any(), any()))
-        .thenReturn(Future.successful(ersRequestObject))
+        .thenReturn(Future.successful(ersRequestObject.copy(
+          schemeName = Some("CSOP"),
+          schemeType = Some("CSOP")
+        )))
       when(mockSessionService.fetchAll()(any())).thenReturn(Future.successful(cacheItem))
       when(mockSessionService.fetch[CompanyDetailsList](refEq(mockErsUtil.GROUP_SCHEME_COMPANIES))(any(), any()))
         .thenReturn(Future.successful(companyDetailsList))
@@ -409,7 +519,8 @@ class GroupSchemeControllerSpec
       val result = testGroupSchemeController.showEditCompany(0)(authRequest)
 
       status(result) shouldBe OK
-      contentAsString(result).contains(Messages("ers_manual_company_details.csop.title"))
+      val document = Jsoup.parse(contentAsString(result))
+      document.getElementsByTag("title").text shouldBe Messages("ers_manual_company_details.csop.title") + " " + Messages("ers.title.postfix")
     }
   }
 
@@ -495,12 +606,16 @@ class GroupSchemeControllerSpec
       val request = buildGroupSchemeSelectedRequest(None, "CSOP")
       val authRequest = buildRequestWithAuth(request)
       when(mockSessionService.fetch[RequestObject](refEq(mockErsUtil.ERS_REQUEST_OBJECT))(any(), any()))
-        .thenReturn(Future.successful(ersRequestObject))
+        .thenReturn(Future.successful(ersRequestObject.copy(
+          schemeName = Some("CSOP"),
+          schemeType = Some("CSOP")
+        )))
 
       val result = testGroupSchemeController.groupSchemeSelected(SCHEME_CSOP)(authRequest)
 
       status(result) shouldBe OK
-      contentAsString(result).contains(Messages("validation.summary.heading")) shouldBe true
+      val document = Jsoup.parse(contentAsString(result))
+      document.getElementsByTag("h2").get(0).text shouldBe Messages("validation.summary.heading")
     }
 
     "display errors if no data is set" in {
@@ -510,7 +625,8 @@ class GroupSchemeControllerSpec
       val result = testGroupSchemeController.showGroupSchemeSelected(ersRequestObject, SCHEME_CSOP)(authRequest)
 
       status(result) shouldBe OK
-      contentAsString(result).contains(Messages("validation.summary.heading")) shouldBe true
+      val document = Jsoup.parse(contentAsString(result))
+      document.getElementsByTag("h2").get(0).text shouldBe Messages("validation.summary.heading")
     }
 
     "redirect to company details page if user select yes for CSOP" in {
@@ -525,7 +641,7 @@ class GroupSchemeControllerSpec
       val result = testGroupSchemeController.showGroupSchemeSelected(ersRequestObject, SCHEME_CSOP)(authRequest)
 
       status(result) shouldBe SEE_OTHER
-      headers(result).get("Location").get.contains("/add-subsidiary-company") shouldBe true
+      headers(result)(implicitly)("Location") shouldBe "/submit-your-ers-annual-return/add-subsidiary-company"
     }
 
     "redirect to alterations page if user select no for CSOP" in {
@@ -540,7 +656,7 @@ class GroupSchemeControllerSpec
       val result = testGroupSchemeController.showGroupSchemeSelected(ersRequestObject.copy(schemeType = Some("CSOP")), SCHEME_CSOP)(authRequest)
 
       status(result) shouldBe SEE_OTHER
-      headers(result).get("Location").get.contains("/alterations-or-a-variation") shouldBe true
+      headers(result)(implicitly)("Location") shouldBe "/submit-your-ers-annual-return/alterations-or-a-variation"
     }
 
     "redirect to company details page if user select yes for SAYE" in {
@@ -556,7 +672,7 @@ class GroupSchemeControllerSpec
         testGroupSchemeController.showGroupSchemeSelected(ersRequestObject, mockErsUtil.SCHEME_SAYE)(authRequest)
 
       status(result) shouldBe SEE_OTHER
-      headers(result).get("Location").get.contains("/add-subsidiary-company") shouldBe true
+      headers(result)(implicitly)("Location") shouldBe "/submit-your-ers-annual-return/add-subsidiary-company"
     }
 
     "redirect to alterations page if user select no for SAYE" in {
@@ -571,7 +687,7 @@ class GroupSchemeControllerSpec
       val result = testGroupSchemeController.showGroupSchemeSelected(ersRequestObject.copy(schemeType = Some("SAYE")), mockErsUtil.SCHEME_SAYE)(authRequest)
 
       status(result) shouldBe SEE_OTHER
-      headers(result).get("Location").get.contains("/alterations-or-a-variation")
+      headers(result)(implicitly)("Location") shouldBe "/submit-your-ers-annual-return/alterations-or-a-variation"
     }
 
     "redirect to company details page if user select yes for EMI" in {
@@ -587,7 +703,7 @@ class GroupSchemeControllerSpec
         testGroupSchemeController.showGroupSchemeSelected(ersRequestObject, mockErsUtil.SCHEME_EMI)(authRequest)
 
       status(result) shouldBe SEE_OTHER
-      headers(result).get("Location").get.contains("/add-subsidiary-company") shouldBe true
+      headers(result)(implicitly)("Location") shouldBe "/submit-your-ers-annual-return/add-subsidiary-company"
     }
 
     "redirect to summary page if user select no for EMI" in {
@@ -602,7 +718,7 @@ class GroupSchemeControllerSpec
       val result = testGroupSchemeController.showGroupSchemeSelected(ersRequestObject.copy(schemeType = Some("EMI")), mockErsUtil.SCHEME_EMI)(authRequest)
 
       status(result) shouldBe SEE_OTHER
-      headers(result).get("Location").get.contains("/annual-return-summary") shouldBe true
+      headers(result)(implicitly)("Location") shouldBe "/submit-your-ers-annual-return/annual-return-summary"
     }
 
     "redirect to company details page if user select yes for SIP" in {
@@ -617,7 +733,7 @@ class GroupSchemeControllerSpec
       val result =
         testGroupSchemeController.showGroupSchemeSelected(ersRequestObject, mockErsUtil.SCHEME_SIP)(authRequest)
       status(result) shouldBe SEE_OTHER
-      headers(result).get("Location").get.contains("/add-subsidiary-company") shouldBe true
+      headers(result)(implicitly)("Location") shouldBe "/submit-your-ers-annual-return/add-subsidiary-company"
     }
 
     "redirect to trustee summary page if user select no for SIP" in {
@@ -632,7 +748,7 @@ class GroupSchemeControllerSpec
       val result = testGroupSchemeController.showGroupSchemeSelected(ersRequestObject.copy(schemeType = Some("SIP")), mockErsUtil.SCHEME_SIP)(authRequest)
       status(result) shouldBe SEE_OTHER
 
-      headers(result).get("Location").get.contains("/trustees") shouldBe true
+      headers(result)(implicitly)("Location") shouldBe "/submit-your-ers-annual-return/trustees"
     }
 
     "redirect to company details page if user select yes for OTHER" in {
@@ -647,7 +763,7 @@ class GroupSchemeControllerSpec
       val result =
         testGroupSchemeController.showGroupSchemeSelected(ersRequestObject, mockErsUtil.SCHEME_OTHER)(authRequest)
       status(result) shouldBe SEE_OTHER
-      headers(result).get("Location").get.contains("/add-subsidiary-company") shouldBe true
+      headers(result)(implicitly)("Location") shouldBe "/submit-your-ers-annual-return/add-subsidiary-company"
     }
 
     "redirect to summary page if user select no for OTHER" in {
@@ -662,7 +778,7 @@ class GroupSchemeControllerSpec
       val result =
         testGroupSchemeController.showGroupSchemeSelected(ersRequestObject, mockErsUtil.SCHEME_OTHER)(authRequest)
       status(result) shouldBe SEE_OTHER
-      headers(result).get("Location").get.contains("/annual-return-summary") shouldBe true
+      headers(result)(implicitly)("Location") shouldBe "/submit-your-ers-annual-return/annual-return-summary"
     }
 
   }
@@ -695,12 +811,31 @@ class GroupSchemeControllerSpec
       val result = testGroupSchemeController.groupPlanSummaryPage()(authRequest)
 
       status(result) shouldBe INTERNAL_SERVER_ERROR
-      contentAsString(result).contains(Messages("ers.global_errors.title")) shouldBe true
+      val document = Jsoup.parse(contentAsString(result))
+      document.getElementsByTag("title").text shouldBe Messages("ers.global_errors.title")
+    }
+
+    "display error page if company list empty" in {
+      when(mockSessionService.fetch[CompanyDetailsList](refEq(mockErsUtil.GROUP_SCHEME_COMPANIES))(any(), any()))
+        .thenReturn(Future.successful(companyDetailsListEmpty))
+
+      when(mockSessionService.fetch[RequestObject](refEq(mockErsUtil.ERS_REQUEST_OBJECT))(any(), any()))
+        .thenReturn(Future.successful(ersRequestObject.copy(
+          schemeName = Some("CSOP"),
+          schemeType = Some("CSOP")
+        )))
+
+      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+      val result = testGroupSchemeController.showGroupPlanSummaryPage()(authRequest)
+
+      status(result) shouldBe INTERNAL_SERVER_ERROR
+      val document = Jsoup.parse(contentAsString(result))
+      document.getElementsByTag("title").text shouldBe Messages("ers.global_errors.title")
     }
 
     "display error page if fetch request object fails" in {
       when(mockSessionService.fetch[CompanyDetailsList](refEq(mockErsUtil.GROUP_SCHEME_COMPANIES))(any(), any()))
-        .thenReturn(Future.successful(mock[CompanyDetailsList]))
+        .thenReturn(Future.successful(companyDetailsList))
       when(mockSessionService.fetch[RequestObject](refEq(mockErsUtil.ERS_REQUEST_OBJECT))(any(), any()))
         .thenReturn(Future.failed(new Exception))
 
@@ -708,7 +843,8 @@ class GroupSchemeControllerSpec
       val result = testGroupSchemeController.showGroupPlanSummaryPage()(authRequest)
 
       status(result) shouldBe INTERNAL_SERVER_ERROR
-      contentAsString(result).contains(Messages("ers.global_errors.title")) shouldBe true
+      val document = Jsoup.parse(contentAsString(result))
+      document.getElementsByTag("title").text shouldBe Messages("ers.global_errors.title")
     }
 
     "display group plan summary if showGroupPlanSummaryPage is called with authentication and correct cache" in {
@@ -716,14 +852,18 @@ class GroupSchemeControllerSpec
         .thenReturn(Future.successful(companyDetailsList))
 
       when(mockSessionService.fetch[RequestObject](refEq(mockErsUtil.ERS_REQUEST_OBJECT))(any(), any()))
-        .thenReturn(Future.successful(ersRequestObject))
+        .thenReturn(Future.successful(ersRequestObject.copy(
+          schemeName = Some("CSOP"),
+          schemeType = Some("CSOP")
+        )))
 
 
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
       val result = testGroupSchemeController.showGroupPlanSummaryPage()(authRequest)
 
       status(result) shouldBe OK
-      contentAsString(result).contains(Messages("ers_group_summary.csop.title"))
+      val document = Jsoup.parse(contentAsString(result))
+      document.getElementsByTag("h1").text shouldBe Messages("ers_group_summary.csop.title")
     }
   }
 
@@ -746,31 +886,31 @@ class GroupSchemeControllerSpec
     "redirect to alterations page for CSOP" in {
       val result = testGroupSchemeController.continueFromGroupPlanSummaryPage(mockErsUtil.SCHEME_CSOP)
       status(result) shouldBe SEE_OTHER
-      headers(result).get("Location").get.contains("/alterations-or-a-variation")
+      headers(result)(implicitly)("Location") shouldBe "/submit-your-ers-annual-return/alterations-or-a-variation"
     }
 
     "redirect to alterations page for SAYE" in {
       val result = testGroupSchemeController.continueFromGroupPlanSummaryPage(mockErsUtil.SCHEME_SAYE)
       status(result) shouldBe SEE_OTHER
-      headers(result).get("Location").get.contains("/alterations-or-a-variation")
+      headers(result)(implicitly)("Location") shouldBe "/submit-your-ers-annual-return/alterations-or-a-variation"
     }
 
     "redirect to summary page for EMI" in {
       val result = testGroupSchemeController.continueFromGroupPlanSummaryPage(mockErsUtil.SCHEME_EMI)
       status(result) shouldBe SEE_OTHER
-      headers(result)(implicitly)("Location").contains("/summary")
+      headers(result)(implicitly)("Location") shouldBe "/submit-your-ers-annual-return/annual-return-summary"
     }
 
     "redirect to trustee page for SIP" in {
       val result = testGroupSchemeController.continueFromGroupPlanSummaryPage(mockErsUtil.SCHEME_SIP)
       status(result) shouldBe SEE_OTHER
-      headers(result)(implicitly)("Location").contains("/trustee-details")
+      headers(result)(implicitly)("Location") shouldBe "/submit-your-ers-annual-return/trustees"
     }
 
     "redirect to summary page for OTHER" in {
       val result = testGroupSchemeController.continueFromGroupPlanSummaryPage(mockErsUtil.SCHEME_OTHER)
       status(result) shouldBe SEE_OTHER
-      headers(result)(implicitly)("Location").contains("/summary")
+      headers(result)(implicitly)("Location") shouldBe "/submit-your-ers-annual-return/annual-return-summary"
     }
   }
 }

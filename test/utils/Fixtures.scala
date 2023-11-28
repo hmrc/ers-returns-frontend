@@ -37,13 +37,13 @@ object Fixtures extends AuthHelper {
 
   val buildFakeUser: ERSAuthData = defaultErsAuthData
 
-  def buildFakeRequestWithSessionId(method: String): FakeRequest[AnyContentAsEmpty.type]     =
+  def buildFakeRequestWithSessionId(method: String): FakeRequest[AnyContentAsEmpty.type] =
     FakeRequest()
       .withSession(("sessionId" -> "FAKE_SESSION_ID"), ("screenSchemeInfo" -> "2 - EMI - MYScheme - XX12345678 - 2016"))
 
-	def buildFakeRequestWithSessionIdCSOP(method: String): FakeRequest[AnyContentAsEmpty.type] = {
-	 FakeRequest().withSession(("sessionId" -> "FAKE_SESSION_ID"), ("screenSchemeInfo" -> "1 - CSOP - MYScheme - XX12345678 - 2016"))
-	}
+  def buildFakeRequestWithSessionIdCSOP(method: String): FakeRequest[AnyContentAsEmpty.type] = {
+    FakeRequest().withSession(("sessionId" -> "FAKE_SESSION_ID"), ("screenSchemeInfo" -> "1 - CSOP - MYScheme - XX12345678 - 2016"))
+  }
 
   def buildFakeRequestWithSessionIdSAYE(method: String): FakeRequest[AnyContentAsEmpty.type] =
     FakeRequest().withSession(
@@ -51,17 +51,17 @@ object Fixtures extends AuthHelper {
       ("screenSchemeInfo" -> "4 - SAYE - MYScheme - XX12345678 - 2016")
     )
 
-  def buildFakeRequestWithSessionIdSIP(method: String): FakeRequest[AnyContentAsEmpty.type]   =
+  def buildFakeRequestWithSessionIdSIP(method: String): FakeRequest[AnyContentAsEmpty.type] =
     FakeRequest()
       .withSession(("sessionId" -> "FAKE_SESSION_ID"), ("screenSchemeInfo" -> "5 - SIP - MYScheme - XX12345678 - 2016"))
 
-  def buildFakeRequestWithSessionIdEMI(method: String): FakeRequest[AnyContentAsEmpty.type]   =
+  def buildFakeRequestWithSessionIdEMI(method: String): FakeRequest[AnyContentAsEmpty.type] =
     FakeRequest()
       .withSession(("sessionId" -> "FAKE_SESSION_ID"), ("screenSchemeInfo" -> "2 - EMI - MYScheme - XX12345678 - 2016"))
 
   def buildFakeRequestWithSessionIdOTHER(method: String): FakeRequest[AnyContentAsEmpty.type] =
     FakeRequest().withSession(
-      ("sessionId"        -> "FAKE_SESSION_ID"),
+      ("sessionId" -> "FAKE_SESSION_ID"),
       ("screenSchemeInfo" -> "3 - OTHER - MYScheme - XX12345678 - 2016")
     )
 

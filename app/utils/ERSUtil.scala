@@ -28,33 +28,33 @@ import scala.concurrent.ExecutionContext
 class ERSUtil @Inject() (val appConfig: ApplicationConfig)
                         (implicit val ec: ExecutionContext, countryCodes: CountryCodes) extends PageBuilder with Constants with Logging {
 
-	final def concatAddress(optionalAddressLines: List[Option[String]], existingAddressLines: String): String = {
-		val definedStrings = optionalAddressLines.filter(_.isDefined).map(_.get)
-		existingAddressLines ++ definedStrings.map(addressLine => ", " + addressLine).mkString("")
-	}
+  final def concatAddress(optionalAddressLines: List[Option[String]], existingAddressLines: String): String = {
+    val definedStrings = optionalAddressLines.filter(_.isDefined).map(_.get)
+    existingAddressLines ++ definedStrings.map(addressLine => ", " + addressLine).mkString("")
+  }
 
-	def buildAddressSummary[A](entity: A): String = {
-		entity match {
-			case companyDetails: CompanyDetails =>
-				val optionalAddressLines = List(
-					companyDetails.addressLine2,
-					companyDetails.addressLine3,
-					companyDetails.addressLine4,
-					companyDetails.postcode,
-					countryCodes.getCountry(companyDetails.country.getOrElse(""))
-				)
-				concatAddress(optionalAddressLines, companyDetails.addressLine1)
-			case trusteeDetails: TrusteeDetails =>
-				val optionalAddressLines = List(trusteeDetails.addressLine2,
-					trusteeDetails.addressLine3,
-					trusteeDetails.addressLine4,
-					trusteeDetails.addressLine5,
-					countryCodes.getCountry(trusteeDetails.country.getOrElse(""))
-				)
-				concatAddress(optionalAddressLines, trusteeDetails.addressLine1)
-			case _ => ""
-		}
-	}
+  def buildAddressSummary[A](entity: A): String = {
+    entity match {
+      case companyDetails: CompanyDetails =>
+        val optionalAddressLines = List(
+          companyDetails.addressLine2,
+          companyDetails.addressLine3,
+          companyDetails.addressLine4,
+          companyDetails.postcode,
+          countryCodes.getCountry(companyDetails.country.getOrElse(""))
+        )
+        concatAddress(optionalAddressLines, companyDetails.addressLine1)
+      case trusteeDetails: TrusteeDetails =>
+        val optionalAddressLines = List(trusteeDetails.addressLine2,
+          trusteeDetails.addressLine3,
+          trusteeDetails.addressLine4,
+          trusteeDetails.addressLine5,
+          countryCodes.getCountry(trusteeDetails.country.getOrElse(""))
+        )
+        concatAddress(optionalAddressLines, trusteeDetails.addressLine1)
+      case _ => ""
+    }
+  }
 
   final def concatEntity(optionalLines: List[Option[String]], existingEntityLines: String): String = {
     val definedStrings = optionalLines.flatten
@@ -95,8 +95,8 @@ class ERSUtil @Inject() (val appConfig: ApplicationConfig)
   def companyLocation(company: CompanyDetails): String =
     company.country
       .collect {
-        case c if c != DEFAULT_COUNTRY => OVERSEAS
-        case c                         => c
+        case c if c != DEFAULT_COUNTRY  => OVERSEAS
+        case c                          => c
       }
       .getOrElse(DEFAULT)
 

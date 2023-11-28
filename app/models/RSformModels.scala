@@ -133,9 +133,9 @@ case class TrusteeDetails(
 
   def updatePart[A](part: A): TrusteeDetails = {
     part match {
-      case name: TrusteeName => replaceName(name)
+      case `name`: TrusteeName => replaceName(`name`)
       case basedInUk: TrusteeBasedInUk => replaceBasedInUk(basedInUk)
-      case address: TrusteeAddress => replaceAddress(address)
+      case `address`: TrusteeAddress => replaceAddress(`address`)
       case _ => this
     }
   }

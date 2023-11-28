@@ -156,12 +156,14 @@
 				}
 			))
 
-		<p class="govuk-body govuk-!-margin-bottom-8 govuk-link">
-			<input class="govuk-link link_button" type="submit" formaction="@routes.GroupSchemeController.deleteCompany(index)" value='@{messages("ers.delete") + " " + company.companyName}'>
-		</p>
+			<p class="govuk-body govuk-!-margin-bottom-8">
+				<a class="govuk-link" id="delete-@index" href=@routes.GroupSchemeController.confirmDeleteCompanyPage(index)>
+					@{messages("ers.delete") + " " + company.companyName}
+				</a>
+			</p>
 		}
 
-		<a class="govuk-link govuk-inset-text govuk-!-display-inline-block govuk-!-margin-top-0 govuk-!-width-full"
+		<a class="govuk-link govuk-inset-text govuk-!-display-inline-block govuk-!-margin-top-0 govuk-!-width-full" id="add-company"
 		   href=@routes.GroupSchemeController.manualCompanyDetailsPage()>
 			@ersUtil.addCompanyMessage(messages, requestObject.schemeType)
 		</a>

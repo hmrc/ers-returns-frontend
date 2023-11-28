@@ -36,7 +36,7 @@ import play.api.test.Helpers.{contentAsString, defaultAwaitTimeout, stubBodyPars
 import play.twirl.api.Html
 import repositories.FrontendSessionsRepository
 import services.audit.AuditEvents
-import services.{FileValidatorService, FrontendSessionService, TrusteeService}
+import services.{CompanyService, FileValidatorService, FrontendSessionService, TrusteeService}
 import uk.gov.hmrc.http.{HeaderCarrier, SessionKeys}
 import uk.gov.hmrc.mongo.cache.CacheItem
 import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
@@ -51,14 +51,14 @@ trait ErsTestHelper extends MockitoSugar with AuthHelper with ERSFakeApplication
 
   val messagesActionBuilder: MessagesActionBuilder =
     new DefaultMessagesActionBuilderImpl(stubBodyParser[AnyContent](), stubMessagesApi())
-  val cc: ControllerComponents                     = stubControllerComponents()
-  val mockMaterializer: Materializer               = mock[Materializer]
-  val defaultParser                                = new Default()(mockMaterializer)
+  val cc: ControllerComponents = stubControllerComponents()
+  val mockMaterializer: Materializer = mock[Materializer]
+  val defaultParser = new Default()(mockMaterializer)
 
   def buildRequestWithAuth(
-    req: Request[AnyContent],
-    authData: ERSAuthData = Fixtures.buildFakeUser
-  ): RequestWithOptionalAuthContext[AnyContent] =
+                            req: Request[AnyContent],
+                            authData: ERSAuthData = Fixtures.buildFakeUser
+                          ): RequestWithOptionalAuthContext[AnyContent] =
     RequestWithOptionalAuthContext(req, authData)
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
@@ -96,8 +96,10 @@ trait ErsTestHelper extends MockitoSugar with AuthHelper with ERSFakeApplication
 	val mockAuditEvents: AuditEvents = mock[AuditEvents]
   val mockSessionRepository: FrontendSessionsRepository = mock[FrontendSessionsRepository]
   val mockSessionService: FrontendSessionService = mock[FrontendSessionService]
+  val mockCompanyService: CompanyService = mock[CompanyService]
   val mockFileValidatorService: FileValidatorService = mock[FileValidatorService]
 	val mockTrusteeService: TrusteeService = mock[TrusteeService]
+  //val mockCacheHelper: CacheHelper = mock[CacheHelper]
 	implicit val mockCountryCodes: CountryCodes = mock[CountryCodes]
   val sessionPair: (String, String) = SessionKeys.sessionId -> sessionId
   val testCacheItem: CacheItem = CacheItem("id", Json.toJson(Map("user1234" -> Json.toJson(Fixtures.ersSummary))).as[JsObject], Instant.now(), Instant.now())
@@ -112,8 +114,8 @@ trait ErsTestHelper extends MockitoSugar with AuthHelper with ERSFakeApplication
   val testAuthAction = new AuthAction(mockAuthConnector, mockAppConfig, mockSessionService, defaultParser)(ec)
   val testAuthActionGov = new AuthActionGovGateway(mockAuthConnector, mockAppConfig, defaultParser)(ec)
 
-	when(mockCountryCodes.countriesMap).thenReturn(List(Country("United Kingdom", "UK"), Country("South Africa", "ZA")))
-	when(mockCountryCodes.getCountry("UK")).thenReturn(Some("United Kingdom"))
+  when(mockCountryCodes.countriesMap).thenReturn(List(Country("United Kingdom", "UK"), Country("South Africa", "ZA")))
+  when(mockCountryCodes.getCountry("UK")).thenReturn(Some("United Kingdom"))
 
   when(mockAppConfig.ggSignInUrl).thenReturn("http://localhost:9949/gg/sign-in")
   when(mockAppConfig.appName).thenReturn("ers-returns-frontend")
