@@ -84,6 +84,7 @@ class SchemeOrganiserController @Inject()(
   }
 
   def schemeOrganiserSubmit(): Action[AnyContent] = authAction.async { implicit request =>
+    println("surely we arrive here pausechamp")
     ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
       showSchemeOrganiserSubmit(requestObject)(request, hc)
     }
@@ -91,24 +92,8 @@ class SchemeOrganiserController @Inject()(
 
   def showSchemeOrganiserSubmit(requestObject: RequestObject)
                                (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
-    RsFormMappings.schemeOrganiserForm().bindFromRequest().fold(
-      errors => {
-        val correctOrder = errors.errors.map(_.key).distinct
-        val incorrectOrderGrouped = errors.errors.groupBy(_.key).map(_._2.head).toSeq
-        val correctOrderGrouped = correctOrder.flatMap(x => incorrectOrderGrouped.find(_.key == x))
-        val firstErrors: Form[models.SchemeOrganiserDetails] = new Form[SchemeOrganiserDetails](errors.mapping, errors.data, correctOrderGrouped, errors.value)
-        Future.successful(Ok(schemeOrganiserView(requestObject, "", firstErrors)))
-      },
-      successful => {
-        ersUtil.cache(ersUtil.SCHEME_ORGANISER_CACHE, successful, requestObject.getSchemeReference).map {
-          _ => Redirect(controllers.routes.GroupSchemeController.groupSchemePage())
-        } recover {
-          case e: Exception =>
-            logger.error(s"[SchemeOrganiserController][showSchemeOrganiserSubmit] Save scheme organiser details failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
-            getGlobalErrorPage
-        }
-      }
-    )
+    println("weee wooo weee wooo")
+    Future.successful(Redirect(controllers.routes.GroupSchemeController.groupSchemePage()))
   }
 
   def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result =
