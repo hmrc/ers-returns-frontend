@@ -74,7 +74,7 @@ class IsSchemeOrganiserUkController @Inject()(val mcc: MessagesControllerCompone
 
   def view(requestObject: RequestObject, index: Int, companyBasedInUkForm: Form[CompanyBasedInUk], edit: Boolean = false)
           (implicit request: Request[AnyContent], hc: HeaderCarrier): Html = {
-    pageView(requestObject, index, companyBasedInUkForm, edit)
+    pageView(requestObject, index, companyBasedInUkForm, edit, schemeOrganiser = true)
   }
 
 }

@@ -59,17 +59,6 @@ class SchemeOrganiserController @Inject()(
                                requestObject: RequestObject
                              )(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
     logger.info(s"[SchemeOrganiserController][showSchemeOrganiserPage] schemeRef: ${requestObject.getSchemeReference}.")
-    lazy val form = SchemeOrganiserDetails(
-      "",
-      "",
-      Some(""),
-      Some(""),
-      Some(""),
-      Some(ersUtil.DEFAULT_COUNTRY),
-      Some(""),
-      Some(""),
-      Some("")
-    )
 
     ersUtil.fetch[ReportableEvents](ersUtil.reportableEvents, requestObject.getSchemeReference).flatMap {
       reportableEvent =>
@@ -96,7 +85,7 @@ class SchemeOrganiserController @Inject()(
                 schemeOrganiserView(
                   requestObject,
                   fileType.get.checkFileType.get,
-                  RsFormMappings.schemeOrganiserForm().fill(form),
+                  RsFormMappings.schemeOrganiserForm(),
                   reportableEvent.isNilReturn.get
                 )
               )
@@ -106,7 +95,7 @@ class SchemeOrganiserController @Inject()(
             schemeOrganiserView(
               requestObject,
               "",
-              RsFormMappings.schemeOrganiserForm().fill(form),
+              RsFormMappings.schemeOrganiserForm(),
               reportableEvent.isNilReturn.get
             )
           )

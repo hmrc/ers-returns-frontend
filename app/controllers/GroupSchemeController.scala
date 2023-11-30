@@ -166,7 +166,7 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
           ersUtil.cache(ersUtil.GROUP_SCHEME_CACHE_CONTROLLER, gsc, requestObject.getSchemeReference).map { _ =>
             (requestObject.getSchemeId, formData.groupScheme) match {
 
-              case (_, Some(ersUtil.OPTION_YES)) => Redirect(controllers.routes.GroupSchemeController.manualCompanyDetailsPage())
+              case (_, Some(ersUtil.OPTION_YES)) => Redirect(controllers.subsidiaries.routes.IsSubsidiaryUkController.questionPage())
 
               case (ersUtil.SCHEME_CSOP | ersUtil.SCHEME_SAYE, _) =>
                 Redirect(routes.AltAmendsController.altActivityPage())

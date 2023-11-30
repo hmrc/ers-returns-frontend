@@ -73,7 +73,7 @@ POST        /delete-trustee/:index/                         controllers.trustees
 GET        /where-is-subsidiary-registered                     controllers.subsidiaries.IsSubsidiaryUkController.questionPage(index: Int = 10000)
 POST       /where-is-subsidiary-registered                     controllers.subsidiaries.IsSubsidiaryUkController.questionSubmit(index: Int)
 GET        /where-is-subsidiary-registered/:index/edit         controllers.subsidiaries.IsSubsidiaryUkController.editCompany(index: Int)
-POST        /where-is-subsidiary-registered/:index/edit        controllers.subsidiaries.IsSubsidiaryUkController.editQuestionSubmit(index: Int)
+POST       /where-is-subsidiary-registered/:index/edit        controllers.subsidiaries.IsSubsidiaryUkController.editQuestionSubmit(index: Int)
 
 GET         /subsidiary-address                                controllers.subsidiaries.SubsidiaryAddressUkController.questionPage(index: Int = 10000)
 POST        /subsidiary-address                                controllers.subsidiaries.SubsidiaryAddressUkController.questionSubmit(index: Int)

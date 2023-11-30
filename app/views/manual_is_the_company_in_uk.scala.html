@@ -36,7 +36,7 @@
         hmrcPageHeading: HmrcPageHeading
 )
 
-@(requestObject: RequestObject, index: Int, companyBasedInUkForm: Form[models.CompanyBasedInUk], edit: Boolean)(implicit request: Request[AnyRef], flash: Flash, messages: Messages, ersUtil: ERSUtil, countryCodes: CountryCodes, appConfig: ApplicationConfig)
+@(requestObject: RequestObject, index: Int, companyBasedInUkForm: Form[models.CompanyBasedInUk], edit: Boolean, schemeOrganiser: Boolean)(implicit request: Request[AnyRef], flash: Flash, messages: Messages, ersUtil: ERSUtil, countryCodes: CountryCodes, appConfig: ApplicationConfig)
 
 @schemeId = @{requestObject.getSchemeId}
 
@@ -64,10 +64,15 @@
         text = messages("ers_manual_is_the_company_in_uk.title")
     ))
 
-    @formWithCSRF(action = if(edit) {
-                    controllers.subsidiaries.routes.IsSubsidiaryUkController.editQuestionSubmit(index)
-                    } else {
-                    controllers.subsidiaries.routes.IsSubsidiaryUkController.questionSubmit(index)}) {
+    @formWithCSRF(action = (edit, schemeOrganiser) match {
+        case (true, false) => controllers.subsidiaries.routes.IsSubsidiaryUkController.editQuestionSubmit(index)
+        case (false, false) =>  controllers.subsidiaries.routes.IsSubsidiaryUkController.questionSubmit(index)
+
+        case (true, true) => controllers.schemeOrganiser.routes.IsSchemeOrganiserUkController.editQuestionSubmit(index)
+        case (false, true) => controllers.schemeOrganiser.routes.IsSchemeOrganiserUkOverseasController.questionSubmit(index)
+        })
+
+        {
 
 
 

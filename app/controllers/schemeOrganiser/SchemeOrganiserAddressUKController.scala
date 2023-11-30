@@ -67,7 +67,7 @@ class SchemeOrganiserAddressUKController @Inject()(val mcc: MessagesControllerCo
 
   def view(requestObject: RequestObject, index: Int, companyAddressUkForm: Form[CompanyAddress], edit: Boolean = false)
           (implicit request: Request[AnyContent], hc: HeaderCarrier): Html = {
-    trusteeAddressUkView(requestObject, index, companyAddressUkForm, edit)
+    trusteeAddressUkView(requestObject, index, companyAddressUkForm, edit, schemeOrganiser = true)
   }
 
 }
