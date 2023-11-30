@@ -182,6 +182,16 @@ class ERSUtil @Inject() (
 		}
 	}
 
+	def actuallyFetchOption[T](key: String, cacheId: String)(implicit hc: HeaderCarrier, formats: json.Format[T]): Future[Option[T]] = {
+		val startTime = System.currentTimeMillis()
+		shortLivedCache.fetchAndGetEntry[T](cacheId, key).map { res =>
+			cacheTimeFetch(System.currentTimeMillis() - startTime, TimeUnit.MILLISECONDS)
+			res
+		} recover {
+			case _ => None
+		}
+	}
+
 	def fetchAll(sr: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[CacheMap] = {
 		val startTime = System.currentTimeMillis()
 		shortLivedCache.fetch(sr).map { res =>

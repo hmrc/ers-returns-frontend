@@ -55,56 +55,31 @@ class SchemeOrganiserController @Inject()(
     }
   }
 
-  def showSchemeOrganiserPage(
-                               requestObject: RequestObject
-                             )(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
+  def showSchemeOrganiserPage(requestObject: RequestObject)
+                             (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
     logger.info(s"[SchemeOrganiserController][showSchemeOrganiserPage] schemeRef: ${requestObject.getSchemeReference}.")
 
-    ersUtil.fetch[ReportableEvents](ersUtil.reportableEvents, requestObject.getSchemeReference).flatMap {
-      reportableEvent =>
-        ersUtil.fetchOption[CheckFileType](ersUtil.FILE_TYPE_CACHE, requestObject.getSchemeReference).flatMap {
-          fileType =>
-            ersUtil
-              .fetch[SchemeOrganiserDetails](ersUtil.SCHEME_ORGANISER_CACHE, requestObject.getSchemeReference)
-              .map { res =>
-                val FileType = if (fileType.isDefined) {
-                  fileType.get.checkFileType.get
-                } else {
-                  ""
-                }
-                Ok(
-                  schemeOrganiserView(
-                    requestObject,
-                    FileType,
-                    RsFormMappings.schemeOrganiserForm().fill(res),
-                    reportableEvent.isNilReturn.get
-                  )
-                )
-              } recover { case _: NoSuchElementException =>
-              Ok(
-                schemeOrganiserView(
-                  requestObject,
-                  fileType.get.checkFileType.get,
-                  RsFormMappings.schemeOrganiserForm(),
-                  reportableEvent.isNilReturn.get
-                )
-              )
-            }
-        } recover { case _: NoSuchElementException =>
-          Ok(
-            schemeOrganiserView(
-              requestObject,
-              "",
-              RsFormMappings.schemeOrganiserForm(),
-              reportableEvent.isNilReturn.get
-            )
-          )
-        }
-    } recover { case e: Exception =>
-      logger.error(
-        s"[SchemeOrganiserController][showSchemeOrganiserPage] Get reportableEvent.isNilReturn failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}."
+    (for {
+      reportableEvent <- ersUtil.fetch[ReportableEvents](ersUtil.reportableEvents, requestObject.getSchemeReference)
+      fileType <- ersUtil.actuallyFetchOption[CheckFileType](ersUtil.FILE_TYPE_CACHE, requestObject.getSchemeReference)
+      res <- ersUtil.actuallyFetchOption[SchemeOrganiserDetails](ersUtil.SCHEME_ORGANISER_CACHE, requestObject.getSchemeReference)
+    } yield {
+      val form = res.fold(RsFormMappings.schemeOrganiserForm())(RsFormMappings.schemeOrganiserForm().fill(_))
+      Ok(
+        schemeOrganiserView(
+          requestObject,
+          fileType.fold("")(_.checkFileType.get),
+          form,
+          reportableEvent.isNilReturn.get
+        )
       )
-      getGlobalErrorPage
+    }) recover {
+      case e: Exception =>
+        logger.error(
+          s"[SchemeOrganiserController][showSchemeOrganiserPage] Get reportableEvent.isNilReturn failed with exception ${e.getMessage}," +
+            s" timestamp: ${System.currentTimeMillis()}."
+        )
+        getGlobalErrorPage
     }
   }
 

@@ -39,6 +39,14 @@
 
 @schemeId = @{requestObject.getSchemeId}
 
+@formAction = @{(edit, schemeOrganiser) match {
+	case (true, false) => controllers.subsidiaries.routes.SubsidiaryAddressOverseasController.editQuestionSubmit(index)
+	case (false, false) => controllers.subsidiaries.routes.SubsidiaryAddressOverseasController.questionSubmit(index)
+
+	case (true, true) => controllers.schemeOrganiser.routes.SchemeOrganiserAddressOverseasController.editQuestionSubmit(index)
+	case (false, true) => controllers.schemeOrganiser.routes.SchemeOrganiserAddressOverseasController.questionSubmit(index)
+}}
+
 @scripts = {
 	<script type="text/javascript" src='@controllers.routes.Assets.versioned("javascripts/uk-or-overseas-form-reveal.js")' @{CSPNonce.attr}></script>
 }
@@ -61,16 +69,7 @@
 		text = messages("ers_manual_address_overseas.title")
 	))
 
-		@formWithCSRF(action = (edit, schemeOrganiser) match {
-		case (true, false) => controllers.subsidiaries.routes.SubsidiaryAddressOverseasController.editQuestionSubmit(index)
-		case (false, false) => controllers.subsidiaries.routes.SubsidiaryAddressOverseasController.questionSubmit(index)
-
-		case (true, true) => controllers.schemeOrganiser.routes.SchemeOrganiserAddressOverseasController.editQuestionSubmit(index)
-		case (false, true) => controllers.schemeOrganiser.routes.SchemeOrganiserAddressOverseasController.questionSubmit(index)
-		})
-
-		{
-
+	@formWithCSRF(action = formAction) {
 
 		@govukInput(Input(
 			id = "addressLine1",

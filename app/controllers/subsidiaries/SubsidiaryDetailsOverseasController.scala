@@ -79,7 +79,7 @@ class SubsidiaryDetailsOverseasController @Inject()(val mcc: MessagesControllerC
 
   def view(requestObject: RequestObject, index: Int, companyNameOverseasForm: Form[Company], edit: Boolean = false)
           (implicit request: Request[AnyContent], hc: HeaderCarrier): Html = {
-    companyOverseasDetailsView(requestObject, index, companyNameOverseasForm, edit)
+    companyOverseasDetailsView(requestObject, index, companyNameOverseasForm, edit, schemeOrganiser = false)
   }
 
 }

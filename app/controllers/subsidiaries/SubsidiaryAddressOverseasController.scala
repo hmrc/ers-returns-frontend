@@ -66,6 +66,6 @@ class SubsidiaryAddressOverseasController  @Inject()(val mcc: MessagesController
 
     def view(requestObject: RequestObject, index: Int, companyAddressOverseasForm: Form[CompanyAddress], edit: Boolean = false)
             (implicit request: Request[AnyContent], hc: HeaderCarrier): Html = {
-      companyAddressOverseasView(requestObject, index, companyAddressOverseasForm, edit)
+      companyAddressOverseasView(requestObject, index, companyAddressOverseasForm, edit, schemeOrganiser = false)
     }
 }

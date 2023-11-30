@@ -81,7 +81,7 @@ class SubsidiaryDetailsUkController @Inject()(val mcc: MessagesControllerCompone
 
   def view(requestObject: RequestObject, index: Int, companyNameUKForm: Form[Company], edit: Boolean = false)
           (implicit request: Request[AnyContent], hc: HeaderCarrier): Html = {
-    companyUKNameView(requestObject, index, companyNameUKForm, edit)
+    companyUKNameView(requestObject, index, companyNameUKForm, edit, schemeOrganiser = false)
   }
 
 }
