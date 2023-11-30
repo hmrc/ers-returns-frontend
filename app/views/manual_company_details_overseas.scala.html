@@ -63,9 +63,9 @@
 	))
 
 	@formWithCSRF(action = if(edit) {
-					controllers.subsidiaries.routes.CompanyDetailsOverseasController.editQuestionSubmit(index)
+					controllers.subsidiaries.routes.SubsidiaryDetailsOverseasController.editQuestionSubmit(index)
 				} else {
-					controllers.subsidiaries.routes.CompanyDetailsOverseasController.questionSubmit(index)}) {
+					controllers.subsidiaries.routes.SubsidiaryDetailsOverseasController.questionSubmit(index)}) {
 
 
 @govukInput(Input(

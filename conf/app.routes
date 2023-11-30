@@ -70,39 +70,63 @@ POST        /trustees       				                controllers.trustees.TrusteeSumm
 
 POST        /delete-trustee/:index/                         controllers.trustees.TrusteeSummaryController.deleteTrustee(index: Int)
 
-GET        /where-is-company-registered                     controllers.subsidiaries.IsCompanyUkController.questionPage(index: Int = 10000)
-POST       /where-is-company-registered                     controllers.subsidiaries.IsCompanyUkController.questionSubmit(index: Int)
-GET        /where-is-company-registered/:index/edit         controllers.subsidiaries.IsCompanyUkController.editCompany(index: Int)
-POST        /where-is-company-registered/:index/edit         controllers.subsidiaries.IsCompanyUkController.editQuestionSubmit(index: Int)
+GET        /where-is-subsidiary-registered                     controllers.subsidiaries.IsSubsidiaryUkController.questionPage(index: Int = 10000)
+POST       /where-is-subsidiary-registered                     controllers.subsidiaries.IsSubsidiaryUkController.questionSubmit(index: Int)
+GET        /where-is-subsidiary-registered/:index/edit         controllers.subsidiaries.IsSubsidiaryUkController.editCompany(index: Int)
+POST        /where-is-subsidiary-registered/:index/edit        controllers.subsidiaries.IsSubsidiaryUkController.editQuestionSubmit(index: Int)
 
+GET         /subsidiary-address                                controllers.subsidiaries.SubsidiaryAddressUkController.questionPage(index: Int = 10000)
+POST        /subsidiary-address                                controllers.subsidiaries.SubsidiaryAddressUkController.questionSubmit(index: Int)
+GET         /subsidiary-address/:index/edit                    controllers.subsidiaries.SubsidiaryAddressUkController.editCompany(index: Int)
+POST        /subsidiary-address/:index/edit                    controllers.subsidiaries.SubsidiaryAddressUkController.editQuestionSubmit(index:Int)
+
+GET         /overseas-subsidiary-address                       controllers.subsidiaries.SubsidiaryAddressOverseasController.questionPage(index: Int = 10000)
+POST        /overseas-subsidiary-address                       controllers.subsidiaries.SubsidiaryAddressOverseasController.questionSubmit(index: Int)
+GET         /overseas-subsidiary-address/:index/edit           controllers.subsidiaries.SubsidiaryAddressOverseasController.editCompany(index: Int)
+POST        /overseas-subsidiary-address/:index/edit           controllers.subsidiaries.SubsidiaryAddressOverseasController.editQuestionSubmit(index:Int)
+
+GET         /subsidiary-details-uk                             controllers.subsidiaries.SubsidiaryDetailsUkController.questionPage(index: Int = 10000)
+POST        /subsidiary-details-uk                             controllers.subsidiaries.SubsidiaryDetailsUkController.questionSubmit(index: Int)
+GET         /subsidiary-details-uk/:index/edit                 controllers.subsidiaries.SubsidiaryDetailsUkController.editCompany(index: Int)
+POST        /subsidiary-details-uk/:index/edit                 controllers.subsidiaries.SubsidiaryDetailsUkController.editQuestionSubmit(index:Int)
+
+GET         /subsidiary-details-overseas                       controllers.subsidiaries.SubsidiaryDetailsOverseasController.questionPage(index: Int = 10000)
+POST        /subsidiary-details-overseas                       controllers.subsidiaries.SubsidiaryDetailsOverseasController.questionSubmit(index: Int)
+GET         /subsidiary-details-overseas/:index/edit           controllers.subsidiaries.SubsidiaryDetailsOverseasController.editCompany(index: Int)
+POST        /subsidiary-details-overseas/:index/edit           controllers.subsidiaries.SubsidiaryDetailsOverseasController.editQuestionSubmit(index:Int)
+
+GET        /where-is-company-registered                     controllers.schemeOrganiser.IsSchemeOrganiserUkController.questionPage(index: Int = 10000)
+POST       /where-is-company-registered                     controllers.schemeOrganiser.IsSchemeOrganiserUkController.questionSubmit(index: Int)
+GET        /where-is-company-registered/:index/edit         controllers.schemeOrganiser.IsSchemeOrganiserUkController.editCompany(index: Int)
+POST       /where-is-company-registered/:index/edit         controllers.schemeOrganiser.IsSchemeOrganiserUkController.editQuestionSubmit(index: Int)
+
+GET         /uk-company-address                             controllers.schemeOrganiser.SchemeOrganiserAddressUKController.questionPage(index: Int = 10000)
+POST        /uk-company-address                             controllers.schemeOrganiser.SchemeOrganiserAddressUKController.questionSubmit(index: Int)
+GET         /uk-company-address/:index/edit                 controllers.schemeOrganiser.SchemeOrganiserAddressUKController.editCompany(index: Int)
+POST        /uk-company-address/:index/edit                 controllers.schemeOrganiser.SchemeOrganiserAddressUKController.editQuestionSubmit(index:Int)
+
+GET         /overseas-company-address                        controllers.schemeOrganiser.SchemeOrganiserAddressOverseasController.questionPage(index: Int = 10000)
+POST        /overseas-company-address                        controllers.schemeOrganiser.SchemeOrganiserAddressOverseasController.questionSubmit(index: Int)
+GET         /overseas-company-address/:index/edit            controllers.schemeOrganiser.SchemeOrganiserAddressOverseasController.editCompany(index: Int)
+POST        /overseas-company-address/:index/edit            controllers.schemeOrganiser.SchemeOrganiserAddressOverseasController.editQuestionSubmit(index:Int)
+
+GET         /company-details-uk                              controllers.schemeOrganiser.SchemeOrganiserDetailsUKController.questionPage(index: Int = 10000)
+POST        /company-details-uk                              controllers.schemeOrganiser.SchemeOrganiserDetailsUKController.questionSubmit(index: Int)
+GET         /company-details-uk/:index/edit                  controllers.schemeOrganiser.SchemeOrganiserDetailsUKController.editCompany(index: Int)
+POST        /company-details-uk/:index/edit                  controllers.schemeOrganiser.SchemeOrganiserDetailsUKController.editQuestionSubmit(index:Int)
+
+GET         /company-details-overseas                       controllers.schemeOrganiser.SchemeOrganiserDetailsOverseasController.questionPage(index: Int = 10000)
+POST        /company-details-overseas                       controllers.schemeOrganiser.SchemeOrganiserDetailsOverseasController.questionSubmit(index: Int)
+GET         /company-details-overseas/:index/edit           controllers.schemeOrganiser.SchemeOrganiserDetailsOverseasController.editCompany(index: Int)
+POST        /company-details-overseas/:index/edit           controllers.schemeOrganiser.SchemeOrganiserDetailsOverseasController.editQuestionSubmit(index:Int)
+
+GET 		/company-details  		                        controllers.schemeOrganiser.SchemeOrganiserController.schemeOrganiserPage()
+POST 		/company-details 			                    controllers.schemeOrganiser.SchemeOrganiserController.schemeOrganiserSubmit()
 
 GET 		/add-subsidiary-company   		        		controllers.GroupSchemeController.manualCompanyDetailsPage(index: Int = 10000)
-POST 		/add-subsidiary-company       					controllers.GroupSchemeController.companySummaryContinue()
 POST 		/add-subsidiary-company/:index/delete       	controllers.GroupSchemeController.deleteCompany(index: Int)
+POST 		/add-subsidiary-company       					controllers.GroupSchemeController.companySummaryContinue()
 
-GET         /company-address                                controllers.subsidiaries.CompanyAddressUkController.questionPage(index: Int = 10000)
-POST        /company-address                                controllers.subsidiaries.CompanyAddressUkController.questionSubmit(index: Int)
-GET         /company-address/:index/edit                     controllers.subsidiaries.CompanyAddressUkController.editCompany(index: Int)
-POST        /company-address/:index/edit                    controllers.subsidiaries.CompanyAddressUkController.editQuestionSubmit(index:Int)
-
-GET         /overseas-company-address                       controllers.subsidiaries.CompanyAddressOverseasController.questionPage(index: Int = 10000)
-POST        /overseas-company-address                       controllers.subsidiaries.CompanyAddressOverseasController.questionSubmit(index: Int)
-GET         /overseas-company-address/:index/edit            controllers.subsidiaries.CompanyAddressOverseasController.editCompany(index: Int)
-POST        /overseas-company-address/:index/edit            controllers.subsidiaries.CompanyAddressOverseasController.editQuestionSubmit(index:Int)
-
-GET         /company-details-uk                             controllers.subsidiaries.CompanyDetailsUkController.questionPage(index: Int = 10000)
-POST        /company-details-uk                             controllers.subsidiaries.CompanyDetailsUkController.questionSubmit(index: Int)
-GET         /company-details-uk/:index/edit                  controllers.subsidiaries.CompanyDetailsUkController.editCompany(index: Int)
-POST        /company-details-uk/:index/edit                  controllers.subsidiaries.CompanyDetailsUkController.editQuestionSubmit(index:Int)
-
-GET         /company-details-overseas                       controllers.subsidiaries.CompanyDetailsOverseasController.questionPage(index: Int = 10000)
-POST        /company-details-overseas                       controllers.subsidiaries.CompanyDetailsOverseasController.questionSubmit(index: Int)
-GET         /company-details-overseas/:index/edit            controllers.subsidiaries.CompanyDetailsOverseasController.editCompany(index: Int)
-POST        /company-details-overseas/:index/edit           controllers.subsidiaries.CompanyDetailsOverseasController.editQuestionSubmit(index:Int)
-
-
-GET 		/company-details  		                        controllers.SchemeOrganiserController.schemeOrganiserPage()
-POST 		/company-details 			                    controllers.SchemeOrganiserController.schemeOrganiserSubmit()
 
 GET 		/annual-return-summary		                    controllers.SummaryDeclarationController.summaryDeclarationPage()
 

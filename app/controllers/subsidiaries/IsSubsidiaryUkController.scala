@@ -40,7 +40,6 @@ import play.api.data.Form
 import play.api.libs.json.Format
 import play.api.mvc.{AnyContent, MessagesControllerComponents, Request, Result}
 import play.twirl.api.Html
-import services.CompanyDetailsService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
@@ -51,21 +50,21 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 
-class IsCompanyUkController @Inject()(val mcc: MessagesControllerComponents,
-                                      val authConnector: DefaultAuthConnector,
-                                      val ersConnector: ErsConnector,
-                                      val globalErrorView: views.html.global_error,
-                                      val authAction: AuthAction,
-                                      implicit val countryCodes: CountryCodes,
-                                      implicit val ersUtil: ERSUtil,
-                                      implicit val appConfig: ApplicationConfig,
-                                      pageView: views.html.manual_is_the_company_in_uk
+class IsSubsidiaryUkController @Inject()(val mcc: MessagesControllerComponents,
+                                         val authConnector: DefaultAuthConnector,
+                                         val ersConnector: ErsConnector,
+                                         val globalErrorView: views.html.global_error,
+                                         val authAction: AuthAction,
+                                         implicit val countryCodes: CountryCodes,
+                                         implicit val ersUtil: ERSUtil,
+                                         implicit val appConfig: ApplicationConfig,
+                                         pageView: views.html.manual_is_the_company_in_uk
                                      )
-  extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with CompanyBaseController[CompanyBasedInUk] {
+  extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with SubsidiaryBaseController[CompanyBasedInUk] {
 
   implicit val ec: ExecutionContext = mcc.executionContext
 
-  val cacheKey: String = ersUtil.COMPANY_BASED
+  val cacheKey: String = ersUtil.SUBSIDIARY_COMPANY_BASED
   implicit val format: Format[CompanyBasedInUk] = CompanyBasedInUk.format
 
   def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier): Future[Result] = {
@@ -78,11 +77,11 @@ class IsCompanyUkController @Inject()(val mcc: MessagesControllerComponents,
       } else {ersUtil.fetch[CompanyBasedInUk](cacheKey, requestObject.getSchemeReference)}
     } yield {
         (subsidiaryBasedInUk.basedInUk, edit) match {
-          case (true, false) => Redirect(controllers.subsidiaries.routes.CompanyDetailsUkController.questionPage())
-          case (false, false) => Redirect(controllers.subsidiaries.routes.CompanyDetailsOverseasController.questionPage())
+          case (true, false) => Redirect(controllers.subsidiaries.routes.SubsidiaryDetailsUkController.questionPage())
+          case (false, false) => Redirect(controllers.subsidiaries.routes.SubsidiaryDetailsOverseasController.questionPage())
 
-          case (true, true) => Redirect(controllers.subsidiaries.routes.CompanyDetailsUkController.editCompany(index))
-          case (false, true) => Redirect(controllers.subsidiaries.routes.CompanyDetailsOverseasController.editCompany(index))
+          case (true, true) => Redirect(controllers.subsidiaries.routes.SubsidiaryDetailsUkController.editCompany(index))
+          case (false, true) => Redirect(controllers.subsidiaries.routes.SubsidiaryDetailsOverseasController.editCompany(index))
         }
       }
     }

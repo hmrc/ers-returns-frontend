@@ -37,7 +37,7 @@ import views.html.{global_error, manual_address_overseas}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class CompanyAddressOverseasControllerSpec extends AnyWordSpecLike
+class SubsidiaryAddressOverseasControllerSpec extends AnyWordSpecLike
 
   with Matchers
   with OptionValues
@@ -59,7 +59,7 @@ class CompanyAddressOverseasControllerSpec extends AnyWordSpecLike
   implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
 
 
-  val testController = new CompanyAddressOverseasController(
+  val testController = new SubsidiaryAddressOverseasController(
     mockMCC,
     mockAuthConnector,
     mockErsConnector,
@@ -123,7 +123,7 @@ class CompanyAddressOverseasControllerSpec extends AnyWordSpecLike
     "successfully bind the form and redirect to the company summary page" in {
       val emptyCacheMap = CacheMap("", Map("" -> Json.obj()))
       when(mockErsUtil.cache[CompanyAddress](any(), any(), any())(any(), any())).thenReturn(Future.successful(emptyCacheMap))
-      when(mockCompanyDetailsService.updateCompanyCache(any())(any())).thenReturn(Future.successful(()), Future.successful(()))
+      when(mockCompanyDetailsService.updateSubsidiaryCompanyCache(any())(any())).thenReturn(Future.successful(()), Future.successful(()))
 
       val companyAddressOverseasData = Map("addressLine1" -> "123 Fake Street")
       val form = RsFormMappings.companyAddressOverseasForm().bind(companyAddressOverseasData)

@@ -63,9 +63,9 @@
 	))
 
 	@formWithCSRF(action = if(edit) {
-						controllers.subsidiaries.routes.CompanyAddressUkController.editQuestionSubmit(index)
+						controllers.subsidiaries.routes.SubsidiaryAddressUkController.editQuestionSubmit(index)
 						} else {
-						controllers.subsidiaries.routes.CompanyAddressUkController.questionSubmit(index)}) {
+						controllers.subsidiaries.routes.SubsidiaryAddressUkController.questionSubmit(index)}) {
 
 		@govukInput(Input(
 				id = "addressLine1",

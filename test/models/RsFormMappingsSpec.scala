@@ -24,7 +24,7 @@ import play.api.i18n.{Messages, MessagesApi}
 import play.api.libs.json.Json
 import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents}
 import play.api.test.Helpers.stubBodyParser
-import utils.{ErsTestHelper, Fixtures}
+import utils.ErsTestHelper
 
 import scala.concurrent.ExecutionContext
 
@@ -343,7 +343,7 @@ class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPer
       )
       val validatedForm = companyAddressOverseasForm.bind(postData, Form.FromJsonMaxChars)
       assert(validatedForm.errors.head.key == companyAddressFields.addressLine5)
-      assert(validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.postcode"))
+      assert(validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.invalidChars.address_line5"))
     }
   }
 

@@ -50,9 +50,9 @@
     items = Seq(
       ActionItem(
        href = if(company.country.getOrElse("") == "UK"){
-        controllers.subsidiaries.routes.CompanyDetailsUkController.editCompany(index).url
+        controllers.subsidiaries.routes.SubsidiaryDetailsOverseasController.editCompany(index).url
        } else {
-        controllers.subsidiaries.routes.CompanyDetailsOverseasController.editCompany(index).url
+        controllers.subsidiaries.routes.SubsidiaryDetailsOverseasController.editCompany(index).url
        },
        content = Text(messages("ers.change_this")),
        visuallyHiddenText = Some(messages("ers.change_this"))
@@ -76,7 +76,7 @@
   classes = "govuk-!-width-one-quarter",
    items = Seq(
     ActionItem(
-       href = controllers.subsidiaries.routes.IsCompanyUkController.editCompany(index).url,
+       href = controllers.subsidiaries.routes.IsSubsidiaryUkController.editCompany(index).url,
        content = Text(messages("ers.change_this")),
        visuallyHiddenText = Some(messages("ers.change_this"))
       )
@@ -97,9 +97,9 @@
       items = Seq(
        ActionItem(
         href = if(company.country.getOrElse("") == "UK"){
-         controllers.subsidiaries.routes.CompanyAddressUkController.editCompany(index).url
+         controllers.subsidiaries.routes.SubsidiaryAddressUkController.editCompany(index).url
         } else {
-         controllers.subsidiaries.routes.CompanyAddressOverseasController.editCompany(index).url
+         controllers.subsidiaries.routes.SubsidiaryAddressOverseasController.editCompany(index).url
         },
         content = Text(messages("ers.change_this")),
         visuallyHiddenText = Some(messages("ers.change_this"))
@@ -122,7 +122,7 @@
       classes = "govuk-!-width-one-quarter",
       items = Seq(
        ActionItem(
-             href = controllers.subsidiaries.routes.CompanyDetailsUkController.editCompany(index).url,
+             href = controllers.subsidiaries.routes.SubsidiaryDetailsUkController.editCompany(index).url,
              content = Text(messages("ers.change_this")),
              visuallyHiddenText = Some(messages("ers.change_this"))
              )
@@ -142,7 +142,7 @@
           classes = "govuk-!-width-one-quarter",
           items = Seq(
           ActionItem(
-             href = controllers.subsidiaries.routes.CompanyDetailsUkController.editCompany(index).url,
+             href = controllers.subsidiaries.routes.SubsidiaryDetailsUkController.editCompany(index).url,
              content = Text(messages("ers.change_this")),
              visuallyHiddenText = Some(messages("ers.change_this"))
              )
@@ -191,7 +191,7 @@ if(company.country.getOrElse("") == "UK") {
  }
 
  <a class="govuk-link govuk-inset-text govuk-!-display-inline-block govuk-!-margin-top-0 govuk-!-width-full"
-    href="@controllers.subsidiaries.routes.IsCompanyUkController.questionPage()">@Html(messages("ers_company_summary.add_company"))</a>
+    href="@controllers.subsidiaries.routes.IsSubsidiaryUkController.questionPage()">@Html(messages("ers_company_summary.add_company"))</a>
 
  @govukButton(Button(
    inputType = Some("submit"),

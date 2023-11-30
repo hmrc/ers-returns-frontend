@@ -21,21 +21,18 @@ import controllers.auth.{AuthAction, RequestWithOptionalAuthContext}
 import models._
 import play.api.Logging
 import play.api.data.Form
-import play.api.http.Writeable.wByteArray
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.mvc._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
+import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils._
 
 import javax.inject.{Inject, Singleton}
-import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
-
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-<<<<<<< HEAD
 class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
 																			val authConnector: DefaultAuthConnector,
 																			implicit val countryCodes: CountryCodes,
@@ -58,7 +55,7 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
   def showManualCompanyDetailsPage(index: Int)(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
     (for {
       requestObject      <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
-      companyDetailsList <- ersUtil.fetch[CompanyDetailsList](ersUtil.COMPANIES_CACHE, requestObject.getSchemeReference)
+      companyDetailsList <- ersUtil.fetch[CompanyDetailsList](ersUtil.SUBSIDIARY_COMPANIES_CACHE, requestObject.getSchemeReference)
     } yield {
       println(companyDetailsList)
       Ok(manualCompanyDetailsView(requestObject, index, companyDetailsList))
@@ -84,9 +81,9 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
   def showDeleteCompany(id: Int)(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
     (for {
       requestObject      <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
-      cachedCompanyList  <- ersUtil.fetch[CompanyDetailsList](ersUtil.COMPANIES_CACHE, requestObject.getSchemeReference)
+      cachedCompanyList  <- ersUtil.fetch[CompanyDetailsList](ersUtil.SUBSIDIARY_COMPANIES_CACHE, requestObject.getSchemeReference)
       companyDetailsList = CompanyDetailsList(filterDeletedCompany(cachedCompanyList, id))
-      _                  <- ersUtil.cache(ersUtil.COMPANIES_CACHE, companyDetailsList, requestObject.getSchemeReference)
+      _                  <- ersUtil.cache(ersUtil.SUBSIDIARY_COMPANIES_CACHE, companyDetailsList, requestObject.getSchemeReference)
     } yield {
       Redirect(controllers.routes.GroupSchemeController.manualCompanyDetailsPage())
 
@@ -169,7 +166,7 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
           ersUtil.cache(ersUtil.GROUP_SCHEME_CACHE_CONTROLLER, gsc, requestObject.getSchemeReference).map { _ =>
             (requestObject.getSchemeId, formData.groupScheme) match {
 
-              case (_, Some(ersUtil.OPTION_YES)) => Redirect(routes.GroupSchemeController.manualCompanyDetailsPage())
+              case (_, Some(ersUtil.OPTION_YES)) => Redirect(controllers.routes.GroupSchemeController.manualCompanyDetailsPage())
 
               case (ersUtil.SCHEME_CSOP | ersUtil.SCHEME_SAYE, _) =>
                 Redirect(routes.AltAmendsController.altActivityPage())

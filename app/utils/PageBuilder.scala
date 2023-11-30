@@ -209,7 +209,7 @@ trait PageBuilder {
 						}
 					case PAGE_ALT_AMENDS => routes.AltAmendsController.altActivityPage().toString
 					case PAGE_GROUP_SUMMARY =>
-						routes.GroupSchemeController.manualCompanyDetailsPage().toString
+						controllers.routes.GroupSchemeController.manualCompanyDetailsPage().toString
 					case PAGE_SUMMARY_DECLARATION =>
 						condition match {
 							case OPTION_YES => routes.AltAmendsController.altAmendsPage().toString
@@ -231,7 +231,7 @@ trait PageBuilder {
 						}
 					case PAGE_GROUP_SUMMARY =>
 						condition match {
-							case OPTION_MANUAL => routes.GroupSchemeController.manualCompanyDetailsPage().toString
+							case OPTION_MANUAL => controllers.routes.GroupSchemeController.manualCompanyDetailsPage().toString
 							case _ => DEFAULT
 						}
 					case PAGE_SUMMARY_DECLARATION =>
@@ -262,7 +262,7 @@ trait PageBuilder {
 					case PAGE_ALT_AMENDS => routes.AltAmendsController.altActivityPage().toString
 					case PAGE_GROUP_SUMMARY =>
 						condition match {
-							case OPTION_MANUAL => routes.GroupSchemeController.manualCompanyDetailsPage().toString
+							case OPTION_MANUAL => controllers.routes.GroupSchemeController.manualCompanyDetailsPage().toString
 							case _ => DEFAULT
 						}
 					case PAGE_SUMMARY_DECLARATION =>
@@ -287,7 +287,7 @@ trait PageBuilder {
 					case PAGE_ALT_ACTIVITY => controllers.trustees.routes.TrusteeSummaryController.trusteeSummaryPage().toString
 					case PAGE_ALT_AMENDS => routes.AltAmendsController.altActivityPage().toString
 					case PAGE_GROUP_SUMMARY =>
-						routes.GroupSchemeController.manualCompanyDetailsPage().toString
+						controllers.routes.GroupSchemeController.manualCompanyDetailsPage().toString
 					case PAGE_SUMMARY_DECLARATION =>
 						condition match {
 							case OPTION_YES => routes.AltAmendsController.altAmendsPage().toString
@@ -315,7 +315,7 @@ trait PageBuilder {
 						}
 					case PAGE_GROUP_SUMMARY =>
 						condition match {
-							case OPTION_MANUAL => routes.GroupSchemeController.manualCompanyDetailsPage().toString
+							case OPTION_MANUAL => controllers.routes.GroupSchemeController.manualCompanyDetailsPage().toString
 							case _ => DEFAULT
 						}
 					case PAGE_SUMMARY_DECLARATION =>

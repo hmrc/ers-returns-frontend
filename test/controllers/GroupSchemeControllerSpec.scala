@@ -34,7 +34,7 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.http.cache.client.CacheMap
 import utils.Fixtures.ersRequestObject
 import utils.{ERSFakeApplicationConfig, ErsTestHelper, Fixtures}
-import views.html.{global_error, group, group_plan_summary,manual_company_details_summary}
+import views.html.{global_error, group, group_plan_summary, manual_company_details_summary}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -62,7 +62,7 @@ class GroupSchemeControllerSpec
   implicit lazy val materializer: Materializer         = app.materializer
   val globalErrorView: global_error                    = app.injector.instanceOf[global_error]
   val groupView: group                                 = app.injector.instanceOf[group]
-  val manualCompanyDetailsView: manual_company_details = app.injector.instanceOf[manual_company_details]
+  val manualCompanyDetailsView: manual_company_details_summary = app.injector.instanceOf[manual_company_details_summary]
   val groupPlanSummaryView: group_plan_summary         = app.injector.instanceOf[group_plan_summary]
 
   val company: CompanyDetails                     =

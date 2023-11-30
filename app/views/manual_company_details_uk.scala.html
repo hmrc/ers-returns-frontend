@@ -63,9 +63,9 @@
 	))
 
 	@formWithCSRF(action = if(edit) {
-		controllers.subsidiaries.routes.CompanyDetailsUkController.editQuestionSubmit(index)
+		controllers.subsidiaries.routes.SubsidiaryDetailsUkController.editQuestionSubmit(index)
 	} else {
-		controllers.subsidiaries.routes.CompanyDetailsUkController.questionSubmit(index)}) {
+		controllers.subsidiaries.routes.SubsidiaryDetailsUkController.questionSubmit(index)}) {
 
 		@govukInput(Input(
 			classes = "govuk-!-width-one-half",

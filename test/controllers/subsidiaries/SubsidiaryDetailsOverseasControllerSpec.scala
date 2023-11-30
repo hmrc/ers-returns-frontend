@@ -38,7 +38,7 @@ import views.html.{global_error, manual_company_details_overseas}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class CompanyDetailsOverseasControllerSpec extends AnyWordSpecLike
+class SubsidiaryDetailsOverseasControllerSpec extends AnyWordSpecLike
   with Matchers
   with OptionValues
   with ERSFakeApplicationConfig
@@ -59,7 +59,7 @@ class CompanyDetailsOverseasControllerSpec extends AnyWordSpecLike
   implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
 
 
-  val testController = new CompanyDetailsOverseasController(
+  val testController = new SubsidiaryDetailsOverseasController(
     mockMCC,
     mockAuthConnector,
     mockErsConnector,
@@ -68,7 +68,6 @@ class CompanyDetailsOverseasControllerSpec extends AnyWordSpecLike
     mockCountryCodes,
     mockErsUtil,
     mockAppConfig,
-    mockCompanyDetailsService,
     app.injector.instanceOf[manual_company_details_overseas]
   )
   "calling showQuestionPage" should {
@@ -123,7 +122,7 @@ class CompanyDetailsOverseasControllerSpec extends AnyWordSpecLike
     "successfully bind the form and go to the company overseas address page if the form is filled correctly" in {
       val emptyCacheMap = CacheMap("", Map("" -> Json.obj()))
       when(mockErsUtil.cache[Company](any(), any(), any())(any(), any())).thenReturn(Future.successful(emptyCacheMap))
-      when(mockCompanyDetailsService.updateCompanyCache(any())(any())).thenReturn(Future.successful(()), Future.successful(()))
+      when(mockCompanyDetailsService.updateSubsidiaryCompanyCache(any())(any())).thenReturn(Future.successful(()), Future.successful(()))
 
       val companyData = Map("name" -> "Test company")
       val form = RsFormMappings.companyNameForm().bind(companyData)

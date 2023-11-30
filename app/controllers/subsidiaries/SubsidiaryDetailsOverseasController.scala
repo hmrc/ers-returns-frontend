@@ -40,7 +40,6 @@ import play.api.data.Form
 import play.api.libs.json.Format
 import play.api.mvc.{AnyContent, MessagesControllerComponents, Request, Result}
 import play.twirl.api.Html
-import services.CompanyDetailsService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
@@ -50,30 +49,29 @@ import utils.{CountryCodes, ERSUtil}
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class CompanyDetailsOverseasController @Inject()(val mcc: MessagesControllerComponents,
-                                                 val authConnector: DefaultAuthConnector,
-                                                 val ersConnector: ErsConnector,
-                                                 val globalErrorView: views.html.global_error,
-                                                 val authAction: AuthAction,
-                                                 implicit val countryCodes: CountryCodes,
-                                                 implicit val ersUtil: ERSUtil,
-                                                 implicit val appConfig: ApplicationConfig,
-                                                 companyDetailsService: CompanyDetailsService,
-                                                 companyOverseasDetailsView: views.html.manual_company_details_overseas
+class SubsidiaryDetailsOverseasController @Inject()(val mcc: MessagesControllerComponents,
+                                                    val authConnector: DefaultAuthConnector,
+                                                    val ersConnector: ErsConnector,
+                                                    val globalErrorView: views.html.global_error,
+                                                    val authAction: AuthAction,
+                                                    implicit val countryCodes: CountryCodes,
+                                                    implicit val ersUtil: ERSUtil,
+                                                    implicit val appConfig: ApplicationConfig,
+                                                    companyOverseasDetailsView: views.html.manual_company_details_overseas
                                                 )
-  extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with CompanyBaseController[Company] {
+  extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with SubsidiaryBaseController[Company] {
 
   implicit val ec: ExecutionContext = mcc.executionContext
 
-  val cacheKey: String = ersUtil.COMPANY_NAME_CACHE
+  val cacheKey: String = ersUtil.SUBSIDIARY_COMPANY_NAME_CACHE
 
   implicit val format: Format[Company] = Company.format
 
   def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier): Future[Result] = {
     if (edit) {
-         Future.successful(Redirect(controllers.subsidiaries.routes.CompanyAddressOverseasController.editCompany(index)))
+         Future.successful(Redirect(controllers.subsidiaries.routes.SubsidiaryAddressOverseasController.editCompany(index)))
       } else {
-        Future.successful(Redirect(controllers.subsidiaries.routes.CompanyAddressOverseasController.questionPage()))
+        Future.successful(Redirect(controllers.subsidiaries.routes.SubsidiaryAddressOverseasController.questionPage()))
       }
     }
 

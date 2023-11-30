@@ -71,7 +71,6 @@ class ERSUtil @Inject() (
 
 	val FILE_NAME_CACHE: String = "file-name"
 
-	val SCHEME_ORGANISER_CACHE: String = "scheme-organiser"
 	val TRUSTEES_CACHE: String = "trustees"
 	val TRUSTEE_NAME_CACHE: String = "trustee-name"
 	val TRUSTEE_BASED_CACHE: String = "trustee-based"
@@ -102,10 +101,15 @@ class ERSUtil @Inject() (
 	val VALIDATED_SHEEETS: String = "validated-sheets"
 
 
-	val COMPANY_NAME_CACHE: String = "company-name"
-	val COMPANY_ADDRESS_CACHE: String = "company-address"
-	val COMPANY_BASED: String = "company-based"
-	val COMPANIES_CACHE: String = "companies"
+	val SUBSIDIARY_COMPANY_NAME_CACHE: String = "subsidiary-company-name"
+	val SUBSIDIARY_COMPANY_ADDRESS_CACHE: String = "subsidiary-company-address"
+	val SUBSIDIARY_COMPANY_BASED: String = "subsidiary-company-based"
+	val SUBSIDIARY_COMPANIES_CACHE: String = "subsidiary-companies"
+
+	val SCHEME_ORGANISER_NAME_CACHE: String = "scheme-organiser-name"
+	val SCHEME_ORGANISER_ADDRESS_CACHE: String = "scheme-organiser-address"
+	val SCHEME_ORGANISER_BASED: String = "scheme-organiser-based"
+	val SCHEME_ORGANISER_CACHE: String = "scheme-organiser"
 
 	def cache[T](key: String, body: T)(implicit hc: HeaderCarrier, ec: ExecutionContext, formats: json.Format[T]): Future[CacheMap] =
 		shortLivedCache.cache[T](getCacheId, key, body)
@@ -364,10 +368,10 @@ class ERSUtil @Inject() (
 	}
 
 	def fetchPartFromCompanyDetailsList[A](index: Int, cacheId: String)(implicit hc: HeaderCarrier, formats: json.Format[A]): Future[Option[A]] = {
-		shortLivedCache.fetchAndGetEntry[JsValue](cacheId, COMPANIES_CACHE).map {
+		shortLivedCache.fetchAndGetEntry[JsValue](cacheId, SUBSIDIARY_COMPANIES_CACHE).map {
 			x =>
 				println("Json here: " + x.getOrElse(""))
-				x.map(_.\(COMPANIES_CACHE).as[JsArray].\(index).getOrElse(Json.obj()).as[A])
+				x.map(_.\(SUBSIDIARY_COMPANIES_CACHE).as[JsArray].\(index).getOrElse(Json.obj()).as[A])
 		} recover {
 			case x: Throwable => {
 				println("[ERSUtil][fetchPartFromCompanyDetailsList] Nothing found in cache, expected if this is not an edit journey: " + x.getMessage)
@@ -377,7 +381,7 @@ class ERSUtil @Inject() (
 	}
 
 	def fetchCompaniesOptionally(cacheId: String)(implicit hc: HeaderCarrier, formats: json.Format[CompanyDetailsList]): Future[CompanyDetailsList] = {
-		fetch[CompanyDetailsList](COMPANIES_CACHE, cacheId).recover {
+		fetch[CompanyDetailsList](SUBSIDIARY_COMPANIES_CACHE, cacheId).recover {
 			case _ => CompanyDetailsList(List.empty[CompanyDetails])
 		}
 	}

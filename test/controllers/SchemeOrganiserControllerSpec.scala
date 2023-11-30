@@ -16,6 +16,7 @@
 
 package controllers
 
+import controllers.schemeOrganiser.SchemeOrganiserController
 import models._
 import org.jsoup.Jsoup
 import org.mockito.ArgumentMatchers._

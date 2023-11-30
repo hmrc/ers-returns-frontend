@@ -51,30 +51,29 @@ import utils.{CountryCodes, ERSUtil}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class CompanyDetailsUkController @Inject()(val mcc: MessagesControllerComponents,
-                                           val authConnector: DefaultAuthConnector,
-                                           val ersConnector: ErsConnector,
-                                           val globalErrorView: views.html.global_error,
-                                           val authAction: AuthAction,
-                                           implicit val countryCodes: CountryCodes,
-                                           implicit val ersUtil: ERSUtil,
-                                           implicit val appConfig: ApplicationConfig,
-                                           companyDetailsService: CompanyDetailsService,
-                                           companyUKNameView: views.html.manual_company_details_uk
+class SubsidiaryDetailsUkController @Inject()(val mcc: MessagesControllerComponents,
+                                              val authConnector: DefaultAuthConnector,
+                                              val ersConnector: ErsConnector,
+                                              val globalErrorView: views.html.global_error,
+                                              val authAction: AuthAction,
+                                              implicit val countryCodes: CountryCodes,
+                                              implicit val ersUtil: ERSUtil,
+                                              implicit val appConfig: ApplicationConfig,
+                                              companyUKNameView: views.html.manual_company_details_uk
                                           )
-  extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with CompanyBaseController[Company] {
+  extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with SubsidiaryBaseController[Company] {
 
   implicit val ec: ExecutionContext = mcc.executionContext
 
-  val cacheKey: String = ersUtil.COMPANY_NAME_CACHE
+  val cacheKey: String = ersUtil.SUBSIDIARY_COMPANY_NAME_CACHE
 
   implicit val format: Format[Company] = Company.format
 
     def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier) = {
       if (edit) {
-          Future.successful(Redirect(controllers.subsidiaries.routes.CompanyAddressUkController.editCompany(index)))
+          Future.successful(Redirect(controllers.subsidiaries.routes.SubsidiaryAddressUkController.editCompany(index)))
       } else {
-        Future.successful(Redirect(controllers.subsidiaries.routes.CompanyAddressUkController.questionPage()))
+        Future.successful(Redirect(controllers.subsidiaries.routes.SubsidiaryAddressUkController.questionPage()))
       }
     }
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package controllers
+package controllers.schemeOrganiser
 
 import config.ApplicationConfig
 import controllers.auth.{AuthAction, RequestWithOptionalAuthContext}
@@ -25,11 +25,11 @@ import play.api.i18n.{I18nSupport, Messages}
 import play.api.mvc._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
+import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils._
-import javax.inject.{Inject, Singleton}
-import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -137,7 +137,7 @@ class SchemeOrganiserController @Inject()(
       },
       successful => {
         ersUtil.cache(ersUtil.SCHEME_ORGANISER_CACHE, successful, requestObject.getSchemeReference).map {
-          _ => Redirect(routes.GroupSchemeController.groupSchemePage())
+          _ => Redirect(controllers.routes.GroupSchemeController.groupSchemePage())
         } recover {
           case e: Exception =>
             logger.error(s"[SchemeOrganiserController][showSchemeOrganiserSubmit] Save scheme organiser details failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")

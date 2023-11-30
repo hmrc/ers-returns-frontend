@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package controllers.subsidiaries
+package controllers.schemeOrganiser
 
 import config.ApplicationConfig
 import controllers.auth.{AuthAction, RequestWithOptionalAuthContext}
@@ -29,10 +29,9 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.ERSUtil
 
-import scala.concurrent.Future.never.recover
 import scala.concurrent.{ExecutionContext, Future}
 
-trait CompanyBaseController[A] extends FrontendController with I18nSupport with Logging {
+trait SchemeOrganiserBaseController[A] extends FrontendController with I18nSupport with Logging {
 
   val ersUtil: ERSUtil
   val authAction: AuthAction
@@ -78,17 +77,18 @@ trait CompanyBaseController[A] extends FrontendController with I18nSupport with 
   }
 
   def submissionHandler(requestObject: RequestObject, index: Int, edit: Boolean = false)
-                        (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
+                       (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
     form.bindFromRequest().fold(
-      errors => {logger.error(errors.errors.mkString)
-          Future.successful(BadRequest(view(requestObject, index, errors, edit)))
+      errors => {
+        logger.error(errors.errors.mkString)
+        Future.successful(BadRequest(view(requestObject, index, errors, edit)))
       },
       result => {
         if (edit) {
           ersUtil.fetchCompaniesOptionally(requestObject.getSchemeReference).flatMap { companies =>
             val updatedCompany = companies.companies(index).updatePart(result)
             val updatedCompanies = CompanyDetailsList(companies.companies.updated(index, updatedCompany))
-            ersUtil.cache[CompanyDetailsList](ersUtil.COMPANIES_CACHE, updatedCompanies, requestObject.getSchemeReference).flatMap{ _ =>
+            ersUtil.cache[CompanyDetailsList](ersUtil.SCHEME_ORGANISER_CACHE, updatedCompanies, requestObject.getSchemeReference).flatMap { _ =>
               nextPageRedirect(index, edit)
             }
           }
@@ -106,7 +106,7 @@ trait CompanyBaseController[A] extends FrontendController with I18nSupport with 
   }
 
   def editCompany(index: Int): Action[AnyContent] = authAction.async {
-    implicit  request =>
+    implicit request =>
       println(s"\n\n[${this.getClass.getSimpleName}] index is $index ")
       ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
         showQuestionPage(requestObject, index, edit = true)(request, hc)

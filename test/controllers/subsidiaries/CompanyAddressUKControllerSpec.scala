@@ -59,7 +59,7 @@ class CompanyAddressUKControllerSpec extends AnyWordSpecLike
   implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
 
 
-  val testController = new CompanyAddressUkController (
+  val testController = new SubsidiaryAddressUkController (
     mockMCC,
     mockAuthConnector,
     mockErsConnector,
@@ -123,7 +123,7 @@ class CompanyAddressUKControllerSpec extends AnyWordSpecLike
     "successfully bind the form and redirect to the company summary page" in {
       val emptyCacheMap = CacheMap("", Map("" -> Json.obj()))
       when(mockErsUtil.cache[CompanyAddress](any(), any(), any())(any(), any())).thenReturn(Future.successful(emptyCacheMap))
-      when(mockCompanyDetailsService.updateCompanyCache(any())(any())).thenReturn(Future.successful(()), Future.successful(()))
+      when(mockCompanyDetailsService.updateSubsidiaryCompanyCache(any())(any())).thenReturn(Future.successful(()), Future.successful(()))
 
       val companyAddressUkData = Map("addressLine1" -> "123 Fake Street")
       val form = RsFormMappings.companyAddressUkForm().bind(companyAddressUkData)

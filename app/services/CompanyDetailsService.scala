@@ -27,22 +27,39 @@ class CompanyDetailsService @Inject()(
                                 ersUtil: ERSUtil
                               )(implicit ec: ExecutionContext) {
 
-  def updateCompanyCache(index: Int)(implicit hc: HeaderCarrier): Future[Unit] = {
+  def updateSubsidiaryCompanyCache(index: Int)(implicit hc: HeaderCarrier): Future[Unit] = {
     for {
       requestObject <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
       schemeRef = requestObject.getSchemeReference
-      name <- ersUtil.fetch[Company](ersUtil.COMPANY_NAME_CACHE, schemeRef)
+      name <- ersUtil.fetch[Company](ersUtil.SUBSIDIARY_COMPANY_NAME_CACHE, schemeRef)
       cachedCompanies <- ersUtil.fetchCompaniesOptionally(schemeRef)
       companyDetailsList <- {
-        ersUtil.fetch[CompanyAddress](ersUtil.COMPANY_ADDRESS_CACHE, schemeRef).map(address =>
+        ersUtil.fetch[CompanyAddress](ersUtil.SUBSIDIARY_COMPANY_ADDRESS_CACHE, schemeRef).map(address =>
           CompanyDetailsList(replaceCompany(cachedCompanies.companies, index, CompanyDetails(name, address)))
         )
       }
-      _ <- ersUtil.cache[CompanyDetailsList](ersUtil.COMPANIES_CACHE, companyDetailsList, schemeRef)
+      _ <- ersUtil.cache[CompanyDetailsList](ersUtil.SUBSIDIARY_COMPANIES_CACHE, companyDetailsList, schemeRef)
     } yield {
       ()
     }
     }
+
+  def updateSchemeOrganiserCache(index: Int)(implicit hc: HeaderCarrier): Future[Unit] = {
+    for {
+      requestObject <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
+      schemeRef = requestObject.getSchemeReference
+      name <- ersUtil.fetch[Company](ersUtil.SCHEME_ORGANISER_NAME_CACHE, schemeRef)
+      cachedCompanies <- ersUtil.fetchCompaniesOptionally(schemeRef)
+      companyDetailsList <- {
+        ersUtil.fetch[CompanyAddress](ersUtil.SCHEME_ORGANISER_ADDRESS_CACHE, schemeRef).map(address =>
+          CompanyDetailsList(replaceCompany(cachedCompanies.companies, index, CompanyDetails(name, address)))
+        )
+      }
+      _ <- ersUtil.cache[CompanyDetailsList](ersUtil.SCHEME_ORGANISER_CACHE, companyDetailsList, schemeRef)
+    } yield {
+      ()
+    }
+  }
 
 
     def replaceCompany(companies: List[CompanyDetails], index: Int, formData: CompanyDetails): List[CompanyDetails] =
