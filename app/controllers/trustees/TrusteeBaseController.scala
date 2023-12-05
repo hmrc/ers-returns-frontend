@@ -29,12 +29,14 @@ import services.TrusteeService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.ERSUtil
+import services.ERSSessionCacheService
 
 import scala.concurrent.{ExecutionContext, Future}
 
 trait TrusteeBaseController[A] extends FrontendController with I18nSupport with Logging {
 
   val ersUtil: ERSUtil
+  val ersSessionCacheService: ERSSessionCacheService
   val trusteeService: TrusteeService
   val authAction: AuthAction
   val globalErrorView: views.html.global_error
@@ -52,7 +54,7 @@ trait TrusteeBaseController[A] extends FrontendController with I18nSupport with 
 
   def questionPage(index: Int): Action[AnyContent] = authAction.async {
     implicit request =>
-      ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
+      ersSessionCacheService.fetch[RequestObject](ersSessionCacheService.ersRequestObject).flatMap { requestObject =>
         showQuestionPage(requestObject, index)
       }
   }
@@ -71,7 +73,7 @@ trait TrusteeBaseController[A] extends FrontendController with I18nSupport with 
 
   def questionSubmit(index: Int): Action[AnyContent] = authAction.async {
     implicit request =>
-      ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
+      ersSessionCacheService.fetch[RequestObject](ersSessionCacheService.ersRequestObject).flatMap { requestObject =>
         handleQuestionSubmit(requestObject, index)(request, hc)
       }
   }
@@ -84,15 +86,15 @@ trait TrusteeBaseController[A] extends FrontendController with I18nSupport with 
       },
       result => {
         if (edit) {
-          ersUtil.fetchTrusteesOptionally(requestObject.getSchemeReference).flatMap { trustees =>
+          ersSessionCacheService.fetchTrusteesOptionally(requestObject.getSchemeReference).flatMap { trustees =>
             val updatedTrustee = trustees.trustees(index).updatePart(result)
             val updatedTrustees = TrusteeDetailsList(trustees.trustees.updated(index, updatedTrustee))
-            ersUtil.cache[TrusteeDetailsList](ersUtil.TRUSTEES_CACHE, updatedTrustees, requestObject.getSchemeReference).flatMap{ _ =>
+            ersSessionCacheService.cache[TrusteeDetailsList](ersSessionCacheService.TRUSTEES_CACHE, updatedTrustees, requestObject.getSchemeReference).flatMap{ _ =>
               nextPageRedirect(index, edit)
             }
           }
         } else {
-          ersUtil.cache[A](cacheKey, result, requestObject.getSchemeReference).flatMap { _ =>
+          ersSessionCacheService.cache[A](cacheKey, result, requestObject.getSchemeReference).flatMap { _ =>
             nextPageRedirect(index, edit)
           }
         }
@@ -106,14 +108,14 @@ trait TrusteeBaseController[A] extends FrontendController with I18nSupport with 
 
   def editQuestion(index: Int): Action[AnyContent] = authAction.async {
     implicit request =>
-      ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
+      ersSessionCacheService.fetch[RequestObject](ersSessionCacheService.ersRequestObject).flatMap { requestObject =>
         showQuestionPage(requestObject, index, edit = true)(request, hc)
       }
   }
 
   def editQuestionSubmit(index: Int): Action[AnyContent] = authAction.async {
     implicit request =>
-      ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
+      ersSessionCacheService.fetch[RequestObject](ersSessionCacheService.ersRequestObject).flatMap { requestObject =>
         handleQuestionSubmit(requestObject, index, edit = true)(request, hc)
       }
   }

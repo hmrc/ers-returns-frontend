@@ -23,7 +23,8 @@ object AppDependencies {
     "com.openhtmltopdf"       %  "openhtmltopdf-core"         % openHtmlVersion,
     "com.openhtmltopdf"       %  "openhtmltopdf-pdfbox"       % openHtmlVersion,
     "com.openhtmltopdf"       %  "openhtmltopdf-svg-support"  % openHtmlVersion,
-    "commons-codec"           %  "commons-codec"              % "1.15"
+    "commons-codec"           %  "commons-codec"              % "1.15",
+    "uk.gov.hmrc.mongo"       %% "hmrc-mongo-play-28"         % "1.3.0",
   )
 
   val test: Seq[ModuleID]      = Seq(
@@ -33,7 +34,8 @@ object AppDependencies {
     "com.vladsch.flexmark"     %  "flexmark-all"            % "0.64.8",
     "org.pegdown"             %  "pegdown"                % "1.6.0",
     "org.jsoup"               %  "jsoup"                  % "1.16.2",
-    "org.wiremock"            % "wiremock-standalone"     % "3.0.2"
+    "org.wiremock"            % "wiremock-standalone"     % "3.0.2",
+    "uk.gov.hmrc.mongo" %% "hmrc-mongo-test-play-28"       % "1.3.0",
   ).map(_ % Test)
 
   val overrides: Seq[ModuleID] = Seq(

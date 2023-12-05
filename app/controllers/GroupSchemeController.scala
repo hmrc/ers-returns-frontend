@@ -27,6 +27,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils._
+import services.ERSSessionCacheService
 import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 
@@ -38,6 +39,7 @@ class GroupSchemeController @Inject() (
   val authConnector: DefaultAuthConnector,
   implicit val countryCodes: CountryCodes,
   implicit val ersUtil: ERSUtil,
+  implicit val ersSessionCacheService: ERSSessionCacheService,
   implicit val appConfig: ApplicationConfig,
   globalErrorView: views.html.global_error,
   groupView: views.html.group,
@@ -58,12 +60,12 @@ class GroupSchemeController @Inject() (
   def showManualCompanyDetailsPage(
     index: Int
   )(implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
-    ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).map { requestObject =>
+    ersSessionCacheService.fetch[RequestObject](ersSessionCacheService.ersRequestObject).map { requestObject =>
       Ok(manualCompanyDetailsView(requestObject, index, RsFormMappings.companyDetailsForm()))
     }
 
   def manualCompanyDetailsSubmit(index: Int): Action[AnyContent] = authAction.async { implicit request =>
-    ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
+    ersSessionCacheService.fetch[RequestObject](ersSessionCacheService.ersRequestObject).flatMap { requestObject =>
       showManualCompanyDetailsSubmit(requestObject, index)(request)
     }
   }
@@ -77,18 +79,18 @@ class GroupSchemeController @Inject() (
       .fold(
         errors => Future(Ok(manualCompanyDetailsView(requestObject, index, errors))),
         successful =>
-          ersUtil.fetch[CompanyDetailsList](ersUtil.GROUP_SCHEME_COMPANIES, requestObject.getSchemeReference).flatMap {
+          ersSessionCacheService.fetch[CompanyDetailsList](ersSessionCacheService.GROUP_SCHEME_COMPANIES, requestObject.getSchemeReference).flatMap {
             cachedCompaniesList =>
               val processedFormData =
                 CompanyDetailsList(replaceCompany(cachedCompaniesList.companies, index, successful))
 
-              ersUtil.cache(ersUtil.GROUP_SCHEME_COMPANIES, processedFormData, requestObject.getSchemeReference).map {
+              ersSessionCacheService.cache(ersSessionCacheService.GROUP_SCHEME_COMPANIES, processedFormData, requestObject.getSchemeReference).map {
                 _ =>
                   Redirect(routes.GroupSchemeController.groupPlanSummaryPage())
               }
           } recoverWith { case _: NoSuchElementException =>
             val companiesList = CompanyDetailsList(List(successful))
-            ersUtil.cache(ersUtil.GROUP_SCHEME_COMPANIES, companiesList, requestObject.getSchemeReference).map { _ =>
+            ersSessionCacheService.cache(ersSessionCacheService.GROUP_SCHEME_COMPANIES, companiesList, requestObject.getSchemeReference).map { _ =>
               Redirect(routes.GroupSchemeController.groupPlanSummaryPage())
             }
           }
@@ -111,13 +113,13 @@ class GroupSchemeController @Inject() (
     id: Int
   )(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] =
     (for {
-      requestObject <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
-      all           <- ersUtil.fetchAll(requestObject.getSchemeReference)
+      requestObject <- ersSessionCacheService.fetch[RequestObject](ersSessionCacheService.ersRequestObject)
+      all           <- ersSessionCacheService.fetchAll(requestObject.getSchemeReference)
 
-      companies          = all.getEntry[CompanyDetailsList](ersUtil.GROUP_SCHEME_COMPANIES).getOrElse(CompanyDetailsList(Nil))
+      companies          = all.getEntry[CompanyDetailsList](ersSessionCacheService.GROUP_SCHEME_COMPANIES).getOrElse(CompanyDetailsList(Nil))
       companyDetailsList = CompanyDetailsList(filterDeletedCompany(companies, id))
 
-      _ <- ersUtil.cache(ersUtil.GROUP_SCHEME_COMPANIES, companyDetailsList, requestObject.getSchemeReference)
+      _ <- ersSessionCacheService.cache(ersSessionCacheService.GROUP_SCHEME_COMPANIES, companyDetailsList, requestObject.getSchemeReference)
     } yield Redirect(routes.GroupSchemeController.groupPlanSummaryPage())) recover { case e: Exception =>
       logger.error(
         s"[GroupSchemeController][showDeleteCompany] Fetch all data failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}."
@@ -136,10 +138,10 @@ class GroupSchemeController @Inject() (
     id: Int
   )(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] =
     (for {
-      requestObject <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
-      all           <- ersUtil.fetchAll(requestObject.getSchemeReference)
+      requestObject <- ersSessionCacheService.fetch[RequestObject](ersSessionCacheService.ersRequestObject)
+      all           <- ersSessionCacheService.fetchAll(requestObject.getSchemeReference)
 
-      companies      = all.getEntry[CompanyDetailsList](ersUtil.GROUP_SCHEME_COMPANIES).getOrElse(CompanyDetailsList(Nil))
+      companies      = all.getEntry[CompanyDetailsList](ersSessionCacheService.GROUP_SCHEME_COMPANIES).getOrElse(CompanyDetailsList(Nil))
       companyDetails = companies.companies(id)
 
     } yield Ok(
@@ -152,7 +154,7 @@ class GroupSchemeController @Inject() (
     }
 
   def groupSchemePage(): Action[AnyContent] = authAction.async { implicit request =>
-    ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
+    ersSessionCacheService.fetch[RequestObject](ersSessionCacheService.ersRequestObject).flatMap { requestObject =>
       showGroupSchemePage(requestObject)(request, hc)
     }
   }
@@ -160,7 +162,7 @@ class GroupSchemeController @Inject() (
   def showGroupSchemePage(
     requestObject: RequestObject
   )(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] =
-    ersUtil.fetch[GroupSchemeInfo](ersUtil.GROUP_SCHEME_CACHE_CONTROLLER, requestObject.getSchemeReference).map {
+    ersSessionCacheService.fetch[GroupSchemeInfo](ersSessionCacheService.GROUP_SCHEME_CACHE_CONTROLLER, requestObject.getSchemeReference).map {
       groupSchemeInfo =>
         Ok(
           groupView(
@@ -170,12 +172,12 @@ class GroupSchemeController @Inject() (
           )
         )
     } recover { case _: Exception =>
-      val form = RS_groupScheme(Some(ersUtil.DEFAULT))
-      Ok(groupView(requestObject, Some(ersUtil.DEFAULT), RsFormMappings.groupForm().fill(form)))
+      val form = RS_groupScheme(Some(ersSessionCacheService.DEFAULT))
+      Ok(groupView(requestObject, Some(ersSessionCacheService.DEFAULT), RsFormMappings.groupForm().fill(form)))
     }
 
   def groupSchemeSelected(scheme: String): Action[AnyContent] = authAction.async { implicit request =>
-    ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
+    ersSessionCacheService.fetch[RequestObject](ersSessionCacheService.ersRequestObject).flatMap { requestObject =>
       showGroupSchemeSelected(requestObject, scheme)(request)
     }
   }
@@ -199,21 +201,21 @@ class GroupSchemeController @Inject() (
           val gsc: GroupSchemeInfo =
             GroupSchemeInfo(
               Some(formData.groupScheme.getOrElse("")),
-              if (formData.groupScheme.contains(ersUtil.OPTION_YES)) Some(ersUtil.OPTION_MANUAL) else None
+              if (formData.groupScheme.contains(ersSessionCacheService.OPTION_YES)) Some(ersSessionCacheService.OPTION_MANUAL) else None
             )
 
-          ersUtil.cache(ersUtil.GROUP_SCHEME_CACHE_CONTROLLER, gsc, requestObject.getSchemeReference).map { _ =>
+          ersSessionCacheService.cache(ersSessionCacheService.GROUP_SCHEME_CACHE_CONTROLLER, gsc, requestObject.getSchemeReference).map { _ =>
             (requestObject.getSchemeId, formData.groupScheme) match {
 
-              case (_, Some(ersUtil.OPTION_YES)) => Redirect(routes.GroupSchemeController.manualCompanyDetailsPage())
+              case (_, Some(ersSessionCacheService.OPTION_YES)) => Redirect(routes.GroupSchemeController.manualCompanyDetailsPage())
 
-              case (ersUtil.SCHEME_CSOP | ersUtil.SCHEME_SAYE, _) =>
+              case (ersSessionCacheService.SCHEME_CSOP | ersSessionCacheService.SCHEME_SAYE, _) =>
                 Redirect(routes.AltAmendsController.altActivityPage())
 
-              case (ersUtil.SCHEME_EMI | ersUtil.SCHEME_OTHER, _) =>
+              case (ersSessionCacheService.SCHEME_EMI | ersSessionCacheService.SCHEME_OTHER, _) =>
                 Redirect(routes.SummaryDeclarationController.summaryDeclarationPage())
 
-            case (ersUtil.SCHEME_SIP, _) => Redirect(controllers.trustees.routes.TrusteeSummaryController.trusteeSummaryPage())
+            case (ersSessionCacheService.SCHEME_SIP, _) => Redirect(controllers.trustees.routes.TrusteeSummaryController.trusteeSummaryPage())
 
               case (_, _) => getGlobalErrorPage
             }
@@ -230,9 +232,9 @@ class GroupSchemeController @Inject() (
     hc: HeaderCarrier
   ): Future[Result] =
     (for {
-      requestObject <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
-      compDetails   <- ersUtil.fetch[CompanyDetailsList](ersUtil.GROUP_SCHEME_COMPANIES, requestObject.getSchemeReference)
-    } yield Ok(groupPlanSummaryView(requestObject, ersUtil.OPTION_MANUAL, compDetails))) recover { case e: Exception =>
+      requestObject <- ersSessionCacheService.fetch[RequestObject](ersSessionCacheService.ersRequestObject)
+      compDetails   <- ersSessionCacheService.fetch[CompanyDetailsList](ersSessionCacheService.GROUP_SCHEME_COMPANIES, requestObject.getSchemeReference)
+    } yield Ok(groupPlanSummaryView(requestObject, ersSessionCacheService.OPTION_MANUAL, compDetails))) recover { case e: Exception =>
       logger.error(
         s"[GroupSchemeController][showGroupPlanSummaryPage]Fetch group scheme companies before call to group plan summary page failed with exception ${e.getMessage}, " +
           s"timestamp: ${System.currentTimeMillis()}."
@@ -246,13 +248,13 @@ class GroupSchemeController @Inject() (
 
   def continueFromGroupPlanSummaryPage(scheme: String): Future[Result] =
     scheme match {
-      case ersUtil.SCHEME_CSOP | ersUtil.SCHEME_SAYE =>
+      case ersSessionCacheService.SCHEME_CSOP | ersSessionCacheService.SCHEME_SAYE =>
         Future(Redirect(routes.AltAmendsController.altActivityPage()))
 
-      case ersUtil.SCHEME_EMI | ersUtil.SCHEME_OTHER =>
+      case ersSessionCacheService.SCHEME_EMI | ersSessionCacheService.SCHEME_OTHER =>
         Future(Redirect(routes.SummaryDeclarationController.summaryDeclarationPage()))
 
-      case ersUtil.SCHEME_SIP =>
+      case ersSessionCacheService.SCHEME_SIP =>
         Future(Redirect(trustees.routes.TrusteeSummaryController.trusteeSummaryPage()))
 
     }

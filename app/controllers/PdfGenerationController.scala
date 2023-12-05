@@ -28,6 +28,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.ERSUtil
+import services.ERSSessionCacheService
 
 import javax.inject.{Inject, Singleton}
 
@@ -40,6 +41,7 @@ class PdfGenerationController @Inject() (
   val authConnector: DefaultAuthConnector,
   val pdfBuilderService: ErsReceiptPdfBuilderService,
   implicit val ersUtil: ERSUtil,
+  implicit val ersSessionCacheService: ERSSessionCacheService,
   implicit val appConfig: ApplicationConfig,
   globalErrorView: views.html.global_error,
   authAction: AuthAction
@@ -51,7 +53,7 @@ class PdfGenerationController @Inject() (
 
   def buildPdfForBundle(bundle: String, dateSubmitted: String): Action[AnyContent] = authAction.async {
     implicit request =>
-      ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
+      ersSessionCacheService.fetch[RequestObject](ersSessionCacheService.ersRequestObject).flatMap { requestObject =>
         generatePdf(requestObject, bundle, dateSubmitted)
       }
   }
@@ -62,7 +64,7 @@ class PdfGenerationController @Inject() (
   ): Future[Result] = {
 
     logger.debug("getting into the controller to generate the pdf")
-    val cache: Future[ErsMetaData] = ersUtil.fetch[ErsMetaData](ersUtil.ersMetaData, requestObject.getSchemeReference)
+    val cache: Future[ErsMetaData] = ersSessionCacheService.fetch[ErsMetaData](ersSessionCacheService.ersMetaData, requestObject.getSchemeReference)
     cache.flatMap { all =>
       logger.debug("pdf generation: got the metadata")
       ersUtil
@@ -70,21 +72,21 @@ class PdfGenerationController @Inject() (
         .flatMap { alldata =>
           logger.debug("pdf generation: got the cache map")
 
-          ersUtil.fetchAll(requestObject.getSchemeReference).map { all =>
+          ersSessionCacheService.fetchAll(requestObject.getSchemeReference).map { all =>
             val filesUploaded: ListBuffer[String] = ListBuffer()
             if (
               all
-                .getEntry[ReportableEvents](ersUtil.reportableEvents)
+                .getEntry[ReportableEvents](ersSessionCacheService.reportableEvents)
                 .get
                 .isNilReturn
-                .get == ersUtil.OPTION_UPLOAD_SPREEDSHEET
+                .get == ersSessionCacheService.OPTION_UPLOAD_SPREEDSHEET
             ) {
-              val fileType = all.getEntry[CheckFileType](ersUtil.FILE_TYPE_CACHE).get.checkFileType.get
-              if (fileType == ersUtil.OPTION_CSV) {
+              val fileType = all.getEntry[CheckFileType](ersSessionCacheService.FILE_TYPE_CACHE).get.checkFileType.get
+              if (fileType == ersSessionCacheService.OPTION_CSV) {
                 val csvCallback                                    = all
-                  .getEntry[UpscanCsvFilesCallbackList](ersUtil.CHECK_CSV_FILES)
+                  .getEntry[UpscanCsvFilesCallbackList](ersSessionCacheService.CHECK_CSV_FILES)
                   .getOrElse(
-                    throw new Exception(s"Cache data missing for key: ${ersUtil.CHECK_CSV_FILES} in CacheMap")
+                    throw new Exception(s"Cache data missing for key: ${ersSessionCacheService.CHECK_CSV_FILES} in CacheMap")
                   )
                 val csvFilesCallback: List[UpscanCsvFilesCallback] = if (csvCallback.areAllFilesSuccessful()) {
                   csvCallback.files.collect {
@@ -95,10 +97,10 @@ class PdfGenerationController @Inject() (
                 }
 
                 for (file <- csvFilesCallback)
-                  filesUploaded += ersUtil
-                    .getPageElement(requestObject.getSchemeId, ersUtil.PAGE_CHECK_CSV_FILE, file.fileId + ".file_name")
+                  filesUploaded += ersSessionCacheService
+                    .getPageElement(requestObject.getSchemeId, ersSessionCacheService.PAGE_CHECK_CSV_FILE, file.fileId + ".file_name")
               } else {
-                filesUploaded += all.getEntry[String](ersUtil.FILE_NAME_CACHE).get
+                filesUploaded += all.getEntry[String](ersSessionCacheService.FILE_NAME_CACHE).get
               }
             }
             val pdf                               = pdfBuilderService.createPdf(alldata, Some(filesUploaded), dateSubmitted).toByteArray

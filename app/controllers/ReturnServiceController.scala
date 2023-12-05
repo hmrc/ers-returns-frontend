@@ -28,6 +28,7 @@ import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.SessionKeys.{BUNDLE_REF, DATE_TIME_SUBMITTED}
 import utils._
+import services.ERSSessionCacheService
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
@@ -37,6 +38,7 @@ class ReturnServiceController @Inject() (
   val mcc: MessagesControllerComponents,
   val authConnector: DefaultAuthConnector,
   implicit val ersUtil: ERSUtil,
+  implicit val ersSessionCacheService: ERSSessionCacheService,
   implicit val appConfig: ApplicationConfig,
   globalErrorView: views.html.global_error,
   unauthorisedView: views.html.unauthorised,
@@ -55,9 +57,9 @@ class ReturnServiceController @Inject() (
     implicit val formatRSParams: OFormat[RequestObject] = Json.format[RequestObject]
     logger.debug("Request Object created --> " + ersRequestObject)
     val futureResult = for {
-      _ <- ersUtil.remove(ersRequestObject.getSchemeReference)
-      _ <- ersUtil.cache(ersUtil.ersMetaData, ersRequestObject.toErsMetaData, ersRequestObject.getSchemeReference)
-      _ <- ersUtil.cache(ersUtil.ersRequestObject, ersRequestObject)
+      _ <- ersSessionCacheService.remove(ersRequestObject.getSchemeReference)
+      _ <- ersSessionCacheService.cache(ersSessionCacheService.ersMetaData, ersRequestObject.toErsMetaData, ersRequestObject.getSchemeReference)
+      _ <- ersSessionCacheService.cache(ersSessionCacheService.ersRequestObject, ersRequestObject)
     } yield {
       logger.info(s"[ReturnServiceController][cacheParams]Meta Data Cached --> ${ersRequestObject.toErsMetaData}")
       logger.info(s"[ReturnServiceController][cacheParams] Request Object Cached -->  $ersRequestObject")
@@ -90,7 +92,7 @@ class ReturnServiceController @Inject() (
       logger.warn("[ReturnServiceController][hmacCheck] Missing SchemeRef in URL")
       Future(getGlobalErrorPage)
     } else {
-      if (ersUtil.isHmacAndTimestampValid(getRequestParameters(request))) {
+      if (ersSessionCacheService.isHmacAndTimestampValid(getRequestParameters(request))) {
         logger.info("[ReturnServiceController][hmacCheck] HMAC Check Valid")
         try cacheParams(getRequestParameters(request))
         catch {
@@ -113,7 +115,7 @@ class ReturnServiceController @Inject() (
   }
 
   def startPage(): Action[AnyContent] = authActionGovGateway.async { implicit request =>
-    ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).map { result =>
+    ersSessionCacheService.fetch[RequestObject](ersSessionCacheService.ersRequestObject).map { result =>
       Ok(startView(result)).withSession(request.session - BUNDLE_REF - DATE_TIME_SUBMITTED)
     }
   }

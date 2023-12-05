@@ -20,11 +20,13 @@ import javax.inject.Inject
 import models.{RequestObject, TrusteeAddress, TrusteeDetails, TrusteeDetailsList, TrusteeName}
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.ERSUtil
+import services.ERSSessionCacheService
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class TrusteeService @Inject()(
-                              ersUtil: ERSUtil
+                              ersUtil: ERSUtil,
+                              ersSessionCacheService : ERSSessionCacheService
                               )(implicit ec: ExecutionContext) {
 
   def updateTrusteeCache(index: Int)(implicit hc: HeaderCarrier): Future[Unit] = {

@@ -26,6 +26,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.ERSUtil
+import services.ERSSessionCacheService
 import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 
@@ -36,6 +37,7 @@ class AltAmendsController @Inject() (
   val mcc: MessagesControllerComponents,
   val authConnector: DefaultAuthConnector,
   implicit val ersUtil: ERSUtil,
+  implicit val ersSessionCacheService: ERSSessionCacheService,
   implicit val appConfig: ApplicationConfig,
   alterationsActivityView: views.html.alterations_activity,
   alterationsAmendsView: views.html.alterations_amends,
@@ -57,18 +59,18 @@ class AltAmendsController @Inject() (
     hc: HeaderCarrier
   ): Future[Result] =
     (for {
-      requestObject     <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
+      requestObject     <- ersSessionCacheService.fetch[RequestObject](ersSessionCacheService.ersRequestObject)
       groupSchemeInfo   <-
-        ersUtil.fetch[GroupSchemeInfo](ersUtil.GROUP_SCHEME_CACHE_CONTROLLER, requestObject.getSchemeReference)
+        ersSessionCacheService.fetch[GroupSchemeInfo](ersSessionCacheService.GROUP_SCHEME_CACHE_CONTROLLER, requestObject.getSchemeReference)
       altAmendsActivity <-
-        ersUtil.fetch[AltAmendsActivity](ersUtil.altAmendsActivity, requestObject.getSchemeReference).recover {
+        ersSessionCacheService.fetch[AltAmendsActivity](ersSessionCacheService.altAmendsActivity, requestObject.getSchemeReference).recover {
           case _: NoSuchElementException => AltAmendsActivity("")
         }
     } yield Ok(
       alterationsActivityView(
         requestObject,
         altAmendsActivity.altActivity,
-        groupSchemeInfo.groupScheme.getOrElse(ersUtil.DEFAULT),
+        groupSchemeInfo.groupScheme.getOrElse(ersSessionCacheService.DEFAULT),
         RsFormMappings.altActivityForm().fill(altAmendsActivity)
       )
     )).recover { case e: Exception =>
@@ -87,19 +89,19 @@ class AltAmendsController @Inject() (
     request: RequestWithOptionalAuthContext[AnyContent],
     hc: HeaderCarrier
   ): Future[Result] =
-    ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
+    ersSessionCacheService.fetch[RequestObject](ersSessionCacheService.ersRequestObject).flatMap { requestObject =>
       RsFormMappings
         .altActivityForm()
         .bindFromRequest()
         .fold(
           errors => Future.successful(Ok(alterationsActivityView(requestObject, "", "", errors))),
           formData =>
-            ersUtil
-              .cache(ersUtil.altAmendsActivity, formData, requestObject.getSchemeReference)
+            ersSessionCacheService
+              .cache(ersSessionCacheService.altAmendsActivity, formData, requestObject.getSchemeReference)
               .map { _ =>
                 formData.altActivity match {
-                  case ersUtil.OPTION_NO  => Redirect(routes.SummaryDeclarationController.summaryDeclarationPage())
-                  case ersUtil.OPTION_YES => Redirect(routes.AltAmendsController.altAmendsPage())
+                  case ersSessionCacheService.OPTION_NO  => Redirect(routes.SummaryDeclarationController.summaryDeclarationPage())
+                  case ersSessionCacheService.OPTION_YES => Redirect(routes.AltAmendsController.altAmendsPage())
                 }
               }
               .recover { case e: Throwable =>
@@ -120,9 +122,9 @@ class AltAmendsController @Inject() (
     hc: HeaderCarrier
   ): Future[Result] =
     for {
-      requestObject <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
+      requestObject <- ersSessionCacheService.fetch[RequestObject](ersSessionCacheService.ersRequestObject)
       altAmends     <-
-        ersUtil.fetchOption[AltAmends](ersUtil.ALT_AMENDS_CACHE_CONTROLLER, requestObject.getSchemeReference).recover {
+        ersSessionCacheService.fetchOption[AltAmends](ersSessionCacheService.ALT_AMENDS_CACHE_CONTROLLER, requestObject.getSchemeReference).recover {
           case _: Throwable => None
         }
     } yield Ok(alterationsAmendsView(requestObject, altAmends.getOrElse(AltAmends(None, None, None, None, None))))
@@ -135,7 +137,7 @@ class AltAmendsController @Inject() (
     request: RequestWithOptionalAuthContext[AnyContent],
     hc: HeaderCarrier
   ): Future[Result] =
-    ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
+    ersSessionCacheService.fetch[RequestObject](ersSessionCacheService.ersRequestObject).flatMap { requestObject =>
       RsFormMappings
         .altAmendsForm()
         .bindFromRequest()
@@ -144,12 +146,12 @@ class AltAmendsController @Inject() (
             Future.successful(
               Redirect(routes.AltAmendsController.altAmendsPage())
                 .flashing(
-                  "alt-amends-not-selected-error" -> ersUtil
-                    .getPageElement(requestObject.getSchemeId, ersUtil.PAGE_ALT_AMENDS, "err.message")
+                  "alt-amends-not-selected-error" -> ersSessionCacheService
+                    .getPageElement(requestObject.getSchemeId, ersSessionCacheService.PAGE_ALT_AMENDS, "err.message")
                 )
             ),
           formData =>
-            ersUtil.cache(ersUtil.ALT_AMENDS_CACHE_CONTROLLER, formData, requestObject.getSchemeReference).flatMap {
+            ersSessionCacheService.cache(ersSessionCacheService.ALT_AMENDS_CACHE_CONTROLLER, formData, requestObject.getSchemeReference).flatMap {
               _ =>
                 if (
                   formData.altAmendsTerms.isEmpty
@@ -161,8 +163,8 @@ class AltAmendsController @Inject() (
                   Future.successful(
                     Redirect(routes.AltAmendsController.altAmendsPage())
                       .flashing(
-                        "alt-amends-not-selected-error" -> ersUtil
-                          .getPageElement(requestObject.getSchemeId, ersUtil.PAGE_ALT_AMENDS, "err.message")
+                        "alt-amends-not-selected-error" -> ersSessionCacheService
+                          .getPageElement(requestObject.getSchemeId, ersSessionCacheService.PAGE_ALT_AMENDS, "err.message")
                       )
                   )
                 } else {

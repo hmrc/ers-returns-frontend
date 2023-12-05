@@ -27,6 +27,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils._
+import services.ERSSessionCacheService
 import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 
@@ -38,6 +39,7 @@ class SchemeOrganiserController @Inject()(
                                            val authConnector: DefaultAuthConnector,
                                            implicit val countryCodes: CountryCodes,
                                            implicit val ersUtil: ERSUtil,
+                                           implicit val ersSessionCacheService: ERSSessionCacheService,
                                            implicit val appConfig: ApplicationConfig,
                                            globalErrorView: views.html.global_error,
                                            schemeOrganiserView: views.html.scheme_organiser,
@@ -50,7 +52,7 @@ class SchemeOrganiserController @Inject()(
   implicit val ec: ExecutionContext = mcc.executionContext
 
   def schemeOrganiserPage(): Action[AnyContent] = authAction.async { implicit request =>
-    ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
+    ersSessionCacheService.fetch[RequestObject](ersSessionCacheService.ersRequestObject).flatMap { requestObject =>
       showSchemeOrganiserPage(requestObject)(request, hc)
     }
   }
@@ -65,18 +67,18 @@ class SchemeOrganiserController @Inject()(
       Some(""),
       Some(""),
       Some(""),
-      Some(ersUtil.DEFAULT_COUNTRY),
+      Some(ersSessionCacheService.DEFAULT_COUNTRY),
       Some(""),
       Some(""),
       Some("")
     )
 
-    ersUtil.fetch[ReportableEvents](ersUtil.reportableEvents, requestObject.getSchemeReference).flatMap {
+    ersSessionCacheService.fetch[ReportableEvents](ersSessionCacheService.reportableEvents, requestObject.getSchemeReference).flatMap {
       reportableEvent =>
-        ersUtil.fetchOption[CheckFileType](ersUtil.FILE_TYPE_CACHE, requestObject.getSchemeReference).flatMap {
+        ersSessionCacheService.fetchOption[CheckFileType](ersSessionCacheService.FILE_TYPE_CACHE, requestObject.getSchemeReference).flatMap {
           fileType =>
-            ersUtil
-              .fetch[SchemeOrganiserDetails](ersUtil.SCHEME_ORGANISER_CACHE, requestObject.getSchemeReference)
+            ersSessionCacheService
+              .fetch[SchemeOrganiserDetails](ersSessionCacheService.SCHEME_ORGANISER_CACHE, requestObject.getSchemeReference)
               .map { res =>
                 val FileType = if (fileType.isDefined) {
                   fileType.get.checkFileType.get
@@ -120,7 +122,7 @@ class SchemeOrganiserController @Inject()(
   }
 
   def schemeOrganiserSubmit(): Action[AnyContent] = authAction.async { implicit request =>
-    ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
+    ersSessionCacheService.fetch[RequestObject](ersSessionCacheService.ersRequestObject).flatMap { requestObject =>
       showSchemeOrganiserSubmit(requestObject)(request, hc)
     }
   }
@@ -136,7 +138,7 @@ class SchemeOrganiserController @Inject()(
         Future.successful(Ok(schemeOrganiserView(requestObject, "", firstErrors)))
       },
       successful => {
-        ersUtil.cache(ersUtil.SCHEME_ORGANISER_CACHE, successful, requestObject.getSchemeReference).map {
+        ersSessionCacheService.cache(ersSessionCacheService.SCHEME_ORGANISER_CACHE, successful, requestObject.getSchemeReference).map {
           _ => Redirect(routes.GroupSchemeController.groupSchemePage())
         } recover {
           case e: Exception =>

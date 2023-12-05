@@ -33,6 +33,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 import utils.ERSUtil
+import services.ERSSessionCacheService
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
@@ -48,6 +49,7 @@ class AuthAction @Inject() (
   override val authConnector: DefaultAuthConnector,
   appConfig: ApplicationConfig,
   ersUtil: ERSUtil,
+  ersSessionCacheService: ERSSessionCacheService,
   val parser: BodyParsers.Default
 )(implicit val executionContext: ExecutionContext)
     extends AuthorisedFunctions
@@ -106,6 +108,7 @@ class AuthActionGovGateway @Inject() (
   override val authConnector: DefaultAuthConnector,
   appConfig: ApplicationConfig,
   ersUtil: ERSUtil,
+  ersSessionCacheService: ERSSessionCacheService,
   val parser: BodyParsers.Default
 )(implicit val executionContext: ExecutionContext)
     extends AuthorisedFunctions

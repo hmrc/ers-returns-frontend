@@ -27,6 +27,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.ERSUtil
+import services.ERSSessionCacheService
 import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 
@@ -37,6 +38,7 @@ class CheckCsvFilesController @Inject() (
   val mcc: MessagesControllerComponents,
   val authConnector: DefaultAuthConnector,
   implicit val ersUtil: ERSUtil,
+  implicit val ersSessionCacheService: ERSSessionCacheService,
   implicit val appConfig: ApplicationConfig,
   globalErrorView: views.html.global_error,
   checkCsvFileView: views.html.check_csv_file,
@@ -56,12 +58,12 @@ class CheckCsvFilesController @Inject() (
     request: RequestWithOptionalAuthContext[AnyContent],
     hc: HeaderCarrier
   ): Future[Result] = {
-    val requestObjectFuture = ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
-    ersUtil.remove(ersUtil.CSV_FILES_UPLOAD)
+    val requestObjectFuture = ersSessionCacheService.fetch[RequestObject](ersSessionCacheService.ersRequestObject)
+    ersSessionCacheService.remove(ersSessionCacheService.CSV_FILES_UPLOAD)
     (for {
       requestObject <- requestObjectFuture
     } yield {
-      val csvFilesList: List[CsvFiles] = ersUtil.getCsvFilesList(requestObject.getSchemeType)
+      val csvFilesList: List[CsvFiles] = ersSessionCacheService.getCsvFilesList(requestObject.getSchemeType)
       Ok(checkCsvFileView(requestObject, CsvFilesList(csvFilesList)))
     }) recover { case _: Throwable =>
       getGlobalErrorPage
@@ -92,8 +94,8 @@ class CheckCsvFilesController @Inject() (
       reloadWithError()
     } else {
       (for {
-        requestObject <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
-        _             <- ersUtil.cache(ersUtil.CSV_FILES_UPLOAD, csvFilesCallbackList, requestObject.getSchemeReference)
+        requestObject <- ersSessionCacheService.fetch[RequestObject](ersSessionCacheService.ersRequestObject)
+        _             <- ersSessionCacheService.cache(ersSessionCacheService.CSV_FILES_UPLOAD, csvFilesCallbackList, requestObject.getSchemeReference)
       } yield Redirect(routes.CsvFileUploadController.uploadFilePage())).recover { case e: Throwable =>
         logger.error(
           s"[CheckCsvFilesController][performCsvFilesPageSelected] Save data to cache failed with exception ${e.getMessage}.",
@@ -112,7 +114,7 @@ class CheckCsvFilesController @Inject() (
   def reloadWithError()(implicit messages: Messages): Future[Result] =
     Future.successful(
       Redirect(routes.CheckCsvFilesController.checkCsvFilesPage())
-        .flashing("csv-file-not-selected-error" -> messages(ersUtil.PAGE_CHECK_CSV_FILE + ".err.message"))
+        .flashing("csv-file-not-selected-error" -> messages(ersSessionCacheService.PAGE_CHECK_CSV_FILE + ".err.message"))
     )
 
   def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result =

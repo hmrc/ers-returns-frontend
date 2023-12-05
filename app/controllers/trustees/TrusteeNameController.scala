@@ -30,6 +30,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.{CountryCodes, ERSUtil}
+import services.ERSSessionCacheService
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -40,6 +41,7 @@ class TrusteeNameController @Inject()(val mcc: MessagesControllerComponents,
                                       val trusteeService: TrusteeService,
                                       implicit val countryCodes: CountryCodes,
                                       implicit val ersUtil: ERSUtil,
+                                      implicit val ersSessionCacheService: ERSSessionCacheService,
                                       implicit val appConfig: ApplicationConfig,
                                       trusteeNameView: views.html.trustee_name
                                      )
@@ -48,7 +50,7 @@ class TrusteeNameController @Inject()(val mcc: MessagesControllerComponents,
   implicit val ec: ExecutionContext        = mcc.executionContext
   implicit val format: Format[TrusteeName] = TrusteeName.format
 
-  val cacheKey: String = ersUtil.TRUSTEE_NAME_CACHE
+  val cacheKey: String = ersSessionCacheService.TRUSTEE_NAME_CACHE
 
   def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier): Future[Result] = {
     if (edit) {
