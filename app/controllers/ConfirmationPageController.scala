@@ -79,7 +79,7 @@ class ConfirmationPageController @Inject() (
             "EOY-RETURN"
           )
           ersConnector.connectToEtmpSummarySubmit(all.sapNumber.get, submissionJson).flatMap { bundle =>
-            ersUtil.getAllData(bundle, all).flatMap { alldata =>
+            ersSessionCacheService.getAllData(bundle, all).flatMap { alldata =>
               if (alldata.isNilReturn == ersSessionCacheService.OPTION_NIL_RETURN) {
                 saveAndSubmit(alldata, all, bundle)
               } else {

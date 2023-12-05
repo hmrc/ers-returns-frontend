@@ -21,7 +21,7 @@ import models.cache.CacheMap
 import org.mongodb.scala.model.{Filters, FindOneAndUpdateOptions, ReturnDocument, Updates}
 import play.api.libs.json.Writes
 import play.api.mvc.Request
-import uk.gov.hmrc.http.SessionKeys
+import uk.gov.hmrc.http.{HeaderCarrier, SessionKeys}
 import uk.gov.hmrc.mongo.cache.{DataKey, SessionCacheRepository}
 import uk.gov.hmrc.mongo.play.json.Codecs
 import uk.gov.hmrc.mongo.{MongoComponent, TimestampSupport}
@@ -44,26 +44,9 @@ class ERSSessionCacheRepository @Inject()(mongoComponent: MongoComponent,
 )(ec) {
 
   def putInSession[T: Writes](dataKey: DataKey[T], data: T)
-                             (implicit request: Request[Any], ec: ExecutionContext): Future[CacheMap] = {
+                             (implicit request: Request[_], ec: ExecutionContext, hc: HeaderCarrier): Future[CacheMap] = {
     cacheRepo
       .put[T](request)(dataKey, data)
-      .map(res => CacheMap(res.id, res.data.value.toMap))
-  }
-
-  def upsert[T: Writes](dataKey: DataKey[T], data: T, sessionId: String): Future[CacheMap] = {
-    cacheRepo
-      .collection
-      .findOneAndUpdate(
-        filter = Filters.equal("_id", sessionId),
-        update = Updates.combine(
-          Updates.set("data." + dataKey.unwrap, Codecs.toBson(data)),
-          Updates.set("modifiedDetails.lastUpdated", timestampSupport.timestamp()),
-          Updates.setOnInsert("_id", sessionId),
-          Updates.setOnInsert("modifiedDetails.createdAt", timestampSupport.timestamp())
-        ),
-        options = FindOneAndUpdateOptions().upsert(true).returnDocument(ReturnDocument.AFTER)
-      )
-      .toFuture()
       .map(res => CacheMap(res.id, res.data.value.toMap))
   }
 
