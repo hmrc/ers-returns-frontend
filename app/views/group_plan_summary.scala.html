@@ -157,13 +157,10 @@
 				}
 			))
 
-         <p class="govuk-body govuk-!-margin-bottom-8 govuk-link">
-	         <a class="govuk-link" href="">
-		       <input class="govuk-link link_button" type="submit" formaction="@routes.GroupSchemeController.deleteCompany(index)" value='@{messages("ers.delete") + " " + company.companyName}'>
-	         </a>
-         </p>
-
-		 }
+		<p class="govuk-body govuk-!-margin-bottom-8 govuk-link">
+			<input class="govuk-link link_button" type="submit" formaction="@routes.GroupSchemeController.deleteCompany(index)" value='@{messages("ers.delete") + " " + company.companyName}'>
+		</p>
+		}
 
 		<a class="govuk-link govuk-inset-text govuk-!-display-inline-block govuk-!-margin-top-0 govuk-!-width-full"
 		   href=@routes.GroupSchemeController.manualCompanyDetailsPage()>

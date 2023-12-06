@@ -1,10 +1,24 @@
 .link_button {
-  background: inherit;
-  border: inherit;
-  font-size: inherit;
-  padding: inherit;
-  color: inherit;
-  cursor: inherit;
+    background: inherit;
+    border: inherit;
+    font-size: inherit;
+    padding: inherit;
+    color: #1d70b8;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.link_button:hover,
+.link_button:focus {
+    color: #003078;
+}
+
+.link_button:visited {
+    color: #4c2c92;
+}
+
+.link_button:active {
+    color: #0b0c0c;
 }
 
 .spinner {

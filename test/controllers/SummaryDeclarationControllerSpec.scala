@@ -160,7 +160,7 @@ class SummaryDeclarationControllerSpec
             "ErsMetaData"
           )
           val addList      =
-            Map("check-file-type" -> Json.toJson(fileTypeCSV), "check-csv-files" -> Json.toJson(csvFilesCallbackList))
+            Map("check-file-type" -> Json.toJson(fileTypeCSV), "check-csv-files" -> Json.toJson(this.csvFilesCallbackList))
           val data         = commonAllDataMap.view.filterKeys(findList.contains(_)).toMap ++ addList
           val cm: CacheMap = new CacheMap("id1", data)
           Future.successful(cm)
@@ -168,7 +168,7 @@ class SummaryDeclarationControllerSpec
           val findList     =
             Seq("scheme-organiser", "group-scheme-companies", "trustees", "ReportableEvents", "ErsMetaData")
           val addList      =
-            Map("check-file-type" -> Json.toJson(fileTypeCSV), "check-csv-files" -> Json.toJson(csvFilesCallbackList))
+            Map("check-file-type" -> Json.toJson(fileTypeCSV), "check-csv-files" -> Json.toJson(this.csvFilesCallbackList))
           val data         = commonAllDataMap.view.filterKeys(findList.contains(_)).toMap ++ addList
           val cm: CacheMap = new CacheMap("id1", data)
           Future.successful(cm)
@@ -195,7 +195,7 @@ class SummaryDeclarationControllerSpec
           val addList                            = Map(
             "ReportableEvents" -> Json.toJson(reportableEvents),
             "check-file-type"  -> Json.toJson(fileType),
-            "check-csv-files"  -> Json.toJson(csvFilesCallbackList)
+            "check-csv-files"  -> Json.toJson(this.csvFilesCallbackList)
           )
           val data                               = commonAllDataMap.view.filterKeys(findList.contains(_)).toMap ++ addList
           val cm: CacheMap                       = new CacheMap("id1", data)
@@ -208,7 +208,7 @@ class SummaryDeclarationControllerSpec
           val addList                            = Map(
             "ReportableEvents" -> Json.toJson(reportableEvents),
             "check-file-type"  -> Json.toJson(fileType),
-            "check-csv-files"  -> Json.toJson(csvFilesCallbackList)
+            "check-csv-files"  -> Json.toJson(this.csvFilesCallbackList)
           )
           val data                               = commonAllDataMap.view.filterKeys(findList.contains(_)).toMap ++ addList
           val cm: CacheMap                       = new CacheMap("id1", data)
@@ -221,7 +221,7 @@ class SummaryDeclarationControllerSpec
           val addList                            = Map(
             "ReportableEvents" -> Json.toJson(reportableEvents),
             "check-file-type"  -> Json.toJson(fileType),
-            "check-csv-files"  -> Json.toJson(csvFilesCallbackList),
+            "check-csv-files"  -> Json.toJson(this.csvFilesCallbackList),
             "file-name"        -> Json.toJson(fileNameODS)
           )
           val data                               = commonAllDataMap.view.filterKeys(findList.contains(_)).toMap ++ addList
