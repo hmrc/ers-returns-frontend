@@ -33,8 +33,8 @@ POST        /choose-csv-files                                controllers.CheckCs
 GET 		/group-scheme   			                    controllers.GroupSchemeController.groupSchemePage()
 POST 		/group-scheme   				                controllers.GroupSchemeController.groupSchemeSelected(scheme: String)
 
-GET 		/subsidiary-company-summary	                    controllers.GroupSchemeController.groupPlanSummaryPage()
-POST 		/subsidiary-company-summary		                controllers.GroupSchemeController.groupPlanSummaryContinue(scheme: String)
+GET 		/scheme-organiser-summary	                    controllers.GroupSchemeController.groupPlanSummaryPage()
+POST 		/scheme-organiser-summary		                controllers.GroupSchemeController.groupPlanSummaryContinue(scheme: String)
 
 GET         /choose-file-type				                controllers.CheckFileTypeController.checkFileTypePage()
 POST        /choose-file-type				                controllers.CheckFileTypeController.checkFileTypeSelected()
@@ -123,9 +123,9 @@ POST        /company-details-overseas/:index/edit           controllers.schemeOr
 GET 		/company-details  		                        controllers.schemeOrganiser.SchemeOrganiserController.schemeOrganiserPage()
 POST 		/company-details 			                    controllers.schemeOrganiser.SchemeOrganiserController.schemeOrganiserSubmit()
 
-GET 		/add-subsidiary-company   		        		controllers.GroupSchemeController.manualCompanyDetailsPage(index: Int = 10000)
-POST 		/add-subsidiary-company/:index/delete       	controllers.GroupSchemeController.deleteCompany(index: Int)
-POST 		/add-subsidiary-company       					controllers.GroupSchemeController.companySummaryContinue()
+GET 		/subsidiary-company-summary   		        	controllers.GroupSchemeController.manualCompanyDetailsPage(index: Int = 10000)
+POST 		/subsidiary-company-summary/:index/delete      	controllers.GroupSchemeController.deleteCompany(index: Int)
+POST 		/subsidiary-company-summary      				controllers.GroupSchemeController.companySummaryContinue()
 
 
 GET 		/annual-return-summary		                    controllers.SummaryDeclarationController.summaryDeclarationPage()

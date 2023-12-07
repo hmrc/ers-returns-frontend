@@ -45,7 +45,7 @@
 	))
 
 	@hmrcPageHeading(PageHeading(
-		text = ersUtil.getPageElement(schemeId, ersUtil.PAGE_GROUP_SUMMARY, "title")
+		text = ersUtil.getPageElement(schemeId, ersUtil.PAGE_SCHEME_ORGANISER, "title")
 	))
 
 	@formWithCSRF(action = routes.GroupSchemeController.groupPlanSummaryContinue(schemeId)) {
@@ -168,18 +168,7 @@
 				}
 			))
 
-         <p class="govuk-body govuk-!-margin-bottom-8 govuk-link">
-	         <a class="govuk-link" href="">
-		       <input class="govuk-link link_button" type="submit" formaction="@routes.GroupSchemeController.deleteCompany(index)" value='@{messages("ers.delete") + " " + company.companyName}'>
-	         </a>
-         </p>
-
 		 }
-
-		<a class="govuk-link govuk-inset-text govuk-!-display-inline-block govuk-!-margin-top-0 govuk-!-width-full"
-		   href=@routes.GroupSchemeController.manualCompanyDetailsPage()>
-			@ersUtil.addCompanyMessage(messages, requestObject.schemeType)
-		</a>
 
 		@govukButton(Button(
 			inputType = Some("submit"),

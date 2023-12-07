@@ -55,10 +55,10 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
   def showManualCompanyDetailsPage(index: Int)(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
     (for {
       requestObject      <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
-      companyDetailsList <- ersUtil.fetch[CompanyDetailsList](ersUtil.SUBSIDIARY_COMPANIES_CACHE, requestObject.getSchemeReference)
+      subsidiaryDetailsList <- ersUtil.fetch[CompanyDetailsList](ersUtil.SUBSIDIARY_COMPANIES_CACHE, requestObject.getSchemeReference)
     } yield {
-      println(companyDetailsList)
-      Ok(manualCompanyDetailsView(requestObject, index, companyDetailsList))
+      println(subsidiaryDetailsList)
+      Ok(manualCompanyDetailsView(requestObject, index, subsidiaryDetailsList))
     }) recover {
       case e: Exception =>
         logger.error(s"[GroupSchemeController][showManualCompanyDetailsPage] Get data from cache failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
@@ -94,15 +94,6 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
 
   private def filterDeletedCompany(companyList: CompanyDetailsList, id: Int): List[CompanyDetails] =
     companyList.companies.zipWithIndex.filterNot(_._2 == id).map(_._1)
-
-
-
-
-
-
-
-
-
 
 
 
@@ -192,7 +183,7 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
   ): Future[Result] =
     (for {
       requestObject <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
-      compDetails   <- ersUtil.fetch[CompanyDetailsList](ersUtil.GROUP_SCHEME_COMPANIES, requestObject.getSchemeReference)
+      compDetails   <- ersUtil.fetch[CompanyDetailsList](ersUtil.SCHEME_ORGANISER_CACHE, requestObject.getSchemeReference)
     } yield Ok(groupPlanSummaryView(requestObject, ersUtil.OPTION_MANUAL, compDetails))) recover { case e: Exception =>
       logger.error(
         s"[GroupSchemeController][showGroupPlanSummaryPage]Fetch group scheme companies before call to group plan summary page failed with exception ${e.getMessage}, " +

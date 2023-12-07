@@ -55,10 +55,10 @@ class SchemeOrganiserAddressUKController @Inject()(val mcc: MessagesControllerCo
 
   def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier): Future[Result] = {
     if (edit) {
-      Future.successful(Redirect(controllers.routes.GroupSchemeController.groupSchemePage()))
+      Future.successful(Redirect(controllers.routes.GroupSchemeController.groupPlanSummaryPage()))
     } else {
       companyDetailsService.updateSchemeOrganiserCache(index).map { _ =>
-        Redirect(controllers.routes.GroupSchemeController.groupSchemePage())
+        Redirect(controllers.routes.GroupSchemeController.groupPlanSummaryPage())
       }
     }
   }

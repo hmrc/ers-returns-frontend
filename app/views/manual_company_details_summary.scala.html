@@ -29,7 +29,7 @@
   hmrcPageHeading: HmrcPageHeading
  )
 
- @(requestObject: RequestObject, index: Int, companies: CompanyDetailsList)(implicit request: Request[AnyRef], flash: Flash,
+ @(requestObject: RequestObject, index: Int, subsidiaries: CompanyDetailsList)(implicit request: Request[AnyRef], flash: Flash,
  messages: Messages, countryCodes: CountryCodes, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 
  @schemeId = @{requestObject.getSchemeId}
@@ -176,28 +176,28 @@ if(company.country.getOrElse("") == "UK") {
 
  @formWithCSRF(action = routes.GroupSchemeController.companySummaryContinue()) {
 
- @for((company, index) <- companies.companies.zipWithIndex) {
+@for((subsidiary, index) <- subsidiaries.companies.zipWithIndex) {
 
- @govukSummaryList(SummaryList(
-  rows = summaryBuilder(company, index)
- ))
+@govukSummaryList(SummaryList(
+rows = summaryBuilder(subsidiary, index)
+))
 
- <p class="govuk-body govuk-!-margin-bottom-8 govuk-link">
-     <a class="govuk-link" href="">
-         <input class="govuk-link link_button" type="submit" formaction="@routes.GroupSchemeController.deleteCompany(index)"
-                value='@{messages("ers.delete") + " " + company.companyName}'>
-     </a>
- </p>
- }
+<p class="govuk-body govuk-!-margin-bottom-8 govuk-link">
+    <a class="govuk-link" href="">
+        <input class="govuk-link link_button" type="submit" formaction="@routes.GroupSchemeController.deleteCompany(index)"
+               value='@{messages("ers.delete") + " " + subsidiary.companyName}'>
+    </a>
+</p>
+}
 
- <a class="govuk-link govuk-inset-text govuk-!-display-inline-block govuk-!-margin-top-0 govuk-!-width-full"
+    <a class="govuk-link govuk-inset-text govuk-!-display-inline-block govuk-!-margin-top-0 govuk-!-width-full"
     href="@controllers.subsidiaries.routes.IsSubsidiaryUkController.questionPage()">@Html(messages("ers_company_summary.add_company"))</a>
 
  @govukButton(Button(
    inputType = Some("submit"),
    content = Text(messages("ers.continue")),
    attributes = Map("id" -> "continue"),
-   disabled = companies.companies.isEmpty
+   disabled = subsidiaries.companies.isEmpty
    ))
   }
  }
