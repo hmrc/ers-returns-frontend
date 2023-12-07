@@ -102,7 +102,6 @@
     classes = "govuk-!-width-two-thirds",
     id = "addressLine4",
     name = "addressLine4",
-    autocomplete = Some("address-line4"),
     value = trusteeDetails(trusteeAddressFields.addressLine4).value,
     label = Label(
         content = Text(messages("ers_trustee_address.county")),
@@ -124,14 +123,17 @@
     classes = "govuk-visually-hidden",
     id = "country",
     name = "country",
-    autocomplete = None,
     value = Some("UK"),
+    label = Label(
+        content = Text(messages("ers_trustee_address.country")),
+        classes = "govuk-visually-hidden"
+    )
 ))
 
 @govukButton(Button(
     inputType = Some("submit"),
     content = Text(messages("ers.continue")),
-    attributes = Map("id" -> "continue"),
+    attributes = Map("id" -> "continue")
 ))
 
 }

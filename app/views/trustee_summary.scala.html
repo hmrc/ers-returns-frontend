@@ -135,9 +135,7 @@
             ))
 
             <p class="govuk-body govuk-!-margin-bottom-8 govuk-link">
-               <a class="govuk-link" href="">
-                 <input class="govuk-link link_button" type="submit" formaction="@controllers.trustees.routes.TrusteeSummaryController.deleteTrustee(index)" value='@{messages("ers.delete") + " " + trustee.name}'>
-               </a>
+                <input class="govuk-link link_button" type="submit" formaction="@controllers.trustees.routes.TrusteeSummaryController.deleteTrustee(index)" value='@{messages("ers.delete") + " " + trustee.name}'>
             </p>
         }
 
