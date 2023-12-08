@@ -41,6 +41,7 @@ class SchemeOrganiserController @Inject()(
                                            implicit val appConfig: ApplicationConfig,
                                            globalErrorView: views.html.global_error,
                                            schemeOrganiserView: views.html.scheme_organiser,
+                                           schemeOrganiserSummaryView: views.html.scheme_organiser_summary,
                                            authAction: AuthAction
                                          ) extends FrontendController(mcc)
   with I18nSupport
@@ -93,7 +94,35 @@ class SchemeOrganiserController @Inject()(
   def showSchemeOrganiserSubmit(requestObject: RequestObject)
                                (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
     println("weee wooo weee wooo")
-    Future.successful(Redirect(controllers.routes.GroupSchemeController.groupSchemePage()))
+    Future.successful(Redirect(controllers.subsidiaries.routes.GroupSchemeController.groupSchemePage()))
+  }
+
+  def schemeOrganiserSummaryPage: Action[AnyContent] = authAction.async {
+    implicit request =>
+      showschemeOrganiserSummaryPage(request, hc)
+  }
+
+  def showschemeOrganiserSummaryPage(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
+    (for {
+      requestObject <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
+      companyDetails <- ersUtil.fetch[CompanyDetails](ersUtil.SCHEME_ORGANISER_CACHE, requestObject.getSchemeReference)
+    } yield {
+      println(companyDetails)
+      Ok(schemeOrganiserSummaryView(requestObject, companyDetails))
+    }) recover {
+      case e: Exception =>
+        logger.error(s"[SchemeOrganiserController][showManualCompanyDetailsPage] Get data from cache failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
+        getGlobalErrorPage
+    }
+  }
+
+  def companySummaryContinue(): Action[AnyContent] = authAction.async {
+    implicit request =>
+      continueFromCompanySummaryPage()(request, hc)
+  }
+
+  def continueFromCompanySummaryPage()(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
+    Future(Redirect(controllers.subsidiaries.routes.GroupSchemeController.groupSchemePage()))
   }
 
   def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result =

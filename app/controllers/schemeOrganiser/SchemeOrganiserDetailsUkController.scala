@@ -34,7 +34,7 @@ import utils.{CountryCodes, ERSUtil}
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class SchemeOrganiserDetailsUKController @Inject()(val mcc: MessagesControllerComponents,
+class SchemeOrganiserDetailsUkController @Inject()(val mcc: MessagesControllerComponents,
                                                    val authConnector: DefaultAuthConnector,
                                                    val ersConnector: ErsConnector,
                                                    val globalErrorView: views.html.global_error,
@@ -44,7 +44,7 @@ class SchemeOrganiserDetailsUKController @Inject()(val mcc: MessagesControllerCo
                                                    implicit val appConfig: ApplicationConfig,
                                                    companyUKNameView: views.html.manual_company_details_uk
                                                   )
-  extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with SubsidiaryBaseController[Company] {
+  extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with SchemeOrganiserBaseController[Company] {
 
   implicit val ec: ExecutionContext = mcc.executionContext
 
@@ -54,9 +54,9 @@ class SchemeOrganiserDetailsUKController @Inject()(val mcc: MessagesControllerCo
 
   def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier) = {
     if (edit) {
-      Future.successful(Redirect(controllers.schemeOrganiser.routes.SchemeOrganiserAddressUKController.editCompany(index)))
+      Future.successful(Redirect(controllers.schemeOrganiser.routes.SchemeOrganiserAddressUkController.editCompany(index)))
     } else {
-      Future.successful(Redirect(controllers.schemeOrganiser.routes.SchemeOrganiserAddressUKController.questionPage()))
+      Future.successful(Redirect(controllers.schemeOrganiser.routes.SchemeOrganiserAddressUkController.questionPage()))
     }
   }
 

@@ -29,12 +29,12 @@
   hmrcPageHeading: HmrcPageHeading
  )
 
- @(requestObject: RequestObject, index: Int, subsidiaries: CompanyDetailsList)(implicit request: Request[AnyRef], flash: Flash,
+@(requestObject: RequestObject, schemeOrganiser: CompanyDetails)(implicit request: Request[AnyRef], flash: Flash,
  messages: Messages, countryCodes: CountryCodes, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 
  @schemeId = @{requestObject.getSchemeId}
 
- @summaryBuilder(company: CompanyDetails, index: Int) = @{
+ @summaryBuilder(company: CompanyDetails) = @{
   val companyNameSummary = Seq(
    SummaryListRow(
    key = Key(
@@ -50,9 +50,9 @@
     items = Seq(
       ActionItem(
        href = if(company.country.getOrElse("") == "UK"){
-        controllers.subsidiaries.routes.SubsidiaryDetailsOverseasController.editCompany(index).url
+        controllers.schemeOrganiser.routes.SchemeOrganiserDetailsUkController.editCompany(0).url
        } else {
-        controllers.subsidiaries.routes.SubsidiaryDetailsOverseasController.editCompany(index).url
+        controllers.schemeOrganiser.routes.SchemeOrganiserDetailsOverseasController.editCompany(0).url
        },
        content = Text(messages("ers.change_this")),
        visuallyHiddenText = Some(messages("ers.change_this"))
@@ -76,7 +76,7 @@
   classes = "govuk-!-width-one-quarter",
    items = Seq(
     ActionItem(
-       href = controllers.subsidiaries.routes.IsSubsidiaryUkController.editCompany(index).url,
+       href = controllers.schemeOrganiser.routes.SchemeOrganiserBasedInUkController.editCompany(0).url,
        content = Text(messages("ers.change_this")),
        visuallyHiddenText = Some(messages("ers.change_this"))
       )
@@ -97,9 +97,9 @@
       items = Seq(
        ActionItem(
         href = if(company.country.getOrElse("") == "UK"){
-         controllers.subsidiaries.routes.SubsidiaryAddressUkController.editCompany(index).url
+         controllers.schemeOrganiser.routes.SchemeOrganiserAddressUkController.editCompany(0).url
         } else {
-         controllers.subsidiaries.routes.SubsidiaryAddressOverseasController.editCompany(index).url
+         controllers.schemeOrganiser.routes.SchemeOrganiserAddressOverseasController.editCompany(0).url
         },
         content = Text(messages("ers.change_this")),
         visuallyHiddenText = Some(messages("ers.change_this"))
@@ -108,8 +108,6 @@
      ))
    )
 )
-
-
      val corporationRegSummary = Seq (
        SummaryListRow (
            key = Key(
@@ -122,7 +120,7 @@
       classes = "govuk-!-width-one-quarter",
       items = Seq(
        ActionItem(
-             href = controllers.subsidiaries.routes.SubsidiaryDetailsUkController.editCompany(index).url,
+             href = controllers.schemeOrganiser.routes.SchemeOrganiserDetailsUkController.editCompany(0).url,
              content = Text(messages("ers.change_this")),
              visuallyHiddenText = Some(messages("ers.change_this"))
              )
@@ -142,16 +140,13 @@
           classes = "govuk-!-width-one-quarter",
           items = Seq(
           ActionItem(
-             href = controllers.subsidiaries.routes.SubsidiaryDetailsUkController.editCompany(index).url,
+             href = controllers.schemeOrganiser.routes.SchemeOrganiserDetailsUkController.editCompany(0).url,
              content = Text(messages("ers.change_this")),
              visuallyHiddenText = Some(messages("ers.change_this"))
              )
           )
        )
 )))
-
-
-
 
 if(company.country.getOrElse("") == "UK") {
  companyNameSummary ++ companyLocationSummary ++ addressSummary ++ corporationRegSummary ++ corporationRefSummary
@@ -160,7 +155,6 @@ if(company.country.getOrElse("") == "UK") {
 }
 
 }
-
 
  @govuk_wrapper(title = messages("ers_company_summary.page_title"), None) {
 
@@ -171,33 +165,19 @@ if(company.country.getOrElse("") == "UK") {
  ))
 
  @hmrcPageHeading(PageHeading(
-  text = messages("ers_company_summary.page_title")
+  text = messages(ersUtil.getPageElement(schemeId, ersUtil.PAGE_SUMMARY_DECLARATION, "organiser"))
  ))
 
- @formWithCSRF(action = routes.GroupSchemeController.companySummaryContinue()) {
-
-@for((subsidiary, index) <- subsidiaries.companies.zipWithIndex) {
+ @formWithCSRF(action = controllers.schemeOrganiser.routes.SchemeOrganiserController.companySummaryContinue()) {
 
 @govukSummaryList(SummaryList(
-rows = summaryBuilder(subsidiary, index)
+    rows = summaryBuilder(schemeOrganiser)
 ))
-
-<p class="govuk-body govuk-!-margin-bottom-8 govuk-link">
-    <a class="govuk-link" href="">
-        <input class="govuk-link link_button" type="submit" formaction="@routes.GroupSchemeController.deleteCompany(index)"
-               value='@{messages("ers.delete") + " " + subsidiary.companyName}'>
-    </a>
-</p>
-}
-
-    <a class="govuk-link govuk-inset-text govuk-!-display-inline-block govuk-!-margin-top-0 govuk-!-width-full"
-    href="@controllers.subsidiaries.routes.IsSubsidiaryUkController.questionPage()">@Html(messages("ers_company_summary.add_company"))</a>
 
  @govukButton(Button(
    inputType = Some("submit"),
    content = Text(messages("ers.continue")),
    attributes = Map("id" -> "continue"),
-   disabled = subsidiaries.companies.isEmpty
    ))
   }
  }

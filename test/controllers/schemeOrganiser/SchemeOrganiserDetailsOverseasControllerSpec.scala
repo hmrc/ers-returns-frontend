@@ -129,7 +129,7 @@ class SchemeOrganiserDetailsOverseasControllerSpec extends AnyWordSpecLike
       val result = testController.questionSubmit(1).apply(authRequest)
 
       status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result).get shouldBe routes.SchemeOrganiserAddressUKController.questionPage().url
+      redirectLocation(result).get shouldBe routes.SchemeOrganiserAddressUkController.questionPage().url
 
     }
   }

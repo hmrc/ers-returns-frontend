@@ -35,7 +35,7 @@ import utils.{CountryCodes, ERSUtil}
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class SchemeOrganiserAddressUKController @Inject()(val mcc: MessagesControllerComponents,
+class SchemeOrganiserAddressUkController @Inject()(val mcc: MessagesControllerComponents,
                                                    val authConnector: DefaultAuthConnector,
                                                    val ersConnector: ErsConnector,
                                                    val globalErrorView: views.html.global_error,
@@ -46,7 +46,7 @@ class SchemeOrganiserAddressUKController @Inject()(val mcc: MessagesControllerCo
                                                    companyDetailsService: CompanyDetailsService,
                                                    trusteeAddressUkView: views.html.manual_address_uk
                                                   )
-  extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with SubsidiaryBaseController[CompanyAddress] {
+  extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with SchemeOrganiserBaseController[CompanyAddress] {
 
   implicit val ec: ExecutionContext = mcc.executionContext
 
@@ -55,10 +55,10 @@ class SchemeOrganiserAddressUKController @Inject()(val mcc: MessagesControllerCo
 
   def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier): Future[Result] = {
     if (edit) {
-      Future.successful(Redirect(controllers.routes.GroupSchemeController.groupPlanSummaryPage()))
+      Future.successful(Redirect(controllers.schemeOrganiser.routes.SchemeOrganiserController.schemeOrganiserSummaryPage()))
     } else {
-      companyDetailsService.updateSchemeOrganiserCache(index).map { _ =>
-        Redirect(controllers.routes.GroupSchemeController.groupPlanSummaryPage())
+      companyDetailsService.updateSchemeOrganiserCache.map { _ =>
+        Redirect(controllers.schemeOrganiser.routes.SchemeOrganiserController.schemeOrganiserSummaryPage())
       }
     }
   }

@@ -116,6 +116,7 @@ class ERSUtil @Inject() (
 
 	def cache[T](key: String, body: T, cacheId: String)(implicit hc: HeaderCarrier, formats: json.Format[T]): Future[CacheMap] = {
 		logger.info(s"[ERSUtil][cache]cache saving key:$key, cacheId:$cacheId")
+		println(s"\n We are Caching:\n$body\nto key: $key")
 		shortLivedCache.cache[T](cacheId, key, body)
 	}
 
@@ -382,6 +383,19 @@ class ERSUtil @Inject() (
 			x =>
 				println("Json here: " + x.getOrElse(""))
 				x.map(_.\(SUBSIDIARY_COMPANIES_CACHE).as[JsArray].\(index).getOrElse(Json.obj()).as[A])
+		} recover {
+			case x: Throwable => {
+				println("[ERSUtil][fetchPartFromCompanyDetailsList] Nothing found in cache, expected if this is not an edit journey: " + x.getMessage)
+				None
+			}
+		}
+	}
+
+	def fetchPartFromCompanyDetails[A](cacheId: String)(implicit hc: HeaderCarrier, formats: json.Format[A]): Future[Option[A]] = {
+		shortLivedCache.fetchAndGetEntry[JsValue](cacheId, SCHEME_ORGANISER_CACHE).map {
+			companyDetailsOpt =>
+				println("Json here: " + companyDetailsOpt.getOrElse(""))
+				companyDetailsOpt.map(_.as[A])
 		} recover {
 			case x: Throwable => {
 				println("[ERSUtil][fetchPartFromCompanyDetailsList] Nothing found in cache, expected if this is not an edit journey: " + x.getMessage)

@@ -43,15 +43,11 @@
 	case (true, false) => controllers.subsidiaries.routes.SubsidiaryAddressUkController.editQuestionSubmit(index)
 	case (false, false) => controllers.subsidiaries.routes.SubsidiaryAddressUkController.questionSubmit(index)
 
-	case (true, true) => controllers.schemeOrganiser.routes.SchemeOrganiserAddressUKController.editQuestionSubmit(index)
-	case (false, true) => controllers.schemeOrganiser.routes.SchemeOrganiserAddressUKController.questionSubmit(index)
+	case (true, true) => controllers.schemeOrganiser.routes.SchemeOrganiserAddressUkController.editQuestionSubmit(index)
+	case (false, true) => controllers.schemeOrganiser.routes.SchemeOrganiserAddressUkController.questionSubmit(index)
 }}
 
-@scripts = {
-	<script type="text/javascript" src='@controllers.routes.Assets.versioned("javascripts/uk-or-overseas-form-reveal.js")' @{CSPNonce.attr}></script>
-}
-
-@govuk_wrapper(title = messages("ers_manual_address_uk.title"), Some(scripts)) {
+@govuk_wrapper(title = messages("ers_manual_address_uk.title")) {
 
 	@reference(requestObject.getPageTitle)
 
@@ -81,7 +77,7 @@
 				ErrorMessage(content = Text(addressLine1.messages.head))
 			},
 			label = Label(
-				content = Text(messages("ers_manual_address_uk.building"))
+				content = Text(messages("ers_company_address.line1"))
 			)
 		))
 
@@ -93,6 +89,9 @@
 			errorMessage = companyDetails.error(companyAddressFields.addressLine2).map { addressLine2 =>
 				ErrorMessage(content = Text(addressLine2.messages.head))
 			},
+			label = Label(
+				content = Text(messages("ers_company_address.line2"))
+			)
 		))
 
 		@govukInput(Input(

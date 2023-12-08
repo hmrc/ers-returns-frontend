@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package controllers
+package controllers.subsidiaries
 
 import config.ApplicationConfig
 import controllers.auth.{AuthAction, RequestWithOptionalAuthContext}
+import controllers.{routes, trustees}
 import models._
 import play.api.Logging
 import play.api.data.Form
@@ -40,38 +41,11 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
 																			implicit val appConfig: ApplicationConfig,
                                       globalErrorView: views.html.global_error,
                                       groupView: views.html.group,
-                                      manualCompanyDetailsView: views.html.manual_company_details_summary,
                                       groupPlanSummaryView: views.html.group_plan_summary,
                                       authAction: AuthAction
 																		 ) extends FrontendController(mcc) with I18nSupport with WithUnsafeDefaultFormBinding with Logging {
 
   implicit val ec: ExecutionContext = mcc.executionContext
-
-
-  def manualCompanyDetailsPage(index: Int): Action[AnyContent] = authAction.async {
-    implicit request =>
-      showManualCompanyDetailsPage(index)(request, hc)
-  }
-  def showManualCompanyDetailsPage(index: Int)(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
-    (for {
-      requestObject      <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
-      subsidiaryDetailsList <- ersUtil.fetch[CompanyDetailsList](ersUtil.SUBSIDIARY_COMPANIES_CACHE, requestObject.getSchemeReference)
-    } yield {
-      println(subsidiaryDetailsList)
-      Ok(manualCompanyDetailsView(requestObject, index, subsidiaryDetailsList))
-    }) recover {
-      case e: Exception =>
-        logger.error(s"[GroupSchemeController][showManualCompanyDetailsPage] Get data from cache failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
-        getGlobalErrorPage
-    }
-  }
-  def companySummaryContinue(): Action[AnyContent] = authAction.async {
-    implicit request =>
-      continueFromCompanySummaryPage()(request, hc)
-  }
-  def continueFromCompanySummaryPage()(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
-    Future(Redirect(controllers.routes.GroupSchemeController.groupSchemePage()))
-  }
 
   def deleteCompany(id: Int): Action[AnyContent] = authAction.async {
     implicit request =>
@@ -85,8 +59,7 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
       companyDetailsList = CompanyDetailsList(filterDeletedCompany(cachedCompanyList, id))
       _                  <- ersUtil.cache(ersUtil.SUBSIDIARY_COMPANIES_CACHE, companyDetailsList, requestObject.getSchemeReference)
     } yield {
-      Redirect(controllers.routes.GroupSchemeController.manualCompanyDetailsPage())
-
+      Redirect(controllers.subsidiaries.routes.GroupSchemeController.groupPlanSummaryPage())
     }) recover {
       case _: Exception => getGlobalErrorPage
     }
@@ -94,13 +67,6 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
 
   private def filterDeletedCompany(companyList: CompanyDetailsList, id: Int): List[CompanyDetails] =
     companyList.companies.zipWithIndex.filterNot(_._2 == id).map(_._1)
-
-
-
-
-
-
-
 
   def groupSchemePage(): Action[AnyContent] = authAction.async {
       implicit request =>
@@ -157,7 +123,7 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
           ersUtil.cache(ersUtil.GROUP_SCHEME_CACHE_CONTROLLER, gsc, requestObject.getSchemeReference).map { _ =>
             (requestObject.getSchemeId, formData.groupScheme) match {
 
-              case (_, Some(ersUtil.OPTION_YES)) => Redirect(controllers.subsidiaries.routes.IsSubsidiaryUkController.questionPage())
+              case (_, Some(ersUtil.OPTION_YES)) => Redirect(controllers.subsidiaries.routes.SubsidiaryBasedInUkController.questionPage())
 
               case (ersUtil.SCHEME_CSOP | ersUtil.SCHEME_SAYE, _) =>
                 Redirect(routes.AltAmendsController.altActivityPage())

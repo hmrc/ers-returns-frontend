@@ -57,7 +57,7 @@ class SchemeOrganiserDetailsUkControllerSpec extends AnyWordSpecLike
   implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
 
 
-  val testController = new SchemeOrganiserDetailsUKController(
+  val testController = new SchemeOrganiserDetailsUkController(
     mockMCC,
     mockAuthConnector,
     mockErsConnector,
@@ -130,7 +130,7 @@ class SchemeOrganiserDetailsUkControllerSpec extends AnyWordSpecLike
       val result = testController.questionSubmit(1).apply(authRequest)
 
       status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result).get shouldBe routes.SchemeOrganiserAddressUKController.questionPage().url
+      redirectLocation(result).get shouldBe routes.SchemeOrganiserAddressUkController.questionPage().url
 
     }
   }

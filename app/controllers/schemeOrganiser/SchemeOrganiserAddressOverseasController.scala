@@ -36,7 +36,6 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class SchemeOrganiserAddressOverseasController @Inject()(val mcc: MessagesControllerComponents,
-                                                         val authConnector: DefaultAuthConnector,
                                                          val ersConnector: ErsConnector,
                                                          val globalErrorView: views.html.global_error,
                                                          val authAction: AuthAction,
@@ -46,7 +45,7 @@ class SchemeOrganiserAddressOverseasController @Inject()(val mcc: MessagesContro
                                                          companyDetailsService: CompanyDetailsService,
                                                          companyAddressOverseasView: views.html.manual_address_overseas
                                                         )
-  extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with SubsidiaryBaseController[CompanyAddress] {
+  extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with SchemeOrganiserBaseController[CompanyAddress] {
 
   implicit val ec: ExecutionContext = mcc.executionContext
 
@@ -55,10 +54,10 @@ class SchemeOrganiserAddressOverseasController @Inject()(val mcc: MessagesContro
 
   def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier): Future[Result] = {
     if (edit) {
-      Future.successful(Redirect(controllers.routes.GroupSchemeController.groupPlanSummaryPage()))
+      Future.successful(Redirect(controllers.schemeOrganiser.routes.SchemeOrganiserController.schemeOrganiserSummaryPage()))
     } else {
-      companyDetailsService.updateSchemeOrganiserCache(index).map { _ =>
-        Redirect(controllers.routes.GroupSchemeController.groupPlanSummaryPage())
+      companyDetailsService.updateSchemeOrganiserCache.map { _ =>
+        Redirect(controllers.schemeOrganiser.routes.SchemeOrganiserController.schemeOrganiserSummaryPage())
       }
     }
   }

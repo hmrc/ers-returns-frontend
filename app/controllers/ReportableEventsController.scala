@@ -115,7 +115,7 @@ class ReportableEventsController @Inject() (
         formData =>
           ersUtil.cache(ersUtil.reportableEvents, formData, requestObject.getSchemeReference).map { _ =>
             if (formData.isNilReturn.get == ersUtil.OPTION_NIL_RETURN) {
-              Redirect(controllers.schemeOrganiser.routes.IsSchemeOrganiserUkController.questionPage())
+              Redirect(controllers.schemeOrganiser.routes.SchemeOrganiserBasedInUkController.questionPage())
             } else {
               logger.info(
                 s"[ReportableEventsController][showReportableEventsSelected] Redirecting to FileUpload controller to get Partial, timestamp: ${System.currentTimeMillis()}."

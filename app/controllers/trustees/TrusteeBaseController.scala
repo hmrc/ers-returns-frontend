@@ -60,7 +60,7 @@ trait TrusteeBaseController[A] extends FrontendController with I18nSupport with 
   def showQuestionPage(requestObject: RequestObject, index: Int, edit: Boolean = false)
                       (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
     ersUtil.fetchPartFromTrusteeDetailsList[A](index, requestObject.getSchemeReference).map { previousAnswer: Option[A] =>
-      val preparedForm = if (previousAnswer.isDefined) form.fill(previousAnswer.get) else form
+      val preparedForm = previousAnswer.fold(form)(form.fill(_))
       Ok(view(requestObject, index, preparedForm, edit))
     } recover {
       case e: Throwable =>

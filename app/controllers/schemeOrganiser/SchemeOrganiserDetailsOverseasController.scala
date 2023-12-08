@@ -44,7 +44,7 @@ class SchemeOrganiserDetailsOverseasController @Inject()(val mcc: MessagesContro
                                                          implicit val appConfig: ApplicationConfig,
                                                          companyOverseasDetailsView: views.html.manual_company_details_overseas
                                                         )
-  extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with SubsidiaryBaseController[Company] {
+  extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with SchemeOrganiserBaseController[Company] {
 
   implicit val ec: ExecutionContext = mcc.executionContext
 

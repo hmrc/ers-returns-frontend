@@ -18,7 +18,7 @@ package controllers.schemeOrganiser
 
 import config.ApplicationConfig
 import controllers.auth.{AuthAction, RequestWithOptionalAuthContext}
-import models.{CompanyDetailsList, RequestObject}
+import models.{CompanyDetails, CompanyDetailsList, RequestObject}
 import play.api.Logging
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, Messages}
@@ -58,8 +58,8 @@ trait SchemeOrganiserBaseController[A] extends FrontendController with I18nSuppo
 
   def showQuestionPage(requestObject: RequestObject, index: Int, edit: Boolean = false)
                       (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
-    ersUtil.fetchPartFromCompanyDetailsList[A](index, requestObject.getSchemeReference).map { oldData: Option[A] =>
-      val preparedForm = if (oldData.isDefined) form.fill(oldData.get) else form
+    ersUtil.fetchPartFromCompanyDetails[A](requestObject.getSchemeReference).map { previousAnswer: Option[A] =>
+      val preparedForm = previousAnswer.fold(form)(form.fill(_))
       Ok(view(requestObject, index, preparedForm, edit))
     } recover {
       case e: Exception =>
@@ -85,10 +85,11 @@ trait SchemeOrganiserBaseController[A] extends FrontendController with I18nSuppo
       },
       result => {
         if (edit) {
-          ersUtil.fetchCompaniesOptionally(requestObject.getSchemeReference).flatMap { companies =>
-            val updatedCompany = companies.companies(index).updatePart(result)
-            val updatedCompanies = CompanyDetailsList(companies.companies.updated(index, updatedCompany))
-            ersUtil.cache[CompanyDetailsList](ersUtil.SCHEME_ORGANISER_CACHE, updatedCompanies, requestObject.getSchemeReference).flatMap { _ =>
+          ersUtil.fetch[CompanyDetails](ersUtil.SCHEME_ORGANISER_CACHE, requestObject.getSchemeReference).flatMap { schemeOrganiser =>
+            println(s"schemeOrganiser: $schemeOrganiser")
+            val updatedSchemeOrganiser = schemeOrganiser.updatePart(result)
+            println(s"updatedSchemeOrganiser: $updatedSchemeOrganiser")
+            ersUtil.cache[CompanyDetails](ersUtil.SCHEME_ORGANISER_CACHE, updatedSchemeOrganiser, requestObject.getSchemeReference).flatMap { _ =>
               nextPageRedirect(index, edit)
             }
           }
@@ -99,7 +100,8 @@ trait SchemeOrganiserBaseController[A] extends FrontendController with I18nSuppo
         }
       }
     ).recover {
-      case _ =>
+      case e: Exception =>
+        logger.error(s"Exception: ${e.getStackTrace.mkString("\n", "\n", "\n")}\n")
         logger.error(s"[${this.getClass.getSimpleName}][submissionHandler] Error occurred while updating company cache")
         getGlobalErrorPage
     }

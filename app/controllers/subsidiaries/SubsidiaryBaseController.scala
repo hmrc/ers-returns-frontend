@@ -54,4 +54,16 @@ trait SubsidiaryBaseController[A] extends SchemeOrganiserBaseController[A] {
     }
   }
 
+  override def showQuestionPage(requestObject: RequestObject, index: Int, edit: Boolean = false)
+                               (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
+    ersUtil.fetchPartFromCompanyDetailsList[A](index, requestObject.getSchemeReference).map { previousAnswer: Option[A] =>
+      val preparedForm = previousAnswer.fold(form)(form.fill(_))
+      Ok(view(requestObject, index, preparedForm, edit))
+    } recover {
+      case e: Exception =>
+        logger.error(s"[SubsidiariesController][showSubsidiariesNamePage] Get data from cache failed with exception ${e.getMessage}")
+        getGlobalErrorPage
+    }
+  }
+
 }

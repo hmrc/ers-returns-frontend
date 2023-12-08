@@ -48,7 +48,7 @@
 		text = ersUtil.getPageElement(schemeId, ersUtil.PAGE_SCHEME_ORGANISER, "title")
 	))
 
-	@formWithCSRF(action = routes.GroupSchemeController.groupPlanSummaryContinue(schemeId)) {
+	@formWithCSRF(action = controllers.subsidiaries.routes.GroupSchemeController.groupPlanSummaryContinue(schemeId)) {
 
 		@for((company, index) <- companies.companies.zipWithIndex) {
 			@govukSummaryList(SummaryList(
@@ -90,7 +90,7 @@
 							classes = "govuk-!-width-one- quarter",
 							items = Seq(
 								ActionItem(
-									href = controllers.subsidiaries.routes.IsSubsidiaryUkController.editCompany(index).url,
+									href = controllers.subsidiaries.routes.SubsidiaryBasedInUkController.editCompany(index).url,
 									content = Text(messages("ers.change_this")),
 									visuallyHiddenText = Some(company.companyName)
 								)

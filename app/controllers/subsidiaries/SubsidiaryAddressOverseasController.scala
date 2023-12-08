@@ -54,10 +54,10 @@ class SubsidiaryAddressOverseasController  @Inject()(val mcc: MessagesController
 
   def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier): Future[Result] = {
     if (edit) {
-      Future.successful(Redirect(controllers.routes.GroupSchemeController.manualCompanyDetailsPage()))
+      Future.successful(Redirect(controllers.subsidiaries.routes.GroupSchemeController.groupPlanSummaryPage()))
     } else {
       companyDetailsService.updateSubsidiaryCompanyCache(index).map { _ =>
-        Redirect(controllers.routes.GroupSchemeController.manualCompanyDetailsPage())
+        Redirect(controllers.subsidiaries.routes.GroupSchemeController.groupPlanSummaryPage())
       }
     }
   }

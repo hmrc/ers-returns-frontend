@@ -44,18 +44,20 @@ class CompanyDetailsService @Inject()(
     }
     }
 
-  def updateSchemeOrganiserCache(index: Int)(implicit hc: HeaderCarrier): Future[Unit] = {
+  def updateSchemeOrganiserCache(implicit hc: HeaderCarrier): Future[Unit] = {
     for {
       requestObject <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
       schemeRef = requestObject.getSchemeReference
       name <- ersUtil.fetch[Company](ersUtil.SCHEME_ORGANISER_NAME_CACHE, schemeRef)
-      cachedCompanies <- ersUtil.fetchCompaniesOptionally(schemeRef)
-      companyDetailsList <- {
-        ersUtil.fetch[CompanyAddress](ersUtil.SCHEME_ORGANISER_ADDRESS_CACHE, schemeRef).map(address =>
-          CompanyDetailsList(replaceCompany(cachedCompanies.companies, index, CompanyDetails(name, address)))
+      companyDetails <- {
+        ersUtil.fetch[CompanyAddress](ersUtil.SCHEME_ORGANISER_ADDRESS_CACHE, schemeRef).map(address => {
+          val x = CompanyDetails(name, address)
+          println(s"We tryna cache these company details for scheme org:\n$x\n")
+          x
+        }
         )
       }
-      _ <- ersUtil.cache[CompanyDetailsList](ersUtil.SCHEME_ORGANISER_CACHE, companyDetailsList, schemeRef)
+      _ <- ersUtil.cache[CompanyDetails](ersUtil.SCHEME_ORGANISER_CACHE, companyDetails, schemeRef)
     } yield {
       ()
     }
