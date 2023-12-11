@@ -28,6 +28,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.ERSUtil
+import services.ERSSessionCacheService
 
 import javax.inject.{Inject, Singleton}
 
@@ -40,6 +41,7 @@ class PdfGenerationController @Inject() (
   val authConnector: DefaultAuthConnector,
   val pdfBuilderService: ErsReceiptPdfBuilderService,
   implicit val ersUtil: ERSUtil,
+  implicit val ersSessionCacheService: ERSSessionCacheService,
   implicit val appConfig: ApplicationConfig,
   globalErrorView: views.html.global_error,
   authAction: AuthAction
@@ -51,7 +53,7 @@ class PdfGenerationController @Inject() (
 
   def buildPdfForBundle(bundle: String, dateSubmitted: String): Action[AnyContent] = authAction.async {
     implicit request =>
-      ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
+      ersSessionCacheService.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
         generatePdf(requestObject, bundle, dateSubmitted)
       }
   }
@@ -62,15 +64,15 @@ class PdfGenerationController @Inject() (
   ): Future[Result] = {
 
     logger.debug("getting into the controller to generate the pdf")
-    val cache: Future[ErsMetaData] = ersUtil.fetch[ErsMetaData](ersUtil.ersMetaData, requestObject.getSchemeReference)
+    val cache: Future[ErsMetaData] = ersSessionCacheService.fetch[ErsMetaData](ersUtil.ersMetaData, requestObject.getSchemeReference)
     cache.flatMap { all =>
       logger.debug("pdf generation: got the metadata")
-      ersUtil
+      ersSessionCacheService
         .getAllData(bundle, all)
         .flatMap { alldata =>
           logger.debug("pdf generation: got the cache map")
 
-          ersUtil.fetchAll(requestObject.getSchemeReference).map { all =>
+          ersSessionCacheService.fetchAll(requestObject.getSchemeReference).map { all =>
             val filesUploaded: ListBuffer[String] = ListBuffer()
             if (
               all

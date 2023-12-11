@@ -30,7 +30,7 @@ import play.api.libs.json._
 import play.api.mvc._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import services.SessionService
+import services.ERSFileValidatorSessionCacheServices
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.{ERSFakeApplicationConfig, ErsTestHelper, UpscanData}
 
@@ -59,7 +59,7 @@ class FileUploadCallbackControllerSpec
   implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
 
   implicit lazy val mat: Materializer    = app.materializer
-  val mockSessionService: SessionService = mock[SessionService]
+  val mockSessionService: ERSFileValidatorSessionCacheServices = mock[ERSFileValidatorSessionCacheServices]
 
   object TestFileUploadCallbackController extends FileUploadCallbackController(mockMCC, mockSessionService)
 

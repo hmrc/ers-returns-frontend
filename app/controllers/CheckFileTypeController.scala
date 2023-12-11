@@ -26,6 +26,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils._
+import services.ERSSessionCacheService
 import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 
@@ -36,6 +37,7 @@ class CheckFileTypeController @Inject() (
   val mcc: MessagesControllerComponents,
   val authConnector: DefaultAuthConnector,
   implicit val ersUtil: ERSUtil,
+  implicit val ersSessionCacheService: ERSSessionCacheService,
   implicit val appConfig: ApplicationConfig,
   globalErrorView: views.html.global_error,
   checkFileTypeView: views.html.check_file_type,
@@ -56,8 +58,8 @@ class CheckFileTypeController @Inject() (
     hc: HeaderCarrier
   ): Future[Result] =
     (for {
-      requestObject <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
-      fileType      <- ersUtil.fetch[CheckFileType](ersUtil.FILE_TYPE_CACHE, requestObject.getSchemeReference).recover {
+      requestObject <- ersSessionCacheService.fetch[RequestObject](ersUtil.ersRequestObject)
+      fileType      <- ersSessionCacheService.fetch[CheckFileType](ersUtil.FILE_TYPE_CACHE, requestObject.getSchemeReference).recover {
                          case _: NoSuchElementException => CheckFileType(Some(""))
                        }
     } yield Ok(
@@ -77,14 +79,14 @@ class CheckFileTypeController @Inject() (
     request: RequestWithOptionalAuthContext[AnyContent],
     hc: HeaderCarrier
   ): Future[Result] =
-    ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
+    ersSessionCacheService.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
       RsFormMappings
         .checkFileTypeForm()
         .bindFromRequest()
         .fold(
           errors => Future.successful(Ok(checkFileTypeView(requestObject, Some(""), errors))),
           formData =>
-            ersUtil
+            ersSessionCacheService
               .cache(ersUtil.FILE_TYPE_CACHE, formData, requestObject.getSchemeReference)
               .map { _ =>
                 if (formData.checkFileType.contains(ersUtil.OPTION_ODS)) {

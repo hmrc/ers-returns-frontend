@@ -6,6 +6,7 @@ object AppDependencies {
   val pdfboxVersion    = "2.0.30"
   val openHtmlVersion  = "1.0.10"
   val bootstrapVersion = "7.23.0"
+  val mongoVersion     = "1.3.0"
 
   val compile: Seq[ModuleID] = Seq(
     guice,
@@ -23,17 +24,19 @@ object AppDependencies {
     "com.openhtmltopdf"       %  "openhtmltopdf-core"         % openHtmlVersion,
     "com.openhtmltopdf"       %  "openhtmltopdf-pdfbox"       % openHtmlVersion,
     "com.openhtmltopdf"       %  "openhtmltopdf-svg-support"  % openHtmlVersion,
-    "commons-codec"           %  "commons-codec"              % "1.16.0"
+    "commons-codec"           %  "commons-codec"              % "1.16.0",
+    "uk.gov.hmrc.mongo"       %% "hmrc-mongo-play-28"         % mongoVersion,
   )
 
   val test: Seq[ModuleID]      = Seq(
-    "uk.gov.hmrc"             %% "bootstrap-test-play-28" % bootstrapVersion,
-    "org.scalatest"           %% "scalatest"              % "3.2.17",
-    "org.scalatestplus"       %% "mockito-4-11"           % "3.2.17.0",
-    "com.vladsch.flexmark"    %  "flexmark-all"           % "0.64.8",
-    "org.pegdown"             %  "pegdown"                % "1.6.0",
-    "org.jsoup"               %  "jsoup"                  % "1.17.1",
-    "org.wiremock"            % "wiremock-standalone"     % "3.3.1"
+    "uk.gov.hmrc"             %% "bootstrap-test-play-28"   % bootstrapVersion,
+    "org.scalatest"           %% "scalatest"                % "3.2.17",
+    "org.scalatestplus"       %% "mockito-4-11"             % "3.2.17.0",
+    "com.vladsch.flexmark"    %  "flexmark-all"             % "0.64.8",
+    "org.pegdown"             %  "pegdown"                  % "1.6.0",
+    "org.jsoup"               %  "jsoup"                    % "1.17.1",
+    "org.wiremock"            % "wiremock-standalone"       % "3.3.1",
+    "uk.gov.hmrc.mongo"       %% "hmrc-mongo-test-play-28"  % mongoVersion,
   ).map(_ % Test)
 
   val overrides: Seq[ModuleID] = Seq(

@@ -36,12 +36,12 @@ import play.api.i18n.{MessagesApi, MessagesImpl}
 import play.api.libs.json.Json
 import play.api.mvc._
 import play.api.test.FakeRequest
-import play.api.test.Helpers.{contentAsString, _}
-import services.{SessionService, UpscanService}
+import play.api.test.Helpers._
+import services.{ERSFileValidatorSessionCacheServices, UpscanService}
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import utils.Fixtures.ersRequestObject
-import utils.{ErsTestHelper, _}
+import utils._
 import views.html.{file_upload_errors, file_upload_problem, global_error, upscan_csv_file_upload}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -77,7 +77,7 @@ class CsvFileUploadControllerSpec
   val fileUploadErrorsView: file_upload_errors        = app.injector.instanceOf[file_upload_errors]
   val fileUploadProblemView: file_upload_problem      = app.injector.instanceOf[file_upload_problem]
 
-  val mockSessionService: SessionService = mock[SessionService]
+  val mockSessionService: ERSFileValidatorSessionCacheServices = mock[ERSFileValidatorSessionCacheServices]
   val mockUpscanService: UpscanService   = mock[UpscanService]
 
   lazy val csvFileUploadController: CsvFileUploadController =

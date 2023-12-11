@@ -31,6 +31,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.{CountryCodes, ERSUtil}
+import services.ERSSessionCacheService
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -41,6 +42,7 @@ class TrusteeBasedInUkController @Inject()(val mcc: MessagesControllerComponents
                                            val trusteeService: TrusteeService,
                                            implicit val countryCodes: CountryCodes,
                                            implicit val ersUtil: ERSUtil,
+                                           implicit val ersSessionCacheService: ERSSessionCacheService,
                                            implicit val appConfig: ApplicationConfig,
                                            trusteeBasedInUkView: views.html.trustee_based_in_uk
                                       )
@@ -51,14 +53,14 @@ class TrusteeBasedInUkController @Inject()(val mcc: MessagesControllerComponents
 
   val cacheKey: String = ersUtil.TRUSTEE_BASED_CACHE
 
-  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier): Future[Result] = {
+  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier, request: Request[_]): Future[Result] = {
     for {
-      requestObject <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
+      requestObject <- ersSessionCacheService.fetch[RequestObject](ersUtil.ersRequestObject)
       trusteeBasedInUk <-  if (edit) {
-        ersUtil.fetchTrusteesOptionally(requestObject.getSchemeReference).map {
+        ersSessionCacheService.fetchTrusteesOptionally(requestObject.getSchemeReference).map {
           trusteeDetailsList => TrusteeBasedInUk(trusteeDetailsList.trustees(index).basedInUk)
         }
-      } else {ersUtil.fetch[TrusteeBasedInUk](cacheKey, requestObject.getSchemeReference)}
+      } else {ersSessionCacheService.fetch[TrusteeBasedInUk](cacheKey, requestObject.getSchemeReference)}
     } yield {
       (trusteeBasedInUk.basedInUk, edit) match {
         case (true, true)    => Redirect(controllers.trustees.routes.TrusteeAddressUkController.editQuestion(index))

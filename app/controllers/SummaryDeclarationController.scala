@@ -25,10 +25,11 @@ import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.mvc._
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.http.cache.client.CacheMap
+import models.cache.CacheMap
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils._
+import services.ERSSessionCacheService
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
@@ -40,6 +41,7 @@ class SummaryDeclarationController @Inject() (
   val ersConnector: ErsConnector,
   implicit val countryCodes: CountryCodes,
   implicit val ersUtil: ERSUtil,
+  implicit val ersSessionCacheService: ERSSessionCacheService,
   implicit val appConfig: ApplicationConfig,
   globalErrorView: views.html.global_error,
   summaryView: views.html.summary,
@@ -51,7 +53,7 @@ class SummaryDeclarationController @Inject() (
   implicit val ec: ExecutionContext = mcc.executionContext
 
   def summaryDeclarationPage(): Action[AnyContent] = authAction.async { implicit request =>
-    ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
+    ersSessionCacheService.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
       showSummaryDeclarationPage(requestObject)(request, hc)
     }
   }
@@ -59,7 +61,7 @@ class SummaryDeclarationController @Inject() (
   def showSummaryDeclarationPage(
     requestObject: RequestObject
   )(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] =
-    ersUtil.fetchAll(requestObject.getSchemeReference).flatMap { all =>
+    ersSessionCacheService.fetchAll(requestObject.getSchemeReference).flatMap { all =>
       val schemeOrganiser: SchemeOrganiserDetails =
         all.getEntry[SchemeOrganiserDetails](ersUtil.SCHEME_ORGANISER_CACHE).get
       val groupSchemeInfo: GroupSchemeInfo        =

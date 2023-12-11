@@ -26,6 +26,7 @@ import play.api.mvc.{Action, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.ERSUtil
+import services.ERSSessionCacheService
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
@@ -36,6 +37,7 @@ class CsvFileUploadCallbackController @Inject() (
   val ersConnector: ErsConnector,
   val authConnector: DefaultAuthConnector,
   implicit val ersUtil: ERSUtil,
+  implicit val ersSessionCacheService: ERSSessionCacheService,
   implicit val appConfig: ApplicationConfig
 ) extends FrontendController(mcc)
     with Logging {
@@ -66,7 +68,7 @@ class CsvFileUploadCallbackController @Inject() (
             s"[CsvFileUploadCallbackController][callback] Updating CSV callback for " +
               s"upload id: ${uploadId.value} to ${uploadStatus.getClass.getSimpleName}"
           )
-          ersUtil.cache(s"${ersUtil.CHECK_CSV_FILES}-${uploadId.value}", uploadStatus, scRef).map { _ =>
+          ersSessionCacheService.cache(s"${ersUtil.CHECK_CSV_FILES}-${uploadId.value}", uploadStatus, scRef).map { _ =>
             Ok
           } recover { case NonFatal(e) =>
             logger.error(

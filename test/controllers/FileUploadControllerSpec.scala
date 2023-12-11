@@ -33,7 +33,7 @@ import play.api.i18n.{MessagesApi, MessagesImpl}
 import play.api.mvc._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import services.{SessionService, UpscanService}
+import services.{ERSFileValidatorSessionCacheServices, UpscanService}
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import utils.{ERSFakeApplicationConfig, ErsTestHelper, UpscanData}
@@ -85,7 +85,7 @@ class FileUploadControllerSpec
     testOptString
   )
 
-  lazy val mockSessionService: SessionService         = mock[SessionService]
+  lazy val mockSessionService: ERSFileValidatorSessionCacheServices         = mock[ERSFileValidatorSessionCacheServices]
   lazy val mockUpscanService: UpscanService           = mock[UpscanService]
   val mockActorSystem: ActorSystem                    = app.injector.instanceOf[ActorSystem]
   val globalErrorView: global_error                   = app.injector.instanceOf[global_error]

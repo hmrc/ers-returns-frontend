@@ -29,6 +29,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.{CountryCodes, ERSUtil}
+import services.ERSSessionCacheService
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -36,6 +37,7 @@ class TrusteeSummaryController @Inject()(val mcc: MessagesControllerComponents,
                                          val ersConnector: ErsConnector,
                                          implicit val countryCodes: CountryCodes,
                                          implicit val ersUtil: ERSUtil,
+                                         implicit val ersSessionCacheService: ERSSessionCacheService,
                                          implicit val appConfig: ApplicationConfig,
                                          globalErrorView: views.html.global_error,
                                          trusteeSummaryView: views.html.trustee_summary,
@@ -51,10 +53,10 @@ class TrusteeSummaryController @Inject()(val mcc: MessagesControllerComponents,
   def showDeleteTrustee(id: Int)(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
 
     (for {
-      requestObject      <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
-      cachedTrusteeList  <- ersUtil.fetch[TrusteeDetailsList](ersUtil.TRUSTEES_CACHE, requestObject.getSchemeReference)
+      requestObject      <- ersSessionCacheService.fetch[RequestObject](ersUtil.ersRequestObject)
+      cachedTrusteeList  <- ersSessionCacheService.fetch[TrusteeDetailsList](ersUtil.TRUSTEES_CACHE, requestObject.getSchemeReference)
       trusteeDetailsList = TrusteeDetailsList(filterDeletedTrustee(cachedTrusteeList, id))
-      _                  <- ersUtil.cache(ersUtil.TRUSTEES_CACHE, trusteeDetailsList, requestObject.getSchemeReference)
+      _                  <- ersSessionCacheService.cache(ersUtil.TRUSTEES_CACHE, trusteeDetailsList, requestObject.getSchemeReference)
     } yield {
       Redirect(controllers.trustees.routes.TrusteeSummaryController.trusteeSummaryPage())
 
@@ -73,8 +75,8 @@ class TrusteeSummaryController @Inject()(val mcc: MessagesControllerComponents,
 
   def showTrusteeSummaryPage()(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
     (for {
-      requestObject      <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
-      trusteeDetailsList <- ersUtil.fetchTrusteesOptionally(requestObject.getSchemeReference)
+      requestObject      <- ersSessionCacheService.fetch[RequestObject](ersUtil.ersRequestObject)
+      trusteeDetailsList <- ersSessionCacheService.fetchTrusteesOptionally(requestObject.getSchemeReference)
     } yield {
       if (trusteeDetailsList.trustees.isEmpty) {
         Redirect(controllers.trustees.routes.TrusteeNameController.questionPage())
@@ -97,8 +99,8 @@ class TrusteeSummaryController @Inject()(val mcc: MessagesControllerComponents,
     RsFormMappings.addTrusteeForm().bindFromRequest().fold(
       _ => {
         for {
-          requestObject <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
-          trusteeDetailsList <- ersUtil.fetchTrusteesOptionally(requestObject.getSchemeReference)
+          requestObject <- ersSessionCacheService.fetch[RequestObject](ersUtil.ersRequestObject)
+          trusteeDetailsList <- ersSessionCacheService.fetchTrusteesOptionally(requestObject.getSchemeReference)
         } yield {
           BadRequest(trusteeSummaryView(requestObject, trusteeDetailsList, formHasError = true))
         }

@@ -35,7 +35,7 @@ import scala.concurrent.Future
 class SessionServiceSpec extends PlaySpec with GuiceOneAppPerSuite with ScalaFutures with MockitoSugar {
 
   val mockSessionCache: ERSFileValidatorSessionCache = mock[ERSFileValidatorSessionCache]
-  val testSessionService                             = new SessionService(mockSessionCache)
+  val testSessionService                             = new ERSFileValidatorSessionCacheServices(mockSessionCache)
 
   val sessionId                             = "sessionId"
   implicit val request: Request[AnyContent] = FakeRequest()

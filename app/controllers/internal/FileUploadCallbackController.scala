@@ -21,14 +21,14 @@ import models.upscan._
 import play.api.Logging
 import play.api.libs.json.JsValue
 import play.api.mvc.{Action, MessagesControllerComponents}
-import services.SessionService
+import services.ERSFileValidatorSessionCacheServices
 import uk.gov.hmrc.http.{HeaderCarrier, SessionId}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class FileUploadCallbackController @Inject() (val mcc: MessagesControllerComponents, val sessionService: SessionService)
+class FileUploadCallbackController @Inject() (val mcc: MessagesControllerComponents, val sessionService: ERSFileValidatorSessionCacheServices)
     extends FrontendController(mcc)
     with Logging {
 

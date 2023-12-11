@@ -63,6 +63,8 @@ class ApplicationConfig @Inject() (config: ServicesConfig) {
   lazy val enableRetrieveSubmissionData: Boolean = config.getBoolean("settings.enable-retrieve-submission-data")
   lazy val languageTranslationEnabled: Boolean   = config.getConfBool("features.welsh-translation", defBool = true)
 
+  lazy val mongoTTLInSeconds: Int = config.getInt("mongodb.timeToLiveInSeconds")
+
   lazy val odsSuccessRetryAmount: Int       = config.getInt("retry.ods-success-cache.complete-upload.amount")
   lazy val odsValidationRetryAmount: Int    = config.getInt("retry.ods-success-cache.validation.amount")
   lazy val allCsvFilesCacheRetryAmount: Int = config.getInt("retry.csv-success-cache.all-files-complete.amount")

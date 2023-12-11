@@ -30,6 +30,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils._
+import services.ERSSessionCacheService
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
@@ -42,6 +43,7 @@ class CsvFileUploadController @Inject() (
   val authConnector: DefaultAuthConnector,
   val upscanService: UpscanService,
   implicit val ersUtil: ERSUtil,
+  implicit val ersSessionCacheService: ERSSessionCacheService,
   implicit val appConfig: ApplicationConfig,
   implicit val actorSystem: ActorSystem,
   globalErrorView: views.html.global_error,
@@ -60,8 +62,8 @@ class CsvFileUploadController @Inject() (
 
   def uploadFilePage(): Action[AnyContent] = authAction.async { implicit request =>
     (for {
-      requestObject  <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
-      csvFilesList   <- ersUtil.fetch[UpscanCsvFilesList](ersUtil.CSV_FILES_UPLOAD, requestObject.getSchemeReference)
+      requestObject  <- ersSessionCacheService.fetch[RequestObject](ersUtil.ersRequestObject)
+      csvFilesList   <- ersSessionCacheService.fetch[UpscanCsvFilesList](ersUtil.CSV_FILES_UPLOAD, requestObject.getSchemeReference)
       currentCsvFile  = csvFilesList.ids.find(ids => ids.uploadStatus == NotStarted)
       if currentCsvFile.isDefined
       upscanFormData <-
@@ -85,13 +87,13 @@ class CsvFileUploadController @Inject() (
   def success(uploadId: UploadId): Action[AnyContent] = authAction.async { implicit request =>
     logger.info(s"[CsvFileUploadController][success] Upload form submitted for ID: $uploadId")
     (for {
-      requestObject       <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
-      csvFileList         <- ersUtil.fetch[UpscanCsvFilesList](ersUtil.CSV_FILES_UPLOAD, requestObject.getSchemeReference)
+      requestObject       <- ersSessionCacheService.fetch[RequestObject](ersUtil.ersRequestObject)
+      csvFileList         <- ersSessionCacheService.fetch[UpscanCsvFilesList](ersUtil.CSV_FILES_UPLOAD, requestObject.getSchemeReference)
       updatedCacheFileList = {
         logger.info(s"[CsvFileUploadController][success] Updating uploadId: ${uploadId.value} to InProgress")
         csvFileList.updateToInProgress(uploadId)
       }
-      _                   <- ersUtil.cache(ersUtil.CSV_FILES_UPLOAD, updatedCacheFileList, requestObject.getSchemeReference)
+      _                   <- ersSessionCacheService.cache(ersUtil.CSV_FILES_UPLOAD, updatedCacheFileList, requestObject.getSchemeReference)
     } yield
       if (updatedCacheFileList.noOfFilesToUpload == updatedCacheFileList.noOfUploads) {
         Redirect(routes.CsvFileUploadController.validationResults())
@@ -116,8 +118,8 @@ class CsvFileUploadController @Inject() (
     hc: HeaderCarrier
   ): Future[Result] =
     (for {
-      requestObject <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
-      all           <- ersUtil.fetch[ErsMetaData](ersUtil.ersMetaData, requestObject.getSchemeReference)
+      requestObject <- ersSessionCacheService.fetch[RequestObject](ersUtil.ersRequestObject)
+      all           <- ersSessionCacheService.fetch[ErsMetaData](ersUtil.ersMetaData, requestObject.getSchemeReference)
       result        <- removePresubmissionData(all.schemeInfo)
     } yield result) recover { case e: Exception =>
       logger.error(
@@ -148,8 +150,8 @@ class CsvFileUploadController @Inject() (
   def extractCsvCallbackData(
     schemeInfo: SchemeInfo
   )(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] =
-    ersUtil.fetch[UpscanCsvFilesList](ersUtil.CSV_FILES_UPLOAD, schemeInfo.schemeRef).flatMap { data =>
-      ersUtil
+    ersSessionCacheService.fetch[UpscanCsvFilesList](ersUtil.CSV_FILES_UPLOAD, schemeInfo.schemeRef).flatMap { data =>
+      ersSessionCacheService
         .fetchAll(schemeInfo.schemeRef)
         .map { cacheMap =>
           data.ids.foldLeft(Option(List.empty[UpscanCsvFilesCallback])) {
@@ -163,7 +165,7 @@ class CsvFileUploadController @Inject() (
         .withRetry(allCsvFilesCacheRetryAmount)(_.isDefined)
         .flatMap { files =>
           val csvFilesCallbackList: UpscanCsvFilesCallbackList = UpscanCsvFilesCallbackList(files.get)
-          ersUtil.cache(ersUtil.CHECK_CSV_FILES, csvFilesCallbackList, schemeInfo.schemeRef).flatMap { _ =>
+          ersSessionCacheService.cache(ersUtil.CHECK_CSV_FILES, csvFilesCallbackList, schemeInfo.schemeRef).flatMap { _ =>
             if (csvFilesCallbackList.files.nonEmpty && csvFilesCallbackList.areAllFilesComplete()) {
               if (csvFilesCallbackList.areAllFilesSuccessful()) {
                 val callbackDataList: List[UploadedSuccessfully] =
@@ -204,7 +206,7 @@ class CsvFileUploadController @Inject() (
     request: RequestWithOptionalAuthContext[AnyContent],
     hc: HeaderCarrier
   ): Future[Result] =
-    ersUtil.fetch[UpscanCsvFilesList](ersUtil.CSV_FILES_UPLOAD, schemeInfo.schemeRef).flatMap { list =>
+    ersSessionCacheService.fetch[UpscanCsvFilesList](ersUtil.CSV_FILES_UPLOAD, schemeInfo.schemeRef).flatMap { list =>
       val uploadedWithCorrectName: Boolean = list.ids
         .map(expectedFile => expectedFile.fileId)
         .zip(
@@ -244,7 +246,7 @@ class CsvFileUploadController @Inject() (
             s"[CsvFileUploadController][validateCsv] Validation is successful for schemeRef: ${schemeInfo.schemeRef}, " +
               s"timestamp: ${System.currentTimeMillis()}."
           )
-          ersUtil.cache(ersUtil.VALIDATED_SHEEETS, res.body, schemeInfo.schemeRef)
+          ersSessionCacheService.cache(ersUtil.VALIDATED_SHEEETS, res.body, schemeInfo.schemeRef)
           Redirect(routes.SchemeOrganiserController.schemeOrganiserPage())
         case ACCEPTED =>
           logger.warn(
@@ -277,8 +279,8 @@ class CsvFileUploadController @Inject() (
       "[CsvFileUploadController][processValidationFailure] Validation Failure: " + (System.currentTimeMillis() / 1000)
     )
     (for {
-      requestObject <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
-      fileType      <- ersUtil.fetch[CheckFileType](ersUtil.FILE_TYPE_CACHE, requestObject.getSchemeReference)
+      requestObject <- ersSessionCacheService.fetch[RequestObject](ersUtil.ersRequestObject)
+      fileType      <- ersSessionCacheService.fetch[CheckFileType](ersUtil.FILE_TYPE_CACHE, requestObject.getSchemeReference)
     } yield {
       Ok(fileUploadErrorsView(requestObject, fileType.checkFileType.getOrElse("")))
     }).recover {

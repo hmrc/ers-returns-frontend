@@ -29,6 +29,7 @@ import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.SessionKeys.{BUNDLE_REF, DATE_TIME_SUBMITTED}
 import utils._
+import services.ERSSessionCacheService
 
 import java.text.SimpleDateFormat
 import java.util.concurrent.TimeUnit
@@ -42,6 +43,7 @@ class ConfirmationPageController @Inject() (
   val authConnector: DefaultAuthConnector,
   val auditEvents: AuditEvents,
   implicit val ersUtil: ERSUtil,
+  implicit val ersSessionCacheService: ERSSessionCacheService,
   implicit val appConfig: ApplicationConfig,
   globalErrorView: views.html.global_error,
   confirmationView: views.html.confirmation,
@@ -60,12 +62,12 @@ class ConfirmationPageController @Inject() (
     request: RequestWithOptionalAuthContext[AnyContent],
     hc: HeaderCarrier
   ): Future[Result] =
-    ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
+    ersSessionCacheService.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
       val schemeRef: String                = requestObject.getSchemeReference
       val sessionBundleRef: String         = request.session.get(BUNDLE_REF).getOrElse("")
       val sessionDateTimeSubmitted: String = request.session.get(DATE_TIME_SUBMITTED).getOrElse("")
       if (sessionBundleRef == "") {
-        ersUtil.fetch[ErsMetaData](ersUtil.ersMetaData, schemeRef).flatMap { all =>
+        ersSessionCacheService.fetch[ErsMetaData](ersUtil.ersMetaData, schemeRef).flatMap { all =>
           if (all.sapNumber.isEmpty)
             logger.error(
               s"[ConfirmationPageController][showConfirmationPage] Did cache util fail for scheme $schemeRef all.sapNumber is empty: $all"
@@ -77,11 +79,11 @@ class ConfirmationPageController @Inject() (
             "EOY-RETURN"
           )
           ersConnector.connectToEtmpSummarySubmit(all.sapNumber.get, submissionJson).flatMap { bundle =>
-            ersUtil.getAllData(bundle, all).flatMap { alldata =>
+            ersSessionCacheService.getAllData(bundle, all).flatMap { alldata =>
               if (alldata.isNilReturn == ersUtil.OPTION_NIL_RETURN) {
                 saveAndSubmit(alldata, all, bundle)
               } else {
-                ersUtil.fetch[String](ersUtil.VALIDATED_SHEEETS, schemeRef).flatMap { validatedSheets =>
+                ersSessionCacheService.fetch[String](ersUtil.VALIDATED_SHEEETS, schemeRef).flatMap { validatedSheets =>
                   ersConnector.checkForPresubmission(all.schemeInfo, validatedSheets).flatMap { checkResult =>
                     checkResult.status match {
                       case OK =>
@@ -103,7 +105,7 @@ class ConfirmationPageController @Inject() (
         }
       } else {
         val url: String = appConfig.portalDomain
-        ersUtil.fetch[ErsMetaData](ersUtil.ersMetaData, schemeRef).flatMap { all =>
+        ersSessionCacheService.fetch[ErsMetaData](ersUtil.ersMetaData, schemeRef).flatMap { all =>
           logger.info(
             s"[ConfirmationPageController][showConfirmationPage] Preventing resubmission of confirmation page, timestamp: ${System.currentTimeMillis()}."
           )
@@ -165,7 +167,7 @@ class ConfirmationPageController @Inject() (
           )
           val url: String = appConfig.portalDomain
 
-          ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).map { requestObject =>
+          ersSessionCacheService.fetch[RequestObject](ersUtil.ersRequestObject).map { requestObject =>
             Ok(confirmationView(requestObject, dateTimeSubmitted, bundle, all.schemeInfo.taxYear, url))
               .withSession(request.session + (BUNDLE_REF -> bundle) + (DATE_TIME_SUBMITTED -> dateTimeSubmitted))
           }

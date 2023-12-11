@@ -27,6 +27,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.ERSUtil
+import services.ERSSessionCacheService
 import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 
@@ -37,6 +38,7 @@ class CheckCsvFilesController @Inject() (
   val mcc: MessagesControllerComponents,
   val authConnector: DefaultAuthConnector,
   implicit val ersUtil: ERSUtil,
+  implicit val ersSessionCacheService: ERSSessionCacheService,
   implicit val appConfig: ApplicationConfig,
   globalErrorView: views.html.global_error,
   checkCsvFileView: views.html.check_csv_file,
@@ -56,8 +58,8 @@ class CheckCsvFilesController @Inject() (
     request: RequestWithOptionalAuthContext[AnyContent],
     hc: HeaderCarrier
   ): Future[Result] = {
-    val requestObjectFuture = ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
-    ersUtil.remove(ersUtil.CSV_FILES_UPLOAD)
+    val requestObjectFuture = ersSessionCacheService.fetch[RequestObject](ersUtil.ersRequestObject)
+    ersSessionCacheService.remove(ersUtil.CSV_FILES_UPLOAD)
     (for {
       requestObject <- requestObjectFuture
     } yield {
@@ -92,8 +94,8 @@ class CheckCsvFilesController @Inject() (
       reloadWithError()
     } else {
       (for {
-        requestObject <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
-        _             <- ersUtil.cache(ersUtil.CSV_FILES_UPLOAD, csvFilesCallbackList, requestObject.getSchemeReference)
+        requestObject <- ersSessionCacheService.fetch[RequestObject](ersUtil.ersRequestObject)
+        _             <- ersSessionCacheService.cache(ersUtil.CSV_FILES_UPLOAD, csvFilesCallbackList, requestObject.getSchemeReference)
       } yield Redirect(routes.CsvFileUploadController.uploadFilePage())).recover { case e: Throwable =>
         logger.error(
           s"[CheckCsvFilesController][performCsvFilesPageSelected] Save data to cache failed with exception ${e.getMessage}.",

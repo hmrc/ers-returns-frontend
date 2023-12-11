@@ -33,6 +33,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 import utils.ERSUtil
+import services.ERSSessionCacheService
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
@@ -48,6 +49,7 @@ class AuthAction @Inject() (
   override val authConnector: DefaultAuthConnector,
   appConfig: ApplicationConfig,
   ersUtil: ERSUtil,
+  ersSessionCacheService: ERSSessionCacheService,
   val parser: BodyParsers.Default
 )(implicit val executionContext: ExecutionContext)
     extends AuthorisedFunctions
@@ -73,6 +75,7 @@ class AuthAction @Inject() (
   ): Future[Result] = {
     implicit val hc: HeaderCarrier                    = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
     implicit val formatRSParams: OFormat[ErsMetaData] = Json.format[ErsMetaData]
+    implicit val impRequest = request
 
     authorised((Enrolment("IR-PAYE") or Enrolment("HMRC-AGENT-AGENT") or Agent) and AuthProviders(GovernmentGateway))
       .retrieve(authorisedEnrolments and affinityGroup) { case authorisedEnrolments ~ affinityGroup =>
@@ -80,8 +83,8 @@ class AuthAction @Inject() (
 
         if (authContext.isAgent) {
           for {
-            requestObject <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
-            all           <- ersUtil.fetch[ErsMetaData](ersUtil.ersMetaData, requestObject.getSchemeReference)
+            requestObject <- ersSessionCacheService.fetch[RequestObject](ersUtil.ersRequestObject)
+            all           <- ersSessionCacheService.fetch[ErsMetaData](ersUtil.ersMetaData, requestObject.getSchemeReference)
             result        <- block(RequestWithOptionalAuthContext(request, delegationModelUser(all, authContext: ERSAuthData)))
           } yield result
         } else {

@@ -27,6 +27,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils._
+import services.ERSSessionCacheService
 import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 
@@ -38,6 +39,7 @@ class ReportableEventsController @Inject() (
   val authConnector: DefaultAuthConnector,
   val ersConnector: ErsConnector,
   implicit val ersUtil: ERSUtil,
+  implicit val ersSessionCacheService: ERSSessionCacheService,
   implicit val appConfig: ApplicationConfig,
   globalErrorView: views.html.global_error,
   reportableEventsView: views.html.reportable_events,
@@ -50,7 +52,7 @@ class ReportableEventsController @Inject() (
   implicit val ec: ExecutionContext = mcc.executionContext
 
   def reportableEventsPage(): Action[AnyContent] = authAction.async { implicit request =>
-    ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObj =>
+    ersSessionCacheService.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObj =>
       updateErsMetaData(requestObj)(request, hc)
       showReportableEventsPage(requestObj)(request, hc)
     }
@@ -60,7 +62,7 @@ class ReportableEventsController @Inject() (
     requestObject: RequestObject
   )(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Object] =
     ersConnector.connectToEtmpSapRequest(requestObject.getSchemeReference).flatMap { sapNumber =>
-      ersUtil.fetch[ErsMetaData](ersUtil.ersMetaData, requestObject.getSchemeReference).map { metaData =>
+      ersSessionCacheService.fetch[ErsMetaData](ersUtil.ersMetaData, requestObject.getSchemeReference).map { metaData =>
         val ersMetaData = ErsMetaData(
           metaData.schemeInfo,
           metaData.ipRef,
@@ -69,7 +71,7 @@ class ReportableEventsController @Inject() (
           metaData.agentRef,
           Some(sapNumber)
         )
-        ersUtil.cache(ersUtil.ersMetaData, ersMetaData, requestObject.getSchemeReference).recover { case e: Exception =>
+        ersSessionCacheService.cache(ersUtil.ersMetaData, ersMetaData, requestObject.getSchemeReference).recover { case e: Exception =>
           logger.error(
             s"[ReportableEventsController][updateErsMetaData] save failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}."
           )
@@ -86,7 +88,7 @@ class ReportableEventsController @Inject() (
   def showReportableEventsPage(
     requestObject: RequestObject
   )(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] =
-    ersUtil.fetch[ReportableEvents](ersUtil.reportableEvents, requestObject.getSchemeReference).map { activity =>
+    ersSessionCacheService.fetch[ReportableEvents](ersUtil.reportableEvents, requestObject.getSchemeReference).map { activity =>
       Ok(reportableEventsView(requestObject, activity.isNilReturn, RsFormMappings.chooseForm().fill(activity)))
     } recover { case _: NoSuchElementException =>
       val form = ReportableEvents(Some(""))
@@ -94,7 +96,7 @@ class ReportableEventsController @Inject() (
     }
 
   def reportableEventsSelected(): Action[AnyContent] = authAction.async { implicit request =>
-    ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObj =>
+    ersSessionCacheService.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObj =>
       showReportableEventsSelected(requestObj)(request) recover { case e: Exception =>
         logger.error(
           s"[ReportableEventsController][reportableEventsSelected] failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}."
@@ -113,7 +115,7 @@ class ReportableEventsController @Inject() (
       .fold(
         errors => Future.successful(Ok(reportableEventsView(requestObject, Some(""), errors))),
         formData =>
-          ersUtil.cache(ersUtil.reportableEvents, formData, requestObject.getSchemeReference).map { _ =>
+          ersSessionCacheService.cache(ersUtil.reportableEvents, formData, requestObject.getSchemeReference).map { _ =>
             if (formData.isNilReturn.get == ersUtil.OPTION_NIL_RETURN) {
               Redirect(routes.SchemeOrganiserController.schemeOrganiserPage())
             } else {

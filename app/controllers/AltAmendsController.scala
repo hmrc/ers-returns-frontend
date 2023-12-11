@@ -26,6 +26,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.ERSUtil
+import services.ERSSessionCacheService
 import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 
@@ -36,6 +37,7 @@ class AltAmendsController @Inject() (
   val mcc: MessagesControllerComponents,
   val authConnector: DefaultAuthConnector,
   implicit val ersUtil: ERSUtil,
+  implicit val ersSessionCacheService: ERSSessionCacheService,
   implicit val appConfig: ApplicationConfig,
   alterationsActivityView: views.html.alterations_activity,
   alterationsAmendsView: views.html.alterations_amends,
@@ -57,11 +59,11 @@ class AltAmendsController @Inject() (
     hc: HeaderCarrier
   ): Future[Result] =
     (for {
-      requestObject     <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
+      requestObject     <- ersSessionCacheService.fetch[RequestObject](ersUtil.ersRequestObject)
       groupSchemeInfo   <-
-        ersUtil.fetch[GroupSchemeInfo](ersUtil.GROUP_SCHEME_CACHE_CONTROLLER, requestObject.getSchemeReference)
+        ersSessionCacheService.fetch[GroupSchemeInfo](ersUtil.GROUP_SCHEME_CACHE_CONTROLLER, requestObject.getSchemeReference)
       altAmendsActivity <-
-        ersUtil.fetch[AltAmendsActivity](ersUtil.altAmendsActivity, requestObject.getSchemeReference).recover {
+        ersSessionCacheService.fetch[AltAmendsActivity](ersUtil.altAmendsActivity, requestObject.getSchemeReference).recover {
           case _: NoSuchElementException => AltAmendsActivity("")
         }
     } yield Ok(
@@ -87,14 +89,14 @@ class AltAmendsController @Inject() (
     request: RequestWithOptionalAuthContext[AnyContent],
     hc: HeaderCarrier
   ): Future[Result] =
-    ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
+    ersSessionCacheService.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
       RsFormMappings
         .altActivityForm()
         .bindFromRequest()
         .fold(
           errors => Future.successful(Ok(alterationsActivityView(requestObject, "", "", errors))),
           formData =>
-            ersUtil
+            ersSessionCacheService
               .cache(ersUtil.altAmendsActivity, formData, requestObject.getSchemeReference)
               .map { _ =>
                 formData.altActivity match {
@@ -120,9 +122,9 @@ class AltAmendsController @Inject() (
     hc: HeaderCarrier
   ): Future[Result] =
     for {
-      requestObject <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
+      requestObject <- ersSessionCacheService.fetch[RequestObject](ersUtil.ersRequestObject)
       altAmends     <-
-        ersUtil.fetchOption[AltAmends](ersUtil.ALT_AMENDS_CACHE_CONTROLLER, requestObject.getSchemeReference).recover {
+        ersSessionCacheService.fetchOption[AltAmends](ersUtil.ALT_AMENDS_CACHE_CONTROLLER, requestObject.getSchemeReference).recover {
           case _: Throwable => None
         }
     } yield Ok(alterationsAmendsView(requestObject, altAmends.getOrElse(AltAmends(None, None, None, None, None))))
@@ -135,7 +137,7 @@ class AltAmendsController @Inject() (
     request: RequestWithOptionalAuthContext[AnyContent],
     hc: HeaderCarrier
   ): Future[Result] =
-    ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
+    ersSessionCacheService.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
       RsFormMappings
         .altAmendsForm()
         .bindFromRequest()
@@ -149,7 +151,7 @@ class AltAmendsController @Inject() (
                 )
             ),
           formData =>
-            ersUtil.cache(ersUtil.ALT_AMENDS_CACHE_CONTROLLER, formData, requestObject.getSchemeReference).flatMap {
+            ersSessionCacheService.cache(ersUtil.ALT_AMENDS_CACHE_CONTROLLER, formData, requestObject.getSchemeReference).flatMap {
               _ =>
                 if (
                   formData.altAmendsTerms.isEmpty

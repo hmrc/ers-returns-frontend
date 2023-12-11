@@ -25,30 +25,32 @@ import models.upscan.{Failed, UploadStatus, UploadedSuccessfully}
 import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.mvc._
-import services.{SessionService, UpscanService}
+import services.{ERSFileValidatorSessionCacheServices, UpscanService}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils._
+import services.ERSSessionCacheService
 import javax.inject.{Inject, Singleton}
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class FileUploadController @Inject() (
-  val mcc: MessagesControllerComponents,
-  val ersConnector: ErsConnector,
-  val authConnector: DefaultAuthConnector,
-  val sessionService: SessionService,
-  val upscanService: UpscanService,
-  implicit val ersUtil: ERSUtil,
-  implicit val appConfig: ApplicationConfig,
-  implicit val actorSystem: ActorSystem,
-  globalErrorView: views.html.global_error,
-  fileUploadErrorsView: views.html.file_upload_errors,
-  upscanOdsFileUploadView: views.html.upscan_ods_file_upload,
-  fileUploadProblemView: views.html.file_upload_problem,
-  authAction: AuthAction
+                                       val mcc: MessagesControllerComponents,
+                                       val ersConnector: ErsConnector,
+                                       val authConnector: DefaultAuthConnector,
+                                       val sessionService: ERSFileValidatorSessionCacheServices,
+                                       val upscanService: UpscanService,
+                                       implicit val ersUtil: ERSUtil,
+                                       implicit val ersSessionCacheService: ERSSessionCacheService,
+                                       implicit val appConfig: ApplicationConfig,
+                                       implicit val actorSystem: ActorSystem,
+                                       globalErrorView: views.html.global_error,
+                                       fileUploadErrorsView: views.html.file_upload_errors,
+                                       upscanOdsFileUploadView: views.html.upscan_ods_file_upload,
+                                       fileUploadProblemView: views.html.file_upload_problem,
+                                       authAction: AuthAction
 ) extends FrontendController(mcc)
     with I18nSupport
     with Retryable
@@ -57,7 +59,7 @@ class FileUploadController @Inject() (
   implicit val ec: ExecutionContext = mcc.executionContext
 
   def uploadFilePage(): Action[AnyContent] = authAction.async { implicit request =>
-    val requestObjectFuture = ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
+    val requestObjectFuture = ersSessionCacheService.fetch[RequestObject](ersUtil.ersRequestObject)
     val upscanFormFuture    = upscanService.getUpscanFormDataOds()
     (for {
       requestObject <- requestObjectFuture
@@ -73,7 +75,7 @@ class FileUploadController @Inject() (
   }
 
   def success(): Action[AnyContent] = authAction.async { implicit request =>
-    val futureRequestObject: Future[RequestObject]       = ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
+    val futureRequestObject: Future[RequestObject]       = ersSessionCacheService.fetch[RequestObject](ersUtil.ersRequestObject)
     val futureCallbackData: Future[Option[UploadStatus]] =
       sessionService.getCallbackRecord.withRetry(appConfig.odsSuccessRetryAmount) { opt =>
         opt.fold(true) {
@@ -94,7 +96,7 @@ class FileUploadController @Inject() (
           logger.info("[FileUploadController][success] User uploaded a non ods file")
           Future(getFileUploadProblemPage())
         } else {
-          ersUtil.cache[String](ersUtil.FILE_NAME_CACHE, file.name, requestObject.getSchemeReference).map { _ =>
+          ersSessionCacheService.cache[String](ersUtil.FILE_NAME_CACHE, file.name, requestObject.getSchemeReference).map { _ =>
             Redirect(routes.FileUploadController.validationResults())
           }
         }
@@ -118,13 +120,13 @@ class FileUploadController @Inject() (
   }
 
   def validationResults(): Action[AnyContent] = authAction.async { implicit request =>
-    val futureRequestObject = ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
+    val futureRequestObject = ersSessionCacheService.fetch[RequestObject](ersUtil.ersRequestObject)
     val futureCallbackData  = sessionService.getCallbackRecord.withRetry(appConfig.odsValidationRetryAmount)(
       _.exists(_.isInstanceOf[UploadedSuccessfully])
     )
     (for {
       requestObject      <- futureRequestObject
-      all                <- ersUtil.fetch[ErsMetaData](ersUtil.ersMetaData, requestObject.getSchemeReference)
+      all                <- ersSessionCacheService.fetch[ErsMetaData](ersUtil.ersMetaData, requestObject.getSchemeReference)
       connectorResponse  <- ersConnector.removePresubmissionData(all.schemeInfo)
       callbackData       <- futureCallbackData
       validationResponse <-
@@ -165,7 +167,7 @@ class FileUploadController @Inject() (
           logger.info(
             s"[FileUploadController][handleValidationResponse] Validation is successful for schemeRef: $schemeRef, timestamp: ${System.currentTimeMillis()}."
           )
-          ersUtil.cache(ersUtil.VALIDATED_SHEEETS, res.body, schemeRef)
+          ersSessionCacheService.cache(ersUtil.VALIDATED_SHEEETS, res.body, schemeRef)
           Redirect(routes.SchemeOrganiserController.schemeOrganiserPage())
         case ACCEPTED =>
           logger.warn(
@@ -184,8 +186,8 @@ class FileUploadController @Inject() (
   def validationFailure(): Action[AnyContent] = authAction.async { implicit request =>
     logger.info("[FileUploadController][validationFailure] Validation Failure: " + (System.currentTimeMillis() / 1000))
     (for {
-      requestObject <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
-      fileType      <- ersUtil.fetch[CheckFileType](ersUtil.FILE_TYPE_CACHE, requestObject.getSchemeReference)
+      requestObject <- ersSessionCacheService.fetch[RequestObject](ersUtil.ersRequestObject)
+      fileType      <- ersSessionCacheService.fetch[CheckFileType](ersUtil.FILE_TYPE_CACHE, requestObject.getSchemeReference)
     } yield {
       Ok(fileUploadErrorsView(requestObject, fileType.checkFileType.getOrElse("")))
     }) recover {

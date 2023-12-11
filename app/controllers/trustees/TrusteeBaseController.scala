@@ -29,12 +29,14 @@ import services.TrusteeService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.ERSUtil
+import services.ERSSessionCacheService
 
 import scala.concurrent.{ExecutionContext, Future}
 
 trait TrusteeBaseController[A] extends FrontendController with I18nSupport with Logging {
 
   val ersUtil: ERSUtil
+  val ersSessionCacheService: ERSSessionCacheService
   val trusteeService: TrusteeService
   val authAction: AuthAction
   val globalErrorView: views.html.global_error
@@ -43,7 +45,7 @@ trait TrusteeBaseController[A] extends FrontendController with I18nSupport with 
   implicit val ec: ExecutionContext
   implicit val format: Format[A]
 
-  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier): Future[Result]
+  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier, request: Request[_]): Future[Result]
 
   def form(implicit request: Request[AnyContent]): Form[A]
 
@@ -52,14 +54,14 @@ trait TrusteeBaseController[A] extends FrontendController with I18nSupport with 
 
   def questionPage(index: Int): Action[AnyContent] = authAction.async {
     implicit request =>
-      ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
+      ersSessionCacheService.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
         showQuestionPage(requestObject, index)
       }
   }
 
   def showQuestionPage(requestObject: RequestObject, index: Int, edit: Boolean = false)
                       (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
-    ersUtil.fetchPartFromTrusteeDetailsList[A](index, requestObject.getSchemeReference).map { previousAnswer: Option[A] =>
+    ersSessionCacheService.fetchPartFromTrusteeDetailsList[A](index, requestObject.getSchemeReference).map { previousAnswer: Option[A] =>
       val preparedForm = if (previousAnswer.isDefined) form.fill(previousAnswer.get) else form
       Ok(view(requestObject, index, preparedForm, edit))
     } recover {
@@ -71,7 +73,7 @@ trait TrusteeBaseController[A] extends FrontendController with I18nSupport with 
 
   def questionSubmit(index: Int): Action[AnyContent] = authAction.async {
     implicit request =>
-      ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
+      ersSessionCacheService.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
         handleQuestionSubmit(requestObject, index)(request, hc)
       }
   }
@@ -84,15 +86,15 @@ trait TrusteeBaseController[A] extends FrontendController with I18nSupport with 
       },
       result => {
         if (edit) {
-          ersUtil.fetchTrusteesOptionally(requestObject.getSchemeReference).flatMap { trustees =>
+          ersSessionCacheService.fetchTrusteesOptionally(requestObject.getSchemeReference).flatMap { trustees =>
             val updatedTrustee = trustees.trustees(index).updatePart(result)
             val updatedTrustees = TrusteeDetailsList(trustees.trustees.updated(index, updatedTrustee))
-            ersUtil.cache[TrusteeDetailsList](ersUtil.TRUSTEES_CACHE, updatedTrustees, requestObject.getSchemeReference).flatMap{ _ =>
+            ersSessionCacheService.cache[TrusteeDetailsList](ersUtil.TRUSTEES_CACHE, updatedTrustees, requestObject.getSchemeReference).flatMap{ _ =>
               nextPageRedirect(index, edit)
             }
           }
         } else {
-          ersUtil.cache[A](cacheKey, result, requestObject.getSchemeReference).flatMap { _ =>
+          ersSessionCacheService.cache[A](cacheKey, result, requestObject.getSchemeReference).flatMap { _ =>
             nextPageRedirect(index, edit)
           }
         }
@@ -106,14 +108,14 @@ trait TrusteeBaseController[A] extends FrontendController with I18nSupport with 
 
   def editQuestion(index: Int): Action[AnyContent] = authAction.async {
     implicit request =>
-      ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
+      ersSessionCacheService.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
         showQuestionPage(requestObject, index, edit = true)(request, hc)
       }
   }
 
   def editQuestionSubmit(index: Int): Action[AnyContent] = authAction.async {
     implicit request =>
-      ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
+      ersSessionCacheService.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
         handleQuestionSubmit(requestObject, index, edit = true)(request, hc)
       }
   }
