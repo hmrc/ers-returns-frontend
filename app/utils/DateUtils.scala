@@ -34,7 +34,6 @@ object DateUtils extends Logging {
   }
 
   def convertDate(date: String, format: String = "dd MMMM yyyy, hh:mma")(implicit messages: Messages): String = {
-    logger.debug("Converting date : " + date)
     val locale: ULocale = new ULocale(messages.lang.code)
     val timeOut         = new com.ibm.icu.text.SimpleDateFormat("h:mma", locale)
     val dateOut         = new com.ibm.icu.text.SimpleDateFormat("E d MMMM yyyy", locale)
@@ -42,7 +41,6 @@ object DateUtils extends Logging {
     val originalDate    = dateFrm.parse(date)
     val on              = messages("ers-confirmation.submission_on")
 
-    logger.debug("The output is " + dateOut.format(originalDate))
     timeOut.format(originalDate) + s" $on " + dateOut.format(originalDate)
   }
 

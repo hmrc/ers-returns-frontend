@@ -16,6 +16,7 @@
 
 package controllers.trustees
 
+import controllers.auth.RequestWithOptionalAuthContext
 import models.{RequestObject, RsFormMappings, TrusteeAddress}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
@@ -71,7 +72,7 @@ class TrusteeAddressOverseasSpec  extends AnyWordSpecLike
   )
 
   "calling showQuestionPage" should {
-    implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+    implicit val authRequest: RequestWithOptionalAuthContext[AnyContent] = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
     setAuthMocks()
     when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any())).thenReturn(Future.successful(ersRequestObject))
 
@@ -107,11 +108,31 @@ class TrusteeAddressOverseasSpec  extends AnyWordSpecLike
     }
   }
 
+  "nextPageRedirect" should {
+    setAuthMocks()
+    when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any())).thenReturn(Future.successful(ersRequestObject))
+
+    "redirect to TrusteeSummaryController.trusteeSummaryPage if edit true" in {
+
+      val result = testController.nextPageRedirect(0, edit = true)
+
+      redirectLocation(result) shouldBe Some("/submit-your-ers-annual-return/trustees")
+    }
+
+    "update trustee cache and redirect to TrusteeSummaryController.trusteeSummaryPage if edit false" in {
+      when(mockTrusteeService.updateTrusteeCache(any())(any())).thenReturn(Future.successful(()))
+
+      val result = testController.nextPageRedirect(0, edit = false)
+
+      redirectLocation(result) shouldBe Some("/submit-your-ers-annual-return/trustees")
+    }
+  }
+
   "calling questionSubmit" should {
     "show the trustee address overseas form page with errors if the form is incorrectly filled" in {
       val trusteeAddressOverseasData = Map("addressLine1" -> "")
       val form = RsFormMappings.trusteeAddressOverseasForm().bind(trusteeAddressOverseasData)
-      implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*))
+      implicit val authRequest: RequestWithOptionalAuthContext[AnyContent] = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*))
       val result = testController.questionSubmit(1).apply(authRequest)
 
       status(result) shouldBe Status.BAD_REQUEST
@@ -126,7 +147,7 @@ class TrusteeAddressOverseasSpec  extends AnyWordSpecLike
 
       val trusteeAddressOverseasData = Map("addressLine1" -> "123 Fake Street")
       val form = RsFormMappings.trusteeAddressOverseasForm().bind(trusteeAddressOverseasData)
-      implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*))
+      implicit val authRequest: RequestWithOptionalAuthContext[AnyContent] = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*))
       val result = testController.questionSubmit(1).apply(authRequest)
 
       status(result) shouldBe Status.SEE_OTHER
@@ -135,7 +156,7 @@ class TrusteeAddressOverseasSpec  extends AnyWordSpecLike
   }
 
   "calling editQuestion" should {
-    implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+    implicit val authRequest: RequestWithOptionalAuthContext[AnyContent] = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
     setAuthMocks()
     when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any())).thenReturn(Future.successful(ersRequestObject))
 
