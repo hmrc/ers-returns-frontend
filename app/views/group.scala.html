@@ -50,7 +50,7 @@
 		))
 	}
 
-	@formWithCSRF(action = routes.GroupSchemeController.groupSchemeSelected(schemeId)) {
+	@formWithCSRF(action = controllers.subsidiaries.routes.GroupSchemeController.groupSchemeSelected(schemeId)) {
 
 		@govukRadios(Radios(
 			fieldset = Some(Fieldset(

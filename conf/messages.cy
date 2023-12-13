@@ -298,6 +298,8 @@ ers_manual_company_details.err.address_line3 = Gwiriwch drydedd linell y cyfeiri
 ers_manual_company_details.err.invalidChars.address_line3 = Gwiriwch drydedd linell y cyfeiriad (mae’n cynnwys cymeriadau annilys)
 ers_manual_company_details.err.address_line4 = Gwiriwch bedwaredd linell y cyfeiriad (mae’n rhaid iddi gynnwys llai na 19 o gymeriad)
 ers_manual_company_details.err.invalidChars.address_line4 = Gwiriwch bedwaredd linell y cyfeiriad (mae’n cynnwys cymeriadau annilys)
+ers_manual_company_details.err.address_line5 = Gwiriwch pumed linell y cyfeiriad (mae’n rhaid iddi gynnwys llai na 19 o gymeriad)
+ers_manual_company_details.err.invalidChars.address_line5 = Gwiriwch pumed linell y cyfeiriad (mae’n cynnwys cymeriadau annilys)
 ers_manual_company_details.err.postcode = Gwiriwch y cod post (mae’n rhaid iddo fod yn ddilys ac yn cynnwys llai na 9 cymeriad)
 ers_manual_company_details.err.summary.company_reg_pattern = Nodwch Rif Cofrestru’r Cwmni yn y fformat cywir
 ers_manual_company_details.err.corporation_ref =Nodwch gyfeirnod Treth Gorfforaeth dilys
@@ -316,6 +318,32 @@ ers_summary_declaration.saye.organiser = Trefnydd y cynllun
 ers_summary_declaration.emi.organiser = Manylion cwmni’r cyflogwr
 ers_summary_declaration.sip.organiser =Manylion y cwmni sefydlu
 ers_summary_declaration.other.organiser = Manylion y cwmni
+ers_manual_is_the_company_in_uk.title = Ymhle y mae’r cwmni wedi’i gofrestru?
+ers_manual_address_uk.title = Beth yw cyfeiriad y cwmni?
+ers_manual_address_uk.building = Adeilad a stryd
+ers_manual_address_uk.town = Tref neu Ddinas (dewisol)
+ers_manual_address_uk.county = Sir (dewisol)
+#TODO innit
+ers_company_address.line1 =   Cyfeiriad – llinell 1
+ers_company_address.line2 =   Cyfeiriad – llinell 2 (dewisol)
+ers_company_address.line3 =   Cyfeiriad – llinell 3 (dewisol)
+ers_company_address.line4 =   Cyfeiriad – llinell 4 (dewisol)
+ers_company_address.line5 =   Cyfeiriad – llinell 5 (dewisol)
+ers_company_address.country = Gwlad (dewisol)
+
+ers_company_summary.page_title = Cwmnïau yn y cynllun grŵp hwn
+ers_company_summary.company_name = Enw’r cwmni
+ers_company_summary.company_location = Ymhle y mae’r cwmni wedi’i gofrestru?
+ers_company_summary.add_company = A oes angen i chi ychwanegu cwmni arall?
+ers_company_summary.add_company.err = Dewiswch ie os oes angen i chi ychwanegu cwmni arall
+
+ers_manual_company_details_overseas.title = Beth yw enw’r cwmni?
+ers_manual_address_overseas.title = Beth yw cyfeiriad y cwmni?
+ers_company_address.line1 = Cyfeiriad – llinell 1
+ers_company_address.line2 = Cyfeiriad – llinell 2
+ers_company_address.line3 = Cyfeiriad – llinell 3
+ers_company_address.line4 = Cyfeiriad – llinell 4
+ers_company_address.line5 = Cyfeiriad – llinell 5
 
 ers_confirmation.page_title = Cadarnhad
 ers_confirmation.submitted = Mae eich Datganiad Blynyddol ar gyfer {0} wedi’i gyflwyno

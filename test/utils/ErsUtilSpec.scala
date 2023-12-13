@@ -367,7 +367,7 @@ class ErsUtilSpec
 
     val schemeCompanies = CompanyDetailsList(
       List(
-        CompanyDetails("Company name", "Company address", None, None, None, None, None, None, None)
+        CompanyDetails("Company name", "Company address", None, None, None, None, None, None, None, true)
       )
     )
 
@@ -494,14 +494,15 @@ class ErsUtilSpec
     "build an address summary from CompanyDetails" in {
       val companyDetails = CompanyDetails(
         "name",
-        addressLine1 = "ADDRESS1",
-        addressLine2 = Some("ADDRESS2"),
-        addressLine3 = None,
-        addressLine4 = None,
-        postcode = Some("AB123CD"),
-        country = Some("UK"),
-        companyReg = Some("ABC"),
-        corporationRef = Some("DEF")
+         addressLine1 = "ADDRESS1",
+         addressLine2 = Some("ADDRESS2"),
+         addressLine3 = None,
+         addressLine4 = None,
+         addressLine5 = Some("AB123CD"),
+         country = Some("UK"),
+         companyReg = Some("ABC"),
+         corporationRef = Some("DEF"),
+        basedInUk = true
       )
       val expected = "ADDRESS1, ADDRESS2, AB123CD, United Kingdom"
       val addressSummary = ersUtil.buildAddressSummary(companyDetails)

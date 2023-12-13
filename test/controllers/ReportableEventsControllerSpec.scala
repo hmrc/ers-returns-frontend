@@ -283,9 +283,9 @@ class ReportableEventsControllerSpec
       val authRequest                                     = buildRequestWithAuth(request)
 
       val result = controllerUnderTest.showReportableEventsSelected(ersRequestObject)(authRequest)
-      status(result)         shouldBe Status.SEE_OTHER
+      status(result)        shouldBe Status.SEE_OTHER
       result.futureValue.header
-        .headers("Location") shouldBe routes.SchemeOrganiserController.schemeOrganiserPage().toString
+        .headers("Location") shouldBe controllers.subsidiaries.routes.SubsidiaryBasedInUkController.questionPage.toString
     }
 
     "direct to ers errors page if fetching reportableEvents throws exception" in {

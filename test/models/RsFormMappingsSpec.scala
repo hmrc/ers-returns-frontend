@@ -24,7 +24,7 @@ import play.api.i18n.{Messages, MessagesApi}
 import play.api.libs.json.Json
 import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents}
 import play.api.test.Helpers.stubBodyParser
-import utils.{ErsTestHelper, Fixtures}
+import utils.ErsTestHelper
 
 import scala.concurrent.ExecutionContext
 
@@ -40,204 +40,310 @@ class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPer
     ExecutionContext.global
   )
 
-  "companyDetailsForm" must {
-    "return no errors with valid data" in {
-      val postData     = Json.obj(
-        companyDetailsFields.companyName  -> Fixtures.companyName,
-        companyDetailsFields.addressLine1 -> "Address Line 1"
-      )
-      val validateForm = companyDetailsForm().bind(postData, Form.FromJsonMaxChars)
-      assert(validateForm.errors.isEmpty)
-    }
-  }
-
   "companyName" must {
     "return an error if companyName missing" in {
-      val postData      = Json.obj(
-        companyDetailsFields.companyName  -> "",
-        companyDetailsFields.addressLine1 -> "Address Line 1"
+      val postData = Json.obj(
+        companyNameFields.companyName -> ""
+
       )
-      val validatedForm = companyDetailsForm().bind(postData, Form.FromJsonMaxChars)
-      assert(validatedForm.errors.head.key == companyDetailsFields.companyName)
-      assert(
-        validatedForm.errors.head.messages.head == Messages(
-          "ers_manual_company_details.err.summary.company_name_required"
-        )
-      )
+      val validatedForm = companyNameForm.bind(postData, Form.FromJsonMaxChars)
+      assert(validatedForm.errors.head.key == companyNameFields.companyName)
+      assert(validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.summary.company_name_required"))
     }
 
     "return an error if companyName size too large" in {
-      val postData      = Json.obj(
-        companyDetailsFields.companyName  -> randomString(121),
-        companyDetailsFields.addressLine1 -> "Address Line 1"
+      val postData = Json.obj(
+        companyNameFields.companyName -> randomString(121)
+
       )
-      val validatedForm = companyDetailsForm().bind(postData, Form.FromJsonMaxChars)
-      assert(validatedForm.errors.head.key == companyDetailsFields.companyName)
+      val validatedForm = companyNameForm.bind(postData, Form.FromJsonMaxChars)
+      assert(validatedForm.errors.head.key == companyNameFields.companyName)
       assert(validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.company_name"))
     }
 
     "return an error if companyName contains invalid chars" in {
-      val postData      = Json.obj(
-        companyDetailsFields.companyName  -> "<script>rm *.*</script>",
-        companyDetailsFields.addressLine1 -> "Address Line 1"
+      val postData = Json.obj(
+        companyNameFields.companyName -> "<script>rm *.*</script>"
       )
-      val validatedForm = companyDetailsForm().bind(postData, Form.FromJsonMaxChars)
-      assert(validatedForm.errors.head.key == companyDetailsFields.companyName)
-      assert(
-        validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.invalidChars.company_name")
+      val validatedForm = companyNameForm.bind(postData, Form.FromJsonMaxChars)
+      assert(validatedForm.errors.head.key == companyNameFields.companyName)
+      assert(validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.invalidChars.company_name"))
+    }
+
+    "return an error if companyReg size too large" in {
+      val postData = Json.obj(
+        companyNameFields.companyName -> " company name",
+        companyNameFields.companyReg -> randomString(121)
+
       )
+      val validatedForm = companyNameForm.bind(postData, Form.FromJsonMaxChars)
+      assert(validatedForm.errors.head.key == companyNameFields.companyReg)
+      assert(validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.company_reg"))
+    }
+
+    "return an error if companyReg contains invalid chars" in {
+      val postData = Json.obj(
+        companyNameFields.companyName -> " company name",
+        companyNameFields.companyReg -> "<script>rm *.*</script>"
+      )
+      val validatedForm = companyNameForm.bind(postData, Form.FromJsonMaxChars)
+      assert(validatedForm.errors.head.key == companyNameFields.companyReg)
+      assert(validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.company_reg"))
+    }
+
+    "return an error if corporationRef contains invalid chars" in {
+      val postData = Json.obj(
+        companyNameFields.companyName -> " company name",
+        companyNameFields.companyReg -> "company reg",
+        companyNameFields.corporationRef -> "<script>rm *.*</script>"
+      )
+      val validatedForm = companyNameForm.bind(postData, Form.FromJsonMaxChars)
+      assert(validatedForm.errors.head.key == companyNameFields.corporationRef)
+      assert(validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.corporation_ref"))
     }
   }
 
-  "addressLine1" must {
+    "companyAddressUk" must {
     "return an error if addressLine1 missing" in {
-      val postData      = Json.obj(
-        companyDetailsFields.companyName  -> Fixtures.companyName,
-        companyDetailsFields.addressLine1 -> ""
+      val postData = Json.obj(
+        companyAddressFields.addressLine1 -> ""
       )
-      val validatedForm = companyDetailsForm().bind(postData, Form.FromJsonMaxChars)
-      assert(validatedForm.errors.head.key == companyDetailsFields.addressLine1)
-      assert(
-        validatedForm.errors.head.messages.head == Messages(
-          "ers_manual_company_details.err.summary.address_line1_required"
-        )
-      )
+      val validatedForm = companyAddressUkForm.bind(postData, Form.FromJsonMaxChars)
+      assert(validatedForm.errors.head.key == companyAddressFields.addressLine1)
+      assert(validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.summary.address_line1_required"))
     }
 
     "return an error if addressLine1 size too large" in {
-      val postData      = Json.obj(
-        companyDetailsFields.companyName  -> Fixtures.companyName,
-        companyDetailsFields.addressLine1 -> randomString(28)
+      val postData = Json.obj(
+        companyAddressFields.addressLine1 -> randomString(28)
       )
-      val validatedForm = companyDetailsForm().bind(postData, Form.FromJsonMaxChars)
-      assert(validatedForm.errors.head.key == companyDetailsFields.addressLine1)
+      val validatedForm = companyAddressUkForm.bind(postData, Form.FromJsonMaxChars)
+      assert(validatedForm.errors.head.key == companyAddressFields.addressLine1)
       assert(validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.address_line1"))
     }
 
     "return an error if addressLine1 contains invalid chars" in {
-      val postData      = Json.obj(
-        companyDetailsFields.companyName  -> Fixtures.companyName,
-        companyDetailsFields.addressLine1 -> "<script>rm *.*</script>"
+      val postData = Json.obj(
+        companyAddressFields.addressLine1 -> "<script>rm *.*</script>"
       )
-      val validatedForm = companyDetailsForm().bind(postData, Form.FromJsonMaxChars)
-      assert(validatedForm.errors.head.key == companyDetailsFields.addressLine1)
-      assert(
-        validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.invalidChars.address_line1")
-      )
+      val validatedForm = companyAddressUkForm.bind(postData, Form.FromJsonMaxChars)
+      assert(validatedForm.errors.head.key == companyAddressFields.addressLine1)
+      assert(validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.invalidChars.address_line1"))
     }
-  }
 
-  "addressLine2" must {
     "return an error if addressLine2 size too large" in {
-      val postData      = Json.obj(
-        companyDetailsFields.companyName  -> Fixtures.companyName,
-        companyDetailsFields.addressLine1 -> "Address Line 1",
-        companyDetailsFields.addressLine2 -> randomString(28)
+      val postData = Json.obj(
+        companyAddressFields.addressLine1 -> "Address Line 1",
+        companyAddressFields.addressLine2 -> randomString(28)
       )
-      val validatedForm = companyDetailsForm().bind(postData, Form.FromJsonMaxChars)
-      assert(validatedForm.errors.head.key == companyDetailsFields.addressLine2)
+      val validatedForm = companyAddressUkForm.bind(postData, Form.FromJsonMaxChars)
+      assert(validatedForm.errors.head.key == companyAddressFields.addressLine2)
       assert(validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.address_line2"))
     }
 
     "return an error if addressLine2 contains invalid chars" in {
-      val postData      = Json.obj(
-        companyDetailsFields.companyName  -> Fixtures.companyName,
-        companyDetailsFields.addressLine1 -> "Address Line 1",
-        companyDetailsFields.addressLine2 -> "<script>rm *.*</script>"
+      val postData = Json.obj(
+        companyAddressFields.addressLine1 -> "Address Line 1",
+        companyAddressFields.addressLine2 -> "<script>rm *.*</script>"
       )
-      val validatedForm = companyDetailsForm().bind(postData, Form.FromJsonMaxChars)
-      assert(validatedForm.errors.head.key == companyDetailsFields.addressLine2)
-      assert(
-        validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.invalidChars.address_line2")
-      )
+      val validatedForm = companyAddressUkForm.bind(postData, Form.FromJsonMaxChars)
+      assert(validatedForm.errors.head.key == companyAddressFields.addressLine2)
+      assert(validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.invalidChars.address_line2"))
     }
-  }
 
-  "addressLine3" must {
     "return an error if addressLine3 size too large" in {
-      val postData      = Json.obj(
-        companyDetailsFields.companyName  -> Fixtures.companyName,
-        companyDetailsFields.addressLine1 -> "Address Line 1",
-        companyDetailsFields.addressLine2 -> "Address Line 2",
-        companyDetailsFields.addressLine3 -> randomString(28)
+      val postData = Json.obj(
+        companyAddressFields.addressLine1 -> "Address Line 1",
+        companyAddressFields.addressLine2 -> "Address Line 2",
+        companyAddressFields.addressLine3 -> randomString(28)
       )
-      val validatedForm = companyDetailsForm().bind(postData, Form.FromJsonMaxChars)
-      assert(validatedForm.errors.head.key == companyDetailsFields.addressLine3)
+      val validatedForm = companyAddressUkForm.bind(postData, Form.FromJsonMaxChars)
+      assert(validatedForm.errors.head.key == companyAddressFields.addressLine3)
       assert(validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.address_line3"))
     }
 
     "return an error if addressLine3 contains invalid chars" in {
-      val postData      = Json.obj(
-        companyDetailsFields.companyName  -> Fixtures.companyName,
-        companyDetailsFields.addressLine1 -> "Address Line 1",
-        companyDetailsFields.addressLine2 -> "Address Line 2",
-        companyDetailsFields.addressLine3 -> "<script>rm *.*</script>"
+      val postData = Json.obj(
+        companyAddressFields.addressLine1 -> "Address Line 1",
+        companyAddressFields.addressLine2 -> "Address Line 2",
+        companyAddressFields.addressLine3 -> "<script>rm *.*</script>"
       )
-      val validatedForm = companyDetailsForm().bind(postData, Form.FromJsonMaxChars)
-      assert(validatedForm.errors.head.key == companyDetailsFields.addressLine3)
-      assert(
-        validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.invalidChars.address_line3")
-      )
+      val validatedForm = companyAddressUkForm.bind(postData, Form.FromJsonMaxChars)
+      assert(validatedForm.errors.head.key == companyAddressFields.addressLine3)
+      assert(validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.invalidChars.address_line3"))
     }
-  }
 
-  "addressLine4" must {
     "return an error if addressLine4 size too large" in {
-      val postData      = Json.obj(
-        companyDetailsFields.companyName  -> Fixtures.companyName,
-        companyDetailsFields.addressLine1 -> "Address Line 1",
-        companyDetailsFields.addressLine2 -> "Address Line 2",
-        companyDetailsFields.addressLine3 -> "Address Line 3",
-        companyDetailsFields.addressLine4 -> randomString(19)
+      val postData = Json.obj(
+        companyAddressFields.addressLine1 -> "Address Line 1",
+        companyAddressFields.addressLine2 -> "Address Line 2",
+        companyAddressFields.addressLine3 -> "Address Line 3",
+        companyAddressFields.addressLine4 -> randomString(30)
       )
-      val validatedForm = companyDetailsForm().bind(postData, Form.FromJsonMaxChars)
-      assert(validatedForm.errors.head.key == companyDetailsFields.addressLine4)
+      val validatedForm = companyAddressUkForm.bind(postData, Form.FromJsonMaxChars)
+      assert(validatedForm.errors.head.key == companyAddressFields.addressLine4)
       assert(validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.address_line4"))
     }
 
     "return an error if addressLine4 contains invalid chars" in {
-      val postData      = Json.obj(
-        companyDetailsFields.companyName  -> Fixtures.companyName,
-        companyDetailsFields.addressLine1 -> "Address Line 1",
-        companyDetailsFields.addressLine2 -> "Address Line 2",
-        companyDetailsFields.addressLine3 -> "Address Line 3",
-        companyDetailsFields.addressLine4 -> "<script>rm *.*</script>"
+      val postData = Json.obj(
+        companyAddressFields.addressLine1 -> "Address Line 1",
+        companyAddressFields.addressLine2 -> "Address Line 2",
+        companyAddressFields.addressLine3 -> "Address Line 3",
+        companyAddressFields.addressLine4 -> "<script>rm *.*</script>"
       )
-      val validatedForm = companyDetailsForm().bind(postData, Form.FromJsonMaxChars)
-      assert(validatedForm.errors.head.key == companyDetailsFields.addressLine4)
-      val errors        = validatedForm.errors.map(formError => formError.messages.head)
+      val validatedForm = companyAddressUkForm.bind(postData, Form.FromJsonMaxChars)
+      assert(validatedForm.errors.head.key == companyAddressFields.addressLine4)
+      val errors = validatedForm.errors.map(formError => formError.messages.head)
       assert(errors.contains(Messages("ers_manual_company_details.err.invalidChars.address_line4")))
-      assert(errors.contains(Messages("ers_manual_company_details.err.address_line4")))
     }
-  }
 
-  "postCode" must {
     "return an error if postCode size too large" in {
-      val postData      = Json.obj(
-        companyDetailsFields.companyName  -> Fixtures.companyName,
-        companyDetailsFields.addressLine1 -> "Address Line 1",
-        companyDetailsFields.addressLine2 -> "Address Line 2",
-        companyDetailsFields.addressLine3 -> "Address Line 3",
-        companyDetailsFields.addressLine4 -> "Address Line 4",
-        companyDetailsFields.postcode     -> randomString(9)
+      val postData = Json.obj(
+        companyAddressFields.addressLine1 -> "Address Line 1",
+        companyAddressFields.addressLine2 -> "Address Line 2",
+        companyAddressFields.addressLine3 -> "Address Line 3",
+        companyAddressFields.addressLine4 -> "Address Line 4",
+        companyAddressFields.addressLine5 -> randomString(9)
       )
-      val validatedForm = companyDetailsForm().bind(postData, Form.FromJsonMaxChars)
-      assert(validatedForm.errors.head.key == companyDetailsFields.postcode)
+      val validatedForm = companyAddressUkForm.bind(postData, Form.FromJsonMaxChars)
+      assert(validatedForm.errors.head.key == companyAddressFields.addressLine5)
       assert(validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.postcode"))
     }
 
     "return an error if postCode contains invalid chars" in {
-      val postData      = Json.obj(
-        companyDetailsFields.companyName  -> Fixtures.companyName,
-        companyDetailsFields.addressLine1 -> "Address Line 1",
-        companyDetailsFields.addressLine2 -> "Address Line 2",
-        companyDetailsFields.addressLine3 -> "Address Line 3",
-        companyDetailsFields.addressLine4 -> "Address Line 4",
-        companyDetailsFields.postcode     -> "??&&$$"
+      val postData = Json.obj(
+        companyAddressFields.addressLine1 -> "Address Line 1",
+        companyAddressFields.addressLine2 -> "Address Line 2",
+        companyAddressFields.addressLine3 -> "Address Line 3",
+        companyAddressFields.addressLine4 -> "Address Line 4",
+        companyAddressFields.addressLine5 ->"??&&$$"
       )
-      val validatedForm = companyDetailsForm().bind(postData, Form.FromJsonMaxChars)
-      assert(validatedForm.errors.head.key == companyDetailsFields.postcode)
+      val validatedForm = companyAddressUkForm.bind(postData, Form.FromJsonMaxChars)
+      assert(validatedForm.errors.head.key == companyAddressFields.addressLine5)
       assert(validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.postcode"))
+    }
+  }
+
+  "companyAddressOverseas" must {
+    "return an error if addressLine1 missing" in {
+      val postData = Json.obj(
+        companyAddressFields.addressLine1 -> ""
+      )
+      val validatedForm = companyAddressOverseasForm.bind(postData, Form.FromJsonMaxChars)
+      assert(validatedForm.errors.head.key == companyAddressFields.addressLine1)
+      assert(validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.address_line1_required"))
+    }
+
+    "return an error if addressLine1 size too large" in {
+      val postData = Json.obj(
+        companyAddressFields.addressLine1 -> randomString(28)
+      )
+      val validatedForm = companyAddressOverseasForm.bind(postData, Form.FromJsonMaxChars)
+      assert(validatedForm.errors.head.key == companyAddressFields.addressLine1)
+      assert(validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.address_line1"))
+    }
+
+    "return an error if addressLine1 contains invalid chars" in {
+      val postData = Json.obj(
+        companyAddressFields.addressLine1 -> "<script>rm *.*</script>"
+      )
+      val validatedForm = companyAddressOverseasForm.bind(postData, Form.FromJsonMaxChars)
+      assert(validatedForm.errors.head.key == companyAddressFields.addressLine1)
+      assert(validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.invalidChars.address_line1"))
+    }
+
+    "return an error if addressLine2 size too large" in {
+      val postData = Json.obj(
+        companyAddressFields.addressLine1 -> "Address Line 1",
+        companyAddressFields.addressLine2 -> randomString(28)
+      )
+      val validatedForm = companyAddressOverseasForm.bind(postData, Form.FromJsonMaxChars)
+      assert(validatedForm.errors.head.key == companyAddressFields.addressLine2)
+      assert(validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.address_line2"))
+    }
+
+    "return an error if addressLine2 contains invalid chars" in {
+      val postData = Json.obj(
+        companyAddressFields.addressLine1 -> "Address Line 1",
+        companyAddressFields.addressLine2 -> "<script>rm *.*</script>"
+      )
+      val validatedForm = companyAddressOverseasForm.bind(postData, Form.FromJsonMaxChars)
+      assert(validatedForm.errors.head.key == companyAddressFields.addressLine2)
+      assert(validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.invalidChars.address_line2"))
+    }
+
+    "return an error if addressLine3 size too large" in {
+      val postData = Json.obj(
+        companyAddressFields.addressLine1 -> "Address Line 1",
+        companyAddressFields.addressLine2 -> "Address Line 2",
+        companyAddressFields.addressLine3 -> randomString(28)
+      )
+      val validatedForm = companyAddressOverseasForm.bind(postData, Form.FromJsonMaxChars)
+      assert(validatedForm.errors.head.key == companyAddressFields.addressLine3)
+      assert(validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.address_line3"))
+    }
+
+    "return an error if addressLine3 contains invalid chars" in {
+      val postData = Json.obj(
+        companyAddressFields.addressLine1 -> "Address Line 1",
+        companyAddressFields.addressLine2 -> "Address Line 2",
+        companyAddressFields.addressLine3 -> "<script>rm *.*</script>"
+      )
+      val validatedForm = companyAddressOverseasForm.bind(postData, Form.FromJsonMaxChars)
+      assert(validatedForm.errors.head.key == companyAddressFields.addressLine3)
+      assert(validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.invalidChars.address_line3"))
+    }
+
+    "return an error if addressLine4 size too large" in {
+      val postData = Json.obj(
+        companyAddressFields.addressLine1 -> "Address Line 1",
+        companyAddressFields.addressLine2 -> "Address Line 2",
+        companyAddressFields.addressLine3 -> "Address Line 3",
+        companyAddressFields.addressLine4 -> randomString(30)
+      )
+      val validatedForm = companyAddressOverseasForm.bind(postData, Form.FromJsonMaxChars)
+      assert(validatedForm.errors.head.key == companyAddressFields.addressLine4)
+      assert(validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.address_line4"))
+    }
+
+    "return an error if addressLine4 contains invalid chars" in {
+      val postData = Json.obj(
+        companyAddressFields.addressLine1 -> "Address Line 1",
+        companyAddressFields.addressLine2 -> "Address Line 2",
+        companyAddressFields.addressLine3 -> "Address Line 3",
+        companyAddressFields.addressLine4 -> "<script>rm *.*</script>"
+      )
+      val validatedForm = companyAddressOverseasForm.bind(postData, Form.FromJsonMaxChars)
+      assert(validatedForm.errors.head.key == companyAddressFields.addressLine4)
+      val errors = validatedForm.errors.map(formError => formError.messages.head)
+      assert(errors.contains(Messages("ers_manual_company_details.err.invalidChars.address_line4")))
+    }
+
+    "return an error if postCode size too large" in {
+      val postData = Json.obj(
+        companyAddressFields.addressLine1 -> "Address Line 1",
+        companyAddressFields.addressLine2 -> "Address Line 2",
+        companyAddressFields.addressLine3 -> "Address Line 3",
+        companyAddressFields.addressLine4 -> "Address Line 4",
+        companyAddressFields.addressLine5 -> randomString(9)
+      )
+      val validatedForm = companyAddressOverseasForm.bind(postData, Form.FromJsonMaxChars)
+      assert(validatedForm.errors.head.key == companyAddressFields.addressLine5)
+      assert(validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.postcode"))
+    }
+
+    "return an error if postCode contains invalid chars" in {
+      val postData = Json.obj(
+        companyAddressFields.addressLine1 -> "Address Line 1",
+        companyAddressFields.addressLine2 -> "Address Line 2",
+        companyAddressFields.addressLine3 -> "Address Line 3",
+        companyAddressFields.addressLine4 -> "Address Line 4",
+        companyAddressFields.addressLine5 ->"??&&$$"
+      )
+      val validatedForm = companyAddressOverseasForm.bind(postData, Form.FromJsonMaxChars)
+      assert(validatedForm.errors.head.key == companyAddressFields.addressLine5)
+      assert(validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.invalidChars.address_line5"))
     }
   }
 

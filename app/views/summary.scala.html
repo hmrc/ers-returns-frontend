@@ -104,7 +104,7 @@
                 actions = Some(Actions(
                     items = Seq(
                         ActionItem(
-                            href = routes.SchemeOrganiserController.schemeOrganiserPage().url,
+                            href = controllers.schemeOrganiser.routes.SchemeOrganiserController.schemeOrganiserPage().url,
                             content = Text(messages("ers_summary_declaration.change_this")),
                             visuallyHiddenText = Some(ersUtil.getPageElement(schemeId, ersUtil.PAGE_SUMMARY_DECLARATION, "organiser"))
                         )
@@ -126,7 +126,7 @@
                 actions = Some(Actions(
                     items = Seq(
                         ActionItem(
-                            href = routes.GroupSchemeController.groupSchemePage().url,
+                            href = controllers.subsidiaries.routes.GroupSchemeController.groupSchemePage().url,
                             content = Text(messages("ers_summary_declaration.change_this")),
                             visuallyHiddenText = Some(ersUtil.getPageElement(schemeId, ersUtil.PAGE_GROUP_ACTIVITY, "question"))
                         )
@@ -143,7 +143,7 @@
                 actions = Some(Actions(
                     items = Seq(
                         ActionItem(
-                            href = routes.GroupSchemeController.groupSchemePage().url,
+                            href = controllers.subsidiaries.routes.GroupSchemeController.groupSchemePage().url,
                             content = Text(messages("ers_summary_declaration.change_this")),
                             visuallyHiddenText = Some(ersUtil.getPageElement(schemeId, ersUtil.PAGE_GROUP_SUMMARY, "title"))
                         )

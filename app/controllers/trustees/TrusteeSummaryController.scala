@@ -57,7 +57,6 @@ class TrusteeSummaryController @Inject()(val mcc: MessagesControllerComponents,
       _                  <- ersUtil.cache(ersUtil.TRUSTEES_CACHE, trusteeDetailsList, requestObject.getSchemeReference)
     } yield {
       Redirect(controllers.trustees.routes.TrusteeSummaryController.trusteeSummaryPage())
-
     }) recover {
       case _: Exception => getGlobalErrorPage
     }

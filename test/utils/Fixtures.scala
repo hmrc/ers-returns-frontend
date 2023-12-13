@@ -172,7 +172,8 @@ object Fixtures extends AuthHelper {
     Some("AA1 1AA"),
     Some("United Kingdom"),
     Some("1234567890"),
-    Some("1234567890")
+    Some("1234567890"),
+    true
   )
 
   val groupScheme = GroupSchemeInfo(Some("1"), Some("emi"))
@@ -208,6 +209,24 @@ object Fixtures extends AuthHelper {
       Some("ts"),
       Some("hmac")
     )
+
+  val companyAddressOverseas: CompanyAddress = CompanyAddress(
+    "Overseas 1",
+    Some("2"),
+    Some("3"),
+    Some("4"),
+    Some("5"),
+    Some("country")
+  )
+
+  val companyAddressUK: CompanyAddress = CompanyAddress(
+    "UK 1",
+    Some("2"),
+    Some("3"),
+    Some("4"),
+    Some("5"),
+    Some("UK")
+  )
 
   val trusteeAddressOverseas: TrusteeAddress = TrusteeAddress(
     "Overseas line 1",

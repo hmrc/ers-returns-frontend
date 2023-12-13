@@ -77,6 +77,7 @@ class SummaryDeclarationControllerSpec
   val rsc: ErsMetaData       =
     new ErsMetaData(schemeInfo, "ipRef", Some("aoRef"), "empRef", Some("agentRef"), Some("sapNumber"))
 
+
   val schemeOrganiser: SchemeOrganiserDetails = new SchemeOrganiserDetails(
     Fixtures.companyName,
     "Add1",
@@ -90,7 +91,7 @@ class SummaryDeclarationControllerSpec
   )
   val groupSchemeInfo: GroupSchemeInfo        = new GroupSchemeInfo(Option("1"), None)
   val gscomp: CompanyDetails                  =
-    new CompanyDetails(Fixtures.companyName, "Adress Line 1", None, None, None, None, None, None, None)
+    new CompanyDetails(Fixtures.companyName, "Adress Line 1", None, None, None, None, None, None, None, true)
   val gscomps: CompanyDetailsList             = new CompanyDetailsList(List(gscomp))
 
 	val reportableEvents: ReportableEvents = new ReportableEvents(Some("1"))
@@ -114,6 +115,7 @@ class SummaryDeclarationControllerSpec
   )
 
   class TestErsUtil(fetchAllMapVal: String) extends ERSUtil(mockSessionCache, mockShortLivedCache, mockAppConfig) {
+
 
 		override def cache[T](key: String, body: T, cacheId: String)
 												 (implicit hc: HeaderCarrier, formats: json.Format[T]): Future[CacheMap] = {

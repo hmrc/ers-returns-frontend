@@ -14,28 +14,26 @@
  * limitations under the License.
  */
 
-package controllers.trustees
+package controllers.schemeOrganiser
 
 import config.ApplicationConfig
 import controllers.auth.{AuthAction, RequestWithOptionalAuthContext}
-import models.{RequestObject, TrusteeDetailsList}
+import models.{CompanyDetails, CompanyDetailsList, RequestObject}
 import play.api.Logging
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.libs.json.Format
 import play.api.mvc.{Action, AnyContent, Request, Result}
 import play.twirl.api.Html
-import services.TrusteeService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.ERSUtil
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait TrusteeBaseController[A] extends FrontendController with I18nSupport with Logging {
+trait SchemeOrganiserBaseController[A] extends FrontendController with I18nSupport with Logging {
 
   val ersUtil: ERSUtil
-  val trusteeService: TrusteeService
   val authAction: AuthAction
   val globalErrorView: views.html.global_error
   val appConfig: ApplicationConfig
@@ -50,6 +48,7 @@ trait TrusteeBaseController[A] extends FrontendController with I18nSupport with 
   def view(requestObject: RequestObject, index: Int, form: Form[A], edit: Boolean = false)
           (implicit request: Request[AnyContent], hc: HeaderCarrier): Html
 
+
   def questionPage(index: Int): Action[AnyContent] = authAction.async {
     implicit request =>
       ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
@@ -59,35 +58,38 @@ trait TrusteeBaseController[A] extends FrontendController with I18nSupport with 
 
   def showQuestionPage(requestObject: RequestObject, index: Int, edit: Boolean = false)
                       (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
-    ersUtil.fetchPartFromTrusteeDetailsList[A](index, requestObject.getSchemeReference).map { previousAnswer: Option[A] =>
+    ersUtil.fetchPartFromCompanyDetails[A](requestObject.getSchemeReference).map { previousAnswer: Option[A] =>
       val preparedForm = previousAnswer.fold(form)(form.fill(_))
       Ok(view(requestObject, index, preparedForm, edit))
     } recover {
-      case e: Throwable =>
-        logger.error(s"[${this.getClass.getSimpleName}][showQuestionPage] Get data from cache failed with exception ${e.getMessage}")
+      case e: Exception =>
+        logger.error(s"[SubsidiariesController][showSubsidiariesNamePage] Get data from cache failed with exception ${e.getMessage}")
         getGlobalErrorPage
     }
   }
 
+
   def questionSubmit(index: Int): Action[AnyContent] = authAction.async {
     implicit request =>
       ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
-        handleQuestionSubmit(requestObject, index)(request, hc)
+        submissionHandler(requestObject, index)(request, hc)
       }
   }
 
-  def handleQuestionSubmit(requestObject: RequestObject, index: Int, edit: Boolean = false)
-                          (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
+  def submissionHandler(requestObject: RequestObject, index: Int, edit: Boolean = false)
+                       (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
     form.bindFromRequest().fold(
       errors => {
+        logger.error(errors.errors.mkString)
         Future.successful(BadRequest(view(requestObject, index, errors, edit)))
       },
       result => {
         if (edit) {
-          ersUtil.fetchTrusteesOptionally(requestObject.getSchemeReference).flatMap { trustees =>
-            val updatedTrustee = trustees.trustees(index).updatePart(result)
-            val updatedTrustees = TrusteeDetailsList(trustees.trustees.updated(index, updatedTrustee))
-            ersUtil.cache[TrusteeDetailsList](ersUtil.TRUSTEES_CACHE, updatedTrustees, requestObject.getSchemeReference).flatMap{ _ =>
+          ersUtil.fetch[CompanyDetails](ersUtil.SCHEME_ORGANISER_CACHE, requestObject.getSchemeReference).flatMap { schemeOrganiser =>
+            println(s"schemeOrganiser: $schemeOrganiser")
+            val updatedSchemeOrganiser = schemeOrganiser.updatePart(result)
+            println(s"updatedSchemeOrganiser: $updatedSchemeOrganiser")
+            ersUtil.cache[CompanyDetails](ersUtil.SCHEME_ORGANISER_CACHE, updatedSchemeOrganiser, requestObject.getSchemeReference).flatMap { _ =>
               nextPageRedirect(index, edit)
             }
           }
@@ -98,14 +100,16 @@ trait TrusteeBaseController[A] extends FrontendController with I18nSupport with 
         }
       }
     ).recover {
-      case _ =>
-        logger.error(s"[${this.getClass.getSimpleName}][handleQuestionSubmit] Error occurred while updating trustee cache")
-      getGlobalErrorPage
+      case e: Exception =>
+        logger.error(s"Exception: ${e.getStackTrace.mkString("\n", "\n", "\n")}\n")
+        logger.error(s"[${this.getClass.getSimpleName}][submissionHandler] Error occurred while updating company cache")
+        getGlobalErrorPage
     }
   }
 
-  def editQuestion(index: Int): Action[AnyContent] = authAction.async {
+  def editCompany(index: Int): Action[AnyContent] = authAction.async {
     implicit request =>
+      println(s"\n\n[${this.getClass.getSimpleName}] index is $index ")
       ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
         showQuestionPage(requestObject, index, edit = true)(request, hc)
       }
@@ -114,7 +118,7 @@ trait TrusteeBaseController[A] extends FrontendController with I18nSupport with 
   def editQuestionSubmit(index: Int): Action[AnyContent] = authAction.async {
     implicit request =>
       ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
-        handleQuestionSubmit(requestObject, index, edit = true)(request, hc)
+        submissionHandler(requestObject, index, edit = true)(request, hc)
       }
   }
 

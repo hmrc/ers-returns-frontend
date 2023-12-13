@@ -76,12 +76,12 @@ class ReportableEventsController @Inject() (
           getGlobalErrorPage
         }
       } recover { case e: NoSuchElementException =>
-        logger.error(
-          s"[ReportableEventsController][updateErsMetaData] fetch failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}."
-        )
-        getGlobalErrorPage
-      }
+      logger.error(
+        s"[ReportableEventsController][updateErsMetaData] fetch failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}."
+      )
+      getGlobalErrorPage
     }
+}
 
   def showReportableEventsPage(
     requestObject: RequestObject
@@ -115,7 +115,7 @@ class ReportableEventsController @Inject() (
         formData =>
           ersUtil.cache(ersUtil.reportableEvents, formData, requestObject.getSchemeReference).map { _ =>
             if (formData.isNilReturn.get == ersUtil.OPTION_NIL_RETURN) {
-              Redirect(routes.SchemeOrganiserController.schemeOrganiserPage())
+              Redirect(controllers.schemeOrganiser.routes.SchemeOrganiserBasedInUkController.questionPage())
             } else {
               logger.info(
                 s"[ReportableEventsController][showReportableEventsSelected] Redirecting to FileUpload controller to get Partial, timestamp: ${System.currentTimeMillis()}."
