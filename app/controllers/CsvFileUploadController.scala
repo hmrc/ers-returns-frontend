@@ -245,7 +245,7 @@ class CsvFileUploadController @Inject() (
               s"timestamp: ${System.currentTimeMillis()}."
           )
           ersUtil.cache(ersUtil.VALIDATED_SHEEETS, res.body, schemeInfo.schemeRef)
-          Redirect(routes.SchemeOrganiserController.schemeOrganiserPage())
+          Redirect(controllers.schemeOrganiser.routes.SchemeOrganiserController.schemeOrganiserPage())
         case ACCEPTED =>
           logger.warn(
             s"[CsvFileUploadController][validateCsv] Validation is not successful for schemeRef: ${schemeInfo.schemeRef}, " +

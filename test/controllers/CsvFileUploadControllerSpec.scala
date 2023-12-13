@@ -35,6 +35,7 @@ import play.api.i18n
 import play.api.i18n.{MessagesApi, MessagesImpl}
 import play.api.libs.json.Json
 import play.api.mvc._
+import play.api.routing.Router.empty.routes
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentAsString, _}
 import services.{SessionService, UpscanService}

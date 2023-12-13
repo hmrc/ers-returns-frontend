@@ -16,6 +16,7 @@
 
 package controllers
 
+import controllers.schemeOrganiser.SchemeOrganiserController
 import models._
 import org.jsoup.Jsoup
 import org.mockito.ArgumentMatchers._
@@ -279,7 +280,7 @@ class SchemeOrganiserControllerSpec
 
       val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(authRequest, hc)
       status(result)                                shouldBe Status.SEE_OTHER
-      result.futureValue.header.headers("Location") shouldBe routes.GroupSchemeController.groupSchemePage().toString
+      result.futureValue.header.headers("Location") shouldBe controllers.subsidiaries.routes.GroupSchemeController.groupSchemePage().toString
     }
 
     "direct to ers errors page if saving scheme organiser data throws exception" in {

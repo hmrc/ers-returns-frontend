@@ -63,7 +63,7 @@
 		text = ersUtil.getPageElement(schemeId, ersUtil.PAGE_SCHEME_ORGANISER, "title")
 	))
 
-	@formWithCSRF(action = routes.SchemeOrganiserController.schemeOrganiserSubmit()) {
+	@formWithCSRF(action = controllers.schemeOrganiser.routes.SchemeOrganiserController.schemeOrganiserSubmit()) {
 
 		@govukRadios(Radios(
 			fieldset = Some(Fieldset(
