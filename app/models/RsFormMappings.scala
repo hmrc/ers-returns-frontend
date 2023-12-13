@@ -288,11 +288,9 @@ object RsFormMappings {
       .transform(int => if (int == "0") true else false, (bool: Boolean) => if (bool) "0" else "1")
   )(CompanyBasedInUk.apply)(CompanyBasedInUk.unapply))
 
-
   object companyBasedInUkFields {
     val basedInUk = "basedInUk"
   }
-
 
   def companyNameForm()(implicit messages: Messages): Form[Company] = Form(mapping(
     companyNameFields.companyName -> text
@@ -305,6 +303,11 @@ object RsFormMappings {
     companyNameFields.corporationRef -> optional(text
       verifying pattern(corporationRefPattern.r, error = Messages("ers_manual_company_details.err.corporation_ref")))
   )(Company.apply)(Company.unapply(_)))
+
+  def addSubsidiaryForm(): Form[AddCompany] = Form(mapping(
+    "addCompany" -> nonEmptyText
+      .transform(int => if (int == "0") true else false, (bool: Boolean) => if (bool) "0" else "1")
+  )(AddCompany.apply)(AddCompany.unapply))
 
   /*
 * scheme type Form definition.

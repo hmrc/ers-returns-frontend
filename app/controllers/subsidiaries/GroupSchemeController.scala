@@ -148,32 +148,55 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
     hc: HeaderCarrier
   ): Future[Result] =
     (for {
-      requestObject <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
-      compDetails   <- ersUtil.fetch[CompanyDetailsList](ersUtil.SCHEME_ORGANISER_CACHE, requestObject.getSchemeReference)
-    } yield Ok(groupPlanSummaryView(requestObject, ersUtil.OPTION_MANUAL, compDetails))) recover { case e: Exception =>
+      requestObject      <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
+      companyDetailsList <- ersUtil.fetch[CompanyDetailsList](ersUtil.SUBSIDIARY_COMPANIES_CACHE, requestObject.getSchemeReference)
+    } yield {
+      if (companyDetailsList.companies.isEmpty) {
+        Redirect(controllers.subsidiaries.routes.GroupSchemeController.groupSchemePage())
+      } else {
+        Ok(groupPlanSummaryView(requestObject, ersUtil.OPTION_MANUAL, companyDetailsList))
+      }
+
+    }) recover { case e: Exception =>
       logger.error(
-        s"[GroupSchemeController][showGroupPlanSummaryPage]Fetch group scheme companies before call to group plan summary page failed with exception ${e.getMessage}, " +
+        s"[GroupSchemeController][showGroupPlanSummaryPage] Fetch group scheme companies before call to group plan summary page failed with exception ${e.getMessage}, " +
           s"timestamp: ${System.currentTimeMillis()}."
       )
       getGlobalErrorPage
     }
 
-  def groupPlanSummaryContinue(scheme: String): Action[AnyContent] = authAction.async {
+  def groupPlanSummaryContinue(scheme: String): Action[AnyContent] = authAction.async { implicit request =>
     continueFromGroupPlanSummaryPage(scheme)
   }
 
-  def continueFromGroupPlanSummaryPage(scheme: String): Future[Result] =
-    scheme match {
-      case ersUtil.SCHEME_CSOP | ersUtil.SCHEME_SAYE =>
-        Future(Redirect(routes.AltAmendsController.altActivityPage()))
+  def continueFromGroupPlanSummaryPage(scheme: String)(implicit request: Request[_]): Future[Result] = {
+    RsFormMappings.addSubsidiaryForm().bindFromRequest().fold(
+      _ => {
+        for {
+          requestObject <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
+          companyDetailsList <- ersUtil.fetchCompaniesOptionally(requestObject.getSchemeReference)
+        } yield {
+          BadRequest(groupPlanSummaryView(requestObject, ersUtil.OPTION_MANUAL, companyDetailsList, formHasError = true))
+        }
+      },
+      addCompany => {
+      if (addCompany.addCompany) {
+        Future.successful(Redirect(controllers.subsidiaries.routes.SubsidiaryBasedInUkController.questionPage()))
+      } else {
+        scheme match {
+          case ersUtil.SCHEME_CSOP | ersUtil.SCHEME_SAYE =>
+            Future(Redirect(routes.AltAmendsController.altActivityPage()))
 
-      case ersUtil.SCHEME_EMI | ersUtil.SCHEME_OTHER =>
-        Future(Redirect(routes.SummaryDeclarationController.summaryDeclarationPage()))
+          case ersUtil.SCHEME_EMI | ersUtil.SCHEME_OTHER =>
+            Future(Redirect(routes.SummaryDeclarationController.summaryDeclarationPage()))
 
-      case ersUtil.SCHEME_SIP =>
-        Future(Redirect(trustees.routes.TrusteeSummaryController.trusteeSummaryPage()))
-
+          case ersUtil.SCHEME_SIP =>
+            Future(Redirect(trustees.routes.TrusteeSummaryController.trusteeSummaryPage()))
+        }
+      }
     }
+    )
+  }
 
   def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result =
     Ok(

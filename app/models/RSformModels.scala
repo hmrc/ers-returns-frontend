@@ -269,3 +269,5 @@ object RequestObject {
 }
 
 case class AddTrustee(addTrustee: Boolean)
+
+case class AddCompany(addCompany: Boolean)

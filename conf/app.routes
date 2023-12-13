@@ -33,9 +33,6 @@ POST        /choose-csv-files                                controllers.CheckCs
 GET 		/group-scheme   			                    controllers.subsidiaries.GroupSchemeController.groupSchemePage()
 POST 		/group-scheme   				                controllers.subsidiaries.GroupSchemeController.groupSchemeSelected(scheme: String)
 
-GET 		/subsidiary-company-summary	                    controllers.subsidiaries.GroupSchemeController.groupPlanSummaryPage()
-POST 		/subsidiary-company-summary		                controllers.subsidiaries.GroupSchemeController.groupPlanSummaryContinue(scheme: String)
-
 GET         /choose-file-type				                controllers.CheckFileTypeController.checkFileTypePage()
 POST        /choose-file-type				                controllers.CheckFileTypeController.checkFileTypeSelected()
 
@@ -68,12 +65,12 @@ POST        /overseas-trustee-address/:index/edit           controllers.trustees
 GET         /trustees       				                controllers.trustees.TrusteeSummaryController.trusteeSummaryPage()
 POST        /trustees       				                controllers.trustees.TrusteeSummaryController.trusteeSummaryContinue()
 
-POST        /delete-trustee/:index/                         controllers.trustees.TrusteeSummaryController.deleteTrustee(index: Int)
+POST        /delete-trustee/:index                          controllers.trustees.TrusteeSummaryController.deleteTrustee(index: Int)
 
-GET        /where-is-subsidiary-registered                  controllers.subsidiaries.SubsidiaryBasedInUkController.questionPage(index: Int = 10000)
-POST       /where-is-subsidiary-registered                  controllers.subsidiaries.SubsidiaryBasedInUkController.questionSubmit(index: Int)
-GET        /where-is-subsidiary-registered/:index/edit      controllers.subsidiaries.SubsidiaryBasedInUkController.editCompany(index: Int)
-POST       /where-is-subsidiary-registered/:index/edit      controllers.subsidiaries.SubsidiaryBasedInUkController.editQuestionSubmit(index: Int)
+GET         /where-is-subsidiary-registered                 controllers.subsidiaries.SubsidiaryBasedInUkController.questionPage(index: Int = 10000)
+POST        /where-is-subsidiary-registered                 controllers.subsidiaries.SubsidiaryBasedInUkController.questionSubmit(index: Int)
+GET         /where-is-subsidiary-registered/:index/edit     controllers.subsidiaries.SubsidiaryBasedInUkController.editCompany(index: Int)
+POST        /where-is-subsidiary-registered/:index/edit     controllers.subsidiaries.SubsidiaryBasedInUkController.editQuestionSubmit(index: Int)
 
 GET         /subsidiary-address                             controllers.subsidiaries.SubsidiaryAddressUkController.questionPage(index: Int = 10000)
 POST        /subsidiary-address                             controllers.subsidiaries.SubsidiaryAddressUkController.questionSubmit(index: Int)
@@ -95,10 +92,15 @@ POST        /subsidiary-details-overseas                    controllers.subsidia
 GET         /subsidiary-details-overseas/:index/edit        controllers.subsidiaries.SubsidiaryDetailsOverseasController.editCompany(index: Int)
 POST        /subsidiary-details-overseas/:index/edit        controllers.subsidiaries.SubsidiaryDetailsOverseasController.editQuestionSubmit(index:Int)
 
-GET        /where-is-company-registered                     controllers.schemeOrganiser.SchemeOrganiserBasedInUkController.questionPage(index: Int = 10000)
-POST       /where-is-company-registered                     controllers.schemeOrganiser.SchemeOrganiserBasedInUkController.questionSubmit(index: Int)
-GET        /where-is-company-registered/:index/edit         controllers.schemeOrganiser.SchemeOrganiserBasedInUkController.editCompany(index: Int)
-POST       /where-is-company-registered/:index/edit         controllers.schemeOrganiser.SchemeOrganiserBasedInUkController.editQuestionSubmit(index: Int)
+GET 		/subsidiary-company-summary	                    controllers.subsidiaries.GroupSchemeController.groupPlanSummaryPage()
+POST 		/subsidiary-company-summary		                controllers.subsidiaries.GroupSchemeController.groupPlanSummaryContinue(scheme: String)
+
+POST 		/delete-subsidiary-company/:index              	controllers.subsidiaries.GroupSchemeController.deleteCompany(index: Int)
+
+GET         /where-is-company-registered                    controllers.schemeOrganiser.SchemeOrganiserBasedInUkController.questionPage(index: Int = 10000)
+POST        /where-is-company-registered                    controllers.schemeOrganiser.SchemeOrganiserBasedInUkController.questionSubmit(index: Int)
+GET         /where-is-company-registered/:index/edit        controllers.schemeOrganiser.SchemeOrganiserBasedInUkController.editCompany(index: Int)
+POST        /where-is-company-registered/:index/edit        controllers.schemeOrganiser.SchemeOrganiserBasedInUkController.editQuestionSubmit(index: Int)
 
 GET         /uk-company-address                             controllers.schemeOrganiser.SchemeOrganiserAddressUkController.questionPage(index: Int = 10000)
 POST        /uk-company-address                             controllers.schemeOrganiser.SchemeOrganiserAddressUkController.questionSubmit(index: Int)
@@ -124,8 +126,7 @@ GET 		/company-details  		                        controllers.schemeOrganiser.Sc
 POST 		/company-details 			                    controllers.schemeOrganiser.SchemeOrganiserController.schemeOrganiserSubmit()
 
 GET 		/scheme-organiser-summary   		        	controllers.schemeOrganiser.SchemeOrganiserController.schemeOrganiserSummaryPage()
-POST 		/scheme-organiser-summary      				controllers.schemeOrganiser.SchemeOrganiserController.companySummaryContinue()
-
+POST 		/scheme-organiser-summary      				    controllers.schemeOrganiser.SchemeOrganiserController.companySummaryContinue()
 
 GET 		/annual-return-summary		                    controllers.SummaryDeclarationController.summaryDeclarationPage()
 

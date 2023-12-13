@@ -349,6 +349,7 @@ ers_company_summary.company_name = Company name
 ers_company_summary.company_location = Where the company is registered
 ers_company_summary.page_title = Companies in this group plan
 ers_company_summary.add_company = Do you need to add another company?
+ers_company_summary.add_company.err = Select yes if you need to add another company
 
 
 #********************************************************************
@@ -364,11 +365,6 @@ ers_manual_company_details.addressLine1 = First line of address
 ers_manual_company_details.addressLine2 = Second line of address
 ers_manual_company_details.addressLine3 = Third line of address
 ers_manual_company_details.addressLine4 = Fourth line of address
-ers_manual_company_details_overseas.addressLine1 = Address line 1
-ers_manual_company_details_overseas.addressLine2 = Address line 2
-ers_manual_company_details_overseas.addressLine3 = Address line 3
-ers_manual_company_details_overseas.addressLine4 = Address line 4
-ers_manual_company_details_overseas.addressLine5 = Address line 5
 ers_manual_company_details.postcode = Postcode (optional)
 ers_manual_company_details.postcode.hint = For example, AA1 1AA
 ers_manual_company_details.postcode_zipcode = Postcode/ZIP code

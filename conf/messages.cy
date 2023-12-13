@@ -335,13 +335,15 @@ ers_company_summary.page_title = Cwmnïau yn y cynllun grŵp hwn
 ers_company_summary.company_name = Enw’r cwmni
 ers_company_summary.company_location = Ymhle y mae’r cwmni wedi’i gofrestru?
 ers_company_summary.add_company = A oes angen i chi ychwanegu cwmni arall?
+ers_company_summary.add_company.err = Dewiswch ie os oes angen i chi ychwanegu cwmni arall
+
 ers_manual_company_details_overseas.title = Beth yw enw’r cwmni?
 ers_manual_address_overseas.title = Beth yw cyfeiriad y cwmni?
-ers_manual_company_details_overseas.addressLine1 = Cyfeiriad – llinell 1
-ers_manual_company_details_overseas.addressLine2 = Cyfeiriad – llinell 2
-ers_manual_company_details_overseas.addressLine3 = Cyfeiriad – llinell 3
-ers_manual_company_details_overseas.addressLine4 = Cyfeiriad – llinell 4
-ers_manual_company_details_overseas.addressLine5 = Cyfeiriad – llinell 5
+ers_company_address.line1 = Cyfeiriad – llinell 1
+ers_company_address.line2 = Cyfeiriad – llinell 2
+ers_company_address.line3 = Cyfeiriad – llinell 3
+ers_company_address.line4 = Cyfeiriad – llinell 4
+ers_company_address.line5 = Cyfeiriad – llinell 5
 
 ers_confirmation.page_title = Cadarnhad
 ers_confirmation.submitted = Mae eich Datganiad Blynyddol ar gyfer {0} wedi’i gyflwyno

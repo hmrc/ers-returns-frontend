@@ -83,7 +83,7 @@ class SubsidiaryAddressOverseasControllerSpec extends AnyWordSpecLike
 
       status(result) shouldBe Status.OK
       contentAsString(result) should include(testMessages("ers_manual_address_overseas.title"))
-      contentAsString(result) should include(testMessages("ers_manual_company_details_overseas.addressLine1"))
+      contentAsString(result) should include(testMessages("ers_company_address.line1"))
     }
 
     "show the prefilled company address overseas question page when there is data to prefill" in {
@@ -93,7 +93,7 @@ class SubsidiaryAddressOverseasControllerSpec extends AnyWordSpecLike
 
       status(result) shouldBe Status.OK
       contentAsString(result) should include(testMessages("ers_manual_address_overseas.title"))
-      contentAsString(result) should include(testMessages("ers_manual_company_details_overseas.addressLine1"))
+      contentAsString(result) should include(testMessages("ers_company_address.line1"))
       contentAsString(result) should include("Overseas 1")
     }
     "show the global error page if an exception occurs while retrieving cached data" in {
@@ -117,7 +117,7 @@ class SubsidiaryAddressOverseasControllerSpec extends AnyWordSpecLike
 
       status(result) shouldBe Status.BAD_REQUEST
       contentAsString(result) should include(testMessages("ers_manual_address_overseas.title"))
-      contentAsString(result) should include(testMessages("ers_manual_company_details_overseas.addressLine1"))
+      contentAsString(result) should include(testMessages("ers_company_address.line1"))
     }
 
     "successfully bind the form and redirect to the company summary page" in {
@@ -147,7 +147,7 @@ class SubsidiaryAddressOverseasControllerSpec extends AnyWordSpecLike
 
       status(result) shouldBe Status.OK
       contentAsString(result) should include(testMessages("ers_manual_address_overseas.title"))
-      contentAsString(result) should include(testMessages("ers_manual_company_details_overseas.addressLine1"))
+      contentAsString(result) should include(testMessages("ers_company_address.line1"))
       contentAsString(result) should include("Overseas 1")
 
     }

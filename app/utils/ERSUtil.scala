@@ -105,6 +105,7 @@ class ERSUtil @Inject() (
 	val SUBSIDIARY_COMPANY_ADDRESS_CACHE: String = "subsidiary-company-address"
 	val SUBSIDIARY_COMPANY_BASED: String = "subsidiary-company-based"
 	val SUBSIDIARY_COMPANIES_CACHE: String = "subsidiary-companies"
+	val COMPANIES: String = "companies"
 
 	val SCHEME_ORGANISER_NAME_CACHE: String = "scheme-organiser-name"
 	val SCHEME_ORGANISER_ADDRESS_CACHE: String = "scheme-organiser-address"
@@ -382,7 +383,7 @@ class ERSUtil @Inject() (
 		shortLivedCache.fetchAndGetEntry[JsValue](cacheId, SUBSIDIARY_COMPANIES_CACHE).map {
 			x =>
 				println("Json here: " + x.getOrElse(""))
-				x.map(_.\(SUBSIDIARY_COMPANIES_CACHE).as[JsArray].\(index).getOrElse(Json.obj()).as[A])
+				x.map(_.\(COMPANIES).as[JsArray].\(index).getOrElse(Json.obj()).as[A])
 		} recover {
 			case x: Throwable => {
 				println("[ERSUtil][fetchPartFromCompanyDetailsList] Nothing found in cache, expected if this is not an edit journey: " + x.getMessage)
