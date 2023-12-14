@@ -134,12 +134,7 @@ class ErsConnector @Inject() (val http: DefaultHttpClient, ersUtil: ERSUtil, app
     hc: HeaderCarrier
   ): Future[HttpResponse] = {
     val empRef: String           = request.authData.empRef.encodedValue
-    val useNewValidator: Boolean = appConfig.useNewValidator
-    val url: String              = if (useNewValidator) {
-      s"$validatorUrl/ers/v2/$empRef/process-csv-file"
-    } else {
-      s"$validatorUrl/ers/$empRef/process-csv-file"
-    }
+    val url: String              = s"$validatorUrl/ers/v2/$empRef/process-csv-file"
 
     http.POST(url, CsvValidatorData(callbackData, schemeInfo)).map { res =>
       res.status match {
