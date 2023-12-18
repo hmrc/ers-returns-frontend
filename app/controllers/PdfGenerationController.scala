@@ -20,110 +20,92 @@ import config.ApplicationConfig
 import controllers.auth.{AuthAction, RequestWithOptionalAuthContext}
 import models._
 import models.upscan.{UploadedSuccessfully, UpscanCsvFilesCallback, UpscanCsvFilesCallbackList}
-import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.mvc._
+import services.FrontendSessionService
 import services.pdf.ErsReceiptPdfBuilderService
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
+import uk.gov.hmrc.mongo.cache.{CacheItem, DataKey}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
-import utils.ERSUtil
+import utils.{CacheHelper, ERSUtil}
 
 import javax.inject.{Inject, Singleton}
-
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class PdfGenerationController @Inject() (
-  val mcc: MessagesControllerComponents,
-  val authConnector: DefaultAuthConnector,
-  val pdfBuilderService: ErsReceiptPdfBuilderService,
-  implicit val ersUtil: ERSUtil,
-  implicit val appConfig: ApplicationConfig,
-  globalErrorView: views.html.global_error,
-  authAction: AuthAction
-) extends FrontendController(mcc)
-    with I18nSupport
-    with Logging {
-
-  implicit val ec: ExecutionContext = mcc.executionContext
+class PdfGenerationController @Inject() (val mcc: MessagesControllerComponents,
+                                         val pdfBuilderService: ErsReceiptPdfBuilderService,
+                                         val sessionService: FrontendSessionService,
+                                         globalErrorView: views.html.global_error,
+                                         authAction: AuthAction)
+                                        (implicit val ec: ExecutionContext,
+                                         val ersUtil: ERSUtil,
+                                         val appConfig: ApplicationConfig)
+  extends FrontendController(mcc) with I18nSupport with CacheHelper {
 
   def buildPdfForBundle(bundle: String, dateSubmitted: String): Action[AnyContent] = authAction.async {
     implicit request =>
-      ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
+      sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT).flatMap { requestObject =>
         generatePdf(requestObject, bundle, dateSubmitted)
       }
   }
 
-  def generatePdf(requestObject: RequestObject, bundle: String, dateSubmitted: String)(implicit
-    request: RequestWithOptionalAuthContext[AnyContent],
-    hc: HeaderCarrier
-  ): Future[Result] = {
+  def generatePdf(requestObject: RequestObject, bundle: String, dateSubmitted: String)
+                 (implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] = {
+    for {
+      allMetaData <- sessionService.fetch[ErsMetaData](ersUtil.ERS_METADATA)
+      allData <- sessionService.getAllData(bundle, allMetaData)
+      allCache <- sessionService.fetchAll()
+      filesUploaded = extractFilesUploaded(allCache, requestObject)
+      pdf = pdfBuilderService.createPdf(allData, Some(filesUploaded), dateSubmitted).toByteArray
+    } yield Ok(pdf).as("application/pdf").withHeaders(CONTENT_DISPOSITION -> s"inline; filename=$bundle-confirmation.pdf")
+  } recoverWith {
+    case e: Exception =>
+      logger.error(s"[PdfGenerationController][generatePdf] Error generating PDF: ${e.getMessage}", e)
+      Future.successful(getGlobalErrorPage())
+  }
 
-    logger.debug("getting into the controller to generate the pdf")
-    val cache: Future[ErsMetaData] = ersUtil.fetch[ErsMetaData](ersUtil.ersMetaData, requestObject.getSchemeReference)
-    cache.flatMap { all =>
-      logger.debug("pdf generation: got the metadata")
-      ersUtil
-        .getAllData(bundle, all)
-        .flatMap { alldata =>
-          logger.debug("pdf generation: got the cache map")
+  private def extractFilesUploaded(all: CacheItem, requestObject: RequestObject)(implicit messages: Messages): ListBuffer[String] = {
+    val filesUploaded = ListBuffer[String]()
 
-          ersUtil.fetchAll(requestObject.getSchemeReference).map { all =>
-            val filesUploaded: ListBuffer[String] = ListBuffer()
-            if (
-              all
-                .getEntry[ReportableEvents](ersUtil.reportableEvents)
-                .get
-                .isNilReturn
-                .get == ersUtil.OPTION_UPLOAD_SPREEDSHEET
-            ) {
-              val fileType = all.getEntry[CheckFileType](ersUtil.FILE_TYPE_CACHE).get.checkFileType.get
-              if (fileType == ersUtil.OPTION_CSV) {
-                val csvCallback                                    = all
-                  .getEntry[UpscanCsvFilesCallbackList](ersUtil.CHECK_CSV_FILES)
-                  .getOrElse(
-                    throw new Exception(s"Cache data missing for key: ${ersUtil.CHECK_CSV_FILES} in CacheMap")
-                  )
-                val csvFilesCallback: List[UpscanCsvFilesCallback] = if (csvCallback.areAllFilesSuccessful()) {
-                  csvCallback.files.collect {
-                    case successfulFile @ UpscanCsvFilesCallback(_, _, _: UploadedSuccessfully) => successfulFile
-                  }
-                } else {
-                  throw new Exception("Not all files have been complete")
-                }
+    val reportableEventsOpt = getEntry[ReportableEvents](all, DataKey(ersUtil.REPORTABLE_EVENTS))
 
-                for (file <- csvFilesCallback)
-                  filesUploaded += ersUtil
-                    .getPageElement(requestObject.getSchemeId, ersUtil.PAGE_CHECK_CSV_FILE, file.fileId + ".file_name")
-              } else {
-                filesUploaded += all.getEntry[String](ersUtil.FILE_NAME_CACHE).get
-              }
-            }
-            val pdf                               = pdfBuilderService.createPdf(alldata, Some(filesUploaded), dateSubmitted).toByteArray
-            Ok(pdf)
-              .as("application/pdf")
-              .withHeaders(CONTENT_DISPOSITION -> s"inline; filename=$bundle-confirmation.pdf")
-          } recover { case e: Throwable =>
-            logger.error(
-              s"[PdfGenerationController][generatePdf] Problem fetching file list from cache ${e.getMessage}.",
-              e
-            )
-            getGlobalErrorPage
-          }
+    reportableEventsOpt.flatMap(_.isNilReturn) match {
+      case Some(ersUtil.OPTION_UPLOAD_SPREEDSHEET) =>
+        val fileTypeOpt = getEntry[CheckFileType](all, DataKey(ersUtil.FILE_TYPE_CACHE)).flatMap(_.checkFileType)
+
+        fileTypeOpt match {
+          case Some(ersUtil.OPTION_CSV) =>
+            processCsvFiles(all, filesUploaded, requestObject)
+          case _ =>
+            getEntry[String](all, DataKey(ersUtil.FILE_NAME_CACHE)).foreach(filesUploaded += _)
         }
-        .recover { case e: Throwable =>
-          logger.error(
-            s"[PdfGenerationController][generatePdf] Problem saving Pdf Receipt ${e.getMessage}, timestamp: ${System.currentTimeMillis()}."
-          )
-          getGlobalErrorPage
+
+      case _ => // No action needed
+    }
+
+    filesUploaded
+  }
+
+  private def processCsvFiles(all: CacheItem, filesUploaded: ListBuffer[String], requestObject: RequestObject)(implicit messages: Messages): Unit = {
+    val csvCallbackOpt = getEntry[UpscanCsvFilesCallbackList](all, DataKey(ersUtil.CHECK_CSV_FILES))
+
+    csvCallbackOpt match {
+      case Some(csvCallback) if csvCallback.areAllFilesSuccessful() =>
+        val csvFilesCallback = csvCallback.files.collect {
+          case successfulFile @ UpscanCsvFilesCallback(_, _, _: UploadedSuccessfully) => successfulFile
         }
+
+        csvFilesCallback.foreach { file =>
+          filesUploaded += ersUtil.getPageElement(requestObject.getSchemeId, ersUtil.PAGE_CHECK_CSV_FILE, file.fileId + ".file_name")
+        }
+      case Some(_) => throw new Exception("Not all CSV files have been completed")
+      case None => throw new Exception(s"Cache data missing for key: ${ersUtil.CHECK_CSV_FILES} in CacheMap")
     }
   }
 
-  def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result =
-    Ok(
+  def getGlobalErrorPage(status: Status = InternalServerError)(implicit request: Request[_], messages: Messages): Result =
+    status(
       globalErrorView(
         "ers.global_errors.title",
         "ers.global_errors.heading",

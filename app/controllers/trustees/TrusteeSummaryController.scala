@@ -19,47 +19,44 @@ package controllers.trustees
 import config.ApplicationConfig
 import connectors.ErsConnector
 import controllers.auth.{AuthAction, RequestWithOptionalAuthContext}
-
-import javax.inject.Inject
 import models.{RequestObject, RsFormMappings, TrusteeDetails, TrusteeDetailsList}
 import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages}
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request, Result}
-import uk.gov.hmrc.http.HeaderCarrier
+import play.api.mvc._
+import services.FrontendSessionService
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
-import utils.{CountryCodes, ERSUtil}
+import utils.{Constants, CountryCodes, ERSUtil}
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class TrusteeSummaryController @Inject()(val mcc: MessagesControllerComponents,
                                          val ersConnector: ErsConnector,
-                                         implicit val countryCodes: CountryCodes,
-                                         implicit val ersUtil: ERSUtil,
-                                         implicit val appConfig: ApplicationConfig,
+                                         val sessionService: FrontendSessionService,
                                          globalErrorView: views.html.global_error,
                                          trusteeSummaryView: views.html.trustee_summary,
-                                         authAction: AuthAction
-                                        ) extends FrontendController(mcc) with I18nSupport with WithUnsafeDefaultFormBinding with Logging {
-
-  implicit val ec: ExecutionContext = mcc.executionContext
+                                         authAction: AuthAction)
+                                        (implicit val ec: ExecutionContext,
+                                         val ersUtil: ERSUtil,
+                                         val appConfig: ApplicationConfig,
+                                         val countryCodes: CountryCodes)
+  extends FrontendController(mcc) with I18nSupport with WithUnsafeDefaultFormBinding with Logging with Constants {
 
   def deleteTrustee(id: Int): Action[AnyContent] = authAction.async {
     implicit request =>
-      showDeleteTrustee(id)(request, hc)
+      showDeleteTrustee(id)(request)
   }
-  def showDeleteTrustee(id: Int)(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
 
+  def showDeleteTrustee(id: Int)(implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] = {
     (for {
-      requestObject      <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
-      cachedTrusteeList  <- ersUtil.fetch[TrusteeDetailsList](ersUtil.TRUSTEES_CACHE, requestObject.getSchemeReference)
+      cachedTrusteeList <- sessionService.fetch[TrusteeDetailsList](TRUSTEES_CACHE)
       trusteeDetailsList = TrusteeDetailsList(filterDeletedTrustee(cachedTrusteeList, id))
-      _                  <- ersUtil.cache(ersUtil.TRUSTEES_CACHE, trusteeDetailsList, requestObject.getSchemeReference)
+      _ <- sessionService.cache(TRUSTEES_CACHE, trusteeDetailsList)
     } yield {
       Redirect(controllers.trustees.routes.TrusteeSummaryController.trusteeSummaryPage())
-
     }) recover {
-      case _: Exception => getGlobalErrorPage
+      case _: Exception => getGlobalErrorPage()
     }
   }
 
@@ -68,13 +65,13 @@ class TrusteeSummaryController @Inject()(val mcc: MessagesControllerComponents,
 
   def trusteeSummaryPage(): Action[AnyContent] = authAction.async {
     implicit request =>
-      showTrusteeSummaryPage()(request, hc)
+      showTrusteeSummaryPage()(request)
   }
 
-  def showTrusteeSummaryPage()(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
+  def showTrusteeSummaryPage()(implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] = {
     (for {
-      requestObject      <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
-      trusteeDetailsList <- ersUtil.fetchTrusteesOptionally(requestObject.getSchemeReference)
+      requestObject <- sessionService.fetch[RequestObject](ERS_REQUEST_OBJECT)
+      trusteeDetailsList <- sessionService.fetchTrusteesOptionally()
     } yield {
       if (trusteeDetailsList.trustees.isEmpty) {
         Redirect(controllers.trustees.routes.TrusteeNameController.questionPage())
@@ -83,22 +80,22 @@ class TrusteeSummaryController @Inject()(val mcc: MessagesControllerComponents,
       }
     }) recover {
       case e: Exception =>
-        logger.error(s"[TrusteeController][showTrusteeSummaryPage] Get data from cache failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
-        getGlobalErrorPage
+        logger.error(s"[TrusteeController][showTrusteeSummaryPage] Get data from cache failed with exception", e)
+        getGlobalErrorPage()
     }
   }
 
   def trusteeSummaryContinue(): Action[AnyContent] = authAction.async {
     implicit request =>
-      continueFromTrusteeSummaryPage()(request, hc)
+      continueFromTrusteeSummaryPage()(request)
   }
 
-  def continueFromTrusteeSummaryPage()(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
+  def continueFromTrusteeSummaryPage()(implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] = {
     RsFormMappings.addTrusteeForm().bindFromRequest().fold(
       _ => {
         for {
-          requestObject <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
-          trusteeDetailsList <- ersUtil.fetchTrusteesOptionally(requestObject.getSchemeReference)
+          requestObject <- sessionService.fetch[RequestObject](ERS_REQUEST_OBJECT)
+          trusteeDetailsList <- sessionService.fetchTrusteesOptionally()
         } yield {
           BadRequest(trusteeSummaryView(requestObject, trusteeDetailsList, formHasError = true))
         }
@@ -112,16 +109,16 @@ class TrusteeSummaryController @Inject()(val mcc: MessagesControllerComponents,
       }
     ).recover {
       _ =>
-        getGlobalErrorPage
+        getGlobalErrorPage()
     }
   }
 
-  def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result = {
-    Ok(globalErrorView(
-      "ers.global_errors.title",
-      "ers.global_errors.heading",
-      "ers.global_errors.message"
-    )(request, messages, appConfig))
-  }
-
+  def getGlobalErrorPage(status: Status = InternalServerError)(implicit request: Request[_], messages: Messages): Result =
+    status(
+      globalErrorView(
+        "ers.global_errors.title",
+        "ers.global_errors.heading",
+        "ers.global_errors.message"
+      )(request, messages, appConfig)
+    )
 }

@@ -18,48 +18,38 @@ package controllers
 
 import config.ApplicationConfig
 import controllers.auth.{AuthActionGovGateway, RequestWithOptionalAuthContext}
-import models.{RsFormMappings, _}
+import models._
 import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.mvc._
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
+import services.FrontendSessionService
+import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils._
-import javax.inject.{Inject, Singleton}
-import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class CheckFileTypeController @Inject() (
-  val mcc: MessagesControllerComponents,
-  val authConnector: DefaultAuthConnector,
-  implicit val ersUtil: ERSUtil,
-  implicit val appConfig: ApplicationConfig,
-  globalErrorView: views.html.global_error,
-  checkFileTypeView: views.html.check_file_type,
-  authActionGovGateway: AuthActionGovGateway
-) extends FrontendController(mcc)
-    with I18nSupport
-    with WithUnsafeDefaultFormBinding
-    with Logging {
-
-  implicit val ec: ExecutionContext = mcc.executionContext
+class CheckFileTypeController @Inject() (val mcc: MessagesControllerComponents,
+                                         val sessionService: FrontendSessionService,
+                                         globalErrorView: views.html.global_error,
+                                         checkFileTypeView: views.html.check_file_type,
+                                         authActionGovGateway: AuthActionGovGateway)
+                                        (implicit val ec: ExecutionContext,
+                                         val ersUtil: ERSUtil,
+                                         val appConfig: ApplicationConfig)
+  extends FrontendController(mcc) with I18nSupport with WithUnsafeDefaultFormBinding with Logging {
 
   def checkFileTypePage(): Action[AnyContent] = authActionGovGateway.async { implicit request =>
-    showCheckFileTypePage()(request, hc)
+    showCheckFileTypePage()(request)
   }
 
-  def showCheckFileTypePage()(implicit
-    request: RequestWithOptionalAuthContext[AnyContent],
-    hc: HeaderCarrier
-  ): Future[Result] =
+  def showCheckFileTypePage()(implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
     (for {
-      requestObject <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
-      fileType      <- ersUtil.fetch[CheckFileType](ersUtil.FILE_TYPE_CACHE, requestObject.getSchemeReference).recover {
-                         case _: NoSuchElementException => CheckFileType(Some(""))
-                       }
+      requestObject <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
+      fileType <- sessionService.fetch[CheckFileType](ersUtil.FILE_TYPE_CACHE)
+        .recover { case _: NoSuchElementException => CheckFileType(Some(""))}
     } yield Ok(
       checkFileTypeView(requestObject, fileType.checkFileType, RsFormMappings.checkFileTypeForm().fill(fileType))
     )).recover { case e: Throwable =>
@@ -70,22 +60,19 @@ class CheckFileTypeController @Inject() (
     }
 
   def checkFileTypeSelected(): Action[AnyContent] = authActionGovGateway.async { implicit request =>
-    showCheckFileTypeSelected()(request, hc)
+    showCheckFileTypeSelected()(request)
   }
 
-  def showCheckFileTypeSelected()(implicit
-    request: RequestWithOptionalAuthContext[AnyContent],
-    hc: HeaderCarrier
-  ): Future[Result] =
-    ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
+  def showCheckFileTypeSelected()(implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
+    sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT).flatMap { requestObject =>
       RsFormMappings
         .checkFileTypeForm()
         .bindFromRequest()
         .fold(
           errors => Future.successful(Ok(checkFileTypeView(requestObject, Some(""), errors))),
           formData =>
-            ersUtil
-              .cache(ersUtil.FILE_TYPE_CACHE, formData, requestObject.getSchemeReference)
+            sessionService
+              .cache(ersUtil.FILE_TYPE_CACHE, formData)
               .map { _ =>
                 if (formData.checkFileType.contains(ersUtil.OPTION_ODS)) {
                   Redirect(routes.FileUploadController.uploadFilePage())

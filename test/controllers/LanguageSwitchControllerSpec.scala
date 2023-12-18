@@ -17,9 +17,9 @@
 package controllers
 
 import org.mockito.Mockito.when
-import org.scalatest.{OptionValues, PrivateMethodTester}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
+import org.scalatest.{OptionValues, PrivateMethodTester}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.i18n.{Lang, MessagesApi}
 import play.api.mvc._

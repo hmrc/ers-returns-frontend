@@ -21,15 +21,14 @@ import org.apache.pdfbox.io.RandomAccessFile
 import org.apache.pdfbox.pdfparser.PDFParser
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.text.PDFTextStripper
+import org.scalatest.OptionValues
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
-import org.scalatest.OptionValues
 import org.scalatestplus.mockito.MockitoSugar
-import java.io.File
-
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-
 import utils.ERSFakeApplicationConfig
+
+import java.io.File
 
 class ErsPdfReaderSpec
     extends AnyWordSpecLike

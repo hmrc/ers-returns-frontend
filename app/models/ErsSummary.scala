@@ -107,7 +107,7 @@ object ErsSummary {
   // Overriding the default play 2.6 DateTime format to allow backwards compatibility with play 2.5 services (ers-submissions)
   implicit val dateFormatDefault: Format[DateTime] = new Format[DateTime] {
     override def reads(json: JsValue): JsResult[DateTime] = JodaReads.DefaultJodaDateTimeReads.reads(json)
-    override def writes(o: DateTime): JsValue             = JodaDateTimeNumberWrites.writes(o)
+    override def writes(o: DateTime): JsValue = JodaDateTimeNumberWrites.writes(o)
   }
-  implicit val format: OFormat[ErsSummary]         = Json.format[ErsSummary]
+  implicit val format: OFormat[ErsSummary] = Json.format[ErsSummary]
 }

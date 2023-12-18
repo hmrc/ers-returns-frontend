@@ -26,7 +26,7 @@ import play.api.data.Form
 import play.api.libs.json.Format
 import play.api.mvc.{AnyContent, MessagesControllerComponents, Request, Result}
 import play.twirl.api.Html
-import services.TrusteeService
+import services.{FrontendSessionService, TrusteeService}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -39,19 +39,19 @@ class TrusteeAddressOverseasController @Inject()(val mcc: MessagesControllerComp
                                                  val globalErrorView: views.html.global_error,
                                                  val authAction: AuthAction,
                                                  val trusteeService: TrusteeService,
-                                                 implicit val countryCodes: CountryCodes,
-                                                 implicit val ersUtil: ERSUtil,
-                                                 implicit val appConfig: ApplicationConfig,
-                                                 trusteeAddressOverseasView: views.html.trustee_address_overseas
-                                          )
+                                                 val sessionService: FrontendSessionService,
+                                                 trusteeAddressOverseasView: views.html.trustee_address_overseas)
+                                                (implicit val ec: ExecutionContext,
+                                                 val ersUtil: ERSUtil,
+                                                 val appConfig: ApplicationConfig,
+                                                 val countryCodes: CountryCodes)
   extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with TrusteeBaseController[TrusteeAddress] {
 
-  implicit val ec: ExecutionContext           = mcc.executionContext
   implicit val format: Format[TrusteeAddress] = TrusteeAddress.format
 
   val cacheKey: String = ersUtil.TRUSTEE_ADDRESS_CACHE
 
-  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier): Future[Result] = {
+  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier, request: Request[_]): Future[Result] = {
     if (edit) {
       Future.successful(Redirect(controllers.trustees.routes.TrusteeSummaryController.trusteeSummaryPage()))
     } else {

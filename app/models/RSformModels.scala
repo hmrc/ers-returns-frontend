@@ -86,6 +86,18 @@ case class SchemeOrganiserDetails(
 
 object SchemeOrganiserDetails {
   implicit val format: OFormat[SchemeOrganiserDetails] = Json.format[SchemeOrganiserDetails]
+
+  val emptyForm = SchemeOrganiserDetails(
+    "",
+    "",
+    Some(""),
+    Some(""),
+    Some(""),
+    Some("UK"),
+    Some(""),
+    Some(""),
+    Some("")
+  )
 }
 
 case class TrusteeDetails(

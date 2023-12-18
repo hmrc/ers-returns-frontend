@@ -24,7 +24,6 @@ import play.api.i18n.{I18nSupport, Messages}
 import play.api.libs.json.{JsObject, Json}
 import play.api.mvc._
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.ERSUtil
 
@@ -32,19 +31,14 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class SubmissionDataController @Inject() (
-  val mcc: MessagesControllerComponents,
-  val authConnector: DefaultAuthConnector,
-  val ersConnector: ErsConnector,
-  implicit val ersUtil: ERSUtil,
-  implicit val appConfig: ApplicationConfig,
-  globalErrorView: views.html.global_error,
-  authAction: AuthAction
-) extends FrontendController(mcc)
-    with I18nSupport
-    with Logging {
-
-  implicit val ec: ExecutionContext = mcc.executionContext
+class SubmissionDataController @Inject() (val mcc: MessagesControllerComponents,
+                                          val ersConnector: ErsConnector,
+                                          globalErrorView: views.html.global_error,
+                                          authAction: AuthAction)
+                                         (implicit val ec: ExecutionContext,
+                                          val ersUtil: ERSUtil,
+                                          val appConfig: ApplicationConfig)
+  extends FrontendController(mcc) with I18nSupport with Logging {
 
   def createSchemeInfoFromURL(request: Request[Any]): Option[JsObject] = {
 
@@ -68,17 +62,10 @@ class SubmissionDataController @Inject() (
     getRetrieveSubmissionData()(request, hc)
   }
 
-  def getRetrieveSubmissionData()(implicit
-    request: RequestWithOptionalAuthContext[AnyContent],
-    hc: HeaderCarrier
-  ): Future[Result] = {
-
+  def getRetrieveSubmissionData()(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
     logger.debug("Retrieve Submission Data Request")
-
     if (appConfig.enableRetrieveSubmissionData) {
-
       logger.debug("Retrieve SubmissionData Enabled")
-
       val data: Option[JsObject] = createSchemeInfoFromURL(request)
       if (data.isDefined) {
 
@@ -130,5 +117,4 @@ class SubmissionDataController @Inject() (
         "ers.global_errors.message"
       )(request, messages, appConfig)
     )
-
 }

@@ -16,28 +16,30 @@
 
 package services
 
-import javax.inject.Inject
-import models.{RequestObject, TrusteeAddress, TrusteeDetails, TrusteeDetailsList, TrusteeName}
-import uk.gov.hmrc.http.HeaderCarrier
+import models._
+import play.api.mvc.Request
 import utils.ERSUtil
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
+@Singleton
 class TrusteeService @Inject()(
-                              ersUtil: ERSUtil
+                              ersUtil: ERSUtil,
+                              sessionService: FrontendSessionService
                               )(implicit ec: ExecutionContext) {
 
-  def updateTrusteeCache(index: Int)(implicit hc: HeaderCarrier): Future[Unit] = {
+  def updateTrusteeCache(index: Int)(implicit request: Request[_]): Future[Unit] = {
     for {
-      requestObject      <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
+      requestObject      <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
       schemeRef          =  requestObject.getSchemeReference
-      name               <- ersUtil.fetch[TrusteeName](ersUtil.TRUSTEE_NAME_CACHE, schemeRef)
-      cachedTrustees     <- ersUtil.fetchTrusteesOptionally(schemeRef)
+      name               <- sessionService.fetch[TrusteeName](ersUtil.TRUSTEE_NAME_CACHE)
+      cachedTrustees     <- sessionService.fetchTrusteesOptionally()
       trusteeDetailsList <- {
-        ersUtil.fetch[TrusteeAddress](ersUtil.TRUSTEE_ADDRESS_CACHE, schemeRef).map( address =>
+        sessionService.fetch[TrusteeAddress](ersUtil.TRUSTEE_ADDRESS_CACHE).map( address =>
         TrusteeDetailsList(replaceTrustee(cachedTrustees.trustees, index, TrusteeDetails(name, address))))
       }
-      _ <- ersUtil.cache[TrusteeDetailsList](ersUtil.TRUSTEES_CACHE, trusteeDetailsList, schemeRef)
+      _ <- sessionService.cache[TrusteeDetailsList](ersUtil.TRUSTEES_CACHE, trusteeDetailsList)
     } yield {
       ()
     }

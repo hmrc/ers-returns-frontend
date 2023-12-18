@@ -25,66 +25,55 @@ import models.upscan.{Failed, UploadStatus, UploadedSuccessfully}
 import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.mvc._
-import services.{SessionService, UpscanService}
+import services.{FileValidatorSessionService, FrontendSessionService, UpscanService}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils._
-import javax.inject.{Inject, Singleton}
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class FileUploadController @Inject() (
-  val mcc: MessagesControllerComponents,
-  val ersConnector: ErsConnector,
-  val authConnector: DefaultAuthConnector,
-  val sessionService: SessionService,
-  val upscanService: UpscanService,
-  implicit val ersUtil: ERSUtil,
-  implicit val appConfig: ApplicationConfig,
-  implicit val actorSystem: ActorSystem,
-  globalErrorView: views.html.global_error,
-  fileUploadErrorsView: views.html.file_upload_errors,
-  upscanOdsFileUploadView: views.html.upscan_ods_file_upload,
-  fileUploadProblemView: views.html.file_upload_problem,
-  authAction: AuthAction
-) extends FrontendController(mcc)
-    with I18nSupport
-    with Retryable
-    with Logging {
-
-  implicit val ec: ExecutionContext = mcc.executionContext
+class FileUploadController @Inject() (val mcc: MessagesControllerComponents,
+                                      val ersConnector: ErsConnector,
+                                      val fileValidatorSessionService: FileValidatorSessionService,
+                                      val sessionService: FrontendSessionService,
+                                      val upscanService: UpscanService,
+                                      globalErrorView: views.html.global_error,
+                                      fileUploadErrorsView: views.html.file_upload_errors,
+                                      upscanOdsFileUploadView: views.html.upscan_ods_file_upload,
+                                      fileUploadProblemView: views.html.file_upload_problem,
+                                      authAction: AuthAction)
+                                     (implicit val ec: ExecutionContext,
+                                      val ersUtil: ERSUtil,
+                                      val appConfig: ApplicationConfig,
+                                      val actorSystem: ActorSystem)
+  extends FrontendController(mcc) with I18nSupport with Retryable with Logging {
 
   def uploadFilePage(): Action[AnyContent] = authAction.async { implicit request =>
-    val requestObjectFuture = ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
-    val upscanFormFuture    = upscanService.getUpscanFormDataOds()
+    val requestObjectFuture = sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
+    val upscanFormFuture = upscanService.getUpscanFormDataOds()
     (for {
       requestObject <- requestObjectFuture
-      response      <- upscanFormFuture
-      _             <- sessionService.createCallbackRecord
+      response <- upscanFormFuture
+      _ <- fileValidatorSessionService.createCallbackRecord
     } yield Ok(upscanOdsFileUploadView(requestObject, response))) recover { case e: Throwable =>
-      logger.error(
-        s"[FileUploadController][uploadFilePage] failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.",
-        e
-      )
+      logger.error(s"[FileUploadController][uploadFilePage] failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.", e)
       getGlobalErrorPage
     }
   }
 
   def success(): Action[AnyContent] = authAction.async { implicit request =>
-    val futureRequestObject: Future[RequestObject]       = ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
     val futureCallbackData: Future[Option[UploadStatus]] =
-      sessionService.getCallbackRecord.withRetry(appConfig.odsSuccessRetryAmount) { opt =>
+      fileValidatorSessionService.getCallbackRecord.withRetry(appConfig.odsSuccessRetryAmount) { opt =>
         opt.fold(true) {
           case _: UploadedSuccessfully | Failed => true
-          case _                                => false
+          case _ => false
         }
       }
 
     (for {
-      requestObject <- futureRequestObject
-      file          <- futureCallbackData
+      file <- futureCallbackData
     } yield file match {
       case Some(file: UploadedSuccessfully) =>
         if (file.name.contains(".csv")) {
@@ -94,88 +83,68 @@ class FileUploadController @Inject() (
           logger.info("[FileUploadController][success] User uploaded a non ods file")
           Future(getFileUploadProblemPage())
         } else {
-          ersUtil.cache[String](ersUtil.FILE_NAME_CACHE, file.name, requestObject.getSchemeReference).map { _ =>
+          sessionService.cache[String](ersUtil.FILE_NAME_CACHE, file.name).map { _ =>
             Redirect(routes.FileUploadController.validationResults())
           }
         }
-      case Some(Failed)                     =>
+      case Some(Failed) =>
         logger.warn("[FileUploadController][success] Upload status is failed")
         Future.successful(getGlobalErrorPage)
-      case None                             =>
+      case None =>
         logger.warn(s"[FileUploadController][success] Failed to verify upload. No data found in cache")
         throw new Exception("Upload data missing in cache for ODS file.")
     }).flatMap(identity) recover {
       case e: LoopException[Option[UploadStatus] @unchecked] =>
-        logger.error(
-          s"[FileUploadController][success] Failed to verify upload. Upload status: ${e.finalFutureData.flatten}",
-          e
-        )
+        logger.error(s"[FileUploadController][success] Failed to verify upload. Upload status: ${e.finalFutureData.flatten}", e)
         getGlobalErrorPage
-      case e: Exception                                      =>
+      case e: Exception =>
         logger.error(s"[FileUploadController][success] failed to save ods file with exception ${e.getMessage}.", e)
         getGlobalErrorPage
     }
   }
 
   def validationResults(): Action[AnyContent] = authAction.async { implicit request =>
-    val futureRequestObject = ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
-    val futureCallbackData  = sessionService.getCallbackRecord.withRetry(appConfig.odsValidationRetryAmount)(
+    val futureCallbackData  = fileValidatorSessionService.getCallbackRecord.withRetry(appConfig.odsValidationRetryAmount)(
       _.exists(_.isInstanceOf[UploadedSuccessfully])
     )
+
     (for {
-      requestObject      <- futureRequestObject
-      all                <- ersUtil.fetch[ErsMetaData](ersUtil.ersMetaData, requestObject.getSchemeReference)
-      connectorResponse  <- ersConnector.removePresubmissionData(all.schemeInfo)
-      callbackData       <- futureCallbackData
+      all <- sessionService.fetch[ErsMetaData](ersUtil.ERS_METADATA)
+      connectorResponse <- ersConnector.removePresubmissionData(all.schemeInfo)
+      callbackData <- futureCallbackData
       validationResponse <-
         if (connectorResponse.status == OK) {
           handleValidationResponse(callbackData.get.asInstanceOf[UploadedSuccessfully], all.schemeInfo)
         } else {
-          logger.error(
-            s"[FileUploadController][validationResults] removePresubmissionData failed with status ${connectorResponse.status}, " +
-              s"timestamp: ${System.currentTimeMillis()}."
-          )
+          logger.error(s"[FileUploadController][validationResults] removePresubmissionData failed with status ${connectorResponse.status}, " +
+              s"timestamp: ${System.currentTimeMillis()}.")
           Future.successful(getGlobalErrorPage)
         }
     } yield validationResponse) recover {
       case e: LoopException[Option[UploadStatus] @unchecked] =>
-        logger.error(
-          s"[FileUploadController][validationResults] Failed to validate as file is not yet successfully uploaded. Current cache data: ${e.finalFutureData.flatten}",
-          e
-        )
+        logger.error(s"[FileUploadController][validationResults] Failed to validate as file is not yet successfully uploaded. Current cache data: ${e.finalFutureData.flatten}", e)
         getGlobalErrorPage
-      case e: Throwable                                      =>
-        logger.error(
-          s"[FileUploadController][validationResults] validationResults failed with Exception ${e.getMessage}",
-          e
-        )
+      case e: Throwable =>
+        logger.error(s"[FileUploadController][validationResults] validationResults failed with Exception ${e.getMessage}", e)
         getGlobalErrorPage
     }
   }
 
-  def handleValidationResponse(callbackData: UploadedSuccessfully, schemeInfo: SchemeInfo)(implicit
-    request: RequestWithOptionalAuthContext[AnyContent],
-    hc: HeaderCarrier
-  ): Future[Result] = {
+  def handleValidationResponse(callbackData: UploadedSuccessfully, schemeInfo: SchemeInfo)
+                              (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
     val schemeRef = schemeInfo.schemeRef
     ersConnector.validateFileData(callbackData, schemeInfo).map { res =>
       logger.info(s"[FileUploadController][handleValidationResponse] Response from validator: ${res.status}, timestamp: ${System.currentTimeMillis()}.")
       res.status match {
-        case OK       =>
-          logger.info(
-            s"[FileUploadController][handleValidationResponse] Validation is successful for schemeRef: $schemeRef, timestamp: ${System.currentTimeMillis()}."
-          )
-          ersUtil.cache(ersUtil.VALIDATED_SHEEETS, res.body, schemeRef)
+        case OK =>
+          logger.info(s"[FileUploadController][handleValidationResponse] Validation is successful for schemeRef: $schemeRef, timestamp: ${System.currentTimeMillis()}.")
+          sessionService.cache(ersUtil.VALIDATED_SHEETS, res.body)
           Redirect(routes.SchemeOrganiserController.schemeOrganiserPage())
         case ACCEPTED =>
-          logger.warn(
-            s"[FileUploadController][handleValidationResponse] Validation is not successful for schemeRef: $schemeRef, timestamp: ${System.currentTimeMillis()}."
-          )
+          logger.warn(s"[FileUploadController][handleValidationResponse] Validation is not successful for schemeRef: $schemeRef, timestamp: ${System.currentTimeMillis()}.")
           Redirect(routes.FileUploadController.validationFailure())
-        case _        =>
-          logger.error(
-            s"[FileUploadController][handleValidationResponse] Validate file data failed with Status ${res.status}, timestamp: ${System.currentTimeMillis()}."
-          )
+        case _ =>
+          logger.error(s"[FileUploadController][handleValidationResponse] Validate file data failed with Status ${res.status}, timestamp: ${System.currentTimeMillis()}.")
           getGlobalErrorPage
       }
     }
@@ -184,16 +153,13 @@ class FileUploadController @Inject() (
   def validationFailure(): Action[AnyContent] = authAction.async { implicit request =>
     logger.info("[FileUploadController][validationFailure] Validation Failure: " + (System.currentTimeMillis() / 1000))
     (for {
-      requestObject <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
-      fileType      <- ersUtil.fetch[CheckFileType](ersUtil.FILE_TYPE_CACHE, requestObject.getSchemeReference)
+      requestObject <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
+      fileType      <- sessionService.fetch[CheckFileType](ersUtil.FILE_TYPE_CACHE)
     } yield {
       Ok(fileUploadErrorsView(requestObject, fileType.checkFileType.getOrElse("")))
     }) recover {
       case e: Throwable =>
-        logger.error(
-          s"[FileUploadController][validationFailure] failed with Exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.",
-          e
-        )
+        logger.error(s"[FileUploadController][validationFailure] failed with Exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.", e)
         getGlobalErrorPage
     }
   }
@@ -221,5 +187,4 @@ class FileUploadController @Inject() (
         "ers.global_errors.message"
       )(request, messages, appConfig)
     )
-
 }

@@ -23,43 +23,33 @@ import models.upscan.{NotStarted, UploadId, UpscanCsvFilesList, UpscanIds}
 import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.mvc._
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
+import services.FrontendSessionService
+import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.ERSUtil
-import javax.inject.{Inject, Singleton}
-import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class CheckCsvFilesController @Inject() (
-  val mcc: MessagesControllerComponents,
-  val authConnector: DefaultAuthConnector,
-  implicit val ersUtil: ERSUtil,
-  implicit val appConfig: ApplicationConfig,
-  globalErrorView: views.html.global_error,
-  checkCsvFileView: views.html.check_csv_file,
-  authAction: AuthAction
-) extends FrontendController(mcc)
-    with I18nSupport
-    with WithUnsafeDefaultFormBinding
-    with Logging {
-
-  implicit val ec: ExecutionContext = mcc.executionContext
+class CheckCsvFilesController @Inject() (val mcc: MessagesControllerComponents,
+                                         val sessionService: FrontendSessionService,
+                                         globalErrorView: views.html.global_error,
+                                         checkCsvFileView: views.html.check_csv_file,
+                                         authAction: AuthAction)
+                                        (implicit val ec: ExecutionContext,
+                                         val ersUtil: ERSUtil,
+                                         val appConfig: ApplicationConfig)
+  extends FrontendController(mcc) with I18nSupport with WithUnsafeDefaultFormBinding with Logging {
 
   def checkCsvFilesPage(): Action[AnyContent] = authAction.async { implicit request =>
-    showCheckCsvFilesPage()(request, hc)
+    showCheckCsvFilesPage()(request)
   }
 
-  def showCheckCsvFilesPage()(implicit
-    request: RequestWithOptionalAuthContext[AnyContent],
-    hc: HeaderCarrier
-  ): Future[Result] = {
-    val requestObjectFuture = ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
-    ersUtil.remove(ersUtil.CSV_FILES_UPLOAD)
+  def showCheckCsvFilesPage()(implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] = {
     (for {
-      requestObject <- requestObjectFuture
+      requestObject <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
+      _ <- sessionService.remove(ersUtil.CSV_FILES_UPLOAD)
     } yield {
       val csvFilesList: List[CsvFiles] = ersUtil.getCsvFilesList(requestObject.getSchemeType)
       Ok(checkCsvFileView(requestObject, CsvFilesList(csvFilesList)))
@@ -72,10 +62,7 @@ class CheckCsvFilesController @Inject() (
     validateCsvFilesPageSelected()
   }
 
-  def validateCsvFilesPageSelected()(implicit
-    request: RequestWithOptionalAuthContext[AnyContent],
-    hc: HeaderCarrier
-  ): Future[Result] =
+  def validateCsvFilesPageSelected()(implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
     RsFormMappings
       .csvFileCheckForm()
       .bindFromRequest()
@@ -84,16 +71,14 @@ class CheckCsvFilesController @Inject() (
         formData => performCsvFilesPageSelected(formData)
       )
 
-  def performCsvFilesPageSelected(
-    formData: CsvFilesList
-  )(implicit request: Request[_], hc: HeaderCarrier): Future[Result] = {
+  def performCsvFilesPageSelected(formData: CsvFilesList)
+                                 (implicit request: Request[_]): Future[Result] = {
     val csvFilesCallbackList: UpscanCsvFilesList = createCacheData(formData.files)
     if (csvFilesCallbackList.ids.isEmpty) {
       reloadWithError()
     } else {
       (for {
-        requestObject <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
-        _             <- ersUtil.cache(ersUtil.CSV_FILES_UPLOAD, csvFilesCallbackList, requestObject.getSchemeReference)
+        _ <- sessionService.cache(ersUtil.CSV_FILES_UPLOAD, csvFilesCallbackList)
       } yield Redirect(routes.CsvFileUploadController.uploadFilePage())).recover { case e: Throwable =>
         logger.error(
           s"[CheckCsvFilesController][performCsvFilesPageSelected] Save data to cache failed with exception ${e.getMessage}.",

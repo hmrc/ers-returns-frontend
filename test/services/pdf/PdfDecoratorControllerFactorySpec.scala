@@ -27,7 +27,7 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.i18n.{Messages, MessagesApi}
 import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents}
 import play.api.test.Helpers.stubBodyParser
-import utils.{CountryCodes, ERSFakeApplicationConfig, ERSUtil, ErsTestHelper, Fixtures}
+import utils._
 
 import scala.concurrent.ExecutionContext
 
@@ -56,7 +56,7 @@ class PdfDecoratorControllerFactorySpec
     val mockCountryCodes: CountryCodes      = mock[CountryCodes]
     override val countryCodes: CountryCodes = mockCountryCodes
     override val ERSUtil: ERSUtil           =
-      new ERSUtil(mockSessionCache, mockShortLivedCache, mockAppConfig)(ec, mockCountryCodes)
+      new ERSUtil(mockFileValidatorSessionService, mockAppConfig)(ec, mockCountryCodes)
   }
 
   lazy val altAmends: AlterationAmends = AlterationAmends(

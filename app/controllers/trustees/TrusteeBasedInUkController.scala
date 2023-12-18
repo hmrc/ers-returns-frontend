@@ -26,7 +26,7 @@ import play.api.data.Form
 import play.api.libs.json.Format
 import play.api.mvc.{AnyContent, MessagesControllerComponents, Request, Result}
 import play.twirl.api.Html
-import services.TrusteeService
+import services.{FrontendSessionService, TrusteeService}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -39,26 +39,26 @@ class TrusteeBasedInUkController @Inject()(val mcc: MessagesControllerComponents
                                            val globalErrorView: views.html.global_error,
                                            val authAction: AuthAction,
                                            val trusteeService: TrusteeService,
-                                           implicit val countryCodes: CountryCodes,
-                                           implicit val ersUtil: ERSUtil,
-                                           implicit val appConfig: ApplicationConfig,
-                                           trusteeBasedInUkView: views.html.trustee_based_in_uk
-                                      )
+                                           val sessionService: FrontendSessionService,
+                                           trusteeBasedInUkView: views.html.trustee_based_in_uk)
+                                          (implicit val ec: ExecutionContext,
+                                           val ersUtil: ERSUtil,
+                                           val appConfig: ApplicationConfig,
+                                           val countryCodes: CountryCodes)
   extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with TrusteeBaseController[TrusteeBasedInUk] {
 
-  implicit val ec: ExecutionContext             = mcc.executionContext
   implicit val format: Format[TrusteeBasedInUk] = TrusteeBasedInUk.format
 
   val cacheKey: String = ersUtil.TRUSTEE_BASED_CACHE
 
-  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier): Future[Result] = {
+  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier, request: Request[_]): Future[Result] = {
     for {
-      requestObject <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
+      //requestObject <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
       trusteeBasedInUk <-  if (edit) {
-        ersUtil.fetchTrusteesOptionally(requestObject.getSchemeReference).map {
+        sessionService.fetchTrusteesOptionally().map {
           trusteeDetailsList => TrusteeBasedInUk(trusteeDetailsList.trustees(index).basedInUk)
         }
-      } else {ersUtil.fetch[TrusteeBasedInUk](cacheKey, requestObject.getSchemeReference)}
+      } else {sessionService.fetch[TrusteeBasedInUk](cacheKey)}
     } yield {
       (trusteeBasedInUk.basedInUk, edit) match {
         case (true, true)    => Redirect(controllers.trustees.routes.TrusteeAddressUkController.editQuestion(index))

@@ -24,8 +24,7 @@ class Bindings extends Module {
   override def bindings(environment: Environment, configuration: Configuration): Seq[Binding[_]] =
     bindDeps()
 
-  private def bindDeps() = Seq(
+  private def bindDeps(): Seq[Binding[CountryCodes]] = Seq(
     play.api.inject.bind(classOf[CountryCodes]).to(classOf[CountryCodesImpl])
   )
-
 }

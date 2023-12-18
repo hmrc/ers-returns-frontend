@@ -25,11 +25,10 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import java.net.URI
 import scala.concurrent.ExecutionContext
 
-class LanguageSwitchController @Inject() (appConfig: ApplicationConfig, val mcc: MessagesControllerComponents)
-    extends FrontendController(mcc)
-    with I18nSupport {
-
-  implicit val ec: ExecutionContext = mcc.executionContext
+class LanguageSwitchController @Inject() (appConfig: ApplicationConfig,
+                                          val mcc: MessagesControllerComponents)
+                                         (implicit val ec: ExecutionContext)
+    extends FrontendController(mcc) with I18nSupport {
 
   private def fallbackURL: String = routes.ReturnServiceController.hmacCheck().url
 

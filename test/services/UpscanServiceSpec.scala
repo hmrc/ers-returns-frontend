@@ -21,8 +21,8 @@ import models.upscan.{Reference, UploadId, UpscanInitiateRequest, UpscanInitiate
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito._
-import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.OptionValues
+import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatestplus.mockito.MockitoSugar
@@ -76,13 +76,13 @@ class UpscanServiceSpec
   "getUpscanFormDataCsv" must {
     "get form data from Upscan Connector with an initiate and uploadId" in {
       implicit val request: Request[_] = FakeRequest("GET", "http://localhost:9290/")
-      val uploadId                     = UploadId("TestUploadId")
-      val scRef                        = "ScRef"
-      val hc                           = HeaderCarrier(sessionId = Some(SessionId("sessionid")))
-      val callback                     = controllers.internal.routes.CsvFileUploadCallbackController.callback(uploadId, scRef).absoluteURL()
-      val success                      = controllers.routes.CsvFileUploadController.success(uploadId).absoluteURL()
-      val failure                      = controllers.routes.CsvFileUploadController.failure().absoluteURL()
-      val expectedInitiateRequest      = UpscanInitiateRequest(callback, success, failure, 1, 104857600)
+      val uploadId = UploadId("TestUploadId")
+      val scRef = "ScRef"
+      val hc = HeaderCarrier(sessionId = Some(SessionId("sessionid")))
+      val callback = controllers.internal.routes.CsvFileUploadCallbackController.callback(uploadId, scRef, "sessionid").absoluteURL()
+      val success = controllers.routes.CsvFileUploadController.success(uploadId).absoluteURL()
+      val failure = controllers.routes.CsvFileUploadController.failure().absoluteURL()
+      val expectedInitiateRequest = UpscanInitiateRequest(callback, success, failure, 1, 104857600)
 
       val upscanInitiateResponse =
         UpscanInitiateResponse(Reference("reference"), "postTarget", formFields = Map.empty[String, String])

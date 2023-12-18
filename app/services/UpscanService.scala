@@ -39,7 +39,7 @@ class UpscanService @Inject() (
     request: Request[_]
   ): Future[UpscanInitiateResponse] = {
     val callback = controllers.internal.routes.CsvFileUploadCallbackController
-      .callback(uploadId, scRef)
+      .callback(uploadId, scRef, hc.sessionId.get.value)
       .absoluteURL(isSecure)
 
     val success               = controllers.routes.CsvFileUploadController.success(uploadId)

@@ -27,9 +27,7 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class UpscanConnector @Inject() (appConfig: ApplicationConfig, httpClient: DefaultHttpClient)(implicit
-  ec: ExecutionContext
-) {
+class UpscanConnector @Inject() (appConfig: ApplicationConfig, httpClient: DefaultHttpClient)(implicit ec: ExecutionContext) {
 
   private val headers = Map(
     HeaderNames.CONTENT_TYPE -> "application/json"

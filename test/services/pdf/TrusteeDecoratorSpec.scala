@@ -23,7 +23,6 @@ import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.i18n.Messages
-
 import utils.{ERSFakeApplicationConfig, ErsTestHelper}
 
 class TrusteeDecoratorSpec

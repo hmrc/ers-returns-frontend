@@ -23,8 +23,7 @@ import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.libs.json.{Json, OFormat}
 import play.api.mvc._
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
+import services.FrontendSessionService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.SessionKeys.{BUNDLE_REF, DATE_TIME_SUBMITTED}
 import utils._
@@ -33,35 +32,31 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class ReturnServiceController @Inject() (
-  val mcc: MessagesControllerComponents,
-  val authConnector: DefaultAuthConnector,
-  implicit val ersUtil: ERSUtil,
-  implicit val appConfig: ApplicationConfig,
-  globalErrorView: views.html.global_error,
-  unauthorisedView: views.html.unauthorised,
-  startView: views.html.start,
-  authActionGovGateway: AuthActionGovGateway
-) extends FrontendController(mcc)
-    with I18nSupport
-    with Logging {
-
-  implicit val ec: ExecutionContext = mcc.executionContext
+class ReturnServiceController @Inject() (val mcc: MessagesControllerComponents,
+                                         val sessionService: FrontendSessionService,
+                                         globalErrorView: views.html.global_error,
+                                         unauthorisedView: views.html.unauthorised,
+                                         startView: views.html.start,
+                                         authActionGovGateway: AuthActionGovGateway)
+                                        (implicit val ec: ExecutionContext,
+                                         val ersUtil: ERSUtil,
+                                         val appConfig: ApplicationConfig)
+  extends FrontendController(mcc) with I18nSupport with HMACUtil with Logging {
 
   lazy val accessThreshold: Int = appConfig.accessThreshold
-  val accessDeniedUrl           = "/outage-ers-frontend/index.html"
+  val accessDeniedUrl = "/outage-ers-frontend/index.html"
 
-  def cacheParams(ersRequestObject: RequestObject)(implicit request: Request[_], hc: HeaderCarrier): Future[Result] = {
+  def cacheParams(ersRequestObject: RequestObject)(implicit request: Request[_]): Future[Result] = {
     implicit val formatRSParams: OFormat[RequestObject] = Json.format[RequestObject]
     logger.debug("Request Object created --> " + ersRequestObject)
     val futureResult = for {
-      _ <- ersUtil.remove(ersRequestObject.getSchemeReference)
-      _ <- ersUtil.cache(ersUtil.ersMetaData, ersRequestObject.toErsMetaData, ersRequestObject.getSchemeReference)
-      _ <- ersUtil.cache(ersUtil.ersRequestObject, ersRequestObject)
+      _ <- sessionService.remove(ersRequestObject.getSchemeReference)
+      _ <- sessionService.cache(ersUtil.ERS_METADATA, ersRequestObject.toErsMetaData)
+      _ <- sessionService.cache(ersUtil.ERS_REQUEST_OBJECT, ersRequestObject)
     } yield {
-      logger.info(s"[ReturnServiceController][cacheParams]Meta Data Cached --> ${ersRequestObject.toErsMetaData}")
+      logger.info(s"[ReturnServiceController][cacheParams] Meta Data Cached --> ${ersRequestObject.toErsMetaData}")
       logger.info(s"[ReturnServiceController][cacheParams] Request Object Cached -->  $ersRequestObject")
-      (showInitialStartPage(ersRequestObject)(request))
+      showInitialStartPage(ersRequestObject)(request)
     }
     futureResult recover { case e: Exception =>
       logger.warn(s"[ReturnServiceController][cacheParams] Caught exception ${e.getMessage}", e)
@@ -90,7 +85,7 @@ class ReturnServiceController @Inject() (
       logger.warn("[ReturnServiceController][hmacCheck] Missing SchemeRef in URL")
       Future(getGlobalErrorPage)
     } else {
-      if (ersUtil.isHmacAndTimestampValid(getRequestParameters(request))) {
+      if (isHmacAndTimestampValid(getRequestParameters(request))) {
         logger.info("[ReturnServiceController][hmacCheck] HMAC Check Valid")
         try cacheParams(getRequestParameters(request))
         catch {
@@ -113,7 +108,7 @@ class ReturnServiceController @Inject() (
   }
 
   def startPage(): Action[AnyContent] = authActionGovGateway.async { implicit request =>
-    ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).map { result =>
+    sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT).map { result =>
       Ok(startView(result)).withSession(request.session - BUNDLE_REF - DATE_TIME_SUBMITTED)
     }
   }

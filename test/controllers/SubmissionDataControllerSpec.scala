@@ -24,7 +24,6 @@ import org.scalatest.OptionValues
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-
 import play.api.i18n
 import play.api.i18n.{MessagesApi, MessagesImpl}
 import play.api.libs.json.{JsObject, Json}
@@ -65,10 +64,7 @@ class SubmissionDataControllerSpec
     lazy val submissionDataController: SubmissionDataController =
       new SubmissionDataController(
         mockMCC,
-        mockAuthConnector,
         mockErsConnector,
-        mockErsUtil,
-        mockAppConfig,
         globalErrorView,
         testAuthAction
       )
@@ -100,10 +96,7 @@ class SubmissionDataControllerSpec
     lazy val submissionDataController: SubmissionDataController =
       new SubmissionDataController(
         mockMCC,
-        mockAuthConnector,
         mockErsConnector,
-        mockErsUtil,
-        mockAppConfig,
         globalErrorView,
         testAuthAction
       )
@@ -122,10 +115,7 @@ class SubmissionDataControllerSpec
     class Setup(obj: Option[JsObject] = None)
         extends SubmissionDataController(
           mockMCC,
-          mockAuthConnector,
           mockErsConnector,
-          mockErsUtil,
-          mockAppConfig,
           globalErrorView,
           testAuthAction
         ) {
@@ -136,7 +126,7 @@ class SubmissionDataControllerSpec
 
     "returns NOT_FOUND if not all parameters are given" in {
       lazy val submissionDataController: SubmissionDataController = new Setup()
-      val authRequest                                             = buildRequestWithAuth(testFakeRequest)
+      val authRequest = buildRequestWithAuth(testFakeRequest)
 
       val result = submissionDataController.getRetrieveSubmissionData()(authRequest, hc)
       status(result) shouldBe NOT_FOUND
@@ -151,7 +141,7 @@ class SubmissionDataControllerSpec
 
       val authRequest = buildRequestWithAuth(testFakeRequest)
       val result      = submissionDataController.getRetrieveSubmissionData()(authRequest, hc)
-      status(result)                                       shouldBe OK
+      status(result) shouldBe OK
       contentAsString(result).contains("Retrieve Failure") shouldBe false
     }
 
@@ -163,8 +153,8 @@ class SubmissionDataControllerSpec
         .thenReturn(Future.successful(HttpResponse(INTERNAL_SERVER_ERROR, "")))
 
       val authRequest = buildRequestWithAuth(testFakeRequest)
-      val result      = submissionDataController.getRetrieveSubmissionData()(authRequest, hc)
-      status(result)                                                              shouldBe OK
+      val result = submissionDataController.getRetrieveSubmissionData()(authRequest, hc)
+      status(result) shouldBe OK
       contentAsString(result).contains(testMessages("ers.global_errors.message")) shouldBe true
     }
 
@@ -177,7 +167,7 @@ class SubmissionDataControllerSpec
 
       val authRequest = buildRequestWithAuth(testFakeRequest)
       val result      = submissionDataController.getRetrieveSubmissionData()(authRequest, hc)
-      status(result)                                                              shouldBe OK
+      status(result) shouldBe OK
       contentAsString(result).contains(testMessages("ers.global_errors.message")) shouldBe true
     }
 
@@ -185,10 +175,7 @@ class SubmissionDataControllerSpec
       lazy val submissionDataController: SubmissionDataController =
         new SubmissionDataController(
           mockMCC,
-          mockAuthConnector,
           mockErsConnector,
-          mockErsUtil,
-          mockAppConfig,
           globalErrorView,
           testAuthAction
         )

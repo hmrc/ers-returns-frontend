@@ -24,7 +24,7 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status.UNAUTHORIZED
 import play.api.i18n
 import play.api.i18n.{MessagesApi, MessagesImpl}
-import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents, Request, Result}
+import play.api.mvc._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import utils.ErsTestHelper
@@ -52,7 +52,7 @@ class ApplicationControllerSpec extends PlaySpec with ErsTestHelper with GuiceOn
   val notAuthorisedView: views.html.not_authorised = app.injector.instanceOf[not_authorised]
 
   override val testAuthActionGov: AuthActionGovGateway =
-    new AuthActionGovGateway(mockAuthConnector, mockAppConfig, mockErsUtil, defaultParser)(ec) {
+    new AuthActionGovGateway(mockAuthConnector, mockAppConfig, defaultParser)(ec) {
       override def invokeBlock[A](
         request: Request[A],
         block: RequestWithOptionalAuthContext[A] => Future[Result]
@@ -62,9 +62,6 @@ class ApplicationControllerSpec extends PlaySpec with ErsTestHelper with GuiceOn
 
   val testController = new ApplicationController(
     mockMCC,
-    mockAuthConnector,
-    mockErsUtil,
-    mockAppConfig,
     unauthorisedView,
     signedOutView,
     notAuthorisedView,

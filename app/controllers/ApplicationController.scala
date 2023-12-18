@@ -20,7 +20,6 @@ import config.ApplicationConfig
 import controllers.auth.AuthActionGovGateway
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.ERSUtil
 
@@ -28,19 +27,14 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class ApplicationController @Inject() (
-  val mcc: MessagesControllerComponents,
-  val authConnector: DefaultAuthConnector,
-  implicit val ersUtil: ERSUtil,
-  implicit val appConfig: ApplicationConfig,
-  unauthorisedView: views.html.unauthorised,
-  signedOutView: views.html.signedOut,
-  notAuthorisedView: views.html.not_authorised,
-  authAction: AuthActionGovGateway
-) extends FrontendController(mcc)
-    with I18nSupport {
-
-  implicit val ec: ExecutionContext = mcc.executionContext
+class ApplicationController @Inject() (val mcc: MessagesControllerComponents,
+                                       unauthorisedView: views.html.unauthorised,
+                                       signedOutView: views.html.signedOut,
+                                       notAuthorisedView: views.html.not_authorised,
+                                       authAction: AuthActionGovGateway)
+                                      (implicit val ec: ExecutionContext,
+                                       val ersUtil: ERSUtil,
+                                       val appConfig: ApplicationConfig) extends FrontendController(mcc) with I18nSupport {
 
   def unauthorised(): Action[AnyContent] = Action { implicit request =>
     Unauthorized(unauthorisedView())

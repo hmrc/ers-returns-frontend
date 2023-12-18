@@ -46,7 +46,6 @@
 	))
 
 	@formWithCSRF(action = routes.GroupSchemeController.groupPlanSummaryContinue(schemeId)) {
-
 		@for((company, index) <- companies.companies.zipWithIndex) {
 			@govukSummaryList(SummaryList(
 				rows = {

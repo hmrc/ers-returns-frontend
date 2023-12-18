@@ -21,12 +21,10 @@ import config.ApplicationConfig
 import connectors.ErsConnector
 import controllers.auth.{AuthAction, RequestWithOptionalAuthContext}
 import models.upscan.{UploadedSuccessfully, UpscanCsvFilesCallback, UpscanCsvFilesCallbackList}
-import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.mvc._
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.http.cache.client.CacheMap
-import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
+import services.FrontendSessionService
+import uk.gov.hmrc.mongo.cache.{CacheItem, DataKey}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils._
 
@@ -34,47 +32,40 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class SummaryDeclarationController @Inject() (
-  val mcc: MessagesControllerComponents,
-  val authConnector: DefaultAuthConnector,
-  val ersConnector: ErsConnector,
-  implicit val countryCodes: CountryCodes,
-  implicit val ersUtil: ERSUtil,
-  implicit val appConfig: ApplicationConfig,
-  globalErrorView: views.html.global_error,
-  summaryView: views.html.summary,
-  authAction: AuthAction
-) extends FrontendController(mcc)
-    with I18nSupport
-    with Logging {
-
-  implicit val ec: ExecutionContext = mcc.executionContext
+class SummaryDeclarationController @Inject() (val mcc: MessagesControllerComponents,
+                                              val ersConnector: ErsConnector,
+                                              val sessionService: FrontendSessionService,
+                                              globalErrorView: views.html.global_error,
+                                              summaryView: views.html.summary,
+                                              authAction: AuthAction)
+                                             (implicit val ec: ExecutionContext,
+                                              val ersUtil: ERSUtil,
+                                              val appConfig: ApplicationConfig,
+                                              val countryCodes: CountryCodes)
+  extends FrontendController(mcc) with I18nSupport with CacheHelper {
 
   def summaryDeclarationPage(): Action[AnyContent] = authAction.async { implicit request =>
-    ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
-      showSummaryDeclarationPage(requestObject)(request, hc)
+    sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT).flatMap { requestObject =>
+      showSummaryDeclarationPage(requestObject)(request)
     }
   }
 
-  def showSummaryDeclarationPage(
-    requestObject: RequestObject
-  )(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] =
-    ersUtil.fetchAll(requestObject.getSchemeReference).flatMap { all =>
+  def showSummaryDeclarationPage(requestObject: RequestObject)(implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
+    sessionService.fetchAll().flatMap { all =>
       val schemeOrganiser: SchemeOrganiserDetails =
-        all.getEntry[SchemeOrganiserDetails](ersUtil.SCHEME_ORGANISER_CACHE).get
-      val groupSchemeInfo: GroupSchemeInfo        =
-        all.getEntry[GroupSchemeInfo](ersUtil.GROUP_SCHEME_CACHE_CONTROLLER).getOrElse(new GroupSchemeInfo(None, None))
-      val groupScheme: String                     = groupSchemeInfo.groupScheme.getOrElse("")
-      val reportableEvents: String                = all.getEntry[ReportableEvents](ersUtil.reportableEvents).get.isNilReturn.get
-      var fileType: String                        = ""
-      var fileNames: String                       = ""
-      var fileCount: Int                          = 0
+        getEntry[SchemeOrganiserDetails](all, DataKey(ersUtil.SCHEME_ORGANISER_CACHE)).get
+      val groupSchemeInfo: GroupSchemeInfo =
+        getEntry[GroupSchemeInfo](all, DataKey(ersUtil.GROUP_SCHEME_CACHE_CONTROLLER)).getOrElse(new GroupSchemeInfo(None, None))
+      val groupScheme: String = groupSchemeInfo.groupScheme.getOrElse("")
+      val reportableEvents: String = getEntry[ReportableEvents](all, DataKey(ersUtil.REPORTABLE_EVENTS)).get.isNilReturn.get
+      var fileType: String = ""
+      var fileNames: String = ""
+      var fileCount: Int = 0
 
       if (reportableEvents == ersUtil.OPTION_YES) {
-        fileType = all.getEntry[CheckFileType](ersUtil.FILE_TYPE_CACHE).get.checkFileType.get
+        fileType = getEntry[CheckFileType](all, DataKey(ersUtil.FILE_TYPE_CACHE)).get.checkFileType.get
         if (fileType == ersUtil.OPTION_CSV) {
-          val csvCallback                                    = all
-            .getEntry[UpscanCsvFilesCallbackList](ersUtil.CHECK_CSV_FILES)
+          val csvCallback = getEntry[UpscanCsvFilesCallbackList](all, DataKey(ersUtil.CHECK_CSV_FILES))
             .getOrElse(
               throw new Exception(s"Cache data missing for key: ${ersUtil.CHECK_CSV_FILES} in CacheMap")
             )
@@ -93,13 +84,13 @@ class SummaryDeclarationController @Inject() (
             fileCount += 1
           }
         } else {
-          fileNames = all.getEntry[String](ersUtil.FILE_NAME_CACHE).get
+          fileNames = getEntry[String](all, DataKey(ersUtil.FILE_NAME_CACHE)).get
           fileCount += 1
         }
       }
 
       val altAmendsActivity =
-        all.getEntry[AltAmendsActivity](ersUtil.altAmendsActivity).getOrElse(AltAmendsActivity(""))
+        getEntry[AltAmendsActivity](all, DataKey(ersUtil.ALT_AMENDS_ACTIVITY)).getOrElse(AltAmendsActivity(""))
       val altActivity       = requestObject.getSchemeId match {
         case ersUtil.SCHEME_CSOP | ersUtil.SCHEME_SIP | ersUtil.SCHEME_SAYE => altAmendsActivity.altActivity
         case _                                                              => ""
@@ -122,24 +113,20 @@ class SummaryDeclarationController @Inject() (
         )
       )
     } recover { case e: Throwable =>
-      logger.error(
-        s"[SummaryDeclarationController][showSummaryDeclarationPage] failed to load page with exception ${e.getMessage}.",
-        e
-      )
+      logger.error(s"[SummaryDeclarationController][showSummaryDeclarationPage] failed to load page with exception ${e.getMessage}.", e)
       getGlobalErrorPage
     }
 
-  def getTrustees(cacheMap: CacheMap): TrusteeDetailsList =
-    cacheMap.getEntry[TrusteeDetailsList](ersUtil.TRUSTEES_CACHE).getOrElse(TrusteeDetailsList(List[TrusteeDetails]()))
+  def getTrustees(cacheItem: CacheItem): TrusteeDetailsList =
+    getEntry[TrusteeDetailsList](cacheItem, DataKey(ersUtil.TRUSTEES_CACHE))
+      .getOrElse(TrusteeDetailsList(List[TrusteeDetails]()))
 
-  def getAltAmends(cacheMap: CacheMap): AlterationAmends =
-    cacheMap
-      .getEntry[AlterationAmends](ersUtil.ALT_AMENDS_CACHE_CONTROLLER)
+  def getAltAmends(cacheItem: CacheItem): AlterationAmends =
+    getEntry[AlterationAmends](cacheItem, DataKey(ersUtil.ALT_AMENDS_CACHE_CONTROLLER))
       .getOrElse(AlterationAmends(None, None, None, None, None))
 
-  def getCompDetails(cacheMap: CacheMap): CompanyDetailsList =
-    cacheMap
-      .getEntry[CompanyDetailsList](ersUtil.GROUP_SCHEME_COMPANIES)
+  def getCompDetails(cacheItem: CacheItem): CompanyDetailsList =
+    getEntry[CompanyDetailsList](cacheItem, DataKey(ersUtil.GROUP_SCHEME_COMPANIES))
       .getOrElse(CompanyDetailsList(List[CompanyDetails]()))
 
   def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result =
@@ -150,5 +137,4 @@ class SummaryDeclarationController @Inject() (
         "ers.global_errors.message"
       )(request, messages, appConfig)
     )
-
 }

@@ -24,7 +24,7 @@ import utils.ErsTestHelper
 class TrusteeServiceSpec extends AnyWordSpecLike with ErsTestHelper {
 
   "calling replace trustee" must {
-    val trusteeService: TrusteeService = new TrusteeService(mockErsUtil)
+    val trusteeService: TrusteeService = new TrusteeService(mockErsUtil, mockSessionService)
 
     val trusteeOne   = TrusteeDetails("First Trustee", "20 Garden View", None, None, None, None, None, true)
     val trusteeTwo   = TrusteeDetails("Second Trustee", "72 Big Avenue", None, None, None, None, None, true)

@@ -37,8 +37,7 @@ case class UpscanCsvFilesCallbackList(files: List[UpscanCsvFilesCallback]) {
   }
 }
 object UpscanCsvFilesCallbackList {
-  implicit val upscanCsvCallbackListFormat: Format[UpscanCsvFilesCallbackList] =
-    Json.format[UpscanCsvFilesCallbackList]
+  implicit val upscanCsvCallbackListFormat: Format[UpscanCsvFilesCallbackList] = Json.format[UpscanCsvFilesCallbackList]
 }
 
 case class UpscanCsvFilesList(ids: List[UpscanIds]) {

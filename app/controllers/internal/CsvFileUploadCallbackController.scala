@@ -16,33 +16,27 @@
 
 package controllers.internal
 
-import config.ApplicationConfig
 import connectors.ErsConnector
-import javax.inject.{Inject, Singleton}
+import models.RequestWithUpdatedSession
 import models.upscan._
 import play.api.Logging
 import play.api.libs.json.JsValue
 import play.api.mvc.{Action, MessagesControllerComponents}
-import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
+import services.FrontendSessionService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.ERSUtil
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
 
 @Singleton
-class CsvFileUploadCallbackController @Inject() (
-  val mcc: MessagesControllerComponents,
-  val ersConnector: ErsConnector,
-  val authConnector: DefaultAuthConnector,
-  implicit val ersUtil: ERSUtil,
-  implicit val appConfig: ApplicationConfig
-) extends FrontendController(mcc)
-    with Logging {
+class CsvFileUploadCallbackController @Inject() (val mcc: MessagesControllerComponents,
+                                                 val ersConnector: ErsConnector,
+                                                 val sessionService: FrontendSessionService)
+                                                (implicit val ec: ExecutionContext, ersUtil: ERSUtil) extends FrontendController(mcc) with Logging {
 
-  implicit val ec: ExecutionContext = mcc.executionContext
-
-  def callback(uploadId: UploadId, scRef: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
+  def callback(uploadId: UploadId, scRef: String, sessionId: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
     request.body
       .validate[UpscanCallback]
       .fold(
@@ -66,7 +60,7 @@ class CsvFileUploadCallbackController @Inject() (
             s"[CsvFileUploadCallbackController][callback] Updating CSV callback for " +
               s"upload id: ${uploadId.value} to ${uploadStatus.getClass.getSimpleName}"
           )
-          ersUtil.cache(s"${ersUtil.CHECK_CSV_FILES}-${uploadId.value}", uploadStatus, scRef).map { _ =>
+          sessionService.cache[UploadStatus](s"${ersUtil.CHECK_CSV_FILES}-${uploadId.value}", uploadStatus)(RequestWithUpdatedSession(request, sessionId), implicitly).map { _ =>
             Ok
           } recover { case NonFatal(e) =>
             logger.error(
