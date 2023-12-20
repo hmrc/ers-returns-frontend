@@ -1,7 +1,24 @@
+/*
+ * Copyright 2023 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import config.ApplicationConfig
 import models._
 import org.scalacheck.Arbitrary
 import play.api.data.Form
+import play.api.data.Forms.boolean
 import play.api.mvc.{AnyContent, Request}
 import play.twirl.api.Html
 import uk.gov.hmrc.scalatestaccessibilitylinter.views.AutomaticAccessibilitySpec
@@ -10,6 +27,8 @@ import views.html._
 
 class FrontendAccessibilitySpec extends AutomaticAccessibilitySpec {
 
+  private val booleanForm: Form[Boolean] = Form("value" -> boolean)
+
   implicit val arbitraryRequest: Arbitrary[Request[AnyRef]] = fixed(fakeRequest)
   implicit val arbConfig: Arbitrary[ApplicationConfig] = fixed(app.injector.instanceOf[ApplicationConfig])
   implicit val arbErsUtil: Arbitrary[ERSUtil] = fixed(app.injector.instanceOf[ERSUtil])
@@ -17,6 +36,7 @@ class FrontendAccessibilitySpec extends AutomaticAccessibilitySpec {
     Some("AA0000000000000"), Some("MyScheme"), Some("CSOP"), Some("agentRef"), Some("empRef"), Some("ts"), Some("hmac")))
   implicit val arbCsvFilesList: Arbitrary[CsvFilesList] = fixed(CsvFilesList(List(CsvFiles("1"), CsvFiles("2"), CsvFiles("3"))))
   implicit val arbHtml: Arbitrary[Html] = fixed(Html("<span />"))
+  implicit val arbForm: Arbitrary[Form[_]] = fixed(booleanForm)
   implicit val arbAltAmendsActivity: Arbitrary[Form[AltAmendsActivity]] = fixed(models.RsFormMappings.altActivityForm()(messages))
   implicit val arbCheckFileType: Arbitrary[Form[CheckFileType]] = fixed(models.RsFormMappings.checkFileTypeForm()(messages))
   implicit val arbRS_groupScheme: Arbitrary[Form[RS_groupScheme]] = fixed(models.RsFormMappings.groupForm()(messages))
@@ -64,6 +84,8 @@ class FrontendAccessibilitySpec extends AutomaticAccessibilitySpec {
       render(trustee_address_uk)
     case trustee_based_in_uk: trustee_based_in_uk => render(trustee_based_in_uk)
     case trustee_name: trustee_name => render(trustee_name)
+    case trustee_remove_problem: trustee_remove_problem => render(trustee_remove_problem)
+    case trustee_remove_yes_no: trustee_remove_yes_no => render(trustee_remove_yes_no)
     case trustee_summary: trustee_summary => render(trustee_summary)
     case unauthorised: unauthorised => render(unauthorised)
     case upscan_csv_file_upload: upscan_csv_file_upload => render(upscan_csv_file_upload)

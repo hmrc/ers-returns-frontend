@@ -19,21 +19,22 @@ package controllers.trustees
 import config.ApplicationConfig
 import connectors.ErsConnector
 import controllers.auth.{AuthAction, RequestWithOptionalAuthContext}
-
-import javax.inject.Inject
-import models.{RequestObject, RsFormMappings, TrusteeDetails, TrusteeDetailsList}
+import models.{RequestObject, RsFormMappings}
 import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages}
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request, Result}
+import play.api.mvc._
+import services.TrusteeService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.{CountryCodes, ERSUtil}
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class TrusteeSummaryController @Inject()(val mcc: MessagesControllerComponents,
                                          val ersConnector: ErsConnector,
+                                         val trusteeService: TrusteeService,
                                          implicit val countryCodes: CountryCodes,
                                          implicit val ersUtil: ERSUtil,
                                          implicit val appConfig: ApplicationConfig,
@@ -46,25 +47,14 @@ class TrusteeSummaryController @Inject()(val mcc: MessagesControllerComponents,
 
   def deleteTrustee(id: Int): Action[AnyContent] = authAction.async {
     implicit request =>
-      showDeleteTrustee(id)(request, hc)
+      for {
+        deleted <- trusteeService.deleteTrustee(id)
+      } yield if (deleted) {
+        Redirect(controllers.trustees.routes.TrusteeSummaryController.trusteeSummaryPage())
+      } else {
+        getGlobalErrorPage
+      }
   }
-  def showDeleteTrustee(id: Int)(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
-
-    (for {
-      requestObject      <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
-      cachedTrusteeList  <- ersUtil.fetch[TrusteeDetailsList](ersUtil.TRUSTEES_CACHE, requestObject.getSchemeReference)
-      trusteeDetailsList = TrusteeDetailsList(filterDeletedTrustee(cachedTrusteeList, id))
-      _                  <- ersUtil.cache(ersUtil.TRUSTEES_CACHE, trusteeDetailsList, requestObject.getSchemeReference)
-    } yield {
-      Redirect(controllers.trustees.routes.TrusteeSummaryController.trusteeSummaryPage())
-
-    }) recover {
-      case _: Exception => getGlobalErrorPage
-    }
-  }
-
-  private def filterDeletedTrustee(trusteeDetailsList: TrusteeDetailsList, id: Int): List[TrusteeDetails] =
-    trusteeDetailsList.trustees.zipWithIndex.filterNot(_._2 == id).map(_._1)
 
   def trusteeSummaryPage(): Action[AnyContent] = authAction.async {
     implicit request =>
@@ -123,5 +113,4 @@ class TrusteeSummaryController @Inject()(val mcc: MessagesControllerComponents,
       "ers.global_errors.message"
     )(request, messages, appConfig))
   }
-
 }

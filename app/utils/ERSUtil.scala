@@ -56,14 +56,7 @@ class ERSUtil @Inject() (
   val csvFilesCallbackList: String          = "csv-file-callback-List"
 
   // Cache Ids
-  val SCHEME_CACHE: String            = "scheme-type"
   val FILE_TYPE_CACHE: String         = "check-file-type"
-  val ERROR_COUNT_CACHE: String       = "error-count"
-  val ERROR_LIST_CACHE: String        = "error-list"
-  val ERROR_SUMMARY_CACHE: String     = "error-summary"
-  val CHOOSE_ACTIVITY_CACHE: String   = "choose-activity"
-  val GROUP_SCHEME_CACHE: String      = "group-scheme"
-  val GROUP_SCHEME_TYPE_CACHE: String = "group-scheme-type"
   val altAmendsActivity: String       = "alt-activity"
 
   val CHECK_CSV_FILES: String  = "check-csv-files"
@@ -76,28 +69,8 @@ class ERSUtil @Inject() (
 	val TRUSTEE_NAME_CACHE: String = "trustee-name"
 	val TRUSTEE_BASED_CACHE: String = "trustee-based"
 	val TRUSTEE_ADDRESS_CACHE: String = "trustee-address"
-	val TRUSTEE_ADDRESS_UK_CACHE: String = "trustee-address-uk"
-	val TRUSTEE_ADDRESS_OVERSEAS_CACHE: String = "trustee-address-overseas"
-	val ERROR_REPORT_DATETIME: String = "error-report-datetime"
-
-  // Params
-  val PORTAL_AOREF_CACHE: String          = "portal-ao-ref"
-  val PORTAL_TAX_YEAR_CACHE: String       = "portal-tax-year"
-  val PORTAL_ERS_SCHEME_REF_CACHE: String = "portal-ers-scheme-ref"
-  val PORTAL_SCHEME_TYPE: String          = "portal-scheme-type"
-  val PORTAL_SCHEME_NAME_CACHE: String    = "portal-scheme-name"
-  val PORTAL_HMAC_CACHE: String           = "portal-hmac"
-  val PORTAL_SCHEME_REF: String           = "portal-scheme-ref"
-
-  val CONFIRMATION_DATETIME_CACHE: String = "confirmation-date-time"
-
-  // new cache amends
-  val PORTAL_PARAMS_CACHE: String = "portal_params"
 
   val BUNDLE_REF: String       = "sap-bundle-ref"
-  val FILE_TRANSFER_CACHE      = "file-tansfer-cache"
-  val FILE_TRANSFER_CACHE_LIST = "file-transfer-cache-list"
-  val IP_REF: String           = "ip-ref"
 
   val VALIDATED_SHEEETS: String = "validated-sheets"
 

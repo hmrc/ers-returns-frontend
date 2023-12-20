@@ -16,16 +16,15 @@
 
 package services
 
-import javax.inject.Inject
-import models.{RequestObject, TrusteeAddress, TrusteeDetails, TrusteeDetailsList, TrusteeName}
+import models._
+import play.api.Logging
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.ERSUtil
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class TrusteeService @Inject()(
-                              ersUtil: ERSUtil
-                              )(implicit ec: ExecutionContext) {
+class TrusteeService @Inject()(ersUtil: ERSUtil)(implicit ec: ExecutionContext) extends Logging {
 
   def updateTrusteeCache(index: Int)(implicit hc: HeaderCarrier): Future[Unit] = {
     for {
@@ -34,8 +33,8 @@ class TrusteeService @Inject()(
       name               <- ersUtil.fetch[TrusteeName](ersUtil.TRUSTEE_NAME_CACHE, schemeRef)
       cachedTrustees     <- ersUtil.fetchTrusteesOptionally(schemeRef)
       trusteeDetailsList <- {
-        ersUtil.fetch[TrusteeAddress](ersUtil.TRUSTEE_ADDRESS_CACHE, schemeRef).map( address =>
-        TrusteeDetailsList(replaceTrustee(cachedTrustees.trustees, index, TrusteeDetails(name, address))))
+        ersUtil.fetch[TrusteeAddress](ersUtil.TRUSTEE_ADDRESS_CACHE, schemeRef).map{ address =>
+        TrusteeDetailsList(replaceTrustee(cachedTrustees.trustees, index, TrusteeDetails(name, address)))}
       }
       _ <- ersUtil.cache[TrusteeDetailsList](ersUtil.TRUSTEES_CACHE, trusteeDetailsList, schemeRef)
     } yield {
@@ -53,4 +52,19 @@ class TrusteeService @Inject()(
       }
     }).distinct
 
+  def deleteTrustee(index: Int)(implicit hc: HeaderCarrier): Future[Boolean] = {
+    (for {
+      requestObject <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
+      cachedTrusteeList <- ersUtil.fetch[TrusteeDetailsList](ersUtil.TRUSTEES_CACHE, requestObject.getSchemeReference)
+      trusteeDetailsList = TrusteeDetailsList(filterDeletedTrustee(cachedTrusteeList, index))
+      _ <- ersUtil.cache(ersUtil.TRUSTEES_CACHE, trusteeDetailsList, requestObject.getSchemeReference)
+    } yield true).recover {
+      case e: Throwable =>
+        logger.warn(s"[TrusteeService][deleteTrustee] Deleting trustee failed: ${e.getMessage}")
+        false
+    }
+  }
+
+  private def filterDeletedTrustee(trusteeDetailsList: TrusteeDetailsList, id: Int): List[TrusteeDetails] =
+    trusteeDetailsList.trustees.zipWithIndex.filterNot(_._2 == id).map(_._1)
 }

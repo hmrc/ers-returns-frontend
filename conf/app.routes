@@ -68,6 +68,9 @@ POST        /overseas-trustee-address/:index/edit           controllers.trustees
 GET         /trustees       				                controllers.trustees.TrusteeSummaryController.trusteeSummaryPage()
 POST        /trustees       				                controllers.trustees.TrusteeSummaryController.trusteeSummaryContinue()
 
+GET         /remove-trustee/:index/                         controllers.trustees.TrusteeRemoveController.onPageLoad(index: Int)
+GET         /remove-trustee/problem                         controllers.trustees.TrusteeRemoveProblemController.onPageLoad()
+POST        /remove-trustee/:index/                         controllers.trustees.TrusteeRemoveController.onSubmit(index: Int)
 POST        /delete-trustee/:index/                         controllers.trustees.TrusteeSummaryController.deleteTrustee(index: Int)
 
 GET 		/add-subsidiary-company   		        		controllers.GroupSchemeController.manualCompanyDetailsPage(index: Int = 10000)
