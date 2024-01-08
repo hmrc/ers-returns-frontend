@@ -19,12 +19,13 @@ package services
 import models.{RequestObject, TrusteeDetails, TrusteeDetailsList}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
-import org.scalatest.BeforeAndAfterEach
-import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
 import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
 import org.scalatest.wordspec.AnyWordSpecLike
 import utils.ErsTestHelper
 import utils.Fixtures.{ersRequestObject, exampleTrustees}
+
+import scala.concurrent.Future
 
 class TrusteeServiceSpec extends AnyWordSpecLike with ErsTestHelper {
 
@@ -122,12 +123,14 @@ class TrusteeServiceSpec extends AnyWordSpecLike with ErsTestHelper {
   }
 
   "deleteTrustee" must {
-    when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any())).thenReturn(Future.successful(ersRequestObject))
-    when(mockErsUtil.fetch[TrusteeDetailsList](any(), any())(any(), any())).thenReturn(Future.successful(exampleTrustees))
+    val trusteeService: TrusteeService = new TrusteeService(mockErsUtil, mockSessionService)
+
+    when(mockSessionService.fetch[RequestObject](any())(any(), any())).thenReturn(Future.successful(ersRequestObject))
+    when(mockSessionService.fetch[TrusteeDetailsList](any())(any(), any())).thenReturn(Future.successful(exampleTrustees))
 
     "return true" when {
       "delete operation was successful" in {
-        when(mockErsUtil.cache(any(), any(), any())(any(), any())).thenReturn(Future.successful(CacheMap("", Map.empty)))
+        when(mockSessionService.cache(any(), any())(any(), any())).thenReturn(Future.successful(sessionPair))
 
         val result = trusteeService.deleteTrustee(0).futureValue
 
@@ -137,7 +140,7 @@ class TrusteeServiceSpec extends AnyWordSpecLike with ErsTestHelper {
 
     "return false" when {
       "delete operation failed" in {
-        when(mockErsUtil.cache(any(), any(), any())(any(), any())).thenReturn(Future.failed(new Exception("caching failed")))
+        when(mockSessionService.cache(any(), any())(any(), any())).thenReturn(Future.failed(new Exception("caching failed")))
 
         val result = trusteeService.deleteTrustee(0).futureValue
 

@@ -17,6 +17,7 @@
 package services
 
 import models._
+import play.api.Logging
 import play.api.mvc.Request
 import utils.ERSUtil
 
@@ -24,17 +25,14 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class TrusteeService @Inject()(
-                              ersUtil: ERSUtil,
+class TrusteeService @Inject()(ersUtil: ERSUtil,
                               sessionService: FrontendSessionService
-                              )(implicit ec: ExecutionContext) {
+                              )(implicit ec: ExecutionContext) extends Logging {
 
   def updateTrusteeCache(index: Int)(implicit request: Request[_]): Future[Unit] = {
     for {
-      requestObject      <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
-      schemeRef          =  requestObject.getSchemeReference
-      name               <- sessionService.fetch[TrusteeName](ersUtil.TRUSTEE_NAME_CACHE)
-      cachedTrustees     <- sessionService.fetchTrusteesOptionally()
+      name <- sessionService.fetch[TrusteeName](ersUtil.TRUSTEE_NAME_CACHE)
+      cachedTrustees <- sessionService.fetchTrusteesOptionally()
       trusteeDetailsList <- {
         sessionService.fetch[TrusteeAddress](ersUtil.TRUSTEE_ADDRESS_CACHE).map( address =>
         TrusteeDetailsList(replaceTrustee(cachedTrustees.trustees, index, TrusteeDetails(name, address))))
@@ -55,12 +53,11 @@ class TrusteeService @Inject()(
       }
     }).distinct
 
-  def deleteTrustee(index: Int)(implicit hc: HeaderCarrier): Future[Boolean] = {
+  def deleteTrustee(index: Int)(implicit request: Request[_]): Future[Boolean] = {
     (for {
-      requestObject <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
-      cachedTrusteeList <- ersUtil.fetch[TrusteeDetailsList](ersUtil.TRUSTEES_CACHE, requestObject.getSchemeReference)
+      cachedTrusteeList <- sessionService.fetch[TrusteeDetailsList](ersUtil.TRUSTEES_CACHE)
       trusteeDetailsList = TrusteeDetailsList(filterDeletedTrustee(cachedTrusteeList, index))
-      _ <- ersUtil.cache(ersUtil.TRUSTEES_CACHE, trusteeDetailsList, requestObject.getSchemeReference)
+      _ <- sessionService.cache(ersUtil.TRUSTEES_CACHE, trusteeDetailsList)
     } yield true).recover {
       case e: Throwable =>
         logger.warn(s"[TrusteeService][deleteTrustee] Deleting trustee failed: ${e.getMessage}")

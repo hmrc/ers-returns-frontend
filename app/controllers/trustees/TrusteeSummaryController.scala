@@ -19,26 +19,21 @@ package controllers.trustees
 import config.ApplicationConfig
 import connectors.ErsConnector
 import controllers.auth.{AuthAction, RequestWithOptionalAuthContext}
-import models.{RequestObject, RsFormMappings, TrusteeDetails, TrusteeDetailsList}
+import models.{RequestObject, RsFormMappings}
 import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.mvc._
-import services.TrusteeService
-import uk.gov.hmrc.http.HeaderCarrier
-import play.api.mvc._
-import services.FrontendSessionService
+import services.{FrontendSessionService, TrusteeService}
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.{Constants, CountryCodes, ERSUtil}
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class TrusteeSummaryController @Inject()(val mcc: MessagesControllerComponents,
                                          val ersConnector: ErsConnector,
                                          val trusteeService: TrusteeService,
-                                         implicit val countryCodes: CountryCodes,
-                                         implicit val ersUtil: ERSUtil,
-                                         implicit val appConfig: ApplicationConfig,
                                          val sessionService: FrontendSessionService,
                                          globalErrorView: views.html.global_error,
                                          trusteeSummaryView: views.html.trustee_summary,
@@ -59,21 +54,6 @@ class TrusteeSummaryController @Inject()(val mcc: MessagesControllerComponents,
         getGlobalErrorPage()
       }
   }
-
-  def showDeleteTrustee(id: Int)(implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] = {
-    (for {
-      cachedTrusteeList <- sessionService.fetch[TrusteeDetailsList](TRUSTEES_CACHE)
-      trusteeDetailsList = TrusteeDetailsList(filterDeletedTrustee(cachedTrusteeList, id))
-      _ <- sessionService.cache(TRUSTEES_CACHE, trusteeDetailsList)
-    } yield {
-      Redirect(controllers.trustees.routes.TrusteeSummaryController.trusteeSummaryPage())
-    }) recover {
-      case _: Exception => getGlobalErrorPage()
-    }
-  }
-
-  private def filterDeletedTrustee(trusteeDetailsList: TrusteeDetailsList, id: Int): List[TrusteeDetails] =
-    trusteeDetailsList.trustees.zipWithIndex.filterNot(_._2 == id).map(_._1)
 
   def trusteeSummaryPage(): Action[AnyContent] = authAction.async {
     implicit request =>

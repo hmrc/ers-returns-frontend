@@ -107,7 +107,7 @@ class TrusteeAddressUkSpec  extends AnyWordSpecLike
 
   "nextPageRedirect" should {
     setAuthMocks()
-    when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any())).thenReturn(Future.successful(ersRequestObject))
+    when(mockSessionService.fetch[RequestObject](any())(any(), any())).thenReturn(Future.successful(ersRequestObject))
 
     "redirect to TrusteeSummaryController.trusteeSummaryPage if edit true" in {
 

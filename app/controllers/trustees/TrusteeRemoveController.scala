@@ -24,7 +24,7 @@ import play.api.Logging
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.mvc._
-import services.TrusteeService
+import services.{FrontendSessionService, TrusteeService}
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.ERSUtil
@@ -37,7 +37,8 @@ class TrusteeRemoveController @Inject()(val mcc: MessagesControllerComponents,
                                         trusteeRemoveView: views.html.trustee_remove_yes_no,
                                         yesNoFormProvider: YesNoFormProvider,
                                         globalErrorView: views.html.global_error,
-                                        trusteeService: TrusteeService)
+                                        trusteeService: TrusteeService,
+                                        val sessionService: FrontendSessionService)
                                        (implicit executionContext: ExecutionContext, appConfig: ApplicationConfig, ersUtil: ERSUtil)
   extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with I18nSupport with Logging {
 
@@ -45,8 +46,8 @@ class TrusteeRemoveController @Inject()(val mcc: MessagesControllerComponents,
 
   def onPageLoad(index: Int): Action[AnyContent] = authAction.async { implicit request =>
     (for {
-      requestObject <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
-      trusteeDetailsList <- ersUtil.fetchTrusteesOptionally(requestObject.getSchemeReference)
+      requestObject <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
+      trusteeDetailsList <- sessionService.fetchTrusteesOptionally()
     } yield {
         Ok(trusteeRemoveView(form, requestObject, trusteeDetailsList.trustees(index).name, index))
     }).recover {
@@ -61,8 +62,8 @@ class TrusteeRemoveController @Inject()(val mcc: MessagesControllerComponents,
 
   def onSubmit(index: Int): Action[AnyContent] = authAction.async { implicit request =>
     val requestObjectWithTrusteeList = for {
-      requestObject <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
-      trusteeDetailsList <- ersUtil.fetchTrusteesOptionally(requestObject.getSchemeReference)
+      requestObject <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
+      trusteeDetailsList <- sessionService.fetchTrusteesOptionally()
     } yield (requestObject, trusteeDetailsList)
 
     requestObjectWithTrusteeList.flatMap { case (requestObject, trusteeDetailsList) =>

@@ -60,6 +60,7 @@ class TrusteeRemoveProblemControllerSpec extends AnyWordSpecLike
     mockMCC,
     testAuthAction,
     mockErsUtil,
+    mockSessionService,
     app.injector.instanceOf[trustee_remove_problem],
     app.injector.instanceOf[global_error]
   )(mockMCC.executionContext, mockAppConfig)
@@ -69,7 +70,7 @@ class TrusteeRemoveProblemControllerSpec extends AnyWordSpecLike
     setAuthMocks()
 
     "show trusteeRemoveProblemView" in {
-      when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any())).thenReturn(Future.successful(ersRequestObject))
+      when(mockSessionService.fetch[RequestObject](any())(any(), any())).thenReturn(Future.successful(ersRequestObject))
 
       val result = testController.onPageLoad().apply(authRequest)
 
@@ -81,7 +82,7 @@ class TrusteeRemoveProblemControllerSpec extends AnyWordSpecLike
     }
 
     "show getGlobalErrorPage if fetch failed" in {
-      when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any())).thenReturn(Future.failed(new Exception("exception")))
+      when(mockSessionService.fetch[RequestObject](any())(any(), any())).thenReturn(Future.failed(new Exception("exception")))
 
       val result = testController.onPageLoad().apply(authRequest)
 
@@ -92,5 +93,4 @@ class TrusteeRemoveProblemControllerSpec extends AnyWordSpecLike
       contentAsString(result) should include(testMessages("ers.global_errors.message"))
     }
   }
-
 }

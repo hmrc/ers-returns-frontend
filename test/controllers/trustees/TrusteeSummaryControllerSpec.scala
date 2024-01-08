@@ -83,61 +83,40 @@ class TrusteeSummaryControllerSpec extends AnyWordSpecLike
     "give a redirect status (to company authentication frontend) on GET if user is not authenticated" in {
       setUnauthorisedMocks()
 
-      val controllerUnderTest = new TrusteeSummaryController(mockMCC, mockErsConnector, mockSessionService, globalErrorView, trusteeSummaryView, testAuthAction)
+      val controllerUnderTest = new TrusteeSummaryController(mockMCC, mockErsConnector, mockTrusteeService, mockSessionService, globalErrorView, trusteeSummaryView, testAuthAction)
 
       val result = controllerUnderTest.deleteTrustee(tenThousand).apply(FakeRequest("GET", ""))
 
       status(result) shouldBe Status.SEE_OTHER
-    }
-
-    "give a status OK on GET if user is authenticated" in {
-      setAuthMocks()
-      when(mockSessionService.fetch[TrusteeDetailsList](refEq(TRUSTEES_CACHE))(any(), any())).thenReturn(Future.successful(TrusteeDetailsList(trusteeList)))
-      when(mockSessionService.cache(refEq(TRUSTEES_CACHE), any())(any(), any())).thenReturn(Future.successful(sessionPair))
-
-      val controllerUnderTest = new TrusteeSummaryController(mockMCC, mockErsConnector, mockSessionService, globalErrorView, trusteeSummaryView, testAuthAction)
-
-      val result = controllerUnderTest.deleteTrustee(tenThousand).apply(Fixtures.buildFakeRequestWithSessionIdSIP("GET"))
-
-      status(result) shouldBe Status.SEE_OTHER
-    }
-
-    "throws exception if fetching trustee details direct to ers errors page" in {
-      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdSIP("GET"))
-      when(mockSessionService.fetch[TrusteeDetailsList](refEq(TRUSTEES_CACHE))(any(), any())).thenReturn(failure)
-
-      val controllerUnderTest = new TrusteeSummaryController(mockMCC, mockErsConnector, mockSessionService, globalErrorView, trusteeSummaryView, testAuthAction)
-
-      contentAsString(controllerUnderTest.showDeleteTrustee(tenThousand)(authRequest)) shouldBe contentAsString(
-        Future(controllerUnderTest.getGlobalErrorPage()(testFakeRequest, testMessages))
-      )
-    }
-
-    "throws exception if cache fails direct to ers errors page" in {
-      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdSIP("GET"))
-      when(mockSessionService.fetch[TrusteeDetailsList](refEq(TRUSTEES_CACHE))(any(), any())).thenReturn(Future.successful(TrusteeDetailsList(trusteeList)))
-      when(mockSessionService.cache(refEq(TRUSTEES_CACHE), any())(any(), any())).thenReturn(failure)
-
-      val controllerUnderTest = new TrusteeSummaryController(mockMCC, mockErsConnector, mockSessionService, globalErrorView, trusteeSummaryView, testAuthAction)
-
-      contentAsString(controllerUnderTest.showDeleteTrustee(tenThousand)(authRequest)) shouldBe contentAsString(
-        Future(controllerUnderTest.getGlobalErrorPage()(testFakeRequest, testMessages))
-      )
+      redirectLocation(result).value should include("sign-in")
     }
 
     "delete trustee for given index and redirect to trustee summary page" in {
-      val expected = List(firstTrustee, thirdTrustee)
+      setAuthMocks()
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdSIP("GET"))
-      when(mockSessionService.fetch[TrusteeDetailsList](refEq(TRUSTEES_CACHE))(any(), any())).thenReturn(Future.successful(TrusteeDetailsList(trusteeList)))
-      when(mockSessionService.cache(refEq(TRUSTEES_CACHE), any())(any(), any())).thenReturn(Future.successful(sessionPair))
+      when(mockTrusteeService.deleteTrustee(any())(any())).thenReturn(Future.successful(true))
 
-      val controllerUnderTest = new TrusteeSummaryController(mockMCC, mockErsConnector, mockSessionService, globalErrorView, trusteeSummaryView, testAuthAction)
+      val controllerUnderTest = new TrusteeSummaryController(mockMCC, mockErsConnector, mockTrusteeService,  mockSessionService, globalErrorView, trusteeSummaryView, testAuthAction)
 
-      val result = controllerUnderTest.showDeleteTrustee(1)(authRequest)
+      val result = controllerUnderTest.deleteTrustee(1)(authRequest)
+
       status(result) shouldBe Status.SEE_OTHER
 
-      verify(mockSessionService, times(1))
-        .cache(meq("trustees"), meq(TrusteeDetailsList(expected)))(any(), any())
+      redirectLocation(result) shouldBe Some("/submit-your-ers-annual-return/trustees")
+
+      verify(mockTrusteeService, times(1))
+        .deleteTrustee(meq(1))(any())
+    }
+
+    "return INTERNAL_SERVER_ERROR id delete returned false" in {
+      setAuthMocks()
+      when(mockTrusteeService.deleteTrustee(any())(any())).thenReturn(Future.successful(false))
+
+      val controllerUnderTest = new TrusteeSummaryController(mockMCC, mockErsConnector, mockTrusteeService,  mockSessionService, globalErrorView, trusteeSummaryView, testAuthAction)
+
+      val result = controllerUnderTest.deleteTrustee(tenThousand).apply(Fixtures.buildFakeRequestWithSessionIdSIP("GET"))
+
+      status(result) shouldBe Status.INTERNAL_SERVER_ERROR
     }
   }
 
@@ -148,7 +127,7 @@ class TrusteeSummaryControllerSpec extends AnyWordSpecLike
     "give a redirect status (to company authentication frontend) on GET if user is not authenticated" in {
       setUnauthorisedMocks()
 
-      val controllerUnderTest = new TrusteeSummaryController(mockMCC, mockErsConnector, mockSessionService, globalErrorView, trusteeSummaryView, testAuthAction)
+      val controllerUnderTest = new TrusteeSummaryController(mockMCC, mockErsConnector, mockTrusteeService,  mockSessionService, globalErrorView, trusteeSummaryView, testAuthAction)
 
       val result = controllerUnderTest.trusteeSummaryPage().apply(FakeRequest("GET", ""))
 
@@ -162,7 +141,7 @@ class TrusteeSummaryControllerSpec extends AnyWordSpecLike
       when(mockSessionService.fetch[RequestObject](refEq(ERS_REQUEST_OBJECT))(any(), any())).thenReturn(Future.successful(ersRequestObject))
       when(mockSessionService.fetchTrusteesOptionally()(any(), any())).thenReturn(Future.successful(TrusteeDetailsList(trusteeList)))
 
-      val controllerUnderTest = new TrusteeSummaryController(mockMCC, mockErsConnector, mockSessionService, globalErrorView, trusteeSummaryView, testAuthAction)
+      val controllerUnderTest = new TrusteeSummaryController(mockMCC, mockErsConnector, mockTrusteeService,  mockSessionService, globalErrorView, trusteeSummaryView, testAuthAction)
 
       val result = controllerUnderTest.trusteeSummaryPage().apply(Fixtures.buildFakeRequestWithSessionIdOTHER("GET"))
 
@@ -174,7 +153,7 @@ class TrusteeSummaryControllerSpec extends AnyWordSpecLike
       when(mockSessionService.fetch[RequestObject](refEq(ERS_REQUEST_OBJECT))(any(), any())).thenReturn(Future.successful(ersRequestObject))
       when(mockSessionService.fetchTrusteesOptionally()(any(), any())).thenReturn(failure)
 
-      val controllerUnderTest = new TrusteeSummaryController(mockMCC, mockErsConnector, mockSessionService, globalErrorView, trusteeSummaryView, testAuthAction)
+      val controllerUnderTest = new TrusteeSummaryController(mockMCC, mockErsConnector, mockTrusteeService,  mockSessionService, globalErrorView, trusteeSummaryView, testAuthAction)
 
       contentAsString(controllerUnderTest.showTrusteeSummaryPage()(authRequest)) shouldBe contentAsString(
         Future(controllerUnderTest.getGlobalErrorPage()(testFakeRequest, testMessages))
@@ -185,7 +164,7 @@ class TrusteeSummaryControllerSpec extends AnyWordSpecLike
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdSIP("GET"))
       when(mockSessionService.fetch[RequestObject](refEq(ERS_REQUEST_OBJECT))(any(), any())).thenReturn(failure)
 
-      val controllerUnderTest = new TrusteeSummaryController(mockMCC, mockErsConnector, mockSessionService, globalErrorView, trusteeSummaryView, testAuthAction)
+      val controllerUnderTest = new TrusteeSummaryController(mockMCC, mockErsConnector, mockTrusteeService,  mockSessionService, globalErrorView, trusteeSummaryView, testAuthAction)
 
       contentAsString(controllerUnderTest.showTrusteeSummaryPage()(authRequest)) shouldBe contentAsString(
         Future(controllerUnderTest.getGlobalErrorPage()(testFakeRequest, testMessages))
@@ -202,7 +181,7 @@ class TrusteeSummaryControllerSpec extends AnyWordSpecLike
       when(mockSessionService.fetch[TrusteeDetailsList](refEq(TRUSTEES_CACHE))(any(), any())).thenReturn(Future.successful(TrusteeDetailsList(trusteeList)))
       when(mockSessionService.fetchTrusteesOptionally()(any(), any())).thenReturn(Future.successful(TrusteeDetailsList(trusteeList)))
 
-      val controllerUnderTest = new TrusteeSummaryController(mockMCC, mockErsConnector, mockSessionService, globalErrorView, trusteeSummaryView, testAuthAction)
+      val controllerUnderTest = new TrusteeSummaryController(mockMCC, mockErsConnector, mockTrusteeService,  mockSessionService, globalErrorView, trusteeSummaryView, testAuthAction)
 
       val result = controllerUnderTest.showTrusteeSummaryPage()(authRequest)
 
@@ -211,10 +190,14 @@ class TrusteeSummaryControllerSpec extends AnyWordSpecLike
 
     "redirect to TrusteeNameController.questionPage if no trustees in list" in {
       setAuthMocks()
-      val controllerUnderTest = buildFakeTrusteeController(Future.successful(TrusteeDetailsList(List.empty)))
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdSIP("GET"))
+      when(mockSessionService.fetch[RequestObject](refEq(ERS_REQUEST_OBJECT))(any(), any())).thenReturn(Future.successful(ersRequestObject))
+      when(mockSessionService.fetch[TrusteeDetailsList](refEq(TRUSTEES_CACHE))(any(), any())).thenReturn(Future.successful(TrusteeDetailsList(List.empty)))
+      when(mockSessionService.fetchTrusteesOptionally()(any(), any())).thenReturn(Future.successful(TrusteeDetailsList(List.empty)))
 
-      val result = controllerUnderTest.showTrusteeSummaryPage()(authRequest, hc)
+      val controllerUnderTest = new TrusteeSummaryController(mockMCC, mockErsConnector, mockTrusteeService,  mockSessionService, globalErrorView, trusteeSummaryView, testAuthAction)
+
+      val result = controllerUnderTest.showTrusteeSummaryPage()(authRequest)
 
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some("/submit-your-ers-annual-return/trustee-name")
@@ -225,7 +208,7 @@ class TrusteeSummaryControllerSpec extends AnyWordSpecLike
       when(mockSessionService.fetch[RequestObject](refEq(ERS_REQUEST_OBJECT))(any(), any())).thenReturn(Future.successful(ersRequestObject))
       when(mockSessionService.fetchTrusteesOptionally()(any(), any())).thenReturn(Future.successful(TrusteeDetailsList(trusteeList)))
 
-      val controllerUnderTest = new TrusteeSummaryController(mockMCC, mockErsConnector, mockSessionService, globalErrorView, trusteeSummaryView, testAuthAction)
+      val controllerUnderTest = new TrusteeSummaryController(mockMCC, mockErsConnector, mockTrusteeService,  mockSessionService, globalErrorView, trusteeSummaryView, testAuthAction)
 
       val result = controllerUnderTest.trusteeSummaryContinue().apply(FakeRequest("GET", ""))
 
@@ -240,7 +223,7 @@ class TrusteeSummaryControllerSpec extends AnyWordSpecLike
       when(mockSessionService.fetch[RequestObject](refEq(ERS_REQUEST_OBJECT))(any(), any())).thenReturn(Future.successful(ersRequestObject))
       when(mockSessionService.fetchTrusteesOptionally()(any(), any())).thenReturn(Future.successful(TrusteeDetailsList(trusteeList)))
 
-      val controllerUnderTest = new TrusteeSummaryController(mockMCC, mockErsConnector, mockSessionService, globalErrorView, trusteeSummaryView, testAuthAction)
+      val controllerUnderTest = new TrusteeSummaryController(mockMCC, mockErsConnector, mockTrusteeService,  mockSessionService, globalErrorView, trusteeSummaryView, testAuthAction)
 
       val result = controllerUnderTest.trusteeSummaryContinue().apply(Fixtures.buildFakeRequestWithSessionIdSIP("GET"))
 
@@ -255,7 +238,7 @@ class TrusteeSummaryControllerSpec extends AnyWordSpecLike
       val addTrustee = Map("addTrustee" -> "0")
       val form = RsFormMappings.addTrusteeForm().bind(addTrustee)
 
-      val controllerUnderTest = new TrusteeSummaryController(mockMCC, mockErsConnector, mockSessionService, globalErrorView, trusteeSummaryView, testAuthAction)
+      val controllerUnderTest = new TrusteeSummaryController(mockMCC, mockErsConnector, mockTrusteeService, mockSessionService, globalErrorView, trusteeSummaryView, testAuthAction)
 
       val result = controllerUnderTest.trusteeSummaryContinue().apply(Fixtures.buildFakeRequestWithSessionIdSIP("GET").withFormUrlEncodedBody(form.data.toSeq: _*))
 
@@ -271,7 +254,7 @@ class TrusteeSummaryControllerSpec extends AnyWordSpecLike
       val addTrustee = Map("addTrustee" -> "1")
       val form = RsFormMappings.addTrusteeForm().bind(addTrustee)
 
-      val controllerUnderTest = new TrusteeSummaryController(mockMCC, mockErsConnector, mockSessionService, globalErrorView, trusteeSummaryView, testAuthAction)
+      val controllerUnderTest = new TrusteeSummaryController(mockMCC, mockErsConnector, mockTrusteeService, mockSessionService, globalErrorView, trusteeSummaryView, testAuthAction)
 
       val result = controllerUnderTest.trusteeSummaryContinue().apply(Fixtures.buildFakeRequestWithSessionIdSIP("GET").withFormUrlEncodedBody(form.data.toSeq: _*))
 
