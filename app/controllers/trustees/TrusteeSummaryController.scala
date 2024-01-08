@@ -23,16 +23,22 @@ import models.{RequestObject, RsFormMappings, TrusteeDetails, TrusteeDetailsList
 import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.mvc._
+import services.TrusteeService
+import uk.gov.hmrc.http.HeaderCarrier
+import play.api.mvc._
 import services.FrontendSessionService
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.{Constants, CountryCodes, ERSUtil}
 
-import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class TrusteeSummaryController @Inject()(val mcc: MessagesControllerComponents,
                                          val ersConnector: ErsConnector,
+                                         val trusteeService: TrusteeService,
+                                         implicit val countryCodes: CountryCodes,
+                                         implicit val ersUtil: ERSUtil,
+                                         implicit val appConfig: ApplicationConfig,
                                          val sessionService: FrontendSessionService,
                                          globalErrorView: views.html.global_error,
                                          trusteeSummaryView: views.html.trustee_summary,
@@ -45,7 +51,13 @@ class TrusteeSummaryController @Inject()(val mcc: MessagesControllerComponents,
 
   def deleteTrustee(id: Int): Action[AnyContent] = authAction.async {
     implicit request =>
-      showDeleteTrustee(id)(request)
+      for {
+        deleted <- trusteeService.deleteTrustee(id)
+      } yield if (deleted) {
+        Redirect(controllers.trustees.routes.TrusteeSummaryController.trusteeSummaryPage())
+      } else {
+        getGlobalErrorPage()
+      }
   }
 
   def showDeleteTrustee(id: Int)(implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] = {

@@ -55,4 +55,19 @@ class TrusteeService @Inject()(
       }
     }).distinct
 
+  def deleteTrustee(index: Int)(implicit hc: HeaderCarrier): Future[Boolean] = {
+    (for {
+      requestObject <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
+      cachedTrusteeList <- ersUtil.fetch[TrusteeDetailsList](ersUtil.TRUSTEES_CACHE, requestObject.getSchemeReference)
+      trusteeDetailsList = TrusteeDetailsList(filterDeletedTrustee(cachedTrusteeList, index))
+      _ <- ersUtil.cache(ersUtil.TRUSTEES_CACHE, trusteeDetailsList, requestObject.getSchemeReference)
+    } yield true).recover {
+      case e: Throwable =>
+        logger.warn(s"[TrusteeService][deleteTrustee] Deleting trustee failed: ${e.getMessage}")
+        false
+    }
+  }
+
+  private def filterDeletedTrustee(trusteeDetailsList: TrusteeDetailsList, id: Int): List[TrusteeDetails] =
+    trusteeDetailsList.trustees.zipWithIndex.filterNot(_._2 == id).map(_._1)
 }

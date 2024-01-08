@@ -105,6 +105,26 @@ class TrusteeAddressUkSpec  extends AnyWordSpecLike
     }
   }
 
+  "nextPageRedirect" should {
+    setAuthMocks()
+    when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any())).thenReturn(Future.successful(ersRequestObject))
+
+    "redirect to TrusteeSummaryController.trusteeSummaryPage if edit true" in {
+
+      val result = testController.nextPageRedirect(0, edit = true)
+
+      redirectLocation(result) shouldBe Some("/submit-your-ers-annual-return/trustees")
+    }
+
+    "update trustee cache and redirect to TrusteeSummaryController.trusteeSummaryPage if edit false" in {
+      when(mockTrusteeService.updateTrusteeCache(any())(any())).thenReturn(Future.successful(()))
+
+      val result = testController.nextPageRedirect(0, edit = false)
+
+      redirectLocation(result) shouldBe Some("/submit-your-ers-annual-return/trustees")
+    }
+  }
+
   "calling handleQuestionSubmit" should {
     "show the trustee address UK form page with errors if the form is incorrectly filled" in {
       val trusteeAddressUkData = Map("addressLine1" -> "")

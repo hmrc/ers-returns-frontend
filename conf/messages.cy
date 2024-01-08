@@ -554,6 +554,14 @@ ers_alt_amends.continue = Derbyn a mynd yn eich blaen
 ers_trustee.add = A oes angen i chi ychwanegu ymddiriedolwr arall?
 ers_trustee.add.err = Dewiswch Iawn os oes angen i chi ychwanegu ymddiriedolwr arall
 
+ers_trustee_remove.title = A ydych am ddileu’r ymddiriedolwr hwn o’r rhestr ymddiriedolwyr – Gwarantau ar Sail Cyflogaeth – GOV.UK
+ers_trustee_remove.h1 = A ydych am ddileu {0} o’r rhestr ymddiriedolwyr?
+ers_trustee_remove.error.required = Dewiswch ‘Iawn’ os ydych am ddileu’r ymddiriedolwr hwn
+
+ers_trustee_remove_problem.title = Mae’n rhaid i’ch Ffurflen Dreth flynyddol gynnwys o leiaf un ymddiriedolwr – Gwarantau ar Sail Cyflogaeth – GOV.UK
+ers_trustee_remove_problem.h1 = Mae’n rhaid i’ch Ffurflen Dreth flynyddol gynnwys o leiaf un ymddiriedolwr.
+ers_trustee_remove_problem.p1 = Mae’n rhaid i chi ychwanegu ymddiriedolwr arall cyn y gallwch ddileu’r ymddiriedolwr hwn.
+
 ers_trustee_name.title = Beth yw enw’r ymddiriedolwr?
 
 ers_trustee_based.title = Ymhle y mae’r ymddiriedolwr wedi’i leoli?

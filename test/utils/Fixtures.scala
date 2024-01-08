@@ -227,7 +227,7 @@ object Fixtures extends AuthHelper {
     Some("UK")
   )
 
-  val exampleTrustees = TrusteeDetailsList(List(
+  val exampleTrustees: TrusteeDetailsList = TrusteeDetailsList(List(
     TrusteeDetails(TrusteeName("John Bonson"), trusteeAddressUk),
     TrusteeDetails(TrusteeName("Dave Daveson"), trusteeAddressOverseas)
   ))

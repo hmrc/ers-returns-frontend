@@ -16,10 +16,15 @@
 
 package services
 
-import models.TrusteeDetails
+import models.{RequestObject, TrusteeDetails, TrusteeDetailsList}
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.when
+import org.scalatest.BeforeAndAfterEach
+import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
 import org.scalatest.wordspec.AnyWordSpecLike
 import utils.ErsTestHelper
+import utils.Fixtures.{ersRequestObject, exampleTrustees}
 
 class TrusteeServiceSpec extends AnyWordSpecLike with ErsTestHelper {
 
@@ -112,6 +117,31 @@ class TrusteeServiceSpec extends AnyWordSpecLike with ErsTestHelper {
         val result = trusteeService.replaceTrustee(duplicateTrusteeDetailsList, index, target)
 
         result shouldBe expectedOutput
+      }
+    }
+  }
+
+  "deleteTrustee" must {
+    when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any())).thenReturn(Future.successful(ersRequestObject))
+    when(mockErsUtil.fetch[TrusteeDetailsList](any(), any())(any(), any())).thenReturn(Future.successful(exampleTrustees))
+
+    "return true" when {
+      "delete operation was successful" in {
+        when(mockErsUtil.cache(any(), any(), any())(any(), any())).thenReturn(Future.successful(CacheMap("", Map.empty)))
+
+        val result = trusteeService.deleteTrustee(0).futureValue
+
+        result shouldBe true
+      }
+    }
+
+    "return false" when {
+      "delete operation failed" in {
+        when(mockErsUtil.cache(any(), any(), any())(any(), any())).thenReturn(Future.failed(new Exception("caching failed")))
+
+        val result = trusteeService.deleteTrustee(0).futureValue
+
+        result shouldBe false
       }
     }
   }

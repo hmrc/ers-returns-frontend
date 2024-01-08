@@ -209,6 +209,17 @@ class TrusteeSummaryControllerSpec extends AnyWordSpecLike
       status(result) shouldBe Status.OK
     }
 
+    "redirect to TrusteeNameController.questionPage if no trustees in list" in {
+      setAuthMocks()
+      val controllerUnderTest = buildFakeTrusteeController(Future.successful(TrusteeDetailsList(List.empty)))
+      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdSIP("GET"))
+
+      val result = controllerUnderTest.showTrusteeSummaryPage()(authRequest, hc)
+
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result) shouldBe Some("/submit-your-ers-annual-return/trustee-name")
+    }
+
     "continue button gives a redirect status (to company authentication frontend) on GET if user is not authenticated" in {
       setUnauthorisedMocks()
       when(mockSessionService.fetch[RequestObject](refEq(ERS_REQUEST_OBJECT))(any(), any())).thenReturn(Future.successful(ersRequestObject))

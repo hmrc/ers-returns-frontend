@@ -693,6 +693,14 @@ ers_alt_amends.continue = Accept and continue
 ers_trustee.add = Do you need to add another trustee?
 ers_trustee.add.err = Select yes if you need to add another trustee
 
+ers_trustee_remove.title = Do you want to delete this trustee from the list of trustees – Employment Related Securities – GOV.UK
+ers_trustee_remove.h1 = Do you want to delete {0} from the list of trustees?
+ers_trustee_remove.error.required = Select yes if you want to delete this trustee
+
+ers_trustee_remove_problem.title = Your annual return must include at least one trustee – Employment Related Securities – GOV.UK
+ers_trustee_remove_problem.h1 = Your return must include at least one trustee.
+ers_trustee_remove_problem.p1 = You must add another trustee before you can delete this trustee.
+
 ers_trustee_name.title = What is the trustee’s name?
 
 ers_trustee_based.title = Where is the trustee based?
