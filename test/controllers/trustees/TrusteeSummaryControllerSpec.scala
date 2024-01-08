@@ -176,7 +176,7 @@ class TrusteeSummaryControllerSpec extends AnyWordSpecLike
     "display trustee summary page pre-filled" in {
       setAuthMocks()
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdSIP("GET"))
-      when(mockSessionService.fetch[ErsMetaData](refEq(ersMetaData))(any(), any())).thenReturn(Future.successful(rsc))
+      when(mockSessionService.fetch[ErsMetaData](refEq(ERS_META_DATA))(any(), any())).thenReturn(Future.successful(rsc))
       when(mockSessionService.fetch[RequestObject](refEq(ERS_REQUEST_OBJECT))(any(), any())).thenReturn(Future.successful(ersRequestObject))
       when(mockSessionService.fetch[TrusteeDetailsList](refEq(TRUSTEES_CACHE))(any(), any())).thenReturn(Future.successful(TrusteeDetailsList(trusteeList)))
       when(mockSessionService.fetchTrusteesOptionally()(any(), any())).thenReturn(Future.successful(TrusteeDetailsList(trusteeList)))

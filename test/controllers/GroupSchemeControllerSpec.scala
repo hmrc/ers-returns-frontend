@@ -72,7 +72,7 @@ class GroupSchemeControllerSpec
     reset(mockErsUtil, mockSessionService)
     when(mockErsUtil.GROUP_SCHEME_COMPANIES).thenReturn("group-scheme-companies")
     when(mockErsUtil.GROUP_SCHEME_CACHE_CONTROLLER).thenReturn("group-scheme-controller")
-    when(mockErsUtil.ERS_REQUEST_OBJECT).thenReturn("ErsRequestObject")
+    when(mockErsUtil.ERS_REQUEST_OBJECT).thenReturn("ers-request-object")
     when(mockErsUtil.OPTION_MANUAL).thenReturn("man")
     when(mockErsUtil.DEFAULT).thenReturn("")
     when(mockErsUtil.SCHEME_CSOP).thenReturn("1")

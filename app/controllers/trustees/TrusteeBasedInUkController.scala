@@ -53,7 +53,6 @@ class TrusteeBasedInUkController @Inject()(val mcc: MessagesControllerComponents
 
   def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier, request: Request[_]): Future[Result] = {
     for {
-      //requestObject <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
       trusteeBasedInUk <-  if (edit) {
         sessionService.fetchTrusteesOptionally().map {
           trusteeDetailsList => TrusteeBasedInUk(trusteeDetailsList.trustees(index).basedInUk)

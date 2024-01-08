@@ -63,7 +63,6 @@ class ReportableEventsControllerSpec
   val globalErrorView: global_error = app.injector.instanceOf[global_error]
   val reportableEventsView: reportable_events  = app.injector.instanceOf[reportable_events]
   val TEST_OPTION_NIL_RETURN = "2"
-  val TEST_REPORTABLE_EVENTS = "ReportableEvents"
 
   "calling Reportable Events Page" should {
 
@@ -90,7 +89,7 @@ class ReportableEventsControllerSpec
       when(mockErsConnector.connectToEtmpSapRequest(anyString())(any(), any()))
         .thenReturn(if (sapRequestRes) Future.successful("1234567890") else Future.failed(new RuntimeException))
 
-      when(mockSessionService.fetch[ReportableEvents](refEq(TEST_REPORTABLE_EVENTS))(any(), any()))
+      when(mockSessionService.fetch[ReportableEvents](refEq(REPORTABLE_EVENTS))(any(), any()))
         .thenReturn(
           if (reportableEventsRes) Future.successful(ReportableEvents(Some(TEST_OPTION_NIL_RETURN)))
           else Future.failed(new NoSuchElementException)
@@ -205,7 +204,7 @@ class ReportableEventsControllerSpec
       when(mockErsConnector.connectToEtmpSapRequest(anyString())(any(), any()))
         .thenReturn(if (sapRequestRes) Future.successful("1234567890") else Future.failed(new RuntimeException))
 
-      when(mockSessionService.fetch[ReportableEvents](refEq(TEST_REPORTABLE_EVENTS))(any(), any()))
+      when(mockSessionService.fetch[ReportableEvents](refEq(REPORTABLE_EVENTS))(any(), any()))
         .thenReturn(
           if (reportableEventsRes) Future.successful(ReportableEvents(Some(TEST_OPTION_NIL_RETURN)))
           else Future.failed(new NoSuchElementException)

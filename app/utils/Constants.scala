@@ -19,9 +19,9 @@ package utils
 trait Constants {
   val LARGE_FILE_STATUS = "largefiles"
   val SAVED_STATUS = "saved"
-  val ERS_METADATA = "ErsMetaData"
-  val ERS_REQUEST_OBJECT = "ErsRequestObject"
-  val REPORTABLE_EVENTS = "ReportableEvents"
+  val ERS_METADATA = "ers-meta-data"
+  val ERS_REQUEST_OBJECT = "ers-request-object"
+  val REPORTABLE_EVENTS = "reportable-events"
   val GROUP_SCHEME_CACHE_CONTROLLER = "group-scheme-controller"
   val ALT_AMENDS_CACHE_CONTROLLER = "alt-amends-cache-controller"
   val GROUP_SCHEME_COMPANIES = "group-scheme-companies"

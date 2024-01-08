@@ -67,7 +67,7 @@ class RequestObjectSpec extends AnyWordSpecLike with Matchers with GuiceOneAppPe
 
     "return an instance of SchemeInfo with the correct field" in {
 
-      val requestObject       =
+      val requestObject =
         RequestObject(
           None,
           Some("2016/17"),
@@ -80,7 +80,7 @@ class RequestObjectSpec extends AnyWordSpecLike with Matchers with GuiceOneAppPe
           None
         )
       val privateToSchemeInfo = PrivateMethod[SchemeInfo](Symbol("toSchemeInfo"))
-      val result              = requestObject invokePrivate privateToSchemeInfo()
+      val result = requestObject invokePrivate privateToSchemeInfo()
 
       result.schemeName mustBe "MyScheme"
       result.schemeId mustBe "1"

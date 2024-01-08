@@ -78,16 +78,15 @@ trait ErsTestHelper extends MockitoSugar with AuthHelper with ERSFakeApplication
   val FILE_TYPE_CACHE           = "check-file-type"
   val FILE_NAME_CACHE           = "file-name"
   val CHECK_CSV_FILES           = "check-csv-files"
-  val ersMetaData               = "ErsMetaData"
-  val REPORTABLE_EVENTS         = "ReportableEvents"
-  val ErsRequestObject          = "ErsRequestObject"
+  val ERS_META_DATA             = "ers-meta-data"
+  val REPORTABLE_EVENTS         = "reportable_events"
+  val ERS_REQUEST_OBJECT        = "ers-request-object"
   val SCHEME_CSOP               = "1"
   val OPTION_CSV                = "csv"
   val OPTION_ODS                = "ods"
   val OPTION_NIL_RETURN         = "2"
   val OPTION_UPLOAD_SPREADSHEET = "1"
-  val TRUSTEES_CACHE = "trustees"
-  val ERS_REQUEST_OBJECT = "ErsRequestObject"
+  val TRUSTEES_CACHE            = "trustees"
 
   val mockHttp: DefaultHttpClient = mock[DefaultHttpClient]
 	implicit val mockAppConfig: ApplicationConfig = mock[ApplicationConfig]
@@ -133,15 +132,15 @@ trait ErsTestHelper extends MockitoSugar with AuthHelper with ERSFakeApplication
 
   when(mockErsUtil.PAGE_ALT_ACTIVITY).thenReturn("ers_alt_activity")
   when(mockErsUtil.CSV_FILES_UPLOAD).thenReturn("csv-files-upload")
-  when(mockErsUtil.ERS_REQUEST_OBJECT).thenReturn("ErsRequestObject")
+  when(mockErsUtil.ERS_REQUEST_OBJECT).thenReturn(ERS_REQUEST_OBJECT)
   when(mockErsUtil.GROUP_SCHEME_COMPANIES).thenReturn("group-scheme-companies")
   when(mockErsUtil.GROUP_SCHEME_CACHE_CONTROLLER).thenReturn("group-scheme-controller")
   when(mockErsUtil.SCHEME_ORGANISER_CACHE).thenReturn("scheme-organiser")
-  when(mockErsUtil.ERS_METADATA).thenReturn("ErsMetaData")
+  when(mockErsUtil.ERS_METADATA).thenReturn(ERS_META_DATA)
   when(mockErsUtil.CHECK_CSV_FILES).thenReturn("check-csv-files")
   when(mockErsUtil.FILE_TYPE_CACHE).thenReturn("check-file-type")
   when(mockErsUtil.FILE_NAME_CACHE).thenReturn("file-name")
-  when(mockErsUtil.REPORTABLE_EVENTS).thenReturn("ReportableEvents")
+  when(mockErsUtil.REPORTABLE_EVENTS).thenReturn(REPORTABLE_EVENTS)
   when(mockErsUtil.TRUSTEES_CACHE).thenReturn("trustees")
   when(mockErsUtil.ALT_AMENDS_CACHE_CONTROLLER).thenReturn("alt-amends-cache-controller")
   when(mockErsUtil.ALT_AMENDS_ACTIVITY).thenReturn("alt-activity")

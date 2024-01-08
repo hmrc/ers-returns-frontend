@@ -71,25 +71,17 @@ trait PageBuilder {
   // pageId's
   val PAGE_START                  = "ers_start"
   val PAGE_CHOOSE                 = "ers_choose"
-  val PAGE_CHECK_FILE             = "ers_check_file"
   val PAGE_CHECK_CSV_FILE         = "ers_check_csv_file"
   val PAGE_CONFIRMATION           = "ers_confirmation"
-  val PAGE_ERROR_REPORT           = "ers_error_report"
   val PAGE_ALT_ACTIVITY           = "ers_alt_activity"
   val PAGE_ALT_AMENDS             = "ers_alt_amends"
   val PAGE_GROUP_ACTIVITY         = "ers_group_activity"
   val PAGE_SUMMARY_DECLARATION    = "ers_summary_declaration"
-  val PAGE_GROUP_SCHEME_TYPE      = "ers_group_scheme_type"
-  val PAGE_GROUP_FILE_CHECK       = "ers_group_file_check"
   val PAGE_GROUP_SUMMARY          = "ers_group_summary"
   val PAGE_MANUAL_COMPANY_DETAILS = "ers_manual_company_details"
   val PAGE_SCHEME_ORGANISER       = "ers_scheme_organiser"
   val PAGE_TRUSTEE_DETAILS        = "ers_trustee_details"
 	val PAGE_TRUSTEE_BASED					= "ers_trustee_based"
-  val PAGE_TRUSTEE_SUMMARY        = "ers_trustee_summary"
-  val PAGE_FILE_UPLOAD            = "file_upload"
-  val PAGE_SUCCESS                = "ers.bulk.success"
-  val PAGE_FILE_UPLOAD_ERRORS     = "file_upload_errors"
 
   // Options
   val OPTION_YES                = "1"
@@ -101,22 +93,11 @@ trait PageBuilder {
   val OPTION_MANUAL             = "man"
 
   // message file entry prefix
-  val MSG_ERS: String   = "ers"
   val MSG_CSOP: String  = ".csop."
   val MSG_EMI: String   = ".emi."
   val MSG_SAYE: String  = ".saye."
   val MSG_SIP: String   = ".sip."
   val MSG_OTHER: String = ".other."
-
-  val CSOP_CSV_FILES: Int  = 3
-  val EMI_CSV_FILES: Int   = 5
-  val SAYE_CSV_FILES: Int  = 3
-  val SIP_CSV_FILES: Int   = 2
-  val OTHER_CSV_FILES: Int = 9
-
-  val AUDIT_ADD    = "ADD"
-  val AUDIT_EDIT   = "EDIT"
-  val AUDIT_DELETE = "DELETE"
 
   val CSVFilesList = Map(
     (
