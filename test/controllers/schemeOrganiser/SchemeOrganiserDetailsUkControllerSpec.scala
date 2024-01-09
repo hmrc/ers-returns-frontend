@@ -29,10 +29,12 @@ import play.api.i18n
 import play.api.i18n.{MessagesApi, MessagesImpl}
 import play.api.libs.json.Json
 import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents}
+import play.api.routing.Router.empty.routes
 import play.api.test.Helpers.{contentAsString, defaultAwaitTimeout, redirectLocation, status, stubBodyParser}
 import uk.gov.hmrc.http.cache.client.CacheMap
 import utils.Fixtures.ersRequestObject
 import utils.{ERSFakeApplicationConfig, ErsTestHelper, Fixtures}
+import views.html.{global_error, manual_company_details_uk}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -74,7 +76,7 @@ class SchemeOrganiserDetailsUkControllerSpec extends AnyWordSpecLike
     when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any())).thenReturn(Future.successful(ersRequestObject))
 
     "show the empty company name question page when there is nothing to prefill" in {
-      when(mockErsUtil.fetchPartFromSchemeOrganiserDetailsList[Company](any(), any())(any(), any())).thenReturn(Future.successful(None))
+      when(mockErsUtil.fetchPartFromCompanyDetailsList[Company](any(), any())(any(), any())).thenReturn(Future.successful(None))
 
       val result = testController.questionPage(1).apply(authRequest)
 
@@ -83,7 +85,7 @@ class SchemeOrganiserDetailsUkControllerSpec extends AnyWordSpecLike
     }
 
     "show the prefilled company name question page when there is data to prefill" in {
-      when(mockErsUtil.fetchPartFromSchemeOrganiserDetailsList[Company](any(), any())(any(), any())).thenReturn(Future.successful(Some(Company("Test Company", Some("AA123456"), Some("1234567890")))))
+      when(mockErsUtil.fetchPartFromCompanyDetailsList[Company](any(), any())(any(), any())).thenReturn(Future.successful(Some(Company("Test Company", Some("AA123456"), Some("1234567890")))))
 
       val result = testController.questionPage(1).apply(authRequest)
 
@@ -96,7 +98,7 @@ class SchemeOrganiserDetailsUkControllerSpec extends AnyWordSpecLike
     }
 
     "show the global error page if an exception occurs while retrieving cached data" in {
-      when(mockErsUtil.fetchPartFromSchemeOrganiserDetailsList[Company](any(), any())(any(), any())).thenReturn(Future.failed(new RuntimeException("Failure scenario")))
+      when(mockErsUtil.fetchPartFromCompanyDetailsList[Company](any(), any())(any(), any())).thenReturn(Future.failed(new RuntimeException("Failure scenario")))
 
       val result = testController.questionPage(1).apply(authRequest)
 

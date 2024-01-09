@@ -218,7 +218,6 @@ class GroupSchemeControllerSpec
       mockAppConfig,
       globalErrorView,
       groupView,
-      manualCompanyDetailsView,
       groupPlanSummaryView,
       testAuthAction
     )

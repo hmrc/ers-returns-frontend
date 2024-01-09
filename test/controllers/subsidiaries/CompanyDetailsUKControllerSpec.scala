@@ -75,7 +75,7 @@ class CompanyDetailsUKControllerSpec extends AnyWordSpecLike
       when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any())).thenReturn(Future.successful(ersRequestObject))
 
       "show the empty company name question page when there is nothing to prefill" in {
-        when(mockErsUtil.fetchPartFromSubsidiaryCompanyDetailsList[Company](any(), any())(any(), any())).thenReturn(Future.successful(None))
+        when(mockErsUtil.fetchPartFromCompanyDetailsList[Company](any(), any())(any(), any())).thenReturn(Future.successful(None))
 
         val result = testController.questionPage(1).apply(authRequest)
 
@@ -84,7 +84,7 @@ class CompanyDetailsUKControllerSpec extends AnyWordSpecLike
       }
 
       "show the prefilled company name question page when there is data to prefill" in {
-        when(mockErsUtil.fetchPartFromSubsidiaryCompanyDetailsList[Company](any(), any())(any(), any())).thenReturn(Future.successful(Some(Company("Test Company", Some("AA123456"), Some("1234567890")))))
+        when(mockErsUtil.fetchPartFromCompanyDetailsList[Company](any(), any())(any(), any())).thenReturn(Future.successful(Some(Company("Test Company", Some("AA123456"), Some("1234567890")))))
 
         val result = testController.questionPage(1).apply(authRequest)
 
@@ -97,7 +97,7 @@ class CompanyDetailsUKControllerSpec extends AnyWordSpecLike
       }
 
       "show the global error page if an exception occurs while retrieving cached data" in {
-        when(mockErsUtil.fetchPartFromSubsidiaryCompanyDetailsList[Company](any(), any())(any(), any())).thenReturn(Future.failed(new RuntimeException("Failure scenario")))
+        when(mockErsUtil.fetchPartFromCompanyDetailsList[Company](any(), any())(any(), any())).thenReturn(Future.failed(new RuntimeException("Failure scenario")))
 
         val result = testController.questionPage(1).apply(authRequest)
 

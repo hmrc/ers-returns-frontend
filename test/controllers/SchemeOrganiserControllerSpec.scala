@@ -34,7 +34,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import utils.Fixtures.ersRequestObject
 import utils.{ERSFakeApplicationConfig, ErsTestHelper, Fixtures}
-import views.html.{global_error, scheme_organiser}
+import views.html.{global_error, scheme_organiser, scheme_organiser_summary}
 
 import java.util.NoSuchElementException
 import scala.concurrent.{ExecutionContext, Future}
@@ -61,6 +61,7 @@ class SchemeOrganiserControllerSpec
   implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
   val globalErrorView: global_error            = app.injector.instanceOf[global_error]
   val schemeOrganiserView: scheme_organiser    = app.injector.instanceOf[scheme_organiser]
+  val schemeOrganiserSummaryView: scheme_organiser_summary = app.injector.instanceOf[scheme_organiser_summary]
 
   "calling Scheme Organiser Page" should {
 
@@ -77,6 +78,7 @@ class SchemeOrganiserControllerSpec
       mockAppConfig,
       globalErrorView,
       schemeOrganiserView,
+      schemeOrganiserSummaryView,
       testAuthAction
     ) {
 
@@ -194,6 +196,7 @@ class SchemeOrganiserControllerSpec
       mockAppConfig,
       globalErrorView,
       schemeOrganiserView,
+      schemeOrganiserSummaryView,
       testAuthAction
     ) {
 

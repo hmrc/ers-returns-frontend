@@ -34,6 +34,7 @@ import play.api.test.Helpers.{contentAsString, defaultAwaitTimeout, redirectLoca
 import uk.gov.hmrc.http.cache.client.CacheMap
 import utils.{ERSFakeApplicationConfig, ErsTestHelper, Fixtures}
 import utils.Fixtures.ersRequestObject
+import views.html.{global_error, manual_company_details_overseas}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -75,7 +76,7 @@ class SchemeOrganiserDetailsOverseasControllerSpec extends AnyWordSpecLike
     when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any())).thenReturn(Future.successful(ersRequestObject))
 
     "show the empty company name question page when there is nothing to prefill" in {
-      when(mockErsUtil.fetchPartFromSchemeOrganiserDetailsList[Company](any(), any())(any(), any())).thenReturn(Future.successful(None))
+      when(mockErsUtil.fetchPartFromCompanyDetailsList[Company](any(), any())(any(), any())).thenReturn(Future.successful(None))
 
       val result = testController.questionPage(1).apply(authRequest)
 
@@ -84,7 +85,7 @@ class SchemeOrganiserDetailsOverseasControllerSpec extends AnyWordSpecLike
     }
 
     "show the prefilled company name question page when there is data to prefill" in {
-      when(mockErsUtil.fetchPartFromSchemeOrganiserDetailsList[Company](any(), any())(any(), any())).thenReturn(Future.successful(Some(Company("Test Company", None, None))))
+      when(mockErsUtil.fetchPartFromCompanyDetailsList[Company](any(), any())(any(), any())).thenReturn(Future.successful(Some(Company("Test Company", None, None))))
 
       val result = testController.questionPage(1).apply(authRequest)
 
@@ -95,7 +96,7 @@ class SchemeOrganiserDetailsOverseasControllerSpec extends AnyWordSpecLike
     }
 
     "show the global error page if an exception occurs while retrieving cached data" in {
-      when(mockErsUtil.fetchPartFromSchemeOrganiserDetailsList[Company](any(), any())(any(), any())).thenReturn(Future.failed(new RuntimeException("Failure scenario")))
+      when(mockErsUtil.fetchPartFromCompanyDetailsList[Company](any(), any())(any(), any())).thenReturn(Future.failed(new RuntimeException("Failure scenario")))
 
       val result = testController.questionPage(1).apply(authRequest)
 

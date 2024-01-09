@@ -78,7 +78,7 @@ class SubsidiaryAddressOverseasControllerSpec extends AnyWordSpecLike
     when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any())).thenReturn(Future.successful(ersRequestObject))
 
     "show the empty company address overseas question page when there is nothing to prefill" in {
-      when(mockErsUtil.fetchPartFromSubsidiaryCompanyDetailsList[CompanyDetailsList](any(), any())(any(), any())).thenReturn(Future.successful(None))
+      when(mockErsUtil.fetchPartFromCompanyDetailsList[CompanyDetailsList](any(), any())(any(), any())).thenReturn(Future.successful(None))
       val result = testController.questionPage(1).apply(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
 
       status(result) shouldBe Status.OK
@@ -87,7 +87,7 @@ class SubsidiaryAddressOverseasControllerSpec extends AnyWordSpecLike
     }
 
     "show the prefilled company address overseas question page when there is data to prefill" in {
-      when(mockErsUtil.fetchPartFromSubsidiaryCompanyDetailsList[CompanyAddress](any(), any())(any(), any())).thenReturn(Future.successful(Some(companyAddressOverseas)))
+      when(mockErsUtil.fetchPartFromCompanyDetailsList[CompanyAddress](any(), any())(any(), any())).thenReturn(Future.successful(Some(companyAddressOverseas)))
 
       val result = testController.questionPage(1).apply(authRequest)
 
@@ -97,7 +97,7 @@ class SubsidiaryAddressOverseasControllerSpec extends AnyWordSpecLike
       contentAsString(result) should include("Overseas 1")
     }
     "show the global error page if an exception occurs while retrieving cached data" in {
-      when(mockErsUtil.fetchPartFromSubsidiaryCompanyDetailsList[CompanyAddress](any(), any())(any(), any())).thenReturn(Future.failed(new RuntimeException("Failure scenario")))
+      when(mockErsUtil.fetchPartFromCompanyDetailsList[CompanyAddress](any(), any())(any(), any())).thenReturn(Future.failed(new RuntimeException("Failure scenario")))
 
       val result = testController.questionPage(1).apply(authRequest)
 
@@ -141,7 +141,7 @@ class SubsidiaryAddressOverseasControllerSpec extends AnyWordSpecLike
     when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any())).thenReturn(Future.successful(ersRequestObject))
 
     "be the same as showQuestion for a specific index" in {
-      when(mockErsUtil.fetchPartFromSubsidiaryCompanyDetailsList[CompanyAddress](any(), any())(any(), any())).thenReturn(Future.successful(Some(companyAddressOverseas)))
+      when(mockErsUtil.fetchPartFromCompanyDetailsList[CompanyAddress](any(), any())(any(), any())).thenReturn(Future.successful(Some(companyAddressOverseas)))
 
       val result = testController.editCompany(1).apply(authRequest)
 
