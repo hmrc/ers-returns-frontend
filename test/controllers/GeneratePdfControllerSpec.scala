@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import models.upscan.{UploadId, UploadedSuccessfully, UpscanCsvFilesCallback, Up
 import org.joda.time.DateTime
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
-import org.scalatest.OptionValues
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
@@ -33,7 +32,6 @@ import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesController
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import services.pdf.ErsReceiptPdfBuilderService
-import uk.gov.hmrc.http.cache.client.CacheMap
 import utils.Fixtures._
 import utils.{ERSFakeApplicationConfig, ErsTestHelper, Fixtures}
 import views.html.global_error
@@ -44,7 +42,6 @@ import scala.concurrent.{ExecutionContext, Future}
 class GeneratePdfControllerSpec
     extends AnyWordSpecLike
     with Matchers
-    with OptionValues
     with ERSFakeApplicationConfig
     with ErsTestHelper
     with GuiceOneAppPerSuite {
@@ -62,144 +59,138 @@ class GeneratePdfControllerSpec
   implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
 
   implicit lazy val mat: Materializer = app.materializer
-  val globalErrorView: global_error   = app.injector.instanceOf[global_error]
+  val globalErrorView: global_error = app.injector.instanceOf[global_error]
 
   lazy val pdfBuilderMock: ErsReceiptPdfBuilderService = mock[ErsReceiptPdfBuilderService]
-  lazy val schemeInfo: SchemeInfo                      = SchemeInfo("XA1100000000000", DateTime.now, "1", "2016", "EMI", "EMI")
-  lazy val rsc: ErsMetaData                            =
-    ErsMetaData(schemeInfo, "ipRef", Some("aoRef"), "empRef", Some("agentRef"), Some("sapNumber"))
-  lazy val ersSummary: ErsSummary                      =
-    ErsSummary("testbundle", "2", None, DateTime.now, rsc, None, None, None, None, None, None, None, None)
-  lazy val cacheMap: CacheMap                          = mock[CacheMap]
+  lazy val schemeInfo: SchemeInfo = SchemeInfo("XA1100000000000", DateTime.now, "1", "2016", "EMI", "EMI")
+  lazy val rsc: ErsMetaData = ErsMetaData(schemeInfo, "ipRef", Some("aoRef"), "empRef", Some("agentRef"), Some("sapNumber"))
+  lazy val ersSummary: ErsSummary = ErsSummary("testbundle", "2", None, DateTime.now, rsc, None, None, None, None, None, None, None, None)
 
   "pdf generation controller" should {
-
     "give a redirect status (to company authentication frontend) on GET if user is not authenticated" in {
       setUnauthorisedMocks()
-      val controller = createController()
-      val result     = controller.buildPdfForBundle("", "").apply(FakeRequest("GET", ""))
+
+      val controller = new PdfGenerationController(mockMCC, pdfBuilderMock, mockSessionService, globalErrorView, testAuthAction)
+
+      val result = controller.buildPdfForBundle("", "").apply(FakeRequest("GET", ""))
+
       status(result) shouldBe Status.SEE_OTHER
     }
 
     "give a status OK on GET if user is authenticated" in {
       setAuthMocks()
-      val controller = createController()
-      val result     = controller.buildPdfForBundle("", "").apply(buildFakeRequestWithSessionIdCSOP("GET"))
+      val byteArrayOutputStream: ByteArrayOutputStream = mock[ByteArrayOutputStream]
+      val testItem = testCacheItem[ReportableEvents](REPORTABLE_EVENTS, ReportableEvents(Some("2")))
+
+      when(mockSessionService.fetch[RequestObject](any())(any(), any())).thenReturn(Future.successful(ersRequestObject))
+      when(mockSessionService.fetch[ErsMetaData](refEq(ERS_META_DATA))(any(), any())).thenReturn(Future.successful(rsc))
+      when(mockSessionService.getAllData(any(), any())(any(), any())).thenReturn(Future.successful(Fixtures.ersSummary))
+      when(mockSessionService.fetchAll()(any())).thenReturn(Future.successful(testItem))
+      when(pdfBuilderMock.createPdf(any(), any(), any())(any())).thenReturn(byteArrayOutputStream)
+      when(byteArrayOutputStream.toByteArray).thenReturn(Array[Byte]())
+
+      val controller = new PdfGenerationController(mockMCC, pdfBuilderMock, mockSessionService, globalErrorView, testAuthAction)
+      val result = controller.buildPdfForBundle("", "").apply(buildFakeRequestWithSessionIdEMI("GET"))
+
       status(result) shouldBe Status.OK
     }
 
     "direct to errors page if fetch all res pdf throws exception" in {
-      val controller  = createController(fetchAllRes = false)
-      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+      val authRequest = buildRequestWithAuth(buildFakeRequestWithSessionIdEMI("GET"))
 
-      val result = controller.generatePdf(ersRequestObject, "", "")(authRequest, hc)
-      contentAsString(result)   should include(testMessages("ers.global_errors.message"))
+      when(mockSessionService.fetch[RequestObject](any())(any(), any())).thenReturn(Future.successful(ersRequestObject))
+      when(mockSessionService.fetch[ErsMetaData](refEq(ERS_META_DATA))(any(), any())).thenReturn(Future.successful(rsc))
+      when(mockSessionService.getAllData(any(), any())(any(), any())).thenReturn(Future.successful(Fixtures.ersSummary))
+      when(mockSessionService.fetchAll()(any())).thenReturn(Future.failed(new Exception("error")))
+
+      val controller = new PdfGenerationController(mockMCC, pdfBuilderMock, mockSessionService, globalErrorView, testAuthAction)
+
+      val result = controller.generatePdf(ersRequestObject, "", "")(authRequest)
+
+      contentAsString(result) should include(testMessages("ers.global_errors.message"))
       contentAsString(result) shouldBe contentAsString(
-        Future(createController().getGlobalErrorPage(testFakeRequest, testMessages))
+        Future(controller.getGlobalErrorPage()(testFakeRequest, testMessages))
       )
     }
 
     "direct to errors page if get all data res pdf throws exception" in {
-      val controller  = createController(getAllDataRes = false)
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
 
-      val result = controller.generatePdf(ersRequestObject, "", "")(authRequest, hc)
-      contentAsString(result)   should include(testMessages("ers.global_errors.message"))
+      when(mockSessionService.fetch[RequestObject](any())(any(), any())).thenReturn(Future.successful(ersRequestObject))
+      when(mockSessionService.fetch[ErsMetaData](refEq(ERS_META_DATA))(any(), any())).thenReturn(Future.successful(rsc))
+      when(mockSessionService.getAllData(any(), any())(any(), any())).thenReturn(Future.failed(new Exception("error")))
+
+      val controller = new PdfGenerationController(mockMCC, pdfBuilderMock, mockSessionService, globalErrorView, testAuthAction)
+
+      val result = controller.generatePdf(ersRequestObject, "", "")(authRequest)
+
+      contentAsString(result) should include(testMessages("ers.global_errors.message"))
       contentAsString(result) shouldBe contentAsString(
-        Future(createController().getGlobalErrorPage(testFakeRequest, testMessages))
+        Future(controller.getGlobalErrorPage()(testFakeRequest, testMessages))
       )
     }
 
     "use bundle ref to generate the confirmation pdf filename (NilReturn)" in {
-      val controller  = createController()
+      val byteArrayOutputStream: ByteArrayOutputStream = mock[ByteArrayOutputStream]
+      val testItem = testCacheItem[ReportableEvents](REPORTABLE_EVENTS, ReportableEvents(Some("2")))
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
 
-      val res = await(controller.generatePdf(ersRequestObject, "123456", "8 August 2016, 4:28pm")(authRequest, hc))
+      when(mockSessionService.fetch[ErsMetaData](any())(any(), any())).thenReturn(Future.successful(Fixtures.EMIMetaData))
+      when(mockSessionService.getAllData(any(), any())(any(), any())).thenReturn(Future.successful(Fixtures.ersSummary))
+      when(mockSessionService.fetchAll()(any())).thenReturn(Future.successful(testItem))
+      when(pdfBuilderMock.createPdf(any(), any(), any())(any())).thenReturn(byteArrayOutputStream)
+      when(byteArrayOutputStream.toByteArray).thenReturn(Array[Byte]())
+
+      val controller = new PdfGenerationController(mockMCC, pdfBuilderMock, mockSessionService, globalErrorView, testAuthAction)
+
+      val res = await(controller.generatePdf(ersRequestObject, "123456", "8 August 2016, 4:28pm")(authRequest))
+
       res.header.headers("Content-Disposition") should include("123456-confirmation.pdf")
     }
 
     "use bundle ref to generate the confirmation pdf filename (CSV File submission)" in {
-      val controller  = createController(isNilReturn = false)
+      val byteArrayOutputStream: ByteArrayOutputStream = mock[ByteArrayOutputStream]
+      val csvFilesCallBack: UpscanCsvFilesCallback =
+        UpscanCsvFilesCallback(UploadId("uploadId"), "file0", UploadedSuccessfully("name", "downloadUrl"))
+      val csvFilesCallbackList: UpscanCsvFilesCallbackList = UpscanCsvFilesCallbackList(List(csvFilesCallBack))
+
+      val testItem = testCacheItem[ReportableEvents](REPORTABLE_EVENTS, ReportableEvents(Some("1")))
+      val testItem2 = testCacheItem[CheckFileType](FILE_TYPE_CACHE, CheckFileType(Some("csv")))
+      val testItem3 = testCacheItem[UpscanCsvFilesCallbackList](CHECK_CSV_FILES, csvFilesCallbackList)
+      val testItems = mergeCacheItems(Seq(testItem, testItem2, testItem3))
+
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
 
-      val res = await(controller.generatePdf(ersRequestObject, "123456", "8 August 2016, 4:28pm")(authRequest, hc))
+      when(mockSessionService.fetch[ErsMetaData](any())(any(), any())).thenReturn(Future.successful(Fixtures.EMIMetaData))
+      when(mockSessionService.getAllData(any(), any())(any(), any())).thenReturn(Future.successful(Fixtures.ersSummary))
+      when(mockSessionService.fetchAll()(any())).thenReturn(Future.successful(testItems))
+      when(pdfBuilderMock.createPdf(any(), any(), any())(any())).thenReturn(byteArrayOutputStream)
+      when(byteArrayOutputStream.toByteArray).thenReturn(Array[Byte]())
+
+      val controller = new PdfGenerationController(mockMCC, pdfBuilderMock, mockSessionService, globalErrorView, testAuthAction)
+
+      val res = await(controller.generatePdf(ersRequestObject, "123456", "8 August 2016, 4:28pm")(authRequest))
+
       res.header.headers("Content-Disposition") should include("123456-confirmation.pdf")
     }
 
     "use bundle ref to generate the confirmation pdf filename (ODS File submission)" in {
-      val controller  = createController(isNilReturn = false, fileTypeCSV = false)
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
 
-      val res = await(controller.generatePdf(ersRequestObject, "123456", "8 August 2016, 4:28pm")(authRequest, hc))
+      val testItem = testCacheItem[ReportableEvents](REPORTABLE_EVENTS, ReportableEvents(Some("1")))
+      val testItem2 = testCacheItem[CheckFileType](FILE_TYPE_CACHE, CheckFileType(Some("ods")))
+      val testItem3 = testCacheItem[String](FILE_NAME_CACHE, "someFileName")
+      val testItems = mergeCacheItems(Seq(testItem, testItem2, testItem3))
+
+      when(mockSessionService.fetch[ErsMetaData](any())(any(), any())).thenReturn(Future.successful(Fixtures.EMIMetaData))
+      when(mockSessionService.getAllData(any(), any())(any(), any())).thenReturn(Future.successful(Fixtures.ersSummary))
+      when(mockSessionService.fetchAll()(any())).thenReturn(Future.successful(testItems))
+
+      val controller = new PdfGenerationController(mockMCC, pdfBuilderMock, mockSessionService, globalErrorView, testAuthAction)
+
+      val res = await(controller.generatePdf(ersRequestObject, "123456", "8 August 2016, 4:28pm")(authRequest))
+
       res.header.headers("Content-Disposition") should include("123456-confirmation.pdf")
     }
-
   }
-
-  def createController(
-    fetchAllRes: Boolean = true,
-    getAllDataRes: Boolean = true,
-    isNilReturn: Boolean = true,
-    fileTypeCSV: Boolean = true
-  ): PdfGenerationController = new PdfGenerationController(
-    mockMCC,
-    mockAuthConnector,
-    pdfBuilderMock,
-    mockErsUtil,
-    mockAppConfig,
-    globalErrorView,
-    testAuthAction
-  ) {
-    val byteArrayOutputStream: ByteArrayOutputStream     = mock[ByteArrayOutputStream]
-    val csvFilesCallBack: UpscanCsvFilesCallback         =
-      UpscanCsvFilesCallback(UploadId("uploadId"), "file0", UploadedSuccessfully("name", "downloadUrl"))
-    val csvFilesCallbackList: UpscanCsvFilesCallbackList = UpscanCsvFilesCallbackList(List(csvFilesCallBack))
-
-    when(pdfBuilderMock.createPdf(any[ErsSummary], any(), any())(any())).thenReturn(byteArrayOutputStream)
-    when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any())).thenReturn(Future.successful(ersRequestObject))
-    when(mockErsUtil.fetch[ErsMetaData](refEq(ersMetaData), anyString())(any(), any()))
-      .thenReturn(Future.successful(rsc))
-    when(cacheMap.getEntry[UpscanCsvFilesCallbackList](refEq(CHECK_CSV_FILES))(any())) thenReturn Some(
-      csvFilesCallbackList
-    )
-    when(cacheMap.getEntry[String](refEq(FILE_NAME_CACHE))(any())) thenReturn Some("test.ods")
-    when(byteArrayOutputStream.toByteArray).thenReturn(Array[Byte]())
-
-    if (fileTypeCSV) {
-      when(cacheMap.getEntry[CheckFileType](refEq(FILE_TYPE_CACHE))(any())) thenReturn Some(
-        new CheckFileType(Some(OPTION_CSV))
-      )
-    } else {
-      when(cacheMap.getEntry[CheckFileType](refEq(FILE_TYPE_CACHE))(any())) thenReturn Some(
-        new CheckFileType(Some(OPTION_ODS))
-      )
-    }
-
-    if (isNilReturn) {
-      when(cacheMap.getEntry[ReportableEvents](refEq(REPORTABLE_EVENTS))(any())) thenReturn Some(
-        new ReportableEvents(Some(OPTION_NIL_RETURN))
-      )
-    } else {
-      when(cacheMap.getEntry[ReportableEvents](refEq(REPORTABLE_EVENTS))(any())) thenReturn Some(
-        new ReportableEvents(Some(OPTION_UPLOAD_SPREADSHEET))
-      )
-    }
-
-    if (fetchAllRes) {
-      when(mockErsUtil.fetchAll(anyString())(any(), any()))
-        .thenReturn(Future.successful(cacheMap))
-    } else {
-      when(mockErsUtil.fetchAll(anyString())(any(), any()))
-        .thenReturn(Future.failed(new Exception))
-    }
-
-    if (getAllDataRes) {
-      when(mockErsUtil.getAllData(anyString(), any[ErsMetaData]())(any(), any()))
-        .thenReturn(Future.successful(ersSummary))
-    } else {
-      when(mockErsUtil.getAllData(anyString(), any[ErsMetaData]())(any(), any()))
-        .thenReturn(Future.failed(new Exception))
-    }
-  }
-
 }

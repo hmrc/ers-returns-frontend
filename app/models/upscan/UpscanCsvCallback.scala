@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,8 +37,7 @@ case class UpscanCsvFilesCallbackList(files: List[UpscanCsvFilesCallback]) {
   }
 }
 object UpscanCsvFilesCallbackList {
-  implicit val upscanCsvCallbackListFormat: Format[UpscanCsvFilesCallbackList] =
-    Json.format[UpscanCsvFilesCallbackList]
+  implicit val upscanCsvCallbackListFormat: Format[UpscanCsvFilesCallbackList] = Json.format[UpscanCsvFilesCallbackList]
 }
 
 case class UpscanCsvFilesList(ids: List[UpscanIds]) {

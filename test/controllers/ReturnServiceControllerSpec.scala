@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package controllers
 
 import akka.stream.Materializer
-import models.{ErsMetaData, _}
+import models._
 import org.joda.time.DateTime
 import org.jsoup.Jsoup
 import org.mockito.ArgumentMatchers.any
@@ -26,16 +26,13 @@ import org.scalatest.OptionValues
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-
 import play.api.http.Status
 import play.api.i18n
 import play.api.i18n.{Messages, MessagesApi, MessagesImpl}
-import play.api.libs.json.JsString
 import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents}
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.http.HttpResponse
-import uk.gov.hmrc.http.cache.client.CacheMap
 import utils.Fixtures.ersRequestObject
 import utils.{ERSFakeApplicationConfig, ErsTestHelper, Fixtures}
 import views.html.{global_error, start, unauthorised}
@@ -65,12 +62,12 @@ class ReturnServiceControllerSpec
   implicit lazy val mat: Materializer = app.materializer
   val globalErrorView: global_error   = app.injector.instanceOf[global_error]
   val unauthorisedView: unauthorised  = app.injector.instanceOf[unauthorised]
-  val startView: start                = app.injector.instanceOf[start]
-  val hundred                         = 100
+  val startView: start = app.injector.instanceOf[start]
+  val hundred = 100
 
   lazy val ExpectedRedirectionUrlIfNotSignedIn = "/gg/sign-in?continue=/submit-your-ers-return"
-  lazy val schemeInfo: SchemeInfo              = SchemeInfo("XA1100000000000", DateTime.now, "1", "2016", "EMI", "EMI")
-  lazy val rsc: ErsMetaData                    =
+  lazy val schemeInfo: SchemeInfo = SchemeInfo("XA1100000000000", DateTime.now, "1", "2016", "EMI", "EMI")
+  lazy val rsc: ErsMetaData =
     new ErsMetaData(schemeInfo, "ipRef", Some("aoRef"), "empRef", Some("agentRef"), Some("sapNumber"))
   lazy val rscAsRequestObject: RequestObject   = RequestObject(
     Some("aoRef"),
@@ -87,9 +84,7 @@ class ReturnServiceControllerSpec
   def buildFakeReturnServiceController(accessThresholdValue: Int = hundred): ReturnServiceController =
     new ReturnServiceController(
       mockMCC,
-      mockAuthConnector,
-      mockErsUtil,
-      mockAppConfig,
+      mockSessionService,
       globalErrorView,
       unauthorisedView,
       startView,
@@ -97,15 +92,14 @@ class ReturnServiceControllerSpec
     ) {
 
       override lazy val accessThreshold: Int = accessThresholdValue
-      override val accessDeniedUrl: String   = "/denied.html"
-      val cacheResponse: Future[CacheMap]    = Future.successful(CacheMap("1", Map("key" -> JsString("result"))))
+      override val accessDeniedUrl: String = "/denied.html"
 
     when(mockHttp.POST[ValidatorData, HttpResponse](any(), any(), any())(any(), any(), any(), any()))
 			.thenReturn(Future.successful(HttpResponse(OK, "")))
-		when(mockErsUtil.cache(any(), any())(any(), any(), any())).thenReturn(cacheResponse)
-		when(mockErsUtil.cache(any(), any(),any())(any(), any())).thenReturn(cacheResponse)
-		when(mockErsUtil.remove(any())(any(), any())).thenReturn(Future.successful(HttpResponse.apply(200, "")))
-		when(mockErsUtil.fetch[RequestObject](any(), any())(any(), any())).thenReturn(Future.successful(rscAsRequestObject))
+		when(mockSessionService.cache(any(), any())(any(), any())).thenReturn(Future.successful(sessionPair))
+		when(mockSessionService.cache(any(), any())(any(), any())).thenReturn(Future.successful(sessionPair))
+		when(mockSessionService.remove(any())(any())).thenReturn(Future.successful(()))
+		when(mockSessionService.fetch[RequestObject](any())(any(), any())).thenReturn(Future.successful(rscAsRequestObject))
   }
 
   "Calling ReturnServiceController.cacheParams with existing cache storage for the given schemeId and schemeRef" should {
@@ -113,7 +107,7 @@ class ReturnServiceControllerSpec
       val controllerUnderTest = buildFakeReturnServiceController()
 
       val result =
-        controllerUnderTest.cacheParams(ersRequestObject)(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"), hc)
+        controllerUnderTest.cacheParams(ersRequestObject)(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
       status(result) shouldBe Status.OK
       val document = Jsoup.parse(contentAsString(result))
       document.getElementsByTag("h1").text() should include(
@@ -126,7 +120,7 @@ class ReturnServiceControllerSpec
     "create a new cache object and redirect to the initial start page" in {
       val controllerUnderTest = buildFakeReturnServiceController()
       val result              =
-        controllerUnderTest.cacheParams(ersRequestObject)(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"), hc)
+        controllerUnderTest.cacheParams(ersRequestObject)(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
       status(result) shouldBe Status.OK
     }
   }

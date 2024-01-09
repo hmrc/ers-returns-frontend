@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,60 +23,43 @@ import play.api.Logging
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.mvc._
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
+import services.FrontendSessionService
+import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils._
-import javax.inject.{Inject, Singleton}
-import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class SchemeOrganiserController @Inject()(
-                                           val mcc: MessagesControllerComponents,
-                                           val authConnector: DefaultAuthConnector,
-                                           implicit val countryCodes: CountryCodes,
-                                           implicit val ersUtil: ERSUtil,
-                                           implicit val appConfig: ApplicationConfig,
-                                           globalErrorView: views.html.global_error,
-                                           schemeOrganiserView: views.html.scheme_organiser,
-                                           authAction: AuthAction
-                                         ) extends FrontendController(mcc)
-  with I18nSupport
-  with WithUnsafeDefaultFormBinding
-  with Logging {
-
-  implicit val ec: ExecutionContext = mcc.executionContext
+class SchemeOrganiserController @Inject()(val mcc: MessagesControllerComponents,
+                                          val sessionService: FrontendSessionService,
+                                          globalErrorView: views.html.global_error,
+                                          schemeOrganiserView: views.html.scheme_organiser,
+                                          authAction: AuthAction)
+                                         (implicit val ec: ExecutionContext,
+                                          val ersUtil: ERSUtil,
+                                          val appConfig: ApplicationConfig,
+                                          val countryCodes: CountryCodes)
+  extends FrontendController(mcc) with I18nSupport with WithUnsafeDefaultFormBinding with Logging {
 
   def schemeOrganiserPage(): Action[AnyContent] = authAction.async { implicit request =>
-    ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
-      showSchemeOrganiserPage(requestObject)(request, hc)
+    sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT).flatMap { requestObject =>
+      showSchemeOrganiserPage(requestObject)(request)
     }
   }
 
-  def showSchemeOrganiserPage(
-                               requestObject: RequestObject
-                             )(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
+  def showSchemeOrganiserPage(requestObject: RequestObject)
+                             (implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] = {
     logger.info(s"[SchemeOrganiserController][showSchemeOrganiserPage] schemeRef: ${requestObject.getSchemeReference}.")
-    lazy val form = SchemeOrganiserDetails(
-      "",
-      "",
-      Some(""),
-      Some(""),
-      Some(""),
-      Some(ersUtil.DEFAULT_COUNTRY),
-      Some(""),
-      Some(""),
-      Some("")
-    )
+    lazy val form = SchemeOrganiserDetails.emptyForm
 
-    ersUtil.fetch[ReportableEvents](ersUtil.reportableEvents, requestObject.getSchemeReference).flatMap {
+    sessionService.fetch[ReportableEvents](ersUtil.REPORTABLE_EVENTS).flatMap {
       reportableEvent =>
-        ersUtil.fetchOption[CheckFileType](ersUtil.FILE_TYPE_CACHE, requestObject.getSchemeReference).flatMap {
+        sessionService.fetchOption[CheckFileType](ersUtil.FILE_TYPE_CACHE, requestObject.getSchemeReference).flatMap {
           fileType =>
-            ersUtil
-              .fetch[SchemeOrganiserDetails](ersUtil.SCHEME_ORGANISER_CACHE, requestObject.getSchemeReference)
+            sessionService
+              .fetch[SchemeOrganiserDetails](ersUtil.SCHEME_ORGANISER_CACHE)
               .map { res =>
                 val FileType = if (fileType.isDefined) {
                   fileType.get.checkFileType.get
@@ -112,21 +95,19 @@ class SchemeOrganiserController @Inject()(
           )
         }
     } recover { case e: Exception =>
-      logger.error(
-        s"[SchemeOrganiserController][showSchemeOrganiserPage] Get reportableEvent.isNilReturn failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}."
-      )
+      logger.error(s"[SchemeOrganiserController][showSchemeOrganiserPage] Get reportableEvent.isNilReturn failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
       getGlobalErrorPage
     }
   }
 
   def schemeOrganiserSubmit(): Action[AnyContent] = authAction.async { implicit request =>
-    ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
-      showSchemeOrganiserSubmit(requestObject)(request, hc)
+    sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT).flatMap { requestObject =>
+      showSchemeOrganiserSubmit(requestObject)(request)
     }
   }
 
   def showSchemeOrganiserSubmit(requestObject: RequestObject)
-                               (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
+                               (implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] = {
     RsFormMappings.schemeOrganiserForm().bindFromRequest().fold(
       errors => {
         val correctOrder = errors.errors.map(_.key).distinct
@@ -136,7 +117,7 @@ class SchemeOrganiserController @Inject()(
         Future.successful(Ok(schemeOrganiserView(requestObject, "", firstErrors)))
       },
       successful => {
-        ersUtil.cache(ersUtil.SCHEME_ORGANISER_CACHE, successful, requestObject.getSchemeReference).map {
+        sessionService.cache(ersUtil.SCHEME_ORGANISER_CACHE, successful).map {
           _ => Redirect(routes.GroupSchemeController.groupSchemePage())
         } recover {
           case e: Exception =>

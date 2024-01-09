@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import play.api.i18n.{MessagesApi, MessagesImpl}
 import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents}
 import play.api.test.Helpers.stubBodyParser
 import services.pdf.ErsReceiptPdfBuilderService
-import utils.{ContentUtil, ERSFakeApplicationConfig, ERSUtil, ErsTestHelper, Fixtures}
+import utils._
 
 import scala.concurrent.ExecutionContext
 

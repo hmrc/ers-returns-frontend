@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,46 +22,37 @@ import controllers.auth.{AuthAction, RequestWithOptionalAuthContext}
 import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.mvc._
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
+import services.FrontendSessionService
+import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.ERSUtil
-import javax.inject.{Inject, Singleton}
-import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent._
 
 @Singleton
-class AltAmendsController @Inject() (
-  val mcc: MessagesControllerComponents,
-  val authConnector: DefaultAuthConnector,
-  implicit val ersUtil: ERSUtil,
-  implicit val appConfig: ApplicationConfig,
-  alterationsActivityView: views.html.alterations_activity,
-  alterationsAmendsView: views.html.alterations_amends,
-  globalErrorView: views.html.global_error,
-  authAction: AuthAction
-) extends FrontendController(mcc)
-    with I18nSupport
-    with WithUnsafeDefaultFormBinding
-    with Logging {
-
-  implicit val ec: ExecutionContext = mcc.executionContext
+class AltAmendsController @Inject() (val mcc: MessagesControllerComponents,
+                                     val sessionService: FrontendSessionService,
+                                     alterationsActivityView: views.html.alterations_activity,
+                                     alterationsAmendsView: views.html.alterations_amends,
+                                     globalErrorView: views.html.global_error,
+                                     authAction: AuthAction)
+                                    (implicit val ec: ExecutionContext,
+                                     val ersUtil: ERSUtil,
+                                     val appConfig: ApplicationConfig)
+  extends FrontendController(mcc) with I18nSupport with WithUnsafeDefaultFormBinding with Logging {
 
   def altActivityPage(): Action[AnyContent] = authAction.async { implicit request =>
     showAltActivityPage()
   }
 
-  def showAltActivityPage()(implicit
-    request: RequestWithOptionalAuthContext[AnyContent],
-    hc: HeaderCarrier
-  ): Future[Result] =
+  def showAltActivityPage()(implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
     (for {
-      requestObject     <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
-      groupSchemeInfo   <-
-        ersUtil.fetch[GroupSchemeInfo](ersUtil.GROUP_SCHEME_CACHE_CONTROLLER, requestObject.getSchemeReference)
+      requestObject <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
+      groupSchemeInfo <-
+        sessionService.fetch[GroupSchemeInfo](ersUtil.GROUP_SCHEME_CACHE_CONTROLLER)
       altAmendsActivity <-
-        ersUtil.fetch[AltAmendsActivity](ersUtil.altAmendsActivity, requestObject.getSchemeReference).recover {
+        sessionService.fetch[AltAmendsActivity](ersUtil.ALT_AMENDS_ACTIVITY).recover {
           case _: NoSuchElementException => AltAmendsActivity("")
         }
     } yield Ok(
@@ -79,23 +70,20 @@ class AltAmendsController @Inject() (
     }
 
   def altActivitySelected(): Action[AnyContent] = authAction.async { implicit request =>
-    showAltActivitySelected()(request, hc)
+    showAltActivitySelected()(request)
 
   }
 
-  def showAltActivitySelected()(implicit
-    request: RequestWithOptionalAuthContext[AnyContent],
-    hc: HeaderCarrier
-  ): Future[Result] =
-    ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
+  def showAltActivitySelected()(implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
+    sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT).flatMap { requestObject =>
       RsFormMappings
         .altActivityForm()
         .bindFromRequest()
         .fold(
           errors => Future.successful(Ok(alterationsActivityView(requestObject, "", "", errors))),
           formData =>
-            ersUtil
-              .cache(ersUtil.altAmendsActivity, formData, requestObject.getSchemeReference)
+            sessionService
+              .cache(ersUtil.ALT_AMENDS_ACTIVITY, formData)
               .map { _ =>
                 formData.altActivity match {
                   case ersUtil.OPTION_NO  => Redirect(routes.SummaryDeclarationController.summaryDeclarationPage())
@@ -112,30 +100,24 @@ class AltAmendsController @Inject() (
     }
 
   def altAmendsPage(): Action[AnyContent] = authAction.async { implicit request =>
-    showAltAmendsPage()(request, hc)
+    showAltAmendsPage()(request)
   }
 
-  def showAltAmendsPage()(implicit
-    request: RequestWithOptionalAuthContext[AnyContent],
-    hc: HeaderCarrier
-  ): Future[Result] =
+  def showAltAmendsPage()(implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
     for {
-      requestObject <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
+      requestObject <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
       altAmends     <-
-        ersUtil.fetchOption[AltAmends](ersUtil.ALT_AMENDS_CACHE_CONTROLLER, requestObject.getSchemeReference).recover {
+        sessionService.fetchOption[AltAmends](ersUtil.ALT_AMENDS_CACHE_CONTROLLER, requestObject.getSchemeReference).recover {
           case _: Throwable => None
         }
     } yield Ok(alterationsAmendsView(requestObject, altAmends.getOrElse(AltAmends(None, None, None, None, None))))
 
   def altAmendsSelected(): Action[AnyContent] = authAction.async { implicit request =>
-    showAltAmendsSelected()(request, hc)
+    showAltAmendsSelected()(request)
   }
 
-  def showAltAmendsSelected()(implicit
-    request: RequestWithOptionalAuthContext[AnyContent],
-    hc: HeaderCarrier
-  ): Future[Result] =
-    ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
+  def showAltAmendsSelected()(implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
+    sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT).flatMap { requestObject =>
       RsFormMappings
         .altAmendsForm()
         .bindFromRequest()
@@ -149,7 +131,7 @@ class AltAmendsController @Inject() (
                 )
             ),
           formData =>
-            ersUtil.cache(ersUtil.ALT_AMENDS_CACHE_CONTROLLER, formData, requestObject.getSchemeReference).flatMap {
+            sessionService.cache(ersUtil.ALT_AMENDS_CACHE_CONTROLLER, formData).flatMap {
               _ =>
                 if (
                   formData.altAmendsTerms.isEmpty

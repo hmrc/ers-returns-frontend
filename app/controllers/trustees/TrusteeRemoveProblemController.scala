@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import models.RequestObject
 import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import services.FrontendSessionService
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.ERSUtil
@@ -32,6 +33,7 @@ import scala.concurrent.ExecutionContext
 class TrusteeRemoveProblemController @Inject()(val mcc: MessagesControllerComponents,
                                                val authAction: AuthAction,
                                                val ersUtil: ERSUtil,
+                                               val sessionService: FrontendSessionService,
                                                trusteeRemoveProblemView: views.html.trustee_remove_problem,
                                                globalErrorView: views.html.global_error)
                                               (implicit executionContext: ExecutionContext, appConfig: ApplicationConfig)
@@ -40,7 +42,7 @@ class TrusteeRemoveProblemController @Inject()(val mcc: MessagesControllerCompon
   def onPageLoad(): Action[AnyContent] = authAction.async {
     implicit request =>
       (for {
-        requestObject <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
+        requestObject <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
       } yield {
         Ok(trusteeRemoveProblemView(requestObject))
       }).recover {

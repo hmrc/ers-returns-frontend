@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package utils
 
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.{JsArray, JsValue, Json}
 
 trait JsonParser {
   def getSubmissionJson(schemeRef: String, schemeType: String, taxYear: String, submissionType: String): JsValue = {
@@ -29,5 +29,14 @@ trait JsonParser {
       "\"submissionType\" : \"" + submissionType + "\"" +
       "}}"
     Json.parse(jsonString)
+  }
+}
+
+object JsonUtils {
+  implicit class RichJsArray(array: JsArray) {
+    def applyOption(index: Int): Option[JsValue] = {
+      if (index >= 0 && index < array.value.size) Some(array.value(index))
+      else None
+    }
   }
 }

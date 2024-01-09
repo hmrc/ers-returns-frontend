@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,8 @@ import org.mockito.Mockito._
 import org.mockito.stubbing.OngoingStubbing
 import org.scalatestplus.mockito.MockitoSugar
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
-import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.auth.core._
+import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.domain.EmpRef
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 

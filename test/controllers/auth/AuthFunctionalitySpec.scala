@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,8 +26,8 @@ import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatestplus.play.guice.GuiceFakeApplicationFactory
 import play.api.i18n.MessagesApi
 import play.api.mvc._
-import play.api.test.{DefaultAwaitTimeout, FakeRequest}
 import play.api.test.Helpers.{redirectLocation, status, stubBodyParser}
+import play.api.test.{DefaultAwaitTimeout, FakeRequest}
 import uk.gov.hmrc.auth.core.AffinityGroup.Agent
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.domain.EmpRef
@@ -78,18 +78,17 @@ class AuthFunctionalitySpec
     lazy val schemeInfo: SchemeInfo   = SchemeInfo("XA1100000000000", DateTime.now, "1", "2016", "EMI", "EMI")
     val validErsMetaData: ErsMetaData =
       ErsMetaData(schemeInfo, "ipRef", Some("aoRef"), "1234/GA4567", Some("agentRef"), Some("sapNumber"))
-    val reqObj: RequestObject         = RequestObject(None, None, None, None, None, None, Some("1234/GA4567"), None, None)
+    val reqObj: RequestObject = RequestObject(None, None, None, None, None, None, Some("1234/GA4567"), None, None)
 
     when(
-      mockErsUtil.fetch[RequestObject](ArgumentMatchers.any())(
-        ArgumentMatchers.any(),
+      mockSessionService.fetch[RequestObject](ArgumentMatchers.any())(
         ArgumentMatchers.any(),
         ArgumentMatchers.any()
       )
     )
       .thenReturn(Future.successful(reqObj))
     when(
-      mockErsUtil.fetch[ErsMetaData](ArgumentMatchers.any(), ArgumentMatchers.any())(
+      mockSessionService.fetch[ErsMetaData](ArgumentMatchers.any())(
         ArgumentMatchers.any(),
         ArgumentMatchers.any()
       )

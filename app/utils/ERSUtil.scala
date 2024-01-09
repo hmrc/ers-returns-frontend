@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,232 +16,19 @@
 
 package utils
 
-import config.{ApplicationConfig, ERSShortLivedCache}
-import metrics.Metrics
+import config.ApplicationConfig
 import models._
-import org.joda.time.DateTime
 import play.api.Logging
 import play.api.i18n.Messages
-import play.api.libs.json
-import play.api.libs.json.{JsArray, JsValue, Json}
-import play.api.mvc.Request
-import services.SessionService
-import uk.gov.hmrc.http.cache.client.CacheMap
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import services.FileValidatorSessionService
 
-import java.util.concurrent.TimeUnit
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 @Singleton
-class ERSUtil @Inject() (
-  val sessionService: SessionService,
-  val shortLivedCache: ERSShortLivedCache,
-  val appConfig: ApplicationConfig
-)(implicit val ec: ExecutionContext, countryCodes: CountryCodes)
-    extends PageBuilder
-    with JsonParser
-    with Metrics
-    with HMACUtil
-    with Logging {
-
-  val largeFileStatus                       = "largefiles"
-  val savedStatus                           = "saved"
-  val ersMetaData: String                   = "ErsMetaData"
-  val ersRequestObject: String              = "ErsRequestObject"
-  val reportableEvents                      = "ReportableEvents"
-  val GROUP_SCHEME_CACHE_CONTROLLER: String = "group-scheme-controller"
-  val ALT_AMENDS_CACHE_CONTROLLER: String   = "alt-amends-cache-controller"
-  val GROUP_SCHEME_COMPANIES: String        = "group-scheme-companies"
-  val csvFilesCallbackList: String          = "csv-file-callback-List"
-
-  // Cache Ids
-  val FILE_TYPE_CACHE: String         = "check-file-type"
-  val altAmendsActivity: String       = "alt-activity"
-
-  val CHECK_CSV_FILES: String  = "check-csv-files"
-  val CSV_FILES_UPLOAD: String = "csv-files-upload"
-
-  val FILE_NAME_CACHE: String = "file-name"
-
-	val SCHEME_ORGANISER_CACHE: String = "scheme-organiser"
-	val TRUSTEES_CACHE: String = "trustees"
-	val TRUSTEE_NAME_CACHE: String = "trustee-name"
-	val TRUSTEE_BASED_CACHE: String = "trustee-based"
-	val TRUSTEE_ADDRESS_CACHE: String = "trustee-address"
-
-  val BUNDLE_REF: String       = "sap-bundle-ref"
-
-  val VALIDATED_SHEEETS: String = "validated-sheets"
-
-	def cache[T](key: String, body: T)(implicit hc: HeaderCarrier, ec: ExecutionContext, formats: json.Format[T]): Future[CacheMap] =
-		shortLivedCache.cache[T](getCacheId, key, body)
-
-	def cache[T](key: String, body: T, cacheId: String)(implicit hc: HeaderCarrier, formats: json.Format[T]): Future[CacheMap] = {
-		logger.info(s"[ERSUtil][cache]cache saving key:$key, cacheId:$cacheId")
-		shortLivedCache.cache[T](cacheId, key, body)
-	}
-
-  def remove(cacheId: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] =
-    shortLivedCache.remove(cacheId)
-
-	def fetch[T](key: String)(implicit hc: HeaderCarrier, ec: ExecutionContext, formats: json.Format[T]): Future[T] = {
-		shortLivedCache.fetchAndGetEntry[JsValue](getCacheId, key).map{ res =>
-			res.get.as[T]
-		} recover {
-			case _: NoSuchElementException =>
-				throw new NoSuchElementException
-			case _ : Throwable =>
-				logger.error(s"[ERSUtil][fetch] fetch failed to get key $key for $getCacheId with exception, timestamp: ${System.currentTimeMillis()}.")
-				throw new Exception
-		}
-	}
-
-	def fetch[T](key: String, cacheId: String)(implicit hc: HeaderCarrier, formats: json.Format[T]): Future[T] = {
-		val startTime = System.currentTimeMillis()
-		shortLivedCache.fetchAndGetEntry[JsValue](cacheId, key).map { res =>
-			cacheTimeFetch(System.currentTimeMillis() - startTime, TimeUnit.MILLISECONDS)
-			res.get.as[T]
-		} recover {
-			case _: NoSuchElementException =>
-				throw new NoSuchElementException
-			case er : Throwable =>
-				logger.warn(s"[ERSUtil][fetch] fetch(with 2 params) failed to get key [$key] for cacheId: [$cacheId] with exception ${er.getMessage}, " +
-					s"timestamp: ${System.currentTimeMillis()}.")
-				throw new Exception
-		}
-	}
-
-	def fetchTrusteesOptionally(cacheId: String)(implicit hc: HeaderCarrier, formats: json.Format[TrusteeDetailsList]): Future[TrusteeDetailsList] = {
-		fetch[TrusteeDetailsList](TRUSTEES_CACHE, cacheId).recover {
-			case _ => TrusteeDetailsList(List.empty[TrusteeDetails])
-		}
-	}
-
-	def fetchPartFromTrusteeDetailsList[A](index: Int, cacheId: String)(implicit hc: HeaderCarrier, formats: json.Format[A]): Future[Option[A]] = {
-		shortLivedCache.fetchAndGetEntry[JsValue](cacheId, TRUSTEES_CACHE).map {
-			_.map(_.\(TRUSTEES_CACHE).as[JsArray].\(index).getOrElse(Json.obj()).as[A])
-		} recover {
-			case x: Throwable => {
-				logger.info("[ERSUtil][fetchPartFromTrusteeDetailsList] Nothing found in cache, expected if this is not an edit journey: " + x.getMessage)
-				None
-			}
-		}
-	}
-
-	//TODO Why is this called "fetchOption" if it throws an expection when there's no data?? It can only return Some[T] or throw exception which I would not describe as "optional" behaviour -.-
-	def fetchOption[T](key: String, cacheId: String)(implicit hc: HeaderCarrier, formats: json.Format[T]): Future[Option[T]] = {
-		val startTime = System.currentTimeMillis()
-		shortLivedCache.fetchAndGetEntry[T](cacheId, key).map { res =>
-			cacheTimeFetch(System.currentTimeMillis() - startTime, TimeUnit.MILLISECONDS)
-			res
-		} recover {
-			case e: NoSuchElementException =>
-				logger.warn(s"[ERSUtil][fetchOption] fetch with 2 params failed to get key $key for $cacheId with exception \n $e \n timestamp: ${System.currentTimeMillis()}.")
-				throw e
-			case e: Throwable =>
-				logger.error(s"[ERSUtil][fetchOption] fetch with 2 params failed to get key $key for $cacheId, timestamp: ${System.currentTimeMillis()}.", e)
-				throw new Exception
-		}
-	}
-
-  def fetchAll(sr: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[CacheMap] = {
-    val startTime = System.currentTimeMillis()
-    shortLivedCache.fetch(sr).map { res =>
-      cacheTimeFetch(System.currentTimeMillis() - startTime, TimeUnit.MILLISECONDS)
-      res.get
-    } recover {
-      case e: NoSuchElementException =>
-        logger.warn(
-          s"[ERSUtil][fetchAll] failed to get all keys with a NoSuchElementException \n $e \n Method: ${request.method} " +
-            s"req: ${request.path}, param: ${request.rawQueryString}"
-        )
-        throw new NoSuchElementException
-      case e: Throwable              =>
-        logger.error(
-          s"[ERSUtil][fetchAll] failed to get all keys with exception \n $e \n Method: ${request.method} " +
-            s"req: ${request.path}, param: ${request.rawQueryString}"
-        )
-        throw new Exception
-    }
-  }
-
-	def getAltAmmendsData(schemeRef: String)(implicit hc: HeaderCarrier,
-																					 ec: ExecutionContext
-	): Future[(Option[AltAmendsActivity], Option[AlterationAmends])] = {
-		fetchOption[AltAmendsActivity](altAmendsActivity, schemeRef).flatMap {
-			altamends =>
-				if(altamends.getOrElse(AltAmendsActivity("")).altActivity == OPTION_YES) {
-					fetchOption[AlterationAmends](ALT_AMENDS_CACHE_CONTROLLER, schemeRef).map {
-						amc =>
-							(altamends, amc)
-					}
-				}
-				else {
-					Future{
-						(altamends, None)
-					}
-				}
-		}
-	}
-
-	def getGroupSchemeData(schemeRef: String)
-												(implicit hc: HeaderCarrier,
-												 ec: ExecutionContext): Future[(Option[GroupSchemeInfo], Option[CompanyDetailsList])] = {
-		fetchOption[GroupSchemeInfo](GROUP_SCHEME_CACHE_CONTROLLER, schemeRef).flatMap { gsc =>
-			if (gsc.getOrElse(GroupSchemeInfo(None, None)).groupScheme.getOrElse("") == OPTION_YES) {
-				fetchOption[CompanyDetailsList](GROUP_SCHEME_COMPANIES, schemeRef).map { comp =>
-					(gsc, comp)
-				}
-			}
-			else {
-				Future {
-					(gsc, None)
-				}
-			}
-		}
-	}
-
-
-	def getAllData(bundleRef: String, ersMetaData: ErsMetaData)
-								(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[ErsSummary] = {
-		val schemeRef = ersMetaData.schemeInfo.schemeRef
-		(for {
-			repEvents <- fetchOption[ReportableEvents](reportableEvents, schemeRef)
-			checkFileType <- fetchOption[CheckFileType](FILE_TYPE_CACHE, schemeRef)
-			soc <- fetchOption[SchemeOrganiserDetails](SCHEME_ORGANISER_CACHE, schemeRef)
-			td <- fetchOption[TrusteeDetailsList](TRUSTEES_CACHE, schemeRef)
-			gc <- getGroupSchemeData(schemeRef)
-			altData <- getAltAmmendsData(schemeRef)
-			trows <- getNoOfRows(repEvents.get.isNilReturn.get)
-		} yield {
-			val fileType = checkFileType.map(_.checkFileType.get)
-			ErsSummary(bundleRef, repEvents.get.isNilReturn.get, fileType, DateTime.now, metaData = ersMetaData,
-				altAmendsActivity = altData._1, alterationAmends = altData._2, groupService = gc._1,
-				schemeOrganiser = soc, companies = gc._2, trustees = td, nofOfRows = trows, transferStatus = getStatus(trows)
-			)
-		}
-		).recover {
-					//TODO I don't like this. Pick up in tech debt review
-			case e: NoSuchElementException =>
-				logger.error(s"[ERSUtil][getAllData]: Get all data from cache failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.", e)
-				throw e
-		}
-	}
-
-  def getStatus(tRows: Option[Int]): Some[String] =
-    if (tRows.isDefined && tRows.get > appConfig.sentViaSchedulerNoOfRowsLimit) {
-      Some(largeFileStatus)
-    } else {
-      Some(savedStatus)
-    }
-
-  def getNoOfRows(nilReturn: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[Int]] =
-    if (isNilReturn(nilReturn: String)) {
-      Future.successful(None)
-    } else {
-      sessionService.getSuccessfulCallbackRecord.map(res => res.flatMap(_.noOfRows))
-    }
+class ERSUtil @Inject() (val fileValidatorSessionService: FileValidatorSessionService,
+                         val appConfig: ApplicationConfig)
+                        (implicit val ec: ExecutionContext, countryCodes: CountryCodes) extends PageBuilder with Constants with Logging {
 
 	final def concatAddress(optionalAddressLines: List[Option[String]], existingAddressLines: String): String = {
 		val definedStrings = optionalAddressLines.filter(_.isDefined).map(_.get)
@@ -306,11 +93,6 @@ class ERSUtil @Inject() (
   ): String =
     if (n == trusteeDetailsList.length) { trusteeNamesList }
     else { buildTrusteeNameList(trusteeDetailsList, n + 1, trusteeNamesList + trusteeDetailsList(n).name + "<br>") }
-
-  private def getCacheId(implicit hc: HeaderCarrier): String =
-    hc.sessionId.getOrElse(throw new RuntimeException("")).value
-
-  def isNilReturn(nilReturn: String): Boolean = nilReturn == OPTION_NIL_RETURN
 
   def companyLocation(company: CompanyDetails): String =
     company.country

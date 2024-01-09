@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,6 +86,18 @@ case class SchemeOrganiserDetails(
 
 object SchemeOrganiserDetails {
   implicit val format: OFormat[SchemeOrganiserDetails] = Json.format[SchemeOrganiserDetails]
+
+  val emptyForm = SchemeOrganiserDetails(
+    "",
+    "",
+    Some(""),
+    Some(""),
+    Some(""),
+    Some("UK"),
+    Some(""),
+    Some(""),
+    Some("")
+  )
 }
 
 case class TrusteeDetails(

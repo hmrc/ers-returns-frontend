@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package connectors
 
 import akka.stream.Materializer
 import com.github.tomakehurst.wiremock.client.WireMock._
-import metrics.Metrics
 import models.{ERSAuthData, SchemeInfo, ValidatorData}
 import org.joda.time.DateTime
 import org.mockito.Mockito.{reset => mreset, _}
@@ -70,14 +69,12 @@ class ERSConnectorSpec
 
   lazy val schemeInfo: SchemeInfo = SchemeInfo("XA1100000000000", DateTime.now, "1", "2016", "EMI", "EMI")
 
-  lazy val ersConnector: ErsConnector = new ErsConnector(testHttp, mockErsUtil, mockAppConfig) {
-    override lazy val metrics: Metrics = mockMetrics
+  lazy val ersConnector: ErsConnector = new ErsConnector(testHttp, mockAppConfig) {
     override lazy val ersUrl           = "ers-returns"
     override lazy val validatorUrl     = s"http://localhost:${server.port()}/process-file"
   }
 
-  lazy val ersConnectorMockHttp: ErsConnector = new ErsConnector(mockHttp, mockErsUtil, mockAppConfig) {
-    override lazy val metrics: Metrics = mockMetrics
+  lazy val ersConnectorMockHttp: ErsConnector = new ErsConnector(mockHttp, mockAppConfig) {
     override lazy val ersUrl           = "ers-returns"
     override lazy val validatorUrl     = "ers-file-validator"
   }

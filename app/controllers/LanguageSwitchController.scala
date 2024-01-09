@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,11 +25,10 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import java.net.URI
 import scala.concurrent.ExecutionContext
 
-class LanguageSwitchController @Inject() (appConfig: ApplicationConfig, val mcc: MessagesControllerComponents)
-    extends FrontendController(mcc)
-    with I18nSupport {
-
-  implicit val ec: ExecutionContext = mcc.executionContext
+class LanguageSwitchController @Inject() (appConfig: ApplicationConfig,
+                                          val mcc: MessagesControllerComponents)
+                                         (implicit val ec: ExecutionContext)
+    extends FrontendController(mcc) with I18nSupport {
 
   private def fallbackURL: String = routes.ReturnServiceController.hmacCheck().url
 

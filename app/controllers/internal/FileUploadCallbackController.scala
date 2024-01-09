@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,26 +16,23 @@
 
 package controllers.internal
 
-import javax.inject.{Inject, Singleton}
+import models.RequestWithUpdatedSession
 import models.upscan._
 import play.api.Logging
 import play.api.libs.json.JsValue
 import play.api.mvc.{Action, MessagesControllerComponents}
-import services.SessionService
-import uk.gov.hmrc.http.{HeaderCarrier, SessionId}
+import services.FileValidatorSessionService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class FileUploadCallbackController @Inject() (val mcc: MessagesControllerComponents, val sessionService: SessionService)
-    extends FrontendController(mcc)
-    with Logging {
-
-  implicit val ec: ExecutionContext = mcc.executionContext
+class FileUploadCallbackController @Inject() (val mcc: MessagesControllerComponents,
+                                              val sessionService: FileValidatorSessionService)
+                                             (implicit val ec: ExecutionContext) extends FrontendController(mcc) with Logging {
 
   def callback(sessionId: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
-    implicit val headerCarrier: HeaderCarrier = hc.copy(sessionId = Some(SessionId(sessionId)))
     request.body
       .validate[UpscanCallback]
       .fold(
@@ -55,8 +52,9 @@ class FileUploadCallbackController @Inject() (val mcc: MessagesControllerCompone
               )
               Failed
           }
+
           logger.info(s"Updating callback for session: $sessionId to ${uploadStatus.getClass.getSimpleName}")
-          sessionService.updateCallbackRecord(sessionId, uploadStatus)(headerCarrier).map(_ => Ok) recover {
+          sessionService.updateCallbackRecord(uploadStatus)(RequestWithUpdatedSession(request, sessionId)).map(_ => Ok) recover {
             case e: Throwable =>
               logger.error(
                 s"[FileUploadCallbackController][callback] Failed to update callback record for session: $sessionId, timestamp: ${System

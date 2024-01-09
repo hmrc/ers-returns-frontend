@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,9 @@
 
 package controllers.trustees
 
+import controllers.auth.RequestWithOptionalAuthContext
 import models.{RequestObject, RsFormMappings, TrusteeBasedInUk}
-import org.mockito.ArgumentMatchers.any
+import org.mockito.ArgumentMatchers.{any, refEq}
 import org.mockito.Mockito.when
 import org.scalatest.OptionValues
 import org.scalatest.concurrent.ScalaFutures
@@ -27,10 +28,8 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status
 import play.api.i18n
 import play.api.i18n.{MessagesApi, MessagesImpl}
-import play.api.libs.json.Json
 import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents}
 import play.api.test.Helpers.{contentAsString, defaultAwaitTimeout, redirectLocation, status, stubBodyParser}
-import uk.gov.hmrc.http.cache.client.CacheMap
 import utils.Fixtures.ersRequestObject
 import utils.{ERSFakeApplicationConfig, ErsTestHelper, Fixtures}
 import views.html.{global_error, trustee_based_in_uk}
@@ -57,26 +56,23 @@ class TrusteeBasedInUkControllerSpec  extends AnyWordSpecLike
 
   implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
 
-
   val testController = new TrusteeBasedInUkController(
     mockMCC,
     mockErsConnector,
     app.injector.instanceOf[global_error],
     testAuthAction,
     mockTrusteeService,
-    mockCountryCodes,
-    mockErsUtil,
-    mockAppConfig,
+    mockSessionService,
     app.injector.instanceOf[trustee_based_in_uk]
   )
 
   "calling showQuestionPage" should {
     implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
     setAuthMocks()
-    when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any())).thenReturn(Future.successful(ersRequestObject))
+    when(mockSessionService.fetch[RequestObject](any())(any(), any())).thenReturn(Future.successful(ersRequestObject))
 
     "show the empty trustee based in UK question page when there is nothing to prefill" in {
-      when(mockErsUtil.fetchPartFromTrusteeDetailsList[TrusteeBasedInUk](any(), any())(any(), any())).thenReturn(Future.successful(None))
+      when(mockSessionService.fetchPartFromTrusteeDetailsList[TrusteeBasedInUk](any())(any(), any())).thenReturn(Future.successful(None))
 
       val result = testController.questionPage(1).apply(authRequest)
 
@@ -87,7 +83,7 @@ class TrusteeBasedInUkControllerSpec  extends AnyWordSpecLike
     }
 
     "show the prefilled trustee based in UK question page when there is data to prefill" in {
-      when(mockErsUtil.fetchPartFromTrusteeDetailsList[TrusteeBasedInUk](any(), any())(any(), any())).thenReturn(Future.successful(Some(TrusteeBasedInUk(true))))
+      when(mockSessionService.fetchPartFromTrusteeDetailsList[TrusteeBasedInUk](any())(any(), any())).thenReturn(Future.successful(Some(TrusteeBasedInUk(true))))
 
       val result = testController.questionPage(1).apply(authRequest)
 
@@ -99,7 +95,7 @@ class TrusteeBasedInUkControllerSpec  extends AnyWordSpecLike
     }
 
     "show the global error page if an exception occurs while retrieving cached data" in {
-      when(mockErsUtil.fetchPartFromTrusteeDetailsList[TrusteeBasedInUk](any(), any())(any(), any())).thenReturn(Future.failed(new RuntimeException("Failure scenario")))
+      when(mockSessionService.fetchPartFromTrusteeDetailsList[TrusteeBasedInUk](any())(any(), any())).thenReturn(Future.failed(new RuntimeException("Failure scenario")))
 
       val result = testController.questionPage(1).apply(authRequest)
 
@@ -125,9 +121,8 @@ class TrusteeBasedInUkControllerSpec  extends AnyWordSpecLike
   }
 
   "successfully bind the form and go to the trustee address UK page if true" in {
-    val emptyCacheMap = CacheMap("", Map("" -> Json.obj()))
-    when(mockErsUtil.cache[TrusteeBasedInUk](any(), any(), any())(any(), any())).thenReturn(Future.successful(emptyCacheMap))
-    when(mockErsUtil.fetch[TrusteeBasedInUk](any(), any())(any(), any())).thenReturn(Future.successful(TrusteeBasedInUk(true)))
+    when(mockSessionService.cache[TrusteeBasedInUk](any(), any())(any(), any())).thenReturn(Future.successful(sessionPair))
+    when(mockSessionService.fetch[TrusteeBasedInUk](refEq(mockErsUtil.TRUSTEE_BASED_CACHE))(any(), any())).thenReturn(Future.successful(TrusteeBasedInUk(true)))
     when(mockTrusteeService.updateTrusteeCache(any())(any())).thenReturn(Future.successful(()), Future.successful(()))
 
     val trusteeBasedData = Map("basedInUk" -> "0")
@@ -140,9 +135,8 @@ class TrusteeBasedInUkControllerSpec  extends AnyWordSpecLike
   }
 
   "successfully bind the form and go to the trustee address overseas page if false" in {
-    val emptyCacheMap = CacheMap("", Map("" -> Json.obj()))
-    when(mockErsUtil.cache[TrusteeBasedInUk](any(), any(), any())(any(), any())).thenReturn(Future.successful(emptyCacheMap))
-    when(mockErsUtil.fetch[TrusteeBasedInUk](any(), any())(any(), any())).thenReturn(Future.successful(TrusteeBasedInUk(false)))
+    when(mockSessionService.cache[TrusteeBasedInUk](any(), any())(any(), any())).thenReturn(Future.successful(sessionPair))
+    when(mockSessionService.fetch[TrusteeBasedInUk](refEq(mockErsUtil.TRUSTEE_BASED_CACHE))(any(), any())).thenReturn(Future.successful(TrusteeBasedInUk(false)))
     when(mockTrusteeService.updateTrusteeCache(any())(any())).thenReturn(Future.successful(()), Future.successful(()))
 
     val trusteeBasedData = Map("basedInUk" -> "1")
@@ -158,10 +152,10 @@ class TrusteeBasedInUkControllerSpec  extends AnyWordSpecLike
   "calling editQuestion" should {
     implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
     setAuthMocks()
-    when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any())).thenReturn(Future.successful(ersRequestObject))
+    when(mockSessionService.fetch[RequestObject](any())(any(), any())).thenReturn(Future.successful(ersRequestObject))
 
     "be the same as showQuestion for a specific index" in {
-      when(mockErsUtil.fetchPartFromTrusteeDetailsList[TrusteeBasedInUk](any(), any())(any(), any())).thenReturn(Future.successful(Some(TrusteeBasedInUk(false))))
+      when(mockSessionService.fetchPartFromTrusteeDetailsList[TrusteeBasedInUk](any())(any(), any())).thenReturn(Future.successful(Some(TrusteeBasedInUk(false))))
 
       val result = testController.editQuestion(1).apply(authRequest)
 
@@ -172,18 +166,17 @@ class TrusteeBasedInUkControllerSpec  extends AnyWordSpecLike
 
   "calling editQuestionSubmit" should {
     setAuthMocks()
-    when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any())).thenReturn(Future.successful(ersRequestObject))
+    when(mockSessionService.fetch[RequestObject](any())(any(), any())).thenReturn(Future.successful(ersRequestObject))
 
     "successfully bind the form and go to the edit version of the trustee address UK page with the index preserved if the answer is true" in {
-      val emptyCacheMap = CacheMap("", Map("" -> Json.obj()))
-      when(mockErsUtil.cache[TrusteeBasedInUk](any(), any(), any())(any(), any())).thenReturn(Future.successful(emptyCacheMap))
-      when(mockErsUtil.fetch[TrusteeBasedInUk](any(), any())(any(), any())).thenReturn(Future.successful(TrusteeBasedInUk(true)))
-      when(mockErsUtil.fetchTrusteesOptionally(any())(any(), any())).thenReturn(Future.successful(Fixtures.exampleTrustees))
+      when(mockSessionService.cache[TrusteeBasedInUk](any(), any())(any(), any())).thenReturn(Future.successful(sessionPair))
+      when(mockSessionService.fetch[TrusteeBasedInUk](refEq(mockErsUtil.TRUSTEE_BASED_CACHE))(any(), any())).thenReturn(Future.successful(TrusteeBasedInUk(true)))
+      when(mockSessionService.fetchTrusteesOptionally()(any(), any())).thenReturn(Future.successful(Fixtures.exampleTrustees))
       when(mockTrusteeService.updateTrusteeCache(any())(any())).thenReturn(Future.successful(()), Future.successful(()))
 
       val trusteeBasedData = Map("basedInUk" -> "0")
       val form = RsFormMappings.trusteeBasedInUkForm().bind(trusteeBasedData)
-      implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*))
+      implicit val authRequest: RequestWithOptionalAuthContext[AnyContent] = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*))
       val result = testController.editQuestionSubmit(0).apply(authRequest)
 
       status(result) shouldBe Status.SEE_OTHER
@@ -191,10 +184,9 @@ class TrusteeBasedInUkControllerSpec  extends AnyWordSpecLike
     }
 
     "successfully bind the form and go to the edit version of the trustee address overseas page with the index preserved if the answer is false" in {
-      val emptyCacheMap = CacheMap("", Map("" -> Json.obj()))
-      when(mockErsUtil.cache[TrusteeBasedInUk](any(), any(), any())(any(), any())).thenReturn(Future.successful(emptyCacheMap))
-      when(mockErsUtil.fetch[TrusteeBasedInUk](any(), any())(any(), any())).thenReturn(Future.successful(TrusteeBasedInUk(false)))
-      when(mockErsUtil.fetchTrusteesOptionally(any())(any(), any())).thenReturn(Future.successful(Fixtures.exampleTrustees))
+      when(mockSessionService.cache[TrusteeBasedInUk](any(), any())(any(), any())).thenReturn(Future.successful(sessionPair))
+      when(mockSessionService.fetch[TrusteeBasedInUk](refEq(mockErsUtil.TRUSTEE_BASED_CACHE))(any(), any())).thenReturn(Future.successful(TrusteeBasedInUk(false)))
+      when(mockSessionService.fetchTrusteesOptionally()(any(), any())).thenReturn(Future.successful(Fixtures.exampleTrustees))
       when(mockTrusteeService.updateTrusteeCache(any())(any())).thenReturn(Future.successful(()), Future.successful(()))
 
       val trusteeBasedData = Map("basedInUk" -> "1")

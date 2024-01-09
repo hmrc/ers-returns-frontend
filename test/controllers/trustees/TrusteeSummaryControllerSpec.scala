@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,23 +14,23 @@
  * limitations under the License.
  */
 
-import controllers.trustees.TrusteeSummaryController
+package controllers.trustees
+
 import models._
+import org.joda.time.DateTime
 import org.mockito.ArgumentMatchers.{eq => meq, _}
 import org.mockito.Mockito._
-import org.scalatest.OptionValues
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
+import org.scalatest.{BeforeAndAfterEach, OptionValues}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status
 import play.api.i18n
 import play.api.i18n.{MessagesApi, MessagesImpl}
-import play.api.libs.json.Json
 import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.http.cache.client.CacheMap
 import utils.Fixtures.ersRequestObject
 import utils._
 import views.html.{global_error, trustee_summary}
@@ -43,6 +43,7 @@ class TrusteeSummaryControllerSpec extends AnyWordSpecLike
   with ERSFakeApplicationConfig
   with ErsTestHelper
   with GuiceOneAppPerSuite
+  with BeforeAndAfterEach
   with ScalaFutures {
 
   val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
@@ -58,120 +59,78 @@ class TrusteeSummaryControllerSpec extends AnyWordSpecLike
   implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
 
 	val tenThousand: Int = 10000
+  val failure: Future[Nothing] = Future.failed(new Exception)
   val globalErrorView: global_error = app.injector.instanceOf[global_error]
   val trusteeSummaryView: trustee_summary = app.injector.instanceOf[trustee_summary]
 
+  val firstTrustee: TrusteeDetails = TrusteeDetails("First Trustee", "1 The Street", None, None, None, Some("UK"), None, true)
+  val secondTrustee: TrusteeDetails = TrusteeDetails("Second Trustee", "34 Some Road", None, None, None, Some("UK"), None, true)
+  val thirdTrustee: TrusteeDetails = TrusteeDetails("Third Trustee", "60 Window Close", None, None, None, Some("UK"), None, true)
+
+  val trusteeList: List[TrusteeDetails] = List(
+    firstTrustee,
+    secondTrustee,
+    thirdTrustee
+  )
+
+  override def beforeEach() = {
+    reset(mockErsUtil, mockSessionService)
+    when(mockErsUtil.trusteeLocationMessage(any())).thenReturn("someLocation")
+    when(mockErsUtil.buildAddressSummary(any())).thenReturn("addressSummary")
+  }
+
   "calling Delete Trustee" should {
-
-    val firstTrustee = TrusteeDetails("First Trustee", "1 The Street", None, None, None, Some("UK"), None, true)
-    val secondTrustee = TrusteeDetails("Second Trustee", "34 Some Road", None, None, None, Some("UK"), None, true)
-    val thirdTrustee = TrusteeDetails("Third Trustee", "60 Window Close", None, None, None, Some("UK"), None, true)
-
-    val trusteeList = List(
-      firstTrustee,
-      secondTrustee,
-      thirdTrustee
-    )
-
-    def buildFakeTrusteeController(trusteeDetailsRes: Future[TrusteeDetailsList] = Future.successful(TrusteeDetailsList(trusteeList)),
-																	 cacheRes: Future[CacheMap] = Future.successful(mock[CacheMap]),
-																	 requestObjectRes: Future[RequestObject] = Future.successful(ersRequestObject)
-																	): TrusteeSummaryController = new TrusteeSummaryController(mockMCC, mockErsConnector,
-      mockTrusteeService, mockCountryCodes, mockErsUtil, mockAppConfig, globalErrorView, trusteeSummaryView, testAuthAction) {
-			when(
-        mockErsUtil.fetch[TrusteeDetailsList](refEq(mockErsUtil.TRUSTEES_CACHE), any())(any(), any())
-      ) thenReturn trusteeDetailsRes
-
-      when(
-        mockErsUtil.cache(refEq(mockErsUtil.TRUSTEES_CACHE), any(), any())(any(), any())
-      ) thenReturn cacheRes
-
-      when(
-        mockErsUtil.fetch[RequestObject](any())(any(), any(), any())
-      ) thenReturn requestObjectRes
-    }
-
     "give a redirect status (to company authentication frontend) on GET if user is not authenticated" in {
       setUnauthorisedMocks()
 
-      val controllerUnderTest = buildFakeTrusteeController()
-      val result              = controllerUnderTest.deleteTrustee(tenThousand).apply(FakeRequest("GET", ""))
+      val controllerUnderTest = new TrusteeSummaryController(mockMCC, mockErsConnector, mockTrusteeService, mockSessionService, globalErrorView, trusteeSummaryView, testAuthAction)
+
+      val result = controllerUnderTest.deleteTrustee(tenThousand).apply(FakeRequest("GET", ""))
 
       status(result) shouldBe Status.SEE_OTHER
-    }
-
-    "give a status OK on GET if user is authenticated" in {
-      setAuthMocks()
-      when(mockTrusteeService.deleteTrustee(any())(any())).thenReturn(Future.successful(true))
-
-      val controllerUnderTest = buildFakeTrusteeController()
-      val result              = controllerUnderTest.deleteTrustee(tenThousand).apply(Fixtures.buildFakeRequestWithSessionIdSIP("GET"))
-
-      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result).value should include("sign-in")
     }
 
     "delete trustee for given index and redirect to trustee summary page" in {
-      val cacheMap = CacheMap("_id", Map(mockErsUtil.TRUSTEES_CACHE -> Json.toJson(trusteeList)))
+      setAuthMocks()
+      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdSIP("GET"))
       when(mockTrusteeService.deleteTrustee(any())(any())).thenReturn(Future.successful(true))
 
-      val controllerUnderTest = buildFakeTrusteeController(cacheRes = Future.successful(cacheMap))
-      val authRequest         = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdSIP("POST"))
+      val controllerUnderTest = new TrusteeSummaryController(mockMCC, mockErsConnector, mockTrusteeService,  mockSessionService, globalErrorView, trusteeSummaryView, testAuthAction)
 
       val result = controllerUnderTest.deleteTrustee(1)(authRequest)
+
       status(result) shouldBe Status.SEE_OTHER
 
-      verify(mockTrusteeService, times(1)).deleteTrustee(meq(1))(any())
+      redirectLocation(result) shouldBe Some("/submit-your-ers-annual-return/trustees")
+
+      verify(mockTrusteeService, times(1))
+        .deleteTrustee(meq(1))(any())
     }
 
-    "show getGlobalErrorPage if deleteTrustee returned false" in {
-      reset(mockTrusteeService)
-      val cacheMap = CacheMap("_id", Map(mockErsUtil.TRUSTEES_CACHE -> Json.toJson(trusteeList)))
+    "return INTERNAL_SERVER_ERROR id delete returned false" in {
+      setAuthMocks()
       when(mockTrusteeService.deleteTrustee(any())(any())).thenReturn(Future.successful(false))
 
-      val controllerUnderTest = buildFakeTrusteeController(cacheRes = Future.successful(cacheMap))
-      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdSIP("POST"))
+      val controllerUnderTest = new TrusteeSummaryController(mockMCC, mockErsConnector, mockTrusteeService,  mockSessionService, globalErrorView, trusteeSummaryView, testAuthAction)
 
-      val result = controllerUnderTest.deleteTrustee(1)(authRequest)
-      status(result) shouldBe Status.OK
+      val result = controllerUnderTest.deleteTrustee(tenThousand).apply(Fixtures.buildFakeRequestWithSessionIdSIP("GET"))
 
-      contentAsString(result) shouldBe contentAsString(Future(controllerUnderTest.getGlobalErrorPage(testFakeRequest, testMessages)))
-
-      verify(mockTrusteeService, times(1)).deleteTrustee(meq(1))(any())
+      status(result) shouldBe Status.INTERNAL_SERVER_ERROR
     }
   }
 
   "calling trustee summary page" should {
-
-    val trusteeList = List(TrusteeDetails("Name", "1 The Street", None, None, None, Some("UK"), None, true))
-    val failure: Future[Nothing] = Future.failed(new Exception("failure innit"))
-
-    def buildFakeTrusteeController(trusteeDetailsRes: Future[TrusteeDetailsList] = Future.successful(TrusteeDetailsList(trusteeList)),
-																	 cacheRes: Future[CacheMap] = Future.successful(mock[CacheMap]),
-																	 requestObjectRes: Future[RequestObject] = Future.successful(ersRequestObject)
-                                  ): TrusteeSummaryController = new TrusteeSummaryController(mockMCC, mockErsConnector,
-      mockTrusteeService, mockCountryCodes, mockErsUtil, mockAppConfig, globalErrorView, trusteeSummaryView, testAuthAction) {
-
-      when(
-        mockErsUtil.fetch[TrusteeDetailsList](refEq(mockErsUtil.TRUSTEES_CACHE), anyString())(any(), any())
-      ) thenReturn trusteeDetailsRes
-
-      when(
-        mockErsUtil.cache(refEq(mockErsUtil.TRUSTEES_CACHE), anyString(), anyString())(any(), any())
-      ) thenReturn cacheRes
-
-      when(
-        mockErsUtil.fetch[RequestObject](any())(any(), any(), any())
-      ) thenReturn requestObjectRes
-
-      when(
-        mockErsUtil.fetchTrusteesOptionally(any())(any(), any())
-      ) thenReturn trusteeDetailsRes
-    }
+    lazy val schemeInfo: SchemeInfo = SchemeInfo("XA1100000000000", DateTime.now, "1", "2016", "EMI", "EMI")
+    lazy val rsc: ErsMetaData = ErsMetaData(schemeInfo, "ipRef", Some("aoRef"), "empRef", Some("agentRef"), Some("sapNumber"))
 
     "give a redirect status (to company authentication frontend) on GET if user is not authenticated" in {
       setUnauthorisedMocks()
-      val controllerUnderTest = buildFakeTrusteeController()
-      val result              = controllerUnderTest.trusteeSummaryPage().apply(FakeRequest("GET", ""))
+
+      val controllerUnderTest = new TrusteeSummaryController(mockMCC, mockErsConnector, mockTrusteeService,  mockSessionService, globalErrorView, trusteeSummaryView, testAuthAction)
+
+      val result = controllerUnderTest.trusteeSummaryPage().apply(FakeRequest("GET", ""))
+
       status(result) shouldBe Status.SEE_OTHER
     }
 
@@ -179,28 +138,36 @@ class TrusteeSummaryControllerSpec extends AnyWordSpecLike
     // Raised https://jira.tools.tax.service.gov.uk/browse/DDCE-4841 to fix
     "give a status OK on GET if user is authenticated" in {
       setAuthMocks()
-      val controllerUnderTest = buildFakeTrusteeController()
+      when(mockSessionService.fetch[RequestObject](refEq(ERS_REQUEST_OBJECT))(any(), any())).thenReturn(Future.successful(ersRequestObject))
+      when(mockSessionService.fetchTrusteesOptionally()(any(), any())).thenReturn(Future.successful(TrusteeDetailsList(trusteeList)))
 
-      val result = controllerUnderTest.trusteeSummaryPage().apply(Fixtures.buildFakeRequestWithSessionIdSIP("GET"))
+      val controllerUnderTest = new TrusteeSummaryController(mockMCC, mockErsConnector, mockTrusteeService,  mockSessionService, globalErrorView, trusteeSummaryView, testAuthAction)
+
+      val result = controllerUnderTest.trusteeSummaryPage().apply(Fixtures.buildFakeRequestWithSessionIdOTHER("GET"))
 
       status(result) shouldBe Status.OK
     }
 
     "direct to ers errors page if fetching trustee details list fails" in {
-      val controllerUnderTest = buildFakeTrusteeController(trusteeDetailsRes = failure)
-      val authRequest         = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdSIP("GET"))
+      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdSIP("GET"))
+      when(mockSessionService.fetch[RequestObject](refEq(ERS_REQUEST_OBJECT))(any(), any())).thenReturn(Future.successful(ersRequestObject))
+      when(mockSessionService.fetchTrusteesOptionally()(any(), any())).thenReturn(failure)
 
-      contentAsString(controllerUnderTest.showTrusteeSummaryPage()(authRequest, hc)) shouldBe contentAsString(
-        Future(controllerUnderTest.getGlobalErrorPage(testFakeRequest, testMessages))
+      val controllerUnderTest = new TrusteeSummaryController(mockMCC, mockErsConnector, mockTrusteeService,  mockSessionService, globalErrorView, trusteeSummaryView, testAuthAction)
+
+      contentAsString(controllerUnderTest.showTrusteeSummaryPage()(authRequest)) shouldBe contentAsString(
+        Future(controllerUnderTest.getGlobalErrorPage()(testFakeRequest, testMessages))
       )
     }
 
     "direct to ers errors page if fetching request object fails" in {
-      val controllerUnderTest = buildFakeTrusteeController(requestObjectRes = failure)
-      val authRequest         = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdSIP("GET"))
+      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdSIP("GET"))
+      when(mockSessionService.fetch[RequestObject](refEq(ERS_REQUEST_OBJECT))(any(), any())).thenReturn(failure)
 
-      contentAsString(controllerUnderTest.showTrusteeSummaryPage()(authRequest, hc)) shouldBe contentAsString(
-        Future(controllerUnderTest.getGlobalErrorPage(testFakeRequest, testMessages))
+      val controllerUnderTest = new TrusteeSummaryController(mockMCC, mockErsConnector, mockTrusteeService,  mockSessionService, globalErrorView, trusteeSummaryView, testAuthAction)
+
+      contentAsString(controllerUnderTest.showTrusteeSummaryPage()(authRequest)) shouldBe contentAsString(
+        Future(controllerUnderTest.getGlobalErrorPage()(testFakeRequest, testMessages))
       )
     }
 
@@ -208,20 +175,29 @@ class TrusteeSummaryControllerSpec extends AnyWordSpecLike
     // Raised https://jira.tools.tax.service.gov.uk/browse/DDCE-4841 to fix
     "display trustee summary page pre-filled" in {
       setAuthMocks()
-      val controllerUnderTest = buildFakeTrusteeController()
-      val authRequest         = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdSIP("GET"))
+      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdSIP("GET"))
+      when(mockSessionService.fetch[ErsMetaData](refEq(ERS_META_DATA))(any(), any())).thenReturn(Future.successful(rsc))
+      when(mockSessionService.fetch[RequestObject](refEq(ERS_REQUEST_OBJECT))(any(), any())).thenReturn(Future.successful(ersRequestObject))
+      when(mockSessionService.fetch[TrusteeDetailsList](refEq(TRUSTEES_CACHE))(any(), any())).thenReturn(Future.successful(TrusteeDetailsList(trusteeList)))
+      when(mockSessionService.fetchTrusteesOptionally()(any(), any())).thenReturn(Future.successful(TrusteeDetailsList(trusteeList)))
 
-      val result = controllerUnderTest.showTrusteeSummaryPage()(authRequest, hc)
+      val controllerUnderTest = new TrusteeSummaryController(mockMCC, mockErsConnector, mockTrusteeService,  mockSessionService, globalErrorView, trusteeSummaryView, testAuthAction)
+
+      val result = controllerUnderTest.showTrusteeSummaryPage()(authRequest)
 
       status(result) shouldBe Status.OK
     }
 
     "redirect to TrusteeNameController.questionPage if no trustees in list" in {
       setAuthMocks()
-      val controllerUnderTest = buildFakeTrusteeController(Future.successful(TrusteeDetailsList(List.empty)))
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdSIP("GET"))
+      when(mockSessionService.fetch[RequestObject](refEq(ERS_REQUEST_OBJECT))(any(), any())).thenReturn(Future.successful(ersRequestObject))
+      when(mockSessionService.fetch[TrusteeDetailsList](refEq(TRUSTEES_CACHE))(any(), any())).thenReturn(Future.successful(TrusteeDetailsList(List.empty)))
+      when(mockSessionService.fetchTrusteesOptionally()(any(), any())).thenReturn(Future.successful(TrusteeDetailsList(List.empty)))
 
-      val result = controllerUnderTest.showTrusteeSummaryPage()(authRequest, hc)
+      val controllerUnderTest = new TrusteeSummaryController(mockMCC, mockErsConnector, mockTrusteeService,  mockSessionService, globalErrorView, trusteeSummaryView, testAuthAction)
+
+      val result = controllerUnderTest.showTrusteeSummaryPage()(authRequest)
 
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some("/submit-your-ers-annual-return/trustee-name")
@@ -229,7 +205,10 @@ class TrusteeSummaryControllerSpec extends AnyWordSpecLike
 
     "continue button gives a redirect status (to company authentication frontend) on GET if user is not authenticated" in {
       setUnauthorisedMocks()
-      val controllerUnderTest = buildFakeTrusteeController()
+      when(mockSessionService.fetch[RequestObject](refEq(ERS_REQUEST_OBJECT))(any(), any())).thenReturn(Future.successful(ersRequestObject))
+      when(mockSessionService.fetchTrusteesOptionally()(any(), any())).thenReturn(Future.successful(TrusteeDetailsList(trusteeList)))
+
+      val controllerUnderTest = new TrusteeSummaryController(mockMCC, mockErsConnector, mockTrusteeService,  mockSessionService, globalErrorView, trusteeSummaryView, testAuthAction)
 
       val result = controllerUnderTest.trusteeSummaryContinue().apply(FakeRequest("GET", ""))
 
@@ -239,34 +218,48 @@ class TrusteeSummaryControllerSpec extends AnyWordSpecLike
 
     // These tests are going to the error page. It succeeds because the only check is that a 200 is returned and global error page is returning a 200 -.-
     // Raised https://jira.tools.tax.service.gov.uk/browse/DDCE-4841 to fix
-    "continue button give a status OK on GET if user is authenticated" in {
+    "continue button give a status BadRequest on POST if user is authenticated and form data missing" in {
       setAuthMocks()
-      val controllerUnderTest = buildFakeTrusteeController()
+      when(mockSessionService.fetch[RequestObject](refEq(ERS_REQUEST_OBJECT))(any(), any())).thenReturn(Future.successful(ersRequestObject))
+      when(mockSessionService.fetchTrusteesOptionally()(any(), any())).thenReturn(Future.successful(TrusteeDetailsList(trusteeList)))
+
+      val controllerUnderTest = new TrusteeSummaryController(mockMCC, mockErsConnector, mockTrusteeService,  mockSessionService, globalErrorView, trusteeSummaryView, testAuthAction)
 
       val result = controllerUnderTest.trusteeSummaryContinue().apply(Fixtures.buildFakeRequestWithSessionIdSIP("GET"))
 
-      status(result) shouldBe Status.OK
+      status(result) shouldBe Status.BAD_REQUEST
     }
 
-    "redirect to TrusteeNameController.questionPage if form posted with true" in {
+    "continue button should redirect on POST if user is authenticated and addTrustee = true" in {
       setAuthMocks()
-      val controllerUnderTest = buildFakeTrusteeController()
+      when(mockSessionService.fetch[RequestObject](refEq(ERS_REQUEST_OBJECT))(any(), any())).thenReturn(Future.successful(ersRequestObject))
+      when(mockSessionService.fetchTrusteesOptionally()(any(), any())).thenReturn(Future.successful(TrusteeDetailsList(trusteeList)))
 
-      val result = controllerUnderTest.trusteeSummaryContinue().apply(Fixtures.buildFakeRequestWithSessionIdSIP("GET").withFormUrlEncodedBody("addTrustee" -> "0"))
+      val addTrustee = Map("addTrustee" -> "0")
+      val form = RsFormMappings.addTrusteeForm().bind(addTrustee)
+
+      val controllerUnderTest = new TrusteeSummaryController(mockMCC, mockErsConnector, mockTrusteeService, mockSessionService, globalErrorView, trusteeSummaryView, testAuthAction)
+
+      val result = controllerUnderTest.trusteeSummaryContinue().apply(Fixtures.buildFakeRequestWithSessionIdSIP("GET").withFormUrlEncodedBody(form.data.toSeq: _*))
 
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some("/submit-your-ers-annual-return/trustee-name")
     }
 
-    "redirect to AltAmendsController.altActivityPage if form posted with false" in {
+    "continue button should redirect on POST if user is authenticated and addTrustee = false" in {
       setAuthMocks()
-      val controllerUnderTest = buildFakeTrusteeController()
+      when(mockSessionService.fetch[RequestObject](refEq(ERS_REQUEST_OBJECT))(any(), any())).thenReturn(Future.successful(ersRequestObject))
+      when(mockSessionService.fetchTrusteesOptionally()(any(), any())).thenReturn(Future.successful(TrusteeDetailsList(trusteeList)))
 
-      val result = controllerUnderTest.trusteeSummaryContinue().apply(Fixtures.buildFakeRequestWithSessionIdSIP("GET").withFormUrlEncodedBody("addTrustee" -> "1"))
+      val addTrustee = Map("addTrustee" -> "1")
+      val form = RsFormMappings.addTrusteeForm().bind(addTrustee)
+
+      val controllerUnderTest = new TrusteeSummaryController(mockMCC, mockErsConnector, mockTrusteeService, mockSessionService, globalErrorView, trusteeSummaryView, testAuthAction)
+
+      val result = controllerUnderTest.trusteeSummaryContinue().apply(Fixtures.buildFakeRequestWithSessionIdSIP("GET").withFormUrlEncodedBody(form.data.toSeq: _*))
 
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some("/submit-your-ers-annual-return/alterations-or-a-variation")
     }
   }
 }
-

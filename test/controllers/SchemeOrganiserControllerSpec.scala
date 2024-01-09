@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,6 @@ import utils.Fixtures.ersRequestObject
 import utils.{ERSFakeApplicationConfig, ErsTestHelper, Fixtures}
 import views.html.{global_error, scheme_organiser}
 
-import java.util.NoSuchElementException
 import scala.concurrent.{ExecutionContext, Future}
 
 class SchemeOrganiserControllerSpec
@@ -70,19 +69,16 @@ class SchemeOrganiserControllerSpec
       fileTypeRes: Boolean = true
     ): SchemeOrganiserController = new SchemeOrganiserController(
       mockMCC,
-      mockAuthConnector,
-      mockCountryCodes,
-      mockErsUtil,
-      mockAppConfig,
+      mockSessionService,
       globalErrorView,
       schemeOrganiserView,
       testAuthAction
     ) {
 
-      when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any())).thenReturn(Future.successful(ersRequestObject))
+      when(mockSessionService.fetch[RequestObject](any())(any(), any())).thenReturn(Future.successful(ersRequestObject))
 
       when(
-        mockErsUtil.fetch[ReportableEvents](refEq(REPORTABLE_EVENTS), any())(any(), any())
+        mockSessionService.fetch[ReportableEvents](refEq(REPORTABLE_EVENTS))(any(), any())
       ).thenReturn(
         if (reportableEventsRes) {
           Future.successful(ReportableEvents(Some(OPTION_NO)))
@@ -91,7 +87,7 @@ class SchemeOrganiserControllerSpec
         }
       )
       when(
-        mockErsUtil.fetchOption[CheckFileType](refEq(FILE_TYPE_CACHE), any())(any(), any())
+        mockSessionService.fetchOption[CheckFileType](refEq(FILE_TYPE_CACHE), any())(any(), any())
       ).thenReturn(
         if (fileTypeRes) {
           Future.successful(Some(CheckFileType(Some(OPTION_CSV))))
@@ -100,7 +96,7 @@ class SchemeOrganiserControllerSpec
         }
       )
       when(
-        mockErsUtil.fetch[SchemeOrganiserDetails](refEq(SCHEME_ORGANISER_CACHE), any())(any(), any())
+        mockSessionService.fetch[SchemeOrganiserDetails](refEq(SCHEME_ORGANISER_CACHE))(any(), any())
       ).thenReturn(
         if (schemeOrganiserDetailsRes) {
           if (schemeOrganiserDataCached) {
@@ -135,7 +131,7 @@ class SchemeOrganiserControllerSpec
       val req                 = Fixtures.buildFakeRequestWithSessionIdCSOP("GET")
       val authRequest         = buildRequestWithAuth(req)
 
-      val result = controllerUnderTest.showSchemeOrganiserPage(ersRequestObject)(authRequest, hc)
+      val result = controllerUnderTest.showSchemeOrganiserPage(ersRequestObject)(authRequest)
       contentAsString(result)   should include(testMessages("ers.global_errors.message"))
       contentAsString(result) shouldBe contentAsString(
         Future(buildFakeSchemeOrganiserController().getGlobalErrorPage(req, testMessages))
@@ -146,7 +142,7 @@ class SchemeOrganiserControllerSpec
       val controllerUnderTest = buildFakeSchemeOrganiserController(fileTypeRes = false)
       val authRequest         = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
 
-      val result = controllerUnderTest.showSchemeOrganiserPage(ersRequestObject)(authRequest, hc)
+      val result = controllerUnderTest.showSchemeOrganiserPage(ersRequestObject)(authRequest)
       status(result) shouldBe Status.OK
       val document = Jsoup.parse(contentAsString(result))
       document.select("input[id=company-name]").hasText   shouldEqual false
@@ -157,7 +153,7 @@ class SchemeOrganiserControllerSpec
       val controllerUnderTest = buildFakeSchemeOrganiserController(schemeOrganiserDetailsRes = false)
       val authRequest         = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
 
-      val result = controllerUnderTest.showSchemeOrganiserPage(ersRequestObject)(authRequest, hc)
+      val result = controllerUnderTest.showSchemeOrganiserPage(ersRequestObject)(authRequest)
       status(result) shouldBe Status.OK
       val document = Jsoup.parse(contentAsString(result))
       document.select("input[id=company-name]").hasText   shouldEqual false
@@ -168,7 +164,7 @@ class SchemeOrganiserControllerSpec
       val controllerUnderTest = buildFakeSchemeOrganiserController(schemeOrganiserDataCached = true)
       val authRequest         = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
 
-      val result = controllerUnderTest.showSchemeOrganiserPage(ersRequestObject)(authRequest, hc)
+      val result = controllerUnderTest.showSchemeOrganiserPage(ersRequestObject)(authRequest)
       status(result) shouldBe Status.OK
       val document = Jsoup.parse(contentAsString(result))
       document.select("input[id=companyName]").`val`()  shouldEqual "Name"
@@ -187,32 +183,29 @@ class SchemeOrganiserControllerSpec
       schemeOrganiserDataCachedOk: Boolean = true
     ): SchemeOrganiserController = new SchemeOrganiserController(
       mockMCC,
-      mockAuthConnector,
-      mockCountryCodes,
-      mockErsUtil,
-      mockAppConfig,
+      mockSessionService,
       globalErrorView,
       schemeOrganiserView,
       testAuthAction
     ) {
 
-      when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any())).thenReturn(Future.successful(ersRequestObject))
+      when(mockSessionService.fetch[RequestObject](any())(any(), any())).thenReturn(Future.successful(ersRequestObject))
 
-      when(mockErsUtil.fetch[ReportableEvents](refEq(REPORTABLE_EVENTS), any())(any(), any())).thenReturn(
+      when(mockSessionService.fetch[ReportableEvents](refEq(REPORTABLE_EVENTS))(any(), any())).thenReturn(
         if (reportableEventsRes) {
           Future.successful(ReportableEvents(Some(OPTION_NO)))
         } else {
           Future.failed(new Exception)
         }
       )
-      when(mockErsUtil.fetchOption[CheckFileType](refEq(FILE_TYPE_CACHE), any())(any(), any())).thenReturn(
+      when(mockSessionService.fetchOption[CheckFileType](refEq(FILE_TYPE_CACHE), any())(any(), any())).thenReturn(
         if (fileTypeRes) {
           Future.successful(Some(CheckFileType(Some(OPTION_CSV))))
         } else {
           Future.failed(new NoSuchElementException)
         }
       )
-      when(mockErsUtil.fetch[SchemeOrganiserDetails](refEq(SCHEME_ORGANISER_CACHE), any())(any(), any())).thenReturn(
+      when(mockSessionService.fetch[SchemeOrganiserDetails](refEq(SCHEME_ORGANISER_CACHE))(any(), any())).thenReturn(
         if (schemeOrganiserDetailsRes) {
           if (schemeOrganiserDataCached) {
             Future.successful(
@@ -225,7 +218,7 @@ class SchemeOrganiserControllerSpec
           Future.failed(new NoSuchElementException)
         }
       )
-      when(mockErsUtil.cache(refEq(SCHEME_ORGANISER_CACHE), any(), any())(any(), any())).thenReturn(
+      when(mockSessionService.cache(refEq(SCHEME_ORGANISER_CACHE), any())(any(), any())).thenReturn(
         if (schemeOrganiserDataCachedOk) {
           Future.successful(null)
         } else {
@@ -256,7 +249,7 @@ class SchemeOrganiserControllerSpec
       val request             = Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val authRequest         = buildRequestWithAuth(request)
 
-      val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(authRequest, hc)
+      val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(authRequest)
       status(result) shouldBe Status.OK
     }
 
@@ -277,7 +270,7 @@ class SchemeOrganiserControllerSpec
       val request             = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val authRequest         = buildRequestWithAuth(request)
 
-      val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(authRequest, hc)
+      val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(authRequest)
       status(result)                                shouldBe Status.SEE_OTHER
       result.futureValue.header.headers("Location") shouldBe routes.GroupSchemeController.groupSchemePage().toString
     }
@@ -299,7 +292,7 @@ class SchemeOrganiserControllerSpec
       val request             = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val authRequest         = buildRequestWithAuth(request)
 
-      val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(authRequest, hc)
+      val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(authRequest)
       contentAsString(result)   should include(testMessages("ers.global_errors.message"))
       contentAsString(result) shouldBe contentAsString(
         Future(buildFakeSchemeOrganiserController().getGlobalErrorPage(request, testMessages))
@@ -323,7 +316,7 @@ class SchemeOrganiserControllerSpec
       val request             = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val authRequest         = buildRequestWithAuth(request)
 
-      val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(authRequest, hc)
+      val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(authRequest)
       contentAsString(result) should include(testMessages("ers_scheme_organiser.err.summary.company_name_required"))
     }
     "check error for company name more than 36 characters" in {
@@ -343,7 +336,7 @@ class SchemeOrganiserControllerSpec
       val request             = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val authRequest         = buildRequestWithAuth(request)
 
-      val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(authRequest, hc)
+      val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(authRequest)
       contentAsString(result) should include(testMessages("ers_scheme_organiser.err.company_name"))
     }
 
@@ -364,7 +357,7 @@ class SchemeOrganiserControllerSpec
       val request             = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val authRequest         = buildRequestWithAuth(request)
 
-      val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(authRequest, hc)
+      val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(authRequest)
       contentAsString(result) should include(testMessages("ers_scheme_organiser.err.invalidChars.company_name"))
     }
 
@@ -385,7 +378,7 @@ class SchemeOrganiserControllerSpec
       val request             = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val authRequest         = buildRequestWithAuth(request)
 
-      val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(authRequest, hc)
+      val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(authRequest)
       contentAsString(result) should include(testMessages("ers_scheme_organiser.err.summary.address_line1_required"))
     }
 
@@ -406,7 +399,7 @@ class SchemeOrganiserControllerSpec
       val request             = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val authRequest         = buildRequestWithAuth(request)
 
-      val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(authRequest, hc)
+      val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(authRequest)
       contentAsString(result) should include(testMessages("ers_scheme_organiser.err.address_line1"))
     }
 
@@ -427,7 +420,7 @@ class SchemeOrganiserControllerSpec
       val request             = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val authRequest         = buildRequestWithAuth(request)
 
-      val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(authRequest, hc)
+      val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(authRequest)
       contentAsString(result) should include(testMessages("ers_scheme_organiser.err.invalidChars.address_line1"))
     }
 
@@ -448,7 +441,7 @@ class SchemeOrganiserControllerSpec
       val request             = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val authRequest         = buildRequestWithAuth(request)
 
-      val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(authRequest, hc)
+      val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(authRequest)
       contentAsString(result) should include(testMessages("ers_scheme_organiser.err.postcode"))
     }
 
@@ -469,7 +462,7 @@ class SchemeOrganiserControllerSpec
       val request             = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val authRequest         = buildRequestWithAuth(request)
 
-      val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(authRequest, hc)
+      val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(authRequest)
       contentAsString(result) should include(testMessages("ers_scheme_organiser.err.invalidChars.postcode"))
     }
 
@@ -490,7 +483,7 @@ class SchemeOrganiserControllerSpec
       val request             = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val authRequest         = buildRequestWithAuth(request)
 
-      val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(authRequest, hc)
+      val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(authRequest)
       contentAsString(result) should include(testMessages("ers_scheme_organiser.err.summary.company_reg"))
     }
 
@@ -511,7 +504,7 @@ class SchemeOrganiserControllerSpec
       val request             = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val authRequest         = buildRequestWithAuth(request)
 
-      val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(authRequest, hc)
+      val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(authRequest)
       contentAsString(result) should include(testMessages("ers_scheme_organiser.err.summary.company_reg"))
     }
 
@@ -532,7 +525,7 @@ class SchemeOrganiserControllerSpec
       val request             = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val authRequest         = buildRequestWithAuth(request)
 
-      val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(authRequest, hc)
+      val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(authRequest)
       contentAsString(result) should include(testMessages("ers_scheme_organiser.err.summary.corporation_ref"))
     }
 
@@ -553,7 +546,7 @@ class SchemeOrganiserControllerSpec
       val request             = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val authRequest         = buildRequestWithAuth(request)
 
-      val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(authRequest, hc)
+      val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(authRequest)
       contentAsString(result) should include(
         testMessages("ers_scheme_organiser.err.summary.invalidChars.corporation_ref_pattern")
       )
@@ -576,7 +569,7 @@ class SchemeOrganiserControllerSpec
       val request             = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val authRequest         = buildRequestWithAuth(request)
 
-      val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(authRequest, hc)
+      val result = controllerUnderTest.showSchemeOrganiserSubmit(ersRequestObject)(authRequest)
       contentAsString(result) should include(testMessages("ers_scheme_organiser.err.invalidFormat.postcode"))
     }
 

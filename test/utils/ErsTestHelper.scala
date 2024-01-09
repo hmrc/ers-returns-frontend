@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package utils
 
 import akka.stream.Materializer
-import config.{ApplicationConfig, ERSShortLivedCache}
+import config.ApplicationConfig
 import connectors.ErsConnector
 import controllers.auth.{AuthAction, AuthActionGovGateway, RequestWithOptionalAuthContext}
 import metrics.Metrics
@@ -28,16 +28,21 @@ import org.mockito.Mockito._
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.i18n
 import play.api.i18n.MessagesImpl
+import play.api.libs.json.{JsObject, JsValue, Json, Writes}
 import play.api.mvc.BodyParsers.Default
 import play.api.mvc._
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentAsString, defaultAwaitTimeout, stubBodyParser, stubControllerComponents, stubMessagesApi}
 import play.twirl.api.Html
-import services.{SessionService, TrusteeService}
+import repositories.FrontendSessionsRepository
 import services.audit.AuditEvents
-import uk.gov.hmrc.http.HeaderCarrier
+import services.{FileValidatorSessionService, FrontendSessionService, TrusteeService}
+import uk.gov.hmrc.http.{HeaderCarrier, SessionKeys}
+import uk.gov.hmrc.mongo.cache.CacheItem
 import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
 
+import java.time.Instant
+import java.util.UUID
 import scala.concurrent.ExecutionContext
 
 trait ErsTestHelper extends MockitoSugar with AuthHelper with ERSFakeApplicationConfig {
@@ -56,13 +61,15 @@ trait ErsTestHelper extends MockitoSugar with AuthHelper with ERSFakeApplication
   ): RequestWithOptionalAuthContext[AnyContent] =
     RequestWithOptionalAuthContext(req, authData)
 
-  implicit val hc: HeaderCarrier                        = HeaderCarrier()
-  implicit val ec: ExecutionContext                     = cc.executionContext
+  implicit val hc: HeaderCarrier = HeaderCarrier()
+  implicit val ec: ExecutionContext = cc.executionContext
   implicit val testFakeRequest: FakeRequest[AnyContent] = FakeRequest()
-  implicit lazy val messages: MessagesImpl              = MessagesImpl(i18n.Lang("en"), stubMessagesApi())
+  implicit lazy val messages: MessagesImpl = MessagesImpl(i18n.Lang("en"), stubMessagesApi())
 
   val requestWithAuth: RequestWithOptionalAuthContext[AnyContent] =
     RequestWithOptionalAuthContext(testFakeRequest, defaultErsAuthData)
+
+  val sessionId: String = UUID.randomUUID.toString
 
   val OPTION_YES                = "1"
   val OPTION_NO                 = "2"
@@ -71,29 +78,39 @@ trait ErsTestHelper extends MockitoSugar with AuthHelper with ERSFakeApplication
   val FILE_TYPE_CACHE           = "check-file-type"
   val FILE_NAME_CACHE           = "file-name"
   val CHECK_CSV_FILES           = "check-csv-files"
-  val ersMetaData               = "ErsMetaData"
-  val REPORTABLE_EVENTS         = "ReportableEvents"
-  val ErsRequestObject          = "ErsRequestObject"
+  val ERS_META_DATA             = "ers-meta-data"
+  val REPORTABLE_EVENTS         = "reportable_events"
+  val ERS_REQUEST_OBJECT        = "ers-request-object"
   val SCHEME_CSOP               = "1"
   val OPTION_CSV                = "csv"
   val OPTION_ODS                = "ods"
   val OPTION_NIL_RETURN         = "2"
   val OPTION_UPLOAD_SPREADSHEET = "1"
+  val TRUSTEES_CACHE            = "trustees"
 
-	val mockHttp: DefaultHttpClient = mock[DefaultHttpClient]
-	val mockAppConfig: ApplicationConfig = mock[ApplicationConfig]
+  val mockHttp: DefaultHttpClient = mock[DefaultHttpClient]
+	implicit val mockAppConfig: ApplicationConfig = mock[ApplicationConfig]
 	val mockErsConnector: ErsConnector = mock[ErsConnector]
-	val mockErsUtil: ERSUtil = mock[ERSUtil]
+	implicit val mockErsUtil: ERSUtil = mock[ERSUtil]
 	val mockMetrics: Metrics = mock[Metrics]
 	val mockAuditEvents: AuditEvents = mock[AuditEvents]
-	val mockShortLivedCache: ERSShortLivedCache = mock[ERSShortLivedCache]
-	val mockSessionCache: SessionService = mock[SessionService]
+  val mockSessionRepository: FrontendSessionsRepository = mock[FrontendSessionsRepository]
+  val mockSessionService: FrontendSessionService = mock[FrontendSessionService]
+  val mockFileValidatorSessionService: FileValidatorSessionService = mock[FileValidatorSessionService]
 	val mockTrusteeService: TrusteeService = mock[TrusteeService]
-	val mockCountryCodes: CountryCodes = mock[CountryCodes]
+	implicit val mockCountryCodes: CountryCodes = mock[CountryCodes]
+  val sessionPair: (String, String) = SessionKeys.sessionId -> sessionId
+  val testCacheItem: CacheItem = CacheItem("id", Json.toJson(Map("user1234" -> Json.toJson(Fixtures.ersSummary))).as[JsObject], Instant.now(), Instant.now())
+  def testCacheItem[A](key: String, data: A)(implicit writes: Writes[A]): CacheItem = CacheItem("id", Json.toJson(Map(key -> Json.toJson(data))).as[JsObject], Instant.now(), Instant.now())
+  def testCacheItems(data: Map[String, JsValue]): CacheItem = CacheItem("id", Json.toJson(data).as[JsObject], Instant.now(), Instant.now())
 
-  val testAuthAction    = new AuthAction(mockAuthConnector, mockAppConfig, mockErsUtil, defaultParser)(ec)
-  val testAuthActionGov = new AuthActionGovGateway(mockAuthConnector, mockAppConfig, mockErsUtil, defaultParser)(ec)
+  def mergeCacheItems(items: Seq[CacheItem]): CacheItem = {
+    val mergedData = items.map(_.data).foldLeft(Json.obj())((acc, data) => acc ++ data)
+    CacheItem("id", mergedData, Instant.now(), Instant.now())
+  }
 
+  val testAuthAction = new AuthAction(mockAuthConnector, mockAppConfig, mockSessionService, defaultParser)(ec)
+  val testAuthActionGov = new AuthActionGovGateway(mockAuthConnector, mockAppConfig, defaultParser)(ec)
 
 	when(mockCountryCodes.countriesMap).thenReturn(List(Country("United Kingdom", "UK"), Country("South Africa", "ZA")))
 	when(mockCountryCodes.getCountry("UK")).thenReturn(Some("United Kingdom"))
@@ -115,19 +132,19 @@ trait ErsTestHelper extends MockitoSugar with AuthHelper with ERSFakeApplication
 
   when(mockErsUtil.PAGE_ALT_ACTIVITY).thenReturn("ers_alt_activity")
   when(mockErsUtil.CSV_FILES_UPLOAD).thenReturn("csv-files-upload")
-  when(mockErsUtil.ersRequestObject).thenReturn("ErsRequestObject")
+  when(mockErsUtil.ERS_REQUEST_OBJECT).thenReturn(ERS_REQUEST_OBJECT)
   when(mockErsUtil.GROUP_SCHEME_COMPANIES).thenReturn("group-scheme-companies")
   when(mockErsUtil.GROUP_SCHEME_CACHE_CONTROLLER).thenReturn("group-scheme-controller")
   when(mockErsUtil.SCHEME_ORGANISER_CACHE).thenReturn("scheme-organiser")
-  when(mockErsUtil.ersMetaData).thenReturn("ErsMetaData")
+  when(mockErsUtil.ERS_METADATA).thenReturn(ERS_META_DATA)
   when(mockErsUtil.CHECK_CSV_FILES).thenReturn("check-csv-files")
   when(mockErsUtil.FILE_TYPE_CACHE).thenReturn("check-file-type")
   when(mockErsUtil.FILE_NAME_CACHE).thenReturn("file-name")
-  when(mockErsUtil.reportableEvents).thenReturn("ReportableEvents")
+  when(mockErsUtil.REPORTABLE_EVENTS).thenReturn(REPORTABLE_EVENTS)
   when(mockErsUtil.TRUSTEES_CACHE).thenReturn("trustees")
   when(mockErsUtil.ALT_AMENDS_CACHE_CONTROLLER).thenReturn("alt-amends-cache-controller")
-  when(mockErsUtil.altAmendsActivity).thenReturn("alt-activity")
-  when(mockErsUtil.VALIDATED_SHEEETS).thenReturn("validated-sheets")
+  when(mockErsUtil.ALT_AMENDS_ACTIVITY).thenReturn("alt-activity")
+  when(mockErsUtil.VALIDATED_SHEETS).thenReturn("validated-sheets")
   when(mockErsUtil.DEFAULT_COUNTRY).thenReturn("UK")
   when(mockErsUtil.DEFAULT).thenReturn("")
   when(mockErsUtil.OPTION_MANUAL).thenReturn("man")

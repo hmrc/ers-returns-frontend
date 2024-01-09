@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,9 @@
 package models
 
 import org.joda.time.{DateTime, Period, PeriodType}
+import org.scalatest.PrivateMethodTester
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
-import org.scalatest.PrivateMethodTester
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.i18n.{Lang, Messages, MessagesApi}
 import play.api.test.FakeRequest
@@ -67,7 +67,7 @@ class RequestObjectSpec extends AnyWordSpecLike with Matchers with GuiceOneAppPe
 
     "return an instance of SchemeInfo with the correct field" in {
 
-      val requestObject       =
+      val requestObject =
         RequestObject(
           None,
           Some("2016/17"),
@@ -80,7 +80,7 @@ class RequestObjectSpec extends AnyWordSpecLike with Matchers with GuiceOneAppPe
           None
         )
       val privateToSchemeInfo = PrivateMethod[SchemeInfo](Symbol("toSchemeInfo"))
-      val result              = requestObject invokePrivate privateToSchemeInfo()
+      val result = requestObject invokePrivate privateToSchemeInfo()
 
       result.schemeName mustBe "MyScheme"
       result.schemeId mustBe "1"

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package controllers
 
 import akka.stream.Materializer
+import controllers.internal.FileUploadCallbackController
 import models.upscan._
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{eq => meq, _}
@@ -30,11 +31,7 @@ import play.api.libs.json._
 import play.api.mvc._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import services.SessionService
-import uk.gov.hmrc.http.HeaderCarrier
 import utils.{ERSFakeApplicationConfig, ErsTestHelper, UpscanData}
-
-import controllers.internal.FileUploadCallbackController
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -59,9 +56,8 @@ class FileUploadCallbackControllerSpec
   implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
 
   implicit lazy val mat: Materializer    = app.materializer
-  val mockSessionService: SessionService = mock[SessionService]
 
-  object TestFileUploadCallbackController extends FileUploadCallbackController(mockMCC, mockSessionService)
+  object TestFileUploadCallbackController extends FileUploadCallbackController(mockMCC, mockFileValidatorSessionService)
 
   "callback" must {
     val sessionId = "sessionId"
@@ -72,8 +68,8 @@ class FileUploadCallbackControllerSpec
         val request                                          = FakeRequest(controllers.internal.routes.FileUploadCallbackController.callback(sessionId))
           .withBody(Json.toJson(readyCallback))
 
-        when(mockSessionService.updateCallbackRecord(meq(sessionId), uploadStatusCaptor.capture())(any[HeaderCarrier]))
-          .thenReturn(Future.successful(()))
+        when(mockFileValidatorSessionService.updateCallbackRecord(uploadStatusCaptor.capture())(any()))
+          .thenReturn(Future.successful(sessionPair))
 
         val result = TestFileUploadCallbackController.callback(sessionId)(request)
 
@@ -82,7 +78,7 @@ class FileUploadCallbackControllerSpec
           uploadDetails.fileName,
           readyCallback.downloadUrl.toExternalForm
         )
-        verify(mockSessionService).updateCallbackRecord(meq(sessionId), any[UploadedSuccessfully])(any[HeaderCarrier])
+        verify(mockFileValidatorSessionService).updateCallbackRecord(any[UploadedSuccessfully])(any())
       }
 
       "Upload status is failed" in {
@@ -90,13 +86,13 @@ class FileUploadCallbackControllerSpec
         val request                                          = FakeRequest(controllers.internal.routes.FileUploadCallbackController.callback(sessionId))
           .withBody(Json.toJson(failedCallback))
 
-        when(mockSessionService.updateCallbackRecord(meq(sessionId), uploadStatusCaptor.capture())(any[HeaderCarrier]))
-          .thenReturn(Future.successful(()))
+        when(mockFileValidatorSessionService.updateCallbackRecord(uploadStatusCaptor.capture())(any()))
+          .thenReturn(Future.successful(sessionPair))
 
         val result = TestFileUploadCallbackController.callback(sessionId)(request)
         status(result) mustBe OK
         uploadStatusCaptor.getValue mustBe Failed
-        verify(mockSessionService).updateCallbackRecord(meq(sessionId), meq(Failed))(any[HeaderCarrier])
+        verify(mockFileValidatorSessionService).updateCallbackRecord(meq(Failed))(any())
       }
     }
 
@@ -105,7 +101,7 @@ class FileUploadCallbackControllerSpec
         val request = FakeRequest(controllers.internal.routes.FileUploadCallbackController.callback(sessionId))
           .withBody(Json.toJson(failedCallback))
 
-        when(mockSessionService.updateCallbackRecord(meq(sessionId), any[UploadStatus])(any[HeaderCarrier]))
+        when(mockFileValidatorSessionService.updateCallbackRecord(any[UploadStatus])(any()))
           .thenReturn(Future.failed(new Exception("Mock Session Service Exception")))
         val result = TestFileUploadCallbackController.callback(sessionId)(request)
         status(result) mustBe INTERNAL_SERVER_ERROR
