@@ -16,11 +16,12 @@
 
 package models
 
-import org.joda.time.DateTime
 import play.api.i18n.Messages
 import play.api.libs.json.{Json, OFormat}
 import play.api.mvc.Request
 import utils.{CountryCodes, DateUtils}
+
+import java.time.ZonedDateTime
 
 case class RS_scheme(scheme: String)
 
@@ -213,7 +214,7 @@ case class RequestObject(
   private def toSchemeInfo: SchemeInfo =
     SchemeInfo(
       getSchemeReference,
-      DateTime.now,
+      ZonedDateTime.now,
       getSchemeId,
       getTaxYear,
       getSchemeName,

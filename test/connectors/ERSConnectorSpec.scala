@@ -21,7 +21,6 @@ import com.github.tomakehurst.wiremock.client.WireMock._
 import controllers.auth.RequestWithOptionalAuthContext
 import models.upscan.{UploadStatus, UploadedSuccessfully}
 import models.{ERSAuthData, ErsSummary, SchemeInfo, ValidatorData}
-import org.joda.time.DateTime
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{reset => mreset, _}
@@ -39,6 +38,7 @@ import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
 import utils.{ERSFakeApplicationConfig, ErsTestHelper, UpscanData, WireMockHelper}
 
+import java.time.ZonedDateTime
 import scala.concurrent.{ExecutionContext, Future}
 
 class ERSConnectorSpec
@@ -71,7 +71,7 @@ class ERSConnectorSpec
   lazy val testHttp: DefaultHttpClient = app.injector.instanceOf[DefaultHttpClient]
   override val requestWithAuth: RequestWithOptionalAuthContext[AnyContent] =
     RequestWithOptionalAuthContext(testFakeRequest.withSession("sessionId" -> "someSessionId"), defaultErsAuthData)
-  lazy val schemeInfo: SchemeInfo = SchemeInfo("XA1100000000000", DateTime.now, "1", "2016", "EMI", "EMI")
+  lazy val schemeInfo: SchemeInfo = SchemeInfo("XA1100000000000", ZonedDateTime.now, "1", "2016", "EMI", "EMI")
 
   lazy val ersConnector: ErsConnector = new ErsConnector(testHttp, mockAppConfig) {
     override lazy val ersUrl = "ers-returns"
@@ -472,7 +472,7 @@ class ERSConnectorSpec
   "removePresubmissionData" should {
     "return an HttpResponse" when {
       "the POST request is successful" in {
-        val mockSchemeInfo: SchemeInfo = SchemeInfo("schemeRef", DateTime.now(), "1", "2020", "schemeType", "schemeName")
+        val mockSchemeInfo: SchemeInfo = SchemeInfo("schemeRef", ZonedDateTime.now, "1", "2020", "schemeType", "schemeName")
         val successfulResponse = HttpResponse(OK, "")
         when(mockHttp.POST[SchemeInfo, HttpResponse](any[String], eqTo(mockSchemeInfo), any())(any(), any(), any(), any()))
           .thenReturn(Future.successful(successfulResponse))
@@ -484,7 +484,7 @@ class ERSConnectorSpec
 
     "return an error HttpResponse" when {
       "response status is not OK" in {
-        val mockSchemeInfo: SchemeInfo = SchemeInfo("schemeRef", DateTime.now(), "1", "2020", "schemeType", "schemeName")
+        val mockSchemeInfo: SchemeInfo = SchemeInfo("schemeRef", ZonedDateTime.now, "1", "2020", "schemeType", "schemeName")
         when(mockHttp.POST[SchemeInfo, HttpResponse](any[String], eqTo(mockSchemeInfo), any())(any(), any(), any(), any()))
           .thenReturn(Future.successful(HttpResponse(BAD_REQUEST, "")))
 
@@ -495,7 +495,7 @@ class ERSConnectorSpec
 
     "throw an exception" when {
       "an exception occurs during the POST request" in {
-        val mockSchemeInfo: SchemeInfo = SchemeInfo("schemeRef", DateTime.now(), "1", "2020", "schemeType", "schemeName")
+        val mockSchemeInfo: SchemeInfo = SchemeInfo("schemeRef", ZonedDateTime.now, "1", "2020", "schemeType", "schemeName")
         when(mockHttp.POST[SchemeInfo, HttpResponse](any[String], eqTo(mockSchemeInfo), any())(any(), any(), any(), any()))
           .thenReturn(Future.failed(new Exception("Test exception")))
 
@@ -507,7 +507,7 @@ class ERSConnectorSpec
   "checkForPresubmission" should {
     "return an HttpResponse" when {
       "the POST request is successful" in {
-        val mockSchemeInfo: SchemeInfo = SchemeInfo("schemeRef", DateTime.now(), "1", "2020", "schemeType", "schemeName")
+        val mockSchemeInfo: SchemeInfo = SchemeInfo("schemeRef", ZonedDateTime.now, "1", "2020", "schemeType", "schemeName")
         val validatedSheets = "sheet1,sheet2"
         val successfulResponse = HttpResponse(OK, "")
 
@@ -521,7 +521,7 @@ class ERSConnectorSpec
 
     "return an error HttpResponse" when {
       "response status is not OK" in {
-        val mockSchemeInfo: SchemeInfo = SchemeInfo("schemeRef", DateTime.now(), "1", "2020", "schemeType", "schemeName")
+        val mockSchemeInfo: SchemeInfo = SchemeInfo("schemeRef", ZonedDateTime.now, "1", "2020", "schemeType", "schemeName")
         val validatedSheets = "sheet1,sheet2"
         when(mockHttp.POST[SchemeInfo, HttpResponse](any[String], eqTo(mockSchemeInfo), any())(any(), any(), any(), any()))
           .thenReturn(Future.successful(HttpResponse(BAD_REQUEST, "")))
@@ -533,7 +533,7 @@ class ERSConnectorSpec
 
     "throw an exception" when {
       "an exception occurs during the POST request" in {
-        val mockSchemeInfo: SchemeInfo = SchemeInfo("schemeRef", DateTime.now(), "1", "2020", "schemeType", "schemeName")
+        val mockSchemeInfo: SchemeInfo = SchemeInfo("schemeRef", ZonedDateTime.now, "1", "2020", "schemeType", "schemeName")
         val validatedSheets = "sheet1,sheet2"
         when(mockHttp.POST[SchemeInfo, HttpResponse](any[String], eqTo(mockSchemeInfo), any())(any(), any(), any(), any()))
           .thenReturn(Future.failed(new Exception("Test exception")))

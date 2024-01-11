@@ -21,7 +21,7 @@ import connectors.ErsConnector
 import controllers.auth.RequestWithOptionalAuthContext
 import models._
 import models.upscan.UpscanCsvFilesCallbackList
-import org.joda.time.DateTime
+import java.time.ZonedDateTime
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import org.scalatest.OptionValues
@@ -74,7 +74,7 @@ class SummaryDeclarationControllerSpec
   val globalErrorView: global_error   = app.injector.instanceOf[global_error]
   val summaryView: summary = app.injector.instanceOf[summary]
 
-  val schemeInfo: SchemeInfo = SchemeInfo("XA1100000000000", DateTime.now, "2", "2016", "EMI", "EMI")
+  val schemeInfo: SchemeInfo = SchemeInfo("XA1100000000000", ZonedDateTime.now, "2", "2016", "EMI", "EMI")
   val rsc: ErsMetaData       =
     new ErsMetaData(schemeInfo, "ipRef", Some("aoRef"), "empRef", Some("agentRef"), Some("sapNumber"))
 
@@ -127,7 +127,7 @@ class SummaryDeclarationControllerSpec
           "testbundle",
           "false",
           None,
-          DateTime.now,
+          ZonedDateTime.now,
           ersMetaData,
           None,
           None,

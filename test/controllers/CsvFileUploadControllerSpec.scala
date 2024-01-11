@@ -21,7 +21,7 @@ import akka.stream.Materializer
 import controllers.auth.RequestWithOptionalAuthContext
 import models._
 import models.upscan._
-import org.joda.time.DateTime
+import java.time.ZonedDateTime
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{eq => meq, _}
 import org.mockito.Mockito._
@@ -408,7 +408,7 @@ class CsvFileUploadControllerSpec
       when(
         mockSessionService.fetch[ErsMetaData](refEq(mockErsUtil.ERS_METADATA))(any(), any())
       ).thenReturn(
-        Future.successful(ErsMetaData(SchemeInfo("", DateTime.now, "", "", "", ""), "", None, "", None, None))
+        Future.successful(ErsMetaData(SchemeInfo("", ZonedDateTime.now, "", "", "", ""), "", None, "", None, None))
       )
 
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
@@ -438,7 +438,7 @@ class CsvFileUploadControllerSpec
       when(
         mockSessionService.fetch[ErsMetaData](anyString())(any(), any())
       ).thenReturn(
-        Future.successful(ErsMetaData(SchemeInfo("", DateTime.now, "", "", "", ""), "", None, "", None, None))
+        Future.successful(ErsMetaData(SchemeInfo("", ZonedDateTime.now, "", "", "", ""), "", None, "", None, None))
       )
 
       when(

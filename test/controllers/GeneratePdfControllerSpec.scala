@@ -19,7 +19,7 @@ package controllers
 import akka.stream.Materializer
 import models._
 import models.upscan.{UploadId, UploadedSuccessfully, UpscanCsvFilesCallback, UpscanCsvFilesCallbackList}
-import org.joda.time.DateTime
+import java.time.ZonedDateTime
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatest.matchers.should.Matchers
@@ -62,9 +62,11 @@ class GeneratePdfControllerSpec
   val globalErrorView: global_error = app.injector.instanceOf[global_error]
 
   lazy val pdfBuilderMock: ErsReceiptPdfBuilderService = mock[ErsReceiptPdfBuilderService]
-  lazy val schemeInfo: SchemeInfo = SchemeInfo("XA1100000000000", DateTime.now, "1", "2016", "EMI", "EMI")
-  lazy val rsc: ErsMetaData = ErsMetaData(schemeInfo, "ipRef", Some("aoRef"), "empRef", Some("agentRef"), Some("sapNumber"))
-  lazy val ersSummary: ErsSummary = ErsSummary("testbundle", "2", None, DateTime.now, rsc, None, None, None, None, None, None, None, None)
+  lazy val schemeInfo: SchemeInfo                      = SchemeInfo("XA1100000000000", ZonedDateTime.now, "1", "2016", "EMI", "EMI")
+  lazy val rsc: ErsMetaData                            =
+    ErsMetaData(schemeInfo, "ipRef", Some("aoRef"), "empRef", Some("agentRef"), Some("sapNumber"))
+  lazy val ersSummary: ErsSummary                      =
+    ErsSummary("testbundle", "2", None, ZonedDateTime.now, rsc, None, None, None, None, None, None, None, None)
 
   "pdf generation controller" should {
     "give a redirect status (to company authentication frontend) on GET if user is not authenticated" in {

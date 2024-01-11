@@ -20,7 +20,6 @@ object AppDependencies {
     "org.apache.pdfbox"       %  "xmpbox"                     % pdfboxVersion,
     "org.apache.xmlgraphics"  %  "batik-transcoder"           % "1.17",
     "org.apache.xmlgraphics"  %  "batik-codec"                % "1.17",
-    "com.typesafe.play"       %% "play-json-joda"             % "2.9.4",
     "com.openhtmltopdf"       %  "openhtmltopdf-core"         % openHtmlVersion,
     "com.openhtmltopdf"       %  "openhtmltopdf-pdfbox"       % openHtmlVersion,
     "com.openhtmltopdf"       %  "openhtmltopdf-svg-support"  % openHtmlVersion,

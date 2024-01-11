@@ -18,7 +18,7 @@ package controllers
 
 import akka.stream.Materializer
 import models._
-import org.joda.time.DateTime
+import java.time.ZonedDateTime
 import org.jsoup.Jsoup
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
@@ -81,7 +81,7 @@ class ReportableEventsControllerSpec
       reportableEventsView,
       testAuthAction
     ) {
-      val schemeInfo: SchemeInfo   = SchemeInfo("XA1100000000000", DateTime.now, "1", "2016", "CSOP 2015/16", "CSOP")
+      val schemeInfo: SchemeInfo   = SchemeInfo("XA1100000000000", ZonedDateTime.now, "1", "2016", "CSOP 2015/16", "CSOP")
       val ersMetaData: ErsMetaData = ErsMetaData(schemeInfo, "300.300.300.300", None, "", None, None)
 
       when(mockSessionService.fetch[RequestObject](any())(any(), any())).thenReturn(Future.successful(ersRequestObject))
@@ -196,7 +196,7 @@ class ReportableEventsControllerSpec
       reportableEventsView,
       testAuthAction
     ) {
-      val schemeInfo: SchemeInfo   = SchemeInfo("XA1100000000000", DateTime.now, "1", "2016", "CSOP 2015/16", "CSOP")
+      val schemeInfo: SchemeInfo   = SchemeInfo("XA1100000000000", ZonedDateTime.now, "1", "2016", "CSOP 2015/16", "CSOP")
       val ersMetaData: ErsMetaData = ErsMetaData(schemeInfo, "300.300.300.300", None, "", None, None)
 
       when(mockSessionService.fetch[RequestObject](any())(any(), any())).thenReturn(Future.successful(ersRequestObject))

@@ -17,7 +17,7 @@
 package services.audit
 
 import models.{ErsMetaData, SchemeInfo}
-import org.joda.time.DateTime
+import java.time.ZonedDateTime
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{times, verify, when}
@@ -48,7 +48,7 @@ class AuditEventsTest
   val rsc                                                   = new ErsMetaData(
     new SchemeInfo(
       schemeRef = "testSchemeRef",
-      timestamp = new DateTime(),
+      timestamp = ZonedDateTime.now(),
       schemeId = "testSchemeId",
       taxYear = "testTaxYear",
       schemeName = "testSchemeName",

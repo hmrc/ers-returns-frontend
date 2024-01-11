@@ -19,8 +19,8 @@ package utils
 import config.ApplicationConfig
 import models.RequestObject
 import org.apache.commons.codec.binary.Base64
-import org.joda.time.{DateTime, Seconds}
 
+import java.time.{Instant, ZoneId, ZoneOffset, ZonedDateTime}
 import javax.crypto.spec.SecretKeySpec
 import javax.crypto.{Mac, SecretKey}
 
@@ -56,9 +56,10 @@ trait HMACUtil {
   def timeIsValid(urlParams: RequestObject): Boolean = {
     try {
       val longTime: Long    = urlParams.getTS.toLong * 1000
-      val urlTime: DateTime = new DateTime(longTime)
-      val now: DateTime     = DateTime.now()
-      val diff: Int         = Seconds.secondsBetween(urlTime, now).getSeconds
+      val instant: Instant = Instant.ofEpochMilli(longTime)
+      val urlTime = ZonedDateTime.ofInstant(instant, ZoneOffset.UTC)
+      val now: ZonedDateTime     = ZonedDateTime.now()
+      val diff: Int         = now.getSecond - urlTime.getSecond
 
       if (diff <= TIME_RANGE) {
         return true

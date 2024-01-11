@@ -16,7 +16,6 @@
 
 package models
 
-import org.joda.time.{DateTime, Period, PeriodType}
 import org.scalatest.PrivateMethodTester
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
@@ -25,6 +24,8 @@ import play.api.i18n.{Lang, Messages, MessagesApi}
 import play.api.test.FakeRequest
 import utils.DateUtils
 import utils.Fixtures.ersRequestObject
+
+import java.time.ZonedDateTime
 
 class RequestObjectSpec extends AnyWordSpecLike with Matchers with GuiceOneAppPerSuite with PrivateMethodTester {
 
@@ -119,9 +120,9 @@ class RequestObjectSpec extends AnyWordSpecLike with Matchers with GuiceOneAppPe
       val result             = requestObject.toErsMetaData
       val resultTimestamp    = result.schemeInfo.timestamp
       val adjustedSchemeInfo = result.schemeInfo.copy(timestamp = null)
-      val diff               = new Period(resultTimestamp, DateTime.now, PeriodType.millis)
+      val diff: Int = resultTimestamp.compareTo(ZonedDateTime.now)
 
-      diff.getMillis must be < 100
+      diff must be < 100
       adjustedSchemeInfo mustBe expectedSchemeInfo
       result.ipRef mustBe request.remoteAddress
       result.aoRef mustBe None
