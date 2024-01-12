@@ -63,11 +63,11 @@ class CsvFileUploadCallbackControllerSpec
   implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
 
   implicit lazy val materializer: Materializer = app.materializer
-  lazy val environment: Environment            = app.injector.instanceOf[Environment]
+  lazy val environment: Environment = app.injector.instanceOf[Environment]
 
   def request(body: JsValue): FakeRequest[JsValue] = FakeRequest().withBody(body)
-  val scRef                                        = "scRef"
-  val url: URL                                     = new URL("http://localhost:9000/myUrl")
+  val scRef = "scRef"
+  val url: URL = new URL("http://localhost:9000/myUrl")
 
   lazy val csvFileUploadCallbackController: CsvFileUploadCallbackController =
     new CsvFileUploadCallbackController(mockMCC, mockErsConnector, mockSessionService) {

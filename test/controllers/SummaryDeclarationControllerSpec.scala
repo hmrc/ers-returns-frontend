@@ -114,14 +114,14 @@ class SummaryDeclarationControllerSpec
     "ErsMetaData"             -> Json.toJson(rsc)
   )
 
-  class TestSessionService(fetchAllMapVal: String) extends FrontendSessionService(mockSessionRepository, mockFileValidatorSessionService, mockAppConfig) {
+  class TestSessionService(fetchAllMapVal: String) extends FrontendSessionService(mockSessionRepository, mockFileValidatorService, mockAppConfig) {
 
 		override def cache[T](key: String, body: T)
 												 (implicit request: Request[_], formats: json.Format[T]): Future[(String, String)] = {
 			Future.successful(sessionPair)
 		}
 
-    override def getAllData(bundleRef: String, ersMetaData: ErsMetaData)(implicit ec: ExecutionContext, request: Request[_]): Future[ErsSummary] =
+    override def getAllData(bundleRef: String, ersMetaData: ErsMetaData)(implicit ec: ExecutionContext, request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[ErsSummary] =
       Future.successful(
         new ErsSummary(
           "testbundle",

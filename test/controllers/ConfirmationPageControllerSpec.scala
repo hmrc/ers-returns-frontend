@@ -111,7 +111,7 @@ class ConfirmationPageControllerSpec
 
         when(mockSessionService.fetch[ErsMetaData](refEq("ErsMetaData"))(any(), any())) thenReturn ersMetaRes
 
-        when(mockSessionService.getAllData(anyString(), any[ErsMetaData]())(any(), any())) thenReturn Future.successful(
+        when(mockSessionService.getAllData(anyString(), any[ErsMetaData]())(any(), any(), any())) thenReturn Future.successful(
           if (isNilReturn) ersSummaryNilReturn2 else ersSummary
         )
 
@@ -166,7 +166,7 @@ class ConfirmationPageControllerSpec
 
     "direct to ers errors page if fetching all data throws exception" in {
       val controllerUnderTest = buildFakeConfirmationPageController()
-      when(mockSessionService.getAllData(anyString(), any[ErsMetaData]())(any(), any()))
+      when(mockSessionService.getAllData(anyString(), any[ErsMetaData]())(any(), any(), any()))
         .thenReturn(Future.failed(new RuntimeException))
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
       val result = controllerUnderTest.showConfirmationPage()(authRequest, hc)

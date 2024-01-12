@@ -17,6 +17,7 @@
 package services
 
 import config.ApplicationConfig
+import controllers.auth.RequestWithOptionalAuthContext
 import models._
 import models.upscan.UploadedSuccessfully
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
@@ -30,20 +31,17 @@ import play.api.Application
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsObject, JsValue, Json}
-import play.api.mvc.AnyContentAsEmpty
-import play.api.test.FakeRequest
+import play.api.mvc.AnyContent
 import repositories.FrontendSessionsRepository
-import uk.gov.hmrc.http.{HeaderCarrier, SessionId}
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.cache.{CacheItem, DataKey}
 import uk.gov.hmrc.mongo.test.MongoSupport
-import utils.Fixtures
+import utils.{ErsTestHelper, Fixtures}
 
 import java.time.Instant
-import java.util.UUID
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
-class FrontendSessionServiceSpec extends AnyWordSpec with Matchers with GuiceOneAppPerSuite with MockitoSugar with MongoSupport with BeforeAndAfter {
+class FrontendSessionServiceSpec extends AnyWordSpec with Matchers with ErsTestHelper with GuiceOneAppPerSuite with MockitoSugar with MongoSupport with BeforeAndAfter {
 
   override lazy val fakeApplication: Application = new GuiceApplicationBuilder()
     .configure("metrics.enabled" -> "false")
@@ -52,21 +50,16 @@ class FrontendSessionServiceSpec extends AnyWordSpec with Matchers with GuiceOne
     )
     .build()
 
-  val sessionId: SessionId = SessionId(UUID.randomUUID().toString)
-  implicit val fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withSession(("sessionId", sessionId.toString))
-
-  implicit val hc: HeaderCarrier = HeaderCarrier()
-  implicit val ec: ExecutionContext = app.injector.instanceOf[ExecutionContext]
+  implicit val fakeRequest: RequestWithOptionalAuthContext[AnyContent] = requestWithAuth
 
   val frontendSessionsRepository: FrontendSessionsRepository = mock[FrontendSessionsRepository]
-  val mockFileValidatorSessionService: FileValidatorSessionService = mock[FileValidatorSessionService]
   val mockApplicationConfig: ApplicationConfig = mock[ApplicationConfig]
 
-  val testService = new FrontendSessionService(frontendSessionsRepository, mockFileValidatorSessionService, mockApplicationConfig)
+  val testService = new FrontendSessionService(frontendSessionsRepository, mockFileValidatorService, mockApplicationConfig)
 
   before {
     reset(frontendSessionsRepository)
-    reset(mockFileValidatorSessionService)
+    reset(mockFileValidatorService)
     reset(frontendSessionsRepository)
     reset(frontendSessionsRepository)
   }
@@ -118,19 +111,19 @@ class FrontendSessionServiceSpec extends AnyWordSpec with Matchers with GuiceOne
 
   "getNoOfRows" should {
     "return None when nilReturn is 2" in {
-      val result = testService.getNoOfRows("2").futureValue
+      val result = testService.getNoOfRows("2")(ec, fakeRequest, hc).futureValue
       result shouldBe None
     }
 
     "return Some with the number of rows when nilReturn is not OPTION_NIL_RETURN and rows are available" in {
       val numberOfRows = Some(5)
-      when(mockFileValidatorSessionService.getSuccessfulCallbackRecord(any())).thenReturn(Future.successful(Some(UploadedSuccessfully("", "", numberOfRows))))
+      when(mockFileValidatorService.getSuccessfulCallbackRecord(any(), any())).thenReturn(Future.successful(Some(UploadedSuccessfully("", "", numberOfRows))))
       val result = testService.getNoOfRows("1").futureValue
       result shouldBe numberOfRows
     }
 
     "return None when nilReturn is not OPTION_NIL_RETURN and no rows are available" in {
-      when(mockFileValidatorSessionService.getSuccessfulCallbackRecord(any())).thenReturn(Future.successful(None))
+      when(mockFileValidatorService.getSuccessfulCallbackRecord(any(), any())).thenReturn(Future.successful(None))
       val result = testService.getNoOfRows("1").futureValue
       result shouldBe None
     }

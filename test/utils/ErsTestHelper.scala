@@ -36,7 +36,7 @@ import play.api.test.Helpers.{contentAsString, defaultAwaitTimeout, stubBodyPars
 import play.twirl.api.Html
 import repositories.FrontendSessionsRepository
 import services.audit.AuditEvents
-import services.{FileValidatorSessionService, FrontendSessionService, TrusteeService}
+import services.{FileValidatorService, FrontendSessionService, TrusteeService}
 import uk.gov.hmrc.http.{HeaderCarrier, SessionKeys}
 import uk.gov.hmrc.mongo.cache.CacheItem
 import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
@@ -96,7 +96,7 @@ trait ErsTestHelper extends MockitoSugar with AuthHelper with ERSFakeApplication
 	val mockAuditEvents: AuditEvents = mock[AuditEvents]
   val mockSessionRepository: FrontendSessionsRepository = mock[FrontendSessionsRepository]
   val mockSessionService: FrontendSessionService = mock[FrontendSessionService]
-  val mockFileValidatorSessionService: FileValidatorSessionService = mock[FileValidatorSessionService]
+  val mockFileValidatorService: FileValidatorService = mock[FileValidatorService]
 	val mockTrusteeService: TrusteeService = mock[TrusteeService]
 	implicit val mockCountryCodes: CountryCodes = mock[CountryCodes]
   val sessionPair: (String, String) = SessionKeys.sessionId -> sessionId

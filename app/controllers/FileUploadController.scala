@@ -25,7 +25,7 @@ import models.upscan.{Failed, UploadStatus, UploadedSuccessfully}
 import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.mvc._
-import services.{FileValidatorSessionService, FrontendSessionService, UpscanService}
+import services.{FrontendSessionService, UpscanService}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils._
@@ -36,7 +36,6 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class FileUploadController @Inject() (val mcc: MessagesControllerComponents,
                                       val ersConnector: ErsConnector,
-                                      val fileValidatorSessionService: FileValidatorSessionService,
                                       val sessionService: FrontendSessionService,
                                       val upscanService: UpscanService,
                                       globalErrorView: views.html.global_error,
@@ -51,12 +50,10 @@ class FileUploadController @Inject() (val mcc: MessagesControllerComponents,
   extends FrontendController(mcc) with I18nSupport with Retryable with Logging {
 
   def uploadFilePage(): Action[AnyContent] = authAction.async { implicit request =>
-    val requestObjectFuture = sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
-    val upscanFormFuture = upscanService.getUpscanFormDataOds()
     (for {
-      requestObject <- requestObjectFuture
-      response <- upscanFormFuture
-      _ <- fileValidatorSessionService.createCallbackRecord
+      requestObject <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
+      response <- upscanService.getUpscanFormDataOds
+      _ <- ersConnector.createCallbackRecord
     } yield Ok(upscanOdsFileUploadView(requestObject, response))) recover { case e: Throwable =>
       logger.error(s"[FileUploadController][uploadFilePage] failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.", e)
       getGlobalErrorPage
@@ -65,7 +62,7 @@ class FileUploadController @Inject() (val mcc: MessagesControllerComponents,
 
   def success(): Action[AnyContent] = authAction.async { implicit request =>
     val futureCallbackData: Future[Option[UploadStatus]] =
-      fileValidatorSessionService.getCallbackRecord.withRetry(appConfig.odsSuccessRetryAmount) { opt =>
+      ersConnector.getCallbackRecord.withRetry(appConfig.odsSuccessRetryAmount) { opt =>
         opt.fold(true) {
           case _: UploadedSuccessfully | Failed => true
           case _ => false
@@ -104,7 +101,7 @@ class FileUploadController @Inject() (val mcc: MessagesControllerComponents,
   }
 
   def validationResults(): Action[AnyContent] = authAction.async { implicit request =>
-    val futureCallbackData  = fileValidatorSessionService.getCallbackRecord.withRetry(appConfig.odsValidationRetryAmount)(
+    val futureCallbackData  = ersConnector.getCallbackRecord.withRetry(appConfig.odsValidationRetryAmount)(
       _.exists(_.isInstanceOf[UploadedSuccessfully])
     )
 

@@ -50,7 +50,7 @@ class UpscanService @Inject() (applicationConfig: ApplicationConfig, upscanConne
     upscanConnector.getUpscanFormData(upscanInitiateRequest)
   }
 
-  def getUpscanFormDataOds()(implicit hc: HeaderCarrier, request: Request[_]): Future[UpscanInitiateResponse] = {
+  def getUpscanFormDataOds(implicit hc: HeaderCarrier, request: Request[_]): Future[UpscanInitiateResponse] = {
     val callbackUrl = generateCallbackUrl(
       hc.sessionId,
       sessionId => controllers.internal.routes.FileUploadCallbackController.callback(sessionId),

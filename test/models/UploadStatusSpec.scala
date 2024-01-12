@@ -37,9 +37,9 @@ class UploadStatusSpec extends AnyWordSpecLike with Matchers with OptionValues {
 
     "return UploadedSuccessfully" when {
       "_type is UploadedSuccessfully" in {
-        val expectedName     = "fileName"
-        val expectedUrl      = "downloadUrl"
-        val json             = s"""{"_type": "UploadedSuccessfully", "name": "$expectedName", "downloadUrl": "$expectedUrl"}"""
+        val expectedName = "fileName"
+        val expectedUrl = "downloadUrl"
+        val json = s"""{"_type": "UploadedSuccessfully", "name": "$expectedName", "downloadUrl": "$expectedUrl"}"""
         val expectedResponse = UploadedSuccessfully(expectedName, expectedUrl, None)
         Json.parse(json).as[UploadStatus] shouldBe expectedResponse
       }

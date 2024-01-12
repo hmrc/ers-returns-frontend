@@ -21,16 +21,16 @@ import models.upscan.{Reference, UploadId, UpscanInitiateRequest, UpscanInitiate
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito._
-import org.scalatest.OptionValues
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
+import org.scalatest.{OptionValues, PrivateMethodTester}
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.mvc.Request
+import play.api.mvc.{Call, Request}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.{HeaderCarrier, SessionId}
 
@@ -42,6 +42,7 @@ class UpscanServiceSpec
     with OptionValues
     with GuiceOneAppPerSuite
     with MockitoSugar
+    with PrivateMethodTester
     with ScalaFutures {
 
   override def fakeApplication(): Application = new GuiceApplicationBuilder()
@@ -49,16 +50,17 @@ class UpscanServiceSpec
     .build()
 
   def upscanService: UpscanService = app.injector.instanceOf[UpscanService]
+  val mockUpscanConnector: UpscanConnector = mock[UpscanConnector]
 
   "getUpscanFormDataOds" must {
     "get form data from Upscan Connector with an initiate request" in {
       implicit val request: Request[_] = FakeRequest("GET", "http://localhost:9290/")
-      val hc                           = HeaderCarrier(sessionId = Some(SessionId("sessionid")))
-      val callback                     =
+      val hc = HeaderCarrier(sessionId = Some(SessionId("sessionid")))
+      val callback =
         controllers.internal.routes.FileUploadCallbackController.callback(hc.sessionId.get.value).absoluteURL()
-      val success                      = controllers.routes.FileUploadController.success().absoluteURL()
-      val failure                      = controllers.routes.FileUploadController.failure().absoluteURL()
-      val expectedInitiateRequest      = UpscanInitiateRequest(callback, success, failure, 1, 10485760)
+      val success = controllers.routes.FileUploadController.success().absoluteURL()
+      val failure = controllers.routes.FileUploadController.failure().absoluteURL()
+      val expectedInitiateRequest = UpscanInitiateRequest(callback, success, failure, 1, 10485760)
 
       val upscanInitiateResponse =
         UpscanInitiateResponse(Reference("reference"), "postTarget", formFields = Map.empty[String, String])
@@ -67,7 +69,7 @@ class UpscanServiceSpec
       when(mockUpscanConnector.getUpscanFormData(initiateRequestCaptor.capture())(any[HeaderCarrier]))
         .thenReturn(Future.successful(upscanInitiateResponse))
 
-      upscanService.getUpscanFormDataOds()(hc, request).futureValue
+      upscanService.getUpscanFormDataOds(hc, request).futureValue
 
       initiateRequestCaptor.getAllValues contains expectedInitiateRequest
     }
@@ -97,6 +99,33 @@ class UpscanServiceSpec
     }
   }
 
-  val mockUpscanConnector: UpscanConnector = mock[UpscanConnector]
+  "generateCallbackUrl" should {
+    "return a valid URL" when {
+      "a valid SessionId is provided" in {
+        val generateCallbackUrl = PrivateMethod[String](Symbol("generateCallbackUrl"))
+        val sessionIdOption = Some(SessionId("exampleSessionId"))
+        val routeFunction: String => Call = sessionId => Call("GET", s"/callback/$sessionId")
+        val isSecure = false
 
+        implicit val fakeRequest: Request[_] = FakeRequest()
+
+        val result = upscanService.invokePrivate(generateCallbackUrl(sessionIdOption, routeFunction, isSecure, fakeRequest))
+
+        result should endWith("/callback/exampleSessionId")
+      }
+    }
+
+    "throw an IllegalStateException" when {
+      "SessionId is None" in {
+        val generateCallbackUrl = PrivateMethod[String](Symbol("generateCallbackUrl"))
+        val sessionIdOption = None
+        val routeFunction: String => Call = _ => Call("GET", "/callback")
+        val isSecure = false
+
+        val fakeRequest: Request[_] = FakeRequest()
+
+        an[IllegalStateException] should be thrownBy upscanService.invokePrivate(generateCallbackUrl(sessionIdOption, routeFunction, isSecure, fakeRequest))
+      }
+    }
+  }
 }
