@@ -65,8 +65,6 @@ class ApplicationConfig @Inject() (config: ServicesConfig) {
   lazy val ampersandRegex: Regex = "(?!&amp;)(?:&)".r
 
   lazy val userSessionsTTL: Duration = config.getDuration("mongodb.userSessionsCacheTTL")
-  lazy val fileValidatorSessionsTTL: Duration = config.getDuration("mongodb.fileValidatorSessionsCacheTTL")
-  lazy val fileValidatorSessionsUri: String = config.getString("mongodb.validatorUri")
 
   lazy val languageMap: Map[String, Lang] = Map(
     "english" -> Lang("en"),

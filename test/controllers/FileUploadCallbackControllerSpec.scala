@@ -57,7 +57,7 @@ class FileUploadCallbackControllerSpec
 
   implicit lazy val mat: Materializer    = app.materializer
 
-  object TestFileUploadCallbackController extends FileUploadCallbackController(mockMCC, mockFileValidatorSessionService)
+  object TestFileUploadCallbackController extends FileUploadCallbackController(mockMCC, mockFileValidatorService)
 
   "callback" must {
     val sessionId = "sessionId"
@@ -65,11 +65,11 @@ class FileUploadCallbackControllerSpec
     "update callback" when {
       "Upload status is UpscanReadyCallback" in {
         val uploadStatusCaptor: ArgumentCaptor[UploadStatus] = ArgumentCaptor.forClass(classOf[UploadStatus])
-        val request                                          = FakeRequest(controllers.internal.routes.FileUploadCallbackController.callback(sessionId))
+        val request = FakeRequest(controllers.internal.routes.FileUploadCallbackController.callback(sessionId))
           .withBody(Json.toJson(readyCallback))
 
-        when(mockFileValidatorSessionService.updateCallbackRecord(uploadStatusCaptor.capture())(any()))
-          .thenReturn(Future.successful(sessionPair))
+        when(mockFileValidatorService.updateCallbackRecord(uploadStatusCaptor.capture(), any())(any()))
+          .thenReturn(Future.successful(NO_CONTENT))
 
         val result = TestFileUploadCallbackController.callback(sessionId)(request)
 
@@ -78,21 +78,21 @@ class FileUploadCallbackControllerSpec
           uploadDetails.fileName,
           readyCallback.downloadUrl.toExternalForm
         )
-        verify(mockFileValidatorSessionService).updateCallbackRecord(any[UploadedSuccessfully])(any())
+        verify(mockFileValidatorService).updateCallbackRecord(any[UploadedSuccessfully], any())(any())
       }
 
       "Upload status is failed" in {
         val uploadStatusCaptor: ArgumentCaptor[UploadStatus] = ArgumentCaptor.forClass(classOf[UploadStatus])
-        val request                                          = FakeRequest(controllers.internal.routes.FileUploadCallbackController.callback(sessionId))
+        val request = FakeRequest(controllers.internal.routes.FileUploadCallbackController.callback(sessionId))
           .withBody(Json.toJson(failedCallback))
 
-        when(mockFileValidatorSessionService.updateCallbackRecord(uploadStatusCaptor.capture())(any()))
-          .thenReturn(Future.successful(sessionPair))
+        when(mockFileValidatorService.updateCallbackRecord(uploadStatusCaptor.capture(), any())(any()))
+          .thenReturn(Future.successful(NO_CONTENT))
 
         val result = TestFileUploadCallbackController.callback(sessionId)(request)
         status(result) mustBe OK
         uploadStatusCaptor.getValue mustBe Failed
-        verify(mockFileValidatorSessionService).updateCallbackRecord(meq(Failed))(any())
+        verify(mockFileValidatorService).updateCallbackRecord(meq(Failed), any())(any())
       }
     }
 
@@ -101,7 +101,7 @@ class FileUploadCallbackControllerSpec
         val request = FakeRequest(controllers.internal.routes.FileUploadCallbackController.callback(sessionId))
           .withBody(Json.toJson(failedCallback))
 
-        when(mockFileValidatorSessionService.updateCallbackRecord(any[UploadStatus])(any()))
+        when(mockFileValidatorService.updateCallbackRecord(any[UploadStatus], any())(any()))
           .thenReturn(Future.failed(new Exception("Mock Session Service Exception")))
         val result = TestFileUploadCallbackController.callback(sessionId)(request)
         status(result) mustBe INTERNAL_SERVER_ERROR

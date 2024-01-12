@@ -20,10 +20,10 @@ import config.ApplicationConfig
 import controllers.auth.RequestWithOptionalAuthContext
 import metrics.Metrics
 import models._
-import models.upscan.UploadedSuccessfully
+import models.upscan.{UploadStatus, UploadedSuccessfully}
 import play.api.Logging
 import play.api.http.Status._
-import play.api.libs.json.{JsObject, JsValue}
+import play.api.libs.json.{JsError, JsObject, JsSuccess, JsValue}
 import play.api.mvc.AnyContent
 import uk.gov.hmrc.http.HttpReads.Implicits
 import uk.gov.hmrc.http.{HeaderCarrier, HttpReads, HttpResponse}
@@ -57,14 +57,14 @@ class ErsConnector @Inject() (val http: DefaultHttpClient, appConfig: Applicatio
             sapNumber
           case _  =>
             logger.error(
-              s"SAP request failed with status ${response.status}, timestamp: ${System.currentTimeMillis()}."
+              s"[ErsConnector][connectToEtmpSapRequest] SAP request failed with status ${response.status}, timestamp: ${System.currentTimeMillis()}."
             )
             throw new Exception
         }
       }
       .recover { case e: Exception =>
         logger.error(
-          s"connectToEtmpSapRequest failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}."
+          s"[ErsConnector][connectToEtmpSapRequest] connectToEtmpSapRequest failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}."
         )
         ersConnector(System.currentTimeMillis() - startTime, TimeUnit.MILLISECONDS)
         throw new Exception
@@ -84,7 +84,7 @@ class ErsConnector @Inject() (val http: DefaultHttpClient, appConfig: Applicatio
           bundleRef
         case _  =>
           logger.error(
-            s"Summary submit request failed with status ${res.status}, timestamp: ${System.currentTimeMillis()}."
+            s"[ErsConnector][connectToEtmpSummarySubmit] Summary submit request failed with status ${res.status}, timestamp: ${System.currentTimeMillis()}."
           )
           throw new Exception
       }
@@ -106,7 +106,7 @@ class ErsConnector @Inject() (val http: DefaultHttpClient, appConfig: Applicatio
     val empRef: String = request.authData.empRef.encodedValue
     val url: String = s"$validatorUrl/ers/$empRef/process-file"
     val startTime = System.currentTimeMillis()
-    logger.debug("validateFileData: Call to Validator: " + (System.currentTimeMillis() / 1000))
+    logger.debug("[ErsConnector][connectToEtmpSapRequest] validateFileData: Call to Validator: " + (System.currentTimeMillis() / 1000))
     http
       .POST(url, ValidatorData(callbackData, schemeInfo))
       .map { res =>
@@ -115,12 +115,12 @@ class ErsConnector @Inject() (val http: DefaultHttpClient, appConfig: Applicatio
           case OK         => res
           case ACCEPTED   => res
           case NO_CONTENT => res
-          case _          => throw new Exception(s"Received status code ${res.status} from file validator")
+          case _          => throw new Exception(s"[ErsConnector][validateFileData] Received status code ${res.status} from file validator")
         }
       }
       .recover { case e: Exception =>
         logger.error(
-          s"validateFileData: Validate file data failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}."
+          s"[ErsConnector][validateFileData] Validate file data failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}."
         )
         ersConnector(System.currentTimeMillis() - startTime, TimeUnit.MILLISECONDS)
         HttpResponse(BAD_REQUEST, "")
@@ -139,11 +139,11 @@ class ErsConnector @Inject() (val http: DefaultHttpClient, appConfig: Applicatio
         case OK => res
         case ACCEPTED => res
         case NO_CONTENT => res
-        case _ => throw new Exception(s"Received status code ${res.status} from file validator")
+        case _ => throw new Exception(s"[ErsConnector][validateCsvFileData] Received status code ${res.status} from file validator")
       }
     } recover { case e: Exception =>
       logger.error(
-        s"validateCsvFileData: Validate file data failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}."
+        s"[ErsConnector][validateCsvFileData] Validate file data failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}."
       )
       HttpResponse(BAD_REQUEST, "")
     }
@@ -180,5 +180,68 @@ class ErsConnector @Inject() (val http: DefaultHttpClient, appConfig: Applicatio
     val empRef: String = request.authData.empRef.encodedValue
     val url: String = s"$ersUrl/ers/$empRef/retrieve-submission-data"
     http.POST(url, data)
+  }
+
+  def createCallbackRecord(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Int] = {
+    withOptionalSession(
+      ifSome = { sessionId =>
+        val url: String = s"$validatorUrl/ers/$sessionId/create-callback"
+        http.POSTEmpty(url).map {
+          case response if response.status == CREATED => CREATED
+          case response =>
+            logger.error(s"[ErsConnector][createCallbackRecord] Received unexpected status code ${response.status} from file validator")
+            throw new Exception(s"[ErsConnector][createCallbackRecord] Unexpected response status code ${response.status}")
+        }.recover {
+          case ex: Exception =>
+            logger.error("[ErsConnector][createCallbackRecord] Error in POST request: " + ex.getMessage, ex)
+            throw ex
+        }
+      },
+      ifNone = Future.failed(new NoSuchElementException("[ErsConnector][createCallbackRecord] Session ID not found in the request session"))
+    )
+  }
+
+  def updateCallbackRecord(uploadStatus: UploadStatus, sessionId: String)(implicit hc: HeaderCarrier): Future[Int] = {
+    val url: String = s"$validatorUrl/ers/$sessionId/update-callback"
+
+    http.PUT(url, uploadStatus).map {
+      case response if response.status == 204 => NO_CONTENT
+      case response =>
+        logger.error(s"[ErsConnector][updateCallbackRecord] Received unexpected status code ${response.status} from file validator")
+        throw new Exception(s"[ErsConnector][updateCallbackRecord] Unexpected response status code ${response.status}")
+    }
+  }
+
+  def getCallbackRecord(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Option[UploadStatus]] = {
+    withOptionalSession(
+      ifSome = { sessionId =>
+        val url: String = s"$validatorUrl/ers/$sessionId/get-callback"
+        http.GET[HttpResponse](url).map {
+          case response if response.status == OK =>
+            response.json.validate[UploadStatus] match {
+              case JsSuccess(uploadStatus, _) => Some(uploadStatus)
+              case JsError(errors) =>
+                logger.error("[ErsConnector][getCallbackRecord] Error parsing UploadStatus: " + errors.toString)
+                None
+            }
+          case response =>
+            logger.error(s"[ErsConnector][getCallbackRecord] Unexpected response status code ${response.status} from file validator")
+            None
+        }.recover {
+          case ex: Exception =>
+            logger.error("[ErsConnector][getCallbackRecord] Error in GET request: " + ex.getMessage, ex)
+            None
+        }
+      },
+      ifNone = Future.successful(None)
+    )
+  }
+
+  def withOptionalSession[A](ifSome: String => Future[A], ifNone: => Future[A])
+                            (implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[A] = {
+    request.session.get("sessionId") match {
+      case Some(sessionId) => ifSome(sessionId)
+      case None => ifNone
+    }
   }
 }

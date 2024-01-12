@@ -20,14 +20,12 @@ import config.ApplicationConfig
 import models._
 import play.api.Logging
 import play.api.i18n.Messages
-import services.FileValidatorSessionService
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
 @Singleton
-class ERSUtil @Inject() (val fileValidatorSessionService: FileValidatorSessionService,
-                         val appConfig: ApplicationConfig)
+class ERSUtil @Inject() (val appConfig: ApplicationConfig)
                         (implicit val ec: ExecutionContext, countryCodes: CountryCodes) extends PageBuilder with Constants with Logging {
 
 	final def concatAddress(optionalAddressLines: List[Option[String]], existingAddressLines: String): String = {

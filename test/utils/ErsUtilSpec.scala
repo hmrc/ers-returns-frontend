@@ -45,7 +45,7 @@ class ErsUtilSpec
   }
 
   "calling buildAddressSummary" should {
-    val ersUtil: ERSUtil = new ERSUtil(mockFileValidatorSessionService, mockAppConfig)
+    val ersUtil: ERSUtil = new ERSUtil(mockAppConfig)
 
     "build an address summary from CompanyDetails" in {
       val companyDetails = CompanyDetails(
@@ -89,7 +89,7 @@ class ErsUtilSpec
   }
 
   "calling replaceAmpersand" should {
-    val ersUtil: ERSUtil = new ERSUtil(mockFileValidatorSessionService, mockAppConfig)
+    val ersUtil: ERSUtil = new ERSUtil(mockAppConfig)
 
     "do nothing to a string with no ampersands" in {
       val input = "I am some test input"
@@ -108,7 +108,7 @@ class ErsUtilSpec
   }
 
   "concatEntity" should {
-    val ersUtil: ERSUtil = new ERSUtil(mockFileValidatorSessionService, mockAppConfig)
+    val ersUtil: ERSUtil = new ERSUtil(mockAppConfig)
 
     "concatenate all defined strings with existing entity lines" in {
       val optionalLines = List(Some("Line2"), Some("Line3"))
@@ -130,7 +130,7 @@ class ErsUtilSpec
   }
 
   "buildEntitySummary" should {
-    val ersUtil: ERSUtil = new ERSUtil(mockFileValidatorSessionService, mockAppConfig)
+    val ersUtil: ERSUtil = new ERSUtil(mockAppConfig)
 
     "build summary with all fields present" in {
       val entity = SchemeOrganiserDetails("Company", "Line1", Some("Line2"), Some("Line3"), Some("Line4"), Some("Country"), Some("Postcode"), Some("Reg"), Some("Ref"))
@@ -144,7 +144,7 @@ class ErsUtilSpec
   }
 
   "buildCompanyNameList" should {
-    val ersUtil: ERSUtil = new ERSUtil(mockFileValidatorSessionService, mockAppConfig)
+    val ersUtil: ERSUtil = new ERSUtil(mockAppConfig)
 
     "handle an empty list" in {
       ersUtil.buildCompanyNameList(List.empty) shouldBe ""
@@ -159,7 +159,7 @@ class ErsUtilSpec
   }
 
   "buildTrusteeNameList" should {
-    val ersUtil: ERSUtil = new ERSUtil(mockFileValidatorSessionService, mockAppConfig)
+    val ersUtil: ERSUtil = new ERSUtil(mockAppConfig)
 
     "handle an empty list" in {
       ersUtil.buildTrusteeNameList(List.empty) shouldBe ""
@@ -174,7 +174,7 @@ class ErsUtilSpec
   }
 
   "companyLocation" should {
-    val ersUtil: ERSUtil = new ERSUtil(mockFileValidatorSessionService, mockAppConfig)
+    val ersUtil: ERSUtil = new ERSUtil(mockAppConfig)
 
     "return OVERSEAS for non-default country" in {
       ersUtil.companyLocation(CompanyDetails(companyName = "", addressLine1= "", None, None, None, country = Some("FR"), None, None, None)) shouldBe "Overseas"
@@ -190,7 +190,7 @@ class ErsUtilSpec
   }
 
   "trusteeLocationMessage" should {
-    val ersUtil: ERSUtil = new ERSUtil(mockFileValidatorSessionService, mockAppConfig)
+    val ersUtil: ERSUtil = new ERSUtil(mockAppConfig)
 
     "return ers_trustee_based.uk for UK-based trustee" in {
       ersUtil.trusteeLocationMessage(TrusteeDetails("First Trustee", "1 The Street", None, None, None, Some("UK"), None, true)) shouldBe "ers_trustee_based.uk"
@@ -202,7 +202,7 @@ class ErsUtilSpec
   }
 
   "addCompanyMessage" should {
-    val ersUtil: ERSUtil = new ERSUtil(mockFileValidatorSessionService, mockAppConfig)
+    val ersUtil: ERSUtil = new ERSUtil(mockAppConfig)
 
     "return appropriate message for Some scheme option" in {
       val messages = mock[Messages]

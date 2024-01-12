@@ -16,21 +16,21 @@
 
 package controllers.internal
 
-import models.RequestWithUpdatedSession
 import models.upscan._
 import play.api.Logging
 import play.api.libs.json.JsValue
 import play.api.mvc.{Action, MessagesControllerComponents}
-import services.FileValidatorSessionService
+import services.FileValidatorService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
+import utils.Constants
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class FileUploadCallbackController @Inject() (val mcc: MessagesControllerComponents,
-                                              val sessionService: FileValidatorSessionService)
-                                             (implicit val ec: ExecutionContext) extends FrontendController(mcc) with Logging {
+                                              fileValidatorService: FileValidatorService)
+                                             (implicit val ec: ExecutionContext) extends FrontendController(mcc) with Logging with Constants {
 
   def callback(sessionId: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
     request.body
@@ -53,8 +53,10 @@ class FileUploadCallbackController @Inject() (val mcc: MessagesControllerCompone
               Failed
           }
 
-          logger.info(s"Updating callback for session: $sessionId to ${uploadStatus.getClass.getSimpleName}")
-          sessionService.updateCallbackRecord(uploadStatus)(RequestWithUpdatedSession(request, sessionId)).map(_ => Ok) recover {
+          logger.info(s"[FileUploadCallbackController][callback] Updating callback for session: $sessionId to ${uploadStatus.getClass.getSimpleName}")
+          (for {
+            _ <- fileValidatorService.updateCallbackRecord(uploadStatus, sessionId)
+          } yield Ok) recover {
             case e: Throwable =>
               logger.error(
                 s"[FileUploadCallbackController][callback] Failed to update callback record for session: $sessionId, timestamp: ${System

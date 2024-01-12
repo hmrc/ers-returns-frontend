@@ -155,4 +155,24 @@ class ReturnServiceControllerSpec
     }
   }
 
+  "getRequestParameters" should {
+    "correctly extract and construct a RequestObject from request query parameters" in {
+      val controllerUnderTest = buildFakeReturnServiceController()
+
+      val queryString = "?aoRef=aoRefValue&taxYear=2020&ersSchemeRef=ersSchemeRefValue&schemeType=schemeTypeValue&schemeName=schemeNameValue&agentRef=agentRefValue&empRef=empRefValue&ts=tsValue&hmac=hmacValue"
+      val fakeRequest = FakeRequest("GET", s"/$queryString").withHeaders("Host" -> "localhost")
+
+      val result = controllerUnderTest.getRequestParameters(fakeRequest)
+
+      result.aoRef shouldBe Some("aoRefValue")
+      result.taxYear shouldBe Some("2020")
+      result.ersSchemeRef shouldBe Some("ersSchemeRefValue")
+      result.schemeType shouldBe Some("schemeTypeValue")
+      result.schemeName shouldBe Some("schemeNameValue")
+      result.agentRef shouldBe Some("agentRefValue")
+      result.empRef shouldBe Some("empRefValue")
+      result.ts shouldBe Some("tsValue")
+      result.hmac shouldBe Some("hmacValue")
+    }
+  }
 }

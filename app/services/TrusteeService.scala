@@ -30,7 +30,7 @@ class TrusteeService @Inject()(ersUtil: ERSUtil,
                               )(implicit ec: ExecutionContext) extends Logging {
 
   def updateTrusteeCache(index: Int)(implicit request: Request[_]): Future[Unit] = {
-    for {
+    (for {
       name <- sessionService.fetch[TrusteeName](ersUtil.TRUSTEE_NAME_CACHE)
       cachedTrustees <- sessionService.fetchTrusteesOptionally()
       trusteeDetailsList <- {
@@ -39,12 +39,15 @@ class TrusteeService @Inject()(ersUtil: ERSUtil,
       }
       _ <- sessionService.cache[TrusteeDetailsList](ersUtil.TRUSTEES_CACHE, trusteeDetailsList)
     } yield {
+      () //to be picked up in tech debt review
+    }).recover {
+      case ex: Throwable =>
+        logger.error("[TrusteeService][updateTrusteeCache] Error updating trustee cache", ex)
       ()
     }
   }
 
   def replaceTrustee(trustees: List[TrusteeDetails], index: Int, formData: TrusteeDetails): List[TrusteeDetails] =
-
     (if (index == 10000) {
       trustees :+ formData
     } else {

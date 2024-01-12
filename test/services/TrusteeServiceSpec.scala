@@ -16,20 +16,21 @@
 
 package services
 
-import models.{RequestObject, TrusteeDetails, TrusteeDetailsList}
-import org.mockito.ArgumentMatchers.any
+import models.{RequestObject, TrusteeAddress, TrusteeDetails, TrusteeDetailsList, TrusteeName}
+import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.when
 import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
 import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
 import org.scalatest.wordspec.AnyWordSpecLike
-import utils.ErsTestHelper
+import play.api.libs.json.Format
+import utils.{ErsTestHelper, Fixtures}
 import utils.Fixtures.{ersRequestObject, exampleTrustees}
 
 import scala.concurrent.Future
 
 class TrusteeServiceSpec extends AnyWordSpecLike with ErsTestHelper {
 
-  "calling replace trustee" must {
+  "replaceTrustee" must {
     val trusteeService: TrusteeService = new TrusteeService(mockErsUtil, mockSessionService)
 
     val trusteeOne   = TrusteeDetails("First Trustee", "20 Garden View", None, None, None, None, None, true)
@@ -146,6 +147,44 @@ class TrusteeServiceSpec extends AnyWordSpecLike with ErsTestHelper {
 
         result shouldBe false
       }
+    }
+  }
+
+  "updateTrusteeCache" must {
+    val trusteeService: TrusteeService = new TrusteeService(mockErsUtil, mockSessionService)
+
+    "successfully update trustee cache" when {
+      "trustee details are fetched and updated" in {
+        val index = 1
+        val trusteeName: TrusteeName = TrusteeName("First Trustee")
+        val trusteeAddress: TrusteeAddress = Fixtures.trusteeAddressUk
+        val trusteeOne = TrusteeDetails(trusteeName.name, "UK line 1", None, None, None, None, None, true)
+        val cachedTrustees = TrusteeDetailsList(List(trusteeOne))
+
+        when(mockSessionService.fetch[TrusteeName](eqTo(mockErsUtil.TRUSTEE_NAME_CACHE))(any(), any[Format[TrusteeName]]))
+          .thenReturn(Future.successful(trusteeName))
+        when(mockSessionService.fetchTrusteesOptionally()(any(), any()))
+          .thenReturn(Future.successful(cachedTrustees))
+        when(mockSessionService.fetch[TrusteeAddress](eqTo(mockErsUtil.TRUSTEE_ADDRESS_CACHE))(any(), eqTo(implicitly[Format[TrusteeAddress]])))
+          .thenReturn(Future.successful(trusteeAddress))
+        when(mockSessionService.cache[TrusteeDetailsList](eqTo(mockErsUtil.TRUSTEES_CACHE), any())(any(), any()))
+          .thenReturn(Future.successful(sessionPair))
+
+        val result: Unit = trusteeService.updateTrusteeCache(index).futureValue
+
+        result shouldBe ()
+      }
+    }
+
+    "handle exceptions during fetching or caching" in {
+      val index = 1
+
+      when(mockSessionService.fetch[TrusteeName](eqTo(mockErsUtil.TRUSTEE_NAME_CACHE))(any(), any[Format[TrusteeName]]))
+        .thenReturn(Future.failed(new Exception("Fetch failed")))
+
+      val result: Unit = trusteeService.updateTrusteeCache(index).futureValue
+
+      result shouldBe ()
     }
   }
 }

@@ -84,7 +84,7 @@ class GeneratePdfControllerSpec
 
       when(mockSessionService.fetch[RequestObject](any())(any(), any())).thenReturn(Future.successful(ersRequestObject))
       when(mockSessionService.fetch[ErsMetaData](refEq(ERS_META_DATA))(any(), any())).thenReturn(Future.successful(rsc))
-      when(mockSessionService.getAllData(any(), any())(any(), any())).thenReturn(Future.successful(Fixtures.ersSummary))
+      when(mockSessionService.getAllData(any(), any())(any(), any(), any())).thenReturn(Future.successful(Fixtures.ersSummary))
       when(mockSessionService.fetchAll()(any())).thenReturn(Future.successful(testItem))
       when(pdfBuilderMock.createPdf(any(), any(), any())(any())).thenReturn(byteArrayOutputStream)
       when(byteArrayOutputStream.toByteArray).thenReturn(Array[Byte]())
@@ -100,7 +100,7 @@ class GeneratePdfControllerSpec
 
       when(mockSessionService.fetch[RequestObject](any())(any(), any())).thenReturn(Future.successful(ersRequestObject))
       when(mockSessionService.fetch[ErsMetaData](refEq(ERS_META_DATA))(any(), any())).thenReturn(Future.successful(rsc))
-      when(mockSessionService.getAllData(any(), any())(any(), any())).thenReturn(Future.successful(Fixtures.ersSummary))
+      when(mockSessionService.getAllData(any(), any())(any(), any(), any())).thenReturn(Future.successful(Fixtures.ersSummary))
       when(mockSessionService.fetchAll()(any())).thenReturn(Future.failed(new Exception("error")))
 
       val controller = new PdfGenerationController(mockMCC, pdfBuilderMock, mockSessionService, globalErrorView, testAuthAction)
@@ -118,7 +118,7 @@ class GeneratePdfControllerSpec
 
       when(mockSessionService.fetch[RequestObject](any())(any(), any())).thenReturn(Future.successful(ersRequestObject))
       when(mockSessionService.fetch[ErsMetaData](refEq(ERS_META_DATA))(any(), any())).thenReturn(Future.successful(rsc))
-      when(mockSessionService.getAllData(any(), any())(any(), any())).thenReturn(Future.failed(new Exception("error")))
+      when(mockSessionService.getAllData(any(), any())(any(), any(), any())).thenReturn(Future.failed(new Exception("error")))
 
       val controller = new PdfGenerationController(mockMCC, pdfBuilderMock, mockSessionService, globalErrorView, testAuthAction)
 
@@ -136,7 +136,7 @@ class GeneratePdfControllerSpec
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
 
       when(mockSessionService.fetch[ErsMetaData](any())(any(), any())).thenReturn(Future.successful(Fixtures.EMIMetaData))
-      when(mockSessionService.getAllData(any(), any())(any(), any())).thenReturn(Future.successful(Fixtures.ersSummary))
+      when(mockSessionService.getAllData(any(), any())(any(), any(), any())).thenReturn(Future.successful(Fixtures.ersSummary))
       when(mockSessionService.fetchAll()(any())).thenReturn(Future.successful(testItem))
       when(pdfBuilderMock.createPdf(any(), any(), any())(any())).thenReturn(byteArrayOutputStream)
       when(byteArrayOutputStream.toByteArray).thenReturn(Array[Byte]())
@@ -162,7 +162,7 @@ class GeneratePdfControllerSpec
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
 
       when(mockSessionService.fetch[ErsMetaData](any())(any(), any())).thenReturn(Future.successful(Fixtures.EMIMetaData))
-      when(mockSessionService.getAllData(any(), any())(any(), any())).thenReturn(Future.successful(Fixtures.ersSummary))
+      when(mockSessionService.getAllData(any(), any())(any(), any(), any())).thenReturn(Future.successful(Fixtures.ersSummary))
       when(mockSessionService.fetchAll()(any())).thenReturn(Future.successful(testItems))
       when(pdfBuilderMock.createPdf(any(), any(), any())(any())).thenReturn(byteArrayOutputStream)
       when(byteArrayOutputStream.toByteArray).thenReturn(Array[Byte]())
@@ -183,7 +183,7 @@ class GeneratePdfControllerSpec
       val testItems = mergeCacheItems(Seq(testItem, testItem2, testItem3))
 
       when(mockSessionService.fetch[ErsMetaData](any())(any(), any())).thenReturn(Future.successful(Fixtures.EMIMetaData))
-      when(mockSessionService.getAllData(any(), any())(any(), any())).thenReturn(Future.successful(Fixtures.ersSummary))
+      when(mockSessionService.getAllData(any(), any())(any(), any(), any())).thenReturn(Future.successful(Fixtures.ersSummary))
       when(mockSessionService.fetchAll()(any())).thenReturn(Future.successful(testItems))
 
       val controller = new PdfGenerationController(mockMCC, pdfBuilderMock, mockSessionService, globalErrorView, testAuthAction)

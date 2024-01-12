@@ -17,13 +17,15 @@
 package services
 
 import config.ApplicationConfig
+import controllers.auth.RequestWithOptionalAuthContext
 import models._
 import org.joda.time.DateTime
 import play.api.Logging
 import play.api.libs.json
 import play.api.libs.json._
-import play.api.mvc.Request
+import play.api.mvc.{AnyContent, Request}
 import repositories.FrontendSessionsRepository
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.mongo.cache.{CacheItem, DataKey}
 import utils.JsonUtils._
 import utils.{Constants, PageBuilder}
@@ -33,7 +35,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class FrontendSessionService @Inject()(val sessionCache: FrontendSessionsRepository,
-                                       fileValidatorSessionsService: FileValidatorSessionService,
+                                       fileValidatorService: FileValidatorService,
                                        applicationConfig: ApplicationConfig)(implicit ec: ExecutionContext) extends PageBuilder with Logging with Constants {
 
   def cache[T](key: String, body: T)(implicit request: Request[_], formats: json.Format[T]): Future[(String, String)] =
@@ -136,7 +138,7 @@ class FrontendSessionService @Inject()(val sessionCache: FrontendSessionsReposit
   }
 
   def getAllData(bundleRef: String, ersMetaData: ErsMetaData)
-                (implicit ec: ExecutionContext, request: Request[_]): Future[ErsSummary] = {
+                (implicit ec: ExecutionContext, request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[ErsSummary] = {
     val schemeRef = ersMetaData.schemeInfo.schemeRef
     (for {
       repEvents <- fetchOption[ReportableEvents](REPORTABLE_EVENTS, schemeRef)
@@ -160,11 +162,11 @@ class FrontendSessionService @Inject()(val sessionCache: FrontendSessionsReposit
     }
   }
 
-  def getNoOfRows(nilReturn: String)(implicit ec: ExecutionContext, request: Request[_]): Future[Option[Int]] =
+  def getNoOfRows(nilReturn: String)(implicit ec: ExecutionContext, request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Option[Int]] =
     if (isNilReturn(nilReturn: String)) {
       Future.successful(None)
     } else {
-      fileValidatorSessionsService.getSuccessfulCallbackRecord.map(res => res.flatMap(_.noOfRows))
+      fileValidatorService.getSuccessfulCallbackRecord.map(res => res.flatMap(_.noOfRows))
     }
 
   def isNilReturn(nilReturn: String): Boolean = nilReturn == OPTION_NIL_RETURN

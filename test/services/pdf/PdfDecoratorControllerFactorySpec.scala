@@ -56,7 +56,7 @@ class PdfDecoratorControllerFactorySpec
     val mockCountryCodes: CountryCodes      = mock[CountryCodes]
     override val countryCodes: CountryCodes = mockCountryCodes
     override val ERSUtil: ERSUtil           =
-      new ERSUtil(mockFileValidatorSessionService, mockAppConfig)(ec, mockCountryCodes)
+      new ERSUtil(mockAppConfig)(ec, mockCountryCodes)
   }
 
   lazy val altAmends: AlterationAmends = AlterationAmends(

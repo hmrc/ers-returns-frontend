@@ -187,20 +187,21 @@ class CsvFileUploadController @Inject() (val mcc: MessagesControllerComponents,
 
   def validateCsv(csvCallbackData: List[UploadedSuccessfully], schemeInfo: SchemeInfo)
                  (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] =
-    ersConnector.validateCsvFileData(csvCallbackData, schemeInfo).map { res =>
+    ersConnector.validateCsvFileData(csvCallbackData, schemeInfo).flatMap { res =>
       res.status match {
-        case OK       =>
+        case OK =>
           logger.info(s"[CsvFileUploadController][validateCsv] Validation is successful for schemeRef: ${schemeInfo.schemeRef}, " +
               s"timestamp: ${System.currentTimeMillis()}.")
-          sessionService.cache(ersUtil.VALIDATED_SHEETS, res.body)
-          Redirect(routes.SchemeOrganiserController.schemeOrganiserPage())
+          sessionService.cache(ersUtil.VALIDATED_SHEETS, res.body).map { _ =>
+              Redirect(routes.SchemeOrganiserController.schemeOrganiserPage())
+          }
         case ACCEPTED =>
           logger.warn(s"[CsvFileUploadController][validateCsv] Validation is not successful for schemeRef: ${schemeInfo.schemeRef}, " +
               s"timestamp: ${System.currentTimeMillis()}.")
-          Redirect(routes.CsvFileUploadController.validationFailure())
+          Future.successful(Redirect(routes.CsvFileUploadController.validationFailure()))
         case _ =>
           logger.error(s"[CsvFileUploadController][validateCsv] Validate file data failed with Status ${res.status}, timestamp: ${System.currentTimeMillis()}.")
-          getGlobalErrorPage
+          Future.successful(getGlobalErrorPage)
       }
     } recover { case e: Exception =>
       logger.error(s"[CsvFileUploadController][validateCsv] Failed to fetch CsvFilesCallbackList with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
