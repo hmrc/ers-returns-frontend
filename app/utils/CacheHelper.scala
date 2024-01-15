@@ -25,11 +25,8 @@ trait CacheHelper extends Logging {
     (cacheItem.data \ key.unwrap).validate[A] match {
       case JsSuccess(value, _) =>
         Some(value)
-      case JsError(errors) =>
-        val errorDetails = errors.map { case (path, validationErrors) =>
-          s"Path: $path, Errors: ${validationErrors.map(_.message).mkString(", ")}"
-        }.mkString("; ")
-        logger.warn(s"Error parsing JSON for key ${key.unwrap}: $errorDetails")
+      case JsError(_) =>
+        logger.info(s"Error parsing JSON for key ${key.unwrap}")
         None
     }
   }
