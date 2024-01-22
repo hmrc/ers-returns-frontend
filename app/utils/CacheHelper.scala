@@ -26,7 +26,7 @@ trait CacheHelper extends Logging {
       case JsSuccess(value, _) =>
         Some(value)
       case JsError(_) =>
-        logger.info(s"Error parsing JSON for key ${key.unwrap}")
+        logger.debug(s"Error parsing JSON for key ${key.unwrap}")
         None
     }
   }

@@ -18,7 +18,8 @@ package services.pdf
 
 import akka.stream.Materializer
 import models.{AltAmendsActivity, AlterationAmends, ErsSummary}
-import org.joda.time.DateTime
+
+import java.time.{LocalDateTime, ZoneId, ZonedDateTime}
 import org.scalatest.OptionValues
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
@@ -71,7 +72,7 @@ class PdfDecoratorControllerFactorySpec
     bundleRef = "",
     isNilReturn = "",
     fileType = None,
-    confirmationDateTime = new DateTime(2016, 6, 8, 11, 45),
+    confirmationDateTime = ZonedDateTime.of(LocalDateTime.of(2016, 6, 8, 11, 45), ZoneId.systemDefault),
     metaData = Fixtures.EMIMetaData,
     altAmendsActivity = Some(AltAmendsActivity(altActivity = "1")),
     alterationAmends = Some(altAmends),
@@ -104,7 +105,7 @@ class PdfDecoratorControllerFactorySpec
         "testbundle",
         "1",
         None,
-        new DateTime(2016, 6, 8, 11, 45),
+        ZonedDateTime.of(LocalDateTime.of(2016, 6, 8, 11, 45), ZoneId.systemDefault),
         metaData = Fixtures.EMIMetaData,
         None,
         None,

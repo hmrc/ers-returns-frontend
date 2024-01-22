@@ -30,6 +30,8 @@ import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesController
 import play.api.test.Helpers.stubBodyParser
 import services.pdf.ErsReceiptPdfBuilderService
 import utils._
+import org.scalatest.prop.TableDrivenPropertyChecks._
+import org.scalatest.prop.TableFor3
 
 import scala.concurrent.ExecutionContext
 
@@ -53,25 +55,43 @@ class ErsReceiptPdfBuilderServiceSpec
     ExecutionContext.global
   )
 
-  implicit lazy val mat: Materializer          = app.materializer
-  implicit val ersUtil: ERSUtil                = mockErsUtil
-  val testErsReceiptPdfBuilderService          = new ErsReceiptPdfBuilderService(mockCountryCodes)
-  implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
+  implicit lazy val mat: Materializer = app.materializer
+  implicit val ersUtil: ERSUtil = mockErsUtil
+  val testErsReceiptPdfBuilderService = new ErsReceiptPdfBuilderService(mockCountryCodes)
+
+  val testCases: TableFor3[String, String, String] = Table(
+    ("language", "inputDate", "expectedOutputDate"),
+    ("en", "12 August 2016, 4:28pm", "4:28PM on Fri 12 August 2016"),
+    ("cy", "12 August 2016, 4:28pm", "4:28yh ar ddydd Gwen 12 Awst 2016"),
+    ("en", "15 January 2022, 9:20am", "9:20AM on Sat 15 January 2022"),
+    ("cy", "15 January 2022, 9:20am", "9:20yb ar ddydd Sad 15 Ionawr 2022")
+  )
 
   "ErsReceiptPdfBuilderService" should {
-    "generate the ERS summary metdata" in {
-      when(mockErsUtil.replaceAmpersand(any[String])).thenAnswer(_.getArgument(0))
-      val output = testErsReceiptPdfBuilderService.addMetaData(Fixtures.ersSummary, "12 August 2016, 4:28pm")
+    forAll(testCases) { (language: String, inputDate: String, expectedOutputDate: String) =>
+      s"generate the ERS summary metdata correctly when parsed the date: $inputDate and language: $language" in {
+        val testMessages: MessagesImpl = MessagesImpl(i18n.Lang(language), mockMCC.messagesApi)
+        when(mockErsUtil.replaceAmpersand(any[String])).thenAnswer(_.getArgument(0))
+        val output = testErsReceiptPdfBuilderService.addMetaData(Fixtures.ersSummary, inputDate)(testMessages)
 
-      val expectedConfirmationMessage =
-        s"Your ${ContentUtil.getSchemeAbbreviation("emi")} annual return has been submitted."
+        val expectedConfirmationMessage =
+          testMessages.messages(
+            "ers.pdf.confirmation.submitted",
+            testMessages.messages(ContentUtil.getSchemeAbbreviation("emi"))
+          )
+        val expectedSchemeName = testMessages.messages("ers.pdf.scheme")
+        val expectedDateAndTime = testMessages.messages("ers.pdf.date_and_time")
 
-      output.contains(expectedConfirmationMessage)    shouldBe true
-      output.contains("Scheme name")                  shouldBe true
-      output.contains("My scheme")                    shouldBe true
-      output.contains("testbundle")                   shouldBe true
-      output.contains("Time and date of submission")  shouldBe true
-      output.contains("4:28PM on Fri 12 August 2016") shouldBe true
+        // static pdf fields which depend on language
+        output.contains(expectedConfirmationMessage) shouldBe true
+        output.contains(expectedSchemeName) shouldBe true
+        output.contains(expectedDateAndTime) shouldBe true
+
+        // pdf fields which depend on input
+        output.contains("My scheme") shouldBe true
+        output.contains("testbundle") shouldBe true
+        output.contains(expectedOutputDate) shouldBe true
+      }
     }
   }
 }

@@ -19,7 +19,6 @@ package services
 import config.ApplicationConfig
 import controllers.auth.RequestWithOptionalAuthContext
 import models._
-import org.joda.time.DateTime
 import play.api.Logging
 import play.api.libs.json
 import play.api.libs.json._
@@ -30,6 +29,7 @@ import uk.gov.hmrc.mongo.cache.{CacheItem, DataKey}
 import utils.JsonUtils._
 import utils.{Constants, PageBuilder}
 
+import java.time.ZonedDateTime
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -150,7 +150,7 @@ class FrontendSessionService @Inject()(val sessionCache: FrontendSessionsReposit
       trows <- getNoOfRows(repEvents.get.isNilReturn.get)
     } yield {
       val fileType = checkFileType.map(_.checkFileType.get)
-      ErsSummary(bundleRef, repEvents.get.isNilReturn.get, fileType, DateTime.now, metaData = ersMetaData,
+      ErsSummary(bundleRef, repEvents.get.isNilReturn.get, fileType, ZonedDateTime.now, metaData = ersMetaData,
         altAmendsActivity = altData._1, alterationAmends = altData._2, groupService = gc._1,
         schemeOrganiser = soc, companies = gc._2, trustees = td, nofOfRows = trows, transferStatus = getStatus(trows)
       )

@@ -31,7 +31,7 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.SessionKeys.{BUNDLE_REF, DATE_TIME_SUBMITTED}
 import utils._
 
-import java.text.SimpleDateFormat
+import java.time.format.DateTimeFormatter
 import java.util.concurrent.TimeUnit
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
@@ -98,9 +98,9 @@ class ConfirmationPageController @Inject() (val mcc: MessagesControllerComponent
   def saveAndSubmit(alldata: ErsSummary, all: ErsMetaData, bundle: String)
                    (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
 
-    val jsonDateTimeFormat = new SimpleDateFormat("d MMMM yyyy, h:mma")
+    val jsonDateTimeFormat = DateTimeFormatter.ofPattern("d MMMM yyyy, h:mma")
     val dateTimeSubmitted  =
-      jsonDateTimeFormat.format(alldata.confirmationDateTime.toDate).replace("AM", "am").replace("PM", "pm")
+      jsonDateTimeFormat.format(alldata.confirmationDateTime)
 
     ersConnector.saveMetadata(alldata).flatMap { res =>
       res.status match {

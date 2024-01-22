@@ -18,7 +18,7 @@ package controllers
 
 import akka.stream.Materializer
 import models._
-import org.joda.time.DateTime
+import java.time.ZonedDateTime
 import org.jsoup.Jsoup
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito._
@@ -66,8 +66,8 @@ class ReturnServiceControllerSpec
   val hundred = 100
 
   lazy val ExpectedRedirectionUrlIfNotSignedIn = "/gg/sign-in?continue=/submit-your-ers-return"
-  lazy val schemeInfo: SchemeInfo = SchemeInfo("XA1100000000000", DateTime.now, "1", "2016", "EMI", "EMI")
-  lazy val rsc: ErsMetaData =
+  lazy val schemeInfo: SchemeInfo              = SchemeInfo("XA1100000000000", ZonedDateTime.now, "1", "2016", "EMI", "EMI")
+  lazy val rsc: ErsMetaData                    =
     new ErsMetaData(schemeInfo, "ipRef", Some("aoRef"), "empRef", Some("agentRef"), Some("sapNumber"))
   lazy val rscAsRequestObject: RequestObject   = RequestObject(
     Some("aoRef"),

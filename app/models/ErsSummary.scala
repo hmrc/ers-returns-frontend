@@ -16,27 +16,40 @@
 
 package models
 
-import org.joda.time.DateTime
-import play.api.libs.json.JodaWrites._
+import java.time.{Instant, ZonedDateTime, ZoneId}
 import play.api.libs.json._
+
+import scala.util._
+
+trait LocalDateTimeFormat {
+  val validationError: JsonValidationError = JsonValidationError("Failed to find matching Json field Type")
+  // Overriding the default play 2.6 LocalDateTime format to allow backwards compatibility with play 2.5 services (ers-submissions)
+  implicit val dateFormatDefault: Format[ZonedDateTime] = new Format[ZonedDateTime] {
+    override def reads(json: JsValue): JsResult[ZonedDateTime] = json match {
+      case JsNumber(numberDate: BigDecimal) =>
+        Try(ZonedDateTime.ofInstant(Instant.ofEpochMilli(numberDate.toLong), ZoneId.systemDefault())) match {
+          case Success(date: ZonedDateTime) => JsSuccess(date)
+          case _                        => JsError(JsonValidationError(s"[LocalDateTimeFormat][JsNumber]: Failed to parse date ($numberDate) to LocalDateTime"))
+        }
+      case _                            => JsError(validationError)
+    }
+    override def writes(o: ZonedDateTime): JsValue = JsNumber(o.toInstant.toEpochMilli)
+  }
+}
 
 case class SchemeInfo(
   schemeRef: String,
-  timestamp: DateTime = DateTime.now,
+  timestamp: ZonedDateTime = ZonedDateTime.now,
   schemeId: String,
   taxYear: String,
   schemeName: String,
   schemeType: String
 )
 
-object SchemeInfo {
-  // Overriding the default play 2.6 DateTime format to allow backwards compatibility with play 2.5 services (ers-submissions)
-  implicit val dateFormatDefault: Format[DateTime] = new Format[DateTime] {
-    override def reads(json: JsValue): JsResult[DateTime] = JodaReads.DefaultJodaDateTimeReads.reads(json)
-    override def writes(o: DateTime): JsValue             = JodaDateTimeNumberWrites.writes(o)
-  }
+object SchemeInfo extends LocalDateTimeFormat {
   implicit val format: OFormat[SchemeInfo]         = Json.format[SchemeInfo]
 }
+
 case class ErsMetaData(
   schemeInfo: SchemeInfo,
   ipRef: String,
@@ -46,7 +59,7 @@ case class ErsMetaData(
   sapNumber: Option[String]
 )
 
-object ErsMetaData {
+object ErsMetaData extends LocalDateTimeFormat {
   implicit val format: OFormat[ErsMetaData] = Json.format[ErsMetaData]
 }
 
@@ -92,7 +105,7 @@ case class ErsSummary(
   bundleRef: String,
   isNilReturn: String,
   fileType: Option[String],
-  confirmationDateTime: DateTime,
+  confirmationDateTime: ZonedDateTime,
   metaData: ErsMetaData,
   altAmendsActivity: Option[AltAmendsActivity],
   alterationAmends: Option[AlterationAmends],
@@ -103,11 +116,6 @@ case class ErsSummary(
   nofOfRows: Option[Int],
   transferStatus: Option[String]
 )
-object ErsSummary {
-  // Overriding the default play 2.6 DateTime format to allow backwards compatibility with play 2.5 services (ers-submissions)
-  implicit val dateFormatDefault: Format[DateTime] = new Format[DateTime] {
-    override def reads(json: JsValue): JsResult[DateTime] = JodaReads.DefaultJodaDateTimeReads.reads(json)
-    override def writes(o: DateTime): JsValue = JodaDateTimeNumberWrites.writes(o)
-  }
+object ErsSummary extends LocalDateTimeFormat {
   implicit val format: OFormat[ErsSummary] = Json.format[ErsSummary]
 }

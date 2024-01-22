@@ -17,7 +17,6 @@
 package controllers.trustees
 
 import models._
-import org.joda.time.DateTime
 import org.mockito.ArgumentMatchers.{eq => meq, _}
 import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
@@ -35,6 +34,7 @@ import utils.Fixtures.ersRequestObject
 import utils._
 import views.html.{global_error, trustee_summary}
 
+import java.time.ZonedDateTime
 import scala.concurrent.{ExecutionContext, Future}
 
 class TrusteeSummaryControllerSpec extends AnyWordSpecLike
@@ -121,7 +121,7 @@ class TrusteeSummaryControllerSpec extends AnyWordSpecLike
   }
 
   "calling trustee summary page" should {
-    lazy val schemeInfo: SchemeInfo = SchemeInfo("XA1100000000000", DateTime.now, "1", "2016", "EMI", "EMI")
+    lazy val schemeInfo: SchemeInfo = SchemeInfo("XA1100000000000", ZonedDateTime.now, "1", "2016", "EMI", "EMI")
     lazy val rsc: ErsMetaData = ErsMetaData(schemeInfo, "ipRef", Some("aoRef"), "empRef", Some("agentRef"), Some("sapNumber"))
 
     "give a redirect status (to company authentication frontend) on GET if user is not authenticated" in {

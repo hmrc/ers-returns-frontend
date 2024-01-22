@@ -17,7 +17,7 @@
 package controllers.auth
 
 import models.{ERSAuthData, ErsMetaData, RequestObject, SchemeInfo}
-import org.joda.time.DateTime
+import java.time.ZonedDateTime
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import org.scalatest.OptionValues
@@ -75,7 +75,7 @@ class AuthFunctionalitySpec
       empRef = testEmpRef
     )
 
-    lazy val schemeInfo: SchemeInfo   = SchemeInfo("XA1100000000000", DateTime.now, "1", "2016", "EMI", "EMI")
+    lazy val schemeInfo: SchemeInfo   = SchemeInfo("XA1100000000000", ZonedDateTime.now, "1", "2016", "EMI", "EMI")
     val validErsMetaData: ErsMetaData =
       ErsMetaData(schemeInfo, "ipRef", Some("aoRef"), "1234/GA4567", Some("agentRef"), Some("sapNumber"))
     val reqObj: RequestObject = RequestObject(None, None, None, None, None, None, Some("1234/GA4567"), None, None)

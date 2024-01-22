@@ -21,7 +21,7 @@ import akka.stream.Materializer
 import controllers.auth.RequestWithOptionalAuthContext
 import models._
 import models.upscan.Failed
-import org.joda.time.DateTime
+import java.time.ZonedDateTime
 import org.mockito.ArgumentMatchers.{eq => meq, _}
 import org.mockito.Mockito._
 import org.scalatest.Assertion
@@ -64,7 +64,7 @@ class FileUploadControllerSpec
   val testOptString: Option[String]   = Some("test")
   val schemeInfo: SchemeInfo          = SchemeInfo(
     testOptString.get,
-    DateTime.now,
+    ZonedDateTime.now,
     testOptString.get,
     testOptString.get,
     testOptString.get,

@@ -16,11 +16,11 @@
 
 package utils
 
+import com.ibm.icu.text.SimpleDateFormat
 import com.ibm.icu.util.ULocale
 import play.api.Logging
 import play.api.i18n.Messages
 
-import java.text.SimpleDateFormat
 import java.time.Instant
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
@@ -33,15 +33,12 @@ object DateUtils extends Logging {
     formatter.format(instant)
   }
 
-  def convertDate(date: String, format: String = "dd MMMM yyyy, hh:mma")(implicit messages: Messages): String = {
+  def convertDate(date: String)(implicit messages: Messages): String = {
     val locale: ULocale = new ULocale(messages.lang.code)
-    val timeOut         = new com.ibm.icu.text.SimpleDateFormat("h:mma", locale)
-    val dateOut         = new com.ibm.icu.text.SimpleDateFormat("E d MMMM yyyy", locale)
-    val dateFrm         = new SimpleDateFormat(format)
-    val originalDate    = dateFrm.parse(date)
-    val on              = messages("ers-confirmation.submission_on")
-
-    timeOut.format(originalDate) + s" $on " + dateOut.format(originalDate)
+    val timeOut: SimpleDateFormat = new SimpleDateFormat("h:mma", locale)
+    val dateOut = new SimpleDateFormat("E d MMMM yyyy", locale)
+    val dateFrm = new SimpleDateFormat("d MMMM yyyy, h:mma").parse(date)
+    s"${timeOut.format(dateFrm)} ${messages("ers-confirmation.submission_on")} ${dateOut.format(dateFrm)}"
   }
 
   def getFullTaxYear(taxYear: String)(implicit messages: Messages): String =

@@ -17,12 +17,12 @@
 package utils
 
 import models._
-import org.joda.time.DateTime
 import play.api.libs.json._
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import uk.gov.hmrc.domain.Generator
 
+import java.time.{LocalDateTime, ZoneId, ZonedDateTime}
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.duration._
 
@@ -69,7 +69,7 @@ object Fixtures extends AuthHelper {
 
   def schemeRef: String = "XYZ12345"
 
-  val timestamp: DateTime = DateTime.now
+  val timestamp: ZonedDateTime = ZonedDateTime.now
 
   val schemeType = "EMI"
 
@@ -182,7 +182,7 @@ object Fixtures extends AuthHelper {
     "testbundle",
     "1",
     None,
-    new DateTime(2016, 6, 8, 11, 5),
+    ZonedDateTime.of(LocalDateTime.of(2016, 6, 8, 11, 5), ZoneId.systemDefault),
     metaData = EMIMetaData,
     None,
     None,

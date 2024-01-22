@@ -16,12 +16,13 @@
 
 package services.audit
 
-import org.joda.time.DateTime
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.DefaultAuditConnector
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import uk.gov.hmrc.play.audit.model.DataEvent
 
+import java.time.format.DateTimeFormatter
+import java.time.{Instant, ZoneId, ZonedDateTime}
 import scala.concurrent.{ExecutionContext, Future}
 
 trait AuditService {
@@ -42,6 +43,9 @@ trait AuditService {
       detail = details
     )
 
-  private[audit] def generateTags(hc: HeaderCarrier): Map[String, String] =
-    hc.otherHeaders.toMap ++ Map("dateTime" -> new DateTime().toString)
+  private[audit] def generateTags(hc: HeaderCarrier): Map[String, String] = {
+    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+    val formattedZonedDateTime: String = ZonedDateTime.now().format(formatter)
+    hc.otherHeaders.toMap ++ Map("dateTime" -> formattedZonedDateTime)
+  }
 }
