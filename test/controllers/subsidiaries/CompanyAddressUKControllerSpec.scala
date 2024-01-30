@@ -131,7 +131,7 @@ class CompanyAddressUKControllerSpec extends AnyWordSpecLike
       val result = testController.questionSubmit(1).apply(authRequest)
 
       status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result).get shouldBe controllers.subsidiaries.routes.GroupSchemeController.manualCompanyDetailsPage().url
+      redirectLocation(result).get shouldBe controllers.subsidiaries.routes.GroupSchemeController.groupSchemePage().url
     }
   }
 
