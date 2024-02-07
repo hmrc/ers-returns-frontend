@@ -384,7 +384,7 @@ class ERSUtil @Inject() (
 		}
 	}
 
-	def fetchPartFromCompanyDetails[A](cacheId: String)(implicit hc: HeaderCarrier, formats: json.Format[A]): Future[Option[A]] = {
+	def fetchPartFromCompanyDetails[A](index: Int, cacheId: String)(implicit hc: HeaderCarrier, formats: json.Format[A]): Future[Option[A]] = {
 		shortLivedCache.fetchAndGetEntry[JsValue](cacheId, SCHEME_ORGANISER_CACHE).map {
 			companyDetailsOpt =>
 				println("Json here: " + companyDetailsOpt.getOrElse(""))

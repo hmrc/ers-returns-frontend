@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package controllers.subsidiaries
+package controllers.schemeOrganiser
 
 import models.{CompanyAddress, CompanyDetailsList, RequestObject, RsFormMappings}
 import org.mockito.ArgumentMatchers.any
@@ -37,7 +37,7 @@ import views.html.{global_error, manual_address_overseas}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class SubsidiaryAddressOverseasControllerSpec extends AnyWordSpecLike
+class SchemeOrganiserAddressOverseasControllerSpec extends AnyWordSpecLike
 
   with Matchers
   with OptionValues
@@ -59,9 +59,8 @@ class SubsidiaryAddressOverseasControllerSpec extends AnyWordSpecLike
   implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
 
 
-  val testController = new SubsidiaryAddressOverseasController(
+  val testController = new SchemeOrganiserAddressOverseasController(
     mockMCC,
-    mockAuthConnector,
     mockErsConnector,
     app.injector.instanceOf[global_error],
     testAuthAction,
@@ -77,7 +76,7 @@ class SubsidiaryAddressOverseasControllerSpec extends AnyWordSpecLike
     setAuthMocks()
     when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any())).thenReturn(Future.successful(ersRequestObject))
 
-    "show the empty company address overseas question page when there is nothing to prefill" in {
+    "show the empty Scheme Organiser address overseas question page when there is nothing to prefill" in {
       when(mockErsUtil.fetchPartFromCompanyDetailsList[CompanyDetailsList](any(), any())(any(), any())).thenReturn(Future.successful(None))
       val result = testController.questionPage(1).apply(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
 
@@ -86,7 +85,7 @@ class SubsidiaryAddressOverseasControllerSpec extends AnyWordSpecLike
       contentAsString(result) should include(testMessages("ers_company_address.line1"))
     }
 
-    "show the prefilled company address overseas question page when there is data to prefill" in {
+    "show the prefilled Scheme Organiser address overseas question page when there is data to prefill" in {
       when(mockErsUtil.fetchPartFromCompanyDetailsList[CompanyAddress](any(), any())(any(), any())).thenReturn(Future.successful(Some(companyAddressOverseas)))
 
       val result = testController.questionPage(1).apply(authRequest)
@@ -109,7 +108,7 @@ class SubsidiaryAddressOverseasControllerSpec extends AnyWordSpecLike
   }
 
   "calling questionSubmit" should {
-    "show company address overseas form page with errors if the form is incorrectly filled" in {
+    "show Scheme Organiser address overseas form page with errors if the form is incorrectly filled" in {
       val companyAddressOverseasData = Map("addressLine1" -> "")
       val form = RsFormMappings.companyAddressOverseasForm().bind(companyAddressOverseasData)
       implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*))
@@ -131,7 +130,7 @@ class SubsidiaryAddressOverseasControllerSpec extends AnyWordSpecLike
       val result = testController.questionSubmit(1).apply(authRequest)
 
       status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result).get shouldBe controllers.subsidiaries.routes.GroupSchemeController.groupPlanSummaryPage().url
+      redirectLocation(result).get shouldBe controllers.schemeOrganiser.routes.SchemeOrganiserController.schemeOrganiserSummaryPage().url
     }
   }
 
@@ -153,4 +152,4 @@ class SubsidiaryAddressOverseasControllerSpec extends AnyWordSpecLike
     }
   }
 
-  }
+}

@@ -58,7 +58,7 @@ trait SchemeOrganiserBaseController[A] extends FrontendController with I18nSuppo
 
   def showQuestionPage(requestObject: RequestObject, index: Int, edit: Boolean = false)
                       (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
-    ersUtil.fetchPartFromCompanyDetails[A](requestObject.getSchemeReference).map { previousAnswer: Option[A] =>
+    ersUtil.fetchPartFromCompanyDetails[A](index, requestObject.getSchemeReference).map { previousAnswer: Option[A] =>
       val preparedForm = previousAnswer.fold(form)(form.fill(_))
       Ok(view(requestObject, index, preparedForm, edit))
     } recover {

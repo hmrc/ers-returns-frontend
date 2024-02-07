@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package controllers.subsidiaries
+package controllers.schemeOrganiser
 
 import models.{CompanyAddress, CompanyDetailsList, RequestObject, RsFormMappings}
 import org.mockito.ArgumentMatchers.any
@@ -31,13 +31,13 @@ import play.api.libs.json.Json
 import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents}
 import play.api.test.Helpers.{contentAsString, defaultAwaitTimeout, redirectLocation, status, stubBodyParser}
 import uk.gov.hmrc.http.cache.client.CacheMap
-import utils.{ERSFakeApplicationConfig, ErsTestHelper, Fixtures}
 import utils.Fixtures.{companyAddressUK, ersRequestObject}
+import utils.{ERSFakeApplicationConfig, ErsTestHelper, Fixtures}
 import views.html.{global_error, manual_address_uk}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class CompanyAddressUKControllerSpec extends AnyWordSpecLike
+class SchemeOrganiserAddressUKControllerSpec extends AnyWordSpecLike
 
   with Matchers
   with OptionValues
@@ -59,7 +59,7 @@ class CompanyAddressUKControllerSpec extends AnyWordSpecLike
   implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
 
 
-  val testController = new SubsidiaryAddressUkController (
+  val testController = new SchemeOrganiserAddressUkController (
     mockMCC,
     mockAuthConnector,
     mockErsConnector,
@@ -77,23 +77,23 @@ class CompanyAddressUKControllerSpec extends AnyWordSpecLike
     setAuthMocks()
     when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any())).thenReturn(Future.successful(ersRequestObject))
 
-    "show the empty company address UK question page when there is nothing to prefill" in {
+    "show the empty scheme organiser address UK question page when there is nothing to prefill" in {
       when(mockErsUtil.fetchPartFromCompanyDetailsList[CompanyDetailsList](any(), any())(any(), any())).thenReturn(Future.successful(None))
       val result = testController.questionPage(1).apply(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
 
       status(result) shouldBe Status.OK
       contentAsString(result) should include(testMessages("ers_manual_address_uk.title"))
-      contentAsString(result) should include(testMessages("ers_manual_address_uk.building"))
+      contentAsString(result) should include(testMessages("ers_company_address.line1"))
     }
 
-    "show the prefilled company address UK question page when there is data to prefill" in {
+    "show the prefilled scheme organiser address UK question page when there is data to prefill" in {
       when(mockErsUtil.fetchPartFromCompanyDetailsList[CompanyAddress](any(), any())(any(), any())).thenReturn(Future.successful(Some(companyAddressUK)))
 
       val result = testController.questionPage(1).apply(authRequest)
 
       status(result) shouldBe Status.OK
       contentAsString(result) should include(testMessages("ers_manual_address_uk.title"))
-      contentAsString(result) should include(testMessages("ers_manual_address_uk.building"))
+      contentAsString(result) should include(testMessages("ers_company_address.line1"))
       contentAsString(result) should include("UK 1")
     }
     "show the global error page if an exception occurs while retrieving cached data" in {
@@ -109,7 +109,7 @@ class CompanyAddressUKControllerSpec extends AnyWordSpecLike
   }
 
   "calling questionSubmit" should {
-    "show company address UK form page with errors if the form is incorrectly filled" in {
+    "show scheme organiser address UK form page with errors if the form is incorrectly filled" in {
       val companyAddressUkData = Map("addressLine1" -> "")
       val form = RsFormMappings.companyAddressUkForm().bind(companyAddressUkData)
       implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*))
@@ -120,7 +120,7 @@ class CompanyAddressUKControllerSpec extends AnyWordSpecLike
       contentAsString(result) should include(testMessages("ers_manual_company_details.err.summary.address_line1_required"))
     }
 
-    "successfully bind the form and redirect to the company summary page" in {
+    "successfully bind the form and redirect to the scheme Organiser Summary Page" in {
       val emptyCacheMap = CacheMap("", Map("" -> Json.obj()))
       when(mockErsUtil.cache[CompanyAddress](any(), any(), any())(any(), any())).thenReturn(Future.successful(emptyCacheMap))
       when(mockCompanyDetailsService.updateSubsidiaryCompanyCache(any())(any())).thenReturn(Future.successful(()), Future.successful(()))
@@ -131,7 +131,7 @@ class CompanyAddressUKControllerSpec extends AnyWordSpecLike
       val result = testController.questionSubmit(1).apply(authRequest)
 
       status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result).get shouldBe controllers.subsidiaries.routes.GroupSchemeController.groupSchemePage().url
+      redirectLocation(result).get shouldBe controllers.schemeOrganiser.routes.SchemeOrganiserController.schemeOrganiserSummaryPage().url
     }
   }
 
@@ -147,7 +147,7 @@ class CompanyAddressUKControllerSpec extends AnyWordSpecLike
 
       status(result) shouldBe Status.OK
       contentAsString(result) should include(testMessages("ers_manual_address_uk.title"))
-      contentAsString(result) should include(testMessages("ers_manual_address_uk.building"))
+      contentAsString(result) should include(testMessages("ers_company_address.line1"))
       contentAsString(result) should include("1")
 
     }

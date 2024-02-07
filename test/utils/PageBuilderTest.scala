@@ -164,7 +164,7 @@ class PageBuilderTest
       val scheme: String = SCHEME_CSOP
       val pageId: String = PAGE_GROUP_SUMMARY
       val result: String = getPageBackLink(scheme, pageId)
-      result shouldBe controllers.subsidiaries.routes.GroupSchemeController.groupSchemePage().toString
+      result shouldBe controllers.schemeOrganiser.routes.SchemeOrganiserController.schemeOrganiserSummaryPage().toString
     }
 
     "return the correct back link for placement on group scheme page, alteration activity NO" in new TestPageBuilder {
@@ -292,7 +292,7 @@ class PageBuilderTest
       val pageId: String    = PAGE_GROUP_SUMMARY
       val condition: String = OPTION_MANUAL
       val result: String    = getPageBackLink(scheme, pageId, condition)
-      result shouldBe controllers.subsidiaries.routes.GroupSchemeController.groupSchemePage().toString
+      result shouldBe controllers.schemeOrganiser.routes.SchemeOrganiserController.schemeOrganiserSummaryPage().toString
     }
 
     "return the correct back link for placement on group scheme page, alteration activity NO" in new TestPageBuilder {

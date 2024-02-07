@@ -37,7 +37,7 @@ import views.html.{global_error, manual_company_details_uk}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class CompanyDetailsUKControllerSpec extends AnyWordSpecLike
+class SubsidiaryDetailsUKControllerSpec extends AnyWordSpecLike
   with Matchers
   with OptionValues
   with ERSFakeApplicationConfig
@@ -126,12 +126,14 @@ class CompanyDetailsUKControllerSpec extends AnyWordSpecLike
         when(mockCompanyDetailsService.updateSubsidiaryCompanyCache(any())(any())).thenReturn(Future.successful(()), Future.successful(()))
 
         val companyData = Map("name" -> "Test company")
-        val form = RsFormMappings.companyNameForm().bind(companyData)
+
+        val form = RsFormMappings.companyAddressUkForm().bind(companyData)
+
         implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*))
         val result = testController.questionSubmit(1).apply(authRequest)
 
         status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(result).get shouldBe routes.SubsidiaryAddressUkController.questionPage().url
+        redirectLocation(result).get shouldBe controllers.subsidiaries.routes.SubsidiaryAddressUkController.questionPage().url
 
       }
     }
