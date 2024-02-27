@@ -369,7 +369,7 @@ class FrontendSessionServiceSpec extends AnyWordSpec with Matchers with ErsTestH
       val testData = "testData"
       val expectedResponse = ("cacheId", "key")
 
-      when(frontendSessionsRepository.putSession[String](DataKey(eqTo(key)), eqTo(testData))(any(), any(), any()))
+      when(frontendSessionsRepository.putSession[String](DataKey(eqTo(key)), eqTo(testData))(any(), any()))
         .thenReturn(Future.successful(expectedResponse))
 
       val result = testService.cache(key, testData).futureValue
@@ -381,7 +381,7 @@ class FrontendSessionServiceSpec extends AnyWordSpec with Matchers with ErsTestH
       val testData = "testData"
       val exception = new RuntimeException("Cache operation failed")
 
-      when(frontendSessionsRepository.putSession[String](DataKey(eqTo(key)), eqTo(testData))(any(), any(), any()))
+      when(frontendSessionsRepository.putSession[String](DataKey(eqTo(key)), eqTo(testData))(any(), any()))
         .thenReturn(Future.failed(exception))
 
       val result = testService.cache(key, testData).failed.futureValue
