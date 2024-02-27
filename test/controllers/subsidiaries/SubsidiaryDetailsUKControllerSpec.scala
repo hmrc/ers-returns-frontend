@@ -125,9 +125,9 @@ class SubsidiaryDetailsUKControllerSpec extends AnyWordSpecLike
         when(mockErsUtil.cache[Company](any(), any(), any())(any(), any())).thenReturn(Future.successful(emptyCacheMap))
         when(mockCompanyDetailsService.updateSubsidiaryCompanyCache(any())(any())).thenReturn(Future.successful(()), Future.successful(()))
 
-        val companyData = Map("name" -> "Test company")
+        val companyData = Map("companyName" -> "Test company")
 
-        val form = RsFormMappings.companyAddressUkForm().bind(companyData)
+        val form = RsFormMappings.companyNameForm().bind(companyData)
 
         implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*))
         val result = testController.questionSubmit(1).apply(authRequest)
@@ -137,4 +137,41 @@ class SubsidiaryDetailsUKControllerSpec extends AnyWordSpecLike
 
       }
     }
+
+  "calling editCompany" should {
+    implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+    setAuthMocks()
+    when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any())).thenReturn(Future.successful(ersRequestObject))
+
+    "be the same as showQuestion for a specific index" in {
+      when(mockErsUtil.fetchPartFromCompanyDetailsList[Company](any(),any())(any(), any())).thenReturn(Future.successful(Some(Company("Test company",None,None))))
+
+      val result = testController.editCompany(1).apply(authRequest)
+
+      status(result) shouldBe Status.OK
+      contentAsString(result) should include(testMessages("ers_manual_company_details_uk.title"))
+      contentAsString(result) should include("Test company")
+
+    }
   }
+
+  "calling editQuestionSubmit" should {
+    setAuthMocks()
+    when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any())).thenReturn(Future.successful(ersRequestObject))
+
+    "successfully bind the form and go to the edit version of the subsidiary address UK page with the index preserved if the form is filled correctly" in {
+      val emptyCacheMap = CacheMap("", Map("" -> Json.obj()))
+      when(mockErsUtil.cache[Company](any(), any(), any())(any(), any())).thenReturn(Future.successful(emptyCacheMap))
+      when(mockErsUtil.fetchCompaniesOptionally(any())(any(), any())).thenReturn(Future.successful(Fixtures.exampleCompanies))
+      when(mockCompanyDetailsService.updateSubsidiaryCompanyCache(any())(any())).thenReturn(Future.successful(()), Future.successful(()))
+
+      val companyAddressData = Map("companyName" -> "Test person")
+      val form = RsFormMappings.companyAddressUkForm().bind(companyAddressData)
+      implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*))
+      val result = testController.editQuestionSubmit(1).apply(authRequest)
+
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result).get shouldBe controllers.subsidiaries.routes.SubsidiaryAddressUkController.editCompany(1).url
+    }
+  }
+}

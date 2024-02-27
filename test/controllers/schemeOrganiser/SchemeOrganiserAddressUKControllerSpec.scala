@@ -78,7 +78,7 @@ class SchemeOrganiserAddressUKControllerSpec extends AnyWordSpecLike
     when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any())).thenReturn(Future.successful(ersRequestObject))
 
     "show the empty scheme organiser address UK question page when there is nothing to prefill" in {
-      when(mockErsUtil.fetchPartFromCompanyDetailsList[CompanyDetailsList](any(), any())(any(), any())).thenReturn(Future.successful(None))
+      when(mockErsUtil.fetchPartFromCompanyDetails[CompanyDetailsList](any())(any(), any())).thenReturn(Future.successful(None))
       val result = testController.questionPage(1).apply(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
 
       status(result) shouldBe Status.OK
@@ -87,7 +87,7 @@ class SchemeOrganiserAddressUKControllerSpec extends AnyWordSpecLike
     }
 
     "show the prefilled scheme organiser address UK question page when there is data to prefill" in {
-      when(mockErsUtil.fetchPartFromCompanyDetailsList[CompanyAddress](any(), any())(any(), any())).thenReturn(Future.successful(Some(companyAddressUK)))
+      when(mockErsUtil.fetchPartFromCompanyDetails[CompanyAddress](any())(any(), any())).thenReturn(Future.successful(Some(companyAddressUK)))
 
       val result = testController.questionPage(1).apply(authRequest)
 
@@ -97,7 +97,7 @@ class SchemeOrganiserAddressUKControllerSpec extends AnyWordSpecLike
       contentAsString(result) should include("UK 1")
     }
     "show the global error page if an exception occurs while retrieving cached data" in {
-      when(mockErsUtil.fetchPartFromCompanyDetailsList[CompanyAddress](any(), any())(any(), any())).thenReturn(Future.failed(new RuntimeException("Failure scenario")))
+      when(mockErsUtil.fetchPartFromCompanyDetails[CompanyAddress](any())(any(), any())).thenReturn(Future.failed(new RuntimeException("Failure scenario")))
 
       val result = testController.questionPage(1).apply(authRequest)
 
@@ -123,7 +123,7 @@ class SchemeOrganiserAddressUKControllerSpec extends AnyWordSpecLike
     "successfully bind the form and redirect to the scheme Organiser Summary Page" in {
       val emptyCacheMap = CacheMap("", Map("" -> Json.obj()))
       when(mockErsUtil.cache[CompanyAddress](any(), any(), any())(any(), any())).thenReturn(Future.successful(emptyCacheMap))
-      when(mockCompanyDetailsService.updateSubsidiaryCompanyCache(any())(any())).thenReturn(Future.successful(()), Future.successful(()))
+      when(mockCompanyDetailsService.updateSchemeOrganiserCache(any())).thenReturn(Future.successful(()), Future.successful(()))
 
       val companyAddressUkData = Map("addressLine1" -> "123 Fake Street")
       val form = RsFormMappings.companyAddressUkForm().bind(companyAddressUkData)
@@ -141,7 +141,7 @@ class SchemeOrganiserAddressUKControllerSpec extends AnyWordSpecLike
     when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any())).thenReturn(Future.successful(ersRequestObject))
 
     "be the same as showQuestion for a specific index" in {
-      when(mockErsUtil.fetchPartFromCompanyDetailsList[CompanyAddress](any(), any())(any(), any())).thenReturn(Future.successful(Some(companyAddressUK)))
+      when(mockErsUtil.fetchPartFromCompanyDetails[CompanyAddress](any())(any(), any())).thenReturn(Future.successful(Some(companyAddressUK)))
 
       val result = testController.editCompany(1).apply(authRequest)
 

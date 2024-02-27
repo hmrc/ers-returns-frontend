@@ -56,7 +56,11 @@ trait SubsidiaryBaseController[A] extends SchemeOrganiserBaseController[A] {
 
   override def showQuestionPage(requestObject: RequestObject, index: Int, edit: Boolean = false)
                                (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
-    ersUtil.fetchPartFromCompanyDetailsList[A](index, requestObject.getSchemeReference).map { previousAnswer: Option[A] =>
+    ersUtil.fetchPartFromCompanyDetailsList[A](
+      index,
+      requestObject.getSchemeReference)
+      .map {
+      previousAnswer: Option[A] =>
       println(s"Previous answer innit: $previousAnswer")
       val preparedForm = previousAnswer.fold(form)(form.fill(_))
       Ok(view(requestObject, index, preparedForm, edit))

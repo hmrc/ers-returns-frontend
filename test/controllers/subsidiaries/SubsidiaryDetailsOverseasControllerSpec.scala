@@ -30,6 +30,7 @@ import play.api.i18n
 import play.api.i18n.{MessagesApi, MessagesImpl}
 import play.api.libs.json.Json
 import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents}
+import play.api.routing.Router.empty.routes
 import play.api.test.Helpers.{contentAsString, defaultAwaitTimeout, redirectLocation, status, stubBodyParser}
 import uk.gov.hmrc.http.cache.client.CacheMap
 import utils.Fixtures.ersRequestObject
@@ -124,14 +125,51 @@ class SubsidiaryDetailsOverseasControllerSpec extends AnyWordSpecLike
       when(mockErsUtil.cache[Company](any(), any(), any())(any(), any())).thenReturn(Future.successful(emptyCacheMap))
       when(mockCompanyDetailsService.updateSubsidiaryCompanyCache(any())(any())).thenReturn(Future.successful(()), Future.successful(()))
 
-      val companyData = Map("name" -> "Test company")
+      val companyData = Map("companyName" -> "Test company")
       val form = RsFormMappings.companyNameForm().bind(companyData)
       implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*))
       val result = testController.questionSubmit(1).apply(authRequest)
 
       status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result).get shouldBe routes.SubsidiaryAddressOverseasController.questionPage().url
+      redirectLocation(result).get shouldBe controllers.subsidiaries.routes.SubsidiaryAddressOverseasController.questionPage().url
 
+    }
+  }
+
+  "calling editCompany" should {
+    implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+    setAuthMocks()
+    when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any())).thenReturn(Future.successful(ersRequestObject))
+
+    "be the same as showQuestion for a specific index" in {
+      when(mockErsUtil.fetchPartFromCompanyDetailsList[Company](any(), any())(any(), any())).thenReturn(Future.successful(Some(Company("Test company",None,None))))
+
+      val result = testController.editCompany(1).apply(authRequest)
+
+      status(result) shouldBe Status.OK
+      contentAsString(result) should include(testMessages("ers_manual_company_details_overseas.title"))
+      contentAsString(result) should include("Test company")
+
+    }
+  }
+
+  "calling editQuestionSubmit" should {
+    setAuthMocks()
+    when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any())).thenReturn(Future.successful(ersRequestObject))
+
+    "successfully bind the form and go to the edit version of the subsidiary address overseas page with the index preserved if the form is filled correctly" in {
+      val emptyCacheMap = CacheMap("", Map("" -> Json.obj()))
+      when(mockErsUtil.cache[Company](any(), any(), any())(any(), any())).thenReturn(Future.successful(emptyCacheMap))
+      when(mockErsUtil.fetchCompaniesOptionally(any())(any(), any())).thenReturn(Future.successful(Fixtures.exampleCompanies))
+      when(mockCompanyDetailsService.updateSubsidiaryCompanyCache(any())(any())).thenReturn(Future.successful(()), Future.successful(()))
+
+      val companyAddressData = Map("companyName" -> "Test person")
+      val form = RsFormMappings.companyAddressOverseasForm().bind(companyAddressData)
+      implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*))
+      val result = testController.editQuestionSubmit(1).apply(authRequest)
+
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result).get shouldBe controllers.subsidiaries.routes.SubsidiaryAddressOverseasController.editCompany(1).url
     }
   }
 }

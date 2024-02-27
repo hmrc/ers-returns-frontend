@@ -384,7 +384,7 @@ class ERSUtil @Inject() (
 		}
 	}
 
-	def fetchPartFromCompanyDetails[A](index: Int, cacheId: String)(implicit hc: HeaderCarrier, formats: json.Format[A]): Future[Option[A]] = {
+	def fetchPartFromCompanyDetails[A](cacheId: String)(implicit hc: HeaderCarrier, formats: json.Format[A]): Future[Option[A]] = {
 		shortLivedCache.fetchAndGetEntry[JsValue](cacheId, SCHEME_ORGANISER_CACHE).map {
 			companyDetailsOpt =>
 				println("Json here: " + companyDetailsOpt.getOrElse(""))
@@ -400,6 +400,12 @@ class ERSUtil @Inject() (
 	def fetchCompaniesOptionally(cacheId: String)(implicit hc: HeaderCarrier, formats: json.Format[CompanyDetailsList]): Future[CompanyDetailsList] = {
 		fetch[CompanyDetailsList](SUBSIDIARY_COMPANIES_CACHE, cacheId).recover {
 			case _ => CompanyDetailsList(List.empty[CompanyDetails])
+		}
+	}
+
+	def fetchSchemeOrganiserOptionally(cacheId: String)(implicit hc: HeaderCarrier, formats: json.Format[CompanyDetails]): Future[Option[CompanyDetails]]= {
+		fetch[CompanyDetails](SCHEME_ORGANISER_CACHE, cacheId).map(Some(_)).recover {
+			case _ => None
 		}
 	}
 }

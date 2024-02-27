@@ -749,7 +749,7 @@ class CsvFileUploadControllerSpec
         csvFileUploadController.validateCsv(mock[List[UploadedSuccessfully]], mock[SchemeInfo])(authRequest, hc)
       status(result)         shouldBe SEE_OTHER
       result.futureValue.header
-        .headers("Location") shouldBe controllers.schemeOrganiser.routes.SchemeOrganiserController.schemeOrganiserPage().toString
+        .headers("Location") shouldBe controllers.schemeOrganiser.routes.SchemeOrganiserBasedInUkController.questionPage().toString
     }
 
     "redirect to validationFailure if validating fails" in {
@@ -847,7 +847,7 @@ class CsvFileUploadControllerSpec
         .checkFileNames(testCsvCallbackData, mockSchemeInfo)(authRequest, hc)
       status(result)         shouldBe SEE_OTHER
       result.futureValue.header
-        .headers("Location") shouldBe controllers.schemeOrganiser.routes.SchemeOrganiserController.schemeOrganiserPage().toString
+        .headers("Location") shouldBe controllers.schemeOrganiser.routes.SchemeOrganiserBasedInUkController.questionPage().toString
     }
 
     "redirect to getFileUploadProblemPage() if file name check is unsuccessful" in {

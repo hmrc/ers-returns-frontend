@@ -65,9 +65,14 @@ class GroupSchemeControllerSpec
   val groupView: group                                 = app.injector.instanceOf[group]
   val groupPlanSummaryView: group_plan_summary         = app.injector.instanceOf[group_plan_summary]
 
-  val company: CompanyDetails                     =
+  val company: CompanyDetails                     = {
     CompanyDetails(Fixtures.companyName, "Address Line 1", None, None, None, None, None, None, None,false)
-  lazy val companyDetailsList: CompanyDetailsList = CompanyDetailsList(List(company, company))
+  }
+
+  val company1: CompanyDetails                     = {
+    CompanyDetails(Fixtures.companyName, "Address Line 1", Some("Address line 2"), None, None, None, None, None, None,true)
+  }
+  lazy val companyDetailsList: CompanyDetailsList = CompanyDetailsList(List(company, company1))
 
   override def beforeEach(): Unit = {
     super.beforeEach()
@@ -115,98 +120,6 @@ class GroupSchemeControllerSpec
     }
   }
 
-//  "showManualCompanyDetailsPage" should {
-//    "display company details page for correct scheme" in {
-//      when(mockErsUtil.fetch[RequestObject](refEq(mockErsUtil.ersRequestObject))(any(), any(), any()))
-//        .thenReturn(Future.successful(ersRequestObject))
-//
-//      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
-//      val result      = testGroupSchemeController.groupSchemePage(1)(authRequest,hc)
-//      status(result) shouldBe OK
-//      contentAsString(result).contains(Messages("ers_manual_company_details.csop.title"))
-//    }
-//  }
-
-  "showManualCompanyDetailsSubmit" should {
-
-//    def buildCompanyDetailsRequest(isValid: Boolean) = {
-//      val data = if (isValid) {
-//        Map("companyName" -> Fixtures.companyName,
-//					"addressLine1" -> "Add1",
-//					"addressLine2" -> "Add2",
-//					"addressLine3" -> "Add3",
-//					"addressLine4" -> "Add4",
-//					"postcode" -> "AA111AA",
-//					"country" -> "United Kingdom",
-//					"companyReg" -> "",
-//					"corporationRef" -> ""
-//				)
-//      }
-//      else {
-//        Map("" -> "")
-//      }
-//      val form = _root_.models.RsFormMappings.companyDetailsList.bind(data)
-//      Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
-//    }
-
-
-//    "redirect to Group Summary page if showManualCompanyDetailsSubmit is called with authentication and correct form data for additional company" in {
-//      when(
-//        mockErsUtil.fetch[CompanyDetailsList](refEq(mockErsUtil.GROUP_SCHEME_COMPANIES), anyString())(any(), any())
-//      ).thenReturn(
-//        Future.successful(companyDetailsList)
-//      )
-//      when(
-//        mockErsUtil.cache(refEq(mockErsUtil.GROUP_SCHEME_COMPANIES), any[CompanyDetailsList](), anyString())(any(), any())
-//      ).thenReturn(
-//        Future.successful(mock[CacheMap])
-//      )
-//
-//      val authRequest = buildRequestWithAuth(buildCompanyDetailsRequest(isValid = true))
-//      val result = testGroupSchemeController.showManualCompanyDetailsPage(1)(authRequest, hc)
-//      status(result) shouldBe SEE_OTHER
-//      headers(result).get("Location").get.contains("/group-summary")
-//    }
-
-//    "redirect to Group Summary page if showManualCompanyDetailsSubmit is called with authentication and correct form data for updated company" in {
-//      when(
-//        mockErsUtil.fetch[CompanyDetailsList](refEq(mockErsUtil.GROUP_SCHEME_COMPANIES), anyString())(any(), any())
-//      ).thenReturn(
-//        Future.successful(companyDetailsList)
-//      )
-//      when(
-//        mockErsUtil.cache(refEq(mockErsUtil.GROUP_SCHEME_COMPANIES), any[CompanyDetailsList](), anyString())(any(), any())
-//      ).thenReturn(
-//        Future.successful(mock[CacheMap])
-//      )
-//
-//      val authRequest = buildRequestWithAuth(buildCompanyDetailsRequest(isValid = true))
-//      val result = testGroupSchemeController.showManualCompanyDetailsPage(1)(authRequest, hc)
-//      status(result) shouldBe SEE_OTHER
-//      headers(result).get("Location").get.contains("/group-summary")
-//    }
-
-
-//    "redirect to Group Summary page if data is filled correctly and there is nothing in existing cache" in {
-//      when(
-//        mockErsUtil.fetch[CompanyDetailsList](refEq(mockErsUtil.GROUP_SCHEME_COMPANIES), anyString())(any(), any())
-//      ).thenReturn(
-//        Future.failed(new NoSuchElementException("Nothing in cache"))
-//      )
-//      when(
-//        mockErsUtil.cache(refEq(mockErsUtil.GROUP_SCHEME_COMPANIES), any[CompanyDetailsList](), anyString())(any(), any())
-//      ).thenReturn(
-//        Future.successful(mock[CacheMap])
-//      )
-//
-//      val authRequest = buildRequestWithAuth(buildCompanyDetailsRequest(isValid = true))
-//      val result = testGroupSchemeController.showManualCompanyDetailsPage(1)(authRequest, hc)
-//      status(result) shouldBe SEE_OTHER
-//      headers(result).get("Location").get.contains("/group-summary")
-//    }
- }
-
-  "calling replace company" should {
 
     lazy val controllerUnderTest: GroupSchemeController = new GroupSchemeController(
       mockMCC,
@@ -220,91 +133,20 @@ class GroupSchemeControllerSpec
       testAuthAction
     )
 
-//    "replace a companies and keep the other companies" when {
-//
-//      "given an index that matches a companies in the list" in {
-//
-//        val index = 2
-//
-//        val formData = CompanyDetails("Replacement Company", "1 Some Place", None, None, None, None, None, None, None)
-//        val target = CompanyDetails("Target Company", "3 Window Close", None, None, None, None, None, None, None)
-//
-//        val companiesDetailsList = List(
-//          CompanyDetails("First Company", "20 Garden View", None, None, None, None, None, None, None),
-//          CompanyDetails("Third Company", "72 Big Avenue", None, None, None, None, None, None, None),
-//          target,
-//          CompanyDetails("Fourth Company", "21 Brick Lane", None, None, None, None, None, None, None)
-//        )
-//
-//        val result = controllerUnderTest.replaceCompany(companiesDetailsList, index, formData)
-//
-//        result should contain(formData)
-//        result shouldNot contain(target)
-//        result.length shouldBe 4
-//      }
-//    }
+    "deleteCompany" should {
+      def deleteCompanyHandler(index: Int, request: FakeRequest[AnyContentAsEmpty.type])(
+        handler: Future[Result] => Any
+      ): Unit =
+        handler(testGroupSchemeController.deleteCompany(index).apply(request))
 
-//    "keep the existing list of companies" when {
-//
-//      "given an index that does not match any existing companies" in {
-//
-//        val index = 100
-//
-//        val formData = CompanyDetails("Replacement Company", "1 Some Place", None, None, None, None, None, None, None)
-//        val target = CompanyDetails("Target Company", "3 Window Close", None, None, None, None, None, None, None)
-//
-//        val companyDetailsList = List(
-//          CompanyDetails("First Company", "20 Garden View", None, None, None, None, None, None, None),
-//          CompanyDetails("Third Company", "72 Big Avenue", None, None, None, None, None, None, None),
-//          target,
-//          CompanyDetails("Fourth Company", "21 Brick Lane", None, None, None, None, None, None, None)
-//        )
-//
-//        val result = controllerUnderTest.replaceCompany(companyDetailsList, index, formData)
-//
-//        result shouldNot contain(formData)
-//        result should contain(target)
-//        result.length shouldBe 4
-//      }
-//    }
-
-//    "remove duplicate records" when {
-//
-//      "duplicates are present" in {
-//
-//        val index = 1
-//
-//        val target = CompanyDetails("Target Company", "3 Window Close", None, None, None, None, None, None, None)
-//
-//        val companyDetailsList = List(
-//          target,
-//          target,
-//          target,
-//          target
-//        )
-//
-//        val result = controllerUnderTest.replaceCompany(companyDetailsList, index, target)
-//
-//        result should contain(target)
-//        result.length shouldBe 1
-//      }
-    // }
-  }
-
-  "deleteCompany" should {
-    def deleteCompanyHandler(index: Int, request: FakeRequest[AnyContentAsEmpty.type])(
-      handler: Future[Result] => Any
-    ): Unit =
-      handler(testGroupSchemeController.deleteCompany(index).apply(request))
-
-    "redirect to sign in page if user is not authenticated" in {
-      setUnauthorisedMocks()
-      deleteCompanyHandler(0, Fixtures.buildFakeRequestWithSessionId("GET")) { result =>
-        status(result)                                                  shouldBe SEE_OTHER
-        headers(result)(implicitly)("Location").contains("/gg/sign-in") shouldBe true
+      "redirect to sign in page if user is not authenticated" in {
+        setUnauthorisedMocks()
+        deleteCompanyHandler(0, Fixtures.buildFakeRequestWithSessionId("GET")) { result =>
+          status(result) shouldBe SEE_OTHER
+          headers(result)(implicitly)("Location").contains("/gg/sign-in") shouldBe true
+        }
       }
     }
-  }
 
   "showDeleteCompany" should {
     "direct to ers errors page if fetchAll fails" in {
@@ -342,7 +184,7 @@ class GroupSchemeControllerSpec
     "give a redirect to groupPlanSummaryPage with the selected company deleted if showDeleteCompany is called with authentication and correct cache" in {
 
       when(mockErsUtil.fetchAll(anyString())(any(), any()))
-        .thenReturn(Future.successful(CacheMap("id1", Map(GROUP_SCHEME_COMPANIES -> Json.toJson(companyDetailsList)))))
+        .thenReturn(Future.successful(CacheMap("_id", Map(GROUP_SCHEME_COMPANIES -> Json.toJson(companyDetailsList)))))
 
       when(
         mockErsUtil.fetch[RequestObject](refEq(mockErsUtil.ersRequestObject))(any(), any(), any())

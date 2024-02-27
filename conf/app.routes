@@ -125,9 +125,6 @@ POST        /company-details-overseas                       controllers.schemeOr
 GET         /company-details-overseas/:index/edit           controllers.schemeOrganiser.SchemeOrganiserDetailsOverseasController.editCompany(index: Int)
 POST        /company-details-overseas/:index/edit           controllers.schemeOrganiser.SchemeOrganiserDetailsOverseasController.editQuestionSubmit(index:Int)
 
-GET 		/company-details  		                        controllers.schemeOrganiser.SchemeOrganiserController.schemeOrganiserPage()
-POST 		/company-details 			                    controllers.schemeOrganiser.SchemeOrganiserController.schemeOrganiserSubmit()
-
 GET 		/scheme-organiser-summary   		        	controllers.schemeOrganiser.SchemeOrganiserController.schemeOrganiserSummaryPage()
 POST 		/scheme-organiser-summary      				    controllers.schemeOrganiser.SchemeOrganiserController.companySummaryContinue()
 

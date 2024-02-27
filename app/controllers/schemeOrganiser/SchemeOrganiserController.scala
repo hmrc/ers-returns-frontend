@@ -40,7 +40,6 @@ class SchemeOrganiserController @Inject()(
                                            implicit val ersUtil: ERSUtil,
                                            implicit val appConfig: ApplicationConfig,
                                            globalErrorView: views.html.global_error,
-                                           schemeOrganiserView: views.html.scheme_organiser,
                                            schemeOrganiserSummaryView: views.html.scheme_organiser_summary,
                                            authAction: AuthAction
                                          ) extends FrontendController(mcc)
@@ -50,68 +49,23 @@ class SchemeOrganiserController @Inject()(
 
   implicit val ec: ExecutionContext = mcc.executionContext
 
-  def schemeOrganiserPage(): Action[AnyContent] = authAction.async { implicit request =>
-    ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
-      showSchemeOrganiserPage(requestObject)(request, hc)
-    }
-  }
-
-  def showSchemeOrganiserPage(requestObject: RequestObject)
-                             (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
-    logger.info(s"[SchemeOrganiserController][showSchemeOrganiserPage] schemeRef: ${requestObject.getSchemeReference}.")
-
-    (for {
-      reportableEvent <- ersUtil.fetch[ReportableEvents](ersUtil.reportableEvents, requestObject.getSchemeReference)
-      fileType <- ersUtil.actuallyFetchOption[CheckFileType](ersUtil.FILE_TYPE_CACHE, requestObject.getSchemeReference)
-      res <- ersUtil.actuallyFetchOption[SchemeOrganiserDetails](ersUtil.SCHEME_ORGANISER_CACHE, requestObject.getSchemeReference)
-    } yield {
-      val form = res.fold(RsFormMappings.schemeOrganiserForm())(RsFormMappings.schemeOrganiserForm().fill(_))
-      Ok(
-        schemeOrganiserView(
-          requestObject,
-          fileType.fold("")(_.checkFileType.get),
-          form,
-          reportableEvent.isNilReturn.get
-        )
-      )
-    }) recover {
-      case e: Exception =>
-        logger.error(
-          s"[SchemeOrganiserController][showSchemeOrganiserPage] Get reportableEvent.isNilReturn failed with exception ${e.getMessage}," +
-            s" timestamp: ${System.currentTimeMillis()}."
-        )
-        getGlobalErrorPage
-    }
-  }
-
-  def schemeOrganiserSubmit(): Action[AnyContent] = authAction.async { implicit request =>
-    println("surely we arrive here pausechamp")
-    ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
-      showSchemeOrganiserSubmit(requestObject)(request, hc)
-    }
-  }
-
-  def showSchemeOrganiserSubmit(requestObject: RequestObject)
-                               (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
-    println("weee wooo weee wooo")
-    Future.successful(Redirect(controllers.subsidiaries.routes.GroupSchemeController.groupSchemePage()))
-  }
-
   def schemeOrganiserSummaryPage: Action[AnyContent] = authAction.async {
     implicit request =>
-      showschemeOrganiserSummaryPage(request, hc)
+      showSchemeOrganiserSummaryPage(request, hc)
   }
 
-  def showschemeOrganiserSummaryPage(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
+  def showSchemeOrganiserSummaryPage(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
     (for {
       requestObject <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
-      companyDetails <- ersUtil.fetch[CompanyDetails](ersUtil.SCHEME_ORGANISER_CACHE, requestObject.getSchemeReference)
-    } yield {
-      println(companyDetails)
-      Ok(schemeOrganiserSummaryView(requestObject, companyDetails))
-    }) recover {
+      companyDetails <- ersUtil.fetchSchemeOrganiserOptionally(requestObject.getSchemeReference)
+    } yield
+      if (companyDetails.isDefined) {
+        Ok(schemeOrganiserSummaryView(requestObject, companyDetails.get))
+      } else {
+        Redirect(controllers.schemeOrganiser.routes.SchemeOrganiserBasedInUkController.questionPage())
+  }) recover {
       case e: Exception =>
-        logger.error(s"[SchemeOrganiserController][showManualCompanyDetailsPage] Get data from cache failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
+        logger.error(s"[SchemeOrganiserController][showSchemeOrganiserSummaryPage] Get data from cache failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
         getGlobalErrorPage
     }
   }

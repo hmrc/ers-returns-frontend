@@ -228,6 +228,12 @@ object Fixtures extends AuthHelper {
     Some("UK")
   )
 
+  val companyUKDetails: Company = Company(
+    "FunnyCompany",
+    Some("AA123456"),
+    Some("1234567890")
+  )
+
   val trusteeAddressOverseas: TrusteeAddress = TrusteeAddress(
     "Overseas line 1",
     Some("Overseas line 2"),
@@ -250,4 +256,15 @@ object Fixtures extends AuthHelper {
     TrusteeDetails(TrusteeName("John Bonson"), trusteeAddressUk),
     TrusteeDetails(TrusteeName("Dave Daveson"), trusteeAddressOverseas)
   ))
+
+  val exampleCompanies: CompanyDetailsList = CompanyDetailsList(List(
+    CompanyDetails(Company("Company1", Some("AA123456"), Some("1234567890")), companyAddressUK),
+    CompanyDetails(Company("Company2", Some("BB123456"), Some("0987654321")), companyAddressOverseas)
+  ))
+
+  val exampleSchemeOrganiserUk: CompanyDetails = CompanyDetails(Company("Company1", Some("AA123456"), Some("1234567890")), companyAddressUK)
+
+  val exampleSchemeOrganiserOverseas: CompanyDetails =  CompanyDetails(Company("Company2", Some("BB123456"), Some("0987654321")), companyAddressOverseas)
+
+
 }

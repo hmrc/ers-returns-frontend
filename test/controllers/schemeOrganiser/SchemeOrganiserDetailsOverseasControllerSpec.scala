@@ -16,7 +16,7 @@
 
 package controllers.schemeOrganiser
 
-import models.{Company, RequestObject, RsFormMappings}
+import models.{Company, CompanyDetails, RequestObject, RsFormMappings}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatest.OptionValues
@@ -33,7 +33,7 @@ import play.api.routing.Router.empty.routes
 import play.api.test.Helpers.{contentAsString, defaultAwaitTimeout, redirectLocation, status, stubBodyParser}
 import uk.gov.hmrc.http.cache.client.CacheMap
 import utils.{ERSFakeApplicationConfig, ErsTestHelper, Fixtures}
-import utils.Fixtures.ersRequestObject
+import utils.Fixtures.{companyDetails, companyName, companyUKDetails, ersRequestObject}
 import views.html.{global_error, manual_company_details_overseas}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -76,27 +76,27 @@ class SchemeOrganiserDetailsOverseasControllerSpec extends AnyWordSpecLike
     when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any())).thenReturn(Future.successful(ersRequestObject))
 
     "show the empty company name question page when there is nothing to prefill" in {
-      when(mockErsUtil.fetchPartFromCompanyDetailsList[Company](any(), any())(any(), any())).thenReturn(Future.successful(None))
+      when(mockErsUtil.fetchPartFromCompanyDetails[Company](any())(any(), any())).thenReturn(Future.successful(None))
 
       val result = testController.questionPage(1).apply(authRequest)
 
       status(result) shouldBe Status.OK
-      contentAsString(result) should include(testMessages("ers_manual_company_details_uk.title"))
+      contentAsString(result) should include(testMessages("ers_manual_company_details_overseas.title"))
     }
 
     "show the prefilled company name question page when there is data to prefill" in {
-      when(mockErsUtil.fetchPartFromCompanyDetailsList[Company](any(), any())(any(), any())).thenReturn(Future.successful(Some(Company("Test Company", None, None))))
+      when(mockErsUtil.fetchPartFromCompanyDetails[Company](any())(any(), any())).thenReturn(Future.successful(Some(Company("Test Company", None, None))))
 
       val result = testController.questionPage(1).apply(authRequest)
 
       status(result) shouldBe Status.OK
-      contentAsString(result) should include(testMessages("ers_manual_company_details_uk.title"))
+      contentAsString(result) should include(testMessages("ers_manual_company_details_overseas.title"))
       contentAsString(result) should include("Test Company")
 
     }
 
     "show the global error page if an exception occurs while retrieving cached data" in {
-      when(mockErsUtil.fetchPartFromCompanyDetailsList[Company](any(), any())(any(), any())).thenReturn(Future.failed(new RuntimeException("Failure scenario")))
+      when(mockErsUtil.fetchPartFromCompanyDetails[Company](any())(any(), any())).thenReturn(Future.failed(new RuntimeException("Failure scenario")))
 
       val result = testController.questionPage(1).apply(authRequest)
 
@@ -119,19 +119,56 @@ class SchemeOrganiserDetailsOverseasControllerSpec extends AnyWordSpecLike
       contentAsString(result) should include(testMessages("error.required"))
     }
 
-    "successfully bind the form and go to the company uk address page if the form is filled correctly" in {
+    "successfully bind the form and go to the company overseas address page if the form is filled correctly" in {
       val emptyCacheMap = CacheMap("", Map("" -> Json.obj()))
       when(mockErsUtil.cache[Company](any(), any(), any())(any(), any())).thenReturn(Future.successful(emptyCacheMap))
-      when(mockCompanyDetailsService.updateSubsidiaryCompanyCache(any())(any())).thenReturn(Future.successful(()), Future.successful(()))
+      when(mockCompanyDetailsService.updateSchemeOrganiserCache(any())).thenReturn(Future.successful(()), Future.successful(()))
 
-      val companyData = Map("name" -> "Test company")
+      val companyData = Map("companyName" -> "Test company")
       val form = RsFormMappings.companyNameForm().bind(companyData)
       implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*))
       val result = testController.questionSubmit(1).apply(authRequest)
 
       status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result).get shouldBe controllers.schemeOrganiser.routes.SchemeOrganiserAddressUkController.questionPage().url
+      redirectLocation(result).get shouldBe controllers.schemeOrganiser.routes.SchemeOrganiserAddressOverseasController.questionPage().url
 
+    }
+  }
+
+  "calling editCompany" should {
+    implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+    setAuthMocks()
+    when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any())).thenReturn(Future.successful(ersRequestObject))
+
+    "be the same as showQuestion for a specific index" in {
+      when(mockErsUtil.fetchPartFromCompanyDetails[Company](any())(any(), any())).thenReturn(Future.successful(Some(Company("Test company",None,None))))
+
+      val result = testController.editCompany(1).apply(authRequest)
+
+      status(result) shouldBe Status.OK
+      contentAsString(result) should include(testMessages("ers_manual_company_details_overseas.title"))
+      contentAsString(result) should include("Test company")
+
+    }
+  }
+
+  "calling editQuestionSubmit" should {
+    setAuthMocks()
+    when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any())).thenReturn(Future.successful(ersRequestObject))
+
+    "successfully bind the form and go to the edit version of the scheme organiser address overseas page with the index preserved if the form is filled correctly" in {
+      val emptyCacheMap = CacheMap("", Map("" -> Json.obj()))
+      when(mockErsUtil.cache[CompanyDetails](any(), any(), any())(any(), any())).thenReturn(Future.successful(emptyCacheMap))
+      when(mockErsUtil.fetch[CompanyDetails](any(), any())(any(), any())).thenReturn(Future.successful(Fixtures.exampleSchemeOrganiserOverseas))
+      when(mockCompanyDetailsService.updateSubsidiaryCompanyCache(any())(any())).thenReturn(Future.successful(()), Future.successful(()))
+
+      val companyAddressData = Map("companyName" -> "Test person")
+      val form = RsFormMappings.companyAddressOverseasForm().bind(companyAddressData)
+      implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*))
+      val result = testController.editQuestionSubmit(1).apply(authRequest)
+
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result).get shouldBe controllers.schemeOrganiser.routes.SchemeOrganiserAddressOverseasController.editCompany(1).url
     }
   }
 }
