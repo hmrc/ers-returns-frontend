@@ -166,11 +166,11 @@ class CsvFileUploadControllerSpec
 
   "success" should {
     "update the cache for the relevant uploadId to InProgress" in {
-      val updatedCallbackCaptor: ArgumentCaptor[UpscanCsvFilesCallbackList] =
-        ArgumentCaptor.forClass(classOf[UpscanCsvFilesCallbackList])
+      val updatedCallbackCaptor: ArgumentCaptor[UpscanCsvFilesList] =
+        ArgumentCaptor.forClass(classOf[UpscanCsvFilesList])
       when(mockSessionService.fetch[UpscanCsvFilesList](meq("csv-files-upload"))(any(), any()))
         .thenReturn(Future.successful(notStartedUpscanCsvFilesList))
-      when(mockSessionService.cache(meq("csv-files-upload"), updatedCallbackCaptor.capture())(any(), any()))
+      when(mockSessionService.cache[UpscanCsvFilesList](meq("csv-files-upload"), updatedCallbackCaptor.capture())(any(), any()))
         .thenReturn(Future.successful(sessionPair))
 
       await(csvFileUploadController.success(testUploadId)(testFakeRequest))
