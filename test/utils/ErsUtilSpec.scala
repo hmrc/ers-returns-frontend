@@ -28,7 +28,7 @@ import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json
 import play.api.libs.json.{Format, JsValue, Json}
-import play.api.test.Helpers.await
+import play.api.test.Helpers.{await, defaultAwaitTimeout}
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.http.{HeaderCarrier, SessionId}
 import utils.SessionKeys.BUNDLE_REF
@@ -136,7 +136,7 @@ class ErsUtilSpec
       }
     }
 
-    "throw an exception if an acception occurs" in {
+    "throw an exception if an exception occurs" in {
       val anyVal = "abc"
       when(mockShortLivedCache.fetchAndGetEntry[JsValue](anyVal, anyVal))
         .thenReturn(Future.failed(new RuntimeException))
@@ -549,6 +549,66 @@ class ErsUtilSpec
     "not affect any &amp; that already exists" in {
       val input = "I am some test input & stuff &amp;"
       ersUtil.replaceAmpersand(input) shouldBe "I am some test input &amp; stuff &amp;"
+    }
+  }
+
+  "fetchPartFromCompanyDetailsList" should {
+    val ersUtil: ERSUtil = new ERSUtil(mockSessionCache, mockShortLivedCache, mockAppConfig)
+
+    "return the requested data from SUBSIDIARY_COMPANIES_CACHE" in {
+      when(mockShortLivedCache.fetchAndGetEntry[JsValue](any(), any())(any(),any(),any()))
+        .thenReturn(Future.successful(Some(Json.toJson(Fixtures.exampleCompanies))))
+
+    val result = ersUtil.fetchPartFromCompanyDetailsList[Company](0, "cacheId")
+    await(result) shouldBe Some(Company("Company1", Some("AA123456"), Some("1234567890")))
+    }
+
+    "return nothing when the cache is empty" in {
+      when(mockShortLivedCache.fetchAndGetEntry[JsValue](any(), any())(any(), any(), any()))
+        .thenReturn(Future.successful(None))
+
+      val result = ersUtil.fetchPartFromCompanyDetailsList[Company](0, "cacheId")
+      await(result) shouldBe None
+    }
+  }
+
+  "fetchPartFromCompanyDetails" should {
+    val ersUtil: ERSUtil = new ERSUtil(mockSessionCache, mockShortLivedCache, mockAppConfig)
+
+    "return the requested data from SCHEME_ORGANISER_CACHE" in {
+      when(mockShortLivedCache.fetchAndGetEntry[JsValue](any(), any())(any(), any(), any()))
+        .thenReturn(Future.successful(Some(Json.toJson(Fixtures.exampleSchemeOrganiserUk))))
+
+      val result = ersUtil.fetchPartFromCompanyDetails[Company]("cacheId")
+      await(result) shouldBe Some(Company("Company1", Some("AA123456"), Some("1234567890")))
+    }
+
+    "return nothing when the cache is empty" in {
+      when(mockShortLivedCache.fetchAndGetEntry[JsValue](any(), any())(any(), any(), any()))
+        .thenReturn(Future.successful(None))
+
+      val result = ersUtil.fetchPartFromCompanyDetails[Company]("cacheId")
+      await(result) shouldBe None
+      }
+    }
+
+  "fetchPartFromTrusteeDetailsList" should {
+    val ersUtil: ERSUtil = new ERSUtil(mockSessionCache, mockShortLivedCache, mockAppConfig)
+
+    "return the requested data from TRUSTEES_CACHE" in {
+      when(mockShortLivedCache.fetchAndGetEntry[JsValue](any(), any())(any(),any(),any()))
+        .thenReturn(Future.successful(Some(Json.toJson(Fixtures.exampleTrustees))))
+
+      val result = ersUtil.fetchPartFromTrusteeDetailsList[TrusteeName](0, "cacheId")
+      await(result) shouldBe Some(TrusteeName("John Bonson"))
+    }
+
+    "return nothing when the cache is empty" in {
+      when(mockShortLivedCache.fetchAndGetEntry[JsValue](any(), any())(any(), any(), any()))
+        .thenReturn(Future.successful(None))
+
+      val result = ersUtil.fetchPartFromTrusteeDetailsList[Company](0, "cacheId")
+      await(result) shouldBe None
     }
   }
 }

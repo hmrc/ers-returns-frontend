@@ -193,13 +193,6 @@ object RsFormMappings {
     trusteeAddressFields.country -> optional(text
       .verifying(pattern(addresssRegx.r, error = Messages("ers_scheme_organiser.err.summary.invalid_country"))))
   )(TrusteeAddress.apply)(TrusteeAddress.unapply))
-  /*
-   * Manual Company Details Form definition
-   */
-
-  /*
-   * Manual Company Details UK Address definition
-   */
 
   def companyAddressUkForm()(implicit messages: Messages): Form[CompanyAddress] = Form(mapping(
     companyAddressFields.addressLine1 -> text.verifying(Messages("ers_manual_company_details.err.summary.address_line1_required"), _.nonEmpty)
@@ -240,42 +233,6 @@ object RsFormMappings {
     companyAddressFields.country -> optional(text
       .verifying(pattern(addresssRegx.r, error = Messages("ers_scheme_organiser.err.summary.invalid_country"))))
   )(CompanyAddress.apply)(CompanyAddress.unapply))
-
-  /*
-   * Scheme Organiser Form definition
-   */
-  def schemeOrganiserForm()(implicit messages: Messages): Form[SchemeOrganiserDetails] = Form(mapping(
-    schemeOrganiserFields.companyName -> text
-			.verifying(Messages("ers_scheme_organiser.err.summary.company_name_required"), _.nonEmpty)
-			.verifying(Messages("ers_scheme_organiser.err.company_name"), so => checkLength(so, "schemeOrganiserFields.companyName"))
-			.verifying(Messages("ers_scheme_organiser.err.invalidChars.company_name"), so => validInputCharacters(so, addresssRegx)),
-    schemeOrganiserFields.addressLine1 -> text
-			.verifying(Messages("ers_scheme_organiser.err.summary.address_line1_required"), _.nonEmpty)
-			.verifying(Messages("ers_scheme_organiser.err.address_line1"), so => checkAddressLength(so, "schemeOrganiserFields.addressLine1"))
-			.verifying(Messages("ers_scheme_organiser.err.invalidChars.address_line1"), so => validInputCharacters(so, addresssRegx)),
-    schemeOrganiserFields.addressLine2 -> optional(text
-			.verifying(Messages("ers_scheme_organiser.err.address_line2"), so => checkAddressLength(so, "schemeOrganiserFields.addressLine2"))
-			.verifying(Messages("ers_scheme_organiser.err.invalidChars.address_line2"), so => validInputCharacters(so, addresssRegx))),
-    schemeOrganiserFields.addressLine3 -> optional(text
-			.verifying(Messages("ers_scheme_organiser.err.address_line3"), so => checkAddressLength(so, "schemeOrganiserFields.addressLine3"))
-			.verifying(Messages("ers_scheme_organiser.err.invalidChars.address_line3"), so => validInputCharacters(so, addresssRegx))),
-    schemeOrganiserFields.addressLine4 -> optional(text
-			.verifying(Messages("ers_scheme_organiser.err.address_line4"), so => checkAddressLength(so, "schemeOrganiserFields.addressLine4"))
-			.verifying(Messages("ers_scheme_organiser.err.invalidChars.address_line4"), so => validInputCharacters(so, addresssRegx))),
-    schemeOrganiserFields.country -> optional(text
-			verifying pattern(addresssRegx.r, error = Messages("ers_scheme_organiser.err.summary.invalid_country"))),
-    schemeOrganiserFields.postcode -> optional(text)
-      .transform((x: Option[String]) => x.map(_.toUpperCase()), (z: Option[String]) => z.map(_.toUpperCase()))
-      .verifying(Messages("ers_scheme_organiser.err.postcode"), so => isValidLengthPostcode(so))
-      .verifying(Messages("ers_scheme_organiser.err.invalidChars.postcode"), so => isValidPostcodeSchemeOrganiser(so))
-      .verifying(Messages("ers_scheme_organiser.err.invalidFormat.postcode"), so => isValidFormatPostcodeSchemeOrganiser(so)),
-    schemeOrganiserFields.companyReg -> optional(text
-			.verifying(Messages("ers_scheme_organiser.err.summary.company_reg"), so => checkLength(so, "schemeOrganiserFields.companyRegistrationNum"))
-			.verifying(pattern(fieldValidationPatterns.companyRegPattern.r, error = Messages("ers_scheme_organiser.err.summary.company_reg")))),
-    schemeOrganiserFields.corporationRef -> optional(text
-      .verifying(Messages("ers_scheme_organiser.err.summary.corporation_ref"), so => checkLength(so, "schemeOrganiserFields.corporationTaxReference"))
-      .verifying(pattern(fieldValidationPatterns.corporationRefPatternSchemeOrg.r, error = Messages("ers_scheme_organiser.err.summary.invalidChars.corporation_ref_pattern"))))
-  )(SchemeOrganiserDetails.apply)(SchemeOrganiserDetails.unapply))
 
   /*
   Subsidiary Company Form Definition
@@ -404,18 +361,6 @@ object companyAddressFields {
   val addressLine4 = "addressLine4"
   val addressLine5 = "addressLine5"
   val country = "country"
-}
-
-object schemeOrganiserFields {
-  val companyName    = "companyName"
-  val addressLine1   = "addressLine1"
-  val addressLine2   = "addressLine2"
-  val addressLine3   = "addressLine3"
-  val addressLine4   = "addressLine4"
-  val country        = "country"
-  val postcode       = "postcode"
-  val companyReg     = "companyReg"
-  val corporationRef = "corporationRef"
 }
 
 object companyNameFields {

@@ -149,7 +149,7 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
   ): Future[Result] =
     (for {
       requestObject      <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
-      companyDetailsList <- ersUtil.fetch[CompanyDetailsList](ersUtil.SUBSIDIARY_COMPANIES_CACHE, requestObject.getSchemeReference)
+      companyDetailsList <- ersUtil.fetchCompaniesOptionally(requestObject.getSchemeReference)
     } yield {
       if (companyDetailsList.companies.isEmpty) {
         Redirect(controllers.subsidiaries.routes.GroupSchemeController.groupSchemePage())

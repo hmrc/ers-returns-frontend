@@ -348,5 +348,279 @@ class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPer
     }
   }
 
+  "trusteeName" must {
+    "return an error if trusteeName missing" in {
+      val postData = Json.obj(
+        trusteeNameFields.name -> ""
+
+      )
+      val validatedForm = trusteeNameForm.bind(postData, Form.FromJsonMaxChars)
+      assert(validatedForm.errors.head.key == trusteeNameFields.name)
+      assert(validatedForm.errors.head.messages.head == Messages("ers_trustee_details.err.summary.name_required"))
+    }
+
+    "return an error if trusteeName size too large" in {
+      val postData = Json.obj(
+        trusteeNameFields.name -> randomString(121)
+
+      )
+      val validatedForm = trusteeNameForm.bind(postData, Form.FromJsonMaxChars)
+      assert(validatedForm.errors.head.key == trusteeNameFields.name)
+      assert(validatedForm.errors.head.messages.head == Messages("ers_trustee_details.err.name"))
+    }
+
+    "return an error if trusteeName contains invalid chars" in {
+      val postData = Json.obj(
+        trusteeNameFields.name -> "<script>rm *.*</script>"
+      )
+      val validatedForm = trusteeNameForm.bind(postData, Form.FromJsonMaxChars)
+      assert(validatedForm.errors.head.key == trusteeNameFields.name)
+      assert(validatedForm.errors.head.messages.head == Messages("ers_trustee_details.err.invalidChars.name"))
+    }
+  }
+
+  "trusteeAddressUk" must {
+    "return an error if addressLine1 missing" in {
+      val postData = Json.obj(
+        trusteeAddressFields.addressLine1 -> ""
+      )
+      val validatedForm = trusteeAddressUkForm.bind(postData, Form.FromJsonMaxChars)
+      assert(validatedForm.errors.head.key == trusteeAddressFields.addressLine1)
+      assert(validatedForm.errors.head.messages.head == Messages("ers_trustee_details.err.summary.address_line1_required"))
+    }
+
+    "return an error if addressLine1 size too large" in {
+      val postData = Json.obj(
+        trusteeAddressFields.addressLine1 -> randomString(28)
+      )
+      val validatedForm = trusteeAddressUkForm.bind(postData, Form.FromJsonMaxChars)
+      assert(validatedForm.errors.head.key == trusteeAddressFields.addressLine1)
+      assert(validatedForm.errors.head.messages.head == Messages("ers_trustee_details.err.address_line1"))
+    }
+
+    "return an error if addressLine1 contains invalid chars" in {
+      val postData = Json.obj(
+        trusteeAddressFields.addressLine1 -> "<script>rm *.*</script>"
+      )
+      val validatedForm = trusteeAddressUkForm.bind(postData, Form.FromJsonMaxChars)
+      assert(validatedForm.errors.head.key == trusteeAddressFields.addressLine1)
+      assert(validatedForm.errors.head.messages.head == Messages("ers_trustee_details.err.invalidChars.address_line1"))
+    }
+
+    "return an error if addressLine2 size too large" in {
+      val postData = Json.obj(
+        trusteeAddressFields.addressLine1 -> "Address Line 1",
+        trusteeAddressFields.addressLine2 -> randomString(28)
+      )
+      val validatedForm = trusteeAddressUkForm.bind(postData, Form.FromJsonMaxChars)
+      assert(validatedForm.errors.head.key == trusteeAddressFields.addressLine2)
+      assert(validatedForm.errors.head.messages.head == Messages("ers_trustee_details.err.address_line2"))
+    }
+
+    "return an error if addressLine2 contains invalid chars" in {
+      val postData = Json.obj(
+        trusteeAddressFields.addressLine1 -> "Address Line 1",
+        trusteeAddressFields.addressLine2 -> "<script>rm *.*</script>"
+      )
+      val validatedForm = trusteeAddressUkForm.bind(postData, Form.FromJsonMaxChars)
+      assert(validatedForm.errors.head.key == trusteeAddressFields.addressLine2)
+      assert(validatedForm.errors.head.messages.head == Messages("ers_trustee_details.err.invalidChars.address_line2"))
+    }
+
+    "return an error if addressLine3 size too large" in {
+      val postData = Json.obj(
+        trusteeAddressFields.addressLine1 -> "Address Line 1",
+        trusteeAddressFields.addressLine2 -> "Address Line 2",
+        trusteeAddressFields.addressLine3 -> randomString(28)
+      )
+      val validatedForm = trusteeAddressUkForm.bind(postData, Form.FromJsonMaxChars)
+      assert(validatedForm.errors.head.key == trusteeAddressFields.addressLine3)
+      assert(validatedForm.errors.head.messages.head == Messages("ers_trustee_details.err.address_line3"))
+    }
+
+    "return an error if addressLine3 contains invalid chars" in {
+      val postData = Json.obj(
+        trusteeAddressFields.addressLine1 -> "Address Line 1",
+        trusteeAddressFields.addressLine2 -> "Address Line 2",
+        trusteeAddressFields.addressLine3 -> "<script>rm *.*</script>"
+      )
+      val validatedForm = trusteeAddressUkForm.bind(postData, Form.FromJsonMaxChars)
+      assert(validatedForm.errors.head.key == trusteeAddressFields.addressLine3)
+      assert(validatedForm.errors.head.messages.head == Messages("ers_trustee_details.err.invalidChars.address_line3"))
+    }
+
+    "return an error if addressLine4 size too large" in {
+      val postData = Json.obj(
+        trusteeAddressFields.addressLine1 -> "Address Line 1",
+        trusteeAddressFields.addressLine2 -> "Address Line 2",
+        trusteeAddressFields.addressLine3 -> "Address Line 3",
+        trusteeAddressFields.addressLine4 -> randomString(30)
+      )
+      val validatedForm = trusteeAddressUkForm.bind(postData, Form.FromJsonMaxChars)
+      assert(validatedForm.errors.head.key == trusteeAddressFields.addressLine4)
+      assert(validatedForm.errors.head.messages.head == Messages("ers_trustee_details.err.address_line4"))
+    }
+
+    "return an error if addressLine4 contains invalid chars" in {
+      val postData = Json.obj(
+        trusteeAddressFields.addressLine1 -> "Address Line 1",
+        trusteeAddressFields.addressLine2 -> "Address Line 2",
+        trusteeAddressFields.addressLine3 -> "Address Line 3",
+        trusteeAddressFields.addressLine4 -> "<script>rm *.*</script>"
+      )
+      val validatedForm = trusteeAddressUkForm.bind(postData, Form.FromJsonMaxChars)
+      assert(validatedForm.errors.head.key == trusteeAddressFields.addressLine4)
+      val errors = validatedForm.errors.map(formError => formError.messages.head)
+      assert(errors.contains(Messages("ers_trustee_details.err.invalidChars.address_line4")))
+    }
+
+    "return an error if postCode size too large" in {
+      val postData = Json.obj(
+        trusteeAddressFields.addressLine1 -> "Address Line 1",
+        trusteeAddressFields.addressLine2 -> "Address Line 2",
+        trusteeAddressFields.addressLine3 -> "Address Line 3",
+        trusteeAddressFields.addressLine4 -> "Address Line 4",
+        trusteeAddressFields.addressLine5 -> randomString(9)
+      )
+      val validatedForm = trusteeAddressUkForm.bind(postData, Form.FromJsonMaxChars)
+      assert(validatedForm.errors.head.key == trusteeAddressFields.addressLine5)
+      assert(validatedForm.errors.head.messages.head == Messages("ers_trustee_details.err.postcode"))
+    }
+
+    "return an error if postCode contains invalid chars" in {
+      val postData = Json.obj(
+        trusteeAddressFields.addressLine1 -> "Address Line 1",
+        trusteeAddressFields.addressLine2 -> "Address Line 2",
+        trusteeAddressFields.addressLine3 -> "Address Line 3",
+        trusteeAddressFields.addressLine4 -> "Address Line 4",
+        trusteeAddressFields.addressLine5 ->"??&&$$"
+      )
+      val validatedForm = trusteeAddressUkForm.bind(postData, Form.FromJsonMaxChars)
+      assert(validatedForm.errors.head.key == trusteeAddressFields.addressLine5)
+      assert(validatedForm.errors.head.messages.head == Messages("ers_trustee_details.err.postcode"))
+    }
+  }
+
+  "trusteeAddressOverseas" must {
+    "return an error if addressLine1 missing" in {
+      val postData = Json.obj(
+        trusteeAddressFields.addressLine1 -> ""
+      )
+      val validatedForm = trusteeAddressOverseasForm.bind(postData, Form.FromJsonMaxChars)
+      assert(validatedForm.errors.head.key == trusteeAddressFields.addressLine1)
+      assert(validatedForm.errors.head.messages.head == Messages("ers_trustee_details.err.summary.address_line1_required"))
+    }
+
+    "return an error if addressLine1 size too large" in {
+      val postData = Json.obj(
+        trusteeAddressFields.addressLine1 -> randomString(28)
+      )
+      val validatedForm = trusteeAddressOverseasForm.bind(postData, Form.FromJsonMaxChars)
+      assert(validatedForm.errors.head.key == trusteeAddressFields.addressLine1)
+      assert(validatedForm.errors.head.messages.head == Messages("ers_trustee_details.err.address_line1"))
+    }
+
+    "return an error if addressLine1 contains invalid chars" in {
+      val postData = Json.obj(
+        trusteeAddressFields.addressLine1 -> "<script>rm *.*</script>"
+      )
+      val validatedForm = trusteeAddressOverseasForm.bind(postData, Form.FromJsonMaxChars)
+      assert(validatedForm.errors.head.key == trusteeAddressFields.addressLine1)
+      assert(validatedForm.errors.head.messages.head == Messages("ers_trustee_details.err.invalidChars.address_line1"))
+    }
+
+    "return an error if addressLine2 size too large" in {
+      val postData = Json.obj(
+        trusteeAddressFields.addressLine1 -> "Address Line 1",
+        trusteeAddressFields.addressLine2 -> randomString(28)
+      )
+      val validatedForm = trusteeAddressOverseasForm.bind(postData, Form.FromJsonMaxChars)
+      assert(validatedForm.errors.head.key == trusteeAddressFields.addressLine2)
+      assert(validatedForm.errors.head.messages.head == Messages("ers_trustee_details.err.address_line2"))
+    }
+
+    "return an error if addressLine2 contains invalid chars" in {
+      val postData = Json.obj(
+        trusteeAddressFields.addressLine1 -> "Address Line 1",
+        trusteeAddressFields.addressLine2 -> "<script>rm *.*</script>"
+      )
+      val validatedForm = trusteeAddressOverseasForm.bind(postData, Form.FromJsonMaxChars)
+      assert(validatedForm.errors.head.key == trusteeAddressFields.addressLine2)
+      assert(validatedForm.errors.head.messages.head == Messages("ers_trustee_details.err.invalidChars.address_line2"))
+    }
+
+    "return an error if addressLine3 size too large" in {
+      val postData = Json.obj(
+        trusteeAddressFields.addressLine1 -> "Address Line 1",
+        trusteeAddressFields.addressLine2 -> "Address Line 2",
+        trusteeAddressFields.addressLine3 -> randomString(28)
+      )
+      val validatedForm = trusteeAddressOverseasForm.bind(postData, Form.FromJsonMaxChars)
+      assert(validatedForm.errors.head.key == trusteeAddressFields.addressLine3)
+      assert(validatedForm.errors.head.messages.head == Messages("ers_trustee_details.err.address_line3"))
+    }
+
+    "return an error if addressLine3 contains invalid chars" in {
+      val postData = Json.obj(
+        trusteeAddressFields.addressLine1 -> "Address Line 1",
+        trusteeAddressFields.addressLine2 -> "Address Line 2",
+        trusteeAddressFields.addressLine3 -> "<script>rm *.*</script>"
+      )
+      val validatedForm = trusteeAddressOverseasForm.bind(postData, Form.FromJsonMaxChars)
+      assert(validatedForm.errors.head.key == trusteeAddressFields.addressLine3)
+      assert(validatedForm.errors.head.messages.head == Messages("ers_trustee_details.err.invalidChars.address_line3"))
+    }
+
+    "return an error if addressLine4 size too large" in {
+      val postData = Json.obj(
+        trusteeAddressFields.addressLine1 -> "Address Line 1",
+        trusteeAddressFields.addressLine2 -> "Address Line 2",
+        trusteeAddressFields.addressLine3 -> "Address Line 3",
+        trusteeAddressFields.addressLine4 -> randomString(30)
+      )
+      val validatedForm = trusteeAddressOverseasForm.bind(postData, Form.FromJsonMaxChars)
+      assert(validatedForm.errors.head.key == trusteeAddressFields.addressLine4)
+      assert(validatedForm.errors.head.messages.head == Messages("ers_trustee_details.err.address_line4"))
+    }
+
+    "return an error if addressLine4 contains invalid chars" in {
+      val postData = Json.obj(
+        trusteeAddressFields.addressLine1 -> "Address Line 1",
+        trusteeAddressFields.addressLine2 -> "Address Line 2",
+        trusteeAddressFields.addressLine3 -> "Address Line 3",
+        trusteeAddressFields.addressLine4 -> "<script>rm *.*</script>"
+      )
+      val validatedForm = trusteeAddressOverseasForm.bind(postData, Form.FromJsonMaxChars)
+      assert(validatedForm.errors.head.key == trusteeAddressFields.addressLine4)
+      val errors = validatedForm.errors.map(formError => formError.messages.head)
+      assert(errors.contains(Messages("ers_trustee_details.err.invalidChars.address_line4")))
+    }
+
+    "return an error if addressLine5 size too large" in {
+      val postData = Json.obj(
+        trusteeAddressFields.addressLine1 -> "Address Line 1",
+        trusteeAddressFields.addressLine2 -> "Address Line 2",
+        trusteeAddressFields.addressLine3 -> "Address Line 3",
+        trusteeAddressFields.addressLine4 -> "Address Line 4",
+        trusteeAddressFields.addressLine5 -> randomString(19)
+      )
+      val validatedForm = trusteeAddressOverseasForm.bind(postData, Form.FromJsonMaxChars)
+      assert(validatedForm.errors.head.key == trusteeAddressFields.addressLine5)
+      assert(validatedForm.errors.head.messages.head == Messages("ers_trustee_details.err.address_line5"))
+    }
+
+    "return an error if addressLine5 contains invalid chars" in {
+      val postData = Json.obj(
+        trusteeAddressFields.addressLine1 -> "Address Line 1",
+        trusteeAddressFields.addressLine2 -> "Address Line 2",
+        trusteeAddressFields.addressLine3 -> "Address Line 3",
+        trusteeAddressFields.addressLine4 -> "Address Line 4",
+        trusteeAddressFields.addressLine5 ->"??&&$$"
+      )
+      val validatedForm = trusteeAddressOverseasForm.bind(postData, Form.FromJsonMaxChars)
+      assert(validatedForm.errors.head.key == trusteeAddressFields.addressLine5)
+      assert(validatedForm.errors.head.messages.head == Messages("ers_trustee_details.err.invalidChars.address_line5"))
+    }
+  }
   def randomString(length: Int): String = scala.util.Random.alphanumeric.take(length).mkString
 }

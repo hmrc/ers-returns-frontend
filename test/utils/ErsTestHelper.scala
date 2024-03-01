@@ -64,21 +64,21 @@ trait ErsTestHelper extends MockitoSugar with AuthHelper with ERSFakeApplication
   val requestWithAuth: RequestWithOptionalAuthContext[AnyContent] =
     RequestWithOptionalAuthContext(testFakeRequest, defaultErsAuthData)
 
-  val OPTION_YES                = "1"
-  val OPTION_NO                 = "2"
-  val SCHEME_ORGANISER_CACHE    = "scheme-organiser"
-  val GROUP_SCHEME_COMPANIES    = "group-scheme-companies"
-  val FILE_TYPE_CACHE           = "check-file-type"
-  val FILE_NAME_CACHE           = "file-name"
-  val CHECK_CSV_FILES           = "check-csv-files"
-  val ersMetaData               = "ErsMetaData"
-  val REPORTABLE_EVENTS         = "ReportableEvents"
-  val ErsRequestObject          = "ErsRequestObject"
-  val SCHEME_CSOP               = "1"
-  val OPTION_CSV                = "csv"
-  val OPTION_ODS                = "ods"
-  val OPTION_NIL_RETURN         = "2"
-  val OPTION_UPLOAD_SPREADSHEET = "1"
+  val OPTION_YES                 = "1"
+  val OPTION_NO                  = "2"
+  val SCHEME_ORGANISER_CACHE     = "scheme-organiser"
+  val SUBSIDIARY_COMPANIES_CACHE = "subsidiary-companies"
+  val FILE_TYPE_CACHE            = "check-file-type"
+  val FILE_NAME_CACHE            = "file-name"
+  val CHECK_CSV_FILES            = "check-csv-files"
+  val ersMetaData                = "ErsMetaData"
+  val REPORTABLE_EVENTS          = "ReportableEvents"
+  val ErsRequestObject           = "ErsRequestObject"
+  val SCHEME_CSOP                = "1"
+  val OPTION_CSV                 = "csv"
+  val OPTION_ODS                 = "ods"
+  val OPTION_NIL_RETURN          = "2"
+  val OPTION_UPLOAD_SPREADSHEET  = "1"
 
 	val mockHttp: DefaultHttpClient = mock[DefaultHttpClient]
 	val mockAppConfig: ApplicationConfig = mock[ApplicationConfig]
