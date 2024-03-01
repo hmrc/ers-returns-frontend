@@ -34,6 +34,7 @@ import play.api.mvc._
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentAsString, defaultAwaitTimeout, stubBodyParser, stubControllerComponents, stubMessagesApi}
 import play.twirl.api.Html
+import services.{CompanyDetailsService, TrusteeService, SessionService}
 import repositories.FrontendSessionsRepository
 import services.audit.AuditEvents
 import services.{FileValidatorService, FrontendSessionService, TrusteeService}
@@ -71,22 +72,23 @@ trait ErsTestHelper extends MockitoSugar with AuthHelper with ERSFakeApplication
 
   val sessionId: String = UUID.randomUUID.toString
 
-  val OPTION_YES                = "1"
-  val OPTION_NO                 = "2"
-  val SCHEME_ORGANISER_CACHE    = "scheme-organiser"
-  val GROUP_SCHEME_COMPANIES    = "group-scheme-companies"
-  val FILE_TYPE_CACHE           = "check-file-type"
-  val FILE_NAME_CACHE           = "file-name"
-  val CHECK_CSV_FILES           = "check-csv-files"
-  val ERS_META_DATA             = "ers-meta-data"
-  val REPORTABLE_EVENTS         = "reportable_events"
-  val ERS_REQUEST_OBJECT        = "ers-request-object"
-  val SCHEME_CSOP               = "1"
-  val OPTION_CSV                = "csv"
-  val OPTION_ODS                = "ods"
-  val OPTION_NIL_RETURN         = "2"
-  val OPTION_UPLOAD_SPREADSHEET = "1"
-  val TRUSTEES_CACHE            = "trustees"
+  val OPTION_YES                 = "1"
+  val OPTION_NO                  = "2"
+  val SCHEME_ORGANISER_CACHE     = "scheme-organiser"
+  val SUBSIDIARY_COMPANIES_CACHE = "subsidiary-companies"
+  val GROUP_SCHEME_COMPANIES     = "group-scheme-companies"
+  val FILE_TYPE_CACHE            = "check-file-type"
+  val FILE_NAME_CACHE            = "file-name"
+  val CHECK_CSV_FILES            = "check-csv-files"
+  val ERS_META_DATA              = "ers-meta-data"
+  val REPORTABLE_EVENTS          = "reportable_events"
+  val ERS_REQUEST_OBJECT         = "ers-request-object"
+  val SCHEME_CSOP                = "1"
+  val OPTION_CSV                 = "csv"
+  val OPTION_ODS                 = "ods"
+  val OPTION_NIL_RETURN          = "2"
+  val OPTION_UPLOAD_SPREADSHEET  = "1"
+  val TRUSTEES_CACHE             = "trustees"
 
   val mockHttp: DefaultHttpClient = mock[DefaultHttpClient]
 	implicit val mockAppConfig: ApplicationConfig = mock[ApplicationConfig]
@@ -98,6 +100,8 @@ trait ErsTestHelper extends MockitoSugar with AuthHelper with ERSFakeApplication
   val mockSessionService: FrontendSessionService = mock[FrontendSessionService]
   val mockFileValidatorService: FileValidatorService = mock[FileValidatorService]
 	val mockTrusteeService: TrusteeService = mock[TrusteeService]
+	val mockCountryCodes: CountryCodes = mock[CountryCodes]
+	val mockCompanyDetailsService: CompanyDetailsService = mock[CompanyDetailsService]
 	implicit val mockCountryCodes: CountryCodes = mock[CountryCodes]
   val sessionPair: (String, String) = SessionKeys.sessionId -> sessionId
   val testCacheItem: CacheItem = CacheItem("id", Json.toJson(Map("user1234" -> Json.toJson(Fixtures.ersSummary))).as[JsObject], Instant.now(), Instant.now())

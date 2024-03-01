@@ -133,10 +133,12 @@ class FileUploadController @Inject() (val mcc: MessagesControllerComponents,
     ersConnector.validateFileData(callbackData, schemeInfo).map { res =>
       logger.info(s"[FileUploadController][handleValidationResponse] Response from validator: ${res.status}, timestamp: ${System.currentTimeMillis()}.")
       res.status match {
-        case OK =>
-          logger.info(s"[FileUploadController][handleValidationResponse] Validation is successful for schemeRef: $schemeRef, timestamp: ${System.currentTimeMillis()}.")
-          sessionService.cache(ersUtil.VALIDATED_SHEETS, res.body)
-          Redirect(routes.SchemeOrganiserController.schemeOrganiserPage())
+        case OK       =>
+          logger.info(
+            s"[FileUploadController][handleValidationResponse] Validation is successful for schemeRef: $schemeRef, timestamp: ${System.currentTimeMillis()}."
+          )
+          ersUtil.cache(ersUtil.VALIDATED_SHEEETS, res.body, schemeRef)
+          Redirect(controllers.schemeOrganiser.routes.SchemeOrganiserBasedInUkController.questionPage())
         case ACCEPTED =>
           logger.warn(s"[FileUploadController][handleValidationResponse] Validation is not successful for schemeRef: $schemeRef, timestamp: ${System.currentTimeMillis()}.")
           Redirect(routes.FileUploadController.validationFailure())

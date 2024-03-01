@@ -57,7 +57,9 @@ class TrusteeBasedInUkController @Inject()(val mcc: MessagesControllerComponents
         sessionService.fetchTrusteesOptionally().map {
           trusteeDetailsList => TrusteeBasedInUk(trusteeDetailsList.trustees(index).basedInUk)
         }
-      } else {sessionService.fetch[TrusteeBasedInUk](cacheKey)}
+      } else {
+        ersUtil.fetch[TrusteeBasedInUk](cacheKey, requestObject.getSchemeReference)
+      }
     } yield {
       (trusteeBasedInUk.basedInUk, edit) match {
         case (true, true)    => Redirect(controllers.trustees.routes.TrusteeAddressUkController.editQuestion(index))

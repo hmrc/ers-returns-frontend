@@ -189,12 +189,13 @@ class CsvFileUploadController @Inject() (val mcc: MessagesControllerComponents,
                  (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] =
     ersConnector.validateCsvFileData(csvCallbackData, schemeInfo).flatMap { res =>
       res.status match {
-        case OK =>
-          logger.info(s"[CsvFileUploadController][validateCsv] Validation is successful for schemeRef: ${schemeInfo.schemeRef}, " +
-              s"timestamp: ${System.currentTimeMillis()}.")
-          sessionService.cache(ersUtil.VALIDATED_SHEETS, res.body).map { _ =>
-              Redirect(routes.SchemeOrganiserController.schemeOrganiserPage())
-          }
+        case OK       =>
+          logger.info(
+            s"[CsvFileUploadController][validateCsv] Validation is successful for schemeRef: ${schemeInfo.schemeRef}, " +
+              s"timestamp: ${System.currentTimeMillis()}."
+          )
+          ersUtil.cache(ersUtil.VALIDATED_SHEEETS, res.body, schemeInfo.schemeRef)
+          Redirect(controllers.schemeOrganiser.routes.SchemeOrganiserBasedInUkController.questionPage())
         case ACCEPTED =>
           logger.warn(s"[CsvFileUploadController][validateCsv] Validation is not successful for schemeRef: ${schemeInfo.schemeRef}, " +
               s"timestamp: ${System.currentTimeMillis()}.")
