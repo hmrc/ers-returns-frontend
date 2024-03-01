@@ -1,0 +1,102 @@
+@*
+ * Copyright 2023 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import _root_.utils.ERSUtil
+@import config.ApplicationConfig
+@import _root_.utils.CountryCodes
+@import views.html.includes.countries
+@import views.html.templates.reference
+@import views.html.helper.CSPNonce
+@import models.RsFormMappings.companyBasedInUkFields
+
+@import uk.gov.hmrc.govukfrontend.views.html.components.implicits._
+
+@this(
+        govuk_wrapper: govuk_wrapper,
+        countriesSelect: countries,
+        formWithCSRF: FormWithCSRF,
+        govukBackLink: GovukBackLink,
+        govukErrorSummary: GovukErrorSummary,
+        govukInput: GovukInput,
+        govukButton: GovukButton,
+        govukRadios: GovukRadios,
+        hmrcPageHeading: HmrcPageHeading
+)
+
+@(requestObject: RequestObject, index: Int, companyBasedInUkForm: Form[models.CompanyBasedInUk], edit: Boolean, schemeOrganiser: Boolean)(implicit request: Request[AnyRef], flash: Flash, messages: Messages, ersUtil: ERSUtil, countryCodes: CountryCodes, appConfig: ApplicationConfig)
+
+@schemeId = @{requestObject.getSchemeId}
+
+@formAction = @{(edit, schemeOrganiser) match {
+    case (true, false) => controllers.subsidiaries.routes.SubsidiaryBasedInUkController.editQuestionSubmit(index)
+    case (false, false) =>  controllers.subsidiaries.routes.SubsidiaryBasedInUkController.questionSubmit(index)
+
+    case (true, true) => controllers.schemeOrganiser.routes.SchemeOrganiserBasedInUkController.editQuestionSubmit(index)
+    case (false, true) => controllers.schemeOrganiser.routes.SchemeOrganiserBasedInUkController.questionSubmit(index)
+}}
+
+@scripts = {
+    <script type="text/javascript" src='@controllers.routes.Assets.versioned("javascripts/uk-or-overseas-form-reveal.js")' @{CSPNonce.attr}></script>
+}
+
+
+@govuk_wrapper(title = messages("ers_manual_is_the_company_in_uk.title"), Some(scripts)) {
+
+    @reference(requestObject.getPageTitle)
+
+    @govukBackLink(BackLink(
+        attributes = Map("id" -> "back-link"), classes="js-enabled", content = HtmlContent(messages("ers.back"))
+    ))
+
+    @if(companyBasedInUkForm.hasErrors) {
+        @govukErrorSummary(ErrorSummary(
+            title = Text(messages("validation.summary.heading")),
+            errorList = companyBasedInUkForm.errors.asTextErrorLinks
+        ))
+    }
+
+    @hmrcPageHeading(PageHeading(
+        text = messages("ers_manual_is_the_company_in_uk.title")
+    ))
+
+    @formWithCSRF(action = formAction) {
+
+        @govukRadios(Radios(
+            name = "basedInUk",
+            items = Seq(
+                RadioItem(
+                    checked = companyBasedInUkForm(companyBasedInUkFields.basedInUk).value.contains("0"),
+                    id = Some("uk-radio-button"),
+                    value = Some("0"),
+                    content = Text(messages("ers_manual_company_details.uk"))
+                ),
+                RadioItem(
+                    checked = companyBasedInUkForm(companyBasedInUkFields.basedInUk).value.contains("1"),
+                    id = Some("overseas-radio-button"),
+                    value = Some("1"),
+                    content = Text(messages("ers_manual_company_details.overseas"))
+                )
+            ),
+            classes = "govuk-radios--inline"
+        ))
+
+        @govukButton(Button(
+            inputType = Some("submit"),
+            content = Text(messages("ers_manual_company_details.continue")),
+            attributes = Map("id" -> "continue"),
+        ))
+    }
+}

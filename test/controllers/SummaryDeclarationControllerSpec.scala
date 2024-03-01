@@ -78,6 +78,7 @@ class SummaryDeclarationControllerSpec
   val rsc: ErsMetaData       =
     new ErsMetaData(schemeInfo, "ipRef", Some("aoRef"), "empRef", Some("agentRef"), Some("sapNumber"))
 
+
   val schemeOrganiser: SchemeOrganiserDetails = new SchemeOrganiserDetails(
     Fixtures.companyName,
     "Add1",
@@ -89,10 +90,10 @@ class SummaryDeclarationControllerSpec
     Option("AB123456"),
     Option("1234567890")
   )
-  val groupSchemeInfo: GroupSchemeInfo = new GroupSchemeInfo(Option("1"), None)
-  val gscomp: CompanyDetails =
-    new CompanyDetails(Fixtures.companyName, "Adress Line 1", None, None, None, None, None, None, None)
-  val gscomps: CompanyDetailsList = new CompanyDetailsList(List(gscomp))
+  val groupSchemeInfo: GroupSchemeInfo        = new GroupSchemeInfo(Option("1"), None)
+  val gscomp: CompanyDetails                  =
+    new CompanyDetails(Fixtures.companyName, "Adress Line 1", None, None, None, None, None, None, None, true)
+  val gscomps: CompanyDetailsList             = new CompanyDetailsList(List(gscomp))
 
 	val reportableEvents: ReportableEvents = new ReportableEvents(Some("1"))
 	val fileTypeCSV: CheckFileType = new CheckFileType(Some("csv"))
@@ -116,9 +117,10 @@ class SummaryDeclarationControllerSpec
 
   class TestSessionService(fetchAllMapVal: String) extends FrontendSessionService(mockSessionRepository, mockFileValidatorService, mockAppConfig) {
 
-		override def cache[T](key: String, body: T)
-												 (implicit request: Request[_], formats: json.Format[T]): Future[(String, String)] = {
-			Future.successful(sessionPair)
+
+		override def cache[T](key: String, body: T, cacheId: String)
+												 (implicit hc: HeaderCarrier, formats: json.Format[T]): Future[CacheMap] = {
+			Future.successful(CacheMap("fakeId", Map()))
 		}
 
     override def getAllData(bundleRef: String, ersMetaData: ErsMetaData)(implicit ec: ExecutionContext, request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[ErsSummary] =
