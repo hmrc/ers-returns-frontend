@@ -60,7 +60,9 @@ class CsvFileUploadController @Inject() (val mcc: MessagesControllerComponents,
       currentCsvFile  = csvFilesList.ids.find(ids => ids.uploadStatus == NotStarted)
       if currentCsvFile.isDefined
       upscanFormData <- upscanService.getUpscanFormDataCsv(currentCsvFile.get.uploadId, requestObject.getSchemeReference)
-    } yield Ok(upscanCsvFileUploadView(requestObject, upscanFormData, currentCsvFile.get.fileId))) recover {
+    } yield {
+      Ok(upscanCsvFileUploadView(requestObject, upscanFormData, currentCsvFile.get.fileId, useCsopV5Templates(requestObject.taxYear)))
+    }).recover {
       case _: NoSuchElementException =>
         logger.warn(s"[CsvFileUploadController][uploadFilePage] Attempting to load upload page when no files are ready to upload")
         getGlobalErrorPage
@@ -69,6 +71,13 @@ class CsvFileUploadController @Inject() (val mcc: MessagesControllerComponents,
         getGlobalErrorPage
     }
   }
+
+  private def useCsopV5Templates(taxYear: Option[String]): Boolean = taxYear match {
+    case Some(year) => appConfig.csopV5Enabled && year.split("/")(0).toInt >= 2023
+    case None if appConfig.csopV5Enabled => true
+    case _ => false
+  }
+
 
   def success(uploadId: UploadId): Action[AnyContent] = authAction.async { implicit request =>
     logger.info(s"[CsvFileUploadController][success] Upload form submitted for ID: $uploadId")
@@ -170,8 +179,14 @@ class CsvFileUploadController @Inject() (val mcc: MessagesControllerComponents,
         .map { names =>
           val expectedName =
             ersUtil.getPageElement(schemeInfo.schemeId, ersUtil.PAGE_CHECK_CSV_FILE, names._1 + ".file_name")
+          val expectedNameCsopV5 =
+            ersUtil.getPageElement(schemeInfo.schemeId, ersUtil.PAGE_CHECK_CSV_FILE, names._1 + ".file_name.v5")
           val uploadedName = names._2
-          (expectedName, uploadedName)
+          if (schemeInfo.schemeType == "CSOP" && uploadedName.contains("V5")) {
+            (expectedNameCsopV5, uploadedName)
+          } else {
+            (expectedName, uploadedName)
+          }
         }
         .forall(names => names._1 == names._2)
       if (uploadedWithCorrectName) {

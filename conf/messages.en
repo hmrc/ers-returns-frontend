@@ -514,10 +514,13 @@ ers_check_csv_options.hint = Select all that apply
 
 ers_check_csv_file.csop.file0.description = Options granted
 ers_check_csv_file.csop.file0.file_name = CSOP_OptionsGranted_V4.csv
+ers_check_csv_file.csop.file0.file_name.v5 = CSOP_OptionsGranted_V5.csv
 ers_check_csv_file.csop.file1.description = Options released (including exchanges) cancelled or lapsed in year
 ers_check_csv_file.csop.file1.file_name = CSOP_OptionsRCL_V4.csv
+ers_check_csv_file.csop.file1.file_name.v5 = CSOP_OptionsRCL_V5.csv
 ers_check_csv_file.csop.file2.description = Options and replacement options exercised
 ers_check_csv_file.csop.file2.file_name = CSOP_OptionsExercised_V4.csv
+ers_check_csv_file.csop.file2.file_name.v5 = CSOP_OptionsExercised_V5.csv
 
 ers_check_csv_file.emi.file0.description = Adjustment of options
 ers_check_csv_file.emi.file0.file_name = EMI40_Adjustments_V4.csv
