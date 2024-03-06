@@ -58,7 +58,7 @@ class TrusteeBasedInUkController @Inject()(val mcc: MessagesControllerComponents
           trusteeDetailsList => TrusteeBasedInUk(trusteeDetailsList.trustees(index).basedInUk)
         }
       } else {
-        ersUtil.fetch[TrusteeBasedInUk](cacheKey)
+        sessionService.fetch[TrusteeBasedInUk](cacheKey)
       }
     } yield {
       (trusteeBasedInUk.basedInUk, edit) match {

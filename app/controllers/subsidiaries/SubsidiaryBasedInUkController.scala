@@ -40,6 +40,7 @@ import play.api.data.Form
 import play.api.libs.json.Format
 import play.api.mvc.{AnyContent, MessagesControllerComponents, Request, Result}
 import play.twirl.api.Html
+import services.FrontendSessionService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
@@ -57,6 +58,7 @@ class SubsidiaryBasedInUkController @Inject()(val mcc: MessagesControllerCompone
                                               val authAction: AuthAction,
                                               implicit val countryCodes: CountryCodes,
                                               implicit val ersUtil: ERSUtil,
+                                              implicit val sessionService: FrontendSessionService,
                                               implicit val appConfig: ApplicationConfig,
                                               pageView: views.html.manual_is_the_company_in_uk
                                      )
@@ -67,14 +69,13 @@ class SubsidiaryBasedInUkController @Inject()(val mcc: MessagesControllerCompone
   val cacheKey: String = ersUtil.SUBSIDIARY_COMPANY_BASED
   implicit val format: Format[CompanyBasedInUk] = CompanyBasedInUk.format
 
-  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier): Future[Result] = {
+  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier, request: Request[_]): Future[Result] = {
     for {
-      requestObject <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
       subsidiaryBasedInUk <-  if (edit) {
-        ersUtil.fetchCompaniesOptionally(requestObject.getSchemeReference).map {
+        sessionService.fetchCompaniesOptionally().map {
           companyDetailsList => CompanyBasedInUk(companyDetailsList.companies(index).basedInUk)
         }
-      } else {ersUtil.fetch[CompanyBasedInUk](cacheKey, requestObject.getSchemeReference)}
+      } else {sessionService.fetch[CompanyBasedInUk](cacheKey)}
     } yield {
         (subsidiaryBasedInUk.basedInUk, edit) match {
           case (true, false) => Redirect(controllers.subsidiaries.routes.SubsidiaryDetailsUkController.questionPage())

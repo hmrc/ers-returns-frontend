@@ -22,6 +22,7 @@ import models._
 import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.mvc._
+import services.FrontendSessionService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
@@ -37,6 +38,7 @@ class SchemeOrganiserController @Inject()(
                                            val authConnector: DefaultAuthConnector,
                                            implicit val countryCodes: CountryCodes,
                                            implicit val ersUtil: ERSUtil,
+                                           implicit val sessionService: FrontendSessionService,
                                            implicit val appConfig: ApplicationConfig,
                                            globalErrorView: views.html.global_error,
                                            schemeOrganiserSummaryView: views.html.scheme_organiser_summary,
@@ -55,8 +57,8 @@ class SchemeOrganiserController @Inject()(
 
   def showSchemeOrganiserSummaryPage(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
     (for {
-      requestObject <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
-      companyDetails <- ersUtil.fetchSchemeOrganiserOptionally(requestObject.getSchemeReference)
+      requestObject <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
+      companyDetails <- sessionService.fetchSchemeOrganiserOptionally()
     } yield
       if (companyDetails.isDefined) {
         Ok(schemeOrganiserSummaryView(requestObject, companyDetails.get))

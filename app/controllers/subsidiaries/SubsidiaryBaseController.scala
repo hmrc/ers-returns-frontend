@@ -34,15 +34,15 @@ trait SubsidiaryBaseController[A] extends SchemeOrganiserBaseController[A] {
       },
       result => {
         if (edit) {
-          ersUtil.fetchCompaniesOptionally(requestObject.getSchemeReference).flatMap { companies =>
+          sessionService.fetchCompaniesOptionally.flatMap { companies =>
             val updatedCompany = companies.companies(index).updatePart(result)
             val updatedCompanies = CompanyDetailsList(companies.companies.updated(index, updatedCompany))
-            ersUtil.cache[CompanyDetailsList](ersUtil.SUBSIDIARY_COMPANIES_CACHE, updatedCompanies, requestObject.getSchemeReference).flatMap{ _ =>
+            sessionService.cache[CompanyDetailsList](sessionService.SUBSIDIARY_COMPANIES_CACHE, updatedCompanies).flatMap{ _ =>
               nextPageRedirect(index, edit)
             }
           }
         } else {
-          ersUtil.cache[A](cacheKey, result, requestObject.getSchemeReference).flatMap { _ =>
+          sessionService.cache[A](cacheKey, result).flatMap { _ =>
             nextPageRedirect(index, edit)
           }
         }
@@ -56,9 +56,8 @@ trait SubsidiaryBaseController[A] extends SchemeOrganiserBaseController[A] {
 
   override def showQuestionPage(requestObject: RequestObject, index: Int, edit: Boolean = false)
                                (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
-    ersUtil.fetchPartFromCompanyDetailsList[A](
-      index,
-      requestObject.getSchemeReference)
+    sessionService.fetchPartFromCompanyDetailsList[A](
+      index)
       .map {
       previousAnswer: Option[A] =>
       println(s"Previous answer innit: $previousAnswer")

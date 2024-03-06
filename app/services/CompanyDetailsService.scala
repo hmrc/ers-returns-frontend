@@ -17,47 +17,47 @@
 package services
 
 import javax.inject.Inject
-import models.{CompanyAddress, CompanyDetails, CompanyDetailsList, Company, RequestObject}
+import models.{Company, CompanyAddress, CompanyDetails, CompanyDetailsList, RequestObject}
+import play.api.mvc.Request
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.ERSUtil
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class CompanyDetailsService @Inject()(
-                                ersUtil: ERSUtil
+                                ersUtil: ERSUtil,
+                                sessionService: FrontendSessionService
                               )(implicit ec: ExecutionContext) {
 
-  def updateSubsidiaryCompanyCache(index: Int)(implicit hc: HeaderCarrier): Future[Unit] = {
+  def updateSubsidiaryCompanyCache(index: Int)(implicit request: Request[_]): Future[Unit] = {
     for {
-      requestObject <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
-      schemeRef = requestObject.getSchemeReference
-      name <- ersUtil.fetch[Company](ersUtil.SUBSIDIARY_COMPANY_NAME_CACHE, schemeRef)
-      cachedCompanies <- ersUtil.fetchCompaniesOptionally(schemeRef)
+      name <- sessionService.fetch[Company](ersUtil.SUBSIDIARY_COMPANY_NAME_CACHE)
+      cachedCompanies <- sessionService.fetchCompaniesOptionally()
       companyDetailsList <- {
-        ersUtil.fetch[CompanyAddress](ersUtil.SUBSIDIARY_COMPANY_ADDRESS_CACHE, schemeRef).map(address =>
+        sessionService.fetch[CompanyAddress](ersUtil.SUBSIDIARY_COMPANY_ADDRESS_CACHE).map(address =>
           CompanyDetailsList(replaceCompany(cachedCompanies.companies, index, CompanyDetails(name, address)))
         )
       }
-      _ <- ersUtil.cache[CompanyDetailsList](ersUtil.SUBSIDIARY_COMPANIES_CACHE, companyDetailsList, schemeRef)
+      _ <- sessionService.cache[CompanyDetailsList](ersUtil.SUBSIDIARY_COMPANIES_CACHE, companyDetailsList)
     } yield {
       ()
     }
     }
 
-  def updateSchemeOrganiserCache(implicit hc: HeaderCarrier): Future[Unit] = {
+  def updateSchemeOrganiserCache(implicit request: Request[_]): Future[Unit] = {
     for {
-      requestObject <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
+      requestObject <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
       schemeRef = requestObject.getSchemeReference
-      name <- ersUtil.fetch[Company](ersUtil.SCHEME_ORGANISER_NAME_CACHE, schemeRef)
+      name <- sessionService.fetch[Company](ersUtil.SCHEME_ORGANISER_NAME_CACHE)
       companyDetails <- {
-        ersUtil.fetch[CompanyAddress](ersUtil.SCHEME_ORGANISER_ADDRESS_CACHE, schemeRef).map(address => {
+        sessionService.fetch[CompanyAddress](ersUtil.SCHEME_ORGANISER_ADDRESS_CACHE).map(address => {
           val x = CompanyDetails(name, address)
           println(s"We tryna cache these company details for scheme org:\n$x\n")
           x
         }
         )
       }
-      _ <- ersUtil.cache[CompanyDetails](ersUtil.SCHEME_ORGANISER_CACHE, companyDetails, schemeRef)
+      _ <- sessionService.cache[CompanyDetails](ersUtil.SCHEME_ORGANISER_CACHE, companyDetails)
     } yield {
       ()
     }

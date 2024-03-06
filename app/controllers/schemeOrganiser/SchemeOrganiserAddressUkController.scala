@@ -25,7 +25,7 @@ import play.api.data.Form
 import play.api.libs.json.Format
 import play.api.mvc.{AnyContent, MessagesControllerComponents, Request, Result}
 import play.twirl.api.Html
-import services.CompanyDetailsService
+import services.{CompanyDetailsService, FrontendSessionService}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
@@ -42,6 +42,7 @@ class SchemeOrganiserAddressUkController @Inject()(val mcc: MessagesControllerCo
                                                    val authAction: AuthAction,
                                                    implicit val countryCodes: CountryCodes,
                                                    implicit val ersUtil: ERSUtil,
+                                                   implicit val sessionService: FrontendSessionService,
                                                    implicit val appConfig: ApplicationConfig,
                                                    companyDetailsService: CompanyDetailsService,
                                                    trusteeAddressUkView: views.html.manual_address_uk
@@ -53,7 +54,7 @@ class SchemeOrganiserAddressUkController @Inject()(val mcc: MessagesControllerCo
   val cacheKey: String = ersUtil.SCHEME_ORGANISER_ADDRESS_CACHE
   implicit val format: Format[CompanyAddress] = CompanyAddress.format
 
-  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier): Future[Result] = {
+  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier, request: Request[_]): Future[Result] = {
     if (edit) {
       Future.successful(Redirect(controllers.schemeOrganiser.routes.SchemeOrganiserController.schemeOrganiserSummaryPage()))
     } else {

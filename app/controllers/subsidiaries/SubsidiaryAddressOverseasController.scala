@@ -24,7 +24,7 @@ import play.api.data.Form
 import play.api.libs.json.Format
 import play.api.mvc.{AnyContent, MessagesControllerComponents, Request, Result}
 import play.twirl.api.Html
-import services.CompanyDetailsService
+import services.{CompanyDetailsService, FrontendSessionService}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
@@ -41,6 +41,7 @@ class SubsidiaryAddressOverseasController  @Inject()(val mcc: MessagesController
                                                      val authAction: AuthAction,
                                                      implicit val countryCodes: CountryCodes,
                                                      implicit val ersUtil: ERSUtil,
+                                                     implicit val sessionService: FrontendSessionService,
                                                      implicit val appConfig: ApplicationConfig,
                                                      companyDetailsService: CompanyDetailsService,
                                                      companyAddressOverseasView: views.html.manual_address_overseas
@@ -52,7 +53,7 @@ class SubsidiaryAddressOverseasController  @Inject()(val mcc: MessagesController
   val cacheKey: String = ersUtil.SUBSIDIARY_COMPANY_ADDRESS_CACHE
   implicit val format: Format[CompanyAddress] = CompanyAddress.format
 
-  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier): Future[Result] = {
+  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier, request: Request[_]): Future[Result] = {
     if (edit) {
       Future.successful(Redirect(controllers.subsidiaries.routes.GroupSchemeController.groupPlanSummaryPage()))
     } else {
