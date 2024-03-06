@@ -25,7 +25,7 @@ import play.api.i18n.Messages
 import play.api.libs.json
 import play.api.libs.json.{JsArray, JsValue, Json}
 import play.api.mvc.Request
-import services.SessionService
+import services.{FrontendSessionService, SessionService}
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
@@ -35,7 +35,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class ERSUtil @Inject() (
-  val sessionService: SessionService,
+  val sessionService: FrontendSessionService,
   val shortLivedCache: ERSShortLivedCache,
   val appConfig: ApplicationConfig
 )(implicit val ec: ExecutionContext, countryCodes: CountryCodes)
@@ -51,24 +51,11 @@ class ERSUtil @Inject() (
   val ersMetaData: String                   = "ErsMetaData"
   val ersRequestObject: String              = "ErsRequestObject"
   val reportableEvents                      = "ReportableEvents"
-  val GROUP_SCHEME_CACHE_CONTROLLER: String = "group-scheme-controller"
-  val ALT_AMENDS_CACHE_CONTROLLER: String   = "alt-amends-cache-controller"
-  val GROUP_SCHEME_COMPANIES: String        = "group-scheme-companies"
   val csvFilesCallbackList: String          = "csv-file-callback-List"
 
   // Cache Ids
-  val FILE_TYPE_CACHE: String         = "check-file-type"
   val altAmendsActivity: String       = "alt-activity"
 
-	val CHECK_CSV_FILES: String = "check-csv-files"
-	val CSV_FILES_UPLOAD: String = "csv-files-upload"
-
-	val FILE_NAME_CACHE: String = "file-name"
-
-	val TRUSTEES_CACHE: String = "trustees"
-	val TRUSTEE_NAME_CACHE: String = "trustee-name"
-	val TRUSTEE_BASED_CACHE: String = "trustee-based"
-	val TRUSTEE_ADDRESS_CACHE: String = "trustee-address"
 	val TRUSTEE_ADDRESS_UK_CACHE: String = "trustee-address-uk"
 	val TRUSTEE_ADDRESS_OVERSEAS_CACHE: String = "trustee-address-overseas"
 	val ERROR_REPORT_DATETIME: String = "error-report-datetime"
@@ -87,23 +74,11 @@ class ERSUtil @Inject() (
   // new cache amends
   val PORTAL_PARAMS_CACHE: String = "portal_params"
 
-  val BUNDLE_REF: String       = "sap-bundle-ref"
   val FILE_TRANSFER_CACHE      = "file-tansfer-cache"
   val FILE_TRANSFER_CACHE_LIST = "file-transfer-cache-list"
   val IP_REF: String           = "ip-ref"
 
 	val VALIDATED_SHEEETS: String = "validated-sheets"
-
-	val SUBSIDIARY_COMPANY_NAME_CACHE: String = "subsidiary-company-name"
-	val SUBSIDIARY_COMPANY_ADDRESS_CACHE: String = "subsidiary-company-address"
-	val SUBSIDIARY_COMPANY_BASED: String = "subsidiary-company-based"
-	val SUBSIDIARY_COMPANIES_CACHE: String = "subsidiary-companies"
-	val COMPANIES: String = "companies"
-
-	val SCHEME_ORGANISER_NAME_CACHE: String = "scheme-organiser-name"
-	val SCHEME_ORGANISER_ADDRESS_CACHE: String = "scheme-organiser-address"
-	val SCHEME_ORGANISER_BASED: String = "scheme-organiser-based"
-	val SCHEME_ORGANISER_CACHE: String = "scheme-organiser"
 
 	def cache[T](key: String, body: T)(implicit hc: HeaderCarrier, ec: ExecutionContext, formats: json.Format[T]): Future[CacheMap] =
 		shortLivedCache.cache[T](getCacheId, key, body)
@@ -370,43 +345,5 @@ class ERSUtil @Inject() (
 	def replaceAmpersand(input: String): String = {
 		appConfig.ampersandRegex
 			.replaceAllIn(input, "&amp;")
-	}
-
-	def fetchPartFromCompanyDetailsList[A](index: Int, cacheId: String)(implicit hc: HeaderCarrier, formats: json.Format[A]): Future[Option[A]] = {
-		shortLivedCache.fetchAndGetEntry[JsValue](cacheId, SUBSIDIARY_COMPANIES_CACHE).map {
-			x =>
-				println("Json here: " + x.getOrElse(""))
-				x.map(_.\(COMPANIES).as[JsArray].\(index).getOrElse(Json.obj()).as[A])
-		} recover {
-			case x: Throwable => {
-				println("[ERSUtil][fetchPartFromCompanyDetailsList] Nothing found in cache, expected if this is not an edit journey: " + x.getMessage)
-				None
-			}
-		}
-	}
-
-	def fetchPartFromCompanyDetails[A](cacheId: String)(implicit hc: HeaderCarrier, formats: json.Format[A]): Future[Option[A]] = {
-		shortLivedCache.fetchAndGetEntry[JsValue](cacheId, SCHEME_ORGANISER_CACHE).map {
-			companyDetailsOpt =>
-				println("Json here: " + companyDetailsOpt.getOrElse(""))
-				companyDetailsOpt.map(_.as[A])
-		} recover {
-			case x: Throwable => {
-				println("[ERSUtil][fetchPartFromCompanyDetailsList] Nothing found in cache, expected if this is not an edit journey: " + x.getMessage)
-				None
-			}
-		}
-	}
-
-	def fetchCompaniesOptionally(cacheId: String)(implicit hc: HeaderCarrier, formats: json.Format[CompanyDetailsList]): Future[CompanyDetailsList] = {
-		fetch[CompanyDetailsList](SUBSIDIARY_COMPANIES_CACHE, cacheId).recover {
-			case _ => CompanyDetailsList(List.empty[CompanyDetails])
-		}
-	}
-
-	def fetchSchemeOrganiserOptionally(cacheId: String)(implicit hc: HeaderCarrier, formats: json.Format[CompanyDetails]): Future[Option[CompanyDetails]]= {
-		fetch[CompanyDetails](SCHEME_ORGANISER_CACHE, cacheId).map(Some(_)).recover {
-			case _ => None
-		}
 	}
 }
