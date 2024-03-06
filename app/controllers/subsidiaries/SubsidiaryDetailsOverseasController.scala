@@ -40,6 +40,7 @@ import play.api.data.Form
 import play.api.libs.json.Format
 import play.api.mvc.{AnyContent, MessagesControllerComponents, Request, Result}
 import play.twirl.api.Html
+import services.FrontendSessionService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
@@ -56,6 +57,7 @@ class SubsidiaryDetailsOverseasController @Inject()(val mcc: MessagesControllerC
                                                     val authAction: AuthAction,
                                                     implicit val countryCodes: CountryCodes,
                                                     implicit val ersUtil: ERSUtil,
+                                                    implicit val sessionService: FrontendSessionService,
                                                     implicit val appConfig: ApplicationConfig,
                                                     companyOverseasDetailsView: views.html.manual_company_details_overseas
                                                 )
@@ -67,7 +69,7 @@ class SubsidiaryDetailsOverseasController @Inject()(val mcc: MessagesControllerC
 
   implicit val format: Format[Company] = Company.format
 
-  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier): Future[Result] = {
+  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier, request: Request[_]): Future[Result] = {
     if (edit) {
          Future.successful(Redirect(controllers.subsidiaries.routes.SubsidiaryAddressOverseasController.editCompany(index)))
       } else {

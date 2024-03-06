@@ -25,6 +25,7 @@ import play.api.i18n.{I18nSupport, Messages}
 import play.api.libs.json.Format
 import play.api.mvc.{Action, AnyContent, Request, Result}
 import play.twirl.api.Html
+import services.FrontendSessionService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.ERSUtil
@@ -33,6 +34,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 trait SchemeOrganiserBaseController[A] extends FrontendController with I18nSupport with Logging {
 
+  val sessionService: FrontendSessionService
   val ersUtil: ERSUtil
   val authAction: AuthAction
   val globalErrorView: views.html.global_error
@@ -41,7 +43,7 @@ trait SchemeOrganiserBaseController[A] extends FrontendController with I18nSuppo
   implicit val ec: ExecutionContext
   implicit val format: Format[A]
 
-  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier): Future[Result]
+  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier, request: Request[_]): Future[Result]
 
   def form(implicit request: Request[AnyContent]): Form[A]
 
@@ -51,15 +53,14 @@ trait SchemeOrganiserBaseController[A] extends FrontendController with I18nSuppo
 
   def questionPage(index: Int): Action[AnyContent] = authAction.async {
     implicit request =>
-      ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
+     sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT).flatMap { requestObject =>
         showQuestionPage(requestObject, index)
       }
   }
 
   def showQuestionPage(requestObject: RequestObject, index: Int, edit: Boolean = false)
                       (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
-    ersUtil.fetchPartFromCompanyDetails[A](
-      requestObject.getSchemeReference)
+   sessionService.fetchPartFromCompanyDetails[A]
       .map
       { previousAnswer: Option[A] =>
       val preparedForm = previousAnswer.fold(form)(form.fill(_))
@@ -74,7 +75,7 @@ trait SchemeOrganiserBaseController[A] extends FrontendController with I18nSuppo
 
   def questionSubmit(index: Int): Action[AnyContent] = authAction.async {
     implicit request =>
-      ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
+     sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT).flatMap { requestObject =>
         submissionHandler(requestObject, index)(request, hc)
       }
   }
@@ -88,16 +89,16 @@ trait SchemeOrganiserBaseController[A] extends FrontendController with I18nSuppo
       },
       result => {
         if (edit) {
-          ersUtil.fetch[CompanyDetails](ersUtil.SCHEME_ORGANISER_CACHE, requestObject.getSchemeReference).flatMap { schemeOrganiser =>
+         sessionService.fetch[CompanyDetails](ersUtil.SCHEME_ORGANISER_CACHE).flatMap { schemeOrganiser =>
             println(s"schemeOrganiser: $schemeOrganiser")
             val updatedSchemeOrganiser = schemeOrganiser.updatePart(result)
             println(s"updatedSchemeOrganiser: $updatedSchemeOrganiser")
-            ersUtil.cache[CompanyDetails](ersUtil.SCHEME_ORGANISER_CACHE, updatedSchemeOrganiser, requestObject.getSchemeReference).flatMap { _ =>
+           sessionService.cache[CompanyDetails](ersUtil.SCHEME_ORGANISER_CACHE, updatedSchemeOrganiser).flatMap { _ =>
               nextPageRedirect(index, edit)
             }
           }
         } else {
-          ersUtil.cache[A](cacheKey, result, requestObject.getSchemeReference).flatMap { _ =>
+         sessionService.cache[A](cacheKey, result).flatMap { _ =>
             nextPageRedirect(index, edit)
           }
         }
@@ -113,14 +114,14 @@ trait SchemeOrganiserBaseController[A] extends FrontendController with I18nSuppo
   def editCompany(index: Int): Action[AnyContent] = authAction.async {
     implicit request =>
       println(s"\n\n[${this.getClass.getSimpleName}] index is $index ")
-      ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
+     sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT).flatMap { requestObject =>
         showQuestionPage(requestObject, index, edit = true)(request, hc)
       }
   }
 
   def editQuestionSubmit(index: Int): Action[AnyContent] = authAction.async {
     implicit request =>
-      ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
+     sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT).flatMap { requestObject =>
         submissionHandler(requestObject, index, edit = true)(request, hc)
       }
   }

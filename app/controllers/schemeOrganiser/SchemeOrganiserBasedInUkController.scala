@@ -19,12 +19,12 @@ package controllers.schemeOrganiser
 import config.ApplicationConfig
 import connectors.ErsConnector
 import controllers.auth.AuthAction
-import controllers.subsidiaries.SubsidiaryBaseController
 import models.{CompanyBasedInUk, CompanyDetails, RequestObject, RsFormMappings}
 import play.api.data.Form
 import play.api.libs.json.Format
 import play.api.mvc.{AnyContent, MessagesControllerComponents, Request, Result}
 import play.twirl.api.Html
+import services.FrontendSessionService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
@@ -41,6 +41,7 @@ class SchemeOrganiserBasedInUkController @Inject()(val mcc: MessagesControllerCo
                                                    val authAction: AuthAction,
                                                    implicit val countryCodes: CountryCodes,
                                                    implicit val ersUtil: ERSUtil,
+                                                   implicit val sessionService: FrontendSessionService,
                                                    implicit val appConfig: ApplicationConfig,
                                                    pageView: views.html.manual_is_the_company_in_uk
                                              )
@@ -51,15 +52,14 @@ class SchemeOrganiserBasedInUkController @Inject()(val mcc: MessagesControllerCo
   val cacheKey: String = ersUtil.SCHEME_ORGANISER_BASED
   implicit val format: Format[CompanyBasedInUk] = CompanyBasedInUk.format
 
-  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier): Future[Result] = {
+  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier, request: Request[_]): Future[Result] = {
     for {
-      requestObject <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
       subsidiaryBasedInUk <-  if (edit) {
-        ersUtil.fetch[CompanyDetails](ersUtil.SCHEME_ORGANISER_CACHE, requestObject.getSchemeReference).map {
+       sessionService.fetch[CompanyDetails](ersUtil.SCHEME_ORGANISER_CACHE).map {
           companyDetails => CompanyBasedInUk(companyDetails.basedInUk)
         }
       } else {
-        ersUtil.fetch[CompanyBasedInUk](cacheKey, requestObject.getSchemeReference)
+       sessionService.fetch[CompanyBasedInUk](cacheKey)
       }
     } yield {
       (subsidiaryBasedInUk.basedInUk, edit) match {

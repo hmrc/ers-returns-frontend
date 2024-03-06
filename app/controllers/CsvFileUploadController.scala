@@ -25,6 +25,7 @@ import models.upscan._
 import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.mvc._
+import play.api.routing.Router.empty.routes
 import services.{FrontendSessionService, UpscanService}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.mongo.cache.DataKey
@@ -81,9 +82,9 @@ class CsvFileUploadController @Inject() (val mcc: MessagesControllerComponents,
       _ <- sessionService.cache(ersUtil.CSV_FILES_UPLOAD, updatedCacheFileList)
     } yield
       if (updatedCacheFileList.noOfFilesToUpload == updatedCacheFileList.noOfUploads) {
-        Redirect(routes.CsvFileUploadController.validationResults())
+        Redirect(controllers.routes.CsvFileUploadController.validationResults())
       } else {
-        Redirect(routes.CsvFileUploadController.uploadFilePage())
+        Redirect(controllers.routes.CsvFileUploadController.uploadFilePage())
       }) recover { case NonFatal(e) =>
       logger.error(s"[CsvFileUploadController][success] failed to fetch callback data with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.", e)
       getGlobalErrorPage
@@ -194,12 +195,12 @@ class CsvFileUploadController @Inject() (val mcc: MessagesControllerComponents,
             s"[CsvFileUploadController][validateCsv] Validation is successful for schemeRef: ${schemeInfo.schemeRef}, " +
               s"timestamp: ${System.currentTimeMillis()}."
           )
-          ersUtil.cache(ersUtil.VALIDATED_SHEEETS, res.body, schemeInfo.schemeRef)
-          Redirect(controllers.schemeOrganiser.routes.SchemeOrganiserBasedInUkController.questionPage())
+          sessionService.cache(ersUtil.VALIDATED_SHEETS, res.body)
+          Future.successful(Redirect(controllers.schemeOrganiser.routes.SchemeOrganiserBasedInUkController.questionPage()))
         case ACCEPTED =>
           logger.warn(s"[CsvFileUploadController][validateCsv] Validation is not successful for schemeRef: ${schemeInfo.schemeRef}, " +
               s"timestamp: ${System.currentTimeMillis()}.")
-          Future.successful(Redirect(routes.CsvFileUploadController.validationFailure()))
+          Future.successful(Redirect(controllers.routes.CsvFileUploadController.validationFailure()))
         case _ =>
           logger.error(s"[CsvFileUploadController][validateCsv] Validate file data failed with Status ${res.status}, timestamp: ${System.currentTimeMillis()}.")
           Future.successful(getGlobalErrorPage)

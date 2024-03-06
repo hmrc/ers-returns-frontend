@@ -178,7 +178,7 @@ class FrontendSessionService @Inject()(val sessionCache: FrontendSessionsReposit
       Some(SAVED_STATUS)
     }
 
-  def fetchPartFromCompanyDetailsList[A](index: Int)(implicit hc: HeaderCarrier, formats: json.Format[A]): Future[Option[A]] = {
+  def fetchPartFromCompanyDetailsList[A](index: Int)(implicit request: Request[_], formats: json.Format[A]): Future[Option[A]] = {
     sessionCache.getFromSession[JsValue](DataKey(SUBSIDIARY_COMPANIES_CACHE)).map {
       x =>
         println("Json here: " + x.getOrElse(""))
@@ -191,7 +191,7 @@ class FrontendSessionService @Inject()(val sessionCache: FrontendSessionsReposit
     }
   }
 
-  def fetchPartFromCompanyDetails[A]()(implicit hc: HeaderCarrier, formats: json.Format[A]): Future[Option[A]] = {
+  def fetchPartFromCompanyDetails[A]()(implicit request: Request[_], formats: json.Format[A]): Future[Option[A]] = {
     sessionCache.getFromSession[JsValue](DataKey( SCHEME_ORGANISER_CACHE)).map {
       companyDetailsOpt =>
         println("Json here: " + companyDetailsOpt.getOrElse(""))
@@ -204,13 +204,13 @@ class FrontendSessionService @Inject()(val sessionCache: FrontendSessionsReposit
     }
   }
 
-  def fetchCompaniesOptionally()(implicit hc: HeaderCarrier, formats: json.Format[CompanyDetailsList]): Future[CompanyDetailsList] = {
+  def fetchCompaniesOptionally()(implicit request: Request[_], formats: json.Format[CompanyDetailsList]): Future[CompanyDetailsList] = {
     fetch[CompanyDetailsList](SUBSIDIARY_COMPANIES_CACHE).recover {
       case _ => CompanyDetailsList(List.empty[CompanyDetails])
     }
   }
 
-  def fetchSchemeOrganiserOptionally()(implicit hc: HeaderCarrier, formats: json.Format[CompanyDetails]): Future[Option[CompanyDetails]]= {
+  def fetchSchemeOrganiserOptionally()(implicit request: Request[_], formats: json.Format[CompanyDetails]): Future[Option[CompanyDetails]]= {
     fetch[CompanyDetails](SCHEME_ORGANISER_CACHE).map(Some(_)).recover {
       case _ => None
     }

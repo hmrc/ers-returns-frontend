@@ -24,6 +24,7 @@ import play.api.Logging
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.mvc._
+import services.FrontendSessionService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
@@ -38,6 +39,7 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
 																			val authConnector: DefaultAuthConnector,
 																			implicit val countryCodes: CountryCodes,
 																			implicit val ersUtil: ERSUtil,
+                                      implicit val sessionService: FrontendSessionService,
 																			implicit val appConfig: ApplicationConfig,
                                       globalErrorView: views.html.global_error,
                                       groupView: views.html.group,
@@ -54,10 +56,10 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
 
   def showDeleteCompany(id: Int)(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
     (for {
-      requestObject      <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
-      cachedCompanyList  <- ersUtil.fetch[CompanyDetailsList](ersUtil.SUBSIDIARY_COMPANIES_CACHE, requestObject.getSchemeReference)
+      requestObject      <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
+      cachedCompanyList  <- sessionService.fetch[CompanyDetailsList](ersUtil.SUBSIDIARY_COMPANIES_CACHE)
       companyDetailsList = CompanyDetailsList(filterDeletedCompany(cachedCompanyList, id))
-      _                  <- ersUtil.cache(ersUtil.SUBSIDIARY_COMPANIES_CACHE, companyDetailsList, requestObject.getSchemeReference)
+      _                  <- sessionService.cache(ersUtil.SUBSIDIARY_COMPANIES_CACHE, companyDetailsList)
     } yield {
       Redirect(controllers.subsidiaries.routes.GroupSchemeController.groupPlanSummaryPage())
     }) recover {
@@ -70,7 +72,7 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
 
   def groupSchemePage(): Action[AnyContent] = authAction.async {
       implicit request =>
-        ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
+        sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT).flatMap { requestObject =>
           showGroupSchemePage(requestObject)(request, hc)
         }
   }
@@ -78,7 +80,7 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
   def showGroupSchemePage(
     requestObject: RequestObject
   )(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] =
-    ersUtil.fetch[GroupSchemeInfo](ersUtil.GROUP_SCHEME_CACHE_CONTROLLER, requestObject.getSchemeReference).map {
+    sessionService.fetch[GroupSchemeInfo](ersUtil.GROUP_SCHEME_CACHE_CONTROLLER).map {
       groupSchemeInfo =>
         Ok(
           groupView(
@@ -93,7 +95,7 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
     }
 
   def groupSchemeSelected(scheme: String): Action[AnyContent] = authAction.async { implicit request =>
-    ersUtil.fetch[RequestObject](ersUtil.ersRequestObject).flatMap { requestObject =>
+    sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT).flatMap { requestObject =>
       showGroupSchemeSelected(requestObject, scheme)(request)
     }
   }
@@ -120,7 +122,7 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
               if (formData.groupScheme.contains(ersUtil.OPTION_YES)) Some(ersUtil.OPTION_MANUAL) else None
             )
 
-          ersUtil.cache(ersUtil.GROUP_SCHEME_CACHE_CONTROLLER, gsc, requestObject.getSchemeReference).map { _ =>
+          sessionService.cache(ersUtil.GROUP_SCHEME_CACHE_CONTROLLER, gsc).map { _ =>
             (requestObject.getSchemeId, formData.groupScheme) match {
 
               case (_, Some(ersUtil.OPTION_YES)) => Redirect(controllers.subsidiaries.routes.SubsidiaryBasedInUkController.questionPage())
@@ -148,8 +150,8 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
     hc: HeaderCarrier
   ): Future[Result] =
     (for {
-      requestObject      <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
-      companyDetailsList <- ersUtil.fetchCompaniesOptionally(requestObject.getSchemeReference)
+      requestObject      <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
+      companyDetailsList <- sessionService.fetchCompaniesOptionally()
     } yield {
       if (companyDetailsList.companies.isEmpty) {
         Redirect(controllers.subsidiaries.routes.GroupSchemeController.groupSchemePage())
@@ -173,8 +175,8 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
     RsFormMappings.addSubsidiaryForm().bindFromRequest().fold(
       _ => {
         for {
-          requestObject <- ersUtil.fetch[RequestObject](ersUtil.ersRequestObject)
-          companyDetailsList <- ersUtil.fetchCompaniesOptionally(requestObject.getSchemeReference)
+          requestObject <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
+          companyDetailsList <- sessionService.fetchCompaniesOptionally()
         } yield {
           BadRequest(groupPlanSummaryView(requestObject, ersUtil.OPTION_MANUAL, companyDetailsList, formHasError = true))
         }

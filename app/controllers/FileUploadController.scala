@@ -137,11 +137,11 @@ class FileUploadController @Inject() (val mcc: MessagesControllerComponents,
           logger.info(
             s"[FileUploadController][handleValidationResponse] Validation is successful for schemeRef: $schemeRef, timestamp: ${System.currentTimeMillis()}."
           )
-          ersUtil.cache(ersUtil.VALIDATED_SHEEETS, res.body, schemeRef)
+          sessionService.cache(ersUtil.VALIDATED_SHEETS, res.body)
           Redirect(controllers.schemeOrganiser.routes.SchemeOrganiserBasedInUkController.questionPage())
         case ACCEPTED =>
           logger.warn(s"[FileUploadController][handleValidationResponse] Validation is not successful for schemeRef: $schemeRef, timestamp: ${System.currentTimeMillis()}.")
-          Redirect(routes.FileUploadController.validationFailure())
+          Redirect(controllers.routes.FileUploadController.validationFailure())
         case _ =>
           logger.error(s"[FileUploadController][handleValidationResponse] Validate file data failed with Status ${res.status}, timestamp: ${System.currentTimeMillis()}.")
           getGlobalErrorPage
