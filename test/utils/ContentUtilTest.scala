@@ -16,7 +16,7 @@
 
 package utils
 
-import akka.stream.Materializer
+import org.apache.pekko.stream.Materializer
 import org.scalatest.OptionValues
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike

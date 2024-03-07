@@ -16,7 +16,7 @@
 
 package utils
 
-import akka.stream.Materializer
+import org.apache.pekko.stream.Materializer
 import controllers._
 import org.scalatest.OptionValues
 import org.scalatest.matchers.should.Matchers

@@ -16,7 +16,7 @@
 
 package controllers
 
-import akka.stream.Materializer
+import org.apache.pekko.stream.Materializer
 import controllers.auth.{AuthActionGovGateway, RequestWithOptionalAuthContext}
 import org.mockito.Mockito.when
 import org.scalatestplus.play.PlaySpec

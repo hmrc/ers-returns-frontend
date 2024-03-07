@@ -16,7 +16,7 @@
 
 package connectors
 
-import akka.stream.Materializer
+import org.apache.pekko.stream.Materializer
 import com.github.tomakehurst.wiremock.client.WireMock._
 import controllers.auth.RequestWithOptionalAuthContext
 import models.upscan.{UploadStatus, UploadedSuccessfully}

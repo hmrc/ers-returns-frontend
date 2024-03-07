@@ -16,7 +16,7 @@
 
 package controllers
 
-import akka.stream.Materializer
+import org.apache.pekko.stream.Materializer
 import models._
 import java.time.ZonedDateTime
 import org.jsoup.Jsoup
