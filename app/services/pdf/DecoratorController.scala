@@ -16,12 +16,11 @@
 
 package services.pdf
 
-import javax.inject.Inject
 import models.{ErsSummary, TrusteeDetailsList}
 import play.api.i18n.Messages
 import utils.{CountryCodes, ERSUtil}
 
-import scala.collection.mutable.ListBuffer
+import javax.inject.Inject
 
 class DecoratorController @Inject()(val decorators: Array[Decorator])(implicit ERSUtil: ERSUtil) {
 
@@ -32,7 +31,7 @@ class DecoratorController @Inject()(val decorators: Array[Decorator])(implicit E
       decorators.map(decorator => decorator.decorate).mkString
     )
 
-  def addFileNamesDecorator(filesUploaded: Option[ListBuffer[String]], ersSummary: ErsSummary): DecoratorController =
+  def addFileNamesDecorator(filesUploaded: Option[List[String]], ersSummary: ErsSummary): DecoratorController =
     addDecorator(new FileNamesDecorator(ersSummary.isNilReturn, filesUploaded))
 
   def addTrusteesDecorator(trusteesList: Option[TrusteeDetailsList]): DecoratorController =

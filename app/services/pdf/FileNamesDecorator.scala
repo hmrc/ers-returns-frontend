@@ -19,9 +19,7 @@ package services.pdf
 import play.api.i18n.Messages
 import utils.PageBuilder
 
-import scala.collection.mutable.ListBuffer
-
-class FileNamesDecorator(reportableEvents: String, filesUploaded: Option[ListBuffer[String]])
+class FileNamesDecorator(reportableEvents: String, filesUploaded: Option[List[String]])
     extends Decorator
     with PageBuilder {
 

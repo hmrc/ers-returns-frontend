@@ -107,7 +107,7 @@ class GeneratePdfControllerSpec
 
       val controller = new PdfGenerationController(mockMCC, pdfBuilderMock, mockSessionService, globalErrorView, testAuthAction)
 
-      val result = controller.generatePdf(ersRequestObject, "", "")(authRequest)
+      val result = controller.generatePdf("", "")(authRequest)
 
       contentAsString(result) should include(testMessages("ers.global_errors.message"))
       contentAsString(result) shouldBe contentAsString(
@@ -124,7 +124,7 @@ class GeneratePdfControllerSpec
 
       val controller = new PdfGenerationController(mockMCC, pdfBuilderMock, mockSessionService, globalErrorView, testAuthAction)
 
-      val result = controller.generatePdf(ersRequestObject, "", "")(authRequest)
+      val result = controller.generatePdf("", "")(authRequest)
 
       contentAsString(result) should include(testMessages("ers.global_errors.message"))
       contentAsString(result) shouldBe contentAsString(
@@ -145,7 +145,7 @@ class GeneratePdfControllerSpec
 
       val controller = new PdfGenerationController(mockMCC, pdfBuilderMock, mockSessionService, globalErrorView, testAuthAction)
 
-      val res = await(controller.generatePdf(ersRequestObject, "123456", "8 August 2016, 4:28pm")(authRequest))
+      val res = await(controller.generatePdf("123456", "8 August 2016, 4:28pm")(authRequest))
 
       res.header.headers("Content-Disposition") should include("123456-confirmation.pdf")
     }
@@ -171,7 +171,7 @@ class GeneratePdfControllerSpec
 
       val controller = new PdfGenerationController(mockMCC, pdfBuilderMock, mockSessionService, globalErrorView, testAuthAction)
 
-      val res = await(controller.generatePdf(ersRequestObject, "123456", "8 August 2016, 4:28pm")(authRequest))
+      val res = await(controller.generatePdf("123456", "8 August 2016, 4:28pm")(authRequest))
 
       res.header.headers("Content-Disposition") should include("123456-confirmation.pdf")
     }
@@ -190,7 +190,7 @@ class GeneratePdfControllerSpec
 
       val controller = new PdfGenerationController(mockMCC, pdfBuilderMock, mockSessionService, globalErrorView, testAuthAction)
 
-      val res = await(controller.generatePdf(ersRequestObject, "123456", "8 August 2016, 4:28pm")(authRequest))
+      val res = await(controller.generatePdf("123456", "8 August 2016, 4:28pm")(authRequest))
 
       res.header.headers("Content-Disposition") should include("123456-confirmation.pdf")
     }
