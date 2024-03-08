@@ -20,7 +20,7 @@ import config.ApplicationConfig
 import models.RequestObject
 import org.apache.commons.codec.binary.Base64
 
-import java.time.{Instant, ZoneId, ZoneOffset, ZonedDateTime}
+import java.time.{Instant, ZoneOffset, ZonedDateTime}
 import javax.crypto.spec.SecretKeySpec
 import javax.crypto.{Mac, SecretKey}
 

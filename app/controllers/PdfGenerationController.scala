@@ -29,7 +29,6 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.{CacheHelper, ERSUtil}
 
 import javax.inject.{Inject, Singleton}
-import scala.collection.mutable.ListBuffer
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -46,17 +45,17 @@ class PdfGenerationController @Inject() (val mcc: MessagesControllerComponents,
   def buildPdfForBundle(bundle: String, dateSubmitted: String): Action[AnyContent] = authAction.async {
     implicit request =>
       sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT).flatMap { requestObject =>
-        generatePdf(requestObject, bundle, dateSubmitted)
+        generatePdf(bundle, dateSubmitted)
       }
   }
 
-  def generatePdf(requestObject: RequestObject, bundle: String, dateSubmitted: String)
+  def generatePdf(bundle: String, dateSubmitted: String)
                  (implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] = {
     for {
       allMetaData <- sessionService.fetch[ErsMetaData](ersUtil.ERS_METADATA)
       allData <- sessionService.getAllData(bundle, allMetaData)
       allCache <- sessionService.fetchAll()
-      filesUploaded = extractFilesUploaded(allCache, requestObject)
+      filesUploaded = extractFilesUploaded(allCache)
       pdf = pdfBuilderService.createPdf(allData, Some(filesUploaded), dateSubmitted).toByteArray
     } yield Ok(pdf).as("application/pdf").withHeaders(CONTENT_DISPOSITION -> s"inline; filename=$bundle-confirmation.pdf")
   } recoverWith {
@@ -65,29 +64,24 @@ class PdfGenerationController @Inject() (val mcc: MessagesControllerComponents,
       Future.successful(getGlobalErrorPage())
   }
 
-  private def extractFilesUploaded(all: CacheItem, requestObject: RequestObject)(implicit messages: Messages): ListBuffer[String] = {
-    val filesUploaded = ListBuffer[String]()
-
+  private def extractFilesUploaded(all: CacheItem): List[String] = {
     val reportableEventsOpt = getEntry[ReportableEvents](all, DataKey(ersUtil.REPORTABLE_EVENTS))
 
     reportableEventsOpt.flatMap(_.isNilReturn) match {
       case Some(ersUtil.OPTION_UPLOAD_SPREEDSHEET) =>
         val fileTypeOpt = getEntry[CheckFileType](all, DataKey(ersUtil.FILE_TYPE_CACHE)).flatMap(_.checkFileType)
-
         fileTypeOpt match {
           case Some(ersUtil.OPTION_CSV) =>
-            processCsvFiles(all, filesUploaded, requestObject)
+            processCsvFiles(all)
           case _ =>
-            getEntry[String](all, DataKey(ersUtil.FILE_NAME_CACHE)).foreach(filesUploaded += _)
+            getEntry[String](all, DataKey(ersUtil.FILE_NAME_CACHE)).toList
         }
 
-      case _ => // No action needed
+      case _ => List.empty
     }
-
-    filesUploaded
   }
 
-  private def processCsvFiles(all: CacheItem, filesUploaded: ListBuffer[String], requestObject: RequestObject)(implicit messages: Messages): Unit = {
+  private def processCsvFiles(all: CacheItem): List[String] = {
     val csvCallbackOpt = getEntry[UpscanCsvFilesCallbackList](all, DataKey(ersUtil.CHECK_CSV_FILES))
 
     csvCallbackOpt match {
@@ -95,9 +89,8 @@ class PdfGenerationController @Inject() (val mcc: MessagesControllerComponents,
         val csvFilesCallback = csvCallback.files.collect {
           case successfulFile @ UpscanCsvFilesCallback(_, _, _: UploadedSuccessfully) => successfulFile
         }
-
-        csvFilesCallback.foreach { file =>
-          filesUploaded += ersUtil.getPageElement(requestObject.getSchemeId, ersUtil.PAGE_CHECK_CSV_FILE, file.fileId + ".file_name")
+        csvFilesCallback.collect {
+          case UpscanCsvFilesCallback(_, _, status: UploadedSuccessfully) => status.name
         }
       case Some(_) => throw new Exception("Not all CSV files have been completed")
       case None => throw new Exception(s"Cache data missing for key: ${ersUtil.CHECK_CSV_FILES} in CacheMap")

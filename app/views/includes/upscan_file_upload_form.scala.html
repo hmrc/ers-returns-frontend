@@ -28,10 +28,11 @@
         postTarget: String,
         headerMsg: String,
         schemeId: String,
-        fileId: String
+        fileId: String,
+        useCsopV5Templates: Boolean = false
 )(implicit messages: Messages, ersUtil: ERSUtil)
 
-@expectedFileName = @{ersUtil.getPageElement(schemeId, ersUtil.PAGE_CHECK_CSV_FILE,fileId+".file_name")}
+@expectedFileName = @{if(schemeId == "1" && useCsopV5Templates) {ersUtil.getPageElement(schemeId, ersUtil.PAGE_CHECK_CSV_FILE,fileId+".file_name.v5")} else ersUtil.getPageElement(schemeId, ersUtil.PAGE_CHECK_CSV_FILE,fileId+".file_name")}
 
 <form method="post" action="@postTarget" enctype="multipart/form-data">
     @hmrcPageHeading(PageHeading(
@@ -50,9 +51,7 @@
             forAttr = Some("fileToUpload"),
             isPageHeading = false,
             content = if (fileType == ".csv") Text(messages("csv_file_upload.upload_your_file", messages(expectedFileName))) else Text(messages("ers_group_file_check.upload_a_file")),
-            attributes = if (fileType == ".csv") Map(
-                "data-file-name" -> s"${messages(ersUtil.getPageElement(schemeId, ersUtil.PAGE_CHECK_CSV_FILE,fileId+".file_name"))}")
-                else Map()
+            attributes = if (fileType == ".csv") Map("data-file-name" -> s"${messages(expectedFileName)}") else Map()
         )
     ))
 

@@ -28,7 +28,7 @@
         govukInsetText: GovukInsetText
 )
 
-@(requestObject: RequestObject, upscanInitiateResponse: UpscanInitiateResponse, fileId: String)(implicit request: Request[_], messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
+@(requestObject: RequestObject, upscanInitiateResponse: UpscanInitiateResponse, fileId: String, useCsopV5Templates: Boolean)(implicit request: Request[_], messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 
 @schemeId = @{requestObject.getSchemeId}
 
@@ -67,7 +67,8 @@
         upscanInitiateResponse.postTarget,
         uploadFileHeader,
         schemeId,
-        fileId
+        fileId,
+        useCsopV5Templates
     )
 
     @govukInsetText(InsetText(

@@ -21,8 +21,8 @@ import uk.gov.hmrc.play.audit.DefaultAuditConnector
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import uk.gov.hmrc.play.audit.model.DataEvent
 
+import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
-import java.time.{Instant, ZoneId, ZonedDateTime}
 import scala.concurrent.{ExecutionContext, Future}
 
 trait AuditService {

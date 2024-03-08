@@ -27,7 +27,6 @@ import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesController
 import play.api.test.Helpers.stubBodyParser
 import utils.{ERSFakeApplicationConfig, ErsTestHelper}
 
-import scala.collection.mutable.ListBuffer
 import scala.concurrent.ExecutionContext
 
 class FileNamesDecoratorSpec
@@ -53,7 +52,7 @@ class FileNamesDecoratorSpec
 
   "file name decorator" should {
     "return an empty string when list of files is empty" in {
-      val decorator = new FileNamesDecorator("2", Some(ListBuffer[String]()))
+      val decorator = new FileNamesDecorator("2", Some(List[String]()))
 
       val output = decorator.decorate
 
@@ -61,24 +60,24 @@ class FileNamesDecoratorSpec
     }
 
     "return ods files names when nil return is false" in {
-      val decorator = new FileNamesDecorator("1", Some(ListBuffer[String]("odsFile")))
+      val decorator = new FileNamesDecorator("1", Some(List[String]("odsFile")))
 
       val output = decorator.decorate
 
       output.contains(Messages("ers_summary_declaration.file_name")) shouldBe true
-      output.contains("odsFile")                                     shouldBe true
-      output.contains("<hr/>")                                       shouldBe true
+      output.contains("odsFile") shouldBe true
+      output.contains("<hr/>") shouldBe true
     }
 
     "show csv files names when nil return is true" in {
-      val decorator = new FileNamesDecorator("1", Some(ListBuffer[String]("csvFile0", "csvFile1")))
+      val decorator = new FileNamesDecorator("1", Some(List[String]("csvFile0", "csvFile1")))
 
       val output = decorator.decorate
 
       output.contains(Messages("ers_summary_declaration.file_name")) shouldBe true
-      output.contains("csvFile0")                                    shouldBe true
-      output.contains("csvFile1")                                    shouldBe true
-      output.contains("<hr/>")                                       shouldBe true
+      output.contains("csvFile0") shouldBe true
+      output.contains("csvFile1") shouldBe true
+      output.contains("<hr/>") shouldBe true
 
     }
   }

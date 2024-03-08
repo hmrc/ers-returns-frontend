@@ -21,7 +21,6 @@ import play.api.i18n.Messages
 import utils.{CountryCodes, ERSUtil, PageBuilder}
 
 import scala.collection.mutable
-import scala.collection.mutable.ListBuffer
 
 trait PdfDecoratorControllerFactory extends PageBuilder {
 
@@ -31,7 +30,7 @@ trait PdfDecoratorControllerFactory extends PageBuilder {
   def createPdfDecoratorControllerForScheme(
     scheme: String,
     ersSummary: ErsSummary,
-    filesUploaded: Option[ListBuffer[String]]
+    filesUploaded: Option[List[String]]
   )(implicit messages: Messages): DecoratorController =
     scheme.trim.toLowerCase match {
       case "emi" =>

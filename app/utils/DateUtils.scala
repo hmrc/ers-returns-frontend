@@ -28,7 +28,7 @@ import java.time.temporal.ChronoUnit
 object DateUtils extends Logging {
 
   def getCurrentDateTime: String = {
-    val instant: Instant             = Instant.now().truncatedTo(ChronoUnit.SECONDS)
+    val instant: Instant = Instant.now().truncatedTo(ChronoUnit.SECONDS)
     val formatter: DateTimeFormatter = DateTimeFormatter.ISO_INSTANT
     formatter.format(instant)
   }

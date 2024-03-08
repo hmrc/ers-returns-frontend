@@ -16,20 +16,17 @@
 
 package services.pdf
 
-import models.ErsSummary
-import play.api.Logging
-import play.api.i18n.Messages
-import utils.{ContentUtil, CountryCodes, DateUtils, ERSUtil}
-import java.io.{ByteArrayOutputStream, File}
-
 import com.openhtmltopdf.pdfboxout.PdfRendererBuilder
 import com.openhtmltopdf.svgsupport.BatikSVGDrawer
 import com.openhtmltopdf.util.XRLog
-
-import javax.inject.{Inject, Singleton}
+import models.ErsSummary
 import org.apache.commons.io.IOUtils
+import play.api.Logging
+import play.api.i18n.Messages
+import utils.{ContentUtil, CountryCodes, DateUtils, ERSUtil}
 
-import scala.collection.mutable.ListBuffer
+import java.io.{ByteArrayOutputStream, File}
+import javax.inject.{Inject, Singleton}
 import scala.io.Source
 
 @Singleton
@@ -39,7 +36,7 @@ class ErsReceiptPdfBuilderService @Inject() (val countryCodes: CountryCodes)(imp
 
   XRLog.listRegisteredLoggers.forEach((logger: String) => XRLog.setLevel(logger, java.util.logging.Level.WARNING))
 
-  def createPdf(ersSummary: ErsSummary, filesUploaded: Option[ListBuffer[String]], dateSubmitted: String)(implicit
+  def createPdf(ersSummary: ErsSummary, filesUploaded: Option[List[String]], dateSubmitted: String)(implicit
     messages: Messages
   ): ByteArrayOutputStream = {
 

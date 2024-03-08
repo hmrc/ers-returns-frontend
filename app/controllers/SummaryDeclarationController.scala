@@ -59,10 +59,8 @@ class SummaryDeclarationController @Inject() (val mcc: MessagesControllerCompone
       val groupScheme: String = groupSchemeInfo.groupScheme.getOrElse("")
       val reportableEvents: String = getEntry[ReportableEvents](all, DataKey(ersUtil.REPORTABLE_EVENTS)).get.isNilReturn.get
       var fileType: String = ""
-      var fileNames: String = ""
-      var fileCount: Int = 0
 
-      if (reportableEvents == ersUtil.OPTION_YES) {
+      val (fileNames: String, fileCount: Int) = if (reportableEvents == ersUtil.OPTION_YES) {
         fileType = getEntry[CheckFileType](all, DataKey(ersUtil.FILE_TYPE_CACHE)).get.checkFileType.get
         if (fileType == ersUtil.OPTION_CSV) {
           val csvCallback = getEntry[UpscanCsvFilesCallbackList](all, DataKey(ersUtil.CHECK_CSV_FILES))
@@ -77,23 +75,21 @@ class SummaryDeclarationController @Inject() (val mcc: MessagesControllerCompone
             throw new Exception("Not all files have been complete")
           }
 
-          for (file <- csvFilesCallback) {
-            fileNames = fileNames + Messages(
-              ersUtil.getPageElement(requestObject.getSchemeId, ersUtil.PAGE_CHECK_CSV_FILE, file.fileId + ".file_name")
-            ) + "\n"
-            fileCount += 1
+          val successfulUploadNames: List[String] = csvFilesCallback.collect {
+            case UpscanCsvFilesCallback(_, _, status: UploadedSuccessfully) => status.name
           }
+
+          (successfulUploadNames.mkString("\n"), successfulUploadNames.length)
         } else {
-          fileNames = getEntry[String](all, DataKey(ersUtil.FILE_NAME_CACHE)).get
-          fileCount += 1
+          (getEntry[String](all, DataKey(ersUtil.FILE_NAME_CACHE)).get, 1)
         }
-      }
+      } else ("", 0)
 
       val altAmendsActivity =
         getEntry[AltAmendsActivity](all, DataKey(ersUtil.ALT_AMENDS_ACTIVITY)).getOrElse(AltAmendsActivity(""))
       val altActivity       = requestObject.getSchemeId match {
         case ersUtil.SCHEME_CSOP | ersUtil.SCHEME_SIP | ersUtil.SCHEME_SAYE => altAmendsActivity.altActivity
-        case _                                                              => ""
+        case _ => ""
       }
       Future(
         Ok(
