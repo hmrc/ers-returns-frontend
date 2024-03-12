@@ -16,8 +16,8 @@
 
 package utils
 
-import akka.actor.{ActorSystem, Scheduler}
-import akka.pattern.after
+import org.apache.pekko.actor.{ActorSystem, Scheduler}
+import org.apache.pekko.pattern.after
 import config.ApplicationConfig
 import play.api.Logging
 

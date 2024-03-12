@@ -16,7 +16,7 @@
 
 package controllers
 
-import akka.stream.Materializer
+import org.apache.pekko.stream.Materializer
 import controllers.auth.RequestWithOptionalAuthContext
 import models._
 import org.jsoup.Jsoup

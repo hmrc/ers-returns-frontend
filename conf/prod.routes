@@ -2,4 +2,3 @@
 ->         /submit-your-ers-annual-return           app.Routes
 ->         /                                        health.Routes
 ->		   /internal				                internal.Routes
-GET        /admin/metrics                           @com.kenshoo.play.metrics.MetricsController.metrics

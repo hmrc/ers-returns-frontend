@@ -16,7 +16,7 @@
 
 package controllers.auth
 
-import akka.http.scaladsl.model.Uri
+import org.apache.pekko.http.scaladsl.model.Uri
 import config.ApplicationConfig
 import models.{ERSAuthData, ErsMetaData}
 import play.api.Logging

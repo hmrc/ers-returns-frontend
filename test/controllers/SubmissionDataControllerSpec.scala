@@ -16,7 +16,7 @@
 
 package controllers
 
-import akka.stream.Materializer
+import org.apache.pekko.stream.Materializer
 import connectors.ErsConnector
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._

@@ -16,7 +16,7 @@
 
 package utils
 
-import akka.actor.ActorSystem
+import org.apache.pekko.actor.ActorSystem
 import config.ApplicationConfig
 import org.mockito.Mockito.{times, verify, when}
 import org.scalatest.OptionValues

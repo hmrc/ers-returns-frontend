@@ -16,7 +16,7 @@
 
 package controllers
 
-import akka.stream.Materializer
+import org.apache.pekko.stream.Materializer
 import models.{CheckFileType, RequestObject, RsFormMappings}
 import org.jsoup.Jsoup
 import org.mockito.ArgumentMatchers._

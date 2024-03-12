@@ -16,7 +16,7 @@
 
 package controllers
 
-import akka.stream.Materializer
+import org.apache.pekko.stream.Materializer
 import controllers.internal.CsvFileUploadCallbackController
 import models.upscan._
 import org.mockito.ArgumentCaptor

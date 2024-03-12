@@ -16,7 +16,7 @@
 
 package services.pdf
 
-import akka.stream.Materializer
+import org.apache.pekko.stream.Materializer
 import models.{AltAmendsActivity, AlterationAmends, ErsSummary}
 
 import java.time.{LocalDateTime, ZoneId, ZonedDateTime}
