@@ -24,7 +24,7 @@ import utils.ErsTestHelper
 class CompanyDetailsServiceSpec extends AnyWordSpecLike with ErsTestHelper {
 
   "calling replace company" must {
-    val companyService: CompanyDetailsService = new CompanyDetailsService(mockErsUtil)
+    val companyService: CompanyDetailsService = new CompanyDetailsService(mockErsUtil, mockSessionService)
 
     val companyOne   = CompanyDetails("First company", "20 Garden View", None, None, None, None, None, None, None, true)
     val companyTwo   = CompanyDetails("Second company", "72 Big Avenue", None, None, None, None, None, None, None, true)

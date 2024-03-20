@@ -118,10 +118,10 @@ class SummaryDeclarationControllerSpec
   class TestSessionService(fetchAllMapVal: String) extends FrontendSessionService(mockSessionRepository, mockFileValidatorService, mockAppConfig) {
 
 
-		override def cache[T](key: String, body: T, cacheId: String)
-												 (implicit hc: HeaderCarrier, formats: json.Format[T]): Future[CacheMap] = {
-			Future.successful(CacheMap("fakeId", Map()))
-		}
+//		override def cache[T](key: String, body: T)
+//												 (implicit hc: HeaderCarrier, formats: json.Format[T]): Future[(String, ())] = {
+//			Future.successful(("fakeId", Map()))
+//		}
 
     override def getAllData(bundleRef: String, ersMetaData: ErsMetaData)(implicit ec: ExecutionContext, request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[ErsSummary] =
       Future.successful(

@@ -26,6 +26,7 @@ import play.api.i18n.{I18nSupport, Messages}
 import play.api.mvc._
 import services.FrontendSessionService
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.mongo.cache.DataKey
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -45,7 +46,7 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
                                       groupView: views.html.group,
                                       groupPlanSummaryView: views.html.group_plan_summary,
                                       authAction: AuthAction
-																		 ) extends FrontendController(mcc) with I18nSupport with WithUnsafeDefaultFormBinding with Logging {
+																		 ) extends FrontendController(mcc) with I18nSupport with WithUnsafeDefaultFormBinding with Logging with Constants with CacheHelper {
 
   implicit val ec: ExecutionContext = mcc.executionContext
 
@@ -56,9 +57,9 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
 
   def showDeleteCompany(id: Int)(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
     (for {
-      requestObject      <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
-      cachedCompanyList  <- sessionService.fetch[CompanyDetailsList](ersUtil.SUBSIDIARY_COMPANIES_CACHE)
-      companyDetailsList = CompanyDetailsList(filterDeletedCompany(cachedCompanyList, id))
+      all <- sessionService.fetchAll()
+      companies = getEntry[CompanyDetailsList](all, DataKey(ersUtil.SUBSIDIARY_COMPANIES_CACHE)).getOrElse(CompanyDetailsList(Nil))
+      companyDetailsList = CompanyDetailsList(filterDeletedCompany(companies, id))
       _                  <- sessionService.cache(ersUtil.SUBSIDIARY_COMPANIES_CACHE, companyDetailsList)
     } yield {
       Redirect(controllers.subsidiaries.routes.GroupSchemeController.groupPlanSummaryPage())

@@ -17,7 +17,7 @@
 package controllers.schemeOrganiser
 
 import models.{Company, CompanyDetails, RequestObject, RsFormMappings}
-import org.mockito.ArgumentMatchers.any
+import org.mockito.ArgumentMatchers.{any, refEq}
 import org.mockito.Mockito.when
 import org.scalatest.OptionValues
 import org.scalatest.concurrent.ScalaFutures
@@ -31,7 +31,6 @@ import play.api.libs.json.Json
 import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents}
 import play.api.routing.Router.empty.routes
 import play.api.test.Helpers.{contentAsString, defaultAwaitTimeout, redirectLocation, status, stubBodyParser}
-import uk.gov.hmrc.http.cache.client.CacheMap
 import utils.Fixtures.ersRequestObject
 import utils.{ERSFakeApplicationConfig, ErsTestHelper, Fixtures}
 import views.html.{global_error, manual_company_details_uk}
@@ -67,16 +66,17 @@ class SchemeOrganiserDetailsUkControllerSpec extends AnyWordSpecLike
     testAuthAction,
     mockCountryCodes,
     mockErsUtil,
+    mockSessionService,
     mockAppConfig,
     app.injector.instanceOf[manual_company_details_uk]
   )
   "calling showQuestionPage" should {
     implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
     setAuthMocks()
-    when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any())).thenReturn(Future.successful(ersRequestObject))
+    when(mockSessionService.fetch[RequestObject](any())(any(), any())).thenReturn(Future.successful(ersRequestObject))
 
     "show the empty company name question page when there is nothing to prefill" in {
-      when(mockErsUtil.fetchPartFromCompanyDetails[Company](any())(any(), any())).thenReturn(Future.successful(None))
+      when(mockSessionService.fetchPartFromCompanyDetails[Company]()(any(), any())).thenReturn(Future.successful(None))
 
       val result = testController.questionPage(1).apply(authRequest)
 
@@ -85,7 +85,7 @@ class SchemeOrganiserDetailsUkControllerSpec extends AnyWordSpecLike
     }
 
     "show the prefilled company name question page when there is data to prefill" in {
-      when(mockErsUtil.fetchPartFromCompanyDetails[Company](any())(any(), any())).thenReturn(Future.successful(Some(Company("Test Company", Some("AA123456"), Some("1234567890")))))
+      when(mockSessionService.fetchPartFromCompanyDetails[Company]()(any(), any())).thenReturn(Future.successful(Some(Company("Test Company", Some("AA123456"), Some("1234567890")))))
 
       val result = testController.questionPage(1).apply(authRequest)
 
@@ -98,7 +98,7 @@ class SchemeOrganiserDetailsUkControllerSpec extends AnyWordSpecLike
     }
 
     "show the global error page if an exception occurs while retrieving cached data" in {
-      when(mockErsUtil.fetchPartFromCompanyDetails[Company](any())(any(), any())).thenReturn(Future.failed(new RuntimeException("Failure scenario")))
+      when(mockSessionService.fetchPartFromCompanyDetails[Company]()(any(), any())).thenReturn(Future.failed(new RuntimeException("Failure scenario")))
 
       val result = testController.questionPage(1).apply(authRequest)
 
@@ -122,8 +122,7 @@ class SchemeOrganiserDetailsUkControllerSpec extends AnyWordSpecLike
     }
 
     "successfully bind the form and go to the company uk address page if the form is filled correctly" in {
-      val emptyCacheMap = CacheMap("", Map("" -> Json.obj()))
-      when(mockErsUtil.cache[Company](any(), any(), any())(any(), any())).thenReturn(Future.successful(emptyCacheMap))
+      when(mockSessionService.cache[Company](any(), any())(any(), any())).thenReturn(Future.successful(("","")))
       when(mockCompanyDetailsService.updateSchemeOrganiserCache(any())).thenReturn(Future.successful(()), Future.successful(()))
 
       val companyData = Map("companyName" -> "Test company")
@@ -142,10 +141,10 @@ class SchemeOrganiserDetailsUkControllerSpec extends AnyWordSpecLike
   "calling editCompany" should {
     implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
     setAuthMocks()
-    when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any())).thenReturn(Future.successful(ersRequestObject))
+    when(mockSessionService.fetch[RequestObject](any())(any(), any())).thenReturn(Future.successful(ersRequestObject))
 
     "be the same as showQuestion for a specific index" in {
-      when(mockErsUtil.fetchPartFromCompanyDetails[Company](any())(any(), any())).thenReturn(Future.successful(Some(Company("Test company",None,None))))
+      when(mockSessionService.fetchPartFromCompanyDetails[Company]()(any(), any())).thenReturn(Future.successful(Some(Company("Test company",None,None))))
 
       val result = testController.editCompany(1).apply(authRequest)
 
@@ -158,13 +157,12 @@ class SchemeOrganiserDetailsUkControllerSpec extends AnyWordSpecLike
 
   "calling editQuestionSubmit" should {
     setAuthMocks()
-    when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any())).thenReturn(Future.successful(ersRequestObject))
+    when(mockSessionService.fetch[RequestObject](any())(any(), any())).thenReturn(Future.successful(ersRequestObject))
 
     "successfully bind the form and go to the edit version of the scheme organiser address UK page with the index preserved if the form is filled correctly" in {
-      val emptyCacheMap = CacheMap("", Map("" -> Json.obj()))
 
-      when(mockErsUtil.cache[CompanyDetails](any(), any(), any())(any(), any())).thenReturn(Future.successful(emptyCacheMap))
-      when(mockErsUtil.fetch[CompanyDetails](any(), any())(any(), any())).thenReturn(Future.successful(Fixtures.exampleSchemeOrganiserUk))
+      when(mockSessionService.cache[CompanyDetails](any(), any())(any(), any())).thenReturn(Future.successful(sessionPair))
+      when(mockSessionService.fetch[CompanyDetails](refEq(mockErsUtil.SCHEME_ORGANISER_NAME_CACHE))(any(), any())).thenReturn(Future.successful(Fixtures.exampleSchemeOrganiserUk))
       when(mockCompanyDetailsService.updateSubsidiaryCompanyCache(any())(any())).thenReturn(Future.successful(()), Future.successful(()))
 
       val companyAddressData = Map("companyName" -> "Test person")
