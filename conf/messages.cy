@@ -355,9 +355,11 @@ file_upload_errors.title = Mae gwallau wedi eu canfod
 file_upload_errors.para1 = Cywirwch y gwallau cyn i chi ddefnyddio’r gwasanaeth hwn eto neu
 file_upload_errors.upload_link = dewiswch ffeil wahanol i’w huwchlwytho
 file_upload_errors.go_fix =Mae angen i chi gywiro’ch gwallau
-file_upload_errors.check_file = Defnyddiwch wasanaeth gwirio ffeiliau Cyllid a Thollau EF
-file_upload_errors.info = er mwyn cael adroddiad manwl o wallau.
+file_upload_errors.check_file = Defnyddiwch wasanaeth gwirio ffeiliau CThEF
+file_upload_errors.info = i gael adroddiad manwl.
 ers.error.unauthorise = Nid ydych wedi’ch awdurdodi i fwrw golwg ar y dudalen hon
+file_upload_errors.inset.csop.text = Mae’n rhaid i’r ffeil ddefnyddio’r templed ODS cywir ar gyfer y flwyddyn dreth.
+file_upload_errors.inset.csop.link.text = Mae templedi datganiad diwedd blwyddyn ar gael ar gyfer Cynlluniau Opsiwn Prynu Cyfranddaliadau Cwmni
 file_upload_errors.csop.guidance = <a href = "https://www.gov.uk/government/publications/company-share-option-plan-end-of-year-return-template">Defnyddiwch y dogfennau arweiniad Cynllun Opsiwn Prynu Cyfranddaliadau Cwmni</a> i’ch helpu i gywiro’r gwallau.
 file_upload_errors.saye.guidance = <a href = "https://www.gov.uk/government/publications/save-as-you-earn-end-of-year-template">Defnyddiwch y dogfennau arweiniad Cynilo Wrth Ennill</a> i’ch helpu i gywiro’r gwallau.
 file_upload_errors.emi.guidance = <a href = "https://www.gov.uk/government/publications/enterprise-management-incentives-end-of-year-template">Defnyddiwch y dogfennau arweiniad Cymhellion Rheoli Mentrau</a> i’ch helpu i gywiro’r gwallau.
