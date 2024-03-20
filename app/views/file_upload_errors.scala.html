@@ -25,7 +25,12 @@
 		hmrcPageHeading: HmrcPageHeading
 )
 
-@(requestObject: RequestObject, fileType: String)(implicit request: Request[_], messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
+@(requestObject: RequestObject, fileType: String, csopTemplateVersionInvalid: Boolean = false)(implicit request: Request[_], messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
+
+@insetCsopContent = {
+	<p>@messages("file_upload_errors.inset.csop.text")</p>
+	<a class="govuk-link" href="https://www.gov.uk/government/publications/company-share-option-plan-end-of-year-return-template">@Messages("file_upload_errors.inset.csop.link.text")</a>.
+}
 
 @govuk_wrapper(title = messages("file_upload_errors.title") + " " + messages("ers.title.postfix")) {
 
@@ -35,21 +40,25 @@
 		text = messages("file_upload_errors.title")
 	))
 
-	@govukInsetText(InsetText(
-		content = {
-			val href = if(fileType == ersUtil.OPTION_ODS) routes.FileUploadController.uploadFilePage().url else routes.CheckCsvFilesController.checkCsvFilesPage().url
-			HtmlContent(s"""${messages("file_upload_errors.para1")} <a href="$href">${messages("file_upload_errors.upload_link")}</a>.""")
-		}
-	))
+	@if(csopTemplateVersionInvalid) {
+		@govukInsetText(InsetText(
+			content = HtmlContent(insetCsopContent)
+		))
+	} else {
+		@govukInsetText(InsetText(
+			content = {
+				val href = if(fileType == ersUtil.OPTION_ODS) routes.FileUploadController.uploadFilePage().url else routes.CheckCsvFilesController.checkCsvFilesPage().url
+				HtmlContent(s"""${messages("file_upload_errors.para1")} <a href="$href">${messages("file_upload_errors.upload_link")}</a>.""")
+			}
+		))
+	}
 
 	<h2 class="govuk-heading-m">
 		@Html(messages("file_upload_errors.go_fix"))
 	</h2>
 
 	<p class="govuk-body">
-		<a class="govuk-link" href="/check-your-ers-files">
-			@Html(messages("file_upload_errors.check_file"))
-		</a>
+		<a class="govuk-link" href="/check-your-ers-files">@Html(messages("file_upload_errors.check_file"))</a>
 		@Html(messages("file_upload_errors.info"))
 	</p>
 }

@@ -6,7 +6,7 @@ object AppDependencies {
   val pdfboxVersion    = "2.0.30"
   val openHtmlVersion  = "1.0.10"
   val bootstrapVersion = "8.5.0"
-  val mongoVersion     = "1.7.0"
+  val mongoVersion     = "1.8.0"
 
   val compile: Seq[ModuleID] = Seq(
     guice,
