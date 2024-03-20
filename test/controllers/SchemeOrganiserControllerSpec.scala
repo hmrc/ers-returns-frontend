@@ -18,7 +18,6 @@ package controllers
 
 import controllers.schemeOrganiser.SchemeOrganiserController
 import models._
-import org.jsoup.Jsoup
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatest.OptionValues
@@ -29,7 +28,6 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status
 import play.api.i18n
 import play.api.i18n.{MessagesApi, MessagesImpl}
-import play.api.libs.json.Writes.list
 import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -75,13 +73,18 @@ class SchemeOrganiserControllerSpec
                                                    requestObjectRes: Future[RequestObject] = Future.successful(ersRequestObject)
                                                  ): SchemeOrganiserController = new SchemeOrganiserController(
       mockMCC,
+      mockAuthConnector,
+      mockCountryCodes,
+      mockErsUtil,
       mockSessionService,
+      mockAppConfig,
       globalErrorView,
       schemeOrganiserSummaryView,
       testAuthAction
-    ) {
+    ){
 
-      when(mockErsUtil.fetch[CompanyDetails](refEq(mockErsUtil.SCHEME_ORGANISER_CACHE), anyString())(any(), any())).thenReturn(
+
+      when(mockSessionService.fetch[CompanyDetails](refEq(mockErsUtil.SCHEME_ORGANISER_CACHE))(any(), any())).thenReturn(
         if (schemeOrganiserSummaryRes) {
           if (schemeOrganiserSummaryCached) {
             Future.successful(
@@ -95,7 +98,7 @@ class SchemeOrganiserControllerSpec
         }
       )
 
-      when(mockErsUtil.cache(refEq(SCHEME_ORGANISER_CACHE), any(), any())(any(), any())).thenReturn(
+      when(mockSessionService.cache(refEq(SCHEME_ORGANISER_CACHE), any())(any(), any())).thenReturn(
         if (schemeOrganiserSummaryCachedOk) {
           Future.successful(null)
         } else {
@@ -103,7 +106,7 @@ class SchemeOrganiserControllerSpec
         }
       )
 
-      when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any())).thenReturn(requestObjectRes)
+      when(mockSessionService.fetch[RequestObject](any())(any(), any())).thenReturn(requestObjectRes)
 
       when(mockSessionService.fetch[ReportableEvents](refEq(REPORTABLE_EVENTS))(any(), any())).thenReturn(
         if (reportableEventsRes) {
@@ -168,7 +171,7 @@ class SchemeOrganiserControllerSpec
 
     "redirect to SchemeOrganiserNameController.questionPage if no scheme organiser is present" in {
 
-      when(mockErsUtil.fetchSchemeOrganiserOptionally(any())(any(),any())).thenReturn(Future.successful(None))
+      when(mockSessionService.fetchSchemeOrganiserOptionally()(any(),any())).thenReturn(Future.successful(None))
       setAuthMocks()
       val controllerUnderTest = buildFakeSchemeOrganiserSummaryController(schemeOrganiserSummaryCached = false)
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdSIP("GET"))

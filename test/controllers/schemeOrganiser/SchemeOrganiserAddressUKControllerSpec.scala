@@ -30,7 +30,6 @@ import play.api.i18n.{MessagesApi, MessagesImpl}
 import play.api.libs.json.Json
 import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents}
 import play.api.test.Helpers.{contentAsString, defaultAwaitTimeout, redirectLocation, status, stubBodyParser}
-import uk.gov.hmrc.http.cache.client.CacheMap
 import utils.Fixtures.{companyAddressUK, ersRequestObject}
 import utils.{ERSFakeApplicationConfig, ErsTestHelper, Fixtures}
 import views.html.{global_error, manual_address_uk}
@@ -67,6 +66,7 @@ class SchemeOrganiserAddressUKControllerSpec extends AnyWordSpecLike
     testAuthAction,
     mockCountryCodes,
     mockErsUtil,
+    mockSessionService,
     mockAppConfig,
     mockCompanyDetailsService,
     app.injector.instanceOf[manual_address_uk]
@@ -75,10 +75,10 @@ class SchemeOrganiserAddressUKControllerSpec extends AnyWordSpecLike
   "calling showQuestionPage" should {
     implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
     setAuthMocks()
-    when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any())).thenReturn(Future.successful(ersRequestObject))
+    when(mockSessionService.fetch[RequestObject](any())(any(), any())).thenReturn(Future.successful(ersRequestObject))
 
     "show the empty scheme organiser address UK question page when there is nothing to prefill" in {
-      when(mockErsUtil.fetchPartFromCompanyDetails[CompanyDetailsList](any())(any(), any())).thenReturn(Future.successful(None))
+      when(mockSessionService.fetchPartFromCompanyDetails[CompanyDetailsList]()(any(), any())).thenReturn(Future.successful(None))
       val result = testController.questionPage(1).apply(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
 
       status(result) shouldBe Status.OK
@@ -87,7 +87,7 @@ class SchemeOrganiserAddressUKControllerSpec extends AnyWordSpecLike
     }
 
     "show the prefilled scheme organiser address UK question page when there is data to prefill" in {
-      when(mockErsUtil.fetchPartFromCompanyDetails[CompanyAddress](any())(any(), any())).thenReturn(Future.successful(Some(companyAddressUK)))
+      when(mockSessionService.fetchPartFromCompanyDetails[CompanyAddress]()(any(), any())).thenReturn(Future.successful(Some(companyAddressUK)))
 
       val result = testController.questionPage(1).apply(authRequest)
 
@@ -97,7 +97,7 @@ class SchemeOrganiserAddressUKControllerSpec extends AnyWordSpecLike
       contentAsString(result) should include("UK 1")
     }
     "show the global error page if an exception occurs while retrieving cached data" in {
-      when(mockErsUtil.fetchPartFromCompanyDetails[CompanyAddress](any())(any(), any())).thenReturn(Future.failed(new RuntimeException("Failure scenario")))
+      when(mockSessionService.fetchPartFromCompanyDetails[CompanyAddress]()(any(), any())).thenReturn(Future.failed(new RuntimeException("Failure scenario")))
 
       val result = testController.questionPage(1).apply(authRequest)
 
@@ -121,8 +121,7 @@ class SchemeOrganiserAddressUKControllerSpec extends AnyWordSpecLike
     }
 
     "successfully bind the form and redirect to the scheme Organiser Summary Page" in {
-      val emptyCacheMap = CacheMap("", Map("" -> Json.obj()))
-      when(mockErsUtil.cache[CompanyAddress](any(), any(), any())(any(), any())).thenReturn(Future.successful(emptyCacheMap))
+      when(mockSessionService.cache[CompanyAddress](any(), any())(any(), any())).thenReturn(Future.successful(("","")))
       when(mockCompanyDetailsService.updateSchemeOrganiserCache(any())).thenReturn(Future.successful(()), Future.successful(()))
 
       val companyAddressUkData = Map("addressLine1" -> "123 Fake Street")
@@ -138,10 +137,10 @@ class SchemeOrganiserAddressUKControllerSpec extends AnyWordSpecLike
   "calling editCompany" should {
     implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
     setAuthMocks()
-    when(mockErsUtil.fetch[RequestObject](any())(any(), any(), any())).thenReturn(Future.successful(ersRequestObject))
+    when(mockSessionService.fetch[RequestObject](any())(any(), any())).thenReturn(Future.successful(ersRequestObject))
 
     "be the same as showQuestion for a specific index" in {
-      when(mockErsUtil.fetchPartFromCompanyDetails[CompanyAddress](any())(any(), any())).thenReturn(Future.successful(Some(companyAddressUK)))
+      when(mockSessionService.fetchPartFromCompanyDetails[CompanyAddress]()(any(), any())).thenReturn(Future.successful(Some(companyAddressUK)))
 
       val result = testController.editCompany(1).apply(authRequest)
 
