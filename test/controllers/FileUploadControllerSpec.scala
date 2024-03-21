@@ -262,10 +262,27 @@ class FileUploadControllerSpec
         status(result) mustBe SEE_OTHER
         redirectLocation(result) mustBe Some(routes.FileUploadController.validationFailure(false).url)
       }
+
+      "Ers Meta Data is returned, callback record is uploaded successfully, remove presubmission data returns OK, validate file data returns Accepted, for CSOP with Incorrect ERS Template validation error, csopV5Enabled = false" in {
+        when(mockAppConfig.csopV5Enabled).thenReturn(false)
+        when(mockSessionService.fetch[RequestObject](anyString())(any(), any())).thenReturn(Future.successful(ersRequestObject))
+        when(mockErsConnector.getCallbackRecord(any(), any)).thenReturn(Future.successful(Some(uploadedSuccessfully)))
+        when(mockErsConnector.removePresubmissionData(any())(any[RequestWithOptionalAuthContext[AnyContent]], any()))
+          .thenReturn(Future.successful(HttpResponse(OK, "")))
+        when(mockSessionService.fetch[ErsMetaData](any())(any(), any())).thenReturn(Future.successful(validErsMetaData))
+        when(mockErsConnector.validateFileData(meq(uploadedSuccessfully), any[SchemeInfo])(any[RequestWithOptionalAuthContext[AnyContent]], any()))
+          .thenReturn(Future.successful(HttpResponse(ACCEPTED, "Incorrect ERS Template")))
+
+        setAuthMocks()
+        val result = TestFileUploadController.validationResults()(testFakeRequest)
+        status(result) mustBe SEE_OTHER
+        redirectLocation(result) mustBe Some(routes.FileUploadController.validationFailure(false).url)
+      }
     }
 
     "redirect the user to FileUploadController.validationFailure(true)" when {
-      "Ers Meta Data is returned, callback record is uploaded successfully, remove presubmission data returns OK, validate file data returns Accepted, for CSOP with Incorrect ERS Template validation error" in {
+      "Ers Meta Data is returned, callback record is uploaded successfully, remove presubmission data returns OK, validate file data returns Accepted, for CSOP with Incorrect ERS Template validation error, csopV5Enabled = true" in {
+        when(mockAppConfig.csopV5Enabled).thenReturn(true)
         when(mockSessionService.fetch[RequestObject](anyString())(any(), any())).thenReturn(Future.successful(ersRequestObject))
         when(mockErsConnector.getCallbackRecord(any(), any)).thenReturn(Future.successful(Some(uploadedSuccessfully)))
         when(mockErsConnector.removePresubmissionData(any())(any[RequestWithOptionalAuthContext[AnyContent]], any()))
