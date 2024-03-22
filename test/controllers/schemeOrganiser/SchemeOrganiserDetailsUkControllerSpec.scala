@@ -162,7 +162,7 @@ class SchemeOrganiserDetailsUkControllerSpec extends AnyWordSpecLike
     "successfully bind the form and go to the edit version of the scheme organiser address UK page with the index preserved if the form is filled correctly" in {
 
       when(mockSessionService.cache[CompanyDetails](any(), any())(any(), any())).thenReturn(Future.successful(sessionPair))
-      when(mockSessionService.fetch[CompanyDetails](refEq(mockErsUtil.SCHEME_ORGANISER_NAME_CACHE))(any(), any())).thenReturn(Future.successful(Fixtures.exampleSchemeOrganiserUk))
+      when(mockSessionService.fetch[CompanyDetails](refEq(mockErsUtil.SCHEME_ORGANISER_CACHE))(any(), any())).thenReturn(Future.successful(Fixtures.exampleSchemeOrganiserUk))
       when(mockCompanyDetailsService.updateSubsidiaryCompanyCache(any())(any())).thenReturn(Future.successful(()), Future.successful(()))
 
       val companyAddressData = Map("companyName" -> "Test person")

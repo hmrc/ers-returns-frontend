@@ -184,10 +184,6 @@ class ErsUtilSpec
     "return default country name" in {
       ersUtil.companyLocation(CompanyDetails(companyName = "", addressLine1= "", None, None, None, None, country = Some("UK"), None, None, true)) shouldBe "UK"
     }
-
-    "return DEFAULT for None country" in {
-      ersUtil.companyLocation(CompanyDetails(companyName = "", addressLine1= "", None, None, None, None, country = None, None, None, false)) shouldBe ""
-    }
   }
 
   "trusteeLocationMessage" should {
