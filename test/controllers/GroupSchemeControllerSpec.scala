@@ -93,6 +93,8 @@ class GroupSchemeControllerSpec
     when(mockErsUtil.getPageElement(any(), any(), any(), any())(any())).thenCallRealMethod()
     when(mockErsUtil.companyLocation(any())).thenReturn("UK")
     when(mockErsUtil.buildAddressSummary(any())).thenReturn("addressSummary")
+    when(mockErsUtil.MSG_CSOP).thenReturn(".csop.")
+    when(mockErsUtil.PAGE_GROUP_SUMMARY).thenReturn("ers_group_summary")
   }
 
   lazy val testGroupSchemeController: GroupSchemeController = new GroupSchemeController(
@@ -531,14 +533,16 @@ class GroupSchemeControllerSpec
         .thenReturn(Future.successful(companyDetailsList))
 
       when(mockSessionService.fetch[RequestObject](refEq(mockErsUtil.ERS_REQUEST_OBJECT))(any(), any()))
-        .thenReturn(Future.successful(ersRequestObject))
-
+        .thenReturn(Future.successful(ersRequestObject.copy(
+          schemeName = Some("CSOP"),
+          schemeType = Some("CSOP")
+        )))
 
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
       val result = testGroupSchemeController.showGroupPlanSummaryPage()(authRequest, hc)
 
       status(result) shouldBe OK
-      contentAsString(result).contains(Messages("ers_group_summary.csop.title"))
+      contentAsString(result).contains(Messages("ers_group_summary.csop.title")) shouldBe true
     }
 
     "redirect to GroupSchemeController groupSchemePage if no subsidiary companies in list" in {
