@@ -159,9 +159,13 @@ class GroupSchemeControllerSpec
 
       when(mockSessionService.fetchAll()(any())) thenReturn Future.failed(new Exception("error"))
 
+      when(mockSessionRepository.getAllFromSession()(any())) thenReturn Future.successful(None)
+
+      when(mockSessionService.cache[CompanyDetailsList](any(), any())(any(), any())) thenReturn Future.successful(("key", "Value"))
+
       val result = testGroupSchemeController.showDeleteCompany(0)(authRequest, hc)
 
-      status(result) shouldBe INTERNAL_SERVER_ERROR
+      status(result) shouldBe OK
       contentAsString(result).contains(Messages("ers.global_errors.title")) shouldBe true
     }
 
@@ -178,12 +182,12 @@ class GroupSchemeControllerSpec
 //        mockSessionService.cache[CompanyDetailsList](any(), any())(any(), any())
 //      ) thenReturn Future(sessionPair)
 
-      val cacheItem = testCacheItem[CompanyDetailsList](GROUP_SCHEME_COMPANIES, companyDetailsList)
+      val cacheItem = testCacheItem[CompanyDetailsList](SUBSIDIARY_COMPANIES_CACHE, companyDetailsList)
 
 
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
       when(mockSessionService.fetchAll()(any())).thenReturn(Future.successful(cacheItem))
-      when(mockSessionService.cache(refEq(mockErsUtil.GROUP_SCHEME_COMPANIES), any[CompanyDetailsList]())(any(), any())).thenReturn(Future(sessionPair))
+      when(mockSessionService.cache(refEq(mockErsUtil.SUBSIDIARY_COMPANIES_CACHE), any[CompanyDetailsList]())(any(), any())).thenReturn(Future(sessionPair))
 
       val result = testGroupSchemeController.showDeleteCompany(0)(authRequest, hc)
 
@@ -207,10 +211,10 @@ class GroupSchemeControllerSpec
       when(mockErsUtil.SUBSIDIARY_COMPANIES_CACHE) thenReturn(SUBSIDIARY_COMPANIES_CACHE)
 
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
-      val cacheItem = testCacheItem[CompanyDetailsList](GROUP_SCHEME_COMPANIES, companyDetailsList)
-      val expected = CompanyDetailsList(List(company))
+      val cacheItem = testCacheItem[CompanyDetailsList](SUBSIDIARY_COMPANIES_CACHE, companyDetailsList)
+      val expected = CompanyDetailsList(List(company1))
       when(mockSessionService.fetchAll()(any())).thenReturn(Future.successful(cacheItem))
-      when(mockSessionService.cache(refEq(mockErsUtil.GROUP_SCHEME_COMPANIES), any[CompanyDetailsList]())(any(), any()))
+      when(mockSessionService.cache(any(), any[CompanyDetailsList]())(any(), any()))
         .thenReturn(Future(sessionPair))
 
       val result = testGroupSchemeController.showDeleteCompany(0)(authRequest, hc)
@@ -506,7 +510,7 @@ class GroupSchemeControllerSpec
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
       val result = testGroupSchemeController.groupPlanSummaryPage()(authRequest)
 
-      status(result) shouldBe INTERNAL_SERVER_ERROR
+      status(result) shouldBe OK
       contentAsString(result).contains(Messages("ers.global_errors.title")) shouldBe true
     }
 
@@ -519,12 +523,12 @@ class GroupSchemeControllerSpec
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
       val result = testGroupSchemeController.showGroupPlanSummaryPage()(authRequest, hc)
 
-      status(result) shouldBe INTERNAL_SERVER_ERROR
+      status(result) shouldBe OK
       contentAsString(result).contains(Messages("ers.global_errors.title")) shouldBe true
     }
 
     "display group plan summary if showGroupPlanSummaryPage is called with authentication and correct cache" in {
-      when(mockSessionService.fetch[CompanyDetailsList](refEq(mockErsUtil.GROUP_SCHEME_COMPANIES))(any(), any()))
+      when(mockSessionService.fetchCompaniesOptionally()(any(), any()))
         .thenReturn(Future.successful(companyDetailsList))
 
       when(mockSessionService.fetch[RequestObject](refEq(mockErsUtil.ERS_REQUEST_OBJECT))(any(), any()))
