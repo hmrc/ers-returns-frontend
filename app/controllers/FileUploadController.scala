@@ -32,6 +32,7 @@ import utils._
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.Try
 
 @Singleton
 class FileUploadController @Inject() (val mcc: MessagesControllerComponents,
@@ -40,6 +41,7 @@ class FileUploadController @Inject() (val mcc: MessagesControllerComponents,
                                       val upscanService: UpscanService,
                                       globalErrorView: views.html.global_error,
                                       fileUploadErrorsView: views.html.file_upload_errors,
+                                      templateFailureView: views.html.template_version_problem,
                                       upscanOdsFileUploadView: views.html.upscan_ods_file_upload,
                                       fileUploadProblemView: views.html.file_upload_problem,
                                       authAction: AuthAction)
@@ -141,11 +143,11 @@ class FileUploadController @Inject() (val mcc: MessagesControllerComponents,
         case ACCEPTED if appConfig.csopV5Enabled && schemeInfo.schemeType == "CSOP" && res.body.contains("Incorrect ERS Template") =>
           logger.warn(s"[FileUploadController][handleValidationResponse] Validation is not successful for schemeRef: $schemeRef, timestamp: ${System.currentTimeMillis()}." +
             s"Wrong CSOP template used for tax year.")
-          Redirect(routes.FileUploadController.validationFailure(true))
+          Redirect(routes.FileUploadController.templateFailure())
 
         case ACCEPTED =>
           logger.warn(s"[FileUploadController][handleValidationResponse] Validation is not successful for schemeRef: $schemeRef, timestamp: ${System.currentTimeMillis()}.")
-          Redirect(routes.FileUploadController.validationFailure(false))
+          Redirect(routes.FileUploadController.validationFailure())
 
         case _ =>
           logger.error(s"[FileUploadController][handleValidationResponse] Validate file data failed with Status ${res.status}, timestamp: ${System.currentTimeMillis()}.")
@@ -154,16 +156,29 @@ class FileUploadController @Inject() (val mcc: MessagesControllerComponents,
     }
   }
 
-  def validationFailure(csopTemplateVersionInvalid: Boolean): Action[AnyContent] = authAction.async { implicit request =>
+  def validationFailure(): Action[AnyContent] = authAction.async { implicit request =>
     logger.info("[FileUploadController][validationFailure] Validation Failure: " + (System.currentTimeMillis() / 1000))
     (for {
       requestObject <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
-      fileType      <- sessionService.fetch[CheckFileType](ersUtil.FILE_TYPE_CACHE)
+      fileType <- sessionService.fetch[CheckFileType](ersUtil.FILE_TYPE_CACHE)
     } yield {
-      Ok(fileUploadErrorsView(requestObject, fileType.checkFileType.getOrElse(""), csopTemplateVersionInvalid))
+      Ok(fileUploadErrorsView(requestObject, fileType.checkFileType.getOrElse("")))
     }) recover {
       case e: Throwable =>
         logger.error(s"[FileUploadController][validationFailure] failed with Exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.", e)
+        getGlobalErrorPage
+    }
+  }
+
+  def templateFailure(): Action[AnyContent] = authAction.async { implicit request =>
+    logger.info("[FileUploadController][templateFailure] Template Failure: " + (System.currentTimeMillis() / 1000))
+    (for {
+      requestObject <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
+    } yield {
+      Ok(templateFailureView(requestObject, DateUtils.getFullTaxYear(requestObject.taxYear.getOrElse("")) , csopV5required(requestObject)))
+    }) recover {
+      case e: Throwable =>
+        logger.error(s"[FileUploadController][templateFailure] failed with Exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.", e)
         getGlobalErrorPage
     }
   }
@@ -191,4 +206,10 @@ class FileUploadController @Inject() (val mcc: MessagesControllerComponents,
         "ers.global_errors.message"
       )(request, messages, appConfig)
     )
+
+  @throws[IllegalArgumentException]
+  private def csopV5required(requestObject: RequestObject): Boolean = {
+    Try(requestObject.taxYear.getOrElse("2023/24").split("/")(0).toInt >= 2023)
+      .getOrElse(throw new IllegalArgumentException(s"Invalid tax year format or conversion error: ${requestObject.taxYear}, expected format YYYY/YY"))
+  }
 }

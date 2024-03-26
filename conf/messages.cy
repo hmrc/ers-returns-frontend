@@ -358,8 +358,20 @@ file_upload_errors.go_fix =Mae angen i chi gywiro’ch gwallau
 file_upload_errors.check_file = Defnyddiwch wasanaeth gwirio ffeiliau CThEF
 file_upload_errors.info = i gael adroddiad manwl.
 ers.error.unauthorise = Nid ydych wedi’ch awdurdodi i fwrw golwg ar y dudalen hon
-file_upload_errors.inset.csop.text = Mae’n rhaid i’r ffeil ddefnyddio’r templed ODS cywir ar gyfer y flwyddyn dreth.
+
+file_upload_errors.inset.csop.text = Mae’n rhaid i’r ffeil ddefnyddio’r fersiwn cywir o’r templed ODS ar gyfer y flwyddyn dreth.
 file_upload_errors.inset.csop.link.text = Mae templedi datganiad diwedd blwyddyn ar gael ar gyfer Cynlluniau Opsiwn Prynu Cyfranddaliadau Cwmni
+file_upload_errors.problem.title = Mae problem wedi codi
+file_upload_errors.problem.heading = Mae problem wedi codi
+file_upload_errors.problem.message.v4 = Ar gyfer blwyddyn dreth {0}, mae’n rhaid i chi ddefnyddio fersiwn 4 o’r templed ODS.
+file_upload_errors.problem.message.v5 = Ar gyfer blwyddyn dreth {0}, mae’n rhaid i chi ddefnyddio fersiwn 5 o’r templed ODS.
+file_upload_errors.problem.message.bullet.0 = Gallwch wneud y canlynol:
+file_upload_errors.problem.message.bullet.1 = cael
+file_upload_errors.problem.message.bullet.1.link = templedi datganiad diwedd blwyddyn
+file_upload_errors.problem.message.bullet.1.text = ar gyfer Cynlluniau Opsiwn Prynu Cyfranddaliadau Cwmni
+file_upload_errors.problem.message.bullet.2 = rhoi cynnig arall arni gan ddefnyddio ffeil wahanol
+file_upload_errors.problem.message.bullet.3 = os oes gennych y fersiwn cywir o’r templed
+
 file_upload_errors.csop.guidance = <a href = "https://www.gov.uk/government/publications/company-share-option-plan-end-of-year-return-template">Defnyddiwch y dogfennau arweiniad Cynllun Opsiwn Prynu Cyfranddaliadau Cwmni</a> i’ch helpu i gywiro’r gwallau.
 file_upload_errors.saye.guidance = <a href = "https://www.gov.uk/government/publications/save-as-you-earn-end-of-year-template">Defnyddiwch y dogfennau arweiniad Cynilo Wrth Ennill</a> i’ch helpu i gywiro’r gwallau.
 file_upload_errors.emi.guidance = <a href = "https://www.gov.uk/government/publications/enterprise-management-incentives-end-of-year-template">Defnyddiwch y dogfennau arweiniad Cymhellion Rheoli Mentrau</a> i’ch helpu i gywiro’r gwallau.
