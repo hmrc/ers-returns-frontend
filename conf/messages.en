@@ -459,8 +459,18 @@ file_upload_errors.go_fix = You need to fix your errors
 file_upload_errors.check_file = Use HMRC’s file check service
 file_upload_errors.info = to get a detailed report.
 ers.error.unauthorise = You’re not authorised to view this page
-file_upload_errors.inset.csop.text = The file must use the correct ODS template for the tax year.
+file_upload_errors.inset.csop.text = The file must use the correct version of the ODS template for the tax year.
 file_upload_errors.inset.csop.link.text = Get end of year return templates for Company Share Option Plan schemes
+file_upload_errors.problem.title = There is a problem
+file_upload_errors.problem.heading = There is a problem
+file_upload_errors.problem.message.v4 = For tax year {0} you must use version 4 of the ODS template.
+file_upload_errors.problem.message.v5 = For tax year {0} you must use version 5 of the ODS template.
+file_upload_errors.problem.message.bullet.0 = You can:
+file_upload_errors.problem.message.bullet.1 = get
+file_upload_errors.problem.message.bullet.1.link = end of year return templates
+file_upload_errors.problem.message.bullet.1.text = for Company Share Option Plan schemes
+file_upload_errors.problem.message.bullet.2 = try again with a different file
+file_upload_errors.problem.message.bullet.3 = if you have the correct version of the template
 
 file_upload_errors.csop.guidance = <a href = "https://www.gov.uk/government/publications/company-share-option-plan-end-of-year-return-template">Use the Company Share Option Plan guidance documents</a> to help you fix the errors.
 file_upload_errors.saye.guidance = <a href = "https://www.gov.uk/government/publications/save-as-you-earn-end-of-year-template">Use the Save As You Earn guidance documents</a> to help you fix the errors.

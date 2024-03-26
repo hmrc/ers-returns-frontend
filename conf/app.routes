@@ -5,7 +5,8 @@
 GET         /assets/*file                               	controllers.Assets.versioned(path="/public", file)
 
 GET         /upload-ods-file                                controllers.FileUploadController.uploadFilePage()
-GET         /errors-have-been-found-ods                     controllers.FileUploadController.validationFailure(csopTemplateVersionInvalid: Boolean)
+GET         /errors-have-been-found-ods                     controllers.FileUploadController.validationFailure()
+GET         /there-is-a-problem                             controllers.FileUploadController.templateFailure()
 GET         /file-upload/failure                            controllers.FileUploadController.failure()
 GET         /if-there-are-no-errors-ods                     controllers.FileUploadController.success()
 

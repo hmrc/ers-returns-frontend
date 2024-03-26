@@ -76,6 +76,7 @@ class FrontendAccessibilitySpec extends AutomaticAccessibilitySpec {
     case summary: summary =>
       implicit val arbAsciiString: Arbitrary[String] = fixed("1")
       render(summary)
+    case template_version_problem: template_version_problem => render(template_version_problem)
     case trustee_address_overseas: trustee_address_overseas =>
       implicit val arbTrusteeAddressOverseas: Arbitrary[Form[TrusteeAddress]] = fixed(models.RsFormMappings.trusteeAddressOverseasForm()(messages))
       render(trustee_address_overseas)
