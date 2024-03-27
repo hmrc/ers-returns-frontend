@@ -16,7 +16,6 @@
 
 package controllers
 
-import akka.stream.Materializer
 import controllers.subsidiaries.GroupSchemeController
 import org.apache.pekko.stream.Materializer
 import models._
