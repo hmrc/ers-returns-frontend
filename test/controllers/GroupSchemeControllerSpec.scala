@@ -418,7 +418,7 @@ class GroupSchemeControllerSpec
       //val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
       val authRequest =
         buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(("value", "true")))
-      when(mockSessionService.fetchCompaniesOptionally()).thenReturn(Future.successful(companyDetailsList))
+      when(mockSessionService.fetchCompaniesOptionally()(any(), any())).thenReturn(Future.successful(companyDetailsList))
       //when(mockSessionService.cache(refEq(mockErsUtil.GROUP_SCHEME_COMPANIES), any[CompanyDetailsList]())(any(), any())).thenReturn(Future(sessionPair))
       when(mockSessionService.fetch[RequestObject](refEq(mockErsUtil.ERS_REQUEST_OBJECT))(any(), any()))
         .thenReturn(Future.successful(ersRequestObject.copy(
