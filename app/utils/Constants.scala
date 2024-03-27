@@ -38,4 +38,12 @@ trait Constants {
   val TRUSTEE_ADDRESS_CACHE = "trustee-address"
   val BUNDLE_REF = "sap-bundle-ref"
   val VALIDATED_SHEETS = "validated-sheets"
+  val SUBSIDIARY_COMPANY_NAME_CACHE: String = "subsidiary-company-name"
+  val SUBSIDIARY_COMPANY_ADDRESS_CACHE: String = "subsidiary-company-address"
+  val SUBSIDIARY_COMPANY_BASED: String = "subsidiary-company-based"
+  val SUBSIDIARY_COMPANIES_CACHE: String = "subsidiary-companies"
+  val COMPANIES: String = "companies"
+  val SCHEME_ORGANISER_NAME_CACHE: String = "scheme-organiser-name"
+  val SCHEME_ORGANISER_ADDRESS_CACHE: String = "scheme-organiser-address"
+  val SCHEME_ORGANISER_BASED: String = "scheme-organiser-based"
 }

@@ -35,6 +35,7 @@ import play.api.i18n
 import play.api.i18n.{MessagesApi, MessagesImpl}
 import play.api.libs.json.{JsObject, Json}
 import play.api.mvc._
+import play.api.routing.Router.empty.routes
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import services.UpscanService
@@ -186,7 +187,7 @@ class CsvFileUploadControllerSpec
 
         val result = csvFileUploadController.success(testUploadId)(testFakeRequest)
         status(result)           shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.CsvFileUploadController.validationResults().url)
+        redirectLocation(result) shouldBe Some(controllers.routes.CsvFileUploadController.validationResults().url)
       }
     }
   }
@@ -199,7 +200,7 @@ class CsvFileUploadControllerSpec
         .thenReturn(Future.successful(sessionPair))
       val result = csvFileUploadController.success(testUploadId)(testFakeRequest)
       status(result)           shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(routes.CsvFileUploadController.uploadFilePage().url)
+      redirectLocation(result) shouldBe Some(controllers.routes.CsvFileUploadController.uploadFilePage().url)
 
     }
   }
@@ -713,7 +714,7 @@ class CsvFileUploadControllerSpec
         csvFileUploadController.validateCsv(mock[List[UploadedSuccessfully]], mock[SchemeInfo])(authRequest, hc)
       status(result)         shouldBe SEE_OTHER
       result.futureValue.header
-        .headers("Location") shouldBe routes.SchemeOrganiserController.schemeOrganiserPage().toString
+        .headers("Location") shouldBe controllers.schemeOrganiser.routes.SchemeOrganiserBasedInUkController.questionPage().toString
     }
 
     "redirect to validationFailure if validating fails" in {
@@ -728,7 +729,7 @@ class CsvFileUploadControllerSpec
       val result      =
         csvFileUploadController.validateCsv(mock[List[UploadedSuccessfully]], mock[SchemeInfo])(authRequest, hc)
       status(result)                                shouldBe SEE_OTHER
-      result.futureValue.header.headers("Location") shouldBe routes.CsvFileUploadController.validationFailure().toString
+      result.futureValue.header.headers("Location") shouldBe controllers.routes.CsvFileUploadController.validationFailure().toString
     }
 
     "show error page if validating returns result other than OK and ACCEPTED" in {
@@ -808,7 +809,7 @@ class CsvFileUploadControllerSpec
         .checkFileNames(testCsvCallbackData, mockSchemeInfo)(authRequest, hc)
       status(result)         shouldBe SEE_OTHER
       result.futureValue.header
-        .headers("Location") shouldBe routes.SchemeOrganiserController.schemeOrganiserPage().toString
+        .headers("Location") shouldBe controllers.schemeOrganiser.routes.SchemeOrganiserBasedInUkController.questionPage().toString
     }
 
     "redirect to getFileUploadProblemPage() if file name check is unsuccessful" in {

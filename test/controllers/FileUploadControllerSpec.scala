@@ -251,7 +251,7 @@ class FileUploadControllerSpec
         setAuthMocks()
         val result = TestFileUploadController.validationResults()(testFakeRequest)
         status(result) mustBe SEE_OTHER
-        redirectLocation(result) mustBe Some(routes.SchemeOrganiserController.schemeOrganiserPage().url)
+        redirectLocation(result) mustBe Some(controllers.schemeOrganiser.routes.SchemeOrganiserBasedInUkController.questionPage().url)
       }
     }
 

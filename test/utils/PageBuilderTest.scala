@@ -142,7 +142,7 @@ class PageBuilderTest
       val pageId: String    = PAGE_ALT_ACTIVITY
       val condition: String = OPTION_NO
       val result: String    = getPageBackLink(scheme, pageId, condition)
-      result shouldBe routes.GroupSchemeController.groupSchemePage().toString
+      result shouldBe controllers.subsidiaries.routes.GroupSchemeController.groupSchemePage().toString
     }
 
     "return the correct back link for placement on alteration amends activity page, is group scheme YES" in new TestPageBuilder {
@@ -150,7 +150,7 @@ class PageBuilderTest
       val pageId: String    = PAGE_ALT_ACTIVITY
       val condition: String = OPTION_YES
       val result: String    = getPageBackLink(scheme, pageId, condition)
-      result shouldBe routes.GroupSchemeController.groupPlanSummaryPage().toString
+      result shouldBe controllers.subsidiaries.routes.GroupSchemeController.groupPlanSummaryPage().toString
     }
 
     "return the correct back link for placement on alteration amends page" in new TestPageBuilder {
@@ -164,7 +164,7 @@ class PageBuilderTest
       val scheme: String = SCHEME_CSOP
       val pageId: String = PAGE_GROUP_SUMMARY
       val result: String = getPageBackLink(scheme, pageId)
-      result shouldBe routes.GroupSchemeController.manualCompanyDetailsPage().toString
+      result shouldBe controllers.schemeOrganiser.routes.SchemeOrganiserController.schemeOrganiserSummaryPage().toString
     }
 
     "return the correct back link for placement on group scheme page, alteration activity NO" in new TestPageBuilder {
@@ -212,12 +212,12 @@ class PageBuilderTest
       result shouldBe routes.ReportableEventsController.reportableEventsPage().toString
     }
 
-    "return the correct back link for placement on group scheme summary page" in new TestPageBuilder {
+    "return the correct back link for placement on scheme organiser summary page" in new TestPageBuilder {
       val scheme: String    = SCHEME_EMI
       val pageId: String    = PAGE_GROUP_SUMMARY
       val condition: String = OPTION_MANUAL
       val result: String    = getPageBackLink(scheme, pageId, condition)
-      result shouldBe routes.GroupSchemeController.manualCompanyDetailsPage().toString
+      result shouldBe controllers.schemeOrganiser.routes.SchemeOrganiserController.schemeOrganiserSummaryPage().toString
     }
 
     "return the correct back link for placement on group scheme page, alteration activity NO" in new TestPageBuilder {
@@ -225,7 +225,7 @@ class PageBuilderTest
       val pageId: String    = PAGE_SUMMARY_DECLARATION
       val condition: String = OPTION_NO
       val result: String    = getPageBackLink(scheme, pageId, condition)
-      result shouldBe routes.GroupSchemeController.groupSchemePage().toString
+      result shouldBe controllers.subsidiaries.routes.GroupSchemeController.groupSchemePage().toString
     }
 
     "return the correct back link for placement on group scheme page, alteration activity YES" in new TestPageBuilder {
@@ -233,7 +233,7 @@ class PageBuilderTest
       val pageId: String    = PAGE_SUMMARY_DECLARATION
       val condition: String = OPTION_YES
       val result: String    = getPageBackLink(scheme, pageId, condition)
-      result shouldBe routes.GroupSchemeController.groupPlanSummaryPage().toString
+      result shouldBe controllers.subsidiaries.routes.GroupSchemeController.groupPlanSummaryPage().toString
     }
   }
 
@@ -262,7 +262,7 @@ class PageBuilderTest
       val pageId: String    = PAGE_ALT_ACTIVITY
       val condition: String = OPTION_NO
       val result: String    = getPageBackLink(scheme, pageId, condition)
-      result shouldBe routes.GroupSchemeController.groupSchemePage().toString
+      result shouldBe controllers.subsidiaries.routes.GroupSchemeController.groupSchemePage().toString
     }
 
     "return the correct back link for placement on alteration amends activity page, is group scheme YES" in new TestPageBuilder {
@@ -270,7 +270,7 @@ class PageBuilderTest
       val pageId: String    = PAGE_ALT_ACTIVITY
       val condition: String = OPTION_YES
       val result: String    = getPageBackLink(scheme, pageId, condition)
-      result shouldBe routes.GroupSchemeController.groupPlanSummaryPage().toString
+      result shouldBe controllers.subsidiaries.routes.GroupSchemeController.groupPlanSummaryPage().toString
     }
 
     "return the correct back link for placement on alteration amends page" in new TestPageBuilder {
@@ -292,7 +292,7 @@ class PageBuilderTest
       val pageId: String    = PAGE_GROUP_SUMMARY
       val condition: String = OPTION_MANUAL
       val result: String    = getPageBackLink(scheme, pageId, condition)
-      result shouldBe routes.GroupSchemeController.manualCompanyDetailsPage().toString
+      result shouldBe controllers.schemeOrganiser.routes.SchemeOrganiserController.schemeOrganiserSummaryPage().toString
     }
 
     "return the correct back link for placement on group scheme page, alteration activity NO" in new TestPageBuilder {
@@ -300,7 +300,7 @@ class PageBuilderTest
       val pageId: String    = PAGE_SUMMARY_DECLARATION
       val condition: String = OPTION_NO
       val result: String    = getPageBackLink(scheme, pageId, condition)
-      result shouldBe routes.GroupSchemeController.groupSchemePage().toString
+      result shouldBe controllers.subsidiaries.routes.GroupSchemeController.groupSchemePage().toString
     }
 
     "return the correct back link for placement on group scheme page, alteration activity YES" in new TestPageBuilder {
@@ -340,12 +340,12 @@ class PageBuilderTest
       result shouldBe routes.ReportableEventsController.reportableEventsPage().toString
     }
 
-    "return the correct back link for placement on group scheme summary page" in new TestPageBuilder {
+    "return the correct back link for placement on scheme organiser summary page" in new TestPageBuilder {
       val scheme: String    = SCHEME_OTHER
       val pageId: String    = PAGE_GROUP_SUMMARY
       val condition: String = OPTION_MANUAL
       val result: String    = getPageBackLink(scheme, pageId, condition)
-      result shouldBe routes.GroupSchemeController.manualCompanyDetailsPage().toString
+      result shouldBe controllers.schemeOrganiser.routes.SchemeOrganiserController.schemeOrganiserSummaryPage().toString
     }
 
     "return the correct back link for placement on group scheme page, alteration activity NO" in new TestPageBuilder {
@@ -353,7 +353,7 @@ class PageBuilderTest
       val pageId: String    = PAGE_SUMMARY_DECLARATION
       val condition: String = OPTION_NO
       val result: String    = getPageBackLink(scheme, pageId, condition)
-      result shouldBe routes.GroupSchemeController.groupSchemePage().toString
+      result shouldBe controllers.subsidiaries.routes.GroupSchemeController.groupSchemePage().toString
     }
 
     "return the correct back link for placement on group scheme page, alteration activity YES" in new TestPageBuilder {
@@ -361,7 +361,7 @@ class PageBuilderTest
       val pageId: String    = PAGE_SUMMARY_DECLARATION
       val condition: String = OPTION_YES
       val result: String    = getPageBackLink(scheme, pageId, condition)
-      result shouldBe routes.GroupSchemeController.groupPlanSummaryPage().toString
+      result shouldBe controllers.subsidiaries.routes.GroupSchemeController.groupPlanSummaryPage().toString
     }
 
   }
@@ -407,11 +407,11 @@ class PageBuilderTest
       result shouldBe routes.AltAmendsController.altActivityPage().toString
     }
 
-    "return the correct back link for placement on group scheme page" in new TestPageBuilder {
+    "return the correct back link for placement on scheme organiser summary page" in new TestPageBuilder {
       val scheme: String = SCHEME_SIP
       val pageId: String = PAGE_GROUP_SUMMARY
       val result: String = getPageBackLink(scheme, pageId)
-      result shouldBe routes.GroupSchemeController.manualCompanyDetailsPage().toString
+      result shouldBe controllers.schemeOrganiser.routes.SchemeOrganiserController.schemeOrganiserSummaryPage().toString
     }
 
     "return the correct back link for placement on group scheme page, alteration activity NO" in new TestPageBuilder {
@@ -435,7 +435,7 @@ class PageBuilderTest
       val pageId: String    = PAGE_TRUSTEE_DETAILS
       val condition: String = OPTION_NO
       val result: String    = getPageBackLink(scheme, pageId, condition)
-      result shouldBe routes.GroupSchemeController.groupSchemePage().toString
+      result shouldBe controllers.subsidiaries.routes.GroupSchemeController.groupSchemePage().toString
     }
 
     "return the correct back link for placement on trustee page, group plan YES" in new TestPageBuilder {
@@ -443,7 +443,7 @@ class PageBuilderTest
       val pageId: String    = PAGE_TRUSTEE_DETAILS
       val condition: String = OPTION_YES
       val result: String    = getPageBackLink(scheme, pageId, condition)
-      result shouldBe routes.GroupSchemeController.groupPlanSummaryPage().toString
+      result shouldBe controllers.subsidiaries.routes.GroupSchemeController.groupPlanSummaryPage().toString
     }
   }
 

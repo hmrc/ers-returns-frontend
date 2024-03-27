@@ -138,7 +138,7 @@ class FileUploadController @Inject() (val mcc: MessagesControllerComponents,
         case OK =>
           logger.info(s"[FileUploadController][handleValidationResponse] Validation is successful for schemeRef: $schemeRef, timestamp: ${System.currentTimeMillis()}.")
           sessionService.cache(ersUtil.VALIDATED_SHEETS, res.body)
-          Redirect(routes.SchemeOrganiserController.schemeOrganiserPage())
+          Redirect(controllers.schemeOrganiser.routes.SchemeOrganiserBasedInUkController.questionPage())
 
         case ACCEPTED if appConfig.csopV5Enabled && schemeInfo.schemeType == "CSOP" && res.body.contains("Incorrect ERS Template") =>
           logger.warn(s"[FileUploadController][handleValidationResponse] Validation is not successful for schemeRef: $schemeRef, timestamp: ${System.currentTimeMillis()}." +

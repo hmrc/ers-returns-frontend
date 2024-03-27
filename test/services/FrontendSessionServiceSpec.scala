@@ -133,7 +133,7 @@ class FrontendSessionServiceSpec extends AnyWordSpec with Matchers with ErsTestH
     "fetch CompanyDetailsList when GroupSchemeInfo is present and groupScheme is OPTION_YES" in {
       val schemeRef = "testSchemeRef"
       val groupSchemeInfo = GroupSchemeInfo(Some("1"), None)
-      val companyDetailsList = CompanyDetailsList(List(CompanyDetails("testCompanyName", "testAddressLine", None, None, None, None, None, None, None)))
+      val companyDetailsList = CompanyDetailsList(List(CompanyDetails(companyName = "testCompanyName", addressLine1= "testAddressLine", None, None, None, None, country = Some("UK"), None, None, true)))
 
       when(frontendSessionsRepository.getFromSession[GroupSchemeInfo](DataKey(eqTo("group-scheme-controller")))(any(), any()))
         .thenReturn(Future.successful(Some(groupSchemeInfo)))
