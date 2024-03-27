@@ -144,7 +144,7 @@ class GroupSchemeController @Inject() (val mcc: MessagesControllerComponents,
     } yield (requestObject, companySize, companyDetailsList)
 
     requestObjectWithCompanyList.flatMap { case (requestObject, companySize, companyDetailsList) =>
-      form.bindFromRequest.fold(
+      form.bindFromRequest().fold(
         formWithErrors => Future.successful(BadRequest(
           confirmDeleteCompanyView(
             requestObject,

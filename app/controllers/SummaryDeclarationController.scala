@@ -94,12 +94,12 @@ class SummaryDeclarationController @Inject() (val mcc: MessagesControllerCompone
 
       if (getCompDetails(all).companies.isEmpty && groupScheme == ersUtil.OPTION_YES) {
         logger.error(
-          s"[SummaryDeclarationController][showSummaryDeclarationPage] attempted to route to summary page with an empty group scheme.",
+          s"[SummaryDeclarationController][showSummaryDeclarationPage] attempted to route to summary page with an empty group scheme."
         )
         Future(getGlobalErrorPage)
       } else if (emptyAltAmends(getAltAmends(all)) && altActivity == ersUtil.OPTION_YES) {
         logger.error(
-          s"[SummaryDeclarationController][showSummaryDeclarationPage] attempted to route to summary page with an empty alt ammends.",
+          s"[SummaryDeclarationController][showSummaryDeclarationPage] attempted to route to summary page with an empty alt ammends."
         )
         Future(getGlobalErrorPage)
       } else {

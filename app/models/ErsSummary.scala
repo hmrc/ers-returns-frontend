@@ -70,12 +70,13 @@ case class AlterationAmends(
   altAmendsEligibility: Option[String],
   altAmendsExchange: Option[String],
   altAmendsVariations: Option[String],
-  altAmendsOther: Option[String],
+  altAmendsOther: Option[String]
 )
 
 object AlterationAmends {
   implicit val format: OFormat[AlterationAmends] = Json.format[AlterationAmends]
 }
+
 case class CompanyDetails(
   companyName: String,
   addressLine1: String,
