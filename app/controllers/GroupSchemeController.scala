@@ -23,7 +23,7 @@ import play.api.Logging
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.mvc._
-import services.FrontendSessionService
+import services.{CompanyService, FrontendSessionService}
 import uk.gov.hmrc.mongo.cache.DataKey
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -36,6 +36,7 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class GroupSchemeController @Inject() (val mcc: MessagesControllerComponents,
                                        val sessionService: FrontendSessionService,
+                                       val companyService: CompanyService,
                                        globalErrorView: views.html.global_error,
                                        groupView: views.html.group,
                                        manualCompanyDetailsView: views.html.manual_company_details,
@@ -92,6 +93,7 @@ class GroupSchemeController @Inject() (val mcc: MessagesControllerComponents,
           }
       )
 
+  //TODO: Add to company service
   def replaceCompany(companies: List[CompanyDetails], index: Int, formData: CompanyDetails): List[CompanyDetails] =
     (if (index == 10000) {
        companies :+ formData
@@ -100,22 +102,6 @@ class GroupSchemeController @Inject() (val mcc: MessagesControllerComponents,
          if (b == index) formData else a
        }
      }).distinct
-
-  def deleteCompany(index: Int)(implicit request: Request[_]): Future[Boolean] = {
-    (for {
-      companies <- sessionService.fetchCompaniesOptionally()
-      companyDetailsList = CompanyDetailsList(filterDeletedCompany(companies, index))
-      companySize = companies.companies.size
-    } yield {
-      sessionService.cache(ersUtil.GROUP_SCHEME_COMPANIES, companyDetailsList)
-      if (companySize == 1) sessionService.cache(ersUtil.GROUP_SCHEME_CACHE_CONTROLLER, GroupSchemeInfo(None, None))
-      true
-    }).recover {
-      case e: Throwable =>
-        logger.warn(s"[GroupSchemeController][deleteCompany] Deleting company failed: ${e.getMessage}")
-        false
-    }
-  }
 
   def confirmDeleteCompanyPage(id: Int): Action[AnyContent] = authAction.async { implicit request =>
     showConfirmDeleteCompany(id)
@@ -156,12 +142,12 @@ class GroupSchemeController @Inject() (val mcc: MessagesControllerComponents,
         )),
         {
           case true if companySize == 1 =>
-            deleteCompany(index).map {
+            companyService.deleteCompany(index).map {
               case true => Redirect(routes.GroupSchemeController.groupSchemePage())
               case _    => getGlobalErrorPage()
             }
           case true =>
-            deleteCompany(index).map {
+            companyService.deleteCompany(index).map {
               case true => Redirect(routes.GroupSchemeController.groupPlanSummaryPage())
               case _    => getGlobalErrorPage()
             }
@@ -170,9 +156,6 @@ class GroupSchemeController @Inject() (val mcc: MessagesControllerComponents,
       )
     }
   }
-
-  private def filterDeletedCompany(companyList: CompanyDetailsList, id: Int): List[CompanyDetails] =
-    companyList.companies.zipWithIndex.filterNot(_._2 == id).map(_._1)
 
   def editCompany(id: Int): Action[AnyContent] = authAction.async { implicit request =>
     showEditCompany(id)(request)
