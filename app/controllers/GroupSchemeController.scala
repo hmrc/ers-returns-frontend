@@ -101,7 +101,7 @@ class GroupSchemeController @Inject() (val mcc: MessagesControllerComponents,
        }
      }).distinct
 
-  def removeCompany(index: Int)(implicit request: Request[_]): Future[Boolean] = {
+  def deleteCompany(index: Int)(implicit request: Request[_]): Future[Boolean] = {
     (for {
       companies <- sessionService.fetchCompaniesOptionally()
       companyDetailsList = CompanyDetailsList(filterDeletedCompany(companies, index))
@@ -117,11 +117,11 @@ class GroupSchemeController @Inject() (val mcc: MessagesControllerComponents,
     }
   }
 
-  def deleteCompany(id: Int): Action[AnyContent] = authAction.async { implicit request =>
-    showDeleteCompany(id)
+  def confirmDeleteCompanyPage(id: Int): Action[AnyContent] = authAction.async { implicit request =>
+    showConfirmDeleteCompany(id)
   }
 
-  def showDeleteCompany(id: Int)(implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
+  def showConfirmDeleteCompany(id: Int)(implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
     (for {
       all             <- sessionService.fetchAll()
       requestObject   <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
@@ -131,12 +131,12 @@ class GroupSchemeController @Inject() (val mcc: MessagesControllerComponents,
       Ok(confirmDeleteCompanyView(requestObject, id, form, companyLength == 1, companies.companies(id).companyName))
     }) recover { case e: Exception =>
       logger.error(
-        s"[GroupSchemeController][showDeleteCompany] Fetch all data failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}."
+        s"[GroupSchemeController][showConfirmDeleteCompany] Fetch all data failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}."
       )
       getGlobalErrorPage()
     }
 
-  def showConfirmDeleteCompanySubmit(index: Int): Action[AnyContent] = authAction.async { implicit request =>
+  def confirmDeleteCompanySubmit(index: Int): Action[AnyContent] = authAction.async { implicit request =>
     val requestObjectWithCompanyList = for {
       requestObject <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
       companyDetailsList <- sessionService.fetchCompaniesOptionally()
@@ -156,12 +156,12 @@ class GroupSchemeController @Inject() (val mcc: MessagesControllerComponents,
         )),
         {
           case true if companySize == 1 =>
-            removeCompany(index).map {
+            deleteCompany(index).map {
               case true => Redirect(routes.GroupSchemeController.groupSchemePage())
               case _    => getGlobalErrorPage()
             }
           case true =>
-            removeCompany(index).map {
+            deleteCompany(index).map {
               case true => Redirect(routes.GroupSchemeController.groupPlanSummaryPage())
               case _    => getGlobalErrorPage()
             }

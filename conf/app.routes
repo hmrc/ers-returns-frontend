@@ -77,8 +77,8 @@ GET 		/add-subsidiary-company   		        		controllers.GroupSchemeController.ma
 POST 		/add-subsidiary-company       					controllers.GroupSchemeController.manualCompanyDetailsSubmit(index: Int)
 GET 		/add-subsidiary-company/:index/edit 	    	controllers.GroupSchemeController.editCompany(index: Int)
 
-GET 		/confirm-delete-company/:index                  controllers.GroupSchemeController.deleteCompany(index: Int)
-POST 		/confirm-delete-company/:index		            controllers.GroupSchemeController.showConfirmDeleteCompanySubmit(index: Int)
+GET 		/confirm-delete-company/:index                  controllers.GroupSchemeController.confirmDeleteCompanyPage(index: Int)
+POST 		/confirm-delete-company/:index		            controllers.GroupSchemeController.confirmDeleteCompanySubmit(index: Int)
 
 GET 		/company-details  		                        controllers.SchemeOrganiserController.schemeOrganiserPage()
 POST 		/company-details 			                    controllers.SchemeOrganiserController.schemeOrganiserSubmit()
