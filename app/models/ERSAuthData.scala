@@ -21,11 +21,12 @@ import uk.gov.hmrc.auth.core.{AffinityGroup, Enrolment}
 import uk.gov.hmrc.domain.EmpRef
 
 case class ERSAuthData(
-  enrolments: Set[Enrolment],
-  affinityGroup: Option[AffinityGroup],
-  empRef: EmpRef = EmpRef("", "")
-) {
+                        enrolments: Set[Enrolment],
+                        affinityGroup: Option[AffinityGroup],
+                        empRef: EmpRef = EmpRef("", "")
+                      ) {
 
-	def getEnrolment(key: String): Option[Enrolment] = enrolments.find(_.key.equalsIgnoreCase(key))
-	def isAgent: Boolean = (affinityGroup contains Agent) || getEnrolment("HMRC-AGENT-AGENT").isDefined
+  def getEnrolment(key: String): Option[Enrolment] = enrolments.find(_.key.equalsIgnoreCase(key))
+
+  def isAgent: Boolean = (affinityGroup contains Agent) || getEnrolment("HMRC-AGENT-AGENT").isDefined
 }

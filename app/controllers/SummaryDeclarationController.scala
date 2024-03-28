@@ -91,23 +91,36 @@ class SummaryDeclarationController @Inject() (val mcc: MessagesControllerCompone
         case ersUtil.SCHEME_CSOP | ersUtil.SCHEME_SIP | ersUtil.SCHEME_SAYE => altAmendsActivity.altActivity
         case _ => ""
       }
-      Future(
-        Ok(
-          summaryView(
-            requestObject,
-            reportableEvents,
-            fileType,
-            fileNames,
-            fileCount,
-            groupScheme,
-            schemeOrganiser,
-            getCompDetails(all),
-            altActivity,
-            getAltAmends(all),
-            getTrustees(all)
+
+      if (getCompDetails(all).companies.isEmpty && groupScheme == ersUtil.OPTION_YES) {
+        logger.error(
+          s"[SummaryDeclarationController][showSummaryDeclarationPage] attempted to route to summary page with an empty group scheme."
+        )
+        Future(getGlobalErrorPage)
+      } else if (emptyAltAmends(getAltAmends(all)) && altActivity == ersUtil.OPTION_YES) {
+        logger.error(
+          s"[SummaryDeclarationController][showSummaryDeclarationPage] attempted to route to summary page with an empty alt ammends."
+        )
+        Future(getGlobalErrorPage)
+      } else {
+        Future(
+          Ok(
+            summaryView(
+              requestObject,
+              reportableEvents,
+              fileType,
+              fileNames,
+              fileCount,
+              groupScheme,
+              schemeOrganiser,
+              getCompDetails(all),
+              altActivity,
+              getAltAmends(all),
+              getTrustees(all)
+            )
           )
         )
-      )
+      }
     } recover { case e: Throwable =>
       logger.error(s"[SummaryDeclarationController][showSummaryDeclarationPage] failed to load page with exception ${e.getMessage}.", e)
       getGlobalErrorPage
@@ -124,6 +137,12 @@ class SummaryDeclarationController @Inject() (val mcc: MessagesControllerCompone
   def getCompDetails(cacheItem: CacheItem): CompanyDetailsList =
     getEntry[CompanyDetailsList](cacheItem, DataKey(ersUtil.GROUP_SCHEME_COMPANIES))
       .getOrElse(CompanyDetailsList(List[CompanyDetails]()))
+
+  def emptyAltAmends(alterationAmends: AlterationAmends): Boolean =
+    alterationAmends match {
+      case AlterationAmends(None, None, None, None, None) => true
+      case _                                              => false
+    }
 
   def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result =
     Ok(
