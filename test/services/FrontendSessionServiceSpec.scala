@@ -412,4 +412,114 @@ class FrontendSessionServiceSpec extends AnyWordSpec with Matchers with ErsTestH
       result.getMessage should include("Removal operation failed")
     }
   }
+
+  "fetchPartFromCompanyDetailsList" should {
+    "return Some(data) when data is successfully found at the given index" in {
+      val index = 0
+      val companyDetails = Json.toJson(CompanyDetails("First Company", "UK line 1", None, None, None, None, None,None,None, true))
+      val companiesCacheData = Json.toJson(Map("companies" -> Json.arr(companyDetails)))
+
+      when(frontendSessionsRepository.getFromSession[JsValue](DataKey(eqTo("subsidiary-companies")))(any(), any()))
+        .thenReturn(Future.successful(Some(companiesCacheData)))
+
+      val result = testService.fetchPartFromCompanyDetailsList[JsValue](index).futureValue
+      result shouldBe Some(companyDetails)
+    }
+
+    "return None when no data is found at the given index" in {
+      val index = 1 // Assuming no data at this index
+      val companiesCacheData = Json.toJson(Map("subsidiary-companies" -> Json.arr(Json.obj("key" -> "value")))) // Single item in the array
+
+      when(frontendSessionsRepository.getFromSession[JsValue](DataKey(eqTo("subsidiary-companies")))(any(), any()))
+        .thenReturn(Future.successful(Some(companiesCacheData)))
+
+      val result = testService.fetchPartFromCompanyDetailsList[JsValue](index).futureValue
+      result shouldBe None
+    }
+
+    "return None and log an info message when an exception occurs" in {
+      val index = 0
+      val exception = new RuntimeException("Unexpected exception")
+
+      when(frontendSessionsRepository.getFromSession[JsValue](DataKey(eqTo("subsidiary-companies")))(any(), any()))
+        .thenReturn(Future.failed(exception))
+
+      val result = testService.fetchPartFromCompanyDetailsList[JsValue](index).futureValue
+      result shouldBe None
+    }
+  }
+
+  "fetchCompaniesOptionally" should {
+    "return a CompanyDetailsList when data is successfully fetched" in {
+      val companiesDetailsList = CompanyDetailsList(List(CompanyDetails("First Company", "UK line 1", None, None, None, None, None,None,None, true)))
+      when(frontendSessionsRepository.getFromSession[JsValue](DataKey(eqTo("subsidiary-companies")))(any(), any()))
+        .thenReturn(Future.successful(Some(Json.toJson(companiesDetailsList))))
+
+      val result = testService.fetchCompaniesOptionally().futureValue
+      result shouldBe companiesDetailsList
+    }
+
+    "return an empty CompanyDetailsList when fetching fails" in {
+      when(frontendSessionsRepository.getFromSession[CompanyDetailsList](DataKey(eqTo("subsidiary-companies")))(any(), any()))
+        .thenReturn(Future.failed(new Exception("Fetching error")))
+
+      val result = testService.fetchCompaniesOptionally().futureValue
+      result shouldBe CompanyDetailsList(List.empty[CompanyDetails])
+    }
+  }
+
+
+
+  "fetchPartFromCompanyDetails" should {
+    "return Some(data) when data is successfully found at the given index" in {
+
+      val companyDetails = Json.toJson(CompanyDetails("First Company", "UK line 1", None, None, None, None, None,None,None, true))
+      val companyCacheData = Json.toJson(companyDetails)
+
+      when(frontendSessionsRepository.getFromSession[JsValue](DataKey(eqTo("scheme-organiser")))(any(), any()))
+        .thenReturn(Future.successful(Some(companyCacheData)))
+
+      val result = testService.fetchPartFromCompanyDetails[JsValue]().futureValue
+      result shouldBe Some(companyDetails)
+    }
+
+    "return None when no data is found" in {
+
+      when(frontendSessionsRepository.getFromSession[JsValue](DataKey(eqTo("scheme-organiser")))(any(), any()))
+        .thenReturn(Future.successful(None))
+
+      val result = testService.fetchPartFromCompanyDetails[JsValue]().futureValue
+      result shouldBe None
+    }
+
+    "return None and log an info message when an exception occurs" in {
+
+      val exception = new RuntimeException("Unexpected exception")
+
+      when(frontendSessionsRepository.getFromSession[JsValue](DataKey(eqTo("scheme-organiser")))(any(), any()))
+        .thenReturn(Future.failed(exception))
+
+      val result = testService.fetchPartFromCompanyDetails[JsValue]().futureValue
+      result shouldBe None
+    }
+  }
+
+  "fetchSchemeOrganiserOptionally" should {
+    "return a CompanyDetails when data is successfully fetched" in {
+      val companyDetails = CompanyDetails("First Company", "UK line 1", None, None, None, None, None,None,None, true)
+      when(frontendSessionsRepository.getFromSession[JsValue](DataKey(eqTo("scheme-organiser")))(any(), any()))
+        .thenReturn(Future.successful(Some(Json.toJson(companyDetails))))
+
+      val result = testService.fetchSchemeOrganiserOptionally().futureValue
+      result shouldBe Some(companyDetails)
+    }
+
+    "return an empty CompanyDetails when fetching fails" in {
+      when(frontendSessionsRepository.getFromSession[CompanyDetails](DataKey(eqTo("scheme-organiser")))(any(), any()))
+        .thenReturn(Future.failed(new Exception("Fetching error")))
+
+      val result = testService.fetchSchemeOrganiserOptionally().futureValue
+      result shouldBe None
+    }
+  }
 }

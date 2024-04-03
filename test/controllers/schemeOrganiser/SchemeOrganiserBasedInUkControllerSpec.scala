@@ -176,7 +176,7 @@ class SchemeOrganiserBasedInUkControllerSpec extends AnyWordSpecLike
     "successfully bind the form and go to the edit version of the scheme organiser details UK page with the index preserved if the answer is true" in {
       when(mockSessionService.cache[CompanyBasedInUk](any(), any())(any(), any())).thenReturn(Future.successful(sessionPair))
       when(mockSessionService.fetch[CompanyBasedInUk](refEq(mockErsUtil.SCHEME_ORGANISER_BASED))(any(), any())).thenReturn(Future.successful(CompanyBasedInUk(true)))
-      when(mockSessionService.fetchSchemeOrganiserOptionally()(any(), any())).thenReturn(Future.successful(Some(Fixtures.exampleSchemeOrganiserUk)))
+      when(mockSessionService.fetch[CompanyDetails](refEq(mockErsUtil.SCHEME_ORGANISER_CACHE))(any(), any())).thenReturn(Future.successful(Fixtures.exampleSchemeOrganiserUk))
       when(mockCompanyDetailsService.updateSchemeOrganiserCache(any())).thenReturn(Future.successful(()), Future.successful(()))
 
       val companyBasedData = Map("basedInUk" -> "0")
@@ -184,14 +184,14 @@ class SchemeOrganiserBasedInUkControllerSpec extends AnyWordSpecLike
       implicit val authRequest: RequestWithOptionalAuthContext[AnyContent] = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*))
       val result = testController.editQuestionSubmit(0).apply(authRequest)
 
-      status(result) shouldBe Status.OK
-//      redirectLocation(result).get shouldBe controllers.schemeOrganiser.routes.SchemeOrganiserDetailsUkController.editCompany(0).url
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result).get shouldBe controllers.schemeOrganiser.routes.SchemeOrganiserDetailsUkController.editCompany(0).url
     }
 
     "successfully bind the form and go to the edit version of the scheme organiser details overseas page with the index preserved if the answer is false" in {
       when(mockSessionService.cache[CompanyBasedInUk](any(), any())(any(), any())).thenReturn(Future.successful(sessionPair))
       when(mockSessionService.fetch[CompanyBasedInUk](refEq(mockErsUtil.SCHEME_ORGANISER_BASED))(any(), any())).thenReturn(Future.successful(CompanyBasedInUk(false)))
-      when(mockSessionService.fetchSchemeOrganiserOptionally()(any(), any())).thenReturn(Future.successful(Some(Fixtures.exampleSchemeOrganiserOverseas)))
+      when(mockSessionService.fetch[CompanyDetails](refEq(mockErsUtil.SCHEME_ORGANISER_CACHE))(any(), any())).thenReturn(Future.successful(Fixtures.exampleSchemeOrganiserOverseas))
       when(mockCompanyDetailsService.updateSchemeOrganiserCache(any())).thenReturn(Future.successful(()), Future.successful(()))
 
       val companyBasedData = Map("basedInUk" -> "0")
@@ -199,8 +199,8 @@ class SchemeOrganiserBasedInUkControllerSpec extends AnyWordSpecLike
       implicit val authRequest: RequestWithOptionalAuthContext[AnyContent] = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*))
       val result = testController.editQuestionSubmit(1).apply(authRequest)
 
-      status(result) shouldBe Status.OK
-//      redirectLocation(result).get shouldBe controllers.schemeOrganiser.routes.SchemeOrganiserDetailsOverseasController.editCompany(1).url
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result).get shouldBe controllers.schemeOrganiser.routes.SchemeOrganiserDetailsOverseasController.editCompany(1).url
     }
   }
 }

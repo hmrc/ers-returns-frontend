@@ -18,6 +18,7 @@ package services
 
 import javax.inject.Inject
 import models.{Company, CompanyAddress, CompanyDetails, CompanyDetailsList, RequestObject}
+import play.api.Logging
 import play.api.mvc.Request
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.ERSUtil
@@ -27,10 +28,10 @@ import scala.concurrent.{ExecutionContext, Future}
 class CompanyDetailsService @Inject()(
                                 ersUtil: ERSUtil,
                                 sessionService: FrontendSessionService
-                              )(implicit ec: ExecutionContext) {
+                              )(implicit ec: ExecutionContext) extends Logging {
 
   def updateSubsidiaryCompanyCache(index: Int)(implicit request: Request[_]): Future[Unit] = {
-    for {
+    (for {
       name <- sessionService.fetch[Company](ersUtil.SUBSIDIARY_COMPANY_NAME_CACHE)
       cachedCompanies <- sessionService.fetchCompaniesOptionally()
       companyDetailsList <- {
@@ -41,11 +42,15 @@ class CompanyDetailsService @Inject()(
       _ <- sessionService.cache[CompanyDetailsList](ersUtil.SUBSIDIARY_COMPANIES_CACHE, companyDetailsList)
     } yield {
       ()
+    }).recover {
+      case ex: Throwable =>
+        logger.error("[CompanyDetailsService][updateSubsidiaryCompanyCache] Error updating subsidiary company cache", ex)
+        ()
     }
     }
 
   def updateSchemeOrganiserCache(implicit request: Request[_]): Future[Unit] = {
-    for {
+    (for {
       requestObject <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
       schemeRef = requestObject.getSchemeReference
       name <- sessionService.fetch[Company](ersUtil.SCHEME_ORGANISER_NAME_CACHE)
@@ -60,8 +65,12 @@ class CompanyDetailsService @Inject()(
       _ <- sessionService.cache[CompanyDetails](ersUtil.SCHEME_ORGANISER_CACHE, companyDetails)
     } yield {
       ()
+    }).recover {
+        case ex: Throwable =>
+          logger.error("[CompanyDetailsService][updateSchemeOrganiserCache] Error updating scheme organiser cache", ex)
+          ()
+      }
     }
-  }
 
 
     def replaceCompany(companies: List[CompanyDetails], index: Int, formData: CompanyDetails): List[CompanyDetails] =

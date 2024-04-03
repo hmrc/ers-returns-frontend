@@ -114,7 +114,6 @@
 		@govukInput(Input(
 			id = "addressLine4",
 			name = "addressLine4",
-			autocomplete = Some("address-line4"),
 			value = companyDetails(companyAddressFields.addressLine4).value,
 			errorMessage = companyDetails.error(companyAddressFields.addressLine4).map { error =>
 				ErrorMessage(content = Text(error.messages.head))
@@ -127,7 +126,6 @@
 		@govukInput(Input(
 			id = "addressLine5",
 			name = "addressLine5",
-			autocomplete = Some("address-line5"),
 			value = companyDetails(companyAddressFields.addressLine5).value,
 			errorMessage = companyDetails.error(companyAddressFields.addressLine5).map { error =>
 				ErrorMessage(content = Text(error.messages.head))

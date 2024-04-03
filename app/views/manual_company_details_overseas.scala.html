@@ -81,6 +81,10 @@
 				errorMessage = companyDetails.error(companyDetailsFields.companyName).map { name =>
 					ErrorMessage(content = Text(name.messages.head))
 				},
+				label = Label(
+					content = Text(messages("ers_manual_company_details.company_name")),
+					classes = "govuk-visually-hidden"
+				)
 			))
 
 			@govukButton(Button(
