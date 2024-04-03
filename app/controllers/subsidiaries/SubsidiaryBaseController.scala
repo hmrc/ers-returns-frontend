@@ -60,7 +60,6 @@ trait SubsidiaryBaseController[A] extends SchemeOrganiserBaseController[A] {
       index)
       .map {
       previousAnswer: Option[A] =>
-      println(s"Previous answer innit: $previousAnswer")
       val preparedForm = previousAnswer.fold(form)(form.fill(_))
       Ok(view(requestObject, index, preparedForm, edit))
     } recover {

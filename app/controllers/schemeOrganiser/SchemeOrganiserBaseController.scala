@@ -90,9 +90,7 @@ trait SchemeOrganiserBaseController[A] extends FrontendController with I18nSuppo
       result => {
         if (edit) {
          sessionService.fetch[CompanyDetails](ersUtil.SCHEME_ORGANISER_CACHE).flatMap { schemeOrganiser =>
-            println(s"schemeOrganiser: $schemeOrganiser")
             val updatedSchemeOrganiser = schemeOrganiser.updatePart(result)
-            println(s"updatedSchemeOrganiser: $updatedSchemeOrganiser")
            sessionService.cache[CompanyDetails](ersUtil.SCHEME_ORGANISER_CACHE, updatedSchemeOrganiser).flatMap { _ =>
               nextPageRedirect(index, edit)
             }
@@ -105,7 +103,6 @@ trait SchemeOrganiserBaseController[A] extends FrontendController with I18nSuppo
       }
     ).recover {
       case e: Exception =>
-        logger.error(s"Exception: ${e.getStackTrace.mkString("\n", "\n", "\n")}\n")
         logger.error(s"[${this.getClass.getSimpleName}][submissionHandler] Error occurred while updating company cache")
         getGlobalErrorPage
     }
@@ -113,7 +110,6 @@ trait SchemeOrganiserBaseController[A] extends FrontendController with I18nSuppo
 
   def editCompany(index: Int): Action[AnyContent] = authAction.async {
     implicit request =>
-      println(s"\n\n[${this.getClass.getSimpleName}] index is $index ")
      sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT).flatMap { requestObject =>
         showQuestionPage(requestObject, index, edit = true)(request, hc)
       }

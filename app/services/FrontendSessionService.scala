@@ -183,11 +183,10 @@ class FrontendSessionService @Inject()(val sessionCache: FrontendSessionsReposit
   def fetchPartFromCompanyDetailsList[A](index: Int)(implicit request: Request[_], formats: json.Format[A]): Future[Option[A]] = {
     sessionCache.getFromSession[JsValue](DataKey(SUBSIDIARY_COMPANIES_CACHE)).map {
       subsidiaryCompanies =>
-        println("Json here: " + subsidiaryCompanies.getOrElse(""))
         subsidiaryCompanies.map(_.\(COMPANIES).as[JsArray].\(index).getOrElse(Json.obj()).as[A])
     } recover {
       case x: Throwable => {
-        println("[ERSUtil][fetchPartFromCompanyDetailsList] Nothing found in cache, expected if this is not an edit journey: " + x.getMessage)
+        logger.debug("[ERSUtil][fetchPartFromCompanyDetailsList] Nothing found in cache, expected if this is not an edit journey: " + x.getMessage)
         None
       }
     }
@@ -198,11 +197,10 @@ class FrontendSessionService @Inject()(val sessionCache: FrontendSessionsReposit
   def fetchPartFromCompanyDetails[A]()(implicit request: Request[_], formats: json.Format[A]): Future[Option[A]] = {
     sessionCache.getFromSession[JsValue](DataKey(SCHEME_ORGANISER_CACHE)).map {
       companyDetailsOpt =>
-        println("Json here: " + companyDetailsOpt.getOrElse(""))
         companyDetailsOpt.map(_.as[A])
     } recover {
       case x: Throwable => {
-        println("[ERSUtil][fetchPartFromCompanyDetailsList] Nothing found in cache, expected if this is not an edit journey: " + x.getMessage)
+        logger.debug("[ERSUtil][fetchPartFromCompanyDetailsList] Nothing found in cache, expected if this is not an edit journey: " + x.getMessage)
         None
       }
     }
