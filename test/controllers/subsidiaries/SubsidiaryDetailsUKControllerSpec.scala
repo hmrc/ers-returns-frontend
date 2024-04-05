@@ -18,7 +18,7 @@ package controllers.subsidiaries
 
 import models.{Company, RequestObject, RsFormMappings}
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.when
+import org.mockito.Mockito.{doNothing, when}
 import org.scalatest.OptionValues
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.should.Matchers
@@ -122,7 +122,7 @@ class SubsidiaryDetailsUKControllerSpec extends AnyWordSpecLike
 
       "successfully bind the form and go to the company uk address page if the form is filled correctly" in {
         when(mockSessionService.cache[Company](any(), any())(any(), any())).thenReturn(Future.successful(("","")))
-        when(mockCompanyDetailsService.updateSubsidiaryCompanyCache(any())(any())).thenReturn(Future.successful(()), Future.successful(()))
+        doNothing().when(mockCompanyDetailsService).updateSubsidiaryCompanyCache(any())(any())
 
         val companyData = Map("companyName" -> "Test company")
 
@@ -161,7 +161,7 @@ class SubsidiaryDetailsUKControllerSpec extends AnyWordSpecLike
     "successfully bind the form and go to the edit version of the subsidiary address UK page with the index preserved if the form is filled correctly" in {
       when(mockSessionService.cache[Company](any(), any())(any(), any())).thenReturn(Future.successful(("","")))
       when(mockSessionService.fetchCompaniesOptionally()(any(), any())).thenReturn(Future.successful(Fixtures.exampleCompanies))
-      when(mockCompanyDetailsService.updateSubsidiaryCompanyCache(any())(any())).thenReturn(Future.successful(()), Future.successful(()))
+      doNothing().when(mockCompanyDetailsService).updateSubsidiaryCompanyCache(any())(any())
 
       val companyAddressData = Map("companyName" -> "Test person")
       val form = RsFormMappings.companyAddressUkForm().bind(companyAddressData)

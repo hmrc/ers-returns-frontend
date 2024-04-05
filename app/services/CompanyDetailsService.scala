@@ -16,13 +16,12 @@
 
 package services
 
-import javax.inject.Inject
-import models.{Company, CompanyAddress, CompanyDetails, CompanyDetailsList, RequestObject}
+import models._
 import play.api.Logging
 import play.api.mvc.Request
-import uk.gov.hmrc.http.HeaderCarrier
 import utils.ERSUtil
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class CompanyDetailsService @Inject()(
@@ -30,24 +29,19 @@ class CompanyDetailsService @Inject()(
                                 sessionService: FrontendSessionService
                               )(implicit ec: ExecutionContext) extends Logging {
 
-  def updateSubsidiaryCompanyCache(index: Int)(implicit request: Request[_]): Future[Unit] = {
-    (for {
-      name <- sessionService.fetch[Company](ersUtil.SUBSIDIARY_COMPANY_NAME_CACHE)
-      cachedCompanies <- sessionService.fetchCompaniesOptionally()
-      companyDetailsList <- {
-        sessionService.fetch[CompanyAddress](ersUtil.SUBSIDIARY_COMPANY_ADDRESS_CACHE).map(address =>
-          CompanyDetailsList(replaceCompany(cachedCompanies.companies, index, CompanyDetails(name, address)))
-        )
-      }
-      _ <- sessionService.cache[CompanyDetailsList](ersUtil.SUBSIDIARY_COMPANIES_CACHE, companyDetailsList)
-    } yield {
-      ()
-    }).recover {
+  def updateSubsidiaryCompanyCache(index: Int)(implicit request: Request[_]): Unit = {
+    try {
+      sessionService.fetch[Company](ersUtil.SUBSIDIARY_COMPANY_NAME_CACHE).map(name =>
+        sessionService.fetchCompaniesOptionally().map(cachedCompanies => {
+          sessionService.fetch[CompanyAddress](ersUtil.SUBSIDIARY_COMPANY_ADDRESS_CACHE).map(address =>
+            CompanyDetailsList(replaceCompany(cachedCompanies.companies, index, CompanyDetails(name, address))))
+          }.map(companyDetailsList =>
+            sessionService.cache[CompanyDetailsList](ersUtil.SUBSIDIARY_COMPANIES_CACHE, companyDetailsList))))
+    } catch {
       case ex: Throwable =>
         logger.error("[CompanyDetailsService][updateSubsidiaryCompanyCache] Error updating subsidiary company cache", ex)
-        ()
     }
-    }
+  }
 
   def updateSchemeOrganiserCache(implicit request: Request[_]): Future[Unit] = {
     (for {

@@ -57,9 +57,8 @@ def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarri
   if (edit) {
     Future.successful(Redirect(controllers.subsidiaries.routes.GroupSchemeController.groupPlanSummaryPage()))
   } else {
-    companyDetailsService.updateSubsidiaryCompanyCache(index).map { _ =>
-      Redirect(controllers.subsidiaries.routes.GroupSchemeController.groupPlanSummaryPage())
-    }
+    companyDetailsService.updateSubsidiaryCompanyCache(index)
+    Future.successful(Redirect(controllers.subsidiaries.routes.GroupSchemeController.groupPlanSummaryPage()))
   }
 }
 

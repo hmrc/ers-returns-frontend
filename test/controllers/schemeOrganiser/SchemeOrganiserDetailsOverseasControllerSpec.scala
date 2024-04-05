@@ -18,7 +18,7 @@ package controllers.schemeOrganiser
 
 import models.{Company, CompanyDetails, RequestObject, RsFormMappings}
 import org.mockito.ArgumentMatchers.{any, refEq}
-import org.mockito.Mockito.when
+import org.mockito.Mockito.{doNothing, when}
 import org.scalatest.OptionValues
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.should.Matchers
@@ -159,7 +159,7 @@ class SchemeOrganiserDetailsOverseasControllerSpec extends AnyWordSpecLike
     "successfully bind the form and go to the edit version of the scheme organiser address overseas page with the index preserved if the form is filled correctly" in {
       when(mockSessionService.cache[CompanyDetails](any(), any())(any(), any())).thenReturn(Future.successful(("","")))
       when(mockSessionService.fetch[CompanyDetails](refEq(mockErsUtil.SCHEME_ORGANISER_CACHE))(any(), any())).thenReturn(Future.successful(Fixtures.exampleSchemeOrganiserOverseas))
-      when(mockCompanyDetailsService.updateSubsidiaryCompanyCache(any())(any())).thenReturn(Future.successful(()), Future.successful(()))
+      doNothing().when(mockCompanyDetailsService).updateSubsidiaryCompanyCache(any())(any())
 
       val companyAddressData = Map("companyName" -> "Test person")
       val form = RsFormMappings.companyAddressOverseasForm().bind(companyAddressData)

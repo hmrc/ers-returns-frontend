@@ -187,9 +187,7 @@ class CompanyDetailsServiceSpec extends AnyWordSpecLike with ErsTestHelper {
         when(mockSessionService.cache[CompanyDetailsList](eqTo(mockErsUtil.SUBSIDIARY_COMPANIES_CACHE), any())(any(), any()))
           .thenReturn(Future.successful(sessionPair))
 
-        val result: Unit = companyDetailsService.updateSubsidiaryCompanyCache(index).futureValue
-
-        result shouldBe ()
+        companyDetailsService.updateSubsidiaryCompanyCache(index)
       }
     }
 
@@ -202,9 +200,7 @@ class CompanyDetailsServiceSpec extends AnyWordSpecLike with ErsTestHelper {
       when(mockSessionService.fetch[Company](eqTo(mockErsUtil.SCHEME_ORGANISER_NAME_CACHE))(any(), any[Format[Company]]))
               .thenReturn(Future.failed(new Exception("Fetch failed")))
 
-            val result: Unit = companyDetailsService.updateSubsidiaryCompanyCache(index).futureValue
-
-      result shouldBe ()
+      companyDetailsService.updateSubsidiaryCompanyCache(index)
     }
   }
 }

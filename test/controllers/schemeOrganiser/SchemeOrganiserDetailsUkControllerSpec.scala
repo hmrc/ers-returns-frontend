@@ -18,7 +18,7 @@ package controllers.schemeOrganiser
 
 import models.{Company, CompanyDetails, RequestObject, RsFormMappings}
 import org.mockito.ArgumentMatchers.{any, refEq}
-import org.mockito.Mockito.when
+import org.mockito.Mockito.{doNothing, when}
 import org.scalatest.OptionValues
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.should.Matchers
@@ -163,7 +163,7 @@ class SchemeOrganiserDetailsUkControllerSpec extends AnyWordSpecLike
 
       when(mockSessionService.cache[CompanyDetails](any(), any())(any(), any())).thenReturn(Future.successful(sessionPair))
       when(mockSessionService.fetch[CompanyDetails](refEq(mockErsUtil.SCHEME_ORGANISER_CACHE))(any(), any())).thenReturn(Future.successful(Fixtures.exampleSchemeOrganiserUk))
-      when(mockCompanyDetailsService.updateSubsidiaryCompanyCache(any())(any())).thenReturn(Future.successful(()), Future.successful(()))
+      doNothing().when(mockCompanyDetailsService).updateSubsidiaryCompanyCache(any())(any())
 
       val companyAddressData = Map("companyName" -> "Test person")
       val form = RsFormMappings.companyAddressUkForm().bind(companyAddressData)
