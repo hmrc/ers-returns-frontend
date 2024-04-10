@@ -401,7 +401,6 @@ ers_manual_company_details.err.postcode = Check the postcode (it must be valid a
 ers_manual_company_details.err.company_reg = Enter a valid Company Registration Number
 ers_manual_company_details.err.corporation_ref = Enter a valid Corporation Tax reference
 
-#TODO here innit
 ers_manual_company_details.continue = Continue
 ers_manual_address_uk.building = Building and street (optional)
 ers_manual_address_uk.town = Town or city (optional)

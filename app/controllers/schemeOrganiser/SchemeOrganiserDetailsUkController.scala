@@ -36,7 +36,6 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class SchemeOrganiserDetailsUkController @Inject()(val mcc: MessagesControllerComponents,
-                                                   val authConnector: DefaultAuthConnector,
                                                    val ersConnector: ErsConnector,
                                                    val globalErrorView: views.html.global_error,
                                                    val authAction: AuthAction,

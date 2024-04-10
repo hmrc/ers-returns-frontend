@@ -33,9 +33,4 @@
     <root level="INFO">
         <appender-ref ref="ASYNCSTDOUT"/>
     </root>
-
-    <logger name="uk.gov.hmrc.audit.handler.DatastreamHandler" level="OFF"/>
-
-    <logger name="uk.gov.hmrc.audit.handler.LoggingHandler" level="OFF"/>
-
 </configuration>

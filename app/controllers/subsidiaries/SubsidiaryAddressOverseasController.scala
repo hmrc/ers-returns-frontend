@@ -57,11 +57,10 @@ class SubsidiaryAddressOverseasController  @Inject()(val mcc: MessagesController
     if (edit) {
       Future.successful(Redirect(controllers.subsidiaries.routes.GroupSchemeController.groupPlanSummaryPage()))
     } else {
-      companyDetailsService.updateSubsidiaryCompanyCache(index).map { _ =>
-        Redirect(controllers.subsidiaries.routes.GroupSchemeController.groupPlanSummaryPage())
+      companyDetailsService.updateSubsidiaryCompanyCache(index)
+        Future.successful(Redirect(controllers.subsidiaries.routes.GroupSchemeController.groupPlanSummaryPage()))
       }
     }
-  }
 
     def form(implicit request: Request[AnyContent]): Form[CompanyAddress] = RsFormMappings.companyAddressOverseasForm()
 

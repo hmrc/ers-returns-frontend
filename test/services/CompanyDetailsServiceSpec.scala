@@ -145,7 +145,7 @@ class CompanyDetailsServiceSpec extends AnyWordSpecLike with ErsTestHelper {
         when(mockSessionService.cache[CompanyDetails](eqTo(mockErsUtil.SCHEME_ORGANISER_CACHE), any())(any(), any()))
           .thenReturn(Future.successful(sessionPair))
 
-        val result: Unit = companyDetailsService.updateSchemeOrganiserCache.futureValue
+        val result: Unit = companyDetailsService.updateSchemeOrganiserCache
 
         result shouldBe ()
       }
@@ -159,7 +159,7 @@ class CompanyDetailsServiceSpec extends AnyWordSpecLike with ErsTestHelper {
       when(mockSessionService.fetch[Company](eqTo(mockErsUtil.SCHEME_ORGANISER_NAME_CACHE))(any(), any[Format[Company]]))
         .thenReturn(Future.failed(new Exception("Fetch failed")))
 
-      val result: Unit = companyDetailsService.updateSchemeOrganiserCache.futureValue
+      val result: Unit = companyDetailsService.updateSchemeOrganiserCache
 
       result shouldBe ()
     }
@@ -187,7 +187,7 @@ class CompanyDetailsServiceSpec extends AnyWordSpecLike with ErsTestHelper {
         when(mockSessionService.cache[CompanyDetailsList](eqTo(mockErsUtil.SUBSIDIARY_COMPANIES_CACHE), any())(any(), any()))
           .thenReturn(Future.successful(sessionPair))
 
-        val result: Unit = companyDetailsService.updateSubsidiaryCompanyCache(index).futureValue
+        val result: Unit = companyDetailsService.updateSubsidiaryCompanyCache(index)
 
         result shouldBe ()
       }
@@ -202,7 +202,7 @@ class CompanyDetailsServiceSpec extends AnyWordSpecLike with ErsTestHelper {
       when(mockSessionService.fetch[Company](eqTo(mockErsUtil.SCHEME_ORGANISER_NAME_CACHE))(any(), any[Format[Company]]))
               .thenReturn(Future.failed(new Exception("Fetch failed")))
 
-            val result: Unit = companyDetailsService.updateSubsidiaryCompanyCache(index).futureValue
+            val result: Unit = companyDetailsService.updateSubsidiaryCompanyCache(index)
 
       result shouldBe ()
     }

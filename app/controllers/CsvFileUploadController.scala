@@ -25,7 +25,6 @@ import models.upscan._
 import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.mvc._
-import play.api.routing.Router.empty.routes
 import services.{FrontendSessionService, UpscanService}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.mongo.cache.DataKey

@@ -57,11 +57,10 @@ class SchemeOrganiserAddressOverseasController @Inject()(val mcc: MessagesContro
     if (edit) {
       Future.successful(Redirect(controllers.schemeOrganiser.routes.SchemeOrganiserController.schemeOrganiserSummaryPage()))
     } else {
-      companyDetailsService.updateSchemeOrganiserCache.map { _ =>
-        Redirect(controllers.schemeOrganiser.routes.SchemeOrganiserController.schemeOrganiserSummaryPage())
+      companyDetailsService.updateSchemeOrganiserCache
+      Future.successful(Redirect(controllers.schemeOrganiser.routes.SchemeOrganiserController.schemeOrganiserSummaryPage()))
       }
     }
-  }
 
   def form(implicit request: Request[AnyContent]): Form[CompanyAddress] = RsFormMappings.companyAddressOverseasForm()
 

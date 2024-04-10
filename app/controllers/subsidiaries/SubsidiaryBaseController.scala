@@ -56,10 +56,7 @@ trait SubsidiaryBaseController[A] extends SchemeOrganiserBaseController[A] {
 
   override def showQuestionPage(requestObject: RequestObject, index: Int, edit: Boolean = false)
                                (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
-    sessionService.fetchPartFromCompanyDetailsList[A](
-      index)
-      .map {
-      previousAnswer: Option[A] =>
+    sessionService.fetchPartFromCompanyDetailsList[A](index).map { previousAnswer: Option[A] =>
       val preparedForm = previousAnswer.fold(form)(form.fill(_))
       Ok(view(requestObject, index, preparedForm, edit))
     } recover {

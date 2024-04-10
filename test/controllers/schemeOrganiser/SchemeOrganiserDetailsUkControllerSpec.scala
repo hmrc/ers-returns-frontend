@@ -18,7 +18,7 @@ package controllers.schemeOrganiser
 
 import models.{Company, CompanyDetails, RequestObject, RsFormMappings}
 import org.mockito.ArgumentMatchers.{any, refEq}
-import org.mockito.Mockito.when
+import org.mockito.Mockito.{doNothing, when}
 import org.scalatest.OptionValues
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.should.Matchers
@@ -60,7 +60,6 @@ class SchemeOrganiserDetailsUkControllerSpec extends AnyWordSpecLike
 
   val testController = new SchemeOrganiserDetailsUkController(
     mockMCC,
-    mockAuthConnector,
     mockErsConnector,
     app.injector.instanceOf[global_error],
     testAuthAction,
@@ -123,7 +122,7 @@ class SchemeOrganiserDetailsUkControllerSpec extends AnyWordSpecLike
 
     "successfully bind the form and go to the company uk address page if the form is filled correctly" in {
       when(mockSessionService.cache[Company](any(), any())(any(), any())).thenReturn(Future.successful(("","")))
-      when(mockCompanyDetailsService.updateSchemeOrganiserCache(any())).thenReturn(Future.successful(()), Future.successful(()))
+      doNothing().when(mockCompanyDetailsService).updateSchemeOrganiserCache(any())
 
       val companyData = Map("companyName" -> "Test company")
 
@@ -163,7 +162,7 @@ class SchemeOrganiserDetailsUkControllerSpec extends AnyWordSpecLike
 
       when(mockSessionService.cache[CompanyDetails](any(), any())(any(), any())).thenReturn(Future.successful(sessionPair))
       when(mockSessionService.fetch[CompanyDetails](refEq(mockErsUtil.SCHEME_ORGANISER_CACHE))(any(), any())).thenReturn(Future.successful(Fixtures.exampleSchemeOrganiserUk))
-      when(mockCompanyDetailsService.updateSubsidiaryCompanyCache(any())(any())).thenReturn(Future.successful(()), Future.successful(()))
+      doNothing().when(mockCompanyDetailsService).updateSchemeOrganiserCache(any())
 
       val companyAddressData = Map("companyName" -> "Test person")
       val form = RsFormMappings.companyAddressUkForm().bind(companyAddressData)

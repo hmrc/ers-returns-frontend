@@ -35,7 +35,6 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class SchemeOrganiserController @Inject()(
                                            val mcc: MessagesControllerComponents,
-                                           val authConnector: DefaultAuthConnector,
                                            implicit val countryCodes: CountryCodes,
                                            implicit val ersUtil: ERSUtil,
                                            implicit val sessionService: FrontendSessionService,

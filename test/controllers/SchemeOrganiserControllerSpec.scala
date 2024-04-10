@@ -73,7 +73,6 @@ class SchemeOrganiserControllerSpec
                                                    requestObjectRes: Future[RequestObject] = Future.successful(ersRequestObject)
                                                  ): SchemeOrganiserController = new SchemeOrganiserController(
       mockMCC,
-      mockAuthConnector,
       mockCountryCodes,
       mockErsUtil,
       mockSessionService,
