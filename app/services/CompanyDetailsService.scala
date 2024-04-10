@@ -16,13 +16,12 @@
 
 package services
 
-import javax.inject.Inject
-import models.{Company, CompanyAddress, CompanyDetails, CompanyDetailsList, RequestObject}
+import models._
 import play.api.Logging
 import play.api.mvc.Request
-import uk.gov.hmrc.http.HeaderCarrier
 import utils.ERSUtil
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class CompanyDetailsService @Inject()(

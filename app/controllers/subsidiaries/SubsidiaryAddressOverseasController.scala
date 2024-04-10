@@ -62,10 +62,11 @@ class SubsidiaryAddressOverseasController  @Inject()(val mcc: MessagesController
       }
     }
 
-    def form(implicit request: Request[AnyContent]): Form[CompanyAddress] = RsFormMappings.companyAddressOverseasForm()
+  def form(implicit request: Request[AnyContent]): Form[CompanyAddress] = RsFormMappings.companyAddressOverseasForm()
 
-    def view(requestObject: RequestObject, index: Int, companyAddressOverseasForm: Form[CompanyAddress], edit: Boolean = false)
+  def view(requestObject: RequestObject, index: Int, companyAddressOverseasForm: Form[CompanyAddress], edit: Boolean = false)
             (implicit request: Request[AnyContent], hc: HeaderCarrier): Html = {
       companyAddressOverseasView(requestObject, index, companyAddressOverseasForm, edit, schemeOrganiser = false)
-    }
+  }
+
 }
