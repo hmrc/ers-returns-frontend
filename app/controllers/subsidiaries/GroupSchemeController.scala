@@ -62,7 +62,11 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
       companyDetailsList = CompanyDetailsList(filterDeletedCompany(companies, id))
       _                  <- sessionService.cache(ersUtil.SUBSIDIARY_COMPANIES_CACHE, companyDetailsList)
     } yield {
-      Redirect(controllers.subsidiaries.routes.GroupSchemeController.groupPlanSummaryPage())
+      if (companyDetailsList.companies.isEmpty) {
+        Redirect(controllers.subsidiaries.routes.GroupSchemeController.groupSchemePage())
+      } else {
+        Redirect(controllers.subsidiaries.routes.GroupSchemeController.groupPlanSummaryPage())
+      }
     }) recover {
       case _: Exception => getGlobalErrorPage
     }
@@ -126,7 +130,7 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
           sessionService.cache(ersUtil.GROUP_SCHEME_CACHE_CONTROLLER, gsc).map { _ =>
             (requestObject.getSchemeId, formData.groupScheme) match {
 
-              case (_, Some(ersUtil.OPTION_YES)) => Redirect(controllers.subsidiaries.routes.SubsidiaryBasedInUkController.questionPage())
+              case (_, Some(ersUtil.OPTION_YES)) => Redirect(controllers.subsidiaries.routes.GroupSchemeController.groupPlanSummaryPage())
 
               case (ersUtil.SCHEME_CSOP | ersUtil.SCHEME_SAYE, _) =>
                 Redirect(routes.AltAmendsController.altActivityPage())
@@ -155,7 +159,7 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
       companyDetailsList <- sessionService.fetchCompaniesOptionally()
     } yield {
       if (companyDetailsList.companies.isEmpty) {
-        Redirect(controllers.subsidiaries.routes.GroupSchemeController.groupSchemePage())
+        Redirect(controllers.subsidiaries.routes.SubsidiaryBasedInUkController.questionPage())
       } else {
         Ok(groupPlanSummaryView(requestObject, ersUtil.OPTION_MANUAL, companyDetailsList))
       }

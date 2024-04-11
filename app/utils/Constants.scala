@@ -24,7 +24,6 @@ trait Constants {
   val REPORTABLE_EVENTS = "reportable-events"
   val GROUP_SCHEME_CACHE_CONTROLLER = "group-scheme-controller"
   val ALT_AMENDS_CACHE_CONTROLLER = "alt-amends-cache-controller"
-  val GROUP_SCHEME_COMPANIES = "group-scheme-companies"
   val CSV_FILES_CALLBACK_LIST = "csv-file-callback-List"
   val FILE_TYPE_CACHE = "check-file-type"
   val ALT_AMENDS_ACTIVITY = "alt-activity"

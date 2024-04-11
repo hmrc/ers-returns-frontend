@@ -78,7 +78,7 @@ class GroupSchemeControllerSpec
   override def beforeEach(): Unit = {
     super.beforeEach()
     reset(mockErsUtil, mockSessionService)
-    when(mockErsUtil.GROUP_SCHEME_COMPANIES).thenReturn("group-scheme-companies")
+    when(mockErsUtil.SUBSIDIARY_COMPANIES_CACHE).thenReturn("group-scheme-companies")
     when(mockErsUtil.GROUP_SCHEME_CACHE_CONTROLLER).thenReturn("group-scheme-controller")
     when(mockErsUtil.ERS_REQUEST_OBJECT).thenReturn("ers-request-object")
     when(mockErsUtil.OPTION_MANUAL).thenReturn("man")
@@ -503,7 +503,7 @@ class GroupSchemeControllerSpec
 
     "display error page if fetch company details list fails" in {
       setAuthMocks()
-      when(mockSessionService.fetch[CompanyDetailsList](refEq(mockErsUtil.GROUP_SCHEME_COMPANIES))(any(), any()))
+      when(mockSessionService.fetch[CompanyDetailsList](refEq(mockErsUtil.SUBSIDIARY_COMPANIES_CACHE))(any(), any()))
         .thenReturn(Future.failed(new NoSuchElementException("Nothing in cache")))
       when(mockSessionService.fetch[RequestObject](refEq(mockErsUtil.ERS_REQUEST_OBJECT))(any(), any()))
         .thenReturn(Future.successful(ersRequestObject))
@@ -516,7 +516,7 @@ class GroupSchemeControllerSpec
     }
 
     "display error page if fetch request object fails" in {
-      when(mockSessionService.fetch[CompanyDetailsList](refEq(mockErsUtil.GROUP_SCHEME_COMPANIES))(any(), any()))
+      when(mockSessionService.fetch[CompanyDetailsList](refEq(mockErsUtil.SUBSIDIARY_COMPANIES_CACHE))(any(), any()))
         .thenReturn(Future.successful(mock[CompanyDetailsList]))
       when(mockSessionService.fetch[RequestObject](refEq(mockErsUtil.ERS_REQUEST_OBJECT))(any(), any()))
         .thenReturn(Future.failed(new Exception))

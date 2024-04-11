@@ -132,7 +132,7 @@ class FrontendSessionService @Inject()(val sessionCache: FrontendSessionsReposit
       gscOption <- fetchOption[GroupSchemeInfo](GROUP_SCHEME_CACHE_CONTROLLER, schemeRef)
       companyDetailsOption <- gscOption match {
         case Some(gsc) if gsc.groupScheme.contains(OPTION_YES) =>
-          fetchOption[CompanyDetailsList](GROUP_SCHEME_COMPANIES, schemeRef)
+          fetchOption[CompanyDetailsList](SUBSIDIARY_COMPANIES_CACHE, schemeRef)
         case _ =>
           Future.successful(None)
       }

@@ -122,7 +122,7 @@ class SummaryDeclarationController @Inject() (val mcc: MessagesControllerCompone
       .getOrElse(AlterationAmends(None, None, None, None, None))
 
   def getCompDetails(cacheItem: CacheItem): CompanyDetailsList =
-    getEntry[CompanyDetailsList](cacheItem, DataKey(ersUtil.GROUP_SCHEME_COMPANIES))
+    getEntry[CompanyDetailsList](cacheItem, DataKey(ersUtil.SUBSIDIARY_COMPANIES_CACHE))
       .getOrElse(CompanyDetailsList(List[CompanyDetails]()))
 
   def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result =

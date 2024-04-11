@@ -136,7 +136,7 @@ trait ErsTestHelper extends MockitoSugar with AuthHelper with ERSFakeApplication
   when(mockErsUtil.PAGE_ALT_ACTIVITY).thenReturn("ers_alt_activity")
   when(mockErsUtil.CSV_FILES_UPLOAD).thenReturn("csv-files-upload")
   when(mockErsUtil.ERS_REQUEST_OBJECT).thenReturn(ERS_REQUEST_OBJECT)
-  when(mockErsUtil.GROUP_SCHEME_COMPANIES).thenReturn("group-scheme-companies")
+  when(mockErsUtil.SUBSIDIARY_COMPANIES_CACHE).thenReturn("subsidiary-companies")
   when(mockErsUtil.GROUP_SCHEME_CACHE_CONTROLLER).thenReturn("group-scheme-controller")
   when(mockErsUtil.SCHEME_ORGANISER_CACHE).thenReturn("scheme-organiser")
   when(mockErsUtil.ERS_METADATA).thenReturn(ERS_META_DATA)

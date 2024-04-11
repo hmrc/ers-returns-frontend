@@ -230,6 +230,7 @@ ers_group_file_check.file_name = Dim ffeil wedi’i dewis.
 ers_group_file_check.format_errors = Mae’r ffeil yn cynnwys gwallau fformatio.
 ers_group_file_check.file_type_error = Mae’r ffeil a atodwyd yn y fformat anghywir. Dim ond ffeiliau .csv y gallwn eu derbyn.
 ers_group_file_check.no_file_error = Dim ffeil wedi’i dewis. Dewiswch eich ffeil.
+
 ers_group_summary.csop.title = Cwmnïau yn y cynllun grŵp hwn
 ers_group_summary.saye.title = Cwmnïau yn y cynllun grŵp hwn
 ers_group_summary.emi.title = Is-gwmnïau yn y cynllun neu drefniant hwn
@@ -253,6 +254,8 @@ ers_group_summary.saye.add_company = Ychwanegu cwmni
 ers_group_summary.emi.add_company = Ychwanegu is-gwmni
 ers_group_summary.sip.add_company = Ychwanegu cwmni
 ers_group_summary.other.add_company = Ychwanegu cwmni
+ers_group_summary.not_provided = Heb ei ddarparu
+
 ers_manual_company_details.csop.title = Ychwanegu manylion y cwmni
 ers_manual_company_details.csop.question =Ymhle y mae’r cwmni wedi’i gofrestru?
 ers_manual_company_details.saye.title = Ychwanegu manylion y cwmni
