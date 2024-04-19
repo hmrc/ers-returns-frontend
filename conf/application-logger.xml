@@ -1,25 +1,12 @@
 <configuration>
     <conversionRule conversionWord="coloredLevel" converterClass="play.api.libs.logback.ColoredLevel"/>
 
-    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
-        <file>${application.home:-.}/logs/application.log</file>
-        <encoder>
-            <pattern>
-                %date{ISO8601} %highlight(%-5level) %cyan(%logger{36}) %magenta(%X{akkaSource}) %msg%n
-            </pattern>
-        </encoder>
-    </appender>
-
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
             <pattern>
                 %date{ISO8601} %highlight(%-5level) %cyan(%logger{36}) %magenta(%X{akkaSource}) %msg%n
             </pattern>
         </encoder>
-    </appender>
-
-    <appender name="ASYNCFILE" class="ch.qos.logback.classic.AsyncAppender">
-        <appender-ref ref="FILE"/>
     </appender>
 
     <appender name="ASYNCSTDOUT" class="ch.qos.logback.classic.AsyncAppender">
@@ -29,6 +16,8 @@
     <logger name="play" level="INFO"/>
 
     <logger name="application" level="INFO"/>
+
+    <logger name="DatastreamHandler" level="NONE"/>
 
     <root level="INFO">
         <appender-ref ref="ASYNCSTDOUT"/>

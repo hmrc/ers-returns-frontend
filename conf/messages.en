@@ -165,7 +165,7 @@ ers_choose.err.message = Select yes if options have been granted, exercised, rel
 ers_scheme_organiser.csop.title = Scheme organiser’s company details
 ers_scheme_organiser.sip.title = Add establishing company details
 ers_scheme_organiser.saye.title = Add scheme organiser details
-ers_scheme_organiser.emi.title = Add employer company details //TODO here
+ers_scheme_organiser.emi.title = Add employer company details
 ers_scheme_organiser.other.title = Add company details
 ers_scheme_organiser.question = Where is the company registered?
 
@@ -334,7 +334,7 @@ ers_manual_company_details.csop.title = Add company details
 ers_manual_company_details.csop.question = Where is the company registered?
 ers_manual_company_details.saye.title = Add company details
 ers_manual_company_details.saye.question = Where is your company registered?
-ers_manual_company_details.emi.title = Add subsidiary company details //TODO here
+ers_manual_company_details.emi.title = Add subsidiary company details
 ers_manual_company_details.emi.question = Where is the company registered?
 ers_manual_company_details.sip.title = Add company details
 ers_manual_company_details.sip.question = Where is your company registered?

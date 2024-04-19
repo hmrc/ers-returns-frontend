@@ -67,7 +67,7 @@
 	}
 
 	@hmrcPageHeading(PageHeading(
-		text = ersUtil.getPageElement(schemeId, ersUtil.PAGE_MANUAL_COMPANY_DETAILS, "title")
+		text = ersUtil.getPageElement(schemeId, if(schemeOrganiser){ersUtil.PAGE_SCHEME_ORGANISER} else {ersUtil.PAGE_MANUAL_COMPANY_DETAILS}, "title")
 	))
 
 	@formWithCSRF(action = formAction) {
