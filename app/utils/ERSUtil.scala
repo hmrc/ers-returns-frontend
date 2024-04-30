@@ -92,7 +92,7 @@ class ERSUtil @Inject() (val appConfig: ApplicationConfig)
     if (n == trusteeDetailsList.length) { trusteeNamesList }
     else { buildTrusteeNameList(trusteeDetailsList, n + 1, trusteeNamesList + trusteeDetailsList(n).name + "<br>") }
 
-	def companyLocation(company: CompanyDetails): String = if (company.basedInUk) DEFAULT_COUNTRY else OVERSEAS
+	def companyLocation(company: CompanyDetails): String = if (company.basedInUk) "ers_trustee_based.uk" else "ers_trustee_based.overseas"
 
 
   def trusteeLocationMessage(trustee: TrusteeDetails): String = if (trustee.basedInUk) "ers_trustee_based.uk" else "ers_trustee_based.overseas"

@@ -342,10 +342,10 @@ ers_company_summary.add_company.err = Dewiswch ie os oes angen i chi ychwanegu c
 ers_manual_company_details_overseas.title = Beth yw enw’r cwmni?
 ers_manual_address_overseas.title = Beth yw cyfeiriad y cwmni?
 ers_company_address.line1 = Cyfeiriad – llinell 1
-ers_company_address.line2 = Cyfeiriad – llinell 2
-ers_company_address.line3 = Cyfeiriad – llinell 3
-ers_company_address.line4 = Cyfeiriad – llinell 4
-ers_company_address.line5 = Cyfeiriad – llinell 5
+ers_company_address.line2 = Cyfeiriad – llinell 2 (dewisol)
+ers_company_address.line3 = Cyfeiriad – llinell 3 (dewisol)
+ers_company_address.line4 = Cyfeiriad – llinell 4 (dewisol)
+ers_company_address.line5 = Cyfeiriad – llinell 5 (dewisol)
 
 ers_confirmation.page_title = Cadarnhad
 ers_confirmation.submitted = Mae eich Datganiad Blynyddol ar gyfer {0} wedi’i gyflwyno
@@ -520,7 +520,7 @@ ers_service_unavailable.para1 = Nid yw’r Gwasanaeth Gwirio ar gael ar hyn o br
 ers_not_authorised.page_title = Gwiriwch eich ffeiliau ERS
 ers_not_authorised.para1 = Nid ydych wedi’ch awdurdodi i gyrchu’r gwasanaeth gwirio ERS
 
-error.required = Mae angen y maes hwn
+error.required = Mae angen llenwi’r maes hwn
 ers_html_error_report.styles = <div></div>
 ers_html_error_report.styles2 = <style>article table td, article table th ‘{’background:none; padding:10px 20px 10px 0’}’ article table td, article table th ‘{’border:none;’}’ article table td, article table th ‘{’border-bottom: 1px solid #BFC1C3;’}’ .column, .row ‘{’width:10%’}’ .report-title ‘{’text-align:right; margin-top:0; margin-bottom:0;’}’</style>
 ers_html_error_report.report_title =Adroddiad o wallau fformatio

@@ -327,7 +327,7 @@ class GroupSchemeControllerSpec
       contentAsString(result).contains(Messages("validation.summary.heading")) shouldBe true
     }
 
-    "redirect to subsidiary based in uk page if user select yes for CSOP" in {
+    "redirect to group plan summary page if user select yes for CSOP" in {
       when(
         mockSessionService.cache(refEq(mockErsUtil.GROUP_SCHEME_CACHE_CONTROLLER), any[GroupSchemeInfo]())(any(), any())
       ).thenReturn(
@@ -339,7 +339,7 @@ class GroupSchemeControllerSpec
       val result = testGroupSchemeController.showGroupSchemeSelected(ersRequestObject, SCHEME_CSOP)(authRequest)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result).get shouldBe controllers.subsidiaries.routes.SubsidiaryBasedInUkController.questionPage().url
+      redirectLocation(result).get shouldBe controllers.subsidiaries.routes.GroupSchemeController.groupPlanSummaryPage().url
     }
 
     "redirect to alterations page if user select no for CSOP" in {
@@ -358,7 +358,7 @@ class GroupSchemeControllerSpec
       redirectLocation(result).get shouldBe controllers.routes.AltAmendsController.altActivityPage().url
     }
 
-    "redirect to company details page if user select yes for SAYE" in {
+    "redirect to group plan summary page if user select yes for SAYE" in {
       when(
         mockSessionService.cache(refEq(mockErsUtil.GROUP_SCHEME_CACHE_CONTROLLER), any[GroupSchemeInfo]())(any(), any())
       ).thenReturn(
@@ -371,7 +371,7 @@ class GroupSchemeControllerSpec
         testGroupSchemeController.showGroupSchemeSelected(ersRequestObject, mockErsUtil.SCHEME_SAYE)(authRequest)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result).get shouldBe controllers.subsidiaries.routes.SubsidiaryBasedInUkController.questionPage().url
+      redirectLocation(result).get shouldBe controllers.subsidiaries.routes.GroupSchemeController.groupPlanSummaryPage().url
     }
 
     "redirect to alterations page if user select no for SAYE" in {
@@ -389,7 +389,7 @@ class GroupSchemeControllerSpec
       redirectLocation(result).get shouldBe controllers.routes.AltAmendsController.altActivityPage().url
     }
 
-    "redirect to company details page if user select yes for EMI" in {
+    "redirect to group plan summary page if user select yes for EMI" in {
       when(
         mockSessionService.cache(refEq(mockErsUtil.GROUP_SCHEME_CACHE_CONTROLLER), any[GroupSchemeInfo]())(any(), any())
       ).thenReturn(
@@ -402,7 +402,7 @@ class GroupSchemeControllerSpec
         testGroupSchemeController.showGroupSchemeSelected(ersRequestObject, mockErsUtil.SCHEME_EMI)(authRequest)
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result).get shouldBe controllers.subsidiaries.routes.SubsidiaryBasedInUkController.questionPage().url
+      redirectLocation(result).get shouldBe controllers.subsidiaries.routes.GroupSchemeController.groupPlanSummaryPage().url
     }
 
     "redirect to summary page if user select no for EMI" in {
@@ -421,7 +421,7 @@ class GroupSchemeControllerSpec
       redirectLocation(result).get shouldBe controllers.routes.SummaryDeclarationController.summaryDeclarationPage().url
     }
 
-    "redirect to company details page if user select yes for SIP" in {
+    "redirect to group plan summary page if user select yes for SIP" in {
       when(
         mockSessionService.cache(refEq(mockErsUtil.GROUP_SCHEME_CACHE_CONTROLLER), any[GroupSchemeInfo]())(any(), any())
       ).thenReturn(
@@ -433,7 +433,7 @@ class GroupSchemeControllerSpec
       val result =
         testGroupSchemeController.showGroupSchemeSelected(ersRequestObject, mockErsUtil.SCHEME_SIP)(authRequest)
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result).get shouldBe controllers.subsidiaries.routes.SubsidiaryBasedInUkController.questionPage().url
+      redirectLocation(result).get shouldBe controllers.subsidiaries.routes.GroupSchemeController.groupPlanSummaryPage().url
     }
 
     "redirect to trustee summary page if user select no for SIP" in {
@@ -451,7 +451,7 @@ class GroupSchemeControllerSpec
       headers(result).get("Location").get.contains("/trustees") shouldBe true
     }
 
-    "redirect to company details page if user select yes for OTHER" in {
+    "redirect to group plan summary page if user select yes for OTHER" in {
       when(
         mockSessionService.cache(refEq(mockErsUtil.GROUP_SCHEME_CACHE_CONTROLLER), any[GroupSchemeInfo]())(any(), any())
       ).thenReturn(
@@ -463,7 +463,7 @@ class GroupSchemeControllerSpec
       val result =
         testGroupSchemeController.showGroupSchemeSelected(ersRequestObject, mockErsUtil.SCHEME_OTHER)(authRequest)
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result).get shouldBe controllers.subsidiaries.routes.SubsidiaryBasedInUkController.questionPage().url
+      redirectLocation(result).get shouldBe controllers.subsidiaries.routes.GroupSchemeController.groupPlanSummaryPage().url
     }
 
     "redirect to summary page if user select no for OTHER" in {
@@ -545,7 +545,7 @@ class GroupSchemeControllerSpec
       contentAsString(result).contains(Messages("ers_group_summary.csop.title")) shouldBe true
     }
 
-    "redirect to GroupSchemeController groupSchemePage if no subsidiary companies in list" in {
+    "redirect to GroupSchemeController subsidiary location page if no subsidiary companies in list" in {
       setAuthMocks()
 
       when(mockSessionService.fetchCompaniesOptionally()(any(), any())).thenReturn(Future.successful(emptyComapnyDetailsList))
@@ -559,7 +559,7 @@ class GroupSchemeControllerSpec
       val result = controllerUnderTest.showGroupPlanSummaryPage()(authRequest, hc)
 
       status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result) shouldBe Some("/submit-your-ers-annual-return/group-scheme")
+      redirectLocation(result) shouldBe Some("/submit-your-ers-annual-return/where-is-subsidiary-registered")
     }
   }
 

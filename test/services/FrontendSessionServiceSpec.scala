@@ -137,7 +137,7 @@ class FrontendSessionServiceSpec extends AnyWordSpec with Matchers with ErsTestH
 
       when(frontendSessionsRepository.getFromSession[GroupSchemeInfo](DataKey(eqTo("group-scheme-controller")))(any(), any()))
         .thenReturn(Future.successful(Some(groupSchemeInfo)))
-      when(frontendSessionsRepository.getFromSession[CompanyDetailsList](DataKey(eqTo("group-scheme-companies")))(any(), any()))
+      when(frontendSessionsRepository.getFromSession[CompanyDetailsList](DataKey(eqTo("subsidiary-companies")))(any(), any()))
         .thenReturn(Future.successful(Some(companyDetailsList)))
 
       val result = testService.getGroupSchemeData(schemeRef).futureValue

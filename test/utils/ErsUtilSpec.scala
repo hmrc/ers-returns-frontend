@@ -178,11 +178,11 @@ class ErsUtilSpec
     val ersUtil: ERSUtil = new ERSUtil(mockAppConfig)
 
     "return OVERSEAS for non-default country" in {
-      ersUtil.companyLocation(CompanyDetails(companyName = "", addressLine1= "", None, None, None, None, country = Some("FR"), None, None, false)) shouldBe "Overseas"
+      ersUtil.companyLocation(CompanyDetails(companyName = "", addressLine1= "", None, None, None, None, country = Some("FR"), None, None, false)) shouldBe "ers_trustee_based.overseas"
     }
 
     "return default country name" in {
-      ersUtil.companyLocation(CompanyDetails(companyName = "", addressLine1= "", None, None, None, None, country = Some("UK"), None, None, true)) shouldBe "UK"
+      ersUtil.companyLocation(CompanyDetails(companyName = "", addressLine1= "", None, None, None, None, country = Some("UK"), None, None, true)) shouldBe "ers_trustee_based.uk"
     }
   }
 
