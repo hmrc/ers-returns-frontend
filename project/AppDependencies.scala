@@ -23,7 +23,8 @@ object AppDependencies {
     "com.openhtmltopdf"       %  "openhtmltopdf-core"         % openHtmlVersion,
     "com.openhtmltopdf"       %  "openhtmltopdf-pdfbox"       % openHtmlVersion,
     "com.openhtmltopdf"       %  "openhtmltopdf-svg-support"  % openHtmlVersion,
-    "commons-codec"           %  "commons-codec"              % "1.16.1"
+    "commons-codec"           %  "commons-codec"              % "1.16.1",
+    "org.codehaus.janino"     %  "janino"                     % "3.1.12"
   )
 
   val test: Seq[ModuleID]      = Seq(

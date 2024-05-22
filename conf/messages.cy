@@ -26,7 +26,7 @@ ers.scheme.CSOP = Opsiwn Prynu Cyfranddaliadau Cwmni (CSOP)
 ers.scheme.EMI = Cymhellion Rheoli Mentrau (EMI)
 ers.scheme.SIP = Cymell Cyfranddaliadau (SIP)
 ers.scheme.SAYE = Cynilo Wrth Ennill (SAYE)
-ers.scheme.OTHER = ARALL
+ers.scheme.Other = ARALL
 ers.scheme.title = Cynllun {0}
 
 ers.start.page_title = Cyflwyno eich Datganiad Blynyddol – Gwarantau ar Sail Cyflogaeth – GOV.UK

@@ -30,7 +30,7 @@ ers.scheme.CSOP = CSOP
 ers.scheme.EMI = EMI
 ers.scheme.SIP = SIP
 ers.scheme.SAYE = SAYE
-ers.scheme.OTHER = OTHER
+ers.scheme.Other = OTHER
 ers.scheme.title = {0} scheme
 
 #********************************************************************

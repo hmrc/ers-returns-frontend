@@ -67,8 +67,8 @@ class FrontendSessionService @Inject()(val sessionCache: FrontendSessionsReposit
 
   def fetchTrusteesOptionally()(implicit request: Request[_], formats: json.Format[TrusteeDetailsList]): Future[TrusteeDetailsList] = {
     fetch[TrusteeDetailsList](TRUSTEES_CACHE).recoverWith {
-      case ex: Exception =>
-        logger.warn(s"[FrontendSessionService][fetchTrusteesOptionally] Failed to fetch trustees, returning empty list. Error: ${ex.getMessage}")
+      case _: Exception =>
+        logger.info(s"[FrontendSessionService][fetchTrusteesOptionally] No trustees were found")
         Future.successful(TrusteeDetailsList(List.empty[TrusteeDetails]))
     }
   }
