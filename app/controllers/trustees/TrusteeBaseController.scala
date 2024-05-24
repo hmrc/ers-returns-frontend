@@ -88,7 +88,7 @@ trait TrusteeBaseController[A] extends FrontendController with I18nSupport with 
           sessionService.fetchTrusteesOptionally().flatMap { trustees =>
             val updatedTrustee = trustees.trustees(index).updatePart(result)
             val updatedTrustees = TrusteeDetailsList(trustees.trustees.updated(index, updatedTrustee))
-            sessionService.cache[TrusteeDetailsList](ersUtil.TRUSTEES_CACHE, updatedTrustees).flatMap{ _ =>
+            sessionService.cache[TrusteeDetailsList](ersUtil.TRUSTEES_CACHE, updatedTrustees).flatMap { _ =>
               nextPageRedirect(index, edit)
             }
           }
@@ -101,7 +101,7 @@ trait TrusteeBaseController[A] extends FrontendController with I18nSupport with 
     ).recover {
       case _ =>
         logger.error(s"[${this.getClass.getSimpleName}][handleQuestionSubmit] Error occurred while updating trustee cache")
-      getGlobalErrorPage
+        getGlobalErrorPage
     }
   }
 

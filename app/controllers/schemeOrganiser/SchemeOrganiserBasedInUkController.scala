@@ -43,7 +43,7 @@ class SchemeOrganiserBasedInUkController @Inject()(val mcc: MessagesControllerCo
                                                    implicit val sessionService: FrontendSessionService,
                                                    implicit val appConfig: ApplicationConfig,
                                                    pageView: views.html.manual_is_the_company_in_uk
-                                             )
+                                                  )
   extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with SchemeOrganiserBaseController[CompanyBasedInUk] {
 
   implicit val ec: ExecutionContext = mcc.executionContext
@@ -53,12 +53,12 @@ class SchemeOrganiserBasedInUkController @Inject()(val mcc: MessagesControllerCo
 
   def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier, request: Request[_]): Future[Result] = {
     for {
-      subsidiaryBasedInUk <-  if (edit) {
-       sessionService.fetch[CompanyDetails](ersUtil.SCHEME_ORGANISER_CACHE).map {
+      subsidiaryBasedInUk <- if (edit) {
+        sessionService.fetch[CompanyDetails](ersUtil.SCHEME_ORGANISER_CACHE).map {
           companyDetails => CompanyBasedInUk(companyDetails.basedInUk)
         }
       } else {
-       sessionService.fetch[CompanyBasedInUk](cacheKey)
+        sessionService.fetch[CompanyBasedInUk](cacheKey)
       }
     } yield {
       (subsidiaryBasedInUk.basedInUk, edit) match {

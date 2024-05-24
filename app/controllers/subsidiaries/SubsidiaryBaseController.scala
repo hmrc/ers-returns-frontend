@@ -29,7 +29,7 @@ trait SubsidiaryBaseController[A] extends SchemeOrganiserBaseController[A] {
  override def submissionHandler(requestObject: RequestObject, index: Int, edit: Boolean = false)
                        (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
     form.bindFromRequest().fold(
-      errors => {logger.error(errors.errors.mkString)
+      errors => {
         Future.successful(BadRequest(view(requestObject, index, errors, edit)))
       },
       result => {
@@ -61,7 +61,7 @@ trait SubsidiaryBaseController[A] extends SchemeOrganiserBaseController[A] {
       Ok(view(requestObject, index, preparedForm, edit))
     } recover {
       case e: Exception =>
-        logger.error(s"[SubsidiariesController][showSubsidiariesNamePage] Get data from cache failed with exception ${e.getMessage}")
+        logger.error(s"[${this.getClass.getSimpleName}][showQuestionPage] Get data from cache failed with exception ${e.getMessage}")
         getGlobalErrorPage
     }
   }

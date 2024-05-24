@@ -60,7 +60,7 @@ class SubsidiaryDetailsOverseasController @Inject()(val mcc: MessagesControllerC
                                                     implicit val sessionService: FrontendSessionService,
                                                     implicit val appConfig: ApplicationConfig,
                                                     companyOverseasDetailsView: views.html.manual_company_details_overseas
-                                                )
+                                                   )
   extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with SubsidiaryBaseController[Company] {
 
   implicit val ec: ExecutionContext = mcc.executionContext
@@ -71,11 +71,11 @@ class SubsidiaryDetailsOverseasController @Inject()(val mcc: MessagesControllerC
 
   def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier, request: Request[_]): Future[Result] = {
     if (edit) {
-         Future.successful(Redirect(controllers.subsidiaries.routes.SubsidiaryAddressOverseasController.editCompany(index)))
-      } else {
-        Future.successful(Redirect(controllers.subsidiaries.routes.SubsidiaryAddressOverseasController.questionPage()))
-      }
+      Future.successful(Redirect(controllers.subsidiaries.routes.SubsidiaryAddressOverseasController.editCompany(index)))
+    } else {
+      Future.successful(Redirect(controllers.subsidiaries.routes.SubsidiaryAddressOverseasController.questionPage()))
     }
+  }
 
   def form(implicit request: Request[AnyContent]): Form[Company] = RsFormMappings.companyNameForm()
 

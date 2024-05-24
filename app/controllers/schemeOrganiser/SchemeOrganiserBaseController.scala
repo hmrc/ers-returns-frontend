@@ -50,24 +50,21 @@ trait SchemeOrganiserBaseController[A] extends FrontendController with I18nSuppo
   def view(requestObject: RequestObject, index: Int, form: Form[A], edit: Boolean = false)
           (implicit request: Request[AnyContent], hc: HeaderCarrier): Html
 
-
   def questionPage(index: Int): Action[AnyContent] = authAction.async {
     implicit request =>
-     sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT).flatMap { requestObject =>
+      sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT).flatMap { requestObject =>
         showQuestionPage(requestObject, index)
       }
   }
 
   def showQuestionPage(requestObject: RequestObject, index: Int, edit: Boolean = false)
                       (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
-   sessionService.fetchPartFromCompanyDetails[A]
-      .map
-      { previousAnswer: Option[A] =>
+    sessionService.fetchPartFromCompanyDetails[A].map { previousAnswer: Option[A] =>
       val preparedForm = previousAnswer.fold(form)(form.fill(_))
       Ok(view(requestObject, index, preparedForm, edit))
     } recover {
       case e: Exception =>
-        logger.error(s"[SubsidiariesController][showSubsidiariesNamePage] Get data from cache failed with exception ${e.getMessage}")
+        logger.error(s"[${this.getClass.getSimpleName}][showQuestionPage] Get data from cache failed with exception ${e.getMessage}")
         getGlobalErrorPage
     }
   }
@@ -75,7 +72,7 @@ trait SchemeOrganiserBaseController[A] extends FrontendController with I18nSuppo
 
   def questionSubmit(index: Int): Action[AnyContent] = authAction.async {
     implicit request =>
-     sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT).flatMap { requestObject =>
+      sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT).flatMap { requestObject =>
         submissionHandler(requestObject, index)(request, hc)
       }
   }
@@ -84,25 +81,24 @@ trait SchemeOrganiserBaseController[A] extends FrontendController with I18nSuppo
                        (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
     form.bindFromRequest().fold(
       errors => {
-        logger.error(errors.errors.mkString)
         Future.successful(BadRequest(view(requestObject, index, errors, edit)))
       },
       result => {
         if (edit) {
-         sessionService.fetch[CompanyDetails](ersUtil.SCHEME_ORGANISER_CACHE).flatMap { schemeOrganiser =>
+          sessionService.fetch[CompanyDetails](ersUtil.SCHEME_ORGANISER_CACHE).flatMap { schemeOrganiser =>
             val updatedSchemeOrganiser = schemeOrganiser.updatePart(result)
-           sessionService.cache[CompanyDetails](ersUtil.SCHEME_ORGANISER_CACHE, updatedSchemeOrganiser).flatMap { _ =>
+            sessionService.cache[CompanyDetails](ersUtil.SCHEME_ORGANISER_CACHE, updatedSchemeOrganiser).flatMap { _ =>
               nextPageRedirect(index, edit)
             }
           }
         } else {
-         sessionService.cache[A](cacheKey, result).flatMap { _ =>
+          sessionService.cache[A](cacheKey, result).flatMap { _ =>
             nextPageRedirect(index, edit)
           }
         }
       }
     ).recover {
-      case e: Exception =>
+      case _: Exception =>
         logger.error(s"[${this.getClass.getSimpleName}][submissionHandler] Error occurred while updating company cache")
         getGlobalErrorPage
     }
@@ -110,14 +106,14 @@ trait SchemeOrganiserBaseController[A] extends FrontendController with I18nSuppo
 
   def editCompany(index: Int): Action[AnyContent] = authAction.async {
     implicit request =>
-     sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT).flatMap { requestObject =>
+      sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT).flatMap { requestObject =>
         showQuestionPage(requestObject, index, edit = true)(request, hc)
       }
   }
 
   def editQuestionSubmit(index: Int): Action[AnyContent] = authAction.async {
     implicit request =>
-     sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT).flatMap { requestObject =>
+      sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT).flatMap { requestObject =>
         submissionHandler(requestObject, index, edit = true)(request, hc)
       }
   }

@@ -63,7 +63,7 @@ class SchemeOrganiserController @Inject()(
         Ok(schemeOrganiserSummaryView(requestObject, companyDetails.get))
       } else {
         Redirect(controllers.schemeOrganiser.routes.SchemeOrganiserBasedInUkController.questionPage())
-  }) recover {
+      }) recover {
       case e: Exception =>
         logger.error(s"[SchemeOrganiserController][showSchemeOrganiserSummaryPage] Get data from cache failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
         getGlobalErrorPage

@@ -51,6 +51,7 @@ class SchemeOrganiserAddressUkController @Inject()(val mcc: MessagesControllerCo
   implicit val ec: ExecutionContext = mcc.executionContext
 
   val cacheKey: String = ersUtil.SCHEME_ORGANISER_ADDRESS_CACHE
+
   implicit val format: Format[CompanyAddress] = CompanyAddress.format
 
   def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier, request: Request[_]): Future[Result] = {
@@ -58,7 +59,7 @@ class SchemeOrganiserAddressUkController @Inject()(val mcc: MessagesControllerCo
       Future.successful(Redirect(controllers.schemeOrganiser.routes.SchemeOrganiserController.schemeOrganiserSummaryPage()))
     } else {
       companyDetailsService.updateSchemeOrganiserCache
-        Future.successful(Redirect(controllers.schemeOrganiser.routes.SchemeOrganiserController.schemeOrganiserSummaryPage()))
+      Future.successful(Redirect(controllers.schemeOrganiser.routes.SchemeOrganiserController.schemeOrganiserSummaryPage()))
       }
     }
 

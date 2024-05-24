@@ -25,9 +25,9 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class CompanyDetailsService @Inject()(
-                                ersUtil: ERSUtil,
-                                sessionService: FrontendSessionService
-                              )(implicit ec: ExecutionContext) extends Logging {
+                                       ersUtil: ERSUtil,
+                                       sessionService: FrontendSessionService
+                                     )(implicit ec: ExecutionContext) extends Logging {
 
   def updateSubsidiaryCompanyCache(index: Int)(implicit request: Request[_]): Unit = {
     try {
@@ -48,19 +48,18 @@ class CompanyDetailsService @Inject()(
       sessionService.fetch[Company](ersUtil.SCHEME_ORGANISER_NAME_CACHE).map(name =>
         sessionService.fetch[CompanyAddress](ersUtil.SCHEME_ORGANISER_ADDRESS_CACHE).map(address =>
           sessionService.cache[CompanyDetails](ersUtil.SCHEME_ORGANISER_CACHE, CompanyDetails(name, address))))
-  } catch {
-    case ex: Throwable =>
-      logger.error("[CompanyDetailsService][updateSchemeOrganiserCache] Error updating scheme organiser cache", ex)
+    } catch {
+      case ex: Throwable =>
+        logger.error("[CompanyDetailsService][updateSchemeOrganiserCache] Error updating scheme organiser cache", ex)
+    }
   }
+
+  def replaceCompany(companies: List[CompanyDetails], index: Int, formData: CompanyDetails): List[CompanyDetails] =
+    (if (index == 10000) {
+      companies :+ formData
+    } else {
+      companies.zipWithIndex.map {
+        case (a, b) => if (b == index) formData else a
+      }
+    }).distinct
 }
-
-
-    def replaceCompany(companies: List[CompanyDetails], index: Int, formData: CompanyDetails): List[CompanyDetails] =
-      (if (index == 10000) {
-        companies :+ formData
-      } else {
-        companies.zipWithIndex.map {
-          case (a, b) => if (b == index) formData else a
-        }
-      }).distinct
-  }

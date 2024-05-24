@@ -58,7 +58,7 @@ class SubsidiaryAddressOverseasController  @Inject()(val mcc: MessagesController
       Future.successful(Redirect(controllers.subsidiaries.routes.GroupSchemeController.groupPlanSummaryPage()))
     } else {
       companyDetailsService.updateSubsidiaryCompanyCache(index)
-        Future.successful(Redirect(controllers.subsidiaries.routes.GroupSchemeController.groupPlanSummaryPage()))
+      Future.successful(Redirect(controllers.subsidiaries.routes.GroupSchemeController.groupPlanSummaryPage()))
       }
     }
 

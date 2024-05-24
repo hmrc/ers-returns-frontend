@@ -37,16 +37,16 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
-																			val authConnector: DefaultAuthConnector,
-																			implicit val countryCodes: CountryCodes,
-																			implicit val ersUtil: ERSUtil,
+                                      val authConnector: DefaultAuthConnector,
+                                      implicit val countryCodes: CountryCodes,
+                                      implicit val ersUtil: ERSUtil,
                                       implicit val sessionService: FrontendSessionService,
-																			implicit val appConfig: ApplicationConfig,
+                                      implicit val appConfig: ApplicationConfig,
                                       globalErrorView: views.html.global_error,
                                       groupView: views.html.group,
                                       groupPlanSummaryView: views.html.group_plan_summary,
                                       authAction: AuthAction
-																		 ) extends FrontendController(mcc) with I18nSupport with WithUnsafeDefaultFormBinding with Logging with Constants with CacheHelper {
+                                     ) extends FrontendController(mcc) with I18nSupport with WithUnsafeDefaultFormBinding with Logging with Constants with CacheHelper {
 
   implicit val ec: ExecutionContext = mcc.executionContext
 
@@ -60,7 +60,7 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
       all <- sessionService.fetchAll()
       companies = getEntry[CompanyDetailsList](all, DataKey(ersUtil.SUBSIDIARY_COMPANIES_CACHE)).getOrElse(CompanyDetailsList(Nil))
       companyDetailsList = CompanyDetailsList(filterDeletedCompany(companies, id))
-      _                  <- sessionService.cache(ersUtil.SUBSIDIARY_COMPANIES_CACHE, companyDetailsList)
+      _ <- sessionService.cache(ersUtil.SUBSIDIARY_COMPANIES_CACHE, companyDetailsList)
     } yield {
       if (companyDetailsList.companies.isEmpty) {
         Redirect(controllers.subsidiaries.routes.GroupSchemeController.groupSchemePage())
@@ -76,15 +76,14 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
     companyList.companies.zipWithIndex.filterNot(_._2 == id).map(_._1)
 
   def groupSchemePage(): Action[AnyContent] = authAction.async {
-      implicit request =>
-        sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT).flatMap { requestObject =>
-          showGroupSchemePage(requestObject)(request, hc)
-        }
+    implicit request =>
+      sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT).flatMap { requestObject =>
+        showGroupSchemePage(requestObject)(request, hc)
+      }
   }
 
-  def showGroupSchemePage(
-    requestObject: RequestObject
-  )(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] =
+  def showGroupSchemePage(requestObject: RequestObject)
+                         (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] =
     sessionService.fetch[GroupSchemeInfo](ersUtil.GROUP_SCHEME_CACHE_CONTROLLER).map {
       groupSchemeInfo =>
         Ok(
@@ -105,17 +104,16 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
     }
   }
 
-  def showGroupSchemeSelected(requestObject: RequestObject, scheme: String)(implicit
-    request: RequestWithOptionalAuthContext[AnyContent]
-  ): Future[Result] =
+  def showGroupSchemeSelected(requestObject: RequestObject, scheme: String)
+                             (implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
     RsFormMappings
       .groupForm()
       .bindFromRequest()
       .fold(
         errors => {
-          val correctOrder                             = errors.errors.map(_.key).distinct
-          val incorrectOrderGrouped                    = errors.errors.groupBy(_.key).map(_._2.head).toSeq
-          val correctOrderGrouped                      = correctOrder.flatMap(x => incorrectOrderGrouped.find(_.key == x))
+          val correctOrder = errors.errors.map(_.key).distinct
+          val incorrectOrderGrouped = errors.errors.groupBy(_.key).map(_._2.head).toSeq
+          val correctOrderGrouped = correctOrder.flatMap(x => incorrectOrderGrouped.find(_.key == x))
           val firstErrors: Form[models.RS_groupScheme] =
             new Form[RS_groupScheme](errors.mapping, errors.data, correctOrderGrouped, errors.value)
           Future.successful(Ok(groupView(requestObject, Some(""), firstErrors)))
@@ -138,7 +136,7 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
               case (ersUtil.SCHEME_EMI | ersUtil.SCHEME_OTHER, _) =>
                 Redirect(routes.SummaryDeclarationController.summaryDeclarationPage())
 
-            case (ersUtil.SCHEME_SIP, _) => Redirect(controllers.trustees.routes.TrusteeSummaryController.trusteeSummaryPage())
+              case (ersUtil.SCHEME_SIP, _) => Redirect(controllers.trustees.routes.TrusteeSummaryController.trusteeSummaryPage())
 
               case (_, _) => getGlobalErrorPage
             }
@@ -150,12 +148,9 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
     showGroupPlanSummaryPage()(request, hc)
   }
 
-  def showGroupPlanSummaryPage()(implicit
-    request: RequestWithOptionalAuthContext[AnyContent],
-    hc: HeaderCarrier
-  ): Future[Result] =
+  def showGroupPlanSummaryPage()(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] =
     (for {
-      requestObject      <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
+      requestObject <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
       companyDetailsList <- sessionService.fetchCompaniesOptionally()
     } yield {
       if (companyDetailsList.companies.isEmpty) {
@@ -166,7 +161,8 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
 
     }) recover { case e: Exception =>
       logger.error(
-        s"[GroupSchemeController][showGroupPlanSummaryPage] Fetch group scheme companies before call to group plan summary page failed with exception ${e.getMessage}, " +
+        s"[GroupSchemeController][showGroupPlanSummaryPage] Fetch group scheme companies before call" +
+          s" to group plan summary page failed with exception ${e.getMessage}, " +
           s"timestamp: ${System.currentTimeMillis()}."
       )
       getGlobalErrorPage
@@ -187,21 +183,21 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
         }
       },
       addCompany => {
-      if (addCompany.addCompany) {
-        Future.successful(Redirect(controllers.subsidiaries.routes.SubsidiaryBasedInUkController.questionPage()))
-      } else {
-        scheme match {
-          case ersUtil.SCHEME_CSOP | ersUtil.SCHEME_SAYE =>
-            Future(Redirect(routes.AltAmendsController.altActivityPage()))
+        if (addCompany.addCompany) {
+          Future.successful(Redirect(controllers.subsidiaries.routes.SubsidiaryBasedInUkController.questionPage()))
+        } else {
+          scheme match {
+            case ersUtil.SCHEME_CSOP | ersUtil.SCHEME_SAYE =>
+              Future(Redirect(routes.AltAmendsController.altActivityPage()))
 
-          case ersUtil.SCHEME_EMI | ersUtil.SCHEME_OTHER =>
-            Future(Redirect(routes.SummaryDeclarationController.summaryDeclarationPage()))
+            case ersUtil.SCHEME_EMI | ersUtil.SCHEME_OTHER =>
+              Future(Redirect(routes.SummaryDeclarationController.summaryDeclarationPage()))
 
-          case ersUtil.SCHEME_SIP =>
-            Future(Redirect(trustees.routes.TrusteeSummaryController.trusteeSummaryPage()))
+            case ersUtil.SCHEME_SIP =>
+              Future(Redirect(trustees.routes.TrusteeSummaryController.trusteeSummaryPage()))
+          }
         }
       }
-    }
     )
   }
 

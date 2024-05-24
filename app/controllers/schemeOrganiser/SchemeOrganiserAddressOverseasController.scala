@@ -51,6 +51,7 @@ class SchemeOrganiserAddressOverseasController @Inject()(val mcc: MessagesContro
   implicit val ec: ExecutionContext = mcc.executionContext
 
   val cacheKey: String = ersUtil.SCHEME_ORGANISER_ADDRESS_CACHE
+
   implicit val format: Format[CompanyAddress] = CompanyAddress.format
 
   def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier, request: Request[_]): Future[Result] = {

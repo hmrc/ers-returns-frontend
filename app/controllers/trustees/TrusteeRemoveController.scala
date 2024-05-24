@@ -49,7 +49,7 @@ class TrusteeRemoveController @Inject()(val mcc: MessagesControllerComponents,
       requestObject <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
       trusteeDetailsList <- sessionService.fetchTrusteesOptionally()
     } yield {
-        Ok(trusteeRemoveView(form, requestObject, trusteeDetailsList.trustees(index).name, index))
+      Ok(trusteeRemoveView(form, requestObject, trusteeDetailsList.trustees(index).name, index))
     }).recover {
       case _: IndexOutOfBoundsException =>
         logger.warn(s"[TrusteeRemoveController][onPageLoad] Requested index $index not found")

@@ -74,7 +74,6 @@ class FrontendSessionService @Inject()(val sessionCache: FrontendSessionsReposit
   }
 
 
-
   def fetchPartFromTrusteeDetailsList[A](index: Int)(implicit request: Request[_], formats: json.Format[A]): Future[Option[A]] = {
     sessionCache.getFromSession[JsValue](DataKey(TRUSTEES_CACHE)).map { optionalJson =>
       optionalJson.flatMap { json =>
@@ -192,8 +191,6 @@ class FrontendSessionService @Inject()(val sessionCache: FrontendSessionsReposit
     }
   }
 
-
-
   def fetchPartFromCompanyDetails[A]()(implicit request: Request[_], formats: json.Format[A]): Future[Option[A]] = {
     sessionCache.getFromSession[JsValue](DataKey(SCHEME_ORGANISER_CACHE)).map {
       companyDetailsOpt =>
@@ -212,7 +209,7 @@ class FrontendSessionService @Inject()(val sessionCache: FrontendSessionsReposit
     }
   }
 
-  def fetchSchemeOrganiserOptionally()(implicit request: Request[_], formats: json.Format[CompanyDetails]): Future[Option[CompanyDetails]]= {
+  def fetchSchemeOrganiserOptionally()(implicit request: Request[_], formats: json.Format[CompanyDetails]): Future[Option[CompanyDetails]] = {
     fetch[CompanyDetails](SCHEME_ORGANISER_CACHE).map(Some(_)).recover {
       case _ => None
     }
