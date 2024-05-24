@@ -326,12 +326,6 @@ ers_manual_address_uk.title = Beth yw cyfeiriad y cwmni?
 ers_manual_address_uk.building = Adeilad a stryd
 ers_manual_address_uk.town = Tref neu Ddinas (dewisol)
 ers_manual_address_uk.county = Sir (dewisol)
-ers_company_address.line1 =   Cyfeiriad – llinell 1
-ers_company_address.line2 =   Cyfeiriad – llinell 2 (dewisol)
-ers_company_address.line3 =   Cyfeiriad – llinell 3 (dewisol)
-ers_company_address.line4 =   Cyfeiriad – llinell 4 (dewisol)
-ers_company_address.line5 =   Cyfeiriad – llinell 5 (dewisol)
-ers_company_address.country = Gwlad (dewisol)
 
 ers_company_summary.page_title = Cwmnïau yn y cynllun grŵp hwn
 ers_company_summary.company_name = Enw’r cwmni
@@ -346,6 +340,7 @@ ers_company_address.line2 = Cyfeiriad – llinell 2 (dewisol)
 ers_company_address.line3 = Cyfeiriad – llinell 3 (dewisol)
 ers_company_address.line4 = Cyfeiriad – llinell 4 (dewisol)
 ers_company_address.line5 = Cyfeiriad – llinell 5 (dewisol)
+ers_company_address.country = Gwlad (dewisol)
 
 ers_confirmation.page_title = Cadarnhad
 ers_confirmation.submitted = Mae eich Datganiad Blynyddol ar gyfer {0} wedi’i gyflwyno
