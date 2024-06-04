@@ -40,7 +40,7 @@ class ERSUtil @Inject() (val appConfig: ApplicationConfig)
 					companyDetails.addressLine2,
 					companyDetails.addressLine3,
 					companyDetails.addressLine4,
-					companyDetails.postcode,
+					companyDetails.addressLine5,
 					countryCodes.getCountry(companyDetails.country.getOrElse(""))
 				)
 				concatAddress(optionalAddressLines, companyDetails.addressLine1)
@@ -92,13 +92,8 @@ class ERSUtil @Inject() (val appConfig: ApplicationConfig)
     if (n == trusteeDetailsList.length) { trusteeNamesList }
     else { buildTrusteeNameList(trusteeDetailsList, n + 1, trusteeNamesList + trusteeDetailsList(n).name + "<br>") }
 
-  def companyLocation(company: CompanyDetails): String =
-    company.country
-      .collect {
-        case c if c != DEFAULT_COUNTRY => OVERSEAS
-        case c                         => c
-      }
-      .getOrElse(DEFAULT)
+	def companyLocation(company: CompanyDetails): String = if (company.basedInUk) "ers_trustee_based.uk" else "ers_trustee_based.overseas"
+
 
   def trusteeLocationMessage(trustee: TrusteeDetails): String = if (trustee.basedInUk) "ers_trustee_based.uk" else "ers_trustee_based.overseas"
 

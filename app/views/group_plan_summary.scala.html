@@ -16,6 +16,9 @@
 
 @import _root_.utils.ERSUtil
 @import config.ApplicationConfig
+@import _root_.utils.CountryCodes
+@import views.html.templates.reference
+@import views.html.helper.CSPNonce
 
 @import views.html.templates.reference
 
@@ -23,12 +26,14 @@
 		govuk_wrapper: govuk_wrapper,
 		govukBackLink: GovukBackLink,
 		govukSummaryList: GovukSummaryList,
+		govukErrorSummary: GovukErrorSummary,
 		govukButton: GovukButton,
+		govukRadios: GovukRadios,
 		hmrcPageHeading: HmrcPageHeading,
 		formWithCSRF: FormWithCSRF
 )
 
-@(requestObject: RequestObject, groupSchemeType: String, companies: CompanyDetailsList)(implicit request: Request[_], messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
+@(requestObject: RequestObject, groupSchemeType: String, companies: CompanyDetailsList, formHasError: Boolean = false)(implicit request: Request[_], messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 
 @schemeId = @{requestObject.getSchemeId}
 
@@ -37,15 +42,25 @@
 	@reference(requestObject.getPageTitle)
 
 	@govukBackLink(BackLink(
-		content = Text(messages("ers.back")),
-		href = ersUtil.getPageBackLink(schemeId,ersUtil.PAGE_GROUP_SUMMARY,groupSchemeType),
+		attributes = Map("id" -> "back-link"), classes="js-enabled", content = HtmlContent(messages("ers.back"))
 	))
+
+	@if(formHasError) {
+		@govukErrorSummary(ErrorSummary(
+			title = Text(messages("validation.summary.heading")),
+			errorList = Seq(ErrorLink(
+			href = Some("#addCompany"),
+			content = Text(messages("ers_company_summary.add_company.err"))
+			))
+		))
+	}
 
 	@hmrcPageHeading(PageHeading(
 		text = ersUtil.getPageElement(schemeId, ersUtil.PAGE_GROUP_SUMMARY, "title")
 	))
 
-	@formWithCSRF(action = routes.GroupSchemeController.groupPlanSummaryContinue(schemeId)) {
+	@formWithCSRF(action = controllers.subsidiaries.routes.GroupSchemeController.groupPlanSummaryContinue(schemeId)) {
+
 		@for((company, index) <- companies.companies.zipWithIndex) {
 			@govukSummaryList(SummaryList(
 				rows = {
@@ -62,7 +77,11 @@
 							classes = "govuk-!-width-one-quarter",
 							items = Seq(
 								ActionItem(
-									href = routes.GroupSchemeController.editCompany(index).url,
+									href = if(company.country.getOrElse("") == "UK"){
+										controllers.subsidiaries.routes.SubsidiaryDetailsUkController.editCompany(index).url
+									} else {
+										controllers.subsidiaries.routes.SubsidiaryDetailsOverseasController.editCompany(index).url
+									},
 									content = Text(messages("ers.change_this")),
 									visuallyHiddenText = Some(company.companyName)
 								)
@@ -76,13 +95,13 @@
 						),
 						value = Value(
 							classes = "govuk-!-width-one-half",
-							content = Text(ersUtil.companyLocation(company))
+							content = Text(messages(ersUtil.companyLocation(company)))
 						),
 						actions = Some(Actions(
 							classes = "govuk-!-width-one- quarter",
 							items = Seq(
 								ActionItem(
-									href = routes.GroupSchemeController.editCompany(index).url,
+									href = controllers.subsidiaries.routes.SubsidiaryBasedInUkController.editCompany(index).url,
 									content = Text(messages("ers.change_this")),
 									visuallyHiddenText = Some(company.companyName)
 								)
@@ -102,7 +121,11 @@
 							classes = "govuk-!-width-one-quarter",
 							items = Seq(
 								ActionItem(
-									href = routes.GroupSchemeController.editCompany(index).url,
+									href = if(company.country.getOrElse("") == "UK"){
+											controllers.subsidiaries.routes.SubsidiaryAddressUkController.editCompany(index).url
+										} else {
+											controllers.subsidiaries.routes.SubsidiaryAddressOverseasController.editCompany(index).url
+										},
 									content = Text(messages("ers.change_this")),
 									visuallyHiddenText = Some(company.companyName)
 								)
@@ -122,7 +145,7 @@
 							classes = "govuk-!-width-one-quarter",
 							items = Seq(
 								ActionItem(
-									href = routes.GroupSchemeController.editCompany(index).url,
+									href = controllers.subsidiaries.routes.SubsidiaryDetailsUkController.editCompany(index).url,
 									content = Text(messages("ers.change_this")),
 									visuallyHiddenText = Some(company.companyName)
 								)
@@ -142,7 +165,7 @@
 							classes = "govuk-!-width-one-quarter",
 							items = Seq(
 								ActionItem(
-									href = routes.GroupSchemeController.editCompany(index).url,
+									href = controllers.subsidiaries.routes.SubsidiaryDetailsUkController.editCompany(index).url,
 									content = Text(messages("ers.change_this")),
 									visuallyHiddenText = Some(company.companyName)
 								)
@@ -156,21 +179,40 @@
 				}
 			))
 
-		<p class="govuk-body govuk-!-margin-bottom-8 govuk-link">
-			<input class="govuk-link link_button" type="submit" formaction="@routes.GroupSchemeController.deleteCompany(index)" value='@{messages("ers.delete") + " " + company.companyName}'>
-		</p>
+			<p class="govuk-body govuk-!-margin-bottom-8 govuk-link">
+				<input class="govuk-link link_button" type="submit" formaction="@controllers.subsidiaries.routes.GroupSchemeController.deleteCompany(index)" value='@{messages("ers.delete") + " " + company.companyName}'>
+			</p>
 		}
 
-		<a class="govuk-link govuk-inset-text govuk-!-display-inline-block govuk-!-margin-top-0 govuk-!-width-full"
-		   href=@routes.GroupSchemeController.manualCompanyDetailsPage()>
-			@ersUtil.addCompanyMessage(messages, requestObject.schemeType)
-		</a>
+		@govukRadios(Radios(
+			name = "addCompany",
+			attributes = Map("id" -> "addCompany"),
+			errorMessage = if(formHasError) Some(ErrorMessage(content = Text(messages("ers_company_summary.add_company.err")))) else None,
+			fieldset = Some(Fieldset(
+				legend = Some(Legend(
+					content = Text(messages("ers_company_summary.add_company")),
+					classes = "govuk-fieldset__legend govuk-fieldset__legend govuk-fieldset__legend--m"
+				)),
+			)),
+			items = Seq(
+				RadioItem(
+					id = Some("yes"),
+					value = Some("0"),
+					content = Text(messages("ers.yes"))
+				),
+				RadioItem(
+					id = Some("no"),
+					value = Some("1"),
+					content = Text(messages("ers.no"))
+				)
+			),
+			classes = "govuk-radios--inline"
+		))
 
 		@govukButton(Button(
 			inputType = Some("submit"),
 			content = Text(messages("ers.continue")),
 			attributes = Map("id" -> "continue"),
-			disabled = companies.companies.isEmpty
 		))
 	}
 }

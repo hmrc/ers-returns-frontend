@@ -90,9 +90,9 @@ class CsvFileUploadController @Inject() (val mcc: MessagesControllerComponents,
       _ <- sessionService.cache(ersUtil.CSV_FILES_UPLOAD, updatedCacheFileList)
     } yield
       if (updatedCacheFileList.noOfFilesToUpload == updatedCacheFileList.noOfUploads) {
-        Redirect(routes.CsvFileUploadController.validationResults())
+        Redirect(controllers.routes.CsvFileUploadController.validationResults())
       } else {
-        Redirect(routes.CsvFileUploadController.uploadFilePage())
+        Redirect(controllers.routes.CsvFileUploadController.uploadFilePage())
       }) recover { case NonFatal(e) =>
       logger.error(s"[CsvFileUploadController][success] failed to fetch callback data with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.", e)
       getGlobalErrorPage
@@ -204,16 +204,17 @@ class CsvFileUploadController @Inject() (val mcc: MessagesControllerComponents,
                  (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] =
     ersConnector.validateCsvFileData(csvCallbackData, schemeInfo).flatMap { res =>
       res.status match {
-        case OK =>
-          logger.info(s"[CsvFileUploadController][validateCsv] Validation is successful for schemeRef: ${schemeInfo.schemeRef}, " +
-              s"timestamp: ${System.currentTimeMillis()}.")
-          sessionService.cache(ersUtil.VALIDATED_SHEETS, res.body).map { _ =>
-              Redirect(routes.SchemeOrganiserController.schemeOrganiserPage())
-          }
+        case OK       =>
+          logger.info(
+            s"[CsvFileUploadController][validateCsv] Validation is successful for schemeRef: ${schemeInfo.schemeRef}, " +
+              s"timestamp: ${System.currentTimeMillis()}."
+          )
+          sessionService.cache(ersUtil.VALIDATED_SHEETS, res.body)
+          Future.successful(Redirect(controllers.schemeOrganiser.routes.SchemeOrganiserBasedInUkController.questionPage()))
         case ACCEPTED =>
           logger.warn(s"[CsvFileUploadController][validateCsv] Validation is not successful for schemeRef: ${schemeInfo.schemeRef}, " +
               s"timestamp: ${System.currentTimeMillis()}.")
-          Future.successful(Redirect(routes.CsvFileUploadController.validationFailure()))
+          Future.successful(Redirect(controllers.routes.CsvFileUploadController.validationFailure()))
         case _ =>
           logger.error(s"[CsvFileUploadController][validateCsv] Validate file data failed with Status ${res.status}, timestamp: ${System.currentTimeMillis()}.")
           Future.successful(getGlobalErrorPage)

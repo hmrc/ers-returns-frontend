@@ -72,7 +72,7 @@ class TrusteeSummaryController @Inject()(val mcc: MessagesControllerComponents,
       }
     }) recover {
       case e: Exception =>
-        logger.error(s"[TrusteeController][showTrusteeSummaryPage] Get data from cache failed with exception", e)
+        logger.error(s"[TrusteeSummaryController][showTrusteeSummaryPage] Get data from cache failed with exception", e)
         getGlobalErrorPage()
     }
   }

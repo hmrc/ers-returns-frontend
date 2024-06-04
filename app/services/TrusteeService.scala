@@ -26,7 +26,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class TrusteeService @Inject()(ersUtil: ERSUtil,
-                              sessionService: FrontendSessionService
+                               sessionService: FrontendSessionService
                               )(implicit ec: ExecutionContext) extends Logging {
 
   def updateTrusteeCache(index: Int)(implicit request: Request[_]): Future[Unit] = {
@@ -34,8 +34,8 @@ class TrusteeService @Inject()(ersUtil: ERSUtil,
       name <- sessionService.fetch[TrusteeName](ersUtil.TRUSTEE_NAME_CACHE)
       cachedTrustees <- sessionService.fetchTrusteesOptionally()
       trusteeDetailsList <- {
-        sessionService.fetch[TrusteeAddress](ersUtil.TRUSTEE_ADDRESS_CACHE).map( address =>
-        TrusteeDetailsList(replaceTrustee(cachedTrustees.trustees, index, TrusteeDetails(name, address))))
+        sessionService.fetch[TrusteeAddress](ersUtil.TRUSTEE_ADDRESS_CACHE).map(address =>
+          TrusteeDetailsList(replaceTrustee(cachedTrustees.trustees, index, TrusteeDetails(name, address))))
       }
       _ <- sessionService.cache[TrusteeDetailsList](ersUtil.TRUSTEES_CACHE, trusteeDetailsList)
     } yield {
@@ -43,7 +43,7 @@ class TrusteeService @Inject()(ersUtil: ERSUtil,
     }).recover {
       case ex: Throwable =>
         logger.error("[TrusteeService][updateTrusteeCache] Error updating trustee cache", ex)
-      ()
+        ()
     }
   }
 
@@ -51,7 +51,7 @@ class TrusteeService @Inject()(ersUtil: ERSUtil,
     (if (index == 10000) {
       trustees :+ formData
     } else {
-      trustees.zipWithIndex.map{
+      trustees.zipWithIndex.map {
         case (a, b) => if (b == index) formData else a
       }
     }).distinct

@@ -30,7 +30,7 @@ ers.scheme.CSOP = CSOP
 ers.scheme.EMI = EMI
 ers.scheme.SIP = SIP
 ers.scheme.SAYE = SAYE
-ers.scheme.OTHER = OTHER
+ers.scheme.Other = OTHER
 ers.scheme.title = {0} scheme
 
 #********************************************************************
@@ -324,9 +324,10 @@ ers_group_summary.saye.add_company = Add a company
 ers_group_summary.emi.add_company = Add a subsidiary company
 ers_group_summary.sip.add_company = Add a company
 ers_group_summary.other.add_company = Add a company
+ers_group_summary.not_provided = Not provided
 
 #********************************************************************
-# Company details
+# Company messages
 #********************************************************************
 
 ers_manual_company_details.csop.title = Add company details
@@ -339,6 +340,18 @@ ers_manual_company_details.sip.title = Add company details
 ers_manual_company_details.sip.question = Where is your company registered?
 ers_manual_company_details.other.title = Add details for the included company
 ers_manual_company_details.other.question = Where is the company registered?
+ers_manual_is_the_company_in_uk.title = Where is the company registered?
+ers_manual_company_details_uk.title = Add company details
+ers_manual_company_details_overseas.title = What is the company name?
+ers_manual_address_uk.title = What is the company’s address?
+ers_manual_company_details.itciu.title = Where is the company registered?
+
+ers_company_summary.company_name = Company name
+ers_company_summary.company_location = Where the company is registered
+ers_company_summary.page_title = Companies in this group plan
+ers_company_summary.add_company = Do you need to add another company?
+ers_company_summary.add_company.err = Select yes if you need to add another company
+
 
 #********************************************************************
 # Address messages
@@ -383,11 +396,25 @@ ers_manual_company_details.err.address_line3 = Check the third line of the addre
 ers_manual_company_details.err.invalidChars.address_line3 = Check the third line of the address (it contains invalid characters)
 ers_manual_company_details.err.address_line4 = Check the fourth line of the address (it must be less than 19 characters)
 ers_manual_company_details.err.invalidChars.address_line4 = Check the fourth line of the address (it contains invalid characters)
+ers_manual_company_details.err.address_line5 = Check the fifth line of the address (it must be less than 19 characters)
+ers_manual_company_details.err.invalidChars.address_line5 = Check the fifth line of the address (it contains invalid characters)
 ers_manual_company_details.err.postcode = Check the postcode (it must be valid and less than 9 characters)
 ers_manual_company_details.err.company_reg = Enter a valid Company Registration Number
 ers_manual_company_details.err.corporation_ref = Enter a valid Corporation Tax reference
 
 ers_manual_company_details.continue = Continue
+ers_manual_address_uk.building = Building and street (optional)
+ers_manual_address_uk.town = Town or city (optional)
+ers_manual_address_uk.county = County (optional)
+
+ers_company_address.line1 = Address line 1
+ers_company_address.line2 = Address line 2 (optional)
+ers_company_address.line3 = Address line 3 (optional)
+ers_company_address.line4 = Address line 4 (optional)
+ers_company_address.line5 = Address line 5 (optional)
+ers_company_address.country = Country (optional)
+
+ers_manual_address_overseas.title = What is the company’s address?
 
 #********************************************************************
 # Declaration messages

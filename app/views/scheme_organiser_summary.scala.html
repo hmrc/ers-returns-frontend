@@ -1,0 +1,193 @@
+@*
+ * Copyright 2023 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import _root_.utils.CountryCodes
+@import _root_.utils.ERSUtil
+@import config.ApplicationConfig
+@import views.html.templates.reference
+@import views.html.helper.CSPNonce
+
+@this(
+        govuk_wrapper: govuk_wrapper,
+        formWithCSRF: FormWithCSRF,
+        govukBackLink: GovukBackLink,
+        govukSummaryList: GovukSummaryList,
+        govukButton: GovukButton,
+        hmrcPageHeading: HmrcPageHeading
+)
+
+@(requestObject: RequestObject, schemeOrganiser: CompanyDetails)(implicit request: Request[AnyRef], flash: Flash,
+        messages: Messages, countryCodes: CountryCodes, ersUtil: ERSUtil, appConfig: ApplicationConfig)
+
+@schemeId = @{
+    requestObject.getSchemeId
+}
+
+@summaryBuilder(company: CompanyDetails) = @{
+    val companyNameSummary = Seq(
+        SummaryListRow(
+            key = Key(
+                classes = "govuk-!-width-one-quarter",
+                content = Text(messages("ers_company_summary.company_name"))
+            ),
+            value = Value(
+                classes = "govuk-!-width-one-half",
+                content = Text(company.companyName)
+            ),
+            actions = Some(Actions(
+                classes = "govuk-!-width-one-quarter",
+                items = Seq(
+                    ActionItem(
+                        href = if(company.country.getOrElse("") == "UK") {
+                            controllers.schemeOrganiser.routes.SchemeOrganiserDetailsUkController.editCompany(0).url
+                        } else {
+                            controllers.schemeOrganiser.routes.SchemeOrganiserDetailsOverseasController.editCompany(0).url
+                        },
+                        content = Text(messages("ers.change_this")),
+                        visuallyHiddenText = Some(messages("ers.change_this"))
+                    )
+                )
+            ))
+        )
+    )
+
+    val companyLocationSummary = Seq(
+        SummaryListRow(
+            key = Key(
+                classes = "govuk-!-width-one-quarter",
+                content = Text(messages("ers_company_summary.company_location"))
+            ),
+            value = Value(
+                classes = "govuk-!-width-one-half",
+                content = Text(messages(ersUtil.companyLocation(company)))
+            ),
+            actions = Some(Actions(
+                classes = "govuk-!-width-one-quarter",
+                items = Seq(
+                    ActionItem(
+                        href = controllers.schemeOrganiser.routes.SchemeOrganiserBasedInUkController.editCompany(0).url,
+                        content = Text(messages("ers.change_this")),
+                        visuallyHiddenText = Some(messages("ers.change_this"))
+                    )
+                )
+            ))
+        )
+    )
+    val addressSummary = Seq(
+        SummaryListRow(
+            key = Key(
+                content = Text(messages("ers_group_summary.address"))
+            ),
+            value = Value(
+                content = Text(ersUtil.buildAddressSummary(company))
+            ),
+            actions = Some(Actions(
+                classes = "govuk-!-width-one-quarter",
+                items = Seq(
+                    ActionItem(
+                        href = if(company.country.getOrElse("") == "UK") {
+                            controllers.schemeOrganiser.routes.SchemeOrganiserAddressUkController.editCompany(0).url
+                        } else {
+                            controllers.schemeOrganiser.routes.SchemeOrganiserAddressOverseasController.editCompany(0).url
+                        },
+                        content = Text(messages("ers.change_this")),
+                        visuallyHiddenText = Some(messages("ers.change_this"))
+                    )
+                )
+            ))
+        )
+    )
+    val corporationRegSummary = Seq(
+        SummaryListRow(
+            key = Key(
+                content = Text(messages("ers_group_summary.crn"))
+            ),
+            value = Value(
+                content = Text(company.companyReg.getOrElse(messages("ers_group_summary.not_provided")))
+            ),
+            actions = Some(Actions(
+                classes = "govuk-!-width-one-quarter",
+                items = Seq(
+                    ActionItem(
+                        href = controllers.schemeOrganiser.routes.SchemeOrganiserDetailsUkController.editCompany(0).url,
+                        content = Text(messages("ers.change_this")),
+                        visuallyHiddenText = Some(messages("ers.change_this"))
+                    )
+                )
+            )
+            )
+        )
+    )
+
+    val corporationRefSummary = {
+        Seq(
+            SummaryListRow(
+                key = Key(
+                    content = Text(messages("ers_group_summary.ctr"))
+                ),
+                value = Value(
+                    content = Text(company.corporationRef.getOrElse(messages("ers_group_summary.not_provided")))
+                ),
+                actions = Some(Actions(
+                    classes = "govuk-!-width-one-quarter",
+                    items = Seq(
+                        ActionItem(
+                            href = controllers.schemeOrganiser.routes.SchemeOrganiserDetailsUkController.editCompany(0).url,
+                            content = Text(messages("ers.change_this")),
+                            visuallyHiddenText = Some(messages("ers.change_this"))
+                        )
+                    )
+                )
+                )
+            )
+        )
+    }
+
+    val stuff = companyNameSummary ++ companyLocationSummary ++ addressSummary
+    if(company.country.getOrElse("") == "UK") {
+        val x = company.corporationRef.fold(stuff)(_ => stuff ++ corporationRefSummary)
+        company.companyReg.fold(x)(_ => x ++ corporationRegSummary)
+    } else {
+        companyNameSummary ++ companyLocationSummary ++ addressSummary
+    }
+
+}
+
+@govuk_wrapper(title = messages("ers_company_summary.page_title"), None) {
+
+    @reference(requestObject.getPageTitle)
+
+    @govukBackLink(BackLink(
+        attributes = Map("id" -> "back-link"), classes = "js-enabled", content = HtmlContent(messages("ers.back"))
+    ))
+
+    @hmrcPageHeading(PageHeading(
+        text = messages(ersUtil.getPageElement(schemeId, ersUtil.PAGE_SUMMARY_DECLARATION, "organiser"))
+    ))
+
+    @formWithCSRF(action = controllers.schemeOrganiser.routes.SchemeOrganiserController.companySummaryContinue()) {
+
+        @govukSummaryList(SummaryList(
+            rows = summaryBuilder(schemeOrganiser)
+        ))
+
+        @govukButton(Button(
+            inputType = Some("submit"),
+            content = Text(messages("ers.continue")),
+            attributes = Map("id" -> "continue"),
+        ))
+    }
+}

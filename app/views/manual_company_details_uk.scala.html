@@ -1,0 +1,123 @@
+@*
+ * Copyright 2023 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import _root_.utils.ERSUtil
+@import config.ApplicationConfig
+@import _root_.utils.CountryCodes
+@import views.html.includes.countries
+@import views.html.templates.reference
+@import views.html.helper.CSPNonce
+
+@import uk.gov.hmrc.govukfrontend.views.html.components.implicits._
+
+@this(
+		govuk_wrapper: govuk_wrapper,
+		countriesSelect: countries,
+		formWithCSRF: FormWithCSRF,
+		govukBackLink: GovukBackLink,
+		govukErrorSummary: GovukErrorSummary,
+		govukInput: GovukInput,
+		govukButton: GovukButton,
+		govukRadios: GovukRadios,
+		hmrcPageHeading: HmrcPageHeading
+)
+
+@(requestObject: RequestObject, index: Int, companyDetails: Form[models.Company], edit: Boolean, schemeOrganiser: Boolean)(implicit request: Request[AnyRef], flash: Flash, messages: Messages, ersUtil: ERSUtil, countryCodes: CountryCodes, appConfig: ApplicationConfig)
+
+@schemeId = @{requestObject.getSchemeId}
+
+@formAction = @{(edit, schemeOrganiser) match {
+	case (true, false) => controllers.subsidiaries.routes.SubsidiaryDetailsUkController.editQuestionSubmit(index)
+	case (false, false) => controllers.subsidiaries.routes.SubsidiaryDetailsUkController.questionSubmit(index)
+
+	case (true, true) => controllers.schemeOrganiser.routes.SchemeOrganiserDetailsUkController.editQuestionSubmit(index)
+	case (false, true) => controllers.schemeOrganiser.routes.SchemeOrganiserDetailsUkController.questionSubmit(index)
+}}
+
+@scripts = {
+	<script type="text/javascript" src='@controllers.routes.Assets.versioned("javascripts/uk-or-overseas-form-reveal.js")' @{CSPNonce.attr}></script>
+}
+
+@govuk_wrapper(title = messages("ers_manual_company_details_uk.title"), Some(scripts)) {
+
+	@reference(requestObject.getPageTitle)
+
+	@govukBackLink(BackLink(
+		attributes = Map("id" -> "back-link"), classes="js-enabled", content = HtmlContent(messages("ers.back"))
+	))
+
+	@if(companyDetails.hasErrors) {
+		@govukErrorSummary(ErrorSummary(
+			title = Text(messages("validation.summary.heading")),
+			errorList = companyDetails.errors.asTextErrorLinks
+		))
+	}
+
+	@hmrcPageHeading(PageHeading(
+		text = ersUtil.getPageElement(schemeId, if(schemeOrganiser){ersUtil.PAGE_SCHEME_ORGANISER} else {ersUtil.PAGE_MANUAL_COMPANY_DETAILS}, "title")
+	))
+
+	@formWithCSRF(action = formAction) {
+
+		@govukInput(Input(
+			classes = "govuk-!-width-one-half",
+			id = "companyName",
+			name = "companyName",
+			value = companyDetails(companyDetailsFields.companyName).value,
+			errorMessage = companyDetails.error(companyDetailsFields.companyName).map { name =>
+			  ErrorMessage(content = Text(name.messages.head))
+			},
+			label = Label(
+				content = Text(messages("ers_manual_company_details.company_name"))
+			)
+		))
+
+		@govukInput(Input(
+			classes = "govuk-!-width-one-half",
+			id = "companyReg",
+			name = "companyReg",
+			value = companyDetails(companyDetailsFields.companyReg).value,
+			errorMessage = companyDetails.error(companyDetailsFields.companyReg).map { error =>
+				ErrorMessage(content = Text(error.messages.head))
+			},
+			hint = Some(Hint(content=Text(messages("ers_manual_company_details.company_reg_number.hint")))),
+			label = Label(
+				content = Text(messages("ers_manual_company_details.company_reg_number")),
+			)
+		))
+
+		@govukInput(Input(
+			classes = "govuk-!-width-one-half",
+			id = "corporationRef",
+			name = "corporationRef",
+			value = companyDetails(companyDetailsFields.corporationRef).value,
+			errorMessage = companyDetails.error(companyDetailsFields.corporationRef).map { error =>
+				ErrorMessage(content = Text(error.messages.head))
+			},
+			hint = Some(Hint(content=Text(messages("ers_manual_company_details.corporation_tax_ref.hint")))),
+			label = Label(
+				content = Text(messages("ers_manual_company_details.corporation_tax_ref")),
+			)
+		))
+
+		@govukButton(Button(
+			inputType = Some("submit"),
+			content = Text(messages("ers_manual_company_details.continue")),
+			attributes = Map("id" -> "continue"),
+		))
+	}
+}
+

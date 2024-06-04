@@ -67,11 +67,12 @@ class FrontendSessionService @Inject()(val sessionCache: FrontendSessionsReposit
 
   def fetchTrusteesOptionally()(implicit request: Request[_], formats: json.Format[TrusteeDetailsList]): Future[TrusteeDetailsList] = {
     fetch[TrusteeDetailsList](TRUSTEES_CACHE).recoverWith {
-      case ex: Exception =>
-        logger.warn(s"[FrontendSessionService][fetchTrusteesOptionally] Failed to fetch trustees, returning empty list. Error: ${ex.getMessage}")
+      case _: Exception =>
+        logger.info(s"[FrontendSessionService][fetchTrusteesOptionally] No trustees were found")
         Future.successful(TrusteeDetailsList(List.empty[TrusteeDetails]))
     }
   }
+
 
   def fetchPartFromTrusteeDetailsList[A](index: Int)(implicit request: Request[_], formats: json.Format[A]): Future[Option[A]] = {
     sessionCache.getFromSession[JsValue](DataKey(TRUSTEES_CACHE)).map { optionalJson =>
@@ -130,7 +131,7 @@ class FrontendSessionService @Inject()(val sessionCache: FrontendSessionsReposit
       gscOption <- fetchOption[GroupSchemeInfo](GROUP_SCHEME_CACHE_CONTROLLER, schemeRef)
       companyDetailsOption <- gscOption match {
         case Some(gsc) if gsc.groupScheme.contains(OPTION_YES) =>
-          fetchOption[CompanyDetailsList](GROUP_SCHEME_COMPANIES, schemeRef)
+          fetchOption[CompanyDetailsList](SUBSIDIARY_COMPANIES_CACHE, schemeRef)
         case _ =>
           Future.successful(None)
       }
@@ -177,4 +178,40 @@ class FrontendSessionService @Inject()(val sessionCache: FrontendSessionsReposit
     } else {
       Some(SAVED_STATUS)
     }
+
+  def fetchPartFromCompanyDetailsList[A](index: Int)(implicit request: Request[_], formats: json.Format[A]): Future[Option[A]] = {
+    sessionCache.getFromSession[JsValue](DataKey(SUBSIDIARY_COMPANIES_CACHE)).map {
+      subsidiaryCompanies =>
+        subsidiaryCompanies.map(_.\(COMPANIES).as[JsArray].\(index).getOrElse(Json.obj()).as[A])
+    } recover {
+      case x: Throwable => {
+        logger.debug("[ERSUtil][fetchPartFromCompanyDetailsList] Nothing found in cache, expected if this is not an edit journey: " + x.getMessage)
+        None
+      }
+    }
+  }
+
+  def fetchPartFromCompanyDetails[A]()(implicit request: Request[_], formats: json.Format[A]): Future[Option[A]] = {
+    sessionCache.getFromSession[JsValue](DataKey(SCHEME_ORGANISER_CACHE)).map {
+      companyDetailsOpt =>
+        companyDetailsOpt.map(_.as[A])
+    } recover {
+      case x: Throwable => {
+        logger.debug("[ERSUtil][fetchPartFromCompanyDetailsList] Nothing found in cache, expected if this is not an edit journey: " + x.getMessage)
+        None
+      }
+    }
+  }
+
+  def fetchCompaniesOptionally()(implicit request: Request[_], formats: json.Format[CompanyDetailsList]): Future[CompanyDetailsList] = {
+    fetch[CompanyDetailsList](SUBSIDIARY_COMPANIES_CACHE).recover {
+      case _ => CompanyDetailsList(List.empty[CompanyDetails])
+    }
+  }
+
+  def fetchSchemeOrganiserOptionally()(implicit request: Request[_], formats: json.Format[CompanyDetails]): Future[Option[CompanyDetails]] = {
+    fetch[CompanyDetails](SCHEME_ORGANISER_CACHE).map(Some(_)).recover {
+      case _ => None
+    }
+  }
 }

@@ -37,16 +37,16 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class ConfirmationPageController @Inject() (val mcc: MessagesControllerComponents,
-                                            val ersConnector: ErsConnector,
-                                            val auditEvents: AuditEvents,
-                                            val sessionService: FrontendSessionService,
-                                            globalErrorView: views.html.global_error,
-                                            confirmationView: views.html.confirmation,
-                                            authAction: AuthAction)
-                                           (implicit val ec: ExecutionContext,
-                                            val ersUtil: ERSUtil,
-                                            val appConfig: ApplicationConfig)
+class ConfirmationPageController @Inject()(val mcc: MessagesControllerComponents,
+                                           val ersConnector: ErsConnector,
+                                           val auditEvents: AuditEvents,
+                                           val sessionService: FrontendSessionService,
+                                           globalErrorView: views.html.global_error,
+                                           confirmationView: views.html.confirmation,
+                                           authAction: AuthAction)
+                                          (implicit val ec: ExecutionContext,
+                                           val ersUtil: ERSUtil,
+                                           val appConfig: ApplicationConfig)
   extends FrontendController(mcc) with I18nSupport with Metrics with JsonParser with Logging {
 
   def confirmationPage(): Action[AnyContent] = authAction.async { implicit request =>
@@ -55,8 +55,8 @@ class ConfirmationPageController @Inject() (val mcc: MessagesControllerComponent
 
   def showConfirmationPage()(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] =
     sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT).flatMap { requestObject =>
-      val schemeRef: String                = requestObject.getSchemeReference
-      val sessionBundleRef: String         = request.session.get(BUNDLE_REF).getOrElse("")
+      val schemeRef: String = requestObject.getSchemeReference
+      val sessionBundleRef: String = request.session.get(BUNDLE_REF).getOrElse("")
       val sessionDateTimeSubmitted: String = request.session.get(DATE_TIME_SUBMITTED).getOrElse("")
       if (sessionBundleRef == "") {
         sessionService.fetch[ErsMetaData](ersUtil.ERS_METADATA).flatMap { all =>
@@ -74,7 +74,7 @@ class ConfirmationPageController @Inject() (val mcc: MessagesControllerComponent
                       case OK =>
                         logger.info(s"[ConfirmationPageController][showConfirmationPage] Check for presubmission success with status ${checkResult.status}.")
                         saveAndSubmit(alldata, all, bundle)
-                      case _  =>
+                      case _ =>
                         logger.error(s"[ConfirmationPageController][showConfirmationPage] File data not found: ${checkResult.status}")
                         Future(getGlobalErrorPage)
                     }
@@ -99,7 +99,7 @@ class ConfirmationPageController @Inject() (val mcc: MessagesControllerComponent
                    (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
 
     val jsonDateTimeFormat = DateTimeFormatter.ofPattern("d MMMM yyyy, h:mma")
-    val dateTimeSubmitted  =
+    val dateTimeSubmitted =
       jsonDateTimeFormat.format(alldata.confirmationDateTime)
 
     ersConnector.saveMetadata(alldata).flatMap { res =>
@@ -116,7 +116,7 @@ class ConfirmationPageController @Inject() (val mcc: MessagesControllerComponent
                   auditEvents.ersSubmissionAuditEvent(all, bundle)
                   submitReturnToBackend(System.currentTimeMillis() - startTime, TimeUnit.MILLISECONDS)
                   logger.info(s"[ConfirmationPageController][saveAndSubmit] Submitting return to backend success with status ${response.status}.")
-                case _  =>
+                case _ =>
                   submitReturnToBackend(System.currentTimeMillis() - startTime, TimeUnit.MILLISECONDS)
                   logger.info(s"[ConfirmationPageController][saveAndSubmit] Submitting return to backend failed with status ${response.status}.")
               }
@@ -127,14 +127,14 @@ class ConfirmationPageController @Inject() (val mcc: MessagesControllerComponent
             }
           }
 
-          logger.warn(s"[ConfirmationPageController][saveAndSubmit] Submission completed for schemeInfo: ${all.schemeInfo.toString}, bundle: $bundle ")
+          logger.info(s"[ConfirmationPageController][saveAndSubmit] Submission completed for schemeInfo: ${all.schemeInfo.toString}, bundle: $bundle ")
           val url: String = appConfig.portalDomain
 
           sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT).map { requestObject =>
             Ok(confirmationView(requestObject, dateTimeSubmitted, bundle, all.schemeInfo.taxYear, url))
               .withSession(request.session + (BUNDLE_REF -> bundle) + (DATE_TIME_SUBMITTED -> dateTimeSubmitted))
           }
-        case _  =>
+        case _ =>
           logger.info(s"[ConfirmationPageController][saveAndSubmit] Save meta data to backend returned status ${res.status}, timestamp: ${System.currentTimeMillis()}.")
           Future.successful(getGlobalErrorPage)
       }

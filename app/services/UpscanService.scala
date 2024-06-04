@@ -28,15 +28,16 @@ import javax.inject.Singleton
 import scala.concurrent.Future
 
 @Singleton
-class UpscanService @Inject() (applicationConfig: ApplicationConfig, upscanConnector: UpscanConnector) extends Logging {
+class UpscanService @Inject()(applicationConfig: ApplicationConfig, upscanConnector: UpscanConnector) extends Logging {
 
   val isSecure: Boolean = applicationConfig.upscanProtocol == "https"
   lazy val redirectUrlBase: String = applicationConfig.upscanRedirectBase
+
   private def urlToString(c: Call): String = redirectUrlBase + c.url
 
   def getUpscanFormDataCsv(uploadId: UploadId, scRef: String)(implicit
-    hc: HeaderCarrier,
-    request: Request[_]
+                                                              hc: HeaderCarrier,
+                                                              request: Request[_]
   ): Future[UpscanInitiateResponse] = {
     val callbackUrl = generateCallbackUrl(
       hc.sessionId,
@@ -63,8 +64,8 @@ class UpscanService @Inject() (applicationConfig: ApplicationConfig, upscanConne
   }
 
   private def generateCallbackUrl(sessionIdOption: Option[SessionId],
-                          routeFunction: String => Call,
-                          isSecure: Boolean)(implicit request: Request[_]): String = {
+                                  routeFunction: String => Call,
+                                  isSecure: Boolean)(implicit request: Request[_]): String = {
 
     sessionIdOption match {
       case Some(sessionId) =>

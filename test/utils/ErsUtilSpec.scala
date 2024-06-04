@@ -50,14 +50,15 @@ class ErsUtilSpec
     "build an address summary from CompanyDetails" in {
       val companyDetails = CompanyDetails(
         "name",
-        addressLine1 = "ADDRESS1",
-        addressLine2 = Some("ADDRESS2"),
-        addressLine3 = None,
-        addressLine4 = None,
-        postcode = Some("AB123CD"),
-        country = Some("UK"),
-        companyReg = Some("ABC"),
-        corporationRef = Some("DEF")
+         addressLine1 = "ADDRESS1",
+         addressLine2 = Some("ADDRESS2"),
+         addressLine3 = None,
+         addressLine4 = None,
+         addressLine5 = Some("AB123CD"),
+         country = Some("UK"),
+         companyReg = Some("ABC"),
+         corporationRef = Some("DEF"),
+        basedInUk = true
       )
       val expected = "ADDRESS1, ADDRESS2, AB123CD, United Kingdom"
       val addressSummary = ersUtil.buildAddressSummary(companyDetails)
@@ -152,8 +153,8 @@ class ErsUtilSpec
 
     "handle a non-empty list" in {
       val companies = List(
-        CompanyDetails(companyName = "Company1", addressLine1= "", None, None, None, country = Some("UK"), None, None, None),
-        CompanyDetails(companyName = "Company2", addressLine1= "", None, None, None, country = Some("UK"), None, None, None))
+        CompanyDetails(companyName = "Company1", addressLine1= "", None, None, None, None, country = Some("UK"), None, None,true),
+        CompanyDetails(companyName = "Company2", addressLine1= "", None, None, None, None, country = Some("UK"), None, None, true))
       ersUtil.buildCompanyNameList(companies) shouldBe "Company1<br>Company2<br>"
     }
   }
@@ -177,15 +178,11 @@ class ErsUtilSpec
     val ersUtil: ERSUtil = new ERSUtil(mockAppConfig)
 
     "return OVERSEAS for non-default country" in {
-      ersUtil.companyLocation(CompanyDetails(companyName = "", addressLine1= "", None, None, None, country = Some("FR"), None, None, None)) shouldBe "Overseas"
+      ersUtil.companyLocation(CompanyDetails(companyName = "", addressLine1= "", None, None, None, None, country = Some("FR"), None, None, false)) shouldBe "ers_trustee_based.overseas"
     }
 
     "return default country name" in {
-      ersUtil.companyLocation(CompanyDetails(companyName = "", addressLine1= "", None, None, None, country = Some("UK"), None, None, None)) shouldBe "UK"
-    }
-
-    "return DEFAULT for None country" in {
-      ersUtil.companyLocation(CompanyDetails(companyName = "", addressLine1= "", None, None, None, country = None, None, None, None)) shouldBe ""
+      ersUtil.companyLocation(CompanyDetails(companyName = "", addressLine1= "", None, None, None, None, country = Some("UK"), None, None, true)) shouldBe "ers_trustee_based.uk"
     }
   }
 
