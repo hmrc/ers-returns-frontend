@@ -3,17 +3,17 @@ import sbt.*
 
 object AppDependencies {
 
-  val pdfboxVersion    = "2.0.30"
+  val pdfboxVersion    = "2.0.31"
   val openHtmlVersion  = "1.0.10"
-  val bootstrapVersion = "8.5.0"
-  val mongoVersion     = "1.8.0"
+  val bootstrapVersion = "8.6.0"
+  val mongoVersion     = "1.9.0"
 
   val compile: Seq[ModuleID] = Seq(
     guice,
     ws,
     "uk.gov.hmrc"             %% "bootstrap-frontend-play-30" % bootstrapVersion,
     "uk.gov.hmrc.mongo"       %% "hmrc-mongo-play-30"         % mongoVersion,
-    "uk.gov.hmrc"             %% "play-frontend-hmrc-play-30" % "8.5.0",
+    "uk.gov.hmrc"             %% "play-frontend-hmrc-play-30" % "9.11.0",
     "uk.gov.hmrc"             %% "play-partials-play-30"      % "9.1.0",
     "uk.gov.hmrc"             %% "domain-play-30"             % "9.0.0",
     "org.apache.pdfbox"       %  "pdfbox"                     % pdfboxVersion,
@@ -23,7 +23,7 @@ object AppDependencies {
     "com.openhtmltopdf"       %  "openhtmltopdf-core"         % openHtmlVersion,
     "com.openhtmltopdf"       %  "openhtmltopdf-pdfbox"       % openHtmlVersion,
     "com.openhtmltopdf"       %  "openhtmltopdf-svg-support"  % openHtmlVersion,
-    "commons-codec"           %  "commons-codec"              % "1.16.1",
+    "commons-codec"           %  "commons-codec"              % "1.17.0",
     "org.codehaus.janino"     %  "janino"                     % "3.1.12"
   )
 
@@ -32,10 +32,10 @@ object AppDependencies {
     "uk.gov.hmrc.mongo"       %% "hmrc-mongo-test-play-30" % mongoVersion,
     "org.scalatest"           %% "scalatest"               % "3.2.18",
     "org.scalatestplus"       %% "mockito-5-10"            % "3.2.18.0",
-    "com.vladsch.flexmark"     %  "flexmark-all"             % "0.64.8",
+    "com.vladsch.flexmark"    %  "flexmark-all"            % "0.64.8",
     "org.pegdown"             %  "pegdown"                 % "1.6.0",
     "org.jsoup"               %  "jsoup"                   % "1.17.2",
-    "org.wiremock"            % "wiremock-standalone"      % "3.4.2"
+    "org.wiremock"            % "wiremock-standalone"      % "3.6.0"
   ).map(_ % Test)
 
   val overrides: Seq[ModuleID] = Seq(

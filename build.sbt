@@ -3,16 +3,14 @@ import DefaultBuildSettings.*
 import scoverage.ScoverageKeys
 import uk.gov.hmrc.versioning.SbtGitVersioning.autoImport.majorVersion
 
-val appName: String = "ers-returns-frontend"
-
-lazy val microservice = Project(appName, file("."))
+lazy val microservice = Project("ers-returns-frontend", file("."))
   .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin)
   .disablePlugins(JUnitXmlReportPlugin)
   .settings(
     scoverageSettings,
     scalaSettings,
     defaultSettings(),
-    scalaVersion := "2.13.13",
+    scalaVersion := "2.13.14",
     libraryDependencies ++= AppDependencies(),
     dependencyOverrides ++= AppDependencies.overrides,
     Test / parallelExecution := false,
