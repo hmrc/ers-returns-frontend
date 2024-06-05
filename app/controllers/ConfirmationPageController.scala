@@ -87,7 +87,7 @@ class ConfirmationPageController @Inject()(val mcc: MessagesControllerComponents
       } else {
         sessionService.fetch[ErsMetaData](ersUtil.ERS_METADATA).flatMap { all =>
           logger.info(s"[ConfirmationPageController][showConfirmationPage] Preventing resubmission of confirmation page, timestamp: ${System.currentTimeMillis()}.")
-          Future(Ok(confirmationView(requestObject, sessionDateTimeSubmitted, sessionBundleRef, all.schemeInfo.taxYear, appConfig.portalDomain)))
+          Future(Ok(confirmationView(requestObject, sessionDateTimeSubmitted, sessionBundleRef.filter(_.isDigit), all.schemeInfo.taxYear, appConfig.portalDomain)))
         }
       }
     } recoverWith { case e: Throwable =>
@@ -131,7 +131,7 @@ class ConfirmationPageController @Inject()(val mcc: MessagesControllerComponents
           val url: String = appConfig.portalDomain
 
           sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT).map { requestObject =>
-            Ok(confirmationView(requestObject, dateTimeSubmitted, bundle, all.schemeInfo.taxYear, url))
+            Ok(confirmationView(requestObject, dateTimeSubmitted, bundle.filter(_.isDigit), all.schemeInfo.taxYear, url))
               .withSession(request.session + (BUNDLE_REF -> bundle) + (DATE_TIME_SUBMITTED -> dateTimeSubmitted))
           }
         case _ =>

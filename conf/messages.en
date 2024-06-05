@@ -440,22 +440,18 @@ ers_summary_declaration.other.organiser = Company details
 # Confirmation messages
 #********************************************************************
 
-ers_confirmation.page_title = Confirmation
-ers_confirmation.submitted = Your {0} annual return has been submitted
-ers_confirmation.date_and_time = Date and time submitted: {0}
-ers_confirmation.sub_heading = What next
-ers_confirmation.instructions = Allow 48 hours before you use HMRC Online services to check the status of your submission in Employment Related Securities (view schemes and arrangements).
-ers_confirmation.download_confirmation = Download your submission receipt [PDF, {0}KB] (opens in a new tab)
+ers_confirmation.page_title = You have submitted your annual return
+ers_confirmation.submitted = You have submitted your annual return
+ers_confirmation.sub_heading_1 = What you must do next
+ers_confirmation.sub_heading_2 = Submission details
+ers_confirmation.download_confirmation = Print or save a copy of your annual return (opens in a new tab)
+ers_confirmation.warning = You must print or save a copy of your annual return for your records. You will not be able to do this at a later date.
+ers_confirmation.instructions_1.start = Allow 48 hours before you
+ers_confirmation.instructions_1.link = view your schemes and arrangements
+ers_confirmation.instructions_1.end = to check the status of your submission.
+ers_confirmation.instructions_2 = If you need to contact HMRC about your annual return, the reference number for this submission is:
 ers-confirmation.submission_date = Submitted at
 ers-confirmation.submission_on = on
-ers_confirmation.submission_ref = Your reference number:
-ers_confirmation.return = Manage your schemes and arrangements
-ers_confirmation.pdf_info = You can download confirmation as a PDF.
-ers_confirmation.csop.finished = http://www.gov.uk/done/company-share-option-plan-return
-ers_confirmation.emi.finished = http://www.gov.uk/done/enterprise-management-incentives-return
-ers_confirmation.saye.finished = http://www.gov.uk/done/save-as-you-earn-return
-ers_confirmation.sip.finished = http://www.gov.uk/done/share-incentive-plan-return
-ers_confirmation.other.finished = http://www.gov.uk/done/other-employment-related-securities-return
 ers_confirmation.feedback = What did you think of this service?
 ers_confirmation.feedback_time = (takes 30 seconds)
 

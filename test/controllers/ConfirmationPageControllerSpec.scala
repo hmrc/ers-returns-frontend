@@ -150,7 +150,7 @@ class ConfirmationPageControllerSpec
         mockAppConfig
       )
       val document = Jsoup.parse(contentAsString(result))
-      document.getElementsByClass("hmrc-user-research-banner").isEmpty shouldBe false
+      document.getElementsByClass("hmrc-user-research-banner").isEmpty shouldBe true
     }
 
     "direct to ers errors page if bundle request throws exception" in {
