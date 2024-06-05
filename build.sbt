@@ -10,7 +10,7 @@ lazy val microservice = Project("ers-returns-frontend", file("."))
     scoverageSettings,
     scalaSettings,
     defaultSettings(),
-    scalaVersion := "2.13.14",
+    scalaVersion := "2.13.13",
     libraryDependencies ++= AppDependencies(),
     dependencyOverrides ++= AppDependencies.overrides,
     Test / parallelExecution := false,
