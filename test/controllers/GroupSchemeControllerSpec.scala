@@ -17,8 +17,8 @@
 package controllers
 
 import controllers.subsidiaries.GroupSchemeController
-import org.apache.pekko.stream.Materializer
 import models._
+import org.apache.pekko.stream.Materializer
 import org.jsoup.Jsoup
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
@@ -164,7 +164,7 @@ class GroupSchemeControllerSpec
 
       when(mockSessionService.cache[CompanyDetailsList](any(), any())(any(), any())) thenReturn Future.successful(("key", "Value"))
 
-      val result = testGroupSchemeController.showDeleteCompany(0)(authRequest, hc)
+      val result = testGroupSchemeController.showDeleteCompany(0)(authRequest)
 
       status(result) shouldBe OK
       contentAsString(result).contains(Messages("ers.global_errors.title")) shouldBe true
@@ -190,7 +190,7 @@ class GroupSchemeControllerSpec
       when(mockSessionService.fetchAll()(any())).thenReturn(Future.successful(cacheItem))
       when(mockSessionService.cache(refEq(mockErsUtil.SUBSIDIARY_COMPANIES_CACHE), any[CompanyDetailsList]())(any(), any())).thenReturn(Future(sessionPair))
 
-      val result = testGroupSchemeController.showDeleteCompany(0)(authRequest, hc)
+      val result = testGroupSchemeController.showDeleteCompany(0)(authRequest)
 
       status(result) shouldBe SEE_OTHER
       headers(result)(implicitly)("Location").contains("/group-summary")
@@ -218,7 +218,7 @@ class GroupSchemeControllerSpec
       when(mockSessionService.cache(any(), any[CompanyDetailsList]())(any(), any()))
         .thenReturn(Future(sessionPair))
 
-      val result = testGroupSchemeController.showDeleteCompany(0)(authRequest, hc)
+      val result = testGroupSchemeController.showDeleteCompany(0)(authRequest)
 
       status(result) shouldBe SEE_OTHER
 
@@ -262,7 +262,7 @@ class GroupSchemeControllerSpec
         .thenReturn(Future.successful(GroupSchemeInfo(Option(OPTION_YES), None)))
 
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
-      val result = testGroupSchemeController.showGroupSchemePage(ersRequestObject)(authRequest, hc)
+      val result = testGroupSchemeController.showGroupSchemePage(ersRequestObject)(authRequest)
 
       status(result) shouldBe OK
       val document = Jsoup.parse(contentAsString(result))
@@ -522,7 +522,7 @@ class GroupSchemeControllerSpec
         .thenReturn(Future.failed(new Exception))
 
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
-      val result = testGroupSchemeController.showGroupPlanSummaryPage()(authRequest, hc)
+      val result = testGroupSchemeController.showGroupPlanSummaryPage()(authRequest)
 
       status(result) shouldBe OK
       contentAsString(result).contains(Messages("ers.global_errors.title")) shouldBe true
@@ -539,7 +539,7 @@ class GroupSchemeControllerSpec
         )))
 
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
-      val result = testGroupSchemeController.showGroupPlanSummaryPage()(authRequest, hc)
+      val result = testGroupSchemeController.showGroupPlanSummaryPage()(authRequest)
 
       status(result) shouldBe OK
       contentAsString(result).contains(Messages("ers_group_summary.csop.title")) shouldBe true
@@ -556,7 +556,7 @@ class GroupSchemeControllerSpec
 
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdSIP("GET"))
 
-      val result = controllerUnderTest.showGroupPlanSummaryPage()(authRequest, hc)
+      val result = controllerUnderTest.showGroupPlanSummaryPage()(authRequest)
 
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some("/submit-your-ers-annual-return/where-is-subsidiary-registered")

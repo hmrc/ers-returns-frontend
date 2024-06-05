@@ -16,12 +16,12 @@
 
 package utils
 
-import org.apache.pekko.stream.Materializer
 import config.ApplicationConfig
 import connectors.ErsConnector
 import controllers.auth.{AuthAction, AuthActionGovGateway, RequestWithOptionalAuthContext}
 import metrics.Metrics
 import models.ERSAuthData
+import org.apache.pekko.stream.Materializer
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.mockito.Mockito._
@@ -34,10 +34,9 @@ import play.api.mvc._
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentAsString, defaultAwaitTimeout, stubBodyParser, stubControllerComponents, stubMessagesApi}
 import play.twirl.api.Html
-import services.{CompanyDetailsService, TrusteeService}
 import repositories.FrontendSessionsRepository
 import services.audit.AuditEvents
-import services.{FileValidatorService, FrontendSessionService}
+import services.{CompanyDetailsService, FileValidatorService, FrontendSessionService, TrusteeService}
 import uk.gov.hmrc.http.{HeaderCarrier, SessionKeys}
 import uk.gov.hmrc.mongo.cache.CacheItem
 import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient

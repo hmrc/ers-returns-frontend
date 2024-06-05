@@ -19,7 +19,6 @@ package controllers.schemeOrganiser
 import config.ApplicationConfig
 import connectors.ErsConnector
 import controllers.auth.AuthAction
-import controllers.subsidiaries.SubsidiaryBaseController
 import models.{Company, RequestObject, RsFormMappings}
 import play.api.data.Form
 import play.api.libs.json.Format
@@ -27,7 +26,6 @@ import play.api.mvc.{AnyContent, MessagesControllerComponents, Request}
 import play.twirl.api.Html
 import services.FrontendSessionService
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.{CountryCodes, ERSUtil}

@@ -16,10 +16,9 @@
 
 package services
 
-import models.{Company, CompanyAddress, CompanyDetails, CompanyDetailsList, RequestObject}
+import models._
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.when
-import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
 import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
 import org.scalatest.wordspec.AnyWordSpecLike
 import play.api.libs.json.Format

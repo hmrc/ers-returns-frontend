@@ -17,7 +17,6 @@
 package services.audit
 
 import models.{ErsMetaData, SchemeInfo}
-import java.time.ZonedDateTime
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{times, verify, when}
@@ -33,6 +32,7 @@ import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
 import uk.gov.hmrc.play.audit.model.DataEvent
 import utils.ErsTestHelper
 
+import java.time.ZonedDateTime
 import scala.concurrent.Future
 
 class AuditEventsTest

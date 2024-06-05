@@ -16,12 +16,11 @@
 
 package controllers
 
-import org.apache.pekko.stream.Materializer
 import connectors.ErsConnector
 import controllers.auth.RequestWithOptionalAuthContext
 import models._
 import models.upscan.UpscanCsvFilesCallbackList
-import java.time.ZonedDateTime
+import org.apache.pekko.stream.Materializer
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import org.scalatest.OptionValues
@@ -32,7 +31,6 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status
 import play.api.i18n
 import play.api.i18n.{MessagesApi, MessagesImpl}
-import play.api.libs.json
 import play.api.libs.json._
 import play.api.mvc._
 import play.api.test.FakeRequest
@@ -44,7 +42,7 @@ import utils.Fixtures.ersRequestObject
 import utils._
 import views.html.{global_error, summary}
 
-import java.time.Instant
+import java.time.{Instant, ZonedDateTime}
 import scala.concurrent.{ExecutionContext, Future}
 
 class SummaryDeclarationControllerSpec

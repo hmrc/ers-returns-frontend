@@ -22,10 +22,10 @@ ers.invalidCharacters = Dileu cymeriadau annilys
 ers.error.title = Heb awdurdod
 ers.warning = Rhybudd
 
-ers.scheme.CSOP = Opsiwn Prynu Cyfranddaliadau Cwmni (CSOP)
-ers.scheme.EMI = Cymhellion Rheoli Mentrau (EMI)
-ers.scheme.SIP = Cymell Cyfranddaliadau (SIP)
-ers.scheme.SAYE = Cynilo Wrth Ennill (SAYE)
+ers.scheme.CSOP = CSOP
+ers.scheme.EMI = EMI
+ers.scheme.SIP = SIP
+ers.scheme.SAYE = SAYE
 ers.scheme.Other = ARALL
 ers.scheme.title = Cynllun {0}
 
@@ -352,7 +352,7 @@ ers_confirmation.instructions_1.link = fwrw golwg dros eich cynlluniau a threfni
 ers_confirmation.instructions_1.end = er mwyn gwirio statws eich cyflwyniad.
 ers_confirmation.instructions_2 = Os oes angen i chi gysylltu â CThEF ynglŷn â’ch datganiad blynyddol, y cyfeirnod ar gyfer y cyflwyniad hwn yw:
 ers-confirmation.submission_date = Cyflwynwyd am
-ers-confirmation.submission_on = ar
+ers-confirmation.submission_on = ar ddydd
 ers_confirmation.feedback = Beth oedd eich barn am y gwasanaeth hwn?
 ers_confirmation.feedback_time = (mae’n cymryd 30 eiliad)
 

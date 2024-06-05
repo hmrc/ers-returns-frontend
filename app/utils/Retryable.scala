@@ -16,13 +16,13 @@
 
 package utils
 
+import config.ApplicationConfig
 import org.apache.pekko.actor.{ActorSystem, Scheduler}
 import org.apache.pekko.pattern.after
-import config.ApplicationConfig
 import play.api.Logging
 
-import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration.FiniteDuration
+import scala.concurrent.{ExecutionContext, Future}
 
 trait Retryable extends Logging {
   val appConfig: ApplicationConfig

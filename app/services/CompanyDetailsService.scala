@@ -22,7 +22,7 @@ import play.api.mvc.Request
 import utils.ERSUtil
 
 import javax.inject.Inject
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 class CompanyDetailsService @Inject()(
                                        ersUtil: ERSUtil,

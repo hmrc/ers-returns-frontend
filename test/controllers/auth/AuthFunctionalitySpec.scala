@@ -17,7 +17,6 @@
 package controllers.auth
 
 import models.{ERSAuthData, ErsMetaData, RequestObject, SchemeInfo}
-import java.time.ZonedDateTime
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import org.scalatest.OptionValues
@@ -34,6 +33,7 @@ import uk.gov.hmrc.domain.EmpRef
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.ErsTestHelper
 
+import java.time.ZonedDateTime
 import scala.concurrent.{ExecutionContext, Future}
 
 class AuthFunctionalitySpec

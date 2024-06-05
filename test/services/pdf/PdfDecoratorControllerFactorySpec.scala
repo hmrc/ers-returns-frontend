@@ -16,10 +16,8 @@
 
 package services.pdf
 
-import org.apache.pekko.stream.Materializer
 import models.{AltAmendsActivity, AlterationAmends, ErsSummary}
-
-import java.time.{LocalDateTime, ZoneId, ZonedDateTime}
+import org.apache.pekko.stream.Materializer
 import org.scalatest.OptionValues
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
@@ -30,6 +28,7 @@ import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesController
 import play.api.test.Helpers.stubBodyParser
 import utils._
 
+import java.time.{LocalDateTime, ZoneId, ZonedDateTime}
 import scala.concurrent.ExecutionContext
 
 class PdfDecoratorControllerFactorySpec

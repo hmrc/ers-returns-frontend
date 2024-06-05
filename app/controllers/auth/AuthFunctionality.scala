@@ -16,9 +16,9 @@
 
 package controllers.auth
 
-import org.apache.pekko.http.scaladsl.model.Uri
 import config.ApplicationConfig
 import models.{ERSAuthData, ErsMetaData}
+import org.apache.pekko.http.scaladsl.model.Uri
 import play.api.Logging
 import play.api.libs.json.{Json, OFormat}
 import play.api.mvc.Results.Redirect

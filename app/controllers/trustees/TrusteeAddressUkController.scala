@@ -19,8 +19,6 @@ package controllers.trustees
 import config.ApplicationConfig
 import connectors.ErsConnector
 import controllers.auth.AuthAction
-
-import javax.inject.Inject
 import models.{RequestObject, RsFormMappings, TrusteeAddress}
 import play.api.data.Form
 import play.api.libs.json.Format
@@ -32,6 +30,7 @@ import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.{CountryCodes, ERSUtil}
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class TrusteeAddressUkController @Inject()(val mcc: MessagesControllerComponents,

@@ -14,14 +14,12 @@
  * limitations under the License.
  *@
 
-@import _root_.utils.ERSUtil
+@import _root_.utils.{CountryCodes, ERSUtil}
 @import config.ApplicationConfig
-@import _root_.utils.CountryCodes
+@import uk.gov.hmrc.govukfrontend.views.html.components.implicits._
+@import views.html.helper.CSPNonce
 @import views.html.includes.countries
 @import views.html.templates.reference
-@import views.html.helper.CSPNonce
-
-@import uk.gov.hmrc.govukfrontend.views.html.components.implicits._
 
 @this(
 		govuk_wrapper: govuk_wrapper,

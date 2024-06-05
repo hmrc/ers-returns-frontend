@@ -16,8 +16,8 @@
 
 package services.pdf
 
-import org.apache.pekko.stream.Materializer
 import models._
+import org.apache.pekko.stream.Materializer
 import org.scalatest.OptionValues
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
