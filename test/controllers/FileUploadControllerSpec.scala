@@ -16,13 +16,11 @@
 
 package controllers
 
-import org.apache.pekko.actor.ActorSystem
-import org.apache.pekko.stream.Materializer
 import controllers.auth.RequestWithOptionalAuthContext
 import models._
 import models.upscan.Failed
-
-import java.time.ZonedDateTime
+import org.apache.pekko.actor.ActorSystem
+import org.apache.pekko.stream.Materializer
 import org.mockito.ArgumentMatchers.{eq => meq, _}
 import org.mockito.Mockito._
 import org.scalatest.Assertion
@@ -37,8 +35,9 @@ import play.api.test.Helpers._
 import services.UpscanService
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import utils.{ERSFakeApplicationConfig, ErsTestHelper, UpscanData}
-import views.html.{file_upload_errors, file_upload_problem, global_error, template_version_problem, upscan_ods_file_upload}
+import views.html._
 
+import java.time.ZonedDateTime
 import scala.concurrent.{ExecutionContext, Future}
 
 class FileUploadControllerSpec

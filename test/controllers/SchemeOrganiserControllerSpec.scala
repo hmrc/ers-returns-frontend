@@ -141,7 +141,7 @@ class SchemeOrganiserControllerSpec
       val controllerUnderTest = buildFakeSchemeOrganiserSummaryController(schemeOrganiserSummaryRes = false)
       val authRequest         = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdSIP("GET"))
 
-      contentAsString(controllerUnderTest.showSchemeOrganiserSummaryPage(authRequest, hc)) shouldBe contentAsString(
+      contentAsString(controllerUnderTest.showSchemeOrganiserSummaryPage(authRequest)) shouldBe contentAsString(
         Future(controllerUnderTest.getGlobalErrorPage(testFakeRequest, testMessages))
       )
     }
@@ -150,7 +150,7 @@ class SchemeOrganiserControllerSpec
       val controllerUnderTest = buildFakeSchemeOrganiserSummaryController(requestObjectRes = failure)
       val authRequest         = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdSIP("GET"))
 
-      contentAsString(controllerUnderTest.showSchemeOrganiserSummaryPage(authRequest, hc)) shouldBe contentAsString(
+      contentAsString(controllerUnderTest.showSchemeOrganiserSummaryPage(authRequest)) shouldBe contentAsString(
         Future(controllerUnderTest.getGlobalErrorPage(testFakeRequest, testMessages))
       )
     }
@@ -163,7 +163,7 @@ class SchemeOrganiserControllerSpec
       val controllerUnderTest = buildFakeSchemeOrganiserSummaryController(schemeOrganiserSummaryCached = true)
       val authRequest         = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdSIP("GET"))
 
-      val result = controllerUnderTest.showSchemeOrganiserSummaryPage(authRequest, hc)
+      val result = controllerUnderTest.showSchemeOrganiserSummaryPage(authRequest)
       status(result) shouldBe Status.OK
 
     }
@@ -175,7 +175,7 @@ class SchemeOrganiserControllerSpec
       val controllerUnderTest = buildFakeSchemeOrganiserSummaryController(schemeOrganiserSummaryCached = false)
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdSIP("GET"))
 
-      val result = controllerUnderTest.showSchemeOrganiserSummaryPage(authRequest, hc)
+      val result = controllerUnderTest.showSchemeOrganiserSummaryPage(authRequest)
 
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some("/submit-your-ers-annual-return/where-is-company-registered")

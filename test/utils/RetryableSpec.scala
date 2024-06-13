@@ -16,8 +16,8 @@
 
 package utils
 
-import org.apache.pekko.actor.ActorSystem
 import config.ApplicationConfig
+import org.apache.pekko.actor.ActorSystem
 import org.mockito.Mockito.{times, verify, when}
 import org.scalatest.OptionValues
 import org.scalatest.matchers.should.Matchers

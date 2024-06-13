@@ -24,10 +24,10 @@ import play.api.libs.json.{JsObject, JsString, JsValue, Json, OWrites}
 
 trait UpscanData {
 
-  val testUploadId: UploadId                     = UploadId("TestUploadId")
-  val notStartedCallback: UpscanCsvFilesCallback = UpscanCsvFilesCallback(testUploadId, "file4", NotStarted)
-  val uploadedSuccessfully                       = UploadedSuccessfully("fileName.ods", "https://downloadUrl.com")
-  val uploadedSuccessfullyCsv                    = UploadedSuccessfully("fileName.csv", "https://downloadUrl.com")
+  val testUploadId: UploadId                        = UploadId("TestUploadId")
+  val notStartedCallback: UpscanCsvFilesCallback    = UpscanCsvFilesCallback(testUploadId, "file4", NotStarted)
+  val uploadedSuccessfully: UploadedSuccessfully    = UploadedSuccessfully("fileName.ods", "https://downloadUrl.com")
+  val uploadedSuccessfullyCsv: UploadedSuccessfully = UploadedSuccessfully("fileName.csv", "https://downloadUrl.com")
 
   /**
     * Provides an upcast of UploadStatus ADT members.<p/>

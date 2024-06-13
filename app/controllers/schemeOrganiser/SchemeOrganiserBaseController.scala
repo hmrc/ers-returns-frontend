@@ -18,7 +18,7 @@ package controllers.schemeOrganiser
 
 import config.ApplicationConfig
 import controllers.auth.{AuthAction, RequestWithOptionalAuthContext}
-import models.{CompanyDetails, CompanyDetailsList, RequestObject}
+import models.{CompanyDetails, RequestObject}
 import play.api.Logging
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, Messages}
@@ -59,7 +59,7 @@ trait SchemeOrganiserBaseController[A] extends FrontendController with I18nSuppo
 
   def showQuestionPage(requestObject: RequestObject, index: Int, edit: Boolean = false)
                       (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
-    sessionService.fetchPartFromCompanyDetails[A].map { previousAnswer: Option[A] =>
+    sessionService.fetchPartFromCompanyDetails[A]().map { previousAnswer: Option[A] =>
       val preparedForm = previousAnswer.fold(form)(form.fill(_))
       Ok(view(requestObject, index, preparedForm, edit))
     } recover {

@@ -17,8 +17,8 @@
 package models
 
 import play.api.libs.typedmap.TypedMap
-import play.api.mvc.{Headers, Request, Session}
 import play.api.mvc.request.{RemoteConnection, RequestTarget}
+import play.api.mvc.{Headers, Request, Session}
 
 case class RequestWithUpdatedSession[A](originalRequest: Request[A], sessionId: String) extends Request[A] {
   override def body: A = originalRequest.body

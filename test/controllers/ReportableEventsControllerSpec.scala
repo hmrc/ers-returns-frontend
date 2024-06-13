@@ -16,9 +16,8 @@
 
 package controllers
 
-import org.apache.pekko.stream.Materializer
 import models._
-import java.time.ZonedDateTime
+import org.apache.pekko.stream.Materializer
 import org.jsoup.Jsoup
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
@@ -37,6 +36,7 @@ import utils.Fixtures.ersRequestObject
 import utils.{ERSFakeApplicationConfig, ErsTestHelper, Fixtures}
 import views.html.{global_error, reportable_events}
 
+import java.time.ZonedDateTime
 import scala.concurrent.{ExecutionContext, Future}
 
 class ReportableEventsControllerSpec
@@ -278,7 +278,7 @@ class ReportableEventsControllerSpec
       val result = controllerUnderTest.showReportableEventsSelected(ersRequestObject)(authRequest)
       status(result) shouldBe Status.SEE_OTHER
       result.futureValue.header
-        .headers("Location") shouldBe controllers.schemeOrganiser.routes.SchemeOrganiserBasedInUkController.questionPage.toString
+        .headers("Location") shouldBe controllers.schemeOrganiser.routes.SchemeOrganiserBasedInUkController.questionPage().toString
     }
 
     "direct to ers errors page if fetching reportableEvents throws exception" in {

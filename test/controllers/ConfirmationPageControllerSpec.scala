@@ -16,9 +16,9 @@
 
 package controllers
 
-import org.apache.pekko.stream.Materializer
 import controllers.auth.RequestWithOptionalAuthContext
 import models._
+import org.apache.pekko.stream.Materializer
 import org.jsoup.Jsoup
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
@@ -150,7 +150,7 @@ class ConfirmationPageControllerSpec
         mockAppConfig
       )
       val document = Jsoup.parse(contentAsString(result))
-      document.getElementsByClass("hmrc-user-research-banner").isEmpty shouldBe false
+      document.getElementsByClass("hmrc-user-research-banner").isEmpty shouldBe true
     }
 
     "direct to ers errors page if bundle request throws exception" in {

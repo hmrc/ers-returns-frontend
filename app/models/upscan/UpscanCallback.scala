@@ -16,7 +16,7 @@
 
 package models.upscan
 
-import play.api.libs.json.{JsonValidationError, _}
+import play.api.libs.json._
 
 import java.net.URL
 import java.time.Instant

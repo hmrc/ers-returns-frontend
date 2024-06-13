@@ -35,12 +35,12 @@ object AppDependencies {
     "com.vladsch.flexmark"    %  "flexmark-all"            % "0.64.8",
     "org.pegdown"             %  "pegdown"                 % "1.6.0",
     "org.jsoup"               %  "jsoup"                   % "1.17.2",
-    "org.wiremock"            % "wiremock-standalone"      % "3.6.0"
+    "org.wiremock"            %  "wiremock-standalone"      % "3.6.0"
   ).map(_ % Test)
 
   val overrides: Seq[ModuleID] = Seq(
     "org.scala-lang.modules" %% "scala-parser-combinators" % "2.2.0",
-    "com.ibm.icu"            % "icu4j"                     % "69.1"   //To resolve dependency clash between flexmark v0.64.4+ and play-language to run accessibility tests, remove when versions align
+    "com.ibm.icu"            %  "icu4j"                    % "69.1"   //To resolve dependency clash between flexmark v0.64.4+ and play-language to run accessibility tests, remove when versions align
   )
 
   def apply(): Seq[ModuleID] = compile ++ test

@@ -16,12 +16,11 @@
 
 package controllers
 
-import org.apache.pekko.actor.ActorSystem
-import org.apache.pekko.stream.Materializer
 import controllers.auth.RequestWithOptionalAuthContext
 import models._
 import models.upscan._
-import java.time.ZonedDateTime
+import org.apache.pekko.actor.ActorSystem
+import org.apache.pekko.stream.Materializer
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{eq => meq, _}
 import org.mockito.Mockito._
@@ -35,7 +34,6 @@ import play.api.i18n
 import play.api.i18n.{MessagesApi, MessagesImpl}
 import play.api.libs.json.{JsObject, Json}
 import play.api.mvc._
-import play.api.routing.Router.empty.routes
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import services.UpscanService
@@ -45,7 +43,7 @@ import utils.Fixtures.ersRequestObject
 import utils._
 import views.html.{file_upload_errors, file_upload_problem, global_error, upscan_csv_file_upload}
 
-import java.time.Instant
+import java.time.{Instant, ZonedDateTime}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Random
 

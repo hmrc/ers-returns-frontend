@@ -16,9 +16,9 @@
 
 package models
 
-import java.time.{Instant, ZonedDateTime, ZoneId}
 import play.api.libs.json._
 
+import java.time.{Instant, ZoneId, ZonedDateTime}
 import scala.util._
 
 trait LocalDateTimeFormat {

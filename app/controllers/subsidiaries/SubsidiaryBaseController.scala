@@ -34,7 +34,7 @@ trait SubsidiaryBaseController[A] extends SchemeOrganiserBaseController[A] {
       },
       result => {
         if (edit) {
-          sessionService.fetchCompaniesOptionally.flatMap { companies =>
+          sessionService.fetchCompaniesOptionally().flatMap { companies =>
             val updatedCompany = companies.companies(index).updatePart(result)
             val updatedCompanies = CompanyDetailsList(companies.companies.updated(index, updatedCompany))
             sessionService.cache[CompanyDetailsList](sessionService.SUBSIDIARY_COMPANIES_CACHE, updatedCompanies).flatMap{ _ =>

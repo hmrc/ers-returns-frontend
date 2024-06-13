@@ -16,7 +16,7 @@
 
 package models
 
-import play.api.data.Forms.{number, _}
+import play.api.data.Forms._
 import play.api.data._
 import play.api.data.validation.Constraints
 import play.api.data.validation.Constraints._

@@ -16,15 +16,15 @@
 
 package services
 
-import models.{RequestObject, TrusteeAddress, TrusteeDetails, TrusteeDetailsList, TrusteeName}
+import models._
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.when
 import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
 import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
 import org.scalatest.wordspec.AnyWordSpecLike
 import play.api.libs.json.Format
-import utils.{ErsTestHelper, Fixtures}
 import utils.Fixtures.{ersRequestObject, exampleTrustees}
+import utils.{ErsTestHelper, Fixtures}
 
 import scala.concurrent.Future
 

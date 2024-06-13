@@ -23,8 +23,6 @@ import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.mvc._
 import services.FrontendSessionService
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils._
@@ -51,10 +49,10 @@ class SchemeOrganiserController @Inject()(
 
   def schemeOrganiserSummaryPage: Action[AnyContent] = authAction.async {
     implicit request =>
-      showSchemeOrganiserSummaryPage(request, hc)
+      showSchemeOrganiserSummaryPage(request)
   }
 
-  def showSchemeOrganiserSummaryPage(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
+  def showSchemeOrganiserSummaryPage(implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] = {
     (for {
       requestObject <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
       companyDetails <- sessionService.fetchSchemeOrganiserOptionally()
@@ -71,11 +69,10 @@ class SchemeOrganiserController @Inject()(
   }
 
   def companySummaryContinue(): Action[AnyContent] = authAction.async {
-    implicit request =>
-      continueFromCompanySummaryPage()(request, hc)
+    continueFromCompanySummaryPage()()
   }
 
-  def continueFromCompanySummaryPage()(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
+  def continueFromCompanySummaryPage()(): Future[Result] = {
     Future(Redirect(controllers.subsidiaries.routes.GroupSchemeController.groupSchemePage()))
   }
 

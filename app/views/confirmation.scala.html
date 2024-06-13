@@ -14,64 +14,74 @@
  * limitations under the License.
  *@
 
-@import _root_.utils.ERSUtil
+@import _root_.utils.{DateUtils, ERSUtil}
 @import config.ApplicationConfig
-@import _root_.utils.{ContentUtil, DateUtils}
 @import views.html.templates.reference
 
 @this(
 		govuk_wrapper: govuk_wrapper,
 		govukPanel: GovukPanel,
-		govukButton: GovukButton
+		govukButton: GovukButton,
+		govukWarningText : GovukWarningText
 )
 
 @(requestObject: RequestObject, dateSubmitted: String, bundle: String, taxYear: String, url: String)(implicit request: Request[_], messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 
 @schemeId = @{requestObject.getSchemeId}
 
-@govuk_wrapper(title = messages("ers.confirmation.page_title"), isUserResearchBannerVisible = true) {
+@govuk_wrapper(title = messages("ers_confirmation.page_title")) {
 
 	@reference(requestObject.getPageTitle)
 
+	<hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
+
 	@govukPanel(Panel(
-		title = Text(messages("ers_confirmation.submitted",ContentUtil.getSchemeName(schemeId))),
-		content = HtmlContent(s"""${messages("ers_confirmation.submission_ref")}<br><b>$bundle</b><br>""")
+		title = Text(messages("ers_confirmation.submitted"))
 	))
+
+	<h2 class="govuk-heading-m">
+		@Html(messages("ers_confirmation.sub_heading_1"))
+	</h2>
+
+	<p class="govuk-body">
+		<a id="download-confirmation-button" class="govuk-link" href="@Some(routes.PdfGenerationController.buildPdfForBundle(bundle, dateSubmitted).url)" target="_blank">
+			@Html(messages("ers_confirmation.download_confirmation", 15))
+		</a>
+	</p>
+
+	@govukWarningText(WarningText(
+		iconFallbackText = Some("Warning"),
+		content = Text(messages("ers_confirmation.warning"))
+	))
+
+	<p class="govuk-body">
+		@Html(messages("ers_confirmation.instructions_1.start"))
+		<a class="govuk-link" href="@url">
+			@Html(messages("ers_confirmation.instructions_1.link"))
+		</a>
+		@Html(messages("ers_confirmation.instructions_1.end"))
+	</p>
+
+	<h2 class="govuk-heading-m">
+		@Html(messages("ers_confirmation.sub_heading_2"))
+	</h2>
+
+	<p class="govuk-body">
+		@Html(messages("ers_confirmation.instructions_2"))
+	</p>
+
+	<p class="govuk-body govuk-!-font-weight-bold">
+		@Html(bundle)
+	</p>
 
 	<p class="govuk-body">
 		@Html(messages("ers-confirmation.submission_date")) @DateUtils.convertDate(dateSubmitted).
 	</p>
 
 	<p class="govuk-body">
-		@Html(messages("ers_confirmation.pdf_info"))
-	</p>
-
-	<p class="govuk-body">
-		<svg id="download-icon" class="download-icon" width="25" height="25" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
-			<rect x="1" y="3" width="12" height="17" fill="#0B0C0C"></rect>
-			<rect x="14" y="5" width="2" height="18" fill="#0B0C0C"></rect>
-			<rect x="4" y="21" width="12" height="2" fill="#0B0C0C"></rect>
-		</svg>
-		<a id="download-confirmation-button" class="govuk-link" href="@Some(routes.PdfGenerationController.buildPdfForBundle(bundle, dateSubmitted).url)" target="_blank">
-			@Html(messages("ers_confirmation.download_confirmation", 15))
-		</a>
-	</p>
-
-	<h2 class="govuk-heading-m">
-		@Html(messages("ers_confirmation.sub_heading"))
-	</h2>
-	<p class="govuk-body">
-		@Html(messages("ers_confirmation.instructions"))
-	</p>
-	<p class="govuk-body">
-		<a class="govuk-link" href="@url">
-			@Html(messages("ers_confirmation.return"))
-		</a>
-	</p>
-	<p class="govuk-body">
 		<a class="govuk-link" href='@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_CONFIRMATION, "finished"))' id="finished">
-			@Html(messages("ers_confirmation.feedback"))
-		</a>&nbsp;
+		  @Html(messages("ers_confirmation.feedback"))
+		</a>
 		@Html(messages("ers_confirmation.feedback_time"))
 	</p>
 }

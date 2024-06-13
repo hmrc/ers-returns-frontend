@@ -27,11 +27,10 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status
 import play.api.i18n
 import play.api.i18n.{MessagesApi, MessagesImpl}
-import play.api.libs.json.Json
 import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents}
 import play.api.test.Helpers.{contentAsString, defaultAwaitTimeout, redirectLocation, status, stubBodyParser}
-import utils.{ERSFakeApplicationConfig, ErsTestHelper, Fixtures}
 import utils.Fixtures.ersRequestObject
+import utils.{ERSFakeApplicationConfig, ErsTestHelper, Fixtures}
 import views.html.{global_error, manual_company_details_uk}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -48,7 +47,7 @@ class SubsidiaryDetailsUKControllerSpec extends AnyWordSpecLike
       messagesActionBuilder,
       DefaultActionBuilder(stubBodyParser[AnyContent]()),
       cc.parsers,
-      fakeApplication.injector.instanceOf[MessagesApi],
+      fakeApplication().injector.instanceOf[MessagesApi],
       cc.langs,
       cc.fileMimeTypes,
       ExecutionContext.global

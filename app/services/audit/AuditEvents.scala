@@ -19,8 +19,8 @@ package services.audit
 import models.ErsMetaData
 import org.apache.commons.lang3.exception.ExceptionUtils
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import uk.gov.hmrc.play.audit.DefaultAuditConnector
+import uk.gov.hmrc.play.audit.http.connector.AuditResult
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}

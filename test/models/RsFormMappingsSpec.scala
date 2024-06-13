@@ -46,7 +46,7 @@ class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPer
         companyNameFields.companyName -> ""
 
       )
-      val validatedForm = companyNameForm.bind(postData, Form.FromJsonMaxChars)
+      val validatedForm = companyNameForm().bind(postData, Form.FromJsonMaxChars)
       assert(validatedForm.errors.head.key == companyNameFields.companyName)
       assert(validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.summary.company_name_required"))
     }
@@ -56,7 +56,7 @@ class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPer
         companyNameFields.companyName -> randomString(121)
 
       )
-      val validatedForm = companyNameForm.bind(postData, Form.FromJsonMaxChars)
+      val validatedForm = companyNameForm().bind(postData, Form.FromJsonMaxChars)
       assert(validatedForm.errors.head.key == companyNameFields.companyName)
       assert(validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.company_name"))
     }
@@ -65,7 +65,7 @@ class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPer
       val postData = Json.obj(
         companyNameFields.companyName -> "<script>rm *.*</script>"
       )
-      val validatedForm = companyNameForm.bind(postData, Form.FromJsonMaxChars)
+      val validatedForm = companyNameForm().bind(postData, Form.FromJsonMaxChars)
       assert(validatedForm.errors.head.key == companyNameFields.companyName)
       assert(validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.invalidChars.company_name"))
     }
@@ -76,7 +76,7 @@ class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPer
         companyNameFields.companyReg -> randomString(121)
 
       )
-      val validatedForm = companyNameForm.bind(postData, Form.FromJsonMaxChars)
+      val validatedForm = companyNameForm().bind(postData, Form.FromJsonMaxChars)
       assert(validatedForm.errors.head.key == companyNameFields.companyReg)
       assert(validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.company_reg"))
     }
@@ -86,7 +86,7 @@ class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPer
         companyNameFields.companyName -> " company name",
         companyNameFields.companyReg -> "<script>rm *.*</script>"
       )
-      val validatedForm = companyNameForm.bind(postData, Form.FromJsonMaxChars)
+      val validatedForm = companyNameForm().bind(postData, Form.FromJsonMaxChars)
       assert(validatedForm.errors.head.key == companyNameFields.companyReg)
       assert(validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.company_reg"))
     }
@@ -97,7 +97,7 @@ class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPer
         companyNameFields.companyReg -> "12345678",
         companyNameFields.corporationRef -> "<script>rm *.*</script>"
       )
-      val validatedForm = companyNameForm.bind(postData, Form.FromJsonMaxChars)
+      val validatedForm = companyNameForm().bind(postData, Form.FromJsonMaxChars)
       println(validatedForm.errors)
       assert(validatedForm.errors.head.key == companyNameFields.corporationRef)
       assert(validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.corporation_ref"))
@@ -109,7 +109,7 @@ class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPer
       val postData = Json.obj(
         companyAddressFields.addressLine1 -> ""
       )
-      val validatedForm = companyAddressUkForm.bind(postData, Form.FromJsonMaxChars)
+      val validatedForm = companyAddressUkForm().bind(postData, Form.FromJsonMaxChars)
       assert(validatedForm.errors.head.key == companyAddressFields.addressLine1)
       assert(validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.summary.address_line1_required"))
     }
@@ -118,7 +118,7 @@ class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPer
       val postData = Json.obj(
         companyAddressFields.addressLine1 -> randomString(28)
       )
-      val validatedForm = companyAddressUkForm.bind(postData, Form.FromJsonMaxChars)
+      val validatedForm = companyAddressUkForm().bind(postData, Form.FromJsonMaxChars)
       assert(validatedForm.errors.head.key == companyAddressFields.addressLine1)
       assert(validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.address_line1"))
     }
@@ -127,7 +127,7 @@ class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPer
       val postData = Json.obj(
         companyAddressFields.addressLine1 -> "<script>rm *.*</script>"
       )
-      val validatedForm = companyAddressUkForm.bind(postData, Form.FromJsonMaxChars)
+      val validatedForm = companyAddressUkForm().bind(postData, Form.FromJsonMaxChars)
       assert(validatedForm.errors.head.key == companyAddressFields.addressLine1)
       assert(validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.invalidChars.address_line1"))
     }
@@ -137,7 +137,7 @@ class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPer
         companyAddressFields.addressLine1 -> "Address Line 1",
         companyAddressFields.addressLine2 -> randomString(28)
       )
-      val validatedForm = companyAddressUkForm.bind(postData, Form.FromJsonMaxChars)
+      val validatedForm = companyAddressUkForm().bind(postData, Form.FromJsonMaxChars)
       assert(validatedForm.errors.head.key == companyAddressFields.addressLine2)
       assert(validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.address_line2"))
     }
@@ -147,7 +147,7 @@ class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPer
         companyAddressFields.addressLine1 -> "Address Line 1",
         companyAddressFields.addressLine2 -> "<script>rm *.*</script>"
       )
-      val validatedForm = companyAddressUkForm.bind(postData, Form.FromJsonMaxChars)
+      val validatedForm = companyAddressUkForm().bind(postData, Form.FromJsonMaxChars)
       assert(validatedForm.errors.head.key == companyAddressFields.addressLine2)
       assert(validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.invalidChars.address_line2"))
     }
@@ -158,7 +158,7 @@ class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPer
         companyAddressFields.addressLine2 -> "Address Line 2",
         companyAddressFields.addressLine3 -> randomString(28)
       )
-      val validatedForm = companyAddressUkForm.bind(postData, Form.FromJsonMaxChars)
+      val validatedForm = companyAddressUkForm().bind(postData, Form.FromJsonMaxChars)
       assert(validatedForm.errors.head.key == companyAddressFields.addressLine3)
       assert(validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.address_line3"))
     }
@@ -169,7 +169,7 @@ class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPer
         companyAddressFields.addressLine2 -> "Address Line 2",
         companyAddressFields.addressLine3 -> "<script>rm *.*</script>"
       )
-      val validatedForm = companyAddressUkForm.bind(postData, Form.FromJsonMaxChars)
+      val validatedForm = companyAddressUkForm().bind(postData, Form.FromJsonMaxChars)
       assert(validatedForm.errors.head.key == companyAddressFields.addressLine3)
       assert(validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.invalidChars.address_line3"))
     }
@@ -181,7 +181,7 @@ class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPer
         companyAddressFields.addressLine3 -> "Address Line 3",
         companyAddressFields.addressLine4 -> randomString(30)
       )
-      val validatedForm = companyAddressUkForm.bind(postData, Form.FromJsonMaxChars)
+      val validatedForm = companyAddressUkForm().bind(postData, Form.FromJsonMaxChars)
       assert(validatedForm.errors.head.key == companyAddressFields.addressLine4)
       assert(validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.address_line4"))
     }
@@ -193,7 +193,7 @@ class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPer
         companyAddressFields.addressLine3 -> "Address Line 3",
         companyAddressFields.addressLine4 -> "<script>rm *.*</script>"
       )
-      val validatedForm = companyAddressUkForm.bind(postData, Form.FromJsonMaxChars)
+      val validatedForm = companyAddressUkForm().bind(postData, Form.FromJsonMaxChars)
       assert(validatedForm.errors.head.key == companyAddressFields.addressLine4)
       val errors = validatedForm.errors.map(formError => formError.messages.head)
       assert(errors.contains(Messages("ers_manual_company_details.err.invalidChars.address_line4")))
@@ -207,7 +207,7 @@ class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPer
         companyAddressFields.addressLine4 -> "Address Line 4",
         companyAddressFields.addressLine5 -> randomString(9)
       )
-      val validatedForm = companyAddressUkForm.bind(postData, Form.FromJsonMaxChars)
+      val validatedForm = companyAddressUkForm().bind(postData, Form.FromJsonMaxChars)
       assert(validatedForm.errors.head.key == companyAddressFields.addressLine5)
       assert(validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.postcode"))
     }
@@ -220,7 +220,7 @@ class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPer
         companyAddressFields.addressLine4 -> "Address Line 4",
         companyAddressFields.addressLine5 ->"??&&$$"
       )
-      val validatedForm = companyAddressUkForm.bind(postData, Form.FromJsonMaxChars)
+      val validatedForm = companyAddressUkForm().bind(postData, Form.FromJsonMaxChars)
       assert(validatedForm.errors.head.key == companyAddressFields.addressLine5)
       assert(validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.postcode"))
     }
@@ -231,7 +231,7 @@ class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPer
       val postData = Json.obj(
         companyAddressFields.addressLine1 -> ""
       )
-      val validatedForm = companyAddressOverseasForm.bind(postData, Form.FromJsonMaxChars)
+      val validatedForm = companyAddressOverseasForm().bind(postData, Form.FromJsonMaxChars)
       assert(validatedForm.errors.head.key == companyAddressFields.addressLine1)
       assert(validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.summary.address_line1_required"))
     }
@@ -240,7 +240,7 @@ class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPer
       val postData = Json.obj(
         companyAddressFields.addressLine1 -> randomString(28)
       )
-      val validatedForm = companyAddressOverseasForm.bind(postData, Form.FromJsonMaxChars)
+      val validatedForm = companyAddressOverseasForm().bind(postData, Form.FromJsonMaxChars)
       assert(validatedForm.errors.head.key == companyAddressFields.addressLine1)
       assert(validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.address_line1"))
     }
@@ -249,7 +249,7 @@ class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPer
       val postData = Json.obj(
         companyAddressFields.addressLine1 -> "<script>rm *.*</script>"
       )
-      val validatedForm = companyAddressOverseasForm.bind(postData, Form.FromJsonMaxChars)
+      val validatedForm = companyAddressOverseasForm().bind(postData, Form.FromJsonMaxChars)
       assert(validatedForm.errors.head.key == companyAddressFields.addressLine1)
       assert(validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.invalidChars.address_line1"))
     }
@@ -259,7 +259,7 @@ class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPer
         companyAddressFields.addressLine1 -> "Address Line 1",
         companyAddressFields.addressLine2 -> randomString(28)
       )
-      val validatedForm = companyAddressOverseasForm.bind(postData, Form.FromJsonMaxChars)
+      val validatedForm = companyAddressOverseasForm().bind(postData, Form.FromJsonMaxChars)
       assert(validatedForm.errors.head.key == companyAddressFields.addressLine2)
       assert(validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.address_line2"))
     }
@@ -269,7 +269,7 @@ class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPer
         companyAddressFields.addressLine1 -> "Address Line 1",
         companyAddressFields.addressLine2 -> "<script>rm *.*</script>"
       )
-      val validatedForm = companyAddressOverseasForm.bind(postData, Form.FromJsonMaxChars)
+      val validatedForm = companyAddressOverseasForm().bind(postData, Form.FromJsonMaxChars)
       assert(validatedForm.errors.head.key == companyAddressFields.addressLine2)
       assert(validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.invalidChars.address_line2"))
     }
@@ -280,7 +280,7 @@ class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPer
         companyAddressFields.addressLine2 -> "Address Line 2",
         companyAddressFields.addressLine3 -> randomString(28)
       )
-      val validatedForm = companyAddressOverseasForm.bind(postData, Form.FromJsonMaxChars)
+      val validatedForm = companyAddressOverseasForm().bind(postData, Form.FromJsonMaxChars)
       assert(validatedForm.errors.head.key == companyAddressFields.addressLine3)
       assert(validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.address_line3"))
     }
@@ -291,7 +291,7 @@ class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPer
         companyAddressFields.addressLine2 -> "Address Line 2",
         companyAddressFields.addressLine3 -> "<script>rm *.*</script>"
       )
-      val validatedForm = companyAddressOverseasForm.bind(postData, Form.FromJsonMaxChars)
+      val validatedForm = companyAddressOverseasForm().bind(postData, Form.FromJsonMaxChars)
       assert(validatedForm.errors.head.key == companyAddressFields.addressLine3)
       assert(validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.invalidChars.address_line3"))
     }
@@ -303,7 +303,7 @@ class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPer
         companyAddressFields.addressLine3 -> "Address Line 3",
         companyAddressFields.addressLine4 -> randomString(30)
       )
-      val validatedForm = companyAddressOverseasForm.bind(postData, Form.FromJsonMaxChars)
+      val validatedForm = companyAddressOverseasForm().bind(postData, Form.FromJsonMaxChars)
       assert(validatedForm.errors.head.key == companyAddressFields.addressLine4)
       assert(validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.address_line4"))
     }
@@ -315,7 +315,7 @@ class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPer
         companyAddressFields.addressLine3 -> "Address Line 3",
         companyAddressFields.addressLine4 -> "<script>rm *.*</script>"
       )
-      val validatedForm = companyAddressOverseasForm.bind(postData, Form.FromJsonMaxChars)
+      val validatedForm = companyAddressOverseasForm().bind(postData, Form.FromJsonMaxChars)
       assert(validatedForm.errors.head.key == companyAddressFields.addressLine4)
       val errors = validatedForm.errors.map(formError => formError.messages.head)
       assert(errors.contains(Messages("ers_manual_company_details.err.invalidChars.address_line4")))
@@ -329,7 +329,7 @@ class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPer
         companyAddressFields.addressLine4 -> "Address Line 4",
         companyAddressFields.addressLine5 -> randomString(19)
       )
-      val validatedForm = companyAddressOverseasForm.bind(postData, Form.FromJsonMaxChars)
+      val validatedForm = companyAddressOverseasForm().bind(postData, Form.FromJsonMaxChars)
       assert(validatedForm.errors.head.key == companyAddressFields.addressLine5)
       assert(validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.address_line5"))
     }
@@ -342,7 +342,7 @@ class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPer
         companyAddressFields.addressLine4 -> "Address Line 4",
         companyAddressFields.addressLine5 ->"??&&$$"
       )
-      val validatedForm = companyAddressOverseasForm.bind(postData, Form.FromJsonMaxChars)
+      val validatedForm = companyAddressOverseasForm().bind(postData, Form.FromJsonMaxChars)
       assert(validatedForm.errors.head.key == companyAddressFields.addressLine5)
       assert(validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.invalidChars.address_line5"))
     }
@@ -354,7 +354,7 @@ class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPer
         trusteeNameFields.name -> ""
 
       )
-      val validatedForm = trusteeNameForm.bind(postData, Form.FromJsonMaxChars)
+      val validatedForm = trusteeNameForm().bind(postData, Form.FromJsonMaxChars)
       assert(validatedForm.errors.head.key == trusteeNameFields.name)
       assert(validatedForm.errors.head.messages.head == Messages("ers_trustee_details.err.summary.name_required"))
     }
@@ -364,7 +364,7 @@ class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPer
         trusteeNameFields.name -> randomString(121)
 
       )
-      val validatedForm = trusteeNameForm.bind(postData, Form.FromJsonMaxChars)
+      val validatedForm = trusteeNameForm().bind(postData, Form.FromJsonMaxChars)
       assert(validatedForm.errors.head.key == trusteeNameFields.name)
       assert(validatedForm.errors.head.messages.head == Messages("ers_trustee_details.err.name"))
     }
@@ -373,7 +373,7 @@ class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPer
       val postData = Json.obj(
         trusteeNameFields.name -> "<script>rm *.*</script>"
       )
-      val validatedForm = trusteeNameForm.bind(postData, Form.FromJsonMaxChars)
+      val validatedForm = trusteeNameForm().bind(postData, Form.FromJsonMaxChars)
       assert(validatedForm.errors.head.key == trusteeNameFields.name)
       assert(validatedForm.errors.head.messages.head == Messages("ers_trustee_details.err.invalidChars.name"))
     }
@@ -384,7 +384,7 @@ class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPer
       val postData = Json.obj(
         trusteeAddressFields.addressLine1 -> ""
       )
-      val validatedForm = trusteeAddressUkForm.bind(postData, Form.FromJsonMaxChars)
+      val validatedForm = trusteeAddressUkForm().bind(postData, Form.FromJsonMaxChars)
       assert(validatedForm.errors.head.key == trusteeAddressFields.addressLine1)
       assert(validatedForm.errors.head.messages.head == Messages("ers_trustee_details.err.summary.address_line1_required"))
     }
@@ -393,7 +393,7 @@ class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPer
       val postData = Json.obj(
         trusteeAddressFields.addressLine1 -> randomString(28)
       )
-      val validatedForm = trusteeAddressUkForm.bind(postData, Form.FromJsonMaxChars)
+      val validatedForm = trusteeAddressUkForm().bind(postData, Form.FromJsonMaxChars)
       assert(validatedForm.errors.head.key == trusteeAddressFields.addressLine1)
       assert(validatedForm.errors.head.messages.head == Messages("ers_trustee_details.err.address_line1"))
     }
@@ -402,7 +402,7 @@ class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPer
       val postData = Json.obj(
         trusteeAddressFields.addressLine1 -> "<script>rm *.*</script>"
       )
-      val validatedForm = trusteeAddressUkForm.bind(postData, Form.FromJsonMaxChars)
+      val validatedForm = trusteeAddressUkForm().bind(postData, Form.FromJsonMaxChars)
       assert(validatedForm.errors.head.key == trusteeAddressFields.addressLine1)
       assert(validatedForm.errors.head.messages.head == Messages("ers_trustee_details.err.invalidChars.address_line1"))
     }
@@ -412,7 +412,7 @@ class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPer
         trusteeAddressFields.addressLine1 -> "Address Line 1",
         trusteeAddressFields.addressLine2 -> randomString(28)
       )
-      val validatedForm = trusteeAddressUkForm.bind(postData, Form.FromJsonMaxChars)
+      val validatedForm = trusteeAddressUkForm().bind(postData, Form.FromJsonMaxChars)
       assert(validatedForm.errors.head.key == trusteeAddressFields.addressLine2)
       assert(validatedForm.errors.head.messages.head == Messages("ers_trustee_details.err.address_line2"))
     }
@@ -422,7 +422,7 @@ class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPer
         trusteeAddressFields.addressLine1 -> "Address Line 1",
         trusteeAddressFields.addressLine2 -> "<script>rm *.*</script>"
       )
-      val validatedForm = trusteeAddressUkForm.bind(postData, Form.FromJsonMaxChars)
+      val validatedForm = trusteeAddressUkForm().bind(postData, Form.FromJsonMaxChars)
       assert(validatedForm.errors.head.key == trusteeAddressFields.addressLine2)
       assert(validatedForm.errors.head.messages.head == Messages("ers_trustee_details.err.invalidChars.address_line2"))
     }
@@ -433,7 +433,7 @@ class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPer
         trusteeAddressFields.addressLine2 -> "Address Line 2",
         trusteeAddressFields.addressLine3 -> randomString(28)
       )
-      val validatedForm = trusteeAddressUkForm.bind(postData, Form.FromJsonMaxChars)
+      val validatedForm = trusteeAddressUkForm().bind(postData, Form.FromJsonMaxChars)
       assert(validatedForm.errors.head.key == trusteeAddressFields.addressLine3)
       assert(validatedForm.errors.head.messages.head == Messages("ers_trustee_details.err.address_line3"))
     }
@@ -444,7 +444,7 @@ class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPer
         trusteeAddressFields.addressLine2 -> "Address Line 2",
         trusteeAddressFields.addressLine3 -> "<script>rm *.*</script>"
       )
-      val validatedForm = trusteeAddressUkForm.bind(postData, Form.FromJsonMaxChars)
+      val validatedForm = trusteeAddressUkForm().bind(postData, Form.FromJsonMaxChars)
       assert(validatedForm.errors.head.key == trusteeAddressFields.addressLine3)
       assert(validatedForm.errors.head.messages.head == Messages("ers_trustee_details.err.invalidChars.address_line3"))
     }
@@ -456,7 +456,7 @@ class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPer
         trusteeAddressFields.addressLine3 -> "Address Line 3",
         trusteeAddressFields.addressLine4 -> randomString(30)
       )
-      val validatedForm = trusteeAddressUkForm.bind(postData, Form.FromJsonMaxChars)
+      val validatedForm = trusteeAddressUkForm().bind(postData, Form.FromJsonMaxChars)
       assert(validatedForm.errors.head.key == trusteeAddressFields.addressLine4)
       assert(validatedForm.errors.head.messages.head == Messages("ers_trustee_details.err.address_line4"))
     }
@@ -468,7 +468,7 @@ class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPer
         trusteeAddressFields.addressLine3 -> "Address Line 3",
         trusteeAddressFields.addressLine4 -> "<script>rm *.*</script>"
       )
-      val validatedForm = trusteeAddressUkForm.bind(postData, Form.FromJsonMaxChars)
+      val validatedForm = trusteeAddressUkForm().bind(postData, Form.FromJsonMaxChars)
       assert(validatedForm.errors.head.key == trusteeAddressFields.addressLine4)
       val errors = validatedForm.errors.map(formError => formError.messages.head)
       assert(errors.contains(Messages("ers_trustee_details.err.invalidChars.address_line4")))
@@ -482,7 +482,7 @@ class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPer
         trusteeAddressFields.addressLine4 -> "Address Line 4",
         trusteeAddressFields.addressLine5 -> randomString(9)
       )
-      val validatedForm = trusteeAddressUkForm.bind(postData, Form.FromJsonMaxChars)
+      val validatedForm = trusteeAddressUkForm().bind(postData, Form.FromJsonMaxChars)
       assert(validatedForm.errors.head.key == trusteeAddressFields.addressLine5)
       assert(validatedForm.errors.head.messages.head == Messages("ers_trustee_details.err.postcode"))
     }
@@ -495,7 +495,7 @@ class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPer
         trusteeAddressFields.addressLine4 -> "Address Line 4",
         trusteeAddressFields.addressLine5 ->"??&&$$"
       )
-      val validatedForm = trusteeAddressUkForm.bind(postData, Form.FromJsonMaxChars)
+      val validatedForm = trusteeAddressUkForm().bind(postData, Form.FromJsonMaxChars)
       assert(validatedForm.errors.head.key == trusteeAddressFields.addressLine5)
       assert(validatedForm.errors.head.messages.head == Messages("ers_trustee_details.err.postcode"))
     }
@@ -506,7 +506,7 @@ class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPer
       val postData = Json.obj(
         trusteeAddressFields.addressLine1 -> ""
       )
-      val validatedForm = trusteeAddressOverseasForm.bind(postData, Form.FromJsonMaxChars)
+      val validatedForm = trusteeAddressOverseasForm().bind(postData, Form.FromJsonMaxChars)
       assert(validatedForm.errors.head.key == trusteeAddressFields.addressLine1)
       assert(validatedForm.errors.head.messages.head == Messages("ers_trustee_details.err.summary.address_line1_required"))
     }
@@ -515,7 +515,7 @@ class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPer
       val postData = Json.obj(
         trusteeAddressFields.addressLine1 -> randomString(28)
       )
-      val validatedForm = trusteeAddressOverseasForm.bind(postData, Form.FromJsonMaxChars)
+      val validatedForm = trusteeAddressOverseasForm().bind(postData, Form.FromJsonMaxChars)
       assert(validatedForm.errors.head.key == trusteeAddressFields.addressLine1)
       assert(validatedForm.errors.head.messages.head == Messages("ers_trustee_details.err.address_line1"))
     }
@@ -524,7 +524,7 @@ class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPer
       val postData = Json.obj(
         trusteeAddressFields.addressLine1 -> "<script>rm *.*</script>"
       )
-      val validatedForm = trusteeAddressOverseasForm.bind(postData, Form.FromJsonMaxChars)
+      val validatedForm = trusteeAddressOverseasForm().bind(postData, Form.FromJsonMaxChars)
       assert(validatedForm.errors.head.key == trusteeAddressFields.addressLine1)
       assert(validatedForm.errors.head.messages.head == Messages("ers_trustee_details.err.invalidChars.address_line1"))
     }
@@ -534,7 +534,7 @@ class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPer
         trusteeAddressFields.addressLine1 -> "Address Line 1",
         trusteeAddressFields.addressLine2 -> randomString(28)
       )
-      val validatedForm = trusteeAddressOverseasForm.bind(postData, Form.FromJsonMaxChars)
+      val validatedForm = trusteeAddressOverseasForm().bind(postData, Form.FromJsonMaxChars)
       assert(validatedForm.errors.head.key == trusteeAddressFields.addressLine2)
       assert(validatedForm.errors.head.messages.head == Messages("ers_trustee_details.err.address_line2"))
     }
@@ -544,7 +544,7 @@ class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPer
         trusteeAddressFields.addressLine1 -> "Address Line 1",
         trusteeAddressFields.addressLine2 -> "<script>rm *.*</script>"
       )
-      val validatedForm = trusteeAddressOverseasForm.bind(postData, Form.FromJsonMaxChars)
+      val validatedForm = trusteeAddressOverseasForm().bind(postData, Form.FromJsonMaxChars)
       assert(validatedForm.errors.head.key == trusteeAddressFields.addressLine2)
       assert(validatedForm.errors.head.messages.head == Messages("ers_trustee_details.err.invalidChars.address_line2"))
     }
@@ -555,7 +555,7 @@ class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPer
         trusteeAddressFields.addressLine2 -> "Address Line 2",
         trusteeAddressFields.addressLine3 -> randomString(28)
       )
-      val validatedForm = trusteeAddressOverseasForm.bind(postData, Form.FromJsonMaxChars)
+      val validatedForm = trusteeAddressOverseasForm().bind(postData, Form.FromJsonMaxChars)
       assert(validatedForm.errors.head.key == trusteeAddressFields.addressLine3)
       assert(validatedForm.errors.head.messages.head == Messages("ers_trustee_details.err.address_line3"))
     }
@@ -566,7 +566,7 @@ class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPer
         trusteeAddressFields.addressLine2 -> "Address Line 2",
         trusteeAddressFields.addressLine3 -> "<script>rm *.*</script>"
       )
-      val validatedForm = trusteeAddressOverseasForm.bind(postData, Form.FromJsonMaxChars)
+      val validatedForm = trusteeAddressOverseasForm().bind(postData, Form.FromJsonMaxChars)
       assert(validatedForm.errors.head.key == trusteeAddressFields.addressLine3)
       assert(validatedForm.errors.head.messages.head == Messages("ers_trustee_details.err.invalidChars.address_line3"))
     }
@@ -578,7 +578,7 @@ class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPer
         trusteeAddressFields.addressLine3 -> "Address Line 3",
         trusteeAddressFields.addressLine4 -> randomString(30)
       )
-      val validatedForm = trusteeAddressOverseasForm.bind(postData, Form.FromJsonMaxChars)
+      val validatedForm = trusteeAddressOverseasForm().bind(postData, Form.FromJsonMaxChars)
       assert(validatedForm.errors.head.key == trusteeAddressFields.addressLine4)
       assert(validatedForm.errors.head.messages.head == Messages("ers_trustee_details.err.address_line4"))
     }
@@ -590,7 +590,7 @@ class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPer
         trusteeAddressFields.addressLine3 -> "Address Line 3",
         trusteeAddressFields.addressLine4 -> "<script>rm *.*</script>"
       )
-      val validatedForm = trusteeAddressOverseasForm.bind(postData, Form.FromJsonMaxChars)
+      val validatedForm = trusteeAddressOverseasForm().bind(postData, Form.FromJsonMaxChars)
       assert(validatedForm.errors.head.key == trusteeAddressFields.addressLine4)
       val errors = validatedForm.errors.map(formError => formError.messages.head)
       assert(errors.contains(Messages("ers_trustee_details.err.invalidChars.address_line4")))
@@ -604,7 +604,7 @@ class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPer
         trusteeAddressFields.addressLine4 -> "Address Line 4",
         trusteeAddressFields.addressLine5 -> randomString(19)
       )
-      val validatedForm = trusteeAddressOverseasForm.bind(postData, Form.FromJsonMaxChars)
+      val validatedForm = trusteeAddressOverseasForm().bind(postData, Form.FromJsonMaxChars)
       assert(validatedForm.errors.head.key == trusteeAddressFields.addressLine5)
       assert(validatedForm.errors.head.messages.head == Messages("ers_trustee_details.err.address_line5"))
     }
@@ -617,7 +617,7 @@ class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPer
         trusteeAddressFields.addressLine4 -> "Address Line 4",
         trusteeAddressFields.addressLine5 ->"??&&$$"
       )
-      val validatedForm = trusteeAddressOverseasForm.bind(postData, Form.FromJsonMaxChars)
+      val validatedForm = trusteeAddressOverseasForm().bind(postData, Form.FromJsonMaxChars)
       assert(validatedForm.errors.head.key == trusteeAddressFields.addressLine5)
       assert(validatedForm.errors.head.messages.head == Messages("ers_trustee_details.err.invalidChars.address_line5"))
     }

@@ -25,7 +25,6 @@ import play.api.data.Form
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.mvc._
 import services.FrontendSessionService
-import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.mongo.cache.DataKey
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
@@ -52,10 +51,10 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
 
   def deleteCompany(id: Int): Action[AnyContent] = authAction.async {
     implicit request =>
-      showDeleteCompany(id)(request, hc)
+      showDeleteCompany(id)(request)
   }
 
-  def showDeleteCompany(id: Int)(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
+  def showDeleteCompany(id: Int)(implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] = {
     (for {
       all <- sessionService.fetchAll()
       companies = getEntry[CompanyDetailsList](all, DataKey(ersUtil.SUBSIDIARY_COMPANIES_CACHE)).getOrElse(CompanyDetailsList(Nil))
@@ -78,12 +77,12 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
   def groupSchemePage(): Action[AnyContent] = authAction.async {
     implicit request =>
       sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT).flatMap { requestObject =>
-        showGroupSchemePage(requestObject)(request, hc)
+        showGroupSchemePage(requestObject)(request)
       }
   }
 
   def showGroupSchemePage(requestObject: RequestObject)
-                         (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] =
+                         (implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
     sessionService.fetch[GroupSchemeInfo](ersUtil.GROUP_SCHEME_CACHE_CONTROLLER).map {
       groupSchemeInfo =>
         Ok(
@@ -145,10 +144,10 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
       )
 
   def groupPlanSummaryPage(): Action[AnyContent] = authAction.async { implicit request =>
-    showGroupPlanSummaryPage()(request, hc)
+    showGroupPlanSummaryPage()(request)
   }
 
-  def showGroupPlanSummaryPage()(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] =
+  def showGroupPlanSummaryPage()(implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
     (for {
       requestObject <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
       companyDetailsList <- sessionService.fetchCompaniesOptionally()

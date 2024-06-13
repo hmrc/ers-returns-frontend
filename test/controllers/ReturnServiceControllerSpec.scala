@@ -16,9 +16,8 @@
 
 package controllers
 
-import org.apache.pekko.stream.Materializer
 import models._
-import java.time.ZonedDateTime
+import org.apache.pekko.stream.Materializer
 import org.jsoup.Jsoup
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito._
@@ -37,6 +36,7 @@ import utils.Fixtures.ersRequestObject
 import utils.{ERSFakeApplicationConfig, ErsTestHelper, Fixtures}
 import views.html.{global_error, start, unauthorised}
 
+import java.time.ZonedDateTime
 import scala.concurrent.{ExecutionContext, Future}
 
 class ReturnServiceControllerSpec

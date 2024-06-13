@@ -16,11 +16,11 @@
 
 package connectors
 
-import org.apache.pekko.stream.Materializer
 import com.github.tomakehurst.wiremock.client.WireMock._
 import controllers.auth.RequestWithOptionalAuthContext
 import models.upscan.{UploadStatus, UploadedSuccessfully}
 import models.{ERSAuthData, ErsSummary, SchemeInfo, ValidatorData}
+import org.apache.pekko.stream.Materializer
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{reset => mreset, _}

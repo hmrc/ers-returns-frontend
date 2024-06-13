@@ -16,10 +16,9 @@
 
 package controllers
 
-import org.apache.pekko.stream.Materializer
 import models._
 import models.upscan.{UploadId, UploadedSuccessfully, UpscanCsvFilesCallback, UpscanCsvFilesCallbackList}
-import java.time.ZonedDateTime
+import org.apache.pekko.stream.Materializer
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.scalatest.matchers.should.Matchers
@@ -37,6 +36,7 @@ import utils.{ERSFakeApplicationConfig, ErsTestHelper, Fixtures}
 import views.html.global_error
 
 import java.io.ByteArrayOutputStream
+import java.time.ZonedDateTime
 import scala.concurrent.{ExecutionContext, Future}
 
 class GeneratePdfControllerSpec

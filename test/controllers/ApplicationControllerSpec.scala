@@ -16,8 +16,8 @@
 
 package controllers
 
-import org.apache.pekko.stream.Materializer
 import controllers.auth.{AuthActionGovGateway, RequestWithOptionalAuthContext}
+import org.apache.pekko.stream.Materializer
 import org.mockito.Mockito.when
 import org.scalatestplus.play.PlaySpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
