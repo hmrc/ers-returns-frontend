@@ -249,17 +249,20 @@ object RsFormMappings {
     val basedInUk = "basedInUk"
   }
 
-  def companyNameForm()(implicit messages: Messages): Form[Company] = Form(mapping(
+  def companyNameForm(isSchemeOrganiser: Boolean = false)(implicit messages: Messages): Form[Company] = {
+    val prefix = if (isSchemeOrganiser) ("schemeOrganiserFields", "ers_scheme_organiser") else ("companyDetailsFields", "ers_manual_company_details")
+    Form(mapping(
     companyNameFields.companyName -> text
       .verifying(Messages("ers_manual_company_details.err.summary.company_name_required"), _.nonEmpty)
-      .verifying(Messages("ers_manual_company_details.err.company_name"), so => checkLength(so, "companyDetailsFields.companyName"))
+      .verifying(Messages(s"${prefix._2}.err.company_name"), so => checkLength(so, s"${prefix._1}.companyName"))
       .verifying(Messages("ers_manual_company_details.err.invalidChars.company_name"), so => validInputCharacters(so, addresssRegx)),
     companyNameFields.companyReg -> optional(text
       .verifying(Messages("ers_manual_company_details.err.company_reg"), so => checkLength(so, "companyDetailsFields.companyReg"))
       .verifying(pattern(fieldValidationPatterns.companyRegPattern.r, error = Messages("ers_manual_company_details.err.company_reg")))),
     companyNameFields.corporationRef -> optional(text
-      verifying pattern(corporationRefPattern.r, error = Messages("ers_manual_company_details.err.corporation_ref")))
+      .verifying(pattern(corporationRefPattern.r, error = Messages("ers_manual_company_details.err.corporation_ref"))))
   )(Company.apply)(Company.unapply(_)))
+  }
 
   def addSubsidiaryForm(): Form[AddCompany] = Form(mapping(
     "addCompany" -> nonEmptyText
@@ -284,8 +287,7 @@ object RsFormMappings {
   def checkLength(so: String, field: String): Boolean = field match {
     case "companyDetailsFields.companyName" | "trusteeNameFields.name" => so.length <= 120
     case "schemeOrganiserFields.companyName" => so.length <= 35
-		case "schemeOrganiserFields.companyRegistrationNum" | "companyDetailsFields.companyReg" => so.length == 8
-		case "schemeOrganiserFields.corporationTaxReference" => so.length == 10
+		case "companyDetailsFields.companyReg" => so.length == 8
     case _ => false
   }
 
