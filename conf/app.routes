@@ -100,7 +100,8 @@ POST        /subsidiary-details-overseas/:index/edit        controllers.subsidia
 GET 		/subsidiary-company-summary	                    controllers.subsidiaries.GroupSchemeController.groupPlanSummaryPage()
 POST 		/subsidiary-company-summary		                controllers.subsidiaries.GroupSchemeController.groupPlanSummaryContinue(scheme: String)
 
-POST 		/delete-subsidiary-company/:index              	controllers.subsidiaries.GroupSchemeController.deleteCompany(index: Int)
+GET 		/delete-subsidiary-company/:index               controllers.subsidiaries.GroupSchemeController.confirmDeleteCompanyPage(index: Int)
+POST 		/delete-subsidiary-company/:index		        controllers.subsidiaries.GroupSchemeController.confirmDeleteCompanySubmit(index: Int)
 
 GET         /where-is-company-registered                    controllers.schemeOrganiser.SchemeOrganiserBasedInUkController.questionPage(index: Int = 10000)
 POST        /where-is-company-registered                    controllers.schemeOrganiser.SchemeOrganiserBasedInUkController.questionSubmit(index: Int)

@@ -63,6 +63,8 @@ object ErsMetaData extends LocalDateTimeFormat {
   implicit val format: OFormat[ErsMetaData] = Json.format[ErsMetaData]
 }
 
+case class Person(name: String, relation: String)
+
 case class AlterationAmends(
   altAmendsTerms: Option[String],
   altAmendsEligibility: Option[String],
@@ -74,6 +76,7 @@ case class AlterationAmends(
 object AlterationAmends {
   implicit val format: OFormat[AlterationAmends] = Json.format[AlterationAmends]
 }
+
 case class CompanyDetails(
                               companyName: String,
                               addressLine1: String,

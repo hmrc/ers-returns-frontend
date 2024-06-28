@@ -16,27 +16,22 @@
 
 package controllers
 
-import connectors.ErsConnector
-import controllers.auth.RequestWithOptionalAuthContext
 import models._
-import models.upscan.UpscanCsvFilesCallbackList
+import models.upscan._
 import org.apache.pekko.stream.Materializer
-import org.mockito.ArgumentMatchers
+import org.jsoup.Jsoup
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito._
-import org.scalatest.OptionValues
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
-import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.{BeforeAndAfterEach, OptionValues}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.http.Status
 import play.api.i18n
-import play.api.i18n.{MessagesApi, MessagesImpl}
+import play.api.i18n.{Messages, MessagesApi, MessagesImpl}
 import play.api.libs.json._
 import play.api.mvc._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import services.FrontendSessionService
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.mongo.cache.CacheItem
 import utils.Fixtures.ersRequestObject
 import utils._
@@ -46,12 +41,12 @@ import java.time.{Instant, ZonedDateTime}
 import scala.concurrent.{ExecutionContext, Future}
 
 class SummaryDeclarationControllerSpec
-    extends AnyWordSpecLike
+  extends AnyWordSpecLike
     with Matchers
     with OptionValues
-    with ERSFakeApplicationConfig
-    with MockitoSugar
     with ErsTestHelper
+    with ERSFakeApplicationConfig
+    with BeforeAndAfterEach
     with UpscanData
     with GuiceOneAppPerSuite {
 
@@ -66,16 +61,15 @@ class SummaryDeclarationControllerSpec
   )
 
   implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
-  implicit val countryCodes: CountryCodes      = mockCountryCodes
+  implicit val countryCodes: CountryCodes = mockCountryCodes
 
-  implicit lazy val mat: Materializer = app.materializer
-  val globalErrorView: global_error   = app.injector.instanceOf[global_error]
+  implicit lazy val materializer: Materializer = app.materializer
+  val globalErrorView: global_error = app.injector.instanceOf[global_error]
   val summaryView: summary = app.injector.instanceOf[summary]
 
   val schemeInfo: SchemeInfo = SchemeInfo("XA1100000000000", ZonedDateTime.now, "2", "2016", "EMI", "EMI")
-  val rsc: ErsMetaData       =
+  val rsc: ErsMetaData =
     new ErsMetaData(schemeInfo, "ipRef", Some("aoRef"), "empRef", Some("agentRef"), Some("sapNumber"))
-
 
   val schemeOrganiser: SchemeOrganiserDetails = new SchemeOrganiserDetails(
     Fixtures.companyName,
@@ -88,235 +82,510 @@ class SummaryDeclarationControllerSpec
     Option("AB123456"),
     Option("1234567890")
   )
-  val groupSchemeInfo: GroupSchemeInfo        = new GroupSchemeInfo(Option("1"), None)
-  val gscomp: CompanyDetails                  =
-    new CompanyDetails(Fixtures.companyName, "Adress Line 1", None, None, None, None, None, None, None, true)
-  val gscomps: CompanyDetailsList             = new CompanyDetailsList(List(gscomp))
+  val groupSchemeInfo: GroupSchemeInfo = new GroupSchemeInfo(Option("1"), None)
+  val gscomp: CompanyDetails =
+    new CompanyDetails(Fixtures.companyName, "Address Line 1", None, None, None, None, Some("UK"), None, None, true)
+  val gscomps: CompanyDetailsList = new CompanyDetailsList(List(gscomp))
 
-	val reportableEvents: ReportableEvents = new ReportableEvents(Some("1"))
-	val fileTypeCSV: CheckFileType = new CheckFileType(Some("csv"))
-	val fileTypeODS: CheckFileType = new CheckFileType(Some("ods"))
-	val csvFilesCallbackList: UpscanCsvFilesCallbackList = incompleteCsvList
-	val trustees: TrusteeDetails = new TrusteeDetails("T Name", "T Add 1", None, None, None, None, None, false)
-	val trusteesList: TrusteeDetailsList = new TrusteeDetailsList(List(trustees))
-	val fileNameODS: String = "test.osd"
-
-  val commonAllDataMap: Map[String, JsValue] = Map(
-    "scheme-type"             -> Json.toJson("1"),
-    "portal-scheme-ref"       -> Json.toJson("CSOP - MyScheme - XA1100000000000 - 2014/15"),
-    "alt-activity"            -> Json.toJson(new AltAmendsActivity("1")),
-    "scheme-organiser"        -> Json.toJson(schemeOrganiser),
-    "group-scheme-controller" -> Json.toJson(groupSchemeInfo),
-    "group-scheme-companies"  -> Json.toJson(gscomps),
-    "trustees"                -> Json.toJson(trusteesList),
-    "ReportableEvents"        -> Json.toJson(reportableEvents),
-    "ErsMetaData"             -> Json.toJson(rsc)
+  val alterationAmends: AlterationAmends = new AlterationAmends(
+    Option("1"),
+    Option("1"),
+    Option("1"),
+    Option("1"),
+    Option("1")
   )
 
-  class TestSessionService(fetchAllMapVal: String) extends FrontendSessionService(mockSessionRepository, mockFileValidatorService, mockAppConfig) {
+  val reportableEvents: ReportableEvents = new ReportableEvents(Some("1"))
+  val fileTypeCSV: CheckFileType = new CheckFileType(Some("csv"))
+  val fileTypeODS: CheckFileType = new CheckFileType(Some("ods"))
+  val csvFileCallBackList: UpscanCsvFilesCallbackList = UpscanCsvFilesCallbackList(List(UpscanCsvFilesCallback(UploadId("abcd"), "id0", UploadedSuccessfully("CSOP_OptionsGranted_V4.csv", "http://test.gov.uk"))))
+  val csvFilesCallbackList: UpscanCsvFilesCallbackList = incompleteCsvList
+  val trustees: TrusteeDetails = new TrusteeDetails("T Name", "T Add 1", None, None, None, None, None, false)
+  val trusteesList: TrusteeDetailsList = new TrusteeDetailsList(List(trustees))
+  val fileNameODS: String = "test.osd"
 
-    override def getAllData(bundleRef: String, ersMetaData: ErsMetaData)(implicit ec: ExecutionContext, request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[ErsSummary] =
-      Future.successful(
-        new ErsSummary(
-          "testbundle",
-          "false",
-          None,
-          ZonedDateTime.now,
-          ersMetaData,
-          None,
-          None,
-          None,
-          None,
-          None,
-          None,
-          None,
-          None
-        )
-      )
+  val company: CompanyDetails =
+    CompanyDetails(Fixtures.companyName, "Address Line 1", None, None, None, None, Some("UK"), None, None, true)
+  lazy val companyDetailsList: CompanyDetailsList = CompanyDetailsList(List(company, company))
+  lazy val companyDetailsListSingle: CompanyDetailsList = CompanyDetailsList(List(company))
 
-    @throws(classOf[NoSuchElementException])
-    override def fetchAll()(implicit request: Request[_]): Future[CacheItem] =
-      fetchAllMapVal match {
-        case "e" => Future(throw new NoSuchElementException)
-        case "withSchemeTypeSchemeRef" =>
-          val data = commonAllDataMap.view.filterKeys(Seq("scheme-type", "portal-scheme-ref").contains(_)).toMap
-          val ci: CacheItem = CacheItem("id1", Json.toJson(data).as[JsObject], Instant.now(), Instant.now())
-          Future.successful(ci)
-        case "withAll" =>
-          val findList     = Seq(
-            "scheme-organiser",
-            "group-scheme-controller",
-            "group-scheme-companies",
-            "trustees",
-            "ReportableEvents",
-            "ErsMetaData"
-          )
-          val addList =
-            Map("check-file-type" -> Json.toJson(fileTypeCSV), "check-csv-files" -> Json.toJson(mockErsUtil.CSV_FILES_CALLBACK_LIST))
-          val data = commonAllDataMap.view.filterKeys(findList.contains(_)).toMap ++ addList
-          val ci: CacheItem = CacheItem("id1", Json.toJson(data).as[JsObject], Instant.now(), Instant.now())
-          Future.successful(ci)
-        case "noGroupSchemeInfo" =>
-          val findList =
-            Seq("scheme-organiser", "group-scheme-companies", "trustees", "ReportableEvents", "ErsMetaData")
-          val addList =
-            Map("check-file-type" -> Json.toJson(fileTypeCSV), "check-csv-files" -> Json.toJson(mockErsUtil.CSV_FILES_CALLBACK_LIST))
-          val data = commonAllDataMap.view.filterKeys(findList.contains(_)).toMap ++ addList
-          val ci: CacheItem = CacheItem("id1", Json.toJson(data).as[JsObject], Instant.now(), Instant.now())
-          Future.successful(ci)
-        case "odsFile" =>
-          val findList = Seq(
-            "scheme-type",
-            "portal-scheme-ref",
-            "alt-activity",
-            "scheme-organiser",
-            "group-scheme-companies",
-            "trustees",
-            "ReportableEvents",
-            "ErsMetaData"
-          )
-          val addList = Map("check-file-type" -> Json.toJson(fileTypeODS), "file-name" -> Json.toJson(fileNameODS))
-          val data = commonAllDataMap.view.filterKeys(findList.contains(_)).toMap ++ addList
-          val ci: CacheItem = CacheItem("id1", Json.toJson(data).as[JsObject], Instant.now(), Instant.now())
-          Future.successful(ci)
-        case "withAllNillReturn" =>
-          val reportableEvents: ReportableEvents = new ReportableEvents(Some(OPTION_NIL_RETURN))
-          val fileType: CheckFileType = new CheckFileType(None)
-          val findList =
-            Seq("scheme-organiser", "group-scheme-controller", "group-scheme-companies", "trustees", "ErsMetaData")
-          val addList = Map(
-            "ReportableEvents" -> Json.toJson(reportableEvents),
-            "check-file-type"  -> Json.toJson(fileType),
-            "check-csv-files"  -> Json.toJson(mockErsUtil.CSV_FILES_CALLBACK_LIST)
-          )
-          val data = commonAllDataMap.view.filterKeys(findList.contains(_)).toMap ++ addList
-          val ci: CacheItem = CacheItem("id1", Json.toJson(data).as[JsObject], Instant.now(), Instant.now())
-          Future.successful(ci)
-        case "withAllCSVFile" =>
-          val reportableEvents: ReportableEvents = new ReportableEvents(Some(OPTION_UPLOAD_SPREEDSHEET))
-          val fileType: CheckFileType = new CheckFileType(Some(OPTION_CSV))
-          val findList =
-            Seq("scheme-organiser", "group-scheme-controller", "group-scheme-companies", "trustees", "ErsMetaData")
-          val addList = Map(
-            "ReportableEvents" -> Json.toJson(reportableEvents),
-            "check-file-type"  -> Json.toJson(fileType),
-            "check-csv-files"  -> Json.toJson(mockErsUtil.CSV_FILES_CALLBACK_LIST)
-          )
-          val data = commonAllDataMap.view.filterKeys(findList.contains(_)).toMap ++ addList
-          val ci: CacheItem = CacheItem("id1", Json.toJson(data).as[JsObject], Instant.now(), Instant.now())
-          Future.successful(ci)
-        case "withAllODSFile" =>
-          val reportableEvents: ReportableEvents = new ReportableEvents(Some(OPTION_UPLOAD_SPREEDSHEET))
-          val fileType: CheckFileType = new CheckFileType(Some(OPTION_ODS))
-          val findList =
-            Seq("scheme-organiser", "group-scheme-controller", "group-scheme-companies", "trustees", "ErsMetaData")
-          val addList = Map(
-            "ReportableEvents" -> Json.toJson(reportableEvents),
-            "check-file-type" -> Json.toJson(fileType),
-            "check-csv-files" -> Json.toJson(mockErsUtil.CSV_FILES_CALLBACK_LIST),
-            "file-name" -> Json.toJson(fileNameODS)
-          )
-          val data = commonAllDataMap.view.filterKeys(findList.contains(_)).toMap ++ addList
-          val ci: CacheItem = CacheItem("id1", Json.toJson(data).as[JsObject], Instant.now(), Instant.now())
-          Future.successful(ci)
-      }
+  val commonAllDataMap: Map[String, JsValue] = Map(
+    "scheme-type" -> Json.toJson("1"),
+    "portal-scheme-ref" -> Json.toJson("CSOP - MyScheme - XA1100000000000 - 2014/15"),
+    "alt-activity" -> Json.toJson(new AltAmendsActivity("1")),
+    "scheme-organiser" -> Json.toJson(schemeOrganiser),
+    "group-scheme-controller" -> Json.toJson(groupSchemeInfo),
+    "subsidiary-companies" -> Json.toJson(gscomps),
+    "trustees" -> Json.toJson(trusteesList),
+    "reportable-events" -> Json.toJson(reportableEvents),
+    "alt-amends-cache-controller" -> Json.toJson(alterationAmends),
+    "ErsMetaData" -> Json.toJson(rsc)
+  )
+
+  val csopRequestObject: RequestObject = ersRequestObject.copy(schemeName = Some("CSOP"), schemeType = Some("CSOP"))
+
+  def setCacheItem(id: String, findList: Seq[String], addList: Map[String, JsValue]): CacheItem = {
+    val data = commonAllDataMap.view.filterKeys(findList.contains(_)).toMap ++ addList
+    CacheItem(id, Json.toJson(data).as[JsObject], Instant.now(), Instant.now())
   }
 
-  lazy val ersConnector: ErsConnector = new ErsConnector(mockHttp, mockAppConfig) {
-    override lazy val ersUrl = "ers-returns"
-    override lazy val validatorUrl = "ers-file-validator"
-    override def connectToEtmpSapRequest(
-      schemeRef: String
-    )(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[String] = Future(
-      "1234567890"
-    )
+  override def beforeEach(): Unit = {
+    super.beforeEach()
+    reset(mockErsUtil, mockSessionService)
+    when(mockErsUtil.SCHEME_ORGANISER_CACHE).thenReturn("scheme-organiser")
+    when(mockErsUtil.SUBSIDIARY_COMPANIES_CACHE).thenReturn("subsidiary-companies")
+    when(mockErsUtil.GROUP_SCHEME_CACHE_CONTROLLER).thenReturn("group-scheme-controller")
+    when(mockErsUtil.ALT_AMENDS_CACHE_CONTROLLER).thenReturn("alt-amends-cache-controller")
+    when(mockErsUtil.REPORTABLE_EVENTS).thenReturn("reportable-events")
+    when(mockErsUtil.FILE_TYPE_CACHE).thenReturn("check-file-type")
+    when(mockErsUtil.OPTION_CSV).thenReturn("csv")
+    when(mockErsUtil.OPTION_ODS).thenReturn("ods")
+    when(mockErsUtil.OPTION_UPLOAD_SPREEDSHEET).thenReturn("1")
+    when(mockErsUtil.OPTION_NIL_RETURN).thenReturn("2")
+    when(mockErsUtil.CHECK_CSV_FILES).thenReturn("check-csv-files")
+    when(mockErsUtil.CSV_FILES_CALLBACK_LIST).thenReturn("csv-file-callback-List")
+    when(mockErsUtil.FILE_NAME_CACHE).thenReturn("file-name")
+    when(mockErsUtil.ALT_AMENDS_ACTIVITY).thenReturn("alt-activity")
+    when(mockErsUtil.TRUSTEES_CACHE).thenReturn("trustees")
+    when(mockErsUtil.ERS_REQUEST_OBJECT).thenReturn("ers-request-object")
+    when(mockErsUtil.OPTION_MANUAL).thenReturn("man")
+    when(mockErsUtil.DEFAULT).thenReturn("")
+    when(mockErsUtil.SCHEME_CSOP).thenReturn("1")
+    when(mockErsUtil.SCHEME_EMI).thenReturn("2")
+    when(mockErsUtil.SCHEME_OTHER).thenReturn("3")
+    when(mockErsUtil.SCHEME_SAYE).thenReturn("4")
+    when(mockErsUtil.SCHEME_SIP).thenReturn("5")
+    when(mockErsUtil.OPTION_YES).thenReturn("1")
+    when(mockErsUtil.OPTION_NO).thenReturn("2")
+    when(mockErsUtil.getPageElement(any(), any(), any(), any())(any())).thenCallRealMethod()
+    when(mockErsUtil.MSG_CSOP).thenReturn(".csop.")
+    when(mockErsUtil.PAGE_GROUP_SUMMARY).thenReturn("ers_group_summary")
+    when(mockErsUtil.PAGE_SUMMARY_DECLARATION).thenReturn("ers_summary_declaration")
+    when(mockErsUtil.PAGE_CHOOSE).thenReturn("ers_choose")
+    when(mockErsUtil.PAGE_ALT_ACTIVITY).thenReturn("ers_alt_activity")
+    when(mockErsUtil.PAGE_GROUP_ACTIVITY).thenReturn("ers_group_activity")
+    when(mockErsUtil.PAGE_ALT_AMENDS).thenReturn("ers_alt_amends")
   }
 
-  def buildFakeSummaryDeclarationController(fetchMapVal: String = "e"): SummaryDeclarationController =
-    new SummaryDeclarationController(
-      mockMCC,
-      ersConnector,
-      new TestSessionService(fetchMapVal),
-      globalErrorView,
-      summaryView,
-      testAuthAction
-    ) {
-      when(
-        mockHttp.POST[ValidatorData, HttpResponse](
-          ArgumentMatchers.any(),
-          ArgumentMatchers.any(),
-          ArgumentMatchers.any()
-        )(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())
-      ).thenReturn(Future.successful(HttpResponse(OK, "")))
-    }
+  lazy val testSummaryDeclarationController: SummaryDeclarationController = new SummaryDeclarationController(
+    mockMCC,
+    mockErsConnector,
+    mockSessionService,
+    globalErrorView,
+    summaryView,
+    testAuthAction
+  )
 
   "Calling SummaryDeclarationController.summaryDeclarationPage (GET) without authentication" should {
+    def summaryDeclarationControllerHandler(request: FakeRequest[AnyContentAsEmpty.type])(
+      handler: Future[Result] => Any
+    ): Unit =
+      handler(testSummaryDeclarationController.summaryDeclarationPage().apply(request))
+
     "give a redirect status (to company authentication frontend)" in {
       setUnauthorisedMocks()
-      val controllerUnderTest = buildFakeSummaryDeclarationController()
-      val result = controllerUnderTest.summaryDeclarationPage().apply(FakeRequest("GET", ""))
-      status(result) shouldBe Status.SEE_OTHER
+      summaryDeclarationControllerHandler(Fixtures.buildFakeRequestWithSessionId("GET")) { result =>
+        status(result) shouldBe SEE_OTHER
+        headers(result)(implicitly)("Location").contains("/gg/sign-in") shouldBe true
+      }
     }
   }
 
-  "Calling SummaryDeclarationController.showSummaryDeclarationPage (GET) with authentication missing elements in the cache" should {
+  "Calling SummaryDeclarationController.showSummaryDeclarationPage (GET) with authentication, missing elements in the cache" should {
     "direct to ers errors page" in {
-      val controllerUnderTest = buildFakeSummaryDeclarationController()
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
+      when(mockSessionService.fetchAll()(any())).thenReturn(Future.failed(new NoSuchElementException))
 
-      contentAsString(
-        controllerUnderTest.showSummaryDeclarationPage(ersRequestObject)(authRequest)
-      ) shouldBe contentAsString(Future(controllerUnderTest.getGlobalErrorPage(testFakeRequest, testMessages)))
+      val result = testSummaryDeclarationController.showSummaryDeclarationPage(ersRequestObject)(authRequest)
+
+      status(result) shouldBe INTERNAL_SERVER_ERROR
+      val document = Jsoup.parse(contentAsString(result))
+      document.getElementsByTag("title").get(0).text shouldBe Messages("ers.global_errors.title")
     }
   }
 
   "Calling SummaryDeclarationController.showSummaryDeclarationPage (GET) with authentication and required elements (Nil Return) in the cache" should {
-    "show the scheme organiser page" in {
-      val controllerUnderTest = buildFakeSummaryDeclarationController("withAllNillReturn")
+    "show the summary declaration page" in {
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
+      val findList =
+        Seq("scheme-organiser", "group-scheme-controller", "subsidiary-companies", "trustees", "ErsMetaData")
+      val addList = Map(
+        "reportable-events" -> Json.toJson(new ReportableEvents(Some(OPTION_NIL_RETURN))),
+        "alt-activity"      -> Json.toJson(new AltAmendsActivity("2"))
+      )
 
-      val result = controllerUnderTest.showSummaryDeclarationPage(ersRequestObject)(authRequest)
-      status(result) shouldBe Status.OK
+      when(mockErsUtil.buildEntitySummary(any())).thenReturn("Company Name, Add1, Add2, Add3, Add4, UK, AA111AA, AB123456, 1234567890")
+      when(mockSessionService.fetchAll()(any())).thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
+
+      val result = testSummaryDeclarationController.showSummaryDeclarationPage(ersRequestObject)(authRequest)
+
+      status(result) shouldBe OK
+      val document = Jsoup.parse(contentAsString(result))
+      document.getElementsByTag("title").get(0).text shouldBe Messages("ers.summary.page_title")
     }
   }
 
   "Calling SummaryDeclarationController.showSummaryDeclarationPage (GET) with authentication and required elements (CSV File Upload) in the cache" should {
-    "show the scheme organiser page" in {
-      val controllerUnderTest = buildFakeSummaryDeclarationController("withAllCSVFile")
+    "show the summary declaration page" in {
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
 
-      val result = controllerUnderTest.showSummaryDeclarationPage(ersRequestObject)(authRequest)
-      status(result) shouldBe Status.OK
+      val findList =
+        Seq("scheme-organiser", "group-scheme-controller", "subsidiary-companies", "trustees", "ErsMetaData")
+      val addList = Map(
+        "reportable-events" -> Json.toJson(new ReportableEvents(Some(mockErsUtil.OPTION_UPLOAD_SPREEDSHEET))),
+        "check-file-type"   -> Json.toJson(fileTypeCSV),
+        "check-csv-files"   -> Json.toJson(csvFileCallBackList),
+        "alt-activity"      -> Json.toJson(new AltAmendsActivity("2"))
+      )
+
+      when(mockErsUtil.buildEntitySummary(any())).thenReturn("Company Name, Add1, Add2, Add3, Add4, UK, AA111AA, AB123456, 1234567890")
+      when(mockSessionService.fetchAll()(any())).thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
+
+      val result = testSummaryDeclarationController.showSummaryDeclarationPage(ersRequestObject)(authRequest)
+
+      status(result) shouldBe OK
+      val document = Jsoup.parse(contentAsString(result))
+      document.getElementsByTag("title").get(0).text shouldBe Messages("ers.summary.page_title")
     }
   }
 
   "Calling SummaryDeclarationController.showSummaryDeclarationPage (GET) with authentication and required elements (ODS File Upload) in the cache" should {
-    "show the scheme organiser page" in {
-      val controllerUnderTest = buildFakeSummaryDeclarationController("withAllODSFile")
+    "show the summary declaration page" in {
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
 
-      val result = controllerUnderTest.showSummaryDeclarationPage(ersRequestObject)(authRequest)
-      status(result) shouldBe Status.OK
+      val findList =
+        Seq("scheme-organiser", "group-scheme-controller", "subsidiary-companies", "trustees", "ErsMetaData")
+      val addList = Map(
+        "reportable-events" -> Json.toJson(new ReportableEvents(Some(mockErsUtil.OPTION_UPLOAD_SPREEDSHEET))),
+        "check-file-type"   -> Json.toJson(fileTypeODS),
+        "file-name"         -> Json.toJson(fileNameODS),
+        "alt-activity"      -> Json.toJson(new AltAmendsActivity("2"))
+      )
+
+      when(mockErsUtil.buildEntitySummary(any())).thenReturn("Company Name, Add1, Add2, Add3, Add4, UK, AA111AA, AB123456, 1234567890")
+      when(mockSessionService.fetchAll()(any())).thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
+
+      val result = testSummaryDeclarationController.showSummaryDeclarationPage(ersRequestObject)(authRequest)
+
+      status(result) shouldBe OK
+      val document = Jsoup.parse(contentAsString(result))
+      document.getElementsByTag("title").get(0).text shouldBe Messages("ers.summary.page_title")
     }
   }
 
   "Calling SummaryDeclarationController.showSummaryDeclarationPage (GET) with authentication and required elements in the cache (ODS)" should {
-    "show the scheme organiser page" in {
-      val controllerUnderTest = buildFakeSummaryDeclarationController("odsFile")
+    "show the summary declaration page" in {
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
 
-      val result = controllerUnderTest.showSummaryDeclarationPage(ersRequestObject)(authRequest)
-      status(result) shouldBe Status.OK
+      val findList = Seq(
+        "scheme-type", "portal-scheme-ref", "scheme-organiser", "group-scheme-controller", "subsidiary-companies", "trustees", "reportable-events", "ErsMetaData"
+      )
+      val addList = Map(
+        "check-file-type" -> Json.toJson(fileTypeODS),
+        "file-name"       -> Json.toJson(fileNameODS),
+        "alt-activity"    -> Json.toJson(new AltAmendsActivity("2"))
+      )
+
+      when(mockErsUtil.buildEntitySummary(any())).thenReturn("Company Name, Add1, Add2, Add3, Add4, UK, AA111AA, AB123456, 1234567890")
+      when(mockSessionService.fetchAll()(any())).thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
+
+      val result = testSummaryDeclarationController.showSummaryDeclarationPage(ersRequestObject)(authRequest)
+
+      status(result) shouldBe OK
+      val document = Jsoup.parse(contentAsString(result))
+      document.getElementsByTag("title").get(0).text shouldBe Messages("ers.summary.page_title")
     }
   }
 
   "Calling SummaryDeclarationController.showSummaryDeclarationPage (GET) with authentication and required elements (no group scheme info) in the cache" should {
-    "show the scheme organiser page" in {
-      val controllerUnderTest = buildFakeSummaryDeclarationController("noGroupSchemeInfo")
+    "show the error page if group scheme info is missing" in {
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
 
-      val result = controllerUnderTest.showSummaryDeclarationPage(ersRequestObject)(authRequest)
-      status(result) shouldBe Status.OK
+      val findList =
+        Seq("scheme-organiser", "subsidiary-companies", "trustees", "ErsMetaData")
+      val addList =
+        Map(
+          "reportable-events" -> Json.toJson(new ReportableEvents(Some(OPTION_NIL_RETURN))),
+          "alt-activity"      -> Json.toJson(new AltAmendsActivity("2"))
+        )
+
+      when(mockErsUtil.buildEntitySummary(any())).thenReturn("Company Name, Add1, Add2, Add3, Add4, UK, AA111AA, AB123456, 1234567890")
+      when(mockSessionService.fetchAll()(any())).thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
+
+      val result = testSummaryDeclarationController.showSummaryDeclarationPage(ersRequestObject)(authRequest)
+
+      status(result) shouldBe INTERNAL_SERVER_ERROR
+      val document = Jsoup.parse(contentAsString(result))
+      document.getElementsByTag("title").get(0).text shouldBe Messages("ers.global_errors.title")
+    }
+  }
+
+  "Calling SummaryDeclarationController.showSummaryDeclarationPage (GET) with authentication and group scheme set to 'Yes" should {
+    "show the global error page if companies empty but group scheme set to 'Yes'" in {
+      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
+
+      val findList =
+        Seq("scheme-organiser", "group-scheme-controller", "trustees", "ErsMetaData")
+      val addList =
+        Map(
+          "reportable-events" -> Json.toJson(new ReportableEvents(Some(OPTION_NIL_RETURN))),
+          "alt-activity"      -> Json.toJson(new AltAmendsActivity("2"))
+        )
+
+      when(mockErsUtil.buildEntitySummary(any())).thenReturn("Company Name, Add1, Add2, Add3, Add4, UK, AA111AA, AB123456, 1234567890")
+      when(mockSessionService.fetchAll()(any())).thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
+
+      val result = testSummaryDeclarationController.showSummaryDeclarationPage(ersRequestObject)(authRequest)
+
+      status(result) shouldBe INTERNAL_SERVER_ERROR
+      val document = Jsoup.parse(contentAsString(result))
+      document.getElementsByTag("title").get(0).text shouldBe Messages("ers.global_errors.title")
+    }
+
+    "show the summary declaration page if companies filled but group scheme set to 'Yes'" in {
+      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
+
+      val findList =
+        Seq("scheme-organiser", "group-scheme-controller", "subsidiary-companies", "trustees", "ErsMetaData")
+      val addList =
+        Map(
+          "reportable-events" -> Json.toJson(new ReportableEvents(Some(OPTION_NIL_RETURN))),
+          "alt-activity"      -> Json.toJson(new AltAmendsActivity("2"))
+        )
+
+      when(mockErsUtil.buildEntitySummary(any())).thenReturn("Company Name, Add1, Add2, Add3, Add4, UK, AA111AA, AB123456, 1234567890")
+      when(mockSessionService.fetchAll()(any())).thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
+
+      val result = testSummaryDeclarationController.showSummaryDeclarationPage(ersRequestObject)(authRequest)
+
+      status(result) shouldBe OK
+      val document = Jsoup.parse(contentAsString(result))
+      document.getElementsByTag("title").get(0).text shouldBe Messages("ers.summary.page_title")
+    }
+  }
+
+  "Calling SummaryDeclarationController.showSummaryDeclarationPage (GET) with authentication and group scheme set to 'No'" should {
+    "show the global error page if companies filled but group scheme set to 'No'" in {
+      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
+
+      val findList =
+        Seq("scheme-organiser", "subsidiary-companies", "trustees", "ErsMetaData")
+      val addList =
+        Map(
+          "reportable-events"       -> Json.toJson(new ReportableEvents(Some(OPTION_NIL_RETURN))),
+          "group-scheme-controller" -> Json.toJson(new GroupSchemeInfo(Option("2"), None)),
+          "alt-activity"            -> Json.toJson(new AltAmendsActivity("2"))
+        )
+
+      when(mockErsUtil.buildEntitySummary(any())).thenReturn("Company Name, Add1, Add2, Add3, Add4, UK, AA111AA, AB123456, 1234567890")
+      when(mockSessionService.fetchAll()(any())).thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
+
+      val result = testSummaryDeclarationController.showSummaryDeclarationPage(ersRequestObject)(authRequest)
+
+      status(result) shouldBe INTERNAL_SERVER_ERROR
+      val document = Jsoup.parse(contentAsString(result))
+      document.getElementsByTag("title").get(0).text shouldBe Messages("ers.global_errors.title")
+    }
+
+    "show the summary declaration page if companies empty but group scheme set to 'No'" in {
+      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
+
+      val findList =
+        Seq("scheme-organiser", "trustees", "ErsMetaData")
+      val addList =
+        Map(
+          "reportable-events"       -> Json.toJson(new ReportableEvents(Some(OPTION_NIL_RETURN))),
+          "group-scheme-controller" -> Json.toJson(new GroupSchemeInfo(Option("2"), None)),
+          "alt-activity"            -> Json.toJson(new AltAmendsActivity("2"))
+        )
+
+      when(mockErsUtil.buildEntitySummary(any())).thenReturn("Company Name, Add1, Add2, Add3, Add4, UK, AA111AA, AB123456, 1234567890")
+      when(mockSessionService.fetchAll()(any())).thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
+
+      val result = testSummaryDeclarationController.showSummaryDeclarationPage(ersRequestObject)(authRequest)
+
+      status(result) shouldBe OK
+      val document = Jsoup.parse(contentAsString(result))
+      document.getElementsByTag("title").get(0).text shouldBe Messages("ers.summary.page_title")
+    }
+  }
+
+  "Calling SummaryDeclarationController.showSummaryDeclarationPage (GET) with authentication and alt activity set to 'Yes'" should {
+    "show the global error page if alt amends empty but alt activity set to 'Yes'" in {
+      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
+
+      val findList =
+        Seq("scheme-type", "portal-scheme-ref", "scheme-organiser", "alt-activity", "trustees", "ErsMetaData")
+      val addList =
+        Map(
+          "reportable-events"       -> Json.toJson(new ReportableEvents(Some(OPTION_NIL_RETURN))),
+          "group-scheme-controller" -> Json.toJson(new GroupSchemeInfo(Option("2"), None))
+        )
+
+      when(mockErsUtil.buildEntitySummary(any())).thenReturn("Company Name, Add1, Add2, Add3, Add4, UK, AA111AA, AB123456, 1234567890")
+      when(mockSessionService.fetchAll()(any())).thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
+
+      val result = testSummaryDeclarationController.showSummaryDeclarationPage(csopRequestObject)(authRequest)
+
+      status(result) shouldBe INTERNAL_SERVER_ERROR
+      val document = Jsoup.parse(contentAsString(result))
+      document.getElementsByTag("title").get(0).text shouldBe Messages("ers.global_errors.title")
+    }
+
+    "show the summary declaration page if alt amends filled but alt activity set to 'Yes'" in {
+      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
+
+      val findList =
+        Seq("scheme-type", "portal-scheme-ref", "scheme-organiser", "alt-activity", "alt-amends-cache-controller", "trustees", "ErsMetaData")
+      val addList =
+        Map(
+          "reportable-events"       -> Json.toJson(new ReportableEvents(Some(OPTION_NIL_RETURN))),
+          "group-scheme-controller" -> Json.toJson(new GroupSchemeInfo(Option("2"), None))
+        )
+
+      when(mockErsUtil.buildEntitySummary(any())).thenReturn("Company Name, Add1, Add2, Add3, Add4, UK, AA111AA, AB123456, 1234567890")
+      when(mockSessionService.fetchAll()(any())).thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
+
+      val result = testSummaryDeclarationController.showSummaryDeclarationPage(csopRequestObject)(authRequest)
+
+      status(result) shouldBe OK
+      val document = Jsoup.parse(contentAsString(result))
+      document.getElementsByTag("title").get(0).text shouldBe Messages("ers.summary.page_title")
+    }
+  }
+
+  "Calling SummaryDeclarationController.showSummaryDeclarationPage (GET) with authentication and alt activity set to 'No'" should {
+    "show the global error page if alt amends filled but alt activity set to 'No'" in {
+      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
+
+      val findList =
+        Seq("scheme-type", "portal-scheme-ref", "alt-amends-cache-controller", "scheme-organiser", "trustees", "ErsMetaData")
+      val addList =
+        Map(
+          "reportable-events"       -> Json.toJson(new ReportableEvents(Some(OPTION_NIL_RETURN))),
+          "group-scheme-controller" -> Json.toJson(new GroupSchemeInfo(Option("2"), None)),
+          "alt-activity"            -> Json.toJson(new AltAmendsActivity("2"))
+        )
+
+      when(mockErsUtil.buildEntitySummary(any())).thenReturn("Company Name, Add1, Add2, Add3, Add4, UK, AA111AA, AB123456, 1234567890")
+      when(mockSessionService.fetchAll()(any())).thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
+
+      val result = testSummaryDeclarationController.showSummaryDeclarationPage(csopRequestObject)(authRequest)
+
+      status(result) shouldBe INTERNAL_SERVER_ERROR
+      val document = Jsoup.parse(contentAsString(result))
+      document.getElementsByTag("title").get(0).text shouldBe Messages("ers.global_errors.title")
+    }
+
+    "show the summary declaration page if alt amends empty but alt activity set to 'No'" in {
+      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
+
+      val findList =
+        Seq("scheme-type", "portal-scheme-ref", "scheme-organiser", "trustees", "ErsMetaData")
+      val addList =
+        Map(
+          "reportable-events"       -> Json.toJson(new ReportableEvents(Some(OPTION_NIL_RETURN))),
+          "group-scheme-controller" -> Json.toJson(new GroupSchemeInfo(Option("2"), None)),
+          "alt-activity"            -> Json.toJson(new AltAmendsActivity("2"))
+        )
+
+      when(mockErsUtil.buildEntitySummary(any())).thenReturn("Company Name, Add1, Add2, Add3, Add4, UK, AA111AA, AB123456, 1234567890")
+      when(mockSessionService.fetchAll()(any())).thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
+
+      val result = testSummaryDeclarationController.showSummaryDeclarationPage(csopRequestObject)(authRequest)
+
+      status(result) shouldBe OK
+      val document = Jsoup.parse(contentAsString(result))
+      document.getElementsByTag("title").get(0).text shouldBe Messages("ers.summary.page_title")
+    }
+  }
+
+  "Calling SummaryDeclarationController.showSummaryDeclarationPage (GET) with authentication and alt activity empty" should {
+    "show the summary declaration page if alt amends empty and alt activity empty" in {
+      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
+
+      val findList =
+        Seq("scheme-type", "portal-scheme-ref", "scheme-organiser", "trustees", "ErsMetaData")
+      val addList =
+        Map(
+          "reportable-events"       -> Json.toJson(new ReportableEvents(Some(OPTION_NIL_RETURN))),
+          "group-scheme-controller" -> Json.toJson(new GroupSchemeInfo(Option("2"), None))
+        )
+
+      when(mockErsUtil.buildEntitySummary(any())).thenReturn("Company Name, Add1, Add2, Add3, Add4, UK, AA111AA, AB123456, 1234567890")
+      when(mockSessionService.fetchAll()(any())).thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
+
+      val result = testSummaryDeclarationController.showSummaryDeclarationPage(csopRequestObject)(authRequest)
+
+      status(result) shouldBe OK
+      val document = Jsoup.parse(contentAsString(result))
+      document.getElementsByTag("title").get(0).text shouldBe Messages("ers.summary.page_title")
+    }
+
+    "show the global error page if alt amends filled but alt activity empty" in {
+      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
+
+      val findList =
+        Seq("scheme-type", "portal-scheme-ref", "scheme-organiser", "alt-amends-cache-controller", "trustees", "ErsMetaData")
+      val addList =
+        Map(
+          "reportable-events"       -> Json.toJson(new ReportableEvents(Some(OPTION_NIL_RETURN))),
+          "group-scheme-controller" -> Json.toJson(new GroupSchemeInfo(Option("2"), None))
+        )
+
+      when(mockErsUtil.buildEntitySummary(any())).thenReturn("Company Name, Add1, Add2, Add3, Add4, UK, AA111AA, AB123456, 1234567890")
+      when(mockSessionService.fetchAll()(any())).thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
+
+      val result = testSummaryDeclarationController.showSummaryDeclarationPage(csopRequestObject)(authRequest)
+
+      status(result) shouldBe INTERNAL_SERVER_ERROR
+      val document = Jsoup.parse(contentAsString(result))
+      document.getElementsByTag("title").get(0).text shouldBe Messages("ers.global_errors.title")
+    }
+  }
+
+  "Calling SummaryDeclarationController.showSummaryDeclarationPage (GET) with authentication and none alt activity valid scheme" should {
+    "show the summary declaration page if alt amends empty but alt activity 'No' for non compliant scheme" in {
+      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
+
+      val findList =
+        Seq("scheme-type", "portal-scheme-ref", "scheme-organiser", "trustees", "ErsMetaData")
+      val addList =
+        Map(
+          "reportable-events"       -> Json.toJson(new ReportableEvents(Some(OPTION_NIL_RETURN))),
+          "group-scheme-controller" -> Json.toJson(new GroupSchemeInfo(Option("2"), None)),
+          "alt-activity"            -> Json.toJson(new AltAmendsActivity("2"))
+        )
+
+      when(mockErsUtil.buildEntitySummary(any())).thenReturn("Company Name, Add1, Add2, Add3, Add4, UK, AA111AA, AB123456, 1234567890")
+      when(mockSessionService.fetchAll()(any())).thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
+
+      val result = testSummaryDeclarationController.showSummaryDeclarationPage(ersRequestObject)(authRequest)
+
+      status(result) shouldBe OK
+      val document = Jsoup.parse(contentAsString(result))
+      document.getElementsByTag("title").get(0).text shouldBe Messages("ers.summary.page_title")
+    }
+
+    "show the global error page if alt amends filled but alt activity empty for non compliant scheme" in {
+      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
+
+      val findList =
+        Seq("scheme-type", "portal-scheme-ref", "scheme-organiser", "alt-amends-cache-controller", "trustees", "ErsMetaData")
+      val addList =
+        Map(
+          "reportable-events"       -> Json.toJson(new ReportableEvents(Some(OPTION_NIL_RETURN))),
+          "group-scheme-controller" -> Json.toJson(new GroupSchemeInfo(Option("2"), None))
+        )
+
+      when(mockErsUtil.buildEntitySummary(any())).thenReturn("Company Name, Add1, Add2, Add3, Add4, UK, AA111AA, AB123456, 1234567890")
+      when(mockSessionService.fetchAll()(any())).thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
+
+      val result = testSummaryDeclarationController.showSummaryDeclarationPage(ersRequestObject)(authRequest)
+
+      status(result) shouldBe INTERNAL_SERVER_ERROR
+      val document = Jsoup.parse(contentAsString(result))
+      document.getElementsByTag("title").get(0).text shouldBe Messages("ers.global_errors.title")
     }
   }
 }

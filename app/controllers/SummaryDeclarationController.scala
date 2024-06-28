@@ -85,33 +85,83 @@ class SummaryDeclarationController @Inject() (val mcc: MessagesControllerCompone
         }
       } else ("", 0)
 
+      val schemeID = requestObject.getSchemeId
       val altAmendsActivity =
         getEntry[AltAmendsActivity](all, DataKey(ersUtil.ALT_AMENDS_ACTIVITY)).getOrElse(AltAmendsActivity(""))
-      val altActivity       = requestObject.getSchemeId match {
+      val altActivity       = schemeID match {
         case ersUtil.SCHEME_CSOP | ersUtil.SCHEME_SIP | ersUtil.SCHEME_SAYE => altAmendsActivity.altActivity
         case _ => ""
       }
-      Future(
-        Ok(
-          summaryView(
-            requestObject,
-            reportableEvents,
-            fileType,
-            fileNames,
-            fileCount,
-            groupScheme,
-            schemeOrganiser,
-            getCompDetails(all),
-            altActivity,
-            getAltAmends(all),
-            getTrustees(all)
+
+      if (validateCompanies(all, groupScheme) && validateAltAmends(all, altActivity, schemeID)) {
+        Future(
+          Ok(
+            summaryView(
+              requestObject,
+              reportableEvents,
+              fileType,
+              fileNames,
+              fileCount,
+              groupScheme,
+              schemeOrganiser,
+              getCompDetails(all),
+              altActivity,
+              getAltAmends(all),
+              getTrustees(all)
+            )
           )
         )
-      )
+      } else {
+        throw new Exception("Validation of companies or alt activities failed")
+      }
     } recover { case e: Throwable =>
       logger.error(s"[SummaryDeclarationController][showSummaryDeclarationPage] failed to load page with exception ${e.getMessage}.", e)
       getGlobalErrorPage
     }
+
+  def validateCompanies(all: CacheItem, groupScheme: String): Boolean = {
+    if ((groupScheme == ersUtil.OPTION_YES) || (groupScheme == ersUtil.OPTION_NO)) {
+      getCompDetails(all).companies match {
+        case Nil if groupScheme == ersUtil.OPTION_YES =>
+          logger.error(s"[SummaryDeclarationController][showSummaryDeclarationPage] attempted to route to summary page with a group scheme + no companies submitted.")
+          false
+        case List(_, _*) if groupScheme == ersUtil.OPTION_NO =>
+          logger.error(s"[SummaryDeclarationController][showSummaryDeclarationPage] attempted to route to summary page with no group scheme + a filled company list.")
+          false
+        case _ => true
+      }
+    } else {
+      logger.error(s"[SummaryDeclarationController][showSummaryDeclarationPage] attempted to route to summary page with empty group scheme.")
+      false
+    }
+  }
+
+  def validateAltAmends(all: CacheItem, altActivity: String, schemeID: String): Boolean = {
+    val altActivityCheck = schemeID match {
+      case ersUtil.SCHEME_CSOP | ersUtil.SCHEME_SIP | ersUtil.SCHEME_SAYE => true
+      case _ => false
+    }
+
+    if (altActivityCheck) {
+      emptyAltAmends(getAltAmends(all)) match {
+        case true if altActivity == ersUtil.OPTION_YES =>
+          logger.error(s"[SummaryDeclarationController][showSummaryDeclarationPage] attempted to route to summary page with empty alt amends + alt activity selected.")
+          false
+        case false if altActivity == ersUtil.OPTION_NO =>
+          logger.error(s"[SummaryDeclarationController][showSummaryDeclarationPage] attempted to route to summary page with alt amends + 'No' alt activity selected.")
+          false
+        case false if altActivity == "" =>
+          logger.error(s"[SummaryDeclarationController][showSummaryDeclarationPage] attempted to route to summary page with alt activity page skipped + alt amends filled.")
+          false
+        case _ => true
+      }
+    } else if (!emptyAltAmends(getAltAmends(all)) || altActivity == ersUtil.OPTION_YES) {
+      logger.error(s"[SummaryDeclarationController][showSummaryDeclarationPage] attempted to route to summary page with alt amends/activity for non compliant scheme.")
+      false
+    } else {
+      true
+    }
+  }
 
   def getTrustees(cacheItem: CacheItem): TrusteeDetailsList =
     getEntry[TrusteeDetailsList](cacheItem, DataKey(ersUtil.TRUSTEES_CACHE))
@@ -125,8 +175,14 @@ class SummaryDeclarationController @Inject() (val mcc: MessagesControllerCompone
     getEntry[CompanyDetailsList](cacheItem, DataKey(ersUtil.SUBSIDIARY_COMPANIES_CACHE))
       .getOrElse(CompanyDetailsList(List[CompanyDetails]()))
 
+  def emptyAltAmends(alterationAmends: AlterationAmends): Boolean =
+    alterationAmends match {
+      case AlterationAmends(None, None, None, None, None) => true
+      case _                                              => false
+    }
+
   def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result =
-    Ok(
+    InternalServerError(
       globalErrorView(
         "ers.global_errors.title",
         "ers.global_errors.heading",

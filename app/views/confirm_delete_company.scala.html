@@ -1,0 +1,105 @@
+@*
+ * Copyright 2024 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import _root_.utils.ERSUtil
+@import config.ApplicationConfig
+
+@import views.html.templates.reference
+
+@this(
+        govuk_wrapper: govuk_wrapper,
+        govukBackLink: GovukBackLink,
+        govukSummaryList: GovukSummaryList,
+        govukButton: GovukButton,
+        govukRadios: GovukRadios,
+        govukErrorSummary: GovukErrorSummary,
+        hmrcPageHeading: HmrcPageHeading,
+        formWithCSRF: FormWithCSRF
+)
+
+@(requestObject: RequestObject, index: Int, form: Form[_], finalCompany: Boolean, companyName: String)(implicit request: Request[_], messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
+
+@schemeId = @{requestObject.getSchemeId}
+
+@govuk_wrapper(title = ersUtil.getPageElement(schemeId, "ers", "is_group_scheme.page_title") + " " + Messages("ers.title.postfix")) {
+
+    @reference(requestObject.getPageTitle)
+
+    @govukBackLink(BackLink(
+        content = Text(messages("ers.back")),
+        href = ersUtil.getPageBackLink(schemeId,ersUtil.PAGE_CONFIRM_DELETE_COMPANY)
+    ))
+
+    @if(finalCompany) {
+        @hmrcPageHeading(PageHeading(
+            text = messages(ersUtil.getPageElement(schemeId, "ers", "is_group_scheme.page_title"))
+        ))
+    }
+
+    @if(form.hasErrors) {
+        @govukErrorSummary(ErrorSummary(
+            title = Text(messages("validation.summary.heading")),
+            errorList = Seq(ErrorLink(
+                href = Some("#value-error"),
+                content = Text(messages(ersUtil.getPageElement(schemeId, "ers", "group_confirm_delete_company.err.message")))
+            ))
+        ))
+    }
+
+    @if(finalCompany) {
+        <p id="final-page-body-1" class="govuk-body govuk-!-margin-bottom-4">
+            @messages(ersUtil.getPageElement(schemeId, "ers", "group_confirm_delete_company.page_body_1"))
+        </p>
+        <p id="final-page-body-2" class="govuk-body govuk-!-margin-bottom-8">
+            @messages(ersUtil.getPageElement(schemeId, "ers", "group_confirm_delete_company.page_body_2"))
+        </p>
+    }
+
+    @formWithCSRF(action = controllers.subsidiaries.routes.GroupSchemeController.confirmDeleteCompanySubmit(index)) {
+
+        @govukRadios(Radios(
+            fieldset = Some(Fieldset(
+                legend = Some(Legend(
+                    content = Text(messages(ersUtil.getPageElement(schemeId, "ers", "group_confirm_delete_company.page_header", companyName))),
+                    classes = "govuk-fieldset__legend--l",
+                    isPageHeading = true
+                ))
+            )),
+            errorMessage = if(form.hasErrors) Some(ErrorMessage(content = Text(messages(ersUtil.getPageElement(schemeId, "ers", "group_confirm_delete_company.err.message"))))) else None,
+            name = "value",
+            items = Seq(
+                RadioItem(
+                    content = Text(messages("ers.yes")),
+                    id = Some("yes"),
+                    value = Some("true"),
+                ),
+                RadioItem(
+                    content = Text(messages("ers.no")),
+                    id = Some("no"),
+                    value = Some("false"),
+                )
+            ),
+            classes = "govuk-radios--inline",
+        ))
+
+        @govukButton(Button(
+            preventDoubleClick = Some(true),
+            inputType = Some("submit"),
+            content = Text(messages("ers.continue")),
+            attributes = Map("id" -> "continue"),
+        ))
+    }
+}

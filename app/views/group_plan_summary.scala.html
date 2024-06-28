@@ -175,8 +175,10 @@
 				}
 			))
 
-			<p class="govuk-body govuk-!-margin-bottom-8 govuk-link">
-				<input class="govuk-link link_button" type="submit" formaction="@controllers.subsidiaries.routes.GroupSchemeController.deleteCompany(index)" value='@{messages("ers.delete") + " " + company.companyName}'>
+			<p class="govuk-body govuk-!-margin-bottom-8">
+				<a class="govuk-link" id="delete-@index" href=@controllers.subsidiaries.routes.GroupSchemeController.confirmDeleteCompanyPage(index)>
+					@{messages("ers.delete") + " " + company.companyName}
+				</a>
 			</p>
 		}
 
