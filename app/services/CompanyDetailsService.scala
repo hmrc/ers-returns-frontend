@@ -22,12 +22,31 @@ import play.api.mvc.Request
 import utils.ERSUtil
 
 import javax.inject.Inject
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 class CompanyDetailsService @Inject()(
                                        ersUtil: ERSUtil,
                                        sessionService: FrontendSessionService
                                      )(implicit ec: ExecutionContext) extends Logging {
+
+  private def filterDeletedCompany(companyList: CompanyDetailsList, id: Int): List[CompanyDetails] =
+    companyList.companies.zipWithIndex.filterNot(_._2 == id).map(_._1)
+
+  def deleteCompany(index: Int)(implicit request: Request[_]): Future[Boolean] = {
+    (for {
+      companies <- sessionService.fetchCompaniesOptionally()
+      companyDetailsList = CompanyDetailsList(filterDeletedCompany(companies, index))
+      companySize = companies.companies.size
+      _ <- sessionService.cache(ersUtil.SUBSIDIARY_COMPANIES_CACHE, companyDetailsList)
+    } yield {
+      if (companySize == 1) sessionService.cache(ersUtil.GROUP_SCHEME_CACHE_CONTROLLER, GroupSchemeInfo(None, None))
+      true
+    }).recover {
+      case _: Throwable =>
+        logger.warn(s"[CompanyService][deleteCompany] Deleting company failed")
+        false
+    }
+  }
 
   def updateSubsidiaryCompanyCache(index: Int)(implicit request: Request[_]): Unit = {
     try {

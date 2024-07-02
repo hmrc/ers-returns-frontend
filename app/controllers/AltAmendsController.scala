@@ -86,7 +86,9 @@ class AltAmendsController @Inject() (val mcc: MessagesControllerComponents,
               .cache(ersUtil.ALT_AMENDS_ACTIVITY, formData)
               .map { _ =>
                 formData.altActivity match {
-                  case ersUtil.OPTION_NO  => Redirect(routes.SummaryDeclarationController.summaryDeclarationPage())
+                  case ersUtil.OPTION_NO  =>
+                    sessionService.remove(ersUtil.ALT_AMENDS_CACHE_CONTROLLER)
+                    Redirect(routes.SummaryDeclarationController.summaryDeclarationPage())
                   case ersUtil.OPTION_YES => Redirect(routes.AltAmendsController.altAmendsPage())
                 }
               }

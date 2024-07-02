@@ -62,6 +62,7 @@ class FrontendAccessibilitySpec extends AutomaticAccessibilitySpec {
     case confirmation: confirmation =>
       val arbDateString: Arbitrary[String] = fixed("05 December 2023, 10:06AM")
       render(confirmation)(arbRequestObject, arbDateString, arbAsciiString, arbAsciiString, arbAsciiString, arbRequest, arbMessages, arbErsUtil, arbConfig)
+    case confirm_delete_company: confirm_delete_company => render(confirm_delete_company)
     case file_upload_errors: file_upload_errors => render(file_upload_errors)
     case file_upload_problem: file_upload_problem => render(file_upload_problem)
     case global_error: global_error => render(global_error)

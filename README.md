@@ -22,12 +22,12 @@ Run the tests with command:
 sbt clean A11y/test
 ```
 
-|Repositories|Link|
-|------------|----|
-|Backend|https://github.com/hmrc/ers-returns|
-|Stub|https://github.com/hmrc/ers-eoy-return-stub|
-|Performance tests|https://github.com/hmrc/ers-returns-perf-tests|
-|Acceptance tests|https://github.com/hmrc/ers-returns-acceptance-tests|
+| Repositories      | Link                                                 |
+|-------------------|------------------------------------------------------|
+| Backend           | https://github.com/hmrc/ers-returns                  |
+| Stub              | https://github.com/hmrc/ers-eoy-return-stub          |
+| Performance tests | https://github.com/hmrc/ers-returns-perf-tests       |
+| Acceptance tests  | https://github.com/hmrc/ers-returns-acceptance-tests |
 
 ## Routes
 
@@ -41,24 +41,24 @@ Fill in the correct credentials:
   
   Select Submit
 
-| *Url* | *Description* |
-|-------|---------------|
-|http://localhost:9290/submit-your-ers-annual-return?aoRef=123PA12345678&taxYear=2015%2F16&ersSchemeRef=XP1100000000350&schemeType=CSOP&schemeName=MyScheme&hmac=qlQmNGgreJRqJroWUUu0MxLq2oo%3D|Submit your Company Share Option Plan annual return|
-|http://localhost:9290/submit-your-ers-annual-return?aoRef=123PA12345678&taxYear=2015%2F16&ersSchemeRef=XQ1100000000351&schemeType=SAYE&schemeName=MyScheme&hmac=qlQmNGgreJRqJroWUUu0MxLq2oo%3D |Submit your Save As You Earn annual return|
-|http://localhost:9290/submit-your-ers-annual-return?aoRef=123PA12345678&taxYear=2015%2F16&ersSchemeRef=XR1100000000352&schemeType=OTHER&schemeName=MyScheme&hmac=qlQmNGgreJRqJroWUUu0MxLq2oo%3D|Submit your Other annual return|
-|http://localhost:9290/submit-your-ers-annual-return?aoRef=123PA12345678&taxYear=2015%2F16&ersSchemeRef=XS1100000000353&schemeType=SIP&schemeName=MyScheme&hmac=qlQmNGgreJRqJroWUUu0MxLq2oo%3D|Submit your Share Incentive Plan annual return|
-|http://localhost:9290/submit-your-ers-annual-return?aoRef=123PA12345678&taxYear=2015%2F16&ersSchemeRef=XT1100000000354&schemeType=EMI&schemeName=MyScheme&hmac=qlQmNGgreJRqJroWUUu0MxLq2oo%3D|Submit your Enterprise Management Incentives annual return|
+| *Url*                                                                                                                                                                                           | *Description*                                              |
+|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------|
+| http://localhost:9290/submit-your-ers-annual-return?aoRef=123PA12345678&taxYear=2015%2F16&ersSchemeRef=XP1100000000350&schemeType=CSOP&schemeName=MyScheme&hmac=qlQmNGgreJRqJroWUUu0MxLq2oo%3D  | Submit your Company Share Option Plan annual return        |
+| http://localhost:9290/submit-your-ers-annual-return?aoRef=123PA12345678&taxYear=2015%2F16&ersSchemeRef=XQ1100000000351&schemeType=SAYE&schemeName=MyScheme&hmac=qlQmNGgreJRqJroWUUu0MxLq2oo%3D  | Submit your Save As You Earn annual return                 |
+| http://localhost:9290/submit-your-ers-annual-return?aoRef=123PA12345678&taxYear=2015%2F16&ersSchemeRef=XR1100000000352&schemeType=OTHER&schemeName=MyScheme&hmac=qlQmNGgreJRqJroWUUu0MxLq2oo%3D | Submit your Other annual return                            |
+| http://localhost:9290/submit-your-ers-annual-return?aoRef=123PA12345678&taxYear=2015%2F16&ersSchemeRef=XS1100000000353&schemeType=SIP&schemeName=MyScheme&hmac=qlQmNGgreJRqJroWUUu0MxLq2oo%3D   | Submit your Share Incentive Plan annual return             |
+| http://localhost:9290/submit-your-ers-annual-return?aoRef=123PA12345678&taxYear=2015%2F16&ersSchemeRef=XT1100000000354&schemeType=EMI&schemeName=MyScheme&hmac=qlQmNGgreJRqJroWUUu0MxLq2oo%3D   | Submit your Enterprise Management Incentives annual return |
 
 ### Testing in QA
 Due to the nature of the connection to DES in QA, only a collection of Scheme References can be used for a successful submission. Using an invalid Scheme Reference will result in a global error page when submitting the return. The current supported Scheme References are as follows:
 
-| *Url* | *Description* |
-|-------|---------------|
-|https://www.qa.tax.service.gov.uk/submit-your-ers-annual-return?aoRef=123PA12345678&taxYear=2014%2F15&ersSchemeRef=XP1100000000350&schemeType=CSOP&schemeName=MyScheme&hmac=qlQmNGgreJRqJroWUUu0MxLq2oo%3D|Submit your Company Share Option Plan annual return|
-|https://www.qa.tax.service.gov.uk/submit-your-ers-annual-return?aoRef=123PA12345678&taxYear=2014%2F15&ersSchemeRef=XQ1100000000351&schemeType=SAYE&schemeName=MyScheme&hmac=qlQmNGgreJRqJroWUUu0MxLq2oo%3D |Submit your Save As You Earn annual return|
-|https://www.qa.tax.service.gov.uk/submit-your-ers-annual-return?aoRef=123PA12345678&taxYear=2014%2F15&ersSchemeRef=XR1100000000352&schemeType=OTHER&schemeName=MyScheme&hmac=qlQmNGgreJRqJroWUUu0MxLq2oo%3D|Submit your Other annual return|
-|https://www.qa.tax.service.gov.uk/submit-your-ers-annual-return?aoRef=123PA12345678&taxYear=2014%2F15&ersSchemeRef=XS1100000000353&schemeType=SIP&schemeName=MyScheme&hmac=qlQmNGgreJRqJroWUUu0MxLq2oo%3D|Submit your Share Incentive Plan annual return|
-|https://www.qa.tax.service.gov.uk/submit-your-ers-annual-return?aoRef=123PA12345678&taxYear=2014%2F15&ersSchemeRef=XT1100000000354&schemeType=EMI&schemeName=MyScheme&hmac=qlQmNGgreJRqJroWUUu0MxLq2oo%3D|Submit your Enterprise Management Incentives annual return|
+| *Url*                                                                                                                                                                                                       | *Description*                                              |
+|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------|
+| https://www.qa.tax.service.gov.uk/submit-your-ers-annual-return?aoRef=123PA12345678&taxYear=2014%2F15&ersSchemeRef=XP1100000000350&schemeType=CSOP&schemeName=MyScheme&hmac=qlQmNGgreJRqJroWUUu0MxLq2oo%3D  | Submit your Company Share Option Plan annual return        |
+| https://www.qa.tax.service.gov.uk/submit-your-ers-annual-return?aoRef=123PA12345678&taxYear=2014%2F15&ersSchemeRef=XQ1100000000351&schemeType=SAYE&schemeName=MyScheme&hmac=qlQmNGgreJRqJroWUUu0MxLq2oo%3D  | Submit your Save As You Earn annual return                 |
+| https://www.qa.tax.service.gov.uk/submit-your-ers-annual-return?aoRef=123PA12345678&taxYear=2014%2F15&ersSchemeRef=XR1100000000352&schemeType=OTHER&schemeName=MyScheme&hmac=qlQmNGgreJRqJroWUUu0MxLq2oo%3D | Submit your Other annual return                            |
+| https://www.qa.tax.service.gov.uk/submit-your-ers-annual-return?aoRef=123PA12345678&taxYear=2014%2F15&ersSchemeRef=XS1100000000353&schemeType=SIP&schemeName=MyScheme&hmac=qlQmNGgreJRqJroWUUu0MxLq2oo%3D   | Submit your Share Incentive Plan annual return             |
+| https://www.qa.tax.service.gov.uk/submit-your-ers-annual-return?aoRef=123PA12345678&taxYear=2014%2F15&ersSchemeRef=XT1100000000354&schemeType=EMI&schemeName=MyScheme&hmac=qlQmNGgreJRqJroWUUu0MxLq2oo%3D   | Submit your Enterprise Management Incentives annual return |
 
 
 #### License
