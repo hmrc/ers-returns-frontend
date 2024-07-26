@@ -19,7 +19,6 @@
 @import models.upscan.UpscanInitiateResponse
 @import views.html.helper.CSPNonce
 @import views.html.includes.upscan_file_upload_form
-@import views.html.templates._
 
 @this(
 		govuk_wrapper: govuk_wrapper,
@@ -38,9 +37,7 @@
 	<script src='@routes.Assets.versioned("/javascripts/welsh-translation.js")' @{CSPNonce.attr}></script>
 }
 
-@govuk_wrapper(title = messages("ers.upload_ods_file.page_title"), Some(scripts)) {
-
-	@reference(requestObject.getPageTitle)
+@govuk_wrapper(title = messages("ers.upload_ods_file.page_title"), bannerTitle = requestObject.getPageTitle, scriptElement = Some(scripts)) {
 
 	@govukBackLink(BackLink(
 		content = Text(messages("ers.back")),

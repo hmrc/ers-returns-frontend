@@ -16,7 +16,6 @@
 
 @import _root_.utils.ERSUtil
 @import config.ApplicationConfig
-@import views.html.templates.reference
 
 
 @this(
@@ -32,8 +31,7 @@
 
 @schemeId = @{requestObject.getSchemeId}
 
-@govuk_wrapper(title = ersUtil.getPageElement(schemeId, "ers", "is_group_scheme.page_title") + " " + Messages("ers.title.postfix")) {
-	@reference(requestObject.getPageTitle)
+@govuk_wrapper(title = ersUtil.getPageElement(schemeId, "ers", "is_group_scheme.page_title") + " " + Messages("ers.title.postfix"), bannerTitle = requestObject.getPageTitle) {
 
 	@govukBackLink(BackLink(
 		attributes = Map("id" -> "back-link"), classes="js-enabled", content = HtmlContent(messages("ers.back"))

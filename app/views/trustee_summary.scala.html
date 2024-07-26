@@ -16,7 +16,6 @@
 
 @import _root_.utils.ERSUtil
 @import config.ApplicationConfig
-@import views.html.templates.reference
 
 @this(
         govuk_wrapper: govuk_wrapper,
@@ -103,9 +102,7 @@
     trusteeNameSummary ++ trusteeLocationSummary ++ addressSummary
 }
 
-@govuk_wrapper(title = messages("ers.trustees.page_title"), None) {
-
-    @reference(requestObject.getPageTitle)
+@govuk_wrapper(title = messages("ers.trustees.page_title"), bannerTitle = requestObject.getPageTitle, scriptElement = None) {
 
     @govukBackLink(BackLink(
         attributes = Map("id" -> "back-link"), classes="js-enabled", content = HtmlContent(messages("ers.back"))

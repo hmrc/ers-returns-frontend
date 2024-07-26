@@ -19,7 +19,6 @@
 @import uk.gov.hmrc.govukfrontend.views.html.components.implicits._
 @import views.html.helper.CSPNonce
 @import views.html.includes.countries
-@import views.html.templates.reference
 
 @this(
 		govuk_wrapper: govuk_wrapper,
@@ -49,8 +48,7 @@
 	<script type="text/javascript" src='@controllers.routes.Assets.versioned("javascripts/uk-or-overseas-form-reveal.js")' @{CSPNonce.attr}></script>
 }
 
-@govuk_wrapper(title = messages("ers_manual_address_overseas.title"), Some(scripts)) {
-	@reference(requestObject.getPageTitle)
+@govuk_wrapper(title = messages("ers_manual_address_overseas.title"), bannerTitle = requestObject.getPageTitle, scriptElement = Some(scripts)) {
 
 	@govukBackLink(BackLink(
 		attributes = Map("id" -> "back-link"), classes="js-enabled", content = HtmlContent(messages("ers.back"))

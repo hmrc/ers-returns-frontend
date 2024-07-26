@@ -16,7 +16,6 @@
 
 @import _root_.utils.{CountryCodes, ERSUtil}
 @import config.ApplicationConfig
-@import views.html.templates.reference
 
 @this(
         govuk_wrapper: govuk_wrapper,
@@ -164,9 +163,7 @@
 
 }
 
-@govuk_wrapper(title = messages("ers_company_summary.page_title"), None) {
-
-    @reference(requestObject.getPageTitle)
+@govuk_wrapper(title = messages("ers_company_summary.page_title"), bannerTitle = requestObject.getPageTitle, scriptElement = None) {
 
     @govukBackLink(BackLink(
         attributes = Map("id" -> "back-link"), classes = "js-enabled", content = HtmlContent(messages("ers.back"))

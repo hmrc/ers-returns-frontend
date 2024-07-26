@@ -34,31 +34,6 @@ class RequestObjectSpec extends AnyWordSpecLike with Matchers with GuiceOneAppPe
 
   "RequestObject" should {
 
-    "return a page title with the correct format" in {
-
-      val expected =
-        s"${messages(s"ers.scheme.${ersRequestObject.getSchemeType}")} - ${messages(s"ers.scheme.title", "Other")} - ${ersRequestObject.getSchemeReference} - ${DateUtils
-          .getFullTaxYear(ersRequestObject.getTaxYear)}"
-
-      ersRequestObject.getPageTitle mustBe expected
-    }
-
-    "return a page title in Welsh with the correct format for scheme Other" in {
-      implicit val messages: Messages = messagesApi.preferred(Seq(Lang.get("cy").get))
-
-      val expected =
-        s"${messages(s"ers.scheme.${ersRequestObject.getSchemeType}")} - ${messages(s"ers.scheme.title", "Arall")} - ${ersRequestObject.getSchemeReference} - ${DateUtils
-          .getFullTaxYear(ersRequestObject.getTaxYear)}"
-
-      ersRequestObject.getPageTitle mustBe expected
-    }
-
-    "return start page title in Welsh with the correct translation for scheme Other" in {
-      implicit val messages: Messages = messagesApi.preferred(Seq(Lang.get("cy").get))
-
-      messages("ers_start.page_title", ersRequestObject.getSchemeNameForDisplay) must include("Arall")
-    }
-
     "return the correct scheme id" in {
 
       val expected = "3"

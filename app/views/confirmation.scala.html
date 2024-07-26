@@ -16,7 +16,6 @@
 
 @import _root_.utils.{DateUtils, ERSUtil}
 @import config.ApplicationConfig
-@import views.html.templates.reference
 
 @this(
 		govuk_wrapper: govuk_wrapper,
@@ -29,11 +28,7 @@
 
 @schemeId = @{requestObject.getSchemeId}
 
-@govuk_wrapper(title = messages("ers_confirmation.page_title")) {
-
-	@reference(requestObject.getPageTitle)
-
-	<hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
+@govuk_wrapper(title = messages("ers_confirmation.page_title"), bannerTitle = requestObject.getPageTitle) {
 
 	@govukPanel(Panel(
 		title = Text(messages("ers_confirmation.submitted"))

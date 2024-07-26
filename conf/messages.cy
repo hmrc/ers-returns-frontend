@@ -63,49 +63,44 @@ ers.summary.page_title = Crynodeb o Ddatganiad Blynyddol – Gwarantau ar Sail C
 ers_not_found.title = Heb ddod o hyd i’r dudalen – 404
 ers_not_found.heading = Ni ellir dod o hyd i’r dudalen hon
 ers_not_found.message = Gwiriwch eich bod wedi nodi’r cyfeiriad gwe cywir.
-ers_start.page_title = Cyflwyno eich Datganiad Blynyddol ar gyfer {0}
-ers_start.csop.intro_para = Defnyddiwch y gwasanaeth hwn i gyflwyno eich Datganiad ar ddiwedd y flwyddyn dreth. Mae’r gwasanaeth hwn yn disodli ffurflen 35.
-ers_start.emi.intro_para = Defnyddiwch y gwasanaeth hwn i gyflwyno eich Datganiad ar ddiwedd y flwyddyn dreth. Mae’r gwasanaeth hwn yn disodli ffurflen EMI40.
-ers_start.saye.intro_para = Defnyddiwch y gwasanaeth hwn i gyflwyno eich Datganiad ar ddiwedd y flwyddyn dreth. Mae’r gwasanaeth hwn yn disodli ffurflen 34.
-ers_start.sip.intro_para = Defnyddiwch y gwasanaeth hwn i gyflwyno eich Datganiad ar ddiwedd y flwyddyn dreth. Mae’r gwasanaeth hwn yn disodli ffurflen 39.
-ers_start.other.intro_para = Defnyddiwch y gwasanaeth hwn i gyflwyno eich Datganiad ar ddiwedd y flwyddyn dreth. Mae’r gwasanaeth hwn yn disodli ‘ffurflen 42’.
-ers_start.sub_title = Cyn i chi ddechrau
-ers_start.large_files =Os oes gennych ffeil .ods sy’n fwy na 10MB neu ffeil .csv sy’n fwy na 100MB
-ers_start.help = Rhaid bod y person sy’n gweithredu fel ysgrifennydd y cwmni wedi cymeradwyo’r Datganiad hwn a chytuno i unrhyw ddatganiad a wnewch o fewn y gwasanaeth hwn.
-ers_start.you_need = Yn dibynnu ar eich amgylchiadau, mae’n bosibl y bydd angen:
-ers_start.csop.bullet_1 = cofnodi unrhyw ddigwyddiadau sy’n berthnasol i’r cynllun mewn taenlen ODS neu CSV
-ers_start.csop.bullet_2 = y manylion canlynol ar gyfer trefnydd y cynllun - enw a chyfeiriad y cwmni, rhif cofrestru’r cwmni, a’r cyfeirnod Treth Gorfforaeth (a’r un manylion ar gyfer aelodau’r cynllun grŵp sy’n cymryd rhan)
-ers_start.csop.bullet_3 = gwybod am unrhyw addasiadau sydd wedi eu gwneud i nodweddion allweddol y cynllun a rhoi gwybod a oes amrywiad wedi bod yn y cyfalaf cyfranddaliadau
-ers_start.csop.intro_para_2 =Os yw’n berthnasol, gellir nodi manylion aelodau’r cynllun grŵp â llaw neu drwy eu huwchlwytho mewn ffeil .csv (fel sy’n briodol).
-ers_start.emi.bullet_1 = cofnodi unrhyw ddigwyddiadau sy’n berthnasol i’r cynllun mewn taenlen ODS neu CSV
-ers_start.emi.bullet_2 =y manylion canlynol ar gyfer cwmni’r cyflogwr - enw a chyfeiriad y cwmni, rhif cofrestru’r cwmni, a’r cyfeirnod Treth Gorfforaeth (a’r un manylion ar gyfer yr is-gwmnïau hynny sy’n gymwys)
-ers_start.emi.intro_para_2 = Os yw’n berthnasol, gellir nodi manylion is-gwmni cymwys â llaw neu drwy eu huwchlwytho mewn ffeil .csv (fel sy’n briodol).
-ers_start.saye.bullet_1 = cofnodi unrhyw ddigwyddiadau sy’n berthnasol i’r cynllun mewn taenlen ODS neu CSV
-ers_start.saye.bullet_2 = y manylion canlynol ar gyfer trefnydd y cynllun - enw a chyfeiriad y cwmni, rhif cofrestru’r cwmni, a’r cyfeirnod Treth Gorfforaeth (a’r un manylion ar gyfer aelodau’r cynllun grŵp sy’n cymryd rhan)
-ers_start.saye.bullet_3 = gwybod am unrhyw addasiadau sydd wedi eu gwneud i nodweddion allweddol y cynllun a rhoi gwybod a oes amrywiad wedi bod yn y cyfalaf cyfranddaliadau
-ers_start.saye.intro_para_2 = Os yw’n berthnasol, gellir nodi manylion aelodau’r cynllun grŵp â llaw neu drwy eu huwchlwytho mewn ffeil .csv (fel sy’n briodol).
-ers_start.sip.bullet_1 = cofnodi unrhyw ddigwyddiadau sy’n berthnasol i’r cynllun mewn taenlen ODS neu CSV
-ers_start.sip.bullet_2 = ar gyfer y cwmni sefydlu - enw a chyfeiriad y cwmni, rhif cofrestru’r cwmni, a’r cyfeirnod Treth Gorfforaeth (a’r un manylion ar gyfer aelodau’r cynllun grŵp sy’n cymryd rhan)
-ers_start.sip.bullet_3 =enw a chyfeiriad unrhyw ymddiriedolwyr
-ers_start.sip.bullet_4 = gwybod am unrhyw addasiadau sydd wedi eu gwneud i nodweddion allweddol y cynllun
-ers_start.sip.intro_para_2 = Os yw’n berthnasol, gellir nodi manylion aelodau’r plan grŵp â llaw neu drwy eu huwchlwytho mewn ffeil .csv (fel sy’n briodol).
-ers_start.other.bullet_1 = cofnodi unrhyw ddigwyddiadau sy’n berthnasol i’r cynllun mewn taenlen ODS neu CSV
-ers_start.other.bullet_2 =y manylion canlynol ar gyfer trefnydd y cynllun - enw a chyfeiriad y cwmni, rhif cofrestru’r cwmni, a’r cyfeirnod Treth Gorfforaeth (a’r un manylion ar gyfer aelodau’r cynllun grŵp sy’n cymryd rhan)
-ers_start.other.bullet_3 = gwybod am unrhyw addasiadau sydd wedi eu gwneud i nodweddion allweddol y cynllun a rhoi gwybod a oes amrywiad wedi bod yn y cyfalaf cyfranddaliadau
-ers_start.other.intro_para_2 =Os yw’n berthnasol, gellir nodi manylion unrhyw gwmnïau eraill a gwmpesir gan y Datganiad hwn â llaw neu drwy eu huwchlwytho mewn ffeil .csv (fel sy’n briodol).
-ers_start.cant_use = Ni allwch ddefnyddio’r gwasanaeth os oes gennych un o’r canlynol:
+
+#********************************************************************
+# Submit returns
+#********************************************************************
+
+#************** Start Page **************
+ers_start.page_title = Cyflwyno’ch datganiad blynyddol
+ers_start.intro_para = Gallwch ddefnyddio’r gwasanaeth hwn i gyflwyno’ch datganiad blynyddol ar ddiwedd y flwyddyn dreth.
+ers_start.warning_para = Mae’n rhaid i chi argraffu neu gadw copi o’ch datganiad blynyddol ar gyfer eich cofnodion. Ni fyddwch yn gallu gwneud hyn yn ddiweddarach.
+
+ers_start.before.title = Cyn i chi ddechrau
+ers_start.before.par_one_you_can = Gallwch
+ers_start.before.par_one_check_ers_file_link = fwrw golwg dros y ffeil sy’n ymwneud â’ch gwarantau ar sail cyflogaeth
+ers_start.before.par_one_formatting_errors = i sicrhau nad oes unrhyw wallau fformatio ynddi cyn mynd ati i gyflwyno’ch datganiad blynyddol.
+ers_start.before.par_two = Mae’n rhaid i’r person sy’n gweithredu fel ysgrifennydd y cwmni fod wedi cymeradwyo’r datganiad hwn a chytuno i unrhyw ddatganiad a wnewch o fewn y gwasanaeth hwn.
+
+ers_start.need.title = Yr hyn y bydd ei angen arnoch
+ers_start.need.intro = Bydd angen i chi roi manylion y cwmni sefydlu ac unrhyw aelodau’r cynllun grŵp sy’n cymryd rhan. Mae hyn cynnwys:
+ers_start.need.bullet_one = enw’r cwmni
+ers_start.need.bullet_two = cyfeiriad y cwmni
+ers_start.need.bullet_three = Rhif Cofrestru’r Cwmni
+ers_start.need.bullet_four = Cyfeirnod Treth Gorfforaeth y cwmni
+
+ers_start.also_need_sip.intro = Mae’n rhaid i chi roi manylion ar gyfer o leiaf un ymddiriedolwr. Bydd angen i chi roi’r manylion canlynol:
+ers_start.also_need_sip.bullet_one = enw’r ymddiriedolwr
+ers_start.also_need_sip.bullet_two = cyfeiriad yr ymddiriedolwr
+
+ers_start.also_need.intro = Yn dibynnu ar eich amgylchiadau:
+ers_start.also_need.bullet_one = mae’n bosibl y bydd angen i chi gofnodi unrhyw ddigwyddiadau sy’n berthnasol i’r cynllun mewn taenlen ODS neu CSV
+ers_start.also_need.bullet_two = mae’n bosibl y bydd angen i chi wybod am unrhyw addasiadau a wnaed i nodweddion allweddol y cynllun
+
+ers_start.cant_use = Ni allwch ddefnyddio’r gwasanaeth hwn os oes gennych:
 ers_start.cant_use_bullet_1 = ffeil ODS sy’n fwy na 10MB
 ers_start.cant_use_bullet_2 = ffeil CSV sy’n fwy na 100MB
-ers_start.ifrelevant = Os yw’n berthnasol:
-ers_start.relevant_bullet_1 =rhaid i ffeiliau .ods a ddefnyddir i gofnodi digwyddiadau beidio â bod yn fwy na 10MB
-ers_start.relevant_bullet_2 =rhaid i ffeiliau .csv a ddefnyddir i gofnodi digwyddiadau beidio â bod yn fwy na 100MB
-ers_start.csop.relevant_bullet_3 = gellir nodi manylion aelodau’r cynllun grŵp â llaw neu drwy eu huwchlwytho mewn ffeil .csv
-ers_start.emi.relevant_bullet_3 =gellir nodi manylion is-gwmni cymwys â llaw neu drwy eu huwchlwytho mewn ffeil .csv
-ers_start.saye.relevant_bullet_3 = gellir nodi manylion aelodau’r cynllun grŵp â llaw neu drwy eu huwchlwytho mewn ffeil .csv
-ers_start.sip.relevant_bullet_3 = gellir nodi manylion aelodau’r plan grŵp â llaw neu drwy eu huwchlwytho mewn ffeil .csv
-ers_start.other.relevant_bullet_3 = gellir nodi manylion unrhyw gwmnïau eraill a gwmpesir gan y Datganiad hwn â llaw neu drwy eu huwchlwytho mewn ffeil .csv
-ers_start.filesize = E-bostiwch <a class="govuk-link" href="mailto:shareschemes@hmrc.gsi.gov.uk">shareschemes@hmrc.gsi.gov.uk</a> a byddwn yn eich helpu gyda’ch cyflwyniad.
+ers_start.file_size_start = Os oes gennych ffeil sy’n rhy fawr i’w chyflwyno, gallwch anfon e-bost at
+ers_start.file_size_mail_link = shareschemes@hmrc.gsi.gov.uk.
 ers_start.start_now_button = Dechrau nawr
+
 ers_choose.title = Digwyddiadau i’w nodi
 ers_choose.csop.question = A oes opsiynau wedi eu haddasu, wedi eu harfer, wedi eu rhyddhau (gan gynnwys cyfnewidfeydd), wedi dod i ben neu wedi eu dileu, yn ystod y flwyddyn dreth?
 ers_choose.saye.question = A oes opsiynau wedi eu haddasu, wedi eu harfer, wedi eu rhyddhau (gan gynnwys cyfnewidfeydd), wedi dod i ben neu wedi eu dileu, yn ystod y flwyddyn dreth?

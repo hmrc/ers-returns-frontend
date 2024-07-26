@@ -32,7 +32,7 @@
         hmrcTimeoutDialogHelper: HmrcTimeoutDialogHelper
 )
 
-@(title: String, scriptElement: Option[Html] = None, isUserResearchBannerVisible: Boolean = false, disableSignOut: Boolean = false)(contentBlock: Html)(implicit request: Request[_], messages: Messages, applicationConfig: ApplicationConfig)
+@(title: String, bannerTitle: String = "", scriptElement: Option[Html] = None, isUserResearchBannerVisible: Boolean = false, disableSignOut: Boolean = false)(contentBlock: Html)(implicit request: Request[_], messages: Messages, applicationConfig: ApplicationConfig)
 
 @head = {
     <meta name="format-detection" content="telephone=no"/>
@@ -45,6 +45,16 @@
             countdown = Some(applicationConfig.timeOutCountDownSeconds)
         )
     }
+}
+
+@banner = {
+    <div class="govuk-phase-banner">
+        <p class="govuk-phase-banner__content">
+                    <span class="govuk-phase-banner__text">
+                        @bannerTitle
+                    </span>
+        </p>
+    </div>
 }
 
 @content = {
@@ -76,6 +86,7 @@
         templateOverrides = TemplateOverrides(
             additionalHeadBlock = Some(head),
             additionalScriptsBlock = Some(hmrcScripts(scriptsBlock = Some(scripts))),
+            mainContentLayout = Some(content => Html(s"<div class='govuk-grid-row'><div class='govuk-grid-column-full'><p>$banner</p></div><div class='govuk-grid-column-two-thirds'>$content</div></div>"))
         ),
         serviceName = Some(messages("service.name")),
         pageTitle = Some(title),
