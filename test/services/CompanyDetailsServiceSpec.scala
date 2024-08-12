@@ -211,28 +211,18 @@ class CompanyDetailsServiceSpec extends AnyWordSpecLike with ErsTestHelper {
     val companyDetailsService: CompanyDetailsService = new CompanyDetailsService(mockErsUtil, mockSessionService)
 
     "return true" when {
-      "delete operation was successful with multiple companies" in {
-        val cachedCompanies = CompanyDetailsList(listOfCompanies)
 
-        when(mockSessionService.fetch[RequestObject](any())(any(), any())).thenReturn(Future.successful(ersRequestObject))
-        when(mockSessionService.cache(any(), any())(any(), any())).thenReturn(Future.successful(sessionPair))
-        when(mockSessionService.fetchCompaniesOptionally()(any(), any())).thenReturn(Future.successful(cachedCompanies))
+      Seq(("the final company", CompanyDetailsList(List(companyOne))), ("multiple companies", CompanyDetailsList(listOfCompanies))).foreach {
+        case (numberCompanies, cachedCompanies) =>
+          s"delete operation was successful with $numberCompanies" in {
+            when(mockSessionService.fetch[RequestObject](any())(any(), any())).thenReturn(Future.successful(ersRequestObject))
+            when(mockSessionService.cache(any(), any())(any(), any())).thenReturn(Future.successful(sessionPair))
+            when(mockSessionService.fetchCompaniesOptionally()(any(), any())).thenReturn(Future.successful(cachedCompanies))
 
-        val result = companyDetailsService.deleteCompany(0).futureValue
+            val result = companyDetailsService.deleteCompany(cachedCompanies, 0).futureValue
 
-        result shouldBe true
-      }
-
-      "delete operation was successful with final company" in {
-        val cachedCompanies = CompanyDetailsList(List(companyOne))
-
-        when(mockSessionService.fetch[RequestObject](any())(any(), any())).thenReturn(Future.successful(ersRequestObject))
-        when(mockSessionService.cache(any(), any())(any(), any())).thenReturn(Future.successful(sessionPair))
-        when(mockSessionService.fetchCompaniesOptionally()(any(), any())).thenReturn(Future.successful(cachedCompanies))
-
-        val result = companyDetailsService.deleteCompany(0).futureValue
-
-        result shouldBe true
+            result shouldBe true
+          }
       }
     }
 
@@ -244,7 +234,7 @@ class CompanyDetailsServiceSpec extends AnyWordSpecLike with ErsTestHelper {
         when(mockSessionService.cache(any(), any())(any(), any())).thenReturn(Future.failed(new Exception("caching failed")))
         when(mockSessionService.fetchCompaniesOptionally()(any(), any())).thenReturn(Future.successful(cachedCompanies))
 
-        val result = companyDetailsService.deleteCompany(0).futureValue
+        val result = companyDetailsService.deleteCompany(cachedCompanies, 0).futureValue
 
         result shouldBe false
       }

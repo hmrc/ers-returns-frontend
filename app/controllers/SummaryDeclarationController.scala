@@ -119,47 +119,29 @@ class SummaryDeclarationController @Inject() (val mcc: MessagesControllerCompone
       getGlobalErrorPage
     }
 
-  def validateCompanies(all: CacheItem, groupScheme: String): Boolean = {
-    if ((groupScheme == ersUtil.OPTION_YES) || (groupScheme == ersUtil.OPTION_NO)) {
-      getCompDetails(all).companies match {
-        case Nil if groupScheme == ersUtil.OPTION_YES =>
-          logger.error(s"[SummaryDeclarationController][showSummaryDeclarationPage] attempted to route to summary page with a group scheme + no companies submitted.")
-          false
-        case List(_, _*) if groupScheme == ersUtil.OPTION_NO =>
-          logger.error(s"[SummaryDeclarationController][showSummaryDeclarationPage] attempted to route to summary page with no group scheme + a filled company list.")
-          false
-        case _ => true
-      }
+  private def validateCompanies(all: CacheItem, groupScheme: String): Boolean = {
+    val companiesExist = getCompDetails(all).companies.nonEmpty
+    if ((companiesExist && groupScheme == ersUtil.OPTION_YES) || (!companiesExist && groupScheme == ersUtil.OPTION_NO)) {
+      true
     } else {
-      logger.error(s"[SummaryDeclarationController][showSummaryDeclarationPage] attempted to route to summary page with empty group scheme.")
+      logger.error(s"[SummaryDeclarationController][showSummaryDeclarationPage] attempted to route to summary page with incompatible state: Companies Filled = $companiesExist. Group Scheme = $groupScheme")
       false
     }
   }
 
-  def validateAltAmends(all: CacheItem, altActivity: String, schemeID: String): Boolean = {
-    val altActivityCheck = schemeID match {
-      case ersUtil.SCHEME_CSOP | ersUtil.SCHEME_SIP | ersUtil.SCHEME_SAYE => true
-      case _ => false
-    }
+  def isValidAltActivity(altActivity: String, altAmendsEmpty: Boolean): Boolean =
+    (altActivity == ersUtil.OPTION_NO && altAmendsEmpty) ||
+    (altActivity.isEmpty && altAmendsEmpty) ||
+    (altActivity == ersUtil.OPTION_YES && !altAmendsEmpty)
+
+  private def validateAltAmends(all: CacheItem, altActivity: String, schemeID: String): Boolean = {
+    val altActivityCheck = Seq(ersUtil.SCHEME_CSOP, ersUtil.SCHEME_SIP, ersUtil.SCHEME_SAYE) contains schemeID
+    val altAmendsEmpty = getAltAmends(all).checkIfEmpty
 
     if (altActivityCheck) {
-      emptyAltAmends(getAltAmends(all)) match {
-        case true if altActivity == ersUtil.OPTION_YES =>
-          logger.error(s"[SummaryDeclarationController][showSummaryDeclarationPage] attempted to route to summary page with empty alt amends + alt activity selected.")
-          false
-        case false if altActivity == ersUtil.OPTION_NO =>
-          logger.error(s"[SummaryDeclarationController][showSummaryDeclarationPage] attempted to route to summary page with alt amends + 'No' alt activity selected.")
-          false
-        case false if altActivity == "" =>
-          logger.error(s"[SummaryDeclarationController][showSummaryDeclarationPage] attempted to route to summary page with alt activity page skipped + alt amends filled.")
-          false
-        case _ => true
-      }
-    } else if (!emptyAltAmends(getAltAmends(all)) || altActivity == ersUtil.OPTION_YES) {
-      logger.error(s"[SummaryDeclarationController][showSummaryDeclarationPage] attempted to route to summary page with alt amends/activity for non compliant scheme.")
-      false
+      isValidAltActivity(altActivity, altAmendsEmpty)
     } else {
-      true
+      altAmendsEmpty && (altActivity.isEmpty || altActivity == ersUtil.OPTION_NO)
     }
   }
 
@@ -174,12 +156,6 @@ class SummaryDeclarationController @Inject() (val mcc: MessagesControllerCompone
   def getCompDetails(cacheItem: CacheItem): CompanyDetailsList =
     getEntry[CompanyDetailsList](cacheItem, DataKey(ersUtil.SUBSIDIARY_COMPANIES_CACHE))
       .getOrElse(CompanyDetailsList(List[CompanyDetails]()))
-
-  def emptyAltAmends(alterationAmends: AlterationAmends): Boolean =
-    alterationAmends match {
-      case AlterationAmends(None, None, None, None, None) => true
-      case _                                              => false
-    }
 
   def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result =
     InternalServerError(

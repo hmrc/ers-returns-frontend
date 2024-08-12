@@ -29,17 +29,15 @@ class CompanyDetailsService @Inject()(
                                        sessionService: FrontendSessionService
                                      )(implicit ec: ExecutionContext) extends Logging {
 
-  private def filterDeletedCompany(companyList: CompanyDetailsList, id: Int): List[CompanyDetails] =
-    companyList.companies.zipWithIndex.filterNot(_._2 == id).map(_._1)
+  private def filterDeletedCompany(companyList: CompanyDetailsList, indexToDelete: Int): List[CompanyDetails] =
+    companyList.companies.zipWithIndex.filterNot(_._2 == indexToDelete).map(_._1)
 
-  def deleteCompany(index: Int)(implicit request: Request[_]): Future[Boolean] = {
+  def deleteCompany(companies: CompanyDetailsList, index: Int)(implicit request: Request[_]): Future[Boolean] = {
+    val activeCompanies = CompanyDetailsList(filterDeletedCompany(companies, index))
     (for {
-      companies <- sessionService.fetchCompaniesOptionally()
-      companyDetailsList = CompanyDetailsList(filterDeletedCompany(companies, index))
-      companySize = companies.companies.size
-      _ <- sessionService.cache(ersUtil.SUBSIDIARY_COMPANIES_CACHE, companyDetailsList)
+        _ <- sessionService.cache(ersUtil.SUBSIDIARY_COMPANIES_CACHE, activeCompanies)
     } yield {
-      if (companySize == 1) sessionService.cache(ersUtil.GROUP_SCHEME_CACHE_CONTROLLER, GroupSchemeInfo(None, None))
+      if (activeCompanies.companies.isEmpty) sessionService.cache(ersUtil.GROUP_SCHEME_CACHE_CONTROLLER, GroupSchemeInfo(None, None))
       true
     }).recover {
       case _: Throwable =>

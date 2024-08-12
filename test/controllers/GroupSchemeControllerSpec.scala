@@ -277,7 +277,7 @@ class GroupSchemeControllerSpec
           schemeType = Some("CSOP")
         )))
       when(mockSessionService.fetchCompaniesOptionally()(any(), any())).thenReturn(Future.successful(companyDetailsList))
-      when(mockCompanyDetailsService.deleteCompany(any())(any())).thenReturn(Future.successful(true))
+      when(mockCompanyDetailsService.deleteCompany(any(), any())(any())).thenReturn(Future.successful(true))
 
       val result = testGroupSchemeController.confirmDeleteCompanySubmit(0)(authRequest)
 
@@ -295,7 +295,7 @@ class GroupSchemeControllerSpec
           schemeName = Some("CSOP"),
           schemeType = Some("CSOP")
         )))
-      when(mockCompanyDetailsService.deleteCompany(any())(any())).thenReturn(Future.successful(true))
+      when(mockCompanyDetailsService.deleteCompany(any(), any())(any())).thenReturn(Future.successful(true))
 
       val result = testGroupSchemeController.confirmDeleteCompanySubmit(0)(authRequest)
 
@@ -341,44 +341,27 @@ class GroupSchemeControllerSpec
       headers(result)(implicitly)("Location") shouldBe "/submit-your-ers-annual-return/subsidiary-company-summary"
     }
 
-    "give a redirect to getGlobalErrorPage if the company is fails to delete" in {
-      setAuthMocks()
-      val authRequest =
-        buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(("value", "true")))
-      when(mockSessionService.fetchCompaniesOptionally()(any(), any())).thenReturn(Future.successful(companyDetailsList))
-      when(mockSessionService.fetch[RequestObject](refEq(mockErsUtil.ERS_REQUEST_OBJECT))(any(), any()))
-        .thenReturn(Future.successful(ersRequestObject.copy(
-          schemeName = Some("CSOP"),
-          schemeType = Some("CSOP")
-        )))
-      when(mockCompanyDetailsService.deleteCompany(any())(any())).thenReturn(Future.successful(false))
+    Seq(("the final", companyDetailsListSingle), ("a", companyDetailsList)).foreach {
+      case (numberCompanies, companyDetails) =>
+        s"give a redirect to getGlobalErrorPage if $numberCompanies company fails to delete" in {
+          setAuthMocks()
+          val authRequest =
+            buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(("value", "true")))
+          when(mockSessionService.fetchCompaniesOptionally()(any(), any())).thenReturn(Future.successful(companyDetails))
+          when(mockSessionService.fetch[RequestObject](refEq(mockErsUtil.ERS_REQUEST_OBJECT))(any(), any()))
+            .thenReturn(Future.successful(ersRequestObject.copy(
+              schemeName = Some("CSOP"),
+              schemeType = Some("CSOP")
+            )))
+          when(mockCompanyDetailsService.deleteCompany(any(), any())(any())).thenReturn(Future.successful(false))
 
-      val result = testGroupSchemeController.confirmDeleteCompanySubmit(0)(authRequest)
+          val result = testGroupSchemeController.confirmDeleteCompanySubmit(0)(authRequest)
 
-      status(result) shouldBe INTERNAL_SERVER_ERROR
+          status(result) shouldBe INTERNAL_SERVER_ERROR
 
-      val document = Jsoup.parse(contentAsString(result))
-      document.getElementsByTag("title").get(0).text shouldBe Messages("ers.global_errors.title")
-    }
-
-    "give a redirect to getGlobalErrorPage if the final company fails to delete" in {
-      setAuthMocks()
-      val authRequest =
-        buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(("value", "true")))
-      when(mockSessionService.fetchCompaniesOptionally()(any(), any())).thenReturn(Future.successful(companyDetailsListSingle))
-      when(mockSessionService.fetch[RequestObject](refEq(mockErsUtil.ERS_REQUEST_OBJECT))(any(), any()))
-        .thenReturn(Future.successful(ersRequestObject.copy(
-          schemeName = Some("CSOP"),
-          schemeType = Some("CSOP")
-        )))
-      when(mockCompanyDetailsService.deleteCompany(any())(any())).thenReturn(Future.successful(false))
-
-      val result = testGroupSchemeController.confirmDeleteCompanySubmit(0)(authRequest)
-
-      status(result) shouldBe INTERNAL_SERVER_ERROR
-
-      val document = Jsoup.parse(contentAsString(result))
-      document.getElementsByTag("title").get(0).text shouldBe Messages("ers.global_errors.title")
+          val document = Jsoup.parse(contentAsString(result))
+          document.getElementsByTag("title").get(0).text shouldBe Messages("ers.global_errors.title")
+        }
     }
   }
 

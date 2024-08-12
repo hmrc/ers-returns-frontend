@@ -63,15 +63,15 @@ object ErsMetaData extends LocalDateTimeFormat {
   implicit val format: OFormat[ErsMetaData] = Json.format[ErsMetaData]
 }
 
-case class Person(name: String, relation: String)
-
 case class AlterationAmends(
-  altAmendsTerms: Option[String],
-  altAmendsEligibility: Option[String],
-  altAmendsExchange: Option[String],
-  altAmendsVariations: Option[String],
-  altAmendsOther: Option[String]
-)
+                             altAmendsTerms: Option[String],
+                             altAmendsEligibility: Option[String],
+                             altAmendsExchange: Option[String],
+                             altAmendsVariations: Option[String],
+                             altAmendsOther: Option[String]
+                           ){
+  val checkIfEmpty: Boolean = List(altAmendsTerms, altAmendsEligibility, altAmendsExchange, altAmendsVariations, altAmendsOther).forall{_.isEmpty}
+}
 
 object AlterationAmends {
   implicit val format: OFormat[AlterationAmends] = Json.format[AlterationAmends]

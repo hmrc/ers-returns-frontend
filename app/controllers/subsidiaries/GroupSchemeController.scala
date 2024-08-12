@@ -34,6 +34,7 @@ import services.CompanyDetailsService
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success}
 
 @Singleton
 class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
@@ -55,30 +56,34 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
 
   private val form: Form[Boolean] = yesNoFormProvider.withPrefix("delete-company")
 
-  def confirmDeleteCompanyPage(id: Int): Action[AnyContent] = authAction.async { implicit request =>
-    showConfirmDeleteCompanyPage(id)
-  }
-
-  def showConfirmDeleteCompanyPage(id: Int)(implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
-    (for {
-      requestObject   <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
-      companyDetailsList <- sessionService.fetchCompaniesOptionally()
-      companyLength   = companyDetailsList.companies.length
-    } yield {
-      Ok(confirmDeleteCompanyView(requestObject, id, form, companyLength == 1, companyDetailsList.companies(id).companyName))
-    }) recover { case _: Exception =>
-      logger.error(
-        s"[GroupSchemeController][showConfirmDeleteCompany] Fetching companies failed, timestamp: ${System.currentTimeMillis()}."
-      )
-      getGlobalErrorPage
-    }
-
-  def confirmDeleteCompanySubmit(index: Int): Action[AnyContent] = authAction.async { implicit request =>
-    val requestObjectWithCompanyList = for {
+  private def getRequestObjAndCompanyDetails()(implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[(RequestObject, Int, CompanyDetailsList)] =
+    for {
       requestObject <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
       companyDetailsList <- sessionService.fetchCompaniesOptionally()
       companySize = companyDetailsList.companies.size
     } yield (requestObject, companySize, companyDetailsList)
+
+
+  def confirmDeleteCompanyPage(id: Int): Action[AnyContent] = authAction.async { implicit request =>
+    showConfirmDeleteCompanyPage(id)
+  }
+
+  def showConfirmDeleteCompanyPage(id: Int)(implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] = {
+    getRequestObjAndCompanyDetails() transformWith {
+      case _ @ Success((requestObject: RequestObject, companySize: Int, companyDetailsList: CompanyDetailsList)) =>
+        Future.successful(Ok(confirmDeleteCompanyView(requestObject, id, form, companySize == 1, companyDetailsList.companies(id).companyName)))
+      case Failure(cause) =>
+        logger.error(
+          s"[GroupSchemeController][showConfirmDeleteCompany] getRequestObjAndCompanyDetails failed, timestamp: ${System.currentTimeMillis()}, error: $cause"
+        )
+        Future.successful(getGlobalErrorPage)
+    } recover { case _: Exception =>
+      getGlobalErrorPage
+    }
+  }
+
+  def confirmDeleteCompanySubmit(index: Int): Action[AnyContent] = authAction.async { implicit request =>
+    val requestObjectWithCompanyList = getRequestObjAndCompanyDetails()
 
     requestObjectWithCompanyList.flatMap { case (requestObject, companySize, companyDetailsList) =>
       form.bindFromRequest().fold(
@@ -92,17 +97,21 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
           )
         )),
         {
-          case true if companySize == 1 =>
-            companyService.deleteCompany(index).map {
-              case true => Redirect(controllers.subsidiaries.routes.GroupSchemeController.groupSchemePage())
-              case _    => getGlobalErrorPage
+          (formSubmissionRadio: Boolean) => {
+            if (formSubmissionRadio) {
+              val pageToRedirectTo = if (companySize == 1) {
+                controllers.subsidiaries.routes.GroupSchemeController.groupSchemePage()
+              } else {
+                controllers.subsidiaries.routes.GroupSchemeController.groupPlanSummaryPage()
+              }
+              companyService.deleteCompany(companyDetailsList, index).map {
+                case true => Redirect(pageToRedirectTo)
+                case _    => getGlobalErrorPage
+              }
+            } else {
+              Future.successful(Redirect(controllers.subsidiaries.routes.GroupSchemeController.groupPlanSummaryPage()))
             }
-          case true =>
-            companyService.deleteCompany(index).map {
-              case true => Redirect(controllers.subsidiaries.routes.GroupSchemeController.groupPlanSummaryPage())
-              case _    => getGlobalErrorPage
-            }
-          case _ => Future.successful(Redirect(controllers.subsidiaries.routes.GroupSchemeController.groupPlanSummaryPage()))
+          }
         }
       )
     } recover { case _: Exception =>

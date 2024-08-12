@@ -82,6 +82,7 @@ class SummaryDeclarationControllerSpec
     Option("AB123456"),
     Option("1234567890")
   )
+  val schemeOrganiserString: String = "Company Name, Add1, Add2, Add3, Add4, UK, AA111AA, AB123456, 1234567890"
   val groupSchemeInfo: GroupSchemeInfo = new GroupSchemeInfo(Option("1"), None)
   val gscomp: CompanyDetails =
     new CompanyDetails(Fixtures.companyName, "Address Line 1", None, None, None, None, Some("UK"), None, None, true)
@@ -214,7 +215,7 @@ class SummaryDeclarationControllerSpec
         "alt-activity"      -> Json.toJson(new AltAmendsActivity("2"))
       )
 
-      when(mockErsUtil.buildEntitySummary(any())).thenReturn("Company Name, Add1, Add2, Add3, Add4, UK, AA111AA, AB123456, 1234567890")
+      when(mockErsUtil.buildEntitySummary(any())).thenReturn(schemeOrganiserString)
       when(mockSessionService.fetchAll()(any())).thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
 
       val result = testSummaryDeclarationController.showSummaryDeclarationPage(ersRequestObject)(authRequest)
@@ -238,7 +239,7 @@ class SummaryDeclarationControllerSpec
         "alt-activity"      -> Json.toJson(new AltAmendsActivity("2"))
       )
 
-      when(mockErsUtil.buildEntitySummary(any())).thenReturn("Company Name, Add1, Add2, Add3, Add4, UK, AA111AA, AB123456, 1234567890")
+      when(mockErsUtil.buildEntitySummary(any())).thenReturn(schemeOrganiserString)
       when(mockSessionService.fetchAll()(any())).thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
 
       val result = testSummaryDeclarationController.showSummaryDeclarationPage(ersRequestObject)(authRequest)
@@ -262,7 +263,7 @@ class SummaryDeclarationControllerSpec
         "alt-activity"      -> Json.toJson(new AltAmendsActivity("2"))
       )
 
-      when(mockErsUtil.buildEntitySummary(any())).thenReturn("Company Name, Add1, Add2, Add3, Add4, UK, AA111AA, AB123456, 1234567890")
+      when(mockErsUtil.buildEntitySummary(any())).thenReturn(schemeOrganiserString)
       when(mockSessionService.fetchAll()(any())).thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
 
       val result = testSummaryDeclarationController.showSummaryDeclarationPage(ersRequestObject)(authRequest)
@@ -286,7 +287,7 @@ class SummaryDeclarationControllerSpec
         "alt-activity"    -> Json.toJson(new AltAmendsActivity("2"))
       )
 
-      when(mockErsUtil.buildEntitySummary(any())).thenReturn("Company Name, Add1, Add2, Add3, Add4, UK, AA111AA, AB123456, 1234567890")
+      when(mockErsUtil.buildEntitySummary(any())).thenReturn(schemeOrganiserString)
       when(mockSessionService.fetchAll()(any())).thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
 
       val result = testSummaryDeclarationController.showSummaryDeclarationPage(ersRequestObject)(authRequest)
@@ -309,7 +310,7 @@ class SummaryDeclarationControllerSpec
           "alt-activity"      -> Json.toJson(new AltAmendsActivity("2"))
         )
 
-      when(mockErsUtil.buildEntitySummary(any())).thenReturn("Company Name, Add1, Add2, Add3, Add4, UK, AA111AA, AB123456, 1234567890")
+      when(mockErsUtil.buildEntitySummary(any())).thenReturn(schemeOrganiserString)
       when(mockSessionService.fetchAll()(any())).thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
 
       val result = testSummaryDeclarationController.showSummaryDeclarationPage(ersRequestObject)(authRequest)
@@ -332,7 +333,7 @@ class SummaryDeclarationControllerSpec
           "alt-activity"      -> Json.toJson(new AltAmendsActivity("2"))
         )
 
-      when(mockErsUtil.buildEntitySummary(any())).thenReturn("Company Name, Add1, Add2, Add3, Add4, UK, AA111AA, AB123456, 1234567890")
+      when(mockErsUtil.buildEntitySummary(any())).thenReturn(schemeOrganiserString)
       when(mockSessionService.fetchAll()(any())).thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
 
       val result = testSummaryDeclarationController.showSummaryDeclarationPage(ersRequestObject)(authRequest)
@@ -353,7 +354,7 @@ class SummaryDeclarationControllerSpec
           "alt-activity"      -> Json.toJson(new AltAmendsActivity("2"))
         )
 
-      when(mockErsUtil.buildEntitySummary(any())).thenReturn("Company Name, Add1, Add2, Add3, Add4, UK, AA111AA, AB123456, 1234567890")
+      when(mockErsUtil.buildEntitySummary(any())).thenReturn(schemeOrganiserString)
       when(mockSessionService.fetchAll()(any())).thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
 
       val result = testSummaryDeclarationController.showSummaryDeclarationPage(ersRequestObject)(authRequest)
@@ -377,7 +378,7 @@ class SummaryDeclarationControllerSpec
           "alt-activity"            -> Json.toJson(new AltAmendsActivity("2"))
         )
 
-      when(mockErsUtil.buildEntitySummary(any())).thenReturn("Company Name, Add1, Add2, Add3, Add4, UK, AA111AA, AB123456, 1234567890")
+      when(mockErsUtil.buildEntitySummary(any())).thenReturn(schemeOrganiserString)
       when(mockSessionService.fetchAll()(any())).thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
 
       val result = testSummaryDeclarationController.showSummaryDeclarationPage(ersRequestObject)(authRequest)
@@ -399,7 +400,7 @@ class SummaryDeclarationControllerSpec
           "alt-activity"            -> Json.toJson(new AltAmendsActivity("2"))
         )
 
-      when(mockErsUtil.buildEntitySummary(any())).thenReturn("Company Name, Add1, Add2, Add3, Add4, UK, AA111AA, AB123456, 1234567890")
+      when(mockErsUtil.buildEntitySummary(any())).thenReturn(schemeOrganiserString)
       when(mockSessionService.fetchAll()(any())).thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
 
       val result = testSummaryDeclarationController.showSummaryDeclarationPage(ersRequestObject)(authRequest)
@@ -422,7 +423,7 @@ class SummaryDeclarationControllerSpec
           "group-scheme-controller" -> Json.toJson(new GroupSchemeInfo(Option("2"), None))
         )
 
-      when(mockErsUtil.buildEntitySummary(any())).thenReturn("Company Name, Add1, Add2, Add3, Add4, UK, AA111AA, AB123456, 1234567890")
+      when(mockErsUtil.buildEntitySummary(any())).thenReturn(schemeOrganiserString)
       when(mockSessionService.fetchAll()(any())).thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
 
       val result = testSummaryDeclarationController.showSummaryDeclarationPage(csopRequestObject)(authRequest)
@@ -443,7 +444,7 @@ class SummaryDeclarationControllerSpec
           "group-scheme-controller" -> Json.toJson(new GroupSchemeInfo(Option("2"), None))
         )
 
-      when(mockErsUtil.buildEntitySummary(any())).thenReturn("Company Name, Add1, Add2, Add3, Add4, UK, AA111AA, AB123456, 1234567890")
+      when(mockErsUtil.buildEntitySummary(any())).thenReturn(schemeOrganiserString)
       when(mockSessionService.fetchAll()(any())).thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
 
       val result = testSummaryDeclarationController.showSummaryDeclarationPage(csopRequestObject)(authRequest)
@@ -467,7 +468,7 @@ class SummaryDeclarationControllerSpec
           "alt-activity"            -> Json.toJson(new AltAmendsActivity("2"))
         )
 
-      when(mockErsUtil.buildEntitySummary(any())).thenReturn("Company Name, Add1, Add2, Add3, Add4, UK, AA111AA, AB123456, 1234567890")
+      when(mockErsUtil.buildEntitySummary(any())).thenReturn(schemeOrganiserString)
       when(mockSessionService.fetchAll()(any())).thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
 
       val result = testSummaryDeclarationController.showSummaryDeclarationPage(csopRequestObject)(authRequest)
@@ -489,7 +490,7 @@ class SummaryDeclarationControllerSpec
           "alt-activity"            -> Json.toJson(new AltAmendsActivity("2"))
         )
 
-      when(mockErsUtil.buildEntitySummary(any())).thenReturn("Company Name, Add1, Add2, Add3, Add4, UK, AA111AA, AB123456, 1234567890")
+      when(mockErsUtil.buildEntitySummary(any())).thenReturn(schemeOrganiserString)
       when(mockSessionService.fetchAll()(any())).thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
 
       val result = testSummaryDeclarationController.showSummaryDeclarationPage(csopRequestObject)(authRequest)
@@ -512,7 +513,7 @@ class SummaryDeclarationControllerSpec
           "group-scheme-controller" -> Json.toJson(new GroupSchemeInfo(Option("2"), None))
         )
 
-      when(mockErsUtil.buildEntitySummary(any())).thenReturn("Company Name, Add1, Add2, Add3, Add4, UK, AA111AA, AB123456, 1234567890")
+      when(mockErsUtil.buildEntitySummary(any())).thenReturn(schemeOrganiserString)
       when(mockSessionService.fetchAll()(any())).thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
 
       val result = testSummaryDeclarationController.showSummaryDeclarationPage(csopRequestObject)(authRequest)
@@ -533,7 +534,7 @@ class SummaryDeclarationControllerSpec
           "group-scheme-controller" -> Json.toJson(new GroupSchemeInfo(Option("2"), None))
         )
 
-      when(mockErsUtil.buildEntitySummary(any())).thenReturn("Company Name, Add1, Add2, Add3, Add4, UK, AA111AA, AB123456, 1234567890")
+      when(mockErsUtil.buildEntitySummary(any())).thenReturn(schemeOrganiserString)
       when(mockSessionService.fetchAll()(any())).thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
 
       val result = testSummaryDeclarationController.showSummaryDeclarationPage(csopRequestObject)(authRequest)
@@ -557,7 +558,7 @@ class SummaryDeclarationControllerSpec
           "alt-activity"            -> Json.toJson(new AltAmendsActivity("2"))
         )
 
-      when(mockErsUtil.buildEntitySummary(any())).thenReturn("Company Name, Add1, Add2, Add3, Add4, UK, AA111AA, AB123456, 1234567890")
+      when(mockErsUtil.buildEntitySummary(any())).thenReturn(schemeOrganiserString)
       when(mockSessionService.fetchAll()(any())).thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
 
       val result = testSummaryDeclarationController.showSummaryDeclarationPage(ersRequestObject)(authRequest)
@@ -578,7 +579,7 @@ class SummaryDeclarationControllerSpec
           "group-scheme-controller" -> Json.toJson(new GroupSchemeInfo(Option("2"), None))
         )
 
-      when(mockErsUtil.buildEntitySummary(any())).thenReturn("Company Name, Add1, Add2, Add3, Add4, UK, AA111AA, AB123456, 1234567890")
+      when(mockErsUtil.buildEntitySummary(any())).thenReturn(schemeOrganiserString)
       when(mockSessionService.fetchAll()(any())).thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
 
       val result = testSummaryDeclarationController.showSummaryDeclarationPage(ersRequestObject)(authRequest)
