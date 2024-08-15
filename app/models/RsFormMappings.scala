@@ -170,7 +170,7 @@ object RsFormMappings {
       .verifying(Messages("ers_trustee_details.err.address_line5"), so => checkAddressLength(so, "trusteeAddressFields.addressLine5"))
       .verifying(Messages("ers_trustee_details.err.invalidChars.address_line5"), so => validInputCharacters(so, addresssRegx))),
     trusteeAddressFields.country -> optional(text
-      verifying pattern(addresssRegx.r, error = Messages("ers_scheme_organiser.err.summary.invalid_country")))
+      verifying pattern(countryCodeRegx.r, error = Messages("ers_scheme_organiser.err.summary.invalid_country")))
   )(TrusteeAddress.apply)(TrusteeAddress.unapply))
 
   def trusteeAddressUkForm()(implicit messages: Messages): Form[TrusteeAddress] = Form(mapping(
@@ -191,7 +191,7 @@ object RsFormMappings {
       .transform((x: Option[String]) => x.map(_.toUpperCase()), (z: Option[String]) => z.map(_.toUpperCase()))
       .verifying(Messages("ers_trustee_details.err.postcode"), so => isValidPostcode(so)),
     trusteeAddressFields.country -> optional(text
-      .verifying(pattern(addresssRegx.r, error = Messages("ers_scheme_organiser.err.summary.invalid_country"))))
+      .verifying(pattern(countryCodeRegx.r, error = Messages("ers_scheme_organiser.err.summary.invalid_country"))))
   )(TrusteeAddress.apply)(TrusteeAddress.unapply))
 
   def companyAddressUkForm()(implicit messages: Messages): Form[CompanyAddress] = Form(mapping(
@@ -211,7 +211,7 @@ object RsFormMappings {
       .transform((x: Option[String]) => x.map(_.toUpperCase()), (z: Option[String]) => z.map(_.toUpperCase()))
       .verifying(Messages("ers_manual_company_details.err.postcode"), so => isValidPostcode(so)),
     companyAddressFields.country -> optional(text
-      .verifying(pattern(addresssRegx.r, error = Messages("ers_scheme_organiser.err.summary.invalid_country"))))
+      .verifying(pattern(countryCodeRegx.r, error = Messages("ers_scheme_organiser.err.summary.invalid_country"))))
   )(CompanyAddress.apply)(CompanyAddress.unapply))
 
   def companyAddressOverseasForm()(implicit messages: Messages): Form[CompanyAddress] = Form(mapping(
@@ -231,7 +231,7 @@ object RsFormMappings {
       .verifying(Messages("ers_manual_company_details.err.address_line5"), so => checkAddressLength(so, "addressLine5"))
       .verifying(Messages("ers_manual_company_details.err.invalidChars.address_line5"), so => validInputCharacters(so, addresssRegx))),
     companyAddressFields.country -> optional(text
-      .verifying(pattern(addresssRegx.r, error = Messages("ers_scheme_organiser.err.summary.invalid_country"))))
+      .verifying(pattern(countryCodeRegx.r, error = Messages("ers_scheme_organiser.err.summary.invalid_country"))))
   )(CompanyAddress.apply)(CompanyAddress.unapply))
 
   /*
@@ -261,7 +261,7 @@ object RsFormMappings {
       .verifying(pattern(fieldValidationPatterns.companyRegPattern.r, error = Messages("ers_manual_company_details.err.company_reg")))),
     companyNameFields.corporationRef -> optional(text
       .verifying(pattern(corporationRefPattern.r, error = Messages("ers_manual_company_details.err.corporation_ref"))))
-  )(Company.apply)(Company.unapply(_)))
+  )(Company.apply)(Company.unapply))
   }
 
   def addSubsidiaryForm(): Form[AddCompany] = Form(mapping(
@@ -382,6 +382,8 @@ object fieldValidationPatterns {
   def corporationRefPatternSchemeOrg = "^[0-9]*$"
 
   def addresssRegx = """^[A-Za-zÂ-ȳ0-9 &'(),-./]{0,}$"""
+  
+  val countryCodeRegx = "^[A-Z]{2}$"
 
   val postCodeRegx =
     """(GIR 0AA)|((([A-Z-[QVX]][0-9][0-9]?)|(([A-Z-[QVX]][A-Z-[IJZ]][0-9][0-9]?)|(([A-Z-[QVX‌​]][0-9][A-HJKSTUW])|([A-Z-[QVX]][A-Z-[IJZ]][0-9][ABEHMNPRVWXY]))))\s?[0-9][A-Z-[C‌​IKMOV]]{2})"""
