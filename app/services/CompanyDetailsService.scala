@@ -29,11 +29,11 @@ class CompanyDetailsService @Inject()(
                                        sessionService: FrontendSessionService
                                      )(implicit ec: ExecutionContext) extends Logging {
 
-  private def filterDeletedCompany(companyList: CompanyDetailsList, indexToDelete: Int): List[CompanyDetails] =
+  private def filterOutDeletedCompany(companyList: CompanyDetailsList, indexToDelete: Int): List[CompanyDetails] =
     companyList.companies.zipWithIndex.filterNot(_._2 == indexToDelete).map(_._1)
 
   def deleteCompany(companies: CompanyDetailsList, index: Int)(implicit request: Request[_]): Future[Boolean] = {
-    val activeCompanies = CompanyDetailsList(filterDeletedCompany(companies, index))
+    val activeCompanies = CompanyDetailsList(filterOutDeletedCompany(companies, index))
     (for {
         _ <- sessionService.cache(ersUtil.SUBSIDIARY_COMPANIES_CACHE, activeCompanies)
     } yield {

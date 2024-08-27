@@ -130,9 +130,8 @@ class SummaryDeclarationController @Inject() (val mcc: MessagesControllerCompone
   }
 
   def isValidAltActivity(altActivity: String, altAmendsEmpty: Boolean): Boolean =
-    (altActivity == ersUtil.OPTION_NO && altAmendsEmpty) ||
-    (altActivity.isEmpty && altAmendsEmpty) ||
-    (altActivity == ersUtil.OPTION_YES && !altAmendsEmpty)
+    (altAmendsEmpty  && (altActivity == ersUtil.OPTION_NO || altActivity.isEmpty)) ||
+    (!altAmendsEmpty && altActivity == ersUtil.OPTION_YES)
 
   private def validateAltAmends(all: CacheItem, altActivity: String, schemeID: String): Boolean = {
     val altActivityCheck = Seq(ersUtil.SCHEME_CSOP, ersUtil.SCHEME_SIP, ersUtil.SCHEME_SAYE) contains schemeID
