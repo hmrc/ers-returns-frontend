@@ -82,6 +82,7 @@ trait PageBuilder {
   val PAGE_SCHEME_ORGANISER       = "ers_scheme_organiser"
   val PAGE_TRUSTEE_DETAILS        = "ers_trustee_details"
 	val PAGE_TRUSTEE_BASED					= "ers_trustee_based"
+	val PAGE_CONFIRM_DELETE_COMPANY = "ers.group_confirm_delete_company"
 
   // Options
   val OPTION_YES                = "1"
@@ -197,6 +198,7 @@ trait PageBuilder {
 							case OPTION_NO => routes.AltAmendsController.altActivityPage().toString
 							case _ => DEFAULT
 						}
+					case PAGE_CONFIRM_DELETE_COMPANY => controllers.subsidiaries.routes.GroupSchemeController.groupPlanSummaryPage().toString
 					case _ => DEFAULT
 				}
 			case SCHEME_EMI =>
@@ -221,6 +223,7 @@ trait PageBuilder {
 							case OPTION_NO => controllers.subsidiaries.routes.GroupSchemeController.groupSchemePage().toString
 							case _ => DEFAULT
 						}
+					case PAGE_CONFIRM_DELETE_COMPANY => controllers.subsidiaries.routes.GroupSchemeController.groupPlanSummaryPage().toString
 					case _ => DEFAULT
 				}
 			case SCHEME_SAYE =>
@@ -252,6 +255,7 @@ trait PageBuilder {
 							case OPTION_NO => controllers.subsidiaries.routes.GroupSchemeController.groupSchemePage().toString
 							case _ => DEFAULT
 						}
+					case PAGE_CONFIRM_DELETE_COMPANY => controllers.subsidiaries.routes.GroupSchemeController.groupPlanSummaryPage().toString
 					case _ => DEFAULT
 				}
 			case SCHEME_SIP =>
@@ -281,6 +285,7 @@ trait PageBuilder {
 							case OPTION_NO => controllers.subsidiaries.routes.GroupSchemeController.groupSchemePage().toString
 							case _ => DEFAULT
 						}
+					case PAGE_CONFIRM_DELETE_COMPANY => controllers.subsidiaries.routes.GroupSchemeController.groupPlanSummaryPage().toString
 					case _ => DEFAULT
 				}
 			case SCHEME_OTHER =>
@@ -305,6 +310,7 @@ trait PageBuilder {
 							case OPTION_NO => controllers.subsidiaries.routes.GroupSchemeController.groupSchemePage().toString
 							case _ => DEFAULT
 						}
+					case PAGE_CONFIRM_DELETE_COMPANY => controllers.subsidiaries.routes.GroupSchemeController.groupPlanSummaryPage().toString
 					case _ => DEFAULT
 				}
 			case _ => DEFAULT

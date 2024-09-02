@@ -19,20 +19,22 @@ package controllers.subsidiaries
 import config.ApplicationConfig
 import controllers.auth.{AuthAction, RequestWithOptionalAuthContext}
 import controllers.{routes, trustees}
+import forms.YesNoFormProvider
 import models._
 import play.api.Logging
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.mvc._
 import services.FrontendSessionService
-import uk.gov.hmrc.mongo.cache.DataKey
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils._
+import services.CompanyDetailsService
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success}
 
 @Singleton
 class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
@@ -40,39 +42,85 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
                                       implicit val countryCodes: CountryCodes,
                                       implicit val ersUtil: ERSUtil,
                                       implicit val sessionService: FrontendSessionService,
+                                      implicit val companyService: CompanyDetailsService,
                                       implicit val appConfig: ApplicationConfig,
                                       globalErrorView: views.html.global_error,
                                       groupView: views.html.group,
                                       groupPlanSummaryView: views.html.group_plan_summary,
+                                      confirmDeleteCompanyView: views.html.confirm_delete_company,
+                                      yesNoFormProvider: YesNoFormProvider,
                                       authAction: AuthAction
                                      ) extends FrontendController(mcc) with I18nSupport with WithUnsafeDefaultFormBinding with Logging with Constants with CacheHelper {
 
   implicit val ec: ExecutionContext = mcc.executionContext
 
-  def deleteCompany(id: Int): Action[AnyContent] = authAction.async {
-    implicit request =>
-      showDeleteCompany(id)(request)
+  private val form: Form[Boolean] = yesNoFormProvider.withPrefix("delete-company")
+
+  private def getRequestObjAndCompanyDetails()(implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[(RequestObject, Int, CompanyDetailsList)] =
+    for {
+      requestObject <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
+      companyDetailsList <- sessionService.fetchCompaniesOptionally()
+      companySize = companyDetailsList.companies.size
+    } yield (requestObject, companySize, companyDetailsList)
+
+
+  def confirmDeleteCompanyPage(id: Int): Action[AnyContent] = authAction.async { implicit request =>
+    showConfirmDeleteCompanyPage(id)
   }
 
-  def showDeleteCompany(id: Int)(implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] = {
-    (for {
-      all <- sessionService.fetchAll()
-      companies = getEntry[CompanyDetailsList](all, DataKey(ersUtil.SUBSIDIARY_COMPANIES_CACHE)).getOrElse(CompanyDetailsList(Nil))
-      companyDetailsList = CompanyDetailsList(filterDeletedCompany(companies, id))
-      _ <- sessionService.cache(ersUtil.SUBSIDIARY_COMPANIES_CACHE, companyDetailsList)
-    } yield {
-      if (companyDetailsList.companies.isEmpty) {
-        Redirect(controllers.subsidiaries.routes.GroupSchemeController.groupSchemePage())
-      } else {
-        Redirect(controllers.subsidiaries.routes.GroupSchemeController.groupPlanSummaryPage())
-      }
-    }) recover {
-      case _: Exception => getGlobalErrorPage
+  def showConfirmDeleteCompanyPage(id: Int)(implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] = {
+    getRequestObjAndCompanyDetails() transformWith {
+      case _ @ Success((requestObject: RequestObject, companySize: Int, companyDetailsList: CompanyDetailsList)) =>
+        Future.successful(Ok(confirmDeleteCompanyView(requestObject, id, form, companySize == 1, companyDetailsList.companies(id).companyName)))
+      case Failure(cause) =>
+        logger.error(
+          s"[GroupSchemeController][showConfirmDeleteCompany] getRequestObjAndCompanyDetails failed, timestamp: ${System.currentTimeMillis()}, error: $cause"
+        )
+        Future.successful(getGlobalErrorPage)
+    } recover { case _: Exception =>
+      getGlobalErrorPage
     }
   }
 
-  private def filterDeletedCompany(companyList: CompanyDetailsList, id: Int): List[CompanyDetails] =
-    companyList.companies.zipWithIndex.filterNot(_._2 == id).map(_._1)
+  def confirmDeleteCompanySubmit(index: Int): Action[AnyContent] = authAction.async { implicit request =>
+    val requestObjectWithCompanyList = getRequestObjAndCompanyDetails()
+
+    requestObjectWithCompanyList.flatMap { case (requestObject, companySize, companyDetailsList) =>
+      form.bindFromRequest().fold(
+        formWithErrors => Future.successful(BadRequest(
+          confirmDeleteCompanyView(
+            requestObject,
+            index,
+            formWithErrors,
+            companySize == 1,
+            companyDetailsList.companies(index).companyName
+          )
+        )),
+        {
+          (formSubmissionRadio: Boolean) => {
+            if (formSubmissionRadio) {
+              val pageToRedirectTo = if (companySize == 1) {
+                controllers.subsidiaries.routes.GroupSchemeController.groupSchemePage()
+              } else {
+                controllers.subsidiaries.routes.GroupSchemeController.groupPlanSummaryPage()
+              }
+              companyService.deleteCompany(companyDetailsList, index).map {
+                case true => Redirect(pageToRedirectTo)
+                case _    => getGlobalErrorPage
+              }
+            } else {
+              Future.successful(Redirect(controllers.subsidiaries.routes.GroupSchemeController.groupPlanSummaryPage()))
+            }
+          }
+        }
+      )
+    } recover { case _: Exception =>
+      logger.error(
+        s"[GroupSchemeController][showConfirmDeleteCompany] Fetching companies failed, timestamp: ${System.currentTimeMillis()}."
+      )
+      getGlobalErrorPage
+    }
+  }
 
   def groupSchemePage(): Action[AnyContent] = authAction.async {
     implicit request =>
@@ -130,12 +178,16 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
               case (_, Some(ersUtil.OPTION_YES)) => Redirect(controllers.subsidiaries.routes.GroupSchemeController.groupPlanSummaryPage())
 
               case (ersUtil.SCHEME_CSOP | ersUtil.SCHEME_SAYE, _) =>
+                sessionService.remove(ersUtil.SUBSIDIARY_COMPANIES_CACHE)
                 Redirect(routes.AltAmendsController.altActivityPage())
 
               case (ersUtil.SCHEME_EMI | ersUtil.SCHEME_OTHER, _) =>
+                sessionService.remove(ersUtil.SUBSIDIARY_COMPANIES_CACHE)
                 Redirect(routes.SummaryDeclarationController.summaryDeclarationPage())
 
-              case (ersUtil.SCHEME_SIP, _) => Redirect(controllers.trustees.routes.TrusteeSummaryController.trusteeSummaryPage())
+              case (ersUtil.SCHEME_SIP, _) =>
+                sessionService.remove(ersUtil.SUBSIDIARY_COMPANIES_CACHE)
+                Redirect(controllers.trustees.routes.TrusteeSummaryController.trusteeSummaryPage())
 
               case (_, _) => getGlobalErrorPage
             }
@@ -201,7 +253,7 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
   }
 
   def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result =
-    Ok(
+    InternalServerError(
       globalErrorView(
         "ers.global_errors.title",
         "ers.global_errors.heading",

@@ -3,10 +3,10 @@ import sbt.*
 
 object AppDependencies {
 
-  val pdfboxVersion    = "2.0.31"
+  val pdfboxVersion    = "2.0.32"
   val openHtmlVersion  = "1.0.10"
   val bootstrapVersion = "8.6.0"
-  val mongoVersion     = "1.9.0"
+  val mongoVersion     = "2.2.0"
 
   val compile: Seq[ModuleID] = Seq(
     guice,
@@ -23,19 +23,19 @@ object AppDependencies {
     "com.openhtmltopdf"       %  "openhtmltopdf-core"         % openHtmlVersion,
     "com.openhtmltopdf"       %  "openhtmltopdf-pdfbox"       % openHtmlVersion,
     "com.openhtmltopdf"       %  "openhtmltopdf-svg-support"  % openHtmlVersion,
-    "commons-codec"           %  "commons-codec"              % "1.17.0",
+    "commons-codec"           %  "commons-codec"              % "1.17.1",
     "org.codehaus.janino"     %  "janino"                     % "3.1.12"
   )
 
   val test: Seq[ModuleID]      = Seq(
     "uk.gov.hmrc"             %% "bootstrap-test-play-30"  % bootstrapVersion,
     "uk.gov.hmrc.mongo"       %% "hmrc-mongo-test-play-30" % mongoVersion,
-    "org.scalatest"           %% "scalatest"               % "3.2.18",
+    "org.scalatest"           %% "scalatest"               % "3.2.19",
     "org.scalatestplus"       %% "mockito-5-10"            % "3.2.18.0",
     "com.vladsch.flexmark"    %  "flexmark-all"            % "0.64.8",
     "org.pegdown"             %  "pegdown"                 % "1.6.0",
-    "org.jsoup"               %  "jsoup"                   % "1.17.2",
-    "org.wiremock"            %  "wiremock-standalone"      % "3.6.0"
+    "org.jsoup"               %  "jsoup"                   % "1.18.1",
+    "org.wiremock"            %  "wiremock-standalone"     % "3.9.1"
   ).map(_ % Test)
 
   val overrides: Seq[ModuleID] = Seq(
