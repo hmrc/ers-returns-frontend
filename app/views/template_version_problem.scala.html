@@ -16,7 +16,6 @@
 
 @import _root_.config.ApplicationConfig
 @import _root_.utils.ERSUtil
-@import views.html.templates.reference
 
 @this(
 		govuk_wrapper: govuk_wrapper,
@@ -27,9 +26,7 @@
 
 @(requestObject: RequestObject, taxYear: String, csopV5required: Boolean = false)(implicit request: Request[_], messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 
-@govuk_wrapper(title = messages("file_upload_errors.problem.title") + " " + messages("ers.title.postfix")) {
-
-	@reference(requestObject.getPageTitle)
+@govuk_wrapper(title = messages("file_upload_errors.problem.title") + " " + messages("ers.title.postfix"), bannerTitle = requestObject.getPageTitle) {
 
 	@hmrcPageHeading(PageHeading(
 		text = messages("file_upload_errors.problem.heading")

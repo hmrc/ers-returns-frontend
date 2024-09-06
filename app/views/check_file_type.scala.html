@@ -16,7 +16,6 @@
 
 @import _root_.utils.ERSUtil
 @import config.ApplicationConfig
-@import views.html.templates.reference
 
 
 @this(
@@ -30,9 +29,7 @@
 
 @(requestObject: RequestObject, checkFileType: Option[String], checkFileTypeForm: Form[models.CheckFileType])(implicit request: Request[_], messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 
-@govuk_wrapper(title = messages("ers.choose_file_type.page_title")) {
-
-	@reference(requestObject.getPageTitle)
+@govuk_wrapper(title = messages("ers.choose_file_type.page_title"), bannerTitle = requestObject.getPageTitle) {
 
 	@govukBackLink(BackLink(
 		content = Text(messages("ers.back")),

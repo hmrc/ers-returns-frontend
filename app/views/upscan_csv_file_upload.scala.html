@@ -18,7 +18,6 @@
 @import config.ApplicationConfig
 @import views.html.helper.CSPNonce
 @import views.html.includes.upscan_file_upload_form
-@import views.html.templates.reference
 
 @this(
         govuk_wrapper: govuk_wrapper,
@@ -47,8 +46,7 @@
   uploadFileHeader + " " + messages("ers.title.postfix")
 }
 
-@govuk_wrapper(title = pageTitle, Some(scripts)) {
-    @reference(requestObject.getPageTitle)
+@govuk_wrapper(title = pageTitle, bannerTitle = requestObject.getPageTitle, scriptElement = Some(scripts)) {
 
     @govukBackLink(BackLink(
         content = Text(messages("ers.back")),

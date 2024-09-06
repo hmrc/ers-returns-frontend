@@ -16,7 +16,6 @@
 
 @import _root_.utils.ERSUtil
 @import config.ApplicationConfig
-@import views.html.templates._
 
 @this(
         govuk_wrapper: govuk_wrapper,
@@ -33,9 +32,7 @@
 
 @fileNameMsg = @{if (fileCount == 1) {messages("ers_summary_declaration.file_name")} else {messages("ers_summary_declaration.file_names")}}
 
-@govuk_wrapper(title = messages("ers.summary.page_title")) {
-
-    @reference(requestObject.getPageTitle)
+@govuk_wrapper(title = messages("ers.summary.page_title"), bannerTitle = requestObject.getPageTitle) {
 
     @govukBackLink(BackLink(
         content = Text(messages("ers.back")),

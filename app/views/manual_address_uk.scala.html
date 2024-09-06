@@ -18,7 +18,6 @@
 @import config.ApplicationConfig
 @import uk.gov.hmrc.govukfrontend.views.html.components.implicits._
 @import views.html.includes.countries
-@import views.html.templates.reference
 
 @this(
 		govuk_wrapper: govuk_wrapper,
@@ -44,9 +43,7 @@
 	case (false, true) => controllers.schemeOrganiser.routes.SchemeOrganiserAddressUkController.questionSubmit(index)
 }}
 
-@govuk_wrapper(title = messages("ers_manual_address_uk.title")) {
-
-	@reference(requestObject.getPageTitle)
+@govuk_wrapper(title = messages("ers_manual_address_uk.title"), bannerTitle = requestObject.getPageTitle) {
 
 	@govukBackLink(BackLink(
 		attributes = Map("id" -> "back-link"), classes="js-enabled", content = HtmlContent(messages("ers.back"))

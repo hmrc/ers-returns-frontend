@@ -18,7 +18,6 @@
 @import config.ApplicationConfig
 @import uk.gov.hmrc.govukfrontend.views.html.components.implicits._
 @import views.html.includes.countries
-@import views.html.templates.reference
 
 
 @this(
@@ -35,9 +34,7 @@
 
 @(requestObject: RequestObject, index: Int, trusteeDetails: Form[models.TrusteeAddress], edit: Boolean = false)(implicit request: Request[AnyRef], messages: Messages, countryCodes: CountryCodes, appConfig: ApplicationConfig)
 
-@govuk_wrapper(title = messages("ers_trustee_address.title")) {
-
-@reference(requestObject.getPageTitle)
+@govuk_wrapper(title = messages("ers_trustee_address.title"), bannerTitle = requestObject.getPageTitle) {
 
 @govukBackLink(BackLink(
     attributes = Map("id" -> "back-link"), classes="js-enabled", content = HtmlContent(messages("ers.back"))

@@ -16,7 +16,6 @@
 
 @import _root_.utils.ERSUtil
 @import config.ApplicationConfig
-@import views.html.templates.reference
 
 @this(
 		govukErrorSummary: GovukErrorSummary,
@@ -31,9 +30,7 @@
 
 @schemeId = @{requestObject.getSchemeId}
 
-@govuk_wrapper(title = messages("ers.reportable_events.page_title")) {
-
-	@reference(requestObject.getPageTitle)
+@govuk_wrapper(title = messages("ers.reportable_events.page_title"), bannerTitle = requestObject.getPageTitle) {
 
 	@govukBackLink(BackLink(
 		content = Text(messages("ers.back")),

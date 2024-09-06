@@ -26,7 +26,11 @@ import scala.concurrent.ExecutionContext
 
 @Singleton
 class ERSUtil @Inject() (val appConfig: ApplicationConfig)
-                        (implicit val ec: ExecutionContext, countryCodes: CountryCodes) extends PageBuilder with Constants with Logging {
+                        (implicit val ec: ExecutionContext, countryCodes: CountryCodes)
+  extends PageBuilder
+    with Constants
+    with Logging
+    with ContentUtil {
 
 	final def concatAddress(optionalAddressLines: List[Option[String]], existingAddressLines: String): String = {
 		val definedStrings = optionalAddressLines.filter(_.isDefined).map(_.get)
