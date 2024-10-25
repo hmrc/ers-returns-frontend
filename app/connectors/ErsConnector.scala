@@ -178,7 +178,7 @@ class ErsConnector @Inject() (val http: DefaultHttpClient, appConfig: Applicatio
     data: JsObject
   )(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[HttpResponse] = {
     val empRef: String = request.authData.empRef.encodedValue
-    val url: String = s"$ersUrl/ers/$empRef/retrieve-submission-data"
+    val url: String = s"$ersUrl/ers/test-only/$empRef/retrieve-submission-data"
     http.POST(url, data)
   }
 
