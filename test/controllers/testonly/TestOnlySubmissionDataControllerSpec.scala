@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package controllers
+package controllers.testonly
 
 import connectors.ErsConnector
+import controllers.testonly.TestOnlySubmissionDataController
 import org.apache.pekko.stream.Materializer
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
@@ -36,8 +37,8 @@ import views.html.global_error
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class SubmissionDataControllerSpec
-    extends AnyWordSpecLike
+class TestOnlySubmissionDataControllerSpec
+  extends AnyWordSpecLike
     with Matchers
     with OptionValues
     with ERSFakeApplicationConfig
@@ -61,8 +62,8 @@ class SubmissionDataControllerSpec
 
   "calling createSchemeInfoFromURL" should {
 
-    lazy val submissionDataController: SubmissionDataController =
-      new SubmissionDataController(
+    lazy val testOnlySubmissionDataController: TestOnlySubmissionDataController =
+      new TestOnlySubmissionDataController(
         mockMCC,
         mockErsConnector,
         globalErrorView,
@@ -71,7 +72,7 @@ class SubmissionDataControllerSpec
 
     "return correct json if all parameters are given in request" in {
       val request = FakeRequest("GET", "/get-submission-data?schemeRef=AA0000000000000&confTime=2016-08-05T11:14:30")
-      val result  = submissionDataController.createSchemeInfoFromURL(request)
+      val result  = testOnlySubmissionDataController.createSchemeInfoFromURL(request)
       result shouldBe Some(
         Json.obj(
           "schemeRef" -> "AA0000000000000",
@@ -86,15 +87,15 @@ class SubmissionDataControllerSpec
           "confTime" -> "2016-08-05T11:14:30"
         )
       )
-      val result  = submissionDataController.createSchemeInfoFromURL(request)
+      val result  = testOnlySubmissionDataController.createSchemeInfoFromURL(request)
       result shouldBe None
     }
 
   }
 
   "calling retrieveSubmissionData" should {
-    lazy val submissionDataController: SubmissionDataController =
-      new SubmissionDataController(
+    lazy val testOnlySubmissionDataController: TestOnlySubmissionDataController =
+      new TestOnlySubmissionDataController(
         mockMCC,
         mockErsConnector,
         globalErrorView,
@@ -103,7 +104,7 @@ class SubmissionDataControllerSpec
 
     "redirect to login page if user is not authenticated" in {
       setUnauthorisedMocks()
-      val result = submissionDataController.retrieveSubmissionData()(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+      val result = testOnlySubmissionDataController.retrieveSubmissionData()(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
       status(result) shouldBe SEE_OTHER
     }
   }
@@ -113,67 +114,67 @@ class SubmissionDataControllerSpec
     val mockErsConnector: ErsConnector = mock[ErsConnector]
 
     class Setup(obj: Option[JsObject] = None)
-        extends SubmissionDataController(
-          mockMCC,
-          mockErsConnector,
-          globalErrorView,
-          testAuthAction
-        ) {
+      extends TestOnlySubmissionDataController(
+        mockMCC,
+        mockErsConnector,
+        globalErrorView,
+        testAuthAction
+      ) {
       when(mockAppConfig.enableRetrieveSubmissionData).thenReturn(true)
 
       override def createSchemeInfoFromURL(request: Request[Any]): Option[JsObject] = obj
     }
 
     "returns NOT_FOUND if not all parameters are given" in {
-      lazy val submissionDataController: SubmissionDataController = new Setup()
+      lazy val testOnlySubmissionDataController: TestOnlySubmissionDataController = new Setup()
       val authRequest = buildRequestWithAuth(testFakeRequest)
 
-      val result = submissionDataController.getRetrieveSubmissionData()(authRequest, hc)
+      val result = testOnlySubmissionDataController.getRetrieveSubmissionData()(authRequest, hc)
       status(result) shouldBe NOT_FOUND
     }
 
     "returns OK if all parameters are given and retrieveSubmissionData is successful" in {
       reset(mockErsConnector)
-      lazy val submissionDataController: SubmissionDataController = new Setup(Some(mock[JsObject]))
+      lazy val testOnlySubmissionDataController: TestOnlySubmissionDataController = new Setup(Some(mock[JsObject]))
 
       when(mockErsConnector.retrieveSubmissionData(any[JsObject]())(any(), any()))
         .thenReturn(Future.successful(HttpResponse(OK, "")))
 
       val authRequest = buildRequestWithAuth(testFakeRequest)
-      val result      = submissionDataController.getRetrieveSubmissionData()(authRequest, hc)
+      val result      = testOnlySubmissionDataController.getRetrieveSubmissionData()(authRequest, hc)
       status(result) shouldBe OK
       contentAsString(result).contains("Retrieve Failure") shouldBe false
     }
 
     "shows error page if all parameters are given but retrieveSubmissionData fails" in {
       reset(mockErsConnector)
-      lazy val submissionDataController: SubmissionDataController = new Setup(Some(mock[JsObject]))
+      lazy val testOnlySubmissionDataController: TestOnlySubmissionDataController = new Setup(Some(mock[JsObject]))
 
       when(mockErsConnector.retrieveSubmissionData(any[JsObject]())(any(), any()))
         .thenReturn(Future.successful(HttpResponse(INTERNAL_SERVER_ERROR, "")))
 
       val authRequest = buildRequestWithAuth(testFakeRequest)
-      val result = submissionDataController.getRetrieveSubmissionData()(authRequest, hc)
+      val result = testOnlySubmissionDataController.getRetrieveSubmissionData()(authRequest, hc)
       status(result) shouldBe OK
       contentAsString(result).contains(testMessages("ers.global_errors.message")) shouldBe true
     }
 
     "shows error page if all parameters are given but retrieveSubmissionData throws exception" in {
       reset(mockErsConnector)
-      lazy val submissionDataController: SubmissionDataController = new Setup(Some(mock[JsObject]))
+      lazy val testOnlySubmissionDataController: TestOnlySubmissionDataController = new Setup(Some(mock[JsObject]))
 
       when(mockErsConnector.retrieveSubmissionData(any[JsObject]())(any(), any()))
         .thenReturn(Future.failed(new RuntimeException))
 
       val authRequest = buildRequestWithAuth(testFakeRequest)
-      val result      = submissionDataController.getRetrieveSubmissionData()(authRequest, hc)
+      val result      = testOnlySubmissionDataController.getRetrieveSubmissionData()(authRequest, hc)
       status(result) shouldBe OK
       contentAsString(result).contains(testMessages("ers.global_errors.message")) shouldBe true
     }
 
     "shows not found page if enableRetrieveSubmissionData is false" in {
-      lazy val submissionDataController: SubmissionDataController =
-        new SubmissionDataController(
+      lazy val testOnlySubmissionDataController: TestOnlySubmissionDataController =
+        new TestOnlySubmissionDataController(
           mockMCC,
           mockErsConnector,
           globalErrorView,
@@ -183,7 +184,7 @@ class SubmissionDataControllerSpec
 
       val authRequest = buildRequestWithAuth(testFakeRequest)
 
-      val result = submissionDataController.getRetrieveSubmissionData()(authRequest, hc)
+      val result = testOnlySubmissionDataController.getRetrieveSubmissionData()(authRequest, hc)
       status(result) shouldBe NOT_FOUND
     }
   }

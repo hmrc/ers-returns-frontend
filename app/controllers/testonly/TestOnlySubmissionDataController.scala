@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package controllers
+package controllers.testonly
 
 import config.ApplicationConfig
 import connectors.ErsConnector
@@ -30,91 +30,82 @@ import utils.ERSUtil
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
+// moved from SubmissionDataController as part of DDCE-2159
 @Singleton
-class SubmissionDataController @Inject() (val mcc: MessagesControllerComponents,
-                                          val ersConnector: ErsConnector,
-                                          globalErrorView: views.html.global_error,
-                                          authAction: AuthAction)
-                                         (implicit val ec: ExecutionContext,
-                                          val ersUtil: ERSUtil,
-                                          val appConfig: ApplicationConfig)
-  extends FrontendController(mcc) with I18nSupport with Logging {
-
-  def createSchemeInfoFromURL(request: Request[Any]): Option[JsObject] = {
-
-    val schemeRef: Option[String] = request.getQueryString("schemeRef")
-    val timestamp: Option[String] = request.getQueryString("confTime")
-
-    if (schemeRef.isDefined && timestamp.isDefined) {
-      Some(
-        Json.obj(
-          "schemeRef" -> schemeRef.get,
-          "confTime"  -> timestamp.get
-        )
-      )
-    } else {
-      None
-    }
-
-  }
+class TestOnlySubmissionDataController @Inject()(val mcc: MessagesControllerComponents,
+                                                 val ersConnector: ErsConnector,
+                                                 globalErrorView: views.html.global_error,
+                                                 authAction: AuthAction)
+                                                (implicit val ec: ExecutionContext,
+                                                 val ersUtil: ERSUtil,
+                                                 val appConfig: ApplicationConfig) extends FrontendController(mcc)
+  with I18nSupport with Logging {
 
   def retrieveSubmissionData(): Action[AnyContent] = authAction.async { implicit request =>
-    getRetrieveSubmissionData()(request, hc)
+    getRetrieveSubmissionData()
   }
 
   def getRetrieveSubmissionData()(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
     logger.debug("Retrieve Submission Data Request")
+
     if (appConfig.enableRetrieveSubmissionData) {
       logger.debug("Retrieve SubmissionData Enabled")
+
       val data: Option[JsObject] = createSchemeInfoFromURL(request)
       if (data.isDefined) {
-
         ersConnector
           .retrieveSubmissionData(data.get)
           .map { res =>
             res.status match {
               case OK => Ok(res.body)
-              case _  =>
+              case _ =>
                 logger.error(s"[SubmissionDataController][getRetrieveSubmissionData] retrieve status: ${res.status}")
-                getGlobalErrorPage
+                getGlobalErrorPage()
             }
           }
           .recover { case ex: Exception =>
             logger.error(s"[SubmissionDataController][getRetrieveSubmissionData] retrieve Exception: ${ex.getMessage}")
-            getGlobalErrorPage
+            getGlobalErrorPage()
           }
 
       } else {
-        Future.successful(
-          NotFound(
-            globalErrorView(
-              "ers_not_found.title",
-              "ers_not_found.heading",
-              "ers_not_found.message"
-            )
-          )
-        )
+        notFoundGlobalErrorView()
       }
     } else {
       logger.debug("Retrieve SubmissionData Disabled")
-      Future.successful(
-        NotFound(
-          globalErrorView(
-            "ers_not_found.title",
-            "ers_not_found.heading",
-            "ers_not_found.message"
-          )
-        )
-      )
+      notFoundGlobalErrorView()
     }
   }
 
-  def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result =
+  def createSchemeInfoFromURL(request: Request[Any]): Option[JsObject] =
+    (request.getQueryString("schemeRef"), request.getQueryString("confTime")) match {
+      case (Some(schemeRef), Some(confTime)) =>
+        Some(
+          Json.obj(
+            "schemeRef" -> schemeRef,
+            "confTime" -> confTime
+          )
+        )
+      case _ => None
+    }
+
+  private def getGlobalErrorPage()(implicit request: Request[_], messages: Messages): Result =
     Ok(
       globalErrorView(
         "ers.global_errors.title",
         "ers.global_errors.heading",
         "ers.global_errors.message"
       )(request, messages, appConfig)
+    )
+
+  private def notFoundGlobalErrorView()(implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
+    Future.successful(
+      NotFound(
+        globalErrorView(
+          "ers_not_found.title",
+          "ers_not_found.heading",
+          "ers_not_found.message"
+        )
+      )
     )
 }
