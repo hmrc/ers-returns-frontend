@@ -13,4 +13,4 @@
 ->         /                          prod.Routes
 
 
-GET         /retrieve-submission-data                       controllers.testonly.TestOnlySubmissionDataController.retrieveSubmissionData()
+GET         /submit-your-ers-annual-return/test-only/retrieve-submission-data                       controllers.testonly.TestOnlySubmissionDataController.retrieveSubmissionData()
