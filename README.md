@@ -29,6 +29,26 @@ sbt clean A11y/test
 | Performance tests | https://github.com/hmrc/ers-returns-perf-tests       |
 | Acceptance tests  | https://github.com/hmrc/ers-returns-acceptance-tests |
 
+
+
+## Running with test-only routes for `/retrieve-submission-data` endpoint
+
+```bash
+sbt run -Dplay.http.router=testOnlyDoNotUseInAppConf.Routes
+```
+
+Note that `ers-returns` must also be running its test router to retrieve submission data.
+
+Relevant URL parameters can be found in the Mongo ers-stub/ers.files collection. </br>
+By taking the first two components of an entry's filename, we can use them as query parameters for `schemeRef` and `confTime`:
+
+`filename: EMI100000000124-2024-10-25T08:08:21-2024-10-25T09:08:21.240851+01:00[Europe/London]`
+
+Becomes:
+
+`http://localhost:9290/submit-your-ers-annual-return/test-only/retrieve-submission-data?schemeRef=EMI100000000124&confTime=2024`
+
+
 ## Routes
 
 Start the service locally by going to http://localhost:9949/auth-login-stub/gg-sign-in
