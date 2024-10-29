@@ -250,7 +250,7 @@ class ErsConnector @Inject() (val http: HttpClientV2Provider, appConfig: Applica
       .get()
       .put(url"$url")
       .withBody(Json.toJson(uploadStatus))
-      .execute
+      .execute[HttpResponse]
       .map {
         case response if response.status == 204 => NO_CONTENT
         case response =>

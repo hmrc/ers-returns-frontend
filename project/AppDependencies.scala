@@ -15,7 +15,7 @@ object AppDependencies {
     "uk.gov.hmrc.mongo"       %% "hmrc-mongo-play-30"         % mongoVersion,
     "uk.gov.hmrc"             %% "play-frontend-hmrc-play-30" % "9.11.0",
     "uk.gov.hmrc"             %% "play-partials-play-30"      % "9.1.0",
-    "uk.gov.hmrc"             %% "domain-play-30"             % "9.0.0",
+    "uk.gov.hmrc"             %% "domain-play-30"             % "10.0.0",
     "org.apache.pdfbox"       %  "pdfbox"                     % pdfboxVersion,
     "org.apache.pdfbox"       %  "xmpbox"                     % pdfboxVersion,
     "org.apache.xmlgraphics"  %  "batik-transcoder"           % "1.17",

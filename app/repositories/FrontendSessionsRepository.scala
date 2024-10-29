@@ -17,7 +17,7 @@
 package repositories
 
 import config.ApplicationConfig
-import play.api.mvc.Request
+import play.api.mvc.{Request, RequestHeader}
 import uk.gov.hmrc.http.SessionKeys
 import uk.gov.hmrc.mongo.cache.{CacheItem, SessionCacheRepository}
 import uk.gov.hmrc.mongo.{CurrentTimestampSupport, MongoComponent}
@@ -35,6 +35,6 @@ class FrontendSessionsRepository @Inject()(mongoComponent: MongoComponent,
   timestampSupport = new CurrentTimestampSupport,
   sessionIdKey = SessionKeys.sessionId
 ) {
-  def getAllFromSession()(implicit request: Request[_]): Future[Option[CacheItem]] =
+  def getAllFromSession()(implicit request: Request[Any]): Future[Option[CacheItem]] =
     cacheRepo.findById(request)
 }
