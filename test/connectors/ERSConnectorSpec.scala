@@ -158,7 +158,7 @@ class ERSConnectorSpec
 
       "validator throw Exception" in {
         mreset(mockHttp)
-        when(mockHttp.get().post(any()) (any()).execute[HttpResponse])
+        when(mockHttp.get().post(any()) (any()).execute)
           .thenReturn(Future.failed(new Exception("Test exception")))
         val result = await(ersConnectorMockHttp.validateFileData(uploadedSuccessfully, schemeInfo)(requestWithAuth, hc))
         result.status shouldBe BAD_REQUEST

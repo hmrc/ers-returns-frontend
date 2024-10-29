@@ -33,7 +33,9 @@
 		hmrcPageHeading: HmrcPageHeading
 )
 
-@(requestObject: RequestObject, index: Int, companyDetails: Form[models.CompanyAddress] , edit: Boolean, schemeOrganiser: Boolean)(implicit request: Request[AnyRef], messages: Messages, countryCodes: CountryCodes, appConfig: ApplicationConfig)
+@(requestObject: RequestObject, index: Int, companyDetails: Form[models.CompanyAddress] , edit: Boolean, schemeOrganiser: Boolean)(implicit request: Request[AnyRef], flash: Flash, messages: Messages, ersUtil: ERSUtil, countryCodes: CountryCodes, appConfig: ApplicationConfig)
+
+@schemeId = @{requestObject.getSchemeId}
 
 @formAction = @{(edit, schemeOrganiser) match {
 	case (true, false) => controllers.subsidiaries.routes.SubsidiaryAddressOverseasController.editQuestionSubmit(index)

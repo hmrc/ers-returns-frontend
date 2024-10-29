@@ -94,7 +94,7 @@ class ReturnServiceControllerSpec
       override lazy val accessThreshold: Int = accessThresholdValue
       override val accessDeniedUrl: String = "/denied.html"
 
-      when(mockHttp.get().post(any()) (any())[ValidatorData, HttpResponse])
+      when(mockHttp.get().post(any()) (any()).execute)
 			.thenReturn(Future.successful(HttpResponse(OK, "")))
 		when(mockSessionService.cache(any(), any())(any(), any())).thenReturn(Future.successful(sessionPair))
 		when(mockSessionService.cache(any(), any())(any(), any())).thenReturn(Future.successful(sessionPair))
