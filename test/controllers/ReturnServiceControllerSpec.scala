@@ -20,14 +20,15 @@ import models._
 import org.apache.pekko.stream.Materializer
 import org.jsoup.Jsoup
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito._
-import org.scalatest.OptionValues
+import org.mockito.Mockito.{reset => mreset, _}
+import org.scalatest.{BeforeAndAfter, OptionValues}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status
 import play.api.i18n
 import play.api.i18n.{Messages, MessagesApi, MessagesImpl}
+import play.api.libs.json.JsObject
 import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents}
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
@@ -45,6 +46,7 @@ class ReturnServiceControllerSpec
     with OptionValues
     with ERSFakeApplicationConfig
     with ErsTestHelper
+      with BeforeAndAfter
     with GuiceOneAppPerSuite {
 
   val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
@@ -81,6 +83,15 @@ class ReturnServiceControllerSpec
     Some("hmac")
   )
 
+  before {
+    mreset(mockHttp, mockHttpClient)
+    when(mockHttp.get()).thenReturn(mockHttpClient)
+    when(mockHttpClient.post(any())(any())).thenReturn(mockRequestBuilder)
+    when(mockHttpClient.get(any())(any())).thenReturn(mockRequestBuilder)
+    when(mockRequestBuilder.setHeader(any())).thenReturn(mockRequestBuilder)
+    when(mockRequestBuilder.withBody(any[JsObject])(any(), any(), any())).thenReturn(mockRequestBuilder)
+  }
+
   def buildFakeReturnServiceController(accessThresholdValue: Int = hundred): ReturnServiceController =
     new ReturnServiceController(
       mockMCC,
@@ -94,8 +105,8 @@ class ReturnServiceControllerSpec
       override lazy val accessThreshold: Int = accessThresholdValue
       override val accessDeniedUrl: String = "/denied.html"
 
-      when(mockHttp.get().post(any()) (any()).execute)
-			.thenReturn(Future.successful(HttpResponse(OK, "")))
+      when(mockRequestBuilder.execute[HttpResponse])
+        .thenReturn(Future.successful(HttpResponse(OK, "")))
 		when(mockSessionService.cache(any(), any())(any(), any())).thenReturn(Future.successful(sessionPair))
 		when(mockSessionService.cache(any(), any())(any(), any())).thenReturn(Future.successful(sessionPair))
 		when(mockSessionService.remove(any())(any())).thenReturn(Future.successful(()))

@@ -37,6 +37,7 @@ import play.twirl.api.Html
 import repositories.FrontendSessionsRepository
 import services.audit.AuditEvents
 import services.{CompanyDetailsService, FileValidatorService, FrontendSessionService, TrusteeService}
+import uk.gov.hmrc.http.client.{HttpClientV2, RequestBuilder}
 import uk.gov.hmrc.http.{HeaderCarrier, SessionKeys}
 import uk.gov.hmrc.mongo.cache.CacheItem
 import uk.gov.hmrc.play.bootstrap.http.HttpClientV2Provider
@@ -90,6 +91,8 @@ trait ErsTestHelper extends MockitoSugar with AuthHelper with ERSFakeApplication
   val TRUSTEES_CACHE             = "trustees"
 
   val mockHttp: HttpClientV2Provider = mock[HttpClientV2Provider]
+  val mockHttpClient: HttpClientV2 = mock[HttpClientV2]
+  val mockRequestBuilder = mock[RequestBuilder]
 	implicit val mockAppConfig: ApplicationConfig = mock[ApplicationConfig]
 	val mockErsConnector: ErsConnector = mock[ErsConnector]
 	implicit val mockErsUtil: ERSUtil = mock[ERSUtil]

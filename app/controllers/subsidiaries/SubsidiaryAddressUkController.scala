@@ -34,7 +34,8 @@ import utils.{CountryCodes, ERSUtil}
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class SubsidiaryAddressUkController @Inject()(val mcc: MessagesControllerComponents,
+class
+SubsidiaryAddressUkController @Inject()(val mcc: MessagesControllerComponents,
                                               val authConnector: DefaultAuthConnector,
                                               val ersConnector: ErsConnector,
                                               val globalErrorView: views.html.global_error,

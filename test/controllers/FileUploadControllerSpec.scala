@@ -139,7 +139,7 @@ class FileUploadControllerSpec
       .thenReturn(Future.successful(ersRequestObject))
     "return OK" when {
       "Upscan form data is successfully returned and callback record is created in session cache" in {
-        when(mockUpscanService.getUpscanFormDataOds(any[HeaderCarrier], any[Request[_]]))
+        when(mockUpscanService.getUpscanFormDataOds(any[HeaderCarrier], any[Request[Any]]))
           .thenReturn(Future.successful(upscanInitiateResponse))
         when(mockErsConnector.createCallbackRecord(any(), any()))
           .thenReturn(Future.successful(CREATED))
@@ -154,7 +154,7 @@ class FileUploadControllerSpec
       "Upscan service returns an exception retrieving form data" in {
         reset(mockErsConnector)
         setAuthMocks()
-        when(mockUpscanService.getUpscanFormDataOds(any[HeaderCarrier], any[Request[_]]))
+        when(mockUpscanService.getUpscanFormDataOds(any[HeaderCarrier], any[Request[Any]]))
           .thenReturn(Future.failed(new Exception("Expected exception")))
         when(mockSessionService.fetch[RequestObject](meq(ERS_REQUEST_OBJECT))(any(), any()))
           .thenReturn(Future.successful(ersRequestObject))
@@ -166,7 +166,7 @@ class FileUploadControllerSpec
       }
 
       "Session service returns an exception creating callback record" in {
-        when(mockUpscanService.getUpscanFormDataOds(any[HeaderCarrier], any[Request[_]]))
+        when(mockUpscanService.getUpscanFormDataOds(any[HeaderCarrier], any[Request[Any]]))
           .thenReturn(Future.successful(upscanInitiateResponse))
         when(mockErsConnector.createCallbackRecord(any(), any()))
           .thenReturn(Future.failed(new Exception("Expected exception")))

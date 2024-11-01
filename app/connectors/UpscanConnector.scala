@@ -30,9 +30,9 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class UpscanConnector @Inject()(appConfig: ApplicationConfig, httpClient: HttpClientV2Provider)(implicit ec: ExecutionContext) {
 
-  private val headers = Map(
-    HeaderNames.CONTENT_TYPE -> "application/json"
-  )
+//  private val headers = Map(
+//    HeaderNames.CONTENT_TYPE -> "application/json"
+//  )
 
   private val upscanInitiateHost: String = appConfig.upscanInitiateHost
   private[connectors] val upscanInitiatePath: String = "/upscan/v2/initiate"
