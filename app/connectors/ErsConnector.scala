@@ -52,7 +52,7 @@ class ErsConnector @Inject() (val http: HttpClientV2Provider, appConfig: Applica
     http
       .get()
       .get(url"$url")
-      .execute
+      .execute[HttpResponse]
       .map { response =>
         response.status match {
           case OK =>
@@ -109,7 +109,7 @@ class ErsConnector @Inject() (val http: HttpClientV2Provider, appConfig: Applica
       .get()
       .post(url"$url")
       .withBody(Json.toJson(allData))
-      .execute
+      .execute[HttpResponse]
   }
 
   def validateFileData(callbackData: UploadedSuccessfully, schemeInfo: SchemeInfo)(implicit
@@ -218,7 +218,7 @@ class ErsConnector @Inject() (val http: HttpClientV2Provider, appConfig: Applica
       .get()
       .post(url"$url")
       .withBody(Json.toJson(data))
-      .execute
+      .execute[HttpResponse]
   }
 
   def createCallbackRecord(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Int] = {
