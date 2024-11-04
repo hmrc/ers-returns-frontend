@@ -106,19 +106,14 @@ class ERSConnectorSpec
       val stringCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
 
 
-      when(mockRequestBuilder
-        .execute[HttpResponse])
-        .thenReturn(Future.successful(HttpResponse(OK, "")))
+      server.stubFor(
+        post(urlPathMatching("/(.*)/process-file"))
+          .willReturn(aResponse()
+            .withStatus(OK)
+            .withBody(stringCaptor.capture()))
+      )
 
-//      println(s"uploadedSuccessfully: $uploadedSuccessfully")
-//      println(s"schemeInfo: $schemeInfo")
-//      println(s"requestWithAuth: $requestWithAuth")
-//      println(s"hc: $hc")
-
-      val result = await(ersConnectorMockHttp.validateFileData(uploadedSuccessfully, schemeInfo)
-      (requestWithAuth,
-        hc))
-
+      val result = await(ersConnector.validateFileData(uploadedSuccessfully, schemeInfo)(requestWithAuth, hc))
       result.status shouldBe OK
       stringCaptor.getValue should include("123%2FABCDE")
     }
@@ -259,10 +254,19 @@ class ERSConnectorSpec
 
       "validator throw Exception" in {
         mreset(mockHttp)
-        when(mockHttp.get().post(any()) (any()).execute[HttpResponse])
-          .thenReturn(Future.failed(new Exception("Test exception")))
+
+        server.stubFor(
+          post(urlPathMatching("/(.*)/process-file"))
+            .willReturn(
+              aResponse()
+                .withStatus(BAD_REQUEST)
+            )
+        )
+
+        //        when(mockHttp.get().post(any())(any()).execute[HttpResponse])
+        //          .thenReturn(Future.failed(new Exception("Test exception")))
         val result =
-          await(ersConnectorMockHttp.validateCsvFileData(List(uploadedSuccessfully), schemeInfo)(requestWithAuth, hc))
+          await(ersConnector.validateCsvFileData(List(uploadedSuccessfully), schemeInfo)(requestWithAuth, hc))
         result.status shouldBe BAD_REQUEST
       }
     }
