@@ -81,7 +81,7 @@ class ERSConnectorSpec
   }
 
   lazy val ersConnectorMockHttp: ErsConnector = new ErsConnector(mockHttp, mockAppConfig) {
-    override lazy val ersUrl = "ers-returns"
+    override lazy val ersUrl = "http://localhost:9226"
     //    override lazy val validatorUrl = "ers-file-validator"
     override lazy val validatorUrl = "http://localhost:9226"
   }
@@ -284,15 +284,16 @@ class ERSConnectorSpec
 //      when(mockRequestBuilder.execute(any[HttpReads[HttpResponse]], any()))
 //        .thenReturn(Future.successful(HttpResponse(OK, "")))
 
-      val result = await(ersConnector.retrieveSubmissionData(data)(requestWithAuth, hc))
+      val result = await(ersConnectorMockHttp.retrieveSubmissionData(data)(requestWithAuth, hc))
       result.status shouldBe OK
     }
-//failed
+
     "failed retrieving" in {
 //      mreset(mockHttp)
 //      when(mockHttp.get().post(any()) (any()).execute[HttpResponse])
 //        .thenReturn(Future.successful(HttpResponse(INTERNAL_SERVER_ERROR, "")))
 
+//      when(mockAppConfig.ersUrl).thenReturn("http://localhost:9226")
       when(mockHttpClient.post(any())(any())).thenReturn(mockRequestBuilder)
             when(mockRequestBuilder.execute(any[HttpReads[HttpResponse]], any()))
               .thenReturn(Future.successful(HttpResponse(INTERNAL_SERVER_ERROR, "")))
@@ -431,7 +432,7 @@ class ERSConnectorSpec
 
   "retrieveSubmissionData" should {
     "return an HttpResponse" when {
-      // failed
+
       "the POST request is successful" in {
         val mockData: JsObject = Json.obj("key" -> "value")
         val successfulResponse = HttpResponse(OK, "")
@@ -443,12 +444,11 @@ class ERSConnectorSpec
         val result = await(ersConnectorMockHttp.retrieveSubmissionData(mockData)(requestWithAuth, hc))
 //        result.status shouldBe successfulResponse
         result.status shouldBe successfulResponse.status
-
       }
     }
 
     "return an error HttpResponse" when {
-      // failed
+
       "response status is not OK" in {
         val mockData: JsObject = Json.obj("key" -> "value")
 //        when(mockRequestBuilder.execute(any[HttpReads[HttpResponse]], any()))
@@ -473,7 +473,7 @@ class ERSConnectorSpec
 
   "removePresubmissionData" should {
     "return an HttpResponse" when {
-      // failed
+
       "the POST request is successful" in {
         val mockSchemeInfo: SchemeInfo = SchemeInfo("schemeRef", ZonedDateTime.now, "1", "2020", "schemeType", "schemeName")
         val successfulResponse = HttpResponse(OK, "")
@@ -486,7 +486,7 @@ class ERSConnectorSpec
     }
 
     "return an error HttpResponse" when {
-      // failed
+
       "response status is not OK" in {
         val mockSchemeInfo: SchemeInfo = SchemeInfo("schemeRef", ZonedDateTime.now, "1", "2020", "schemeType", "schemeName")
         when(mockRequestBuilder.execute(any[HttpReads[HttpResponse]], any()))
@@ -525,11 +525,12 @@ class ERSConnectorSpec
     }
 
     "return an error HttpResponse" when {
-      // failed
+
       "response status is not OK" in {
         val mockSchemeInfo: SchemeInfo = SchemeInfo("schemeRef", ZonedDateTime.now, "1", "2020", "schemeType", "schemeName")
         val validatedSheets = "sheet1,sheet2"
-        when(mockHttp.get().post(any()) (any()).execute[HttpResponse])
+        when(mockHttpClient.post(any())(any())).thenReturn(mockRequestBuilder)
+        when(mockRequestBuilder.execute(any[HttpReads[HttpResponse]], any()))
           .thenReturn(Future.successful(HttpResponse(BAD_REQUEST, "")))
 
         val result = await(ersConnectorMockHttp.checkForPresubmission(mockSchemeInfo, validatedSheets)(requestWithAuth, hc))
@@ -555,6 +556,7 @@ class ERSConnectorSpec
       "the POST request is successful" in {
         val mockErsSummary: ErsSummary = mock[ErsSummary]
         val successfulResponse = HttpResponse(OK, "")
+        when(mockHttpClient.post(any())(any())).thenReturn(mockRequestBuilder)
         when(mockRequestBuilder.execute(any[HttpReads[HttpResponse]], any()))
           .thenReturn(Future.successful(successfulResponse))
 
@@ -605,6 +607,7 @@ class ERSConnectorSpec
       // failed
       "response status is not OK" in {
         val mockErsSummary: ErsSummary = mock[ErsSummary]
+        when(mockErsSummary.bundleRef).thenReturn("Test")
         when(mockHttpClient.get(any())(any())).thenReturn(mockRequestBuilder)
         when(mockRequestBuilder.execute(any[HttpReads[HttpResponse]], any()))
           .thenReturn(Future.successful(HttpResponse(BAD_REQUEST, "")))
