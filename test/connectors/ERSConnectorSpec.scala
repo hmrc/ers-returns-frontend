@@ -492,7 +492,7 @@ class ERSConnectorSpec
         val validatedSheets = "sheet1,sheet2"
         val successfulResponse = HttpResponse(OK, "")
 
-        when(mockHttp.get().post(any()) (any()).execute[HttpResponse])
+        when(mockRequestBuilder.execute(any[HttpReads[HttpResponse]], any()))
           .thenReturn(Future.successful(successfulResponse))
 
         val result = await(ersConnectorMockHttp.checkForPresubmission(mockSchemeInfo, validatedSheets)(requestWithAuth, hc))
@@ -505,7 +505,6 @@ class ERSConnectorSpec
       "response status is not OK" in {
         val mockSchemeInfo: SchemeInfo = SchemeInfo("schemeRef", ZonedDateTime.now, "1", "2020", "schemeType", "schemeName")
         val validatedSheets = "sheet1,sheet2"
-        when(mockHttpClient.post(any())(any())).thenReturn(mockRequestBuilder)
         when(mockRequestBuilder.execute(any[HttpReads[HttpResponse]], any()))
           .thenReturn(Future.successful(HttpResponse(BAD_REQUEST, "")))
 
