@@ -42,7 +42,7 @@ class ErsConnector @Inject() (val http: HttpClientV2Provider, appConfig: Applica
   lazy val validatorUrl: String = appConfig.validatorUrl
   implicit val rds: HttpReads[HttpResponse] = Implicits.readRaw
 
-  def connectToEtmpSapRequest(
+  def   connectToEtmpSapRequest(
     schemeRef: String
   )(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[String] = {
     val empRef: String = request.authData.empRef.encodedValue
@@ -105,11 +105,10 @@ class ErsConnector @Inject() (val http: HttpClientV2Provider, appConfig: Applica
   )(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[HttpResponse] = {
     val empRef: String = request.authData.empRef.encodedValue
     val url: String = s"$ersUrl/ers/$empRef/saveReturnData"
-    println("Json.toJson(allData):::" + allData)
     http
       .get()
       .post(url"$url")
-      .withBody(Json.toJson(allData))
+      .withBody(allData.toString)
       .execute[HttpResponse]
   }
 
@@ -181,7 +180,7 @@ class ErsConnector @Inject() (val http: HttpClientV2Provider, appConfig: Applica
     http
       .get()
       .post(url"$url")
-      .withBody(Json.toJson(allData))
+      .withBody(allData.toString)
       .execute
   }
 
@@ -203,6 +202,7 @@ class ErsConnector @Inject() (val http: HttpClientV2Provider, appConfig: Applica
   )(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[HttpResponse] = {
     val empRef: String = request.authData.empRef.encodedValue
     val url: String = s"$ersUrl/ers/$empRef/removePresubmissionData"
+    println("URL" + url)
     http
       .get()
       .post(url"$url")
@@ -214,9 +214,7 @@ class ErsConnector @Inject() (val http: HttpClientV2Provider, appConfig: Applica
     data: JsObject
   )(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[HttpResponse] = {
     val empRef: String = request.authData.empRef.encodedValue
-    println(s"Constructed ersUrl: $ersUrl")
     val url: String = s"$ersUrl/ers/$empRef/retrieve-submission-data"
-    println(s"Constructed URL: $url") // debugging
     http
       .get()
       .post(url"$url")
