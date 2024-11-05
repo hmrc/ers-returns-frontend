@@ -207,7 +207,7 @@ class ErsConnector @Inject() (val http: HttpClientV2Provider, appConfig: Applica
       .get()
       .post(url"$url")
       .withBody(Json.toJson(schemeInfo))
-      .execute
+      .execute[HttpResponse]
   }
 
   def retrieveSubmissionData(

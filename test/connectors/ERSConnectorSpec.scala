@@ -319,12 +319,13 @@ class ERSConnectorSpec
 
     "return None" when {
       "an exception occurs during the GET request" in {
-        when(mockHttpClient.get(any())(any())).thenReturn(mockRequestBuilder)
         when(mockRequestBuilder.execute(any[HttpReads[HttpResponse]], any()))
           .thenReturn(Future.failed(new Exception("Test exception")))
 
         val result = await(ersConnectorMockHttp.getCallbackRecord(requestWithAuth, hc))
         result shouldBe None
+
+//        an[Exception] should be thrownBy await(ersConnectorMockHttp.removePresubmissionData(mockSchemeInfo)(requestWithAuth, hc))
       }
     }
   }
@@ -417,7 +418,6 @@ class ERSConnectorSpec
           .thenReturn(Future.successful(successfulResponse))
 
         val result = await(ersConnectorMockHttp.retrieveSubmissionData(mockData)(requestWithAuth, hc))
-//        result.status shouldBe successfulResponse
         result.status shouldBe successfulResponse.status
       }
     }
