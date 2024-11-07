@@ -92,7 +92,7 @@ trait ErsTestHelper extends MockitoSugar with AuthHelper with ERSFakeApplication
 
   val mockHttp: HttpClientV2Provider = mock[HttpClientV2Provider]
   val mockHttpClient: HttpClientV2 = mock[HttpClientV2]
-  val mockRequestBuilder = mock[RequestBuilder]
+  val mockRequestBuilder: RequestBuilder = mock[RequestBuilder]
   implicit val mockAppConfig: ApplicationConfig = mock[ApplicationConfig]
   val mockErsConnector: ErsConnector = mock[ErsConnector]
   implicit val mockErsUtil: ERSUtil = mock[ERSUtil]
@@ -130,7 +130,7 @@ trait ErsTestHelper extends MockitoSugar with AuthHelper with ERSFakeApplication
   when(mockAppConfig.odsSuccessRetryAmount).thenReturn(5)
   when(mockAppConfig.odsValidationRetryAmount).thenReturn(1)
   when(mockAppConfig.urBannerLink).thenReturn("http://")
-  when(mockAppConfig.ampersandRegex).thenReturn("(?!&amp;)(?:&)".r)
+  when(mockAppConfig.ampersandRegex).thenReturn("(?!&amp;)&".r)
 
   import scala.concurrent.duration._
   when(mockAppConfig.retryDelay).thenReturn(3.milliseconds)

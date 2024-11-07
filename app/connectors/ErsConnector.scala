@@ -24,12 +24,10 @@ import models.upscan.{UploadStatus, UploadedSuccessfully}
 import play.api.Logging
 import play.api.http.Status._
 import play.api.libs.json.{JsError, JsObject, JsSuccess, JsValue, Json}
-import play.api.libs.ws.BodyWritable
 import play.api.mvc.AnyContent
 import uk.gov.hmrc.http.HttpReads.Implicits
 import uk.gov.hmrc.http.{HeaderCarrier, HttpReads, HttpResponse, StringContextOps}
 import uk.gov.hmrc.play.bootstrap.http.HttpClientV2Provider
-
 import java.util.concurrent.TimeUnit
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}

@@ -29,7 +29,7 @@ import play.api.http.Status
 import play.api.i18n
 import play.api.i18n.{Messages, MessagesApi, MessagesImpl}
 import play.api.libs.json.JsObject
-import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents}
+import play.api.mvc.{AnyContent, AnyContentAsEmpty, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents}
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.http.HttpResponse
@@ -149,7 +149,7 @@ class ReturnServiceControllerSpec
   "Calling ReturnServiceController.hmacCheck" should {
     "without authentication should redirect to to company authentication frontend" in {
       setUnauthorisedMocks()
-      implicit val fakeRequest = Fixtures.buildFakeRequestWithSessionId("?")
+      implicit val fakeRequest: FakeRequest[AnyContentAsEmpty.type] = Fixtures.buildFakeRequestWithSessionId("?")
       val controllerUnderTest  = buildFakeReturnServiceController(accessThresholdValue = 0)
       val result               = controllerUnderTest.hmacCheck()(fakeRequest)
       Helpers.redirectLocation(result).get.startsWith(mockAppConfig.ggSignInUrl) shouldBe true
@@ -159,7 +159,7 @@ class ReturnServiceControllerSpec
   "Calling ReturnServiceController.startPage" should {
     "without authentication should redirect to to company authentication frontend" in {
       setUnauthorisedMocks()
-      implicit val fakeRequest = Fixtures.buildFakeRequestWithSessionId("?")
+      implicit val fakeRequest: FakeRequest[AnyContentAsEmpty.type] = Fixtures.buildFakeRequestWithSessionId("?")
       val controllerUnderTest  = buildFakeReturnServiceController(accessThresholdValue = 0)
       val result               = controllerUnderTest.startPage()(fakeRequest)
       Helpers.redirectLocation(result).get.startsWith(mockAppConfig.ggSignInUrl) shouldBe true

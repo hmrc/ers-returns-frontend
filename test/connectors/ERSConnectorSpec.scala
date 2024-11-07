@@ -21,8 +21,8 @@ import controllers.auth.RequestWithOptionalAuthContext
 import models.upscan.UploadedSuccessfully
 import models.{ERSAuthData, ErsMetaData, ErsSummary, SchemeInfo}
 import org.apache.pekko.stream.Materializer
-import org.mockito.{ArgumentCaptor, Mockito}
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import org.mockito.ArgumentCaptor
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{reset => mreset, _}
 import org.scalatest.{BeforeAndAfter, OptionValues}
 import org.scalatest.matchers.should.Matchers
@@ -32,13 +32,11 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.i18n
 import play.api.i18n.{MessagesApi, MessagesImpl}
 import play.api.libs.json.{JsObject, Json}
-import play.api.libs.ws.BodyWritable
 import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents}
 import play.api.test.Helpers._
-import uk.gov.hmrc.http.{HeaderCarrier, HttpReads, HttpResponse, StringContextOps}
+import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.http.HttpClientV2Provider
 import utils.{ERSFakeApplicationConfig, ErsTestHelper, UpscanData, WireMockHelper}
-
 import java.net.URL
 import java.time.ZonedDateTime
 import scala.concurrent.{ExecutionContext, Future}
@@ -100,12 +98,7 @@ class ERSConnectorSpec
     when(mockHttpClient.post(any())(any())).thenReturn(mockRequestBuilder)
     when(mockHttpClient.put(any())(any())).thenReturn(mockRequestBuilder)
     when(mockRequestBuilder.setHeader(any())).thenReturn(mockRequestBuilder)
-//    when(mockRequestBuilder.withBody(any[JsObject])(any(), any(), any())).thenReturn(mockRequestBuilder)
     when(mockRequestBuilder.withBody(any())(any(), any(), any())).thenReturn(mockRequestBuilder)
-
-
-
-
   }
 
   lazy val data: JsObject = Json.obj(
@@ -372,7 +365,6 @@ class ERSConnectorSpec
   "createCallbackRecord" should {
     "return CREATED" when {
       "callback record is created successfully" in {
-//        when(mockHttpClient.post(any())(any())).thenReturn(mockRequestBuilder)
         when(mockRequestBuilder.execute(any[HttpReads[HttpResponse]], any()))
           .thenReturn(Future.successful(HttpResponse(CREATED, "")))
 
@@ -392,7 +384,6 @@ class ERSConnectorSpec
 
     "throw an exception" when {
       "an exception occurs during the POST request" in {
-        //        when(mockHttpClient.post(any())(any())).thenReturn(mockRequestBuilder)
         when(mockRequestBuilder.execute(any[HttpReads[HttpResponse]], any()))
           .thenReturn(Future.failed(new Exception("Test exception")))
 
@@ -404,7 +395,6 @@ class ERSConnectorSpec
       "no session ID in the request" in {
         val requestWithAuthNoSession: RequestWithOptionalAuthContext[AnyContent] =
           RequestWithOptionalAuthContext(testFakeRequest, defaultErsAuthData)
-//        when(mockHttpClient.post(any())(any())).thenReturn(mockRequestBuilder)
         when(mockRequestBuilder.execute(any[HttpReads[HttpResponse]], any()))
           .thenReturn(Future.failed(new Exception("Test exception")))
 
@@ -442,7 +432,6 @@ class ERSConnectorSpec
     "throw an exception" when {
       "an exception occurs during the POST request" in {
         val mockData: JsObject = Json.obj("key" -> "value")
-//        when(mockHttpClient.post(any())(any())).thenReturn(mockRequestBuilder)
         when(mockRequestBuilder.execute(any[HttpReads[HttpResponse]], any()))
           .thenReturn(Future.failed(new Exception("Test exception")))
 
@@ -455,7 +444,6 @@ class ERSConnectorSpec
     "return an HttpResponse" when {
 
       "the POST request is successful" in {
-//        val mockSchemeInfo: SchemeInfo = SchemeInfo("schemeRef", ZonedDateTime.now, "1", "2020", "schemeType", "schemeName")
         val successfulResponse = HttpResponse(OK, "")
         when(mockRequestBuilder.execute(any[HttpReads[HttpResponse]], any()))
           .thenReturn(Future.successful(successfulResponse))
@@ -468,7 +456,6 @@ class ERSConnectorSpec
     "return an error HttpResponse" when {
 
       "response status is not OK" in {
-//        val mockSchemeInfo: SchemeInfo = SchemeInfo("schemeRef", ZonedDateTime.now, "1", "2020", "schemeType", "schemeName")
         when(mockRequestBuilder.execute(any[HttpReads[HttpResponse]], any()))
           .thenReturn(Future.successful(HttpResponse(BAD_REQUEST, "")))
 
@@ -479,7 +466,6 @@ class ERSConnectorSpec
 
     "throw an exception" when {
       "an exception occurs during the POST request" in {
-//        val mockSchemeInfo: SchemeInfo = SchemeInfo("schemeRef", ZonedDateTime.now, "1", "2020", "schemeType", "schemeName")
         when(mockRequestBuilder.execute(any[HttpReads[HttpResponse]], any()))
           .thenReturn(Future.failed(new Exception("Test exception")))
 
@@ -491,7 +477,6 @@ class ERSConnectorSpec
   "checkForPresubmission" should {
     "return an HttpResponse" when {
       "the POST request is successful" in {
-//        val mockSchemeInfo: SchemeInfo = SchemeInfo("schemeRef", ZonedDateTime.now, "1", "2020", "schemeType", "schemeName")
         val validatedSheets = "sheet1,sheet2"
         val successfulResponse = HttpResponse(OK, "")
 
@@ -504,7 +489,6 @@ class ERSConnectorSpec
     }
 
     "return an error HttpResponse" when {
-
       "response status is not OK" in {
         val validatedSheets = "sheet1,sheet2"
         when(mockRequestBuilder.execute(any[HttpReads[HttpResponse]], any()))
@@ -610,7 +594,6 @@ class ERSConnectorSpec
       "response status is not OK" in {
         val sap = "sap123"
         val payload = Json.obj("key" -> "value")
-
         when(mockRequestBuilder.execute(any[HttpReads[HttpResponse]], any()))
           .thenReturn(Future.successful(HttpResponse(BAD_REQUEST, "")))
 
@@ -622,7 +605,6 @@ class ERSConnectorSpec
       "an exception occurs during the POST request" in {
         val sap = "sap123"
         val payload = Json.obj("key" -> "value")
-
         when(mockHttp.get().post(any()) (any()).execute[HttpResponse])
           .thenReturn(Future.failed(new Exception("Test exception")))
 
@@ -638,7 +620,6 @@ class ERSConnectorSpec
         val sapNumber = "sapNumber123"
         val successfulResponse = HttpResponse(OK, Json.obj("SAP Number" -> sapNumber).toString())
 
-//        when(mockHttpClient.get(any())(any())).thenReturn(mockRequestBuilder)
         when(mockRequestBuilder.execute(any[HttpReads[HttpResponse]], any()))
           .thenReturn(Future.successful(successfulResponse))
 
@@ -650,7 +631,6 @@ class ERSConnectorSpec
     "throw an exception" when {
       "response status is not OK" in {
         val schemeRef = "scheme123"
-//        when(mockHttpClient.get(any())(any())).thenReturn(mockRequestBuilder)
         when(mockRequestBuilder.execute(any[HttpReads[HttpResponse]], any()))
           .thenReturn(Future.successful(HttpResponse(BAD_REQUEST, "")))
 
@@ -661,7 +641,6 @@ class ERSConnectorSpec
     "throw an exception" when {
       "an exception occurs during the GET request" in {
         val schemeRef = "scheme123"
-//        when(mockHttpClient.get(any())(any())).thenReturn(mockRequestBuilder)
         when(mockRequestBuilder.execute(any[HttpReads[HttpResponse]], any()))
           .thenReturn(Future.failed(new Exception("Test exception")))
 
