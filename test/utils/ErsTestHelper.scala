@@ -37,9 +37,10 @@ import play.twirl.api.Html
 import repositories.FrontendSessionsRepository
 import services.audit.AuditEvents
 import services.{CompanyDetailsService, FileValidatorService, FrontendSessionService, TrusteeService}
+import uk.gov.hmrc.http.client.{HttpClientV2, RequestBuilder}
 import uk.gov.hmrc.http.{HeaderCarrier, SessionKeys}
 import uk.gov.hmrc.mongo.cache.CacheItem
-import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
+import uk.gov.hmrc.play.bootstrap.http.HttpClientV2Provider
 
 import java.time.Instant
 import java.util.UUID
@@ -56,9 +57,9 @@ trait ErsTestHelper extends MockitoSugar with AuthHelper with ERSFakeApplication
   val defaultParser                                = new Default()(mockMaterializer)
 
   def buildRequestWithAuth(
-    req: Request[AnyContent],
-    authData: ERSAuthData = Fixtures.buildFakeUser
-  ): RequestWithOptionalAuthContext[AnyContent] =
+                            req: Request[AnyContent],
+                            authData: ERSAuthData = Fixtures.buildFakeUser
+                          ): RequestWithOptionalAuthContext[AnyContent] =
     RequestWithOptionalAuthContext(req, authData)
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
@@ -89,18 +90,20 @@ trait ErsTestHelper extends MockitoSugar with AuthHelper with ERSFakeApplication
   val OPTION_UPLOAD_SPREADSHEET  = "1"
   val TRUSTEES_CACHE             = "trustees"
 
-  val mockHttp: DefaultHttpClient = mock[DefaultHttpClient]
-	implicit val mockAppConfig: ApplicationConfig = mock[ApplicationConfig]
-	val mockErsConnector: ErsConnector = mock[ErsConnector]
-	implicit val mockErsUtil: ERSUtil = mock[ERSUtil]
-	val mockMetrics: Metrics = mock[Metrics]
-	val mockAuditEvents: AuditEvents = mock[AuditEvents]
+  val mockHttp: HttpClientV2Provider = mock[HttpClientV2Provider]
+  val mockHttpClient: HttpClientV2 = mock[HttpClientV2]
+  val mockRequestBuilder = mock[RequestBuilder]
+  implicit val mockAppConfig: ApplicationConfig = mock[ApplicationConfig]
+  val mockErsConnector: ErsConnector = mock[ErsConnector]
+  implicit val mockErsUtil: ERSUtil = mock[ERSUtil]
+  val mockMetrics: Metrics = mock[Metrics]
+  val mockAuditEvents: AuditEvents = mock[AuditEvents]
   val mockSessionRepository: FrontendSessionsRepository = mock[FrontendSessionsRepository]
   val mockSessionService: FrontendSessionService = mock[FrontendSessionService]
   val mockFileValidatorService: FileValidatorService = mock[FileValidatorService]
-	val mockTrusteeService: TrusteeService = mock[TrusteeService]
-	val mockCompanyDetailsService: CompanyDetailsService = mock[CompanyDetailsService]
-	implicit val mockCountryCodes: CountryCodes = mock[CountryCodes]
+  val mockTrusteeService: TrusteeService = mock[TrusteeService]
+  val mockCompanyDetailsService: CompanyDetailsService = mock[CompanyDetailsService]
+  implicit val mockCountryCodes: CountryCodes = mock[CountryCodes]
   val sessionPair: (String, String) = SessionKeys.sessionId -> sessionId
   val testCacheItem: CacheItem = CacheItem("id", Json.toJson(Map("user1234" -> Json.toJson(Fixtures.ersSummary))).as[JsObject], Instant.now(), Instant.now())
   def testCacheItem[A](key: String, data: A)(implicit writes: Writes[A]): CacheItem = CacheItem("id", Json.toJson(Map(key -> Json.toJson(data))).as[JsObject], Instant.now(), Instant.now())
@@ -114,8 +117,8 @@ trait ErsTestHelper extends MockitoSugar with AuthHelper with ERSFakeApplication
   val testAuthAction = new AuthAction(mockAuthConnector, mockAppConfig, mockSessionService, defaultParser)(ec)
   val testAuthActionGov = new AuthActionGovGateway(mockAuthConnector, mockAppConfig, defaultParser)(ec)
 
-	when(mockCountryCodes.countriesMap).thenReturn(List(Country("United Kingdom", "UK"), Country("South Africa", "ZA")))
-	when(mockCountryCodes.getCountry("UK")).thenReturn(Some("United Kingdom"))
+  when(mockCountryCodes.countriesMap).thenReturn(List(Country("United Kingdom", "UK"), Country("South Africa", "ZA")))
+  when(mockCountryCodes.getCountry("UK")).thenReturn(Some("United Kingdom"))
 
   when(mockAppConfig.ggSignInUrl).thenReturn("http://localhost:9949/gg/sign-in")
   when(mockAppConfig.appName).thenReturn("ers-returns-frontend")

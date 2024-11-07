@@ -34,7 +34,7 @@ import utils.WireMockHelper
 import scala.concurrent.duration.SECONDS
 
 class UpscanConnectorSpec
-    extends AnyWordSpecLike
+  extends AnyWordSpecLike
     with Matchers
     with OptionValues
     with GuiceOneAppPerSuite
