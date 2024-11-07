@@ -200,7 +200,6 @@ class ErsConnector @Inject() (val http: HttpClientV2Provider, appConfig: Applica
                              )(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[HttpResponse] = {
     val empRef: String = request.authData.empRef.encodedValue
     val url: String = s"$ersUrl/ers/$empRef/removePresubmissionData"
-    println("URL" + url)
     http
       .get()
       .post(url"$url")

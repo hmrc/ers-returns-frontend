@@ -98,7 +98,6 @@ class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPer
         companyNameFields.corporationRef -> "<script>rm *.*</script>"
       )
       val validatedForm = companyNameForm().bind(postData, Form.FromJsonMaxChars)
-      println(validatedForm.errors)
       assert(validatedForm.errors.head.key == companyNameFields.corporationRef)
       assert(validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.corporation_ref"))
     }
