@@ -137,6 +137,4 @@ GET 		/confirmation                                    controllers.ConfirmationP
 
 GET 		/confirmation/:bundle 		                    controllers.PdfGenerationController.buildPdfForBundle(bundle: String, dateSubmitted: String)
 
-GET         /retrieve-submission-data                       controllers.SubmissionDataController.retrieveSubmissionData()
-
 GET         /language/:lang                                 controllers.LanguageSwitchController.switchToLanguage(lang: String)
