@@ -11,3 +11,6 @@
 
 # Add all the application routes to the prod.routes file
 ->         /                          prod.Routes
+
+
+GET         /submit-your-ers-annual-return/test-only/retrieve-submission-data                       controllers.testonly.TestOnlySubmissionDataController.retrieveSubmissionData()
