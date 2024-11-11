@@ -211,12 +211,17 @@ class ErsConnector @Inject() (val http: HttpClientV2Provider, appConfig: Applica
                               data: JsObject
                             )(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[HttpResponse] = {
     val empRef: String = request.authData.empRef.encodedValue
+
     val url: String = s"$ersUrl/ers/$empRef/retrieve-submission-data"
     http
       .get()
       .post(url"$url")
       .withBody(Json.toJson(data))
       .execute[HttpResponse]
+
+    val url: String = s"$ersUrl/ers/test-only/$empRef/retrieve-submission-data"
+    http.POST(url, data)
+
   }
 
   def createCallbackRecord(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Int] = {
