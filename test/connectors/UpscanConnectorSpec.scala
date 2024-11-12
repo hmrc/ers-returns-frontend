@@ -30,11 +30,10 @@ import play.api.libs.json.Json
 import play.api.test.Helpers.await
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import utils.WireMockHelper
-
 import scala.concurrent.duration.SECONDS
 
 class UpscanConnectorSpec
-    extends AnyWordSpecLike
+  extends AnyWordSpecLike
     with Matchers
     with OptionValues
     with GuiceOneAppPerSuite
@@ -81,7 +80,6 @@ class UpscanConnectorSpec
         val exception = intercept[UpstreamErrorResponse] {
           await(connector.getUpscanFormData(request), 1, SECONDS)
         }
-
         exception.statusCode shouldBe 400
       }
 
@@ -97,7 +95,6 @@ class UpscanConnectorSpec
         val exception = intercept[UpstreamErrorResponse] {
           await(connector.getUpscanFormData(request), 1, SECONDS)
         }
-
         exception.statusCode shouldBe 503
       }
     }
