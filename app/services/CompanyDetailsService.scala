@@ -40,8 +40,8 @@ class CompanyDetailsService @Inject()(
       if (activeCompanies.companies.isEmpty) sessionService.cache(ersUtil.GROUP_SCHEME_CACHE_CONTROLLER, GroupSchemeInfo(None, None))
       true
     }).recover {
-      case _: Throwable =>
-        logger.warn(s"[CompanyService][deleteCompany] Deleting company failed")
+      case e: Throwable =>
+        logger.warn(s"[CompanyDetailsService][deleteCompany] Deleting company failed: ${e.getMessage}")
         false
     }
   }

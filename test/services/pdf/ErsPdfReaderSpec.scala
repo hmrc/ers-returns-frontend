@@ -17,7 +17,7 @@
 package services.pdf
 
 import org.apache.pdfbox.cos.COSDocument
-import org.apache.pdfbox.io.RandomAccessFile
+import org.apache.pdfbox.io.RandomAccessReadBufferedFile
 import org.apache.pdfbox.pdfparser.PDFParser
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.text.PDFTextStripper
@@ -40,16 +40,13 @@ class ErsPdfReaderSpec
 
   var pdfStripper: PDFTextStripper   = mock[PDFTextStripper]
   var pdDoc: PDDocument              = mock[PDDocument]
-  var cosDocCOSDocument: COSDocument = mock[COSDocument]
   var file: File                     = new File("test/resources/pdfFiles/confirmation.pdf")
   var parsedText: String             = ""
 
   try {
-    val parser: PDFParser = new PDFParser(new RandomAccessFile(file, "r"))
-    parser.parse()
-    val cosDoc            = parser.getDocument
+    val parser: PDFParser = new PDFParser(new RandomAccessReadBufferedFile(file))
+    pdDoc = parser.parse()
     pdfStripper = new PDFTextStripper()
-    pdDoc = new PDDocument(cosDoc)
     parsedText = pdfStripper.getText(pdDoc)
   } catch {
     case e: Exception => throw new Exception

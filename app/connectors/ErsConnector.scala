@@ -129,7 +129,9 @@ class ErsConnector @Inject() (val http: HttpClientV2Provider, appConfig: Applica
           case OK         => res
           case ACCEPTED   => res
           case NO_CONTENT => res
-          case _          => throw new Exception(s"[ErsConnector][validateFileData] Received status code ${res.status} from file validator")
+          case _          =>
+            logger.error(s"[ErsConnector][validateFileData] Received status code ${res.status} from file validator")
+            throw new Exception(s"[ErsConnector][validateFileData] Received status code ${res.status} from file validator")
         }
       }
       .recover { case e: Exception =>
@@ -159,7 +161,9 @@ class ErsConnector @Inject() (val http: HttpClientV2Provider, appConfig: Applica
             case OK => res
             case ACCEPTED => res
             case NO_CONTENT => res
-            case _ => throw new Exception(s"[ErsConnector][validateCsvFileData] Received status code ${res.status} from file validator")
+            case _ =>
+              logger.error(s"[ErsConnector][validateCsvFileData] Received status code ${res.status} from file validator")
+              throw new Exception(s"[ErsConnector][validateCsvFileData] Received status code ${res.status} from file validator")
           }
       }
       .recover { case e: Exception =>

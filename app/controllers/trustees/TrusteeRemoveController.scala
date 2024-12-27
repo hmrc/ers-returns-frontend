@@ -82,7 +82,9 @@ class TrusteeRemoveController @Inject()(val mcc: MessagesControllerComponents,
           case true =>
             trusteeService.deleteTrustee(index).map {
               case true => Redirect(controllers.trustees.routes.TrusteeSummaryController.trusteeSummaryPage())
-              case _ => getGlobalErrorPage
+              case _ =>
+                logger.error("s[TrusteeRemoveController][onSubmit] Error on submit")
+                getGlobalErrorPage
             }
           case _ =>
             Future.successful(Redirect(controllers.trustees.routes.TrusteeSummaryController.trusteeSummaryPage()))

@@ -48,8 +48,8 @@ trait SubsidiaryBaseController[A] extends SchemeOrganiserBaseController[A] {
         }
       }
     ).recover {
-      case _ =>
-        logger.error(s"[${this.getClass.getSimpleName}][submissionHandler] Error occurred while updating company cache")
+      case e: Exception =>
+        logger.error(s"[${this.getClass.getSimpleName}][submissionHandler] Error occurred while updating company cache: ${e.getMessage}")
         getGlobalErrorPage
     }
   }
