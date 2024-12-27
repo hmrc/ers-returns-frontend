@@ -74,10 +74,11 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
         Future.successful(Ok(confirmDeleteCompanyView(requestObject, id, form, companySize == 1, companyDetailsList.companies(id).companyName)))
       case Failure(cause) =>
         logger.error(
-          s"[GroupSchemeController][showConfirmDeleteCompany] getRequestObjAndCompanyDetails failed, timestamp: ${System.currentTimeMillis()}, error: $cause"
+          s"[GroupSchemeController][showConfirmDeleteCompanyPage] getRequestObjAndCompanyDetails failed, timestamp: ${System.currentTimeMillis()}, error: $cause"
         )
         Future.successful(getGlobalErrorPage)
-    } recover { case _: Exception =>
+    } recover { case e: Exception =>
+      logger.error(s"[GroupSchemeController][showConfirmDeleteCompanyPage] getRequestObjAndCompanyDetails failed, ${e.getMessage}")
       getGlobalErrorPage
     }
   }
@@ -114,9 +115,9 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
           }
         }
       )
-    } recover { case _: Exception =>
+    } recover { case e: Exception =>
       logger.error(
-        s"[GroupSchemeController][showConfirmDeleteCompany] Fetching companies failed, timestamp: ${System.currentTimeMillis()}."
+        s"[GroupSchemeController][confirmDeleteCompanySubmit] Fetching companies failed, timestamp: ${System.currentTimeMillis()}, error: ${e.getMessage}"
       )
       getGlobalErrorPage
     }

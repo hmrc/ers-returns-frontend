@@ -92,7 +92,7 @@ class AuthAction @Inject() (override val authConnector: DefaultAuthConnector,
       case _: NoActiveSession         =>
         Redirect(signInUrl, loginParams(request.queryString.map { case (k, v) => k -> v.headOption.getOrElse("") }))
       case er: AuthorisationException =>
-        logger.error(s"[AuthFunctionality][handleException] Auth exception: $er")
+        logger.error(s"[AuthFunctionality][invokeBlock] Auth exception: $er")
         Redirect(controllers.routes.ApplicationController.unauthorised().url)
     }
   }
@@ -135,7 +135,7 @@ class AuthActionGovGateway @Inject() (
       case _: NoActiveSession         =>
         Redirect(signInUrl, loginParams(request.queryString.map { case (k, v) => k -> v.headOption.getOrElse("") }))
       case er: AuthorisationException =>
-        logger.error(s"[AuthFunctionality][handleException] Auth exception: $er")
+        logger.error(s"[AuthFunctionality][invokeBlock] Auth exception: $er")
         Redirect(controllers.routes.ApplicationController.unauthorised().url)
     }
   }

@@ -53,7 +53,8 @@ class CheckCsvFilesController @Inject() (val mcc: MessagesControllerComponents,
     } yield {
       val csvFilesList: List[CsvFiles] = ersUtil.getCsvFilesList(requestObject.getSchemeType)
       Ok(checkCsvFileView(requestObject, CsvFilesList(csvFilesList)))
-    }) recover { case _: Throwable =>
+    }) recover { case e: Throwable =>
+      logger.error(s"[CheckCsvFilesController][showCheckCsvFilesPage] Error while CSV file check: ${e.getMessage}, timestamp: ${System.currentTimeMillis()}")
       getGlobalErrorPage
     }
   }
@@ -81,7 +82,7 @@ class CheckCsvFilesController @Inject() (val mcc: MessagesControllerComponents,
         _ <- sessionService.cache(ersUtil.CSV_FILES_UPLOAD, csvFilesCallbackList)
       } yield Redirect(routes.CsvFileUploadController.uploadFilePage())).recover { case e: Throwable =>
         logger.error(
-          s"[CheckCsvFilesController][performCsvFilesPageSelected] Save data to cache failed with exception ${e.getMessage}.",
+          s"[CheckCsvFilesController][performCsvFilesPageSelected] Save data to cache failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.",
           e
         )
         getGlobalErrorPage

@@ -63,8 +63,8 @@ class CsvFileUploadController @Inject() (val mcc: MessagesControllerComponents,
     } yield {
       Ok(upscanCsvFileUploadView(requestObject, upscanFormData, currentCsvFile.get.fileId, useCsopV5Templates(requestObject.taxYear)))
     }).recover {
-      case _: NoSuchElementException =>
-        logger.warn(s"[CsvFileUploadController][uploadFilePage] Attempting to load upload page when no files are ready to upload")
+      case ex: NoSuchElementException =>
+        logger.warn(s"[CsvFileUploadController][uploadFilePage] Attempting to load upload page when no files are ready to upload: ${ex.getMessage}, timestamp: ${System.currentTimeMillis()}")
         getGlobalErrorPage
       case e: Throwable =>
         logger.error(s"[CsvFileUploadController][uploadFilePage] Failed to display csv upload page with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.", e)
@@ -192,7 +192,7 @@ class CsvFileUploadController @Inject() (val mcc: MessagesControllerComponents,
       if (uploadedWithCorrectName) {
         validateCsv(csvCallbackData, schemeInfo) //HERE IS CALL TO FILE-VALIDATOR
       } else {
-        logger.info(s"[CsvFileUploadController][checkFileNames] User uploaded the wrong file")
+        logger.info(s"[CsvFileUploadController][checkFileNames] User uploaded the wrong file: $uploadedWithCorrectName")
         Future(getFileUploadProblemPage())
       }
     } recover { case e: Exception =>

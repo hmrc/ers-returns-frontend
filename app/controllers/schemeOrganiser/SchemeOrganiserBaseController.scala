@@ -98,8 +98,8 @@ trait SchemeOrganiserBaseController[A] extends FrontendController with I18nSuppo
         }
       }
     ).recover {
-      case _: Exception =>
-        logger.error(s"[${this.getClass.getSimpleName}][submissionHandler] Error occurred while updating company cache")
+      case ex: Exception =>
+        logger.error(s"[${this.getClass.getSimpleName}][submissionHandler] Error occurred while updating company cache, ${ex.getMessage}")
         getGlobalErrorPage
     }
   }

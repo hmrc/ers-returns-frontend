@@ -56,7 +56,8 @@ class FrontendSessionService @Inject()(val sessionCache: FrontendSessionsReposit
     sessionCache.getFromSession[JsValue](DataKey(key)).map { result =>
       result.get.as[T] //to be picked up in tech debt review
     } recoverWith {
-      case _: NoSuchElementException =>
+      case e: NoSuchElementException =>
+        logger.error(s"[FrontendSessionService][fetch] No data found for key: $key error: ${e.getMessage}")
         throw new NoSuchElementException(s"[FrontendSessionService][fetch] No data found for key $key")
       case ex: Exception =>
         val errMsg = s"[FrontendSessionService][fetch] Fetch failed for key $key in session ${request.session.get("sessionId").getOrElse("no session id")} with exception ${ex.getMessage}, timestamp: ${System.currentTimeMillis()}."
@@ -91,8 +92,8 @@ class FrontendSessionService @Inject()(val sessionCache: FrontendSessionsReposit
       case e: NoSuchElementException =>
         logger.warn(s"[FrontendSessionService][fetchOption] No data found for key $key in cache $cacheId. Exception: ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
         Future.successful(None)
-      case e: Throwable =>
-        logger.error(s"[FrontendSessionService][fetchOption] Error fetching key $key from cache $cacheId, timestamp: ${System.currentTimeMillis()}.", e)
+      case ex: Throwable =>
+        logger.error(s"[FrontendSessionService][fetchOption] Error fetching key $key from cache $cacheId, timestamp: ${System.currentTimeMillis()}.", ex)
         Future.successful(None)
     }
   }
