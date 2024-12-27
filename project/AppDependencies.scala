@@ -3,7 +3,7 @@ import sbt.*
 
 object AppDependencies {
 
-  val pdfboxVersion    = "3.0.3"
+  val pdfboxVersion    = "2.0.32"
   val openHtmlVersion  = "1.0.10"
   val bootstrapVersion = "9.5.0"
   val mongoVersion     = "2.2.0"
