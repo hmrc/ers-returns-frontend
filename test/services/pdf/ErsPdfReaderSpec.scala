@@ -40,16 +40,13 @@ class ErsPdfReaderSpec
 
   var pdfStripper: PDFTextStripper   = mock[PDFTextStripper]
   var pdDoc: PDDocument              = mock[PDDocument]
-  var cosDocCOSDocument: COSDocument = mock[COSDocument]
   var file: File                     = new File("test/resources/pdfFiles/confirmation.pdf")
   var parsedText: String             = ""
 
   try {
     val parser: PDFParser = new PDFParser(new RandomAccessReadBufferedFile(file))
-    val cosDoc            = parser.parse()
+    pdDoc = parser.parse()
     pdfStripper = new PDFTextStripper()
-//    pdDoc = new PDDocument(cosDoc)
-    pdDoc = cosDoc
     parsedText = pdfStripper.getText(pdDoc)
   } catch {
     case e: Exception => throw new Exception
