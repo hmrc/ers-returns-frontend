@@ -37,9 +37,11 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.http.HttpClientV2Provider
 import utils.{ERSFakeApplicationConfig, ErsTestHelper, UpscanData, WireMockHelper}
+
 import java.net.URL
 import java.time.ZonedDateTime
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.duration.Duration.Inf
+import scala.concurrent.{Await, ExecutionContext, Future}
 
 class ERSConnectorSpec
   extends AnyWordSpecLike
@@ -624,27 +626,29 @@ class ERSConnectorSpec
           .thenReturn(Future.successful(successfulResponse))
 
         val result = await(ersConnectorMockHttp.connectToEtmpSapRequest(schemeRef)(requestWithAuth, hc))
-        result shouldBe sapNumber
+        result shouldBe Right(sapNumber)
       }
     }
 
-    "throw an exception" when {
+    "return a Left wrapped Exception" when {
       "response status is not OK" in {
         val schemeRef = "scheme123"
         when(mockRequestBuilder.execute(any[HttpReads[HttpResponse]], any()))
           .thenReturn(Future.successful(HttpResponse(BAD_REQUEST, "")))
 
-        an[Exception] should be thrownBy await(ersConnectorMockHttp.connectToEtmpSapRequest(schemeRef)(requestWithAuth, hc))
+        val result: Either[Exception, String] = Await.result(ersConnectorMockHttp.connectToEtmpSapRequest(schemeRef)(requestWithAuth, hc), Inf)
+        val errorMessage = result.swap.map(_.getMessage).toOption
+        errorMessage shouldBe Some("Failed to get sap number")
       }
-    }
 
-    "throw an exception" when {
       "an exception occurs during the GET request" in {
         val schemeRef = "scheme123"
         when(mockRequestBuilder.execute(any[HttpReads[HttpResponse]], any()))
           .thenReturn(Future.failed(new Exception("Test exception")))
 
-        an[Exception] should be thrownBy await(ersConnectorMockHttp.connectToEtmpSapRequest(schemeRef)(requestWithAuth, hc))
+        val result: Either[Exception, String] = Await.result(ersConnectorMockHttp.connectToEtmpSapRequest(schemeRef)(requestWithAuth, hc), Inf)
+        val errorMessage = result.swap.map(_.getMessage).toOption
+        errorMessage shouldBe Some("Failed to get sap number")
       }
     }
   }

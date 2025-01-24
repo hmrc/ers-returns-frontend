@@ -46,12 +46,12 @@ class ReportableEventsController @Inject() (val mcc: MessagesControllerComponent
 
   def reportableEventsPage(): Action[AnyContent] = authAction.async { implicit request =>
     sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
-      .flatMap { requestObj =>
-          updateErsMetaData(requestObj)(request, hc)
-            .flatMap {
-              case Left(globalErrorPage: Result) => Future.successful(globalErrorPage)
-              case Right(_) => showReportableEventsPage(requestObj)(request)
-            }
+      .flatMap { requestObj: RequestObject =>
+        updateErsMetaData(requestObj)(request, hc)
+          .flatMap {
+            case Left(globalErrorPage: Result) => Future.successful(globalErrorPage)
+            case Right(_: (String, String)) => showReportableEventsPage(requestObj)(request)
+          }
       }
     }
 
@@ -69,6 +69,10 @@ class ReportableEventsController @Inject() (val mcc: MessagesControllerComponent
             metaData: ErsMetaData <- sessionService.fetch[ErsMetaData](ersUtil.ERS_METADATA)
             updatedMetadata: (String, String) <- sessionService.cache(ersUtil.ERS_METADATA, metaData.copy(sapNumber = Some(sapNumber)))
           } yield Right(updatedMetadata)
+      }
+      .recover { case e: Exception =>
+        logger.error(s"[ReportableEventsController][reportableEventsSelected] failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
+        Left(getGlobalErrorPage)
       }
 
   def showReportableEventsPage(requestObject: RequestObject)

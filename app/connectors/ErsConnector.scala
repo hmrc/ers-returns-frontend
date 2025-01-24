@@ -60,7 +60,7 @@ class ErsConnector @Inject() (val http: HttpClientV2Provider, appConfig: Applica
             logger.error(
               s"[ErsConnector][connectToEtmpSapRequest] SAP request failed with status ${response.status}, timestamp: ${System.currentTimeMillis()}."
             )
-            Left(new Exception)
+            Left(new Exception("Failed to get sap number"))
         }
       }
       .recover { case e: Exception =>
@@ -68,7 +68,7 @@ class ErsConnector @Inject() (val http: HttpClientV2Provider, appConfig: Applica
           s"[ErsConnector][connectToEtmpSapRequest] connectToEtmpSapRequest failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}."
         )
         ersConnector(System.currentTimeMillis() - startTime, TimeUnit.MILLISECONDS)
-        Left(new Exception)
+        Left(new Exception("Failed to get sap number"))
       }
   }
 

@@ -36,8 +36,8 @@ import utils.Fixtures.ersRequestObject
 import utils.{ERSFakeApplicationConfig, ErsTestHelper, Fixtures}
 import views.html.{global_error, reportable_events}
 
-import java.time.ZonedDateTime
-import scala.concurrent.{ExecutionContext, Future}
+import java.time.{Duration, ZonedDateTime}
+import scala.concurrent.{Await, ExecutionContext, Future}
 
 class ReportableEventsControllerSpec
     extends AnyWordSpecLike
@@ -87,7 +87,7 @@ class ReportableEventsControllerSpec
       when(mockSessionService.fetch[RequestObject](any())(any(), any())).thenReturn(Future.successful(ersRequestObject))
 
       when(mockErsConnector.connectToEtmpSapRequest(anyString())(any(), any()))
-        .thenReturn(if (sapRequestRes) Future.successful("1234567890") else Future.failed(new RuntimeException))
+        .thenReturn(if (sapRequestRes) Future.successful(Right("1234567890")) else Future.successful(Left(new RuntimeException)))
 
       when(mockSessionService.fetch[ReportableEvents](refEq(REPORTABLE_EVENTS))(any(), any()))
         .thenReturn(
@@ -99,7 +99,7 @@ class ReportableEventsControllerSpec
         .thenReturn(if (ersMetaDataRes) Future.successful(ersMetaData) else Future.failed(new NoSuchElementException))
 
 			when(mockSessionService.cache(refEq(mockErsUtil.ERS_METADATA), any())(any(), any()))
-				.thenReturn(if (ersMetaDataCachedOk) Future.successful(null) else Future.failed(new Exception))
+				.thenReturn(if (ersMetaDataCachedOk) Future.successful(("", "")) else Future.failed(new Exception))
 
       when(
         mockSessionService.fetch[SchemeOrganiserDetails](refEq(mockErsUtil.SCHEME_ORGANISER_CACHE))(any(), any())
@@ -137,9 +137,14 @@ class ReportableEventsControllerSpec
       val controllerUnderTest = buildFakeReportableEventsController(ersMetaDataRes = false)
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
 
-      val result = controllerUnderTest.updateErsMetaData(ersRequestObject)(authRequest, hc)
-      status(result.asInstanceOf[Future[Result]]) shouldBe 500
-      contentAsString(result.asInstanceOf[Future[Result]]) shouldBe contentAsString(
+      val result: Future[Result] = controllerUnderTest
+        .updateErsMetaData(ersRequestObject)(authRequest, hc)
+        .map {
+          case Left(value: Result) => value
+        }
+
+      status(result) shouldBe 500
+      contentAsString(result) shouldBe contentAsString(
         Future.successful(controllerUnderTest.getGlobalErrorPage(testFakeRequest, testMessages))
       )
     }
@@ -148,9 +153,14 @@ class ReportableEventsControllerSpec
       val controllerUnderTest = buildFakeReportableEventsController(ersMetaDataCachedOk = false)
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
 
-      val result = controllerUnderTest.updateErsMetaData(ersRequestObject)(authRequest, hc).futureValue
-      status(result.asInstanceOf[Future[Result]])          shouldBe 500
-      contentAsString(result.asInstanceOf[Future[Result]]) shouldBe contentAsString(
+      val result: Future[Result] = controllerUnderTest
+        .updateErsMetaData(ersRequestObject)(authRequest, hc)
+        .map {
+          case Left(value: Result) => value
+        }
+
+      status(result) shouldBe 500
+      contentAsString(result) shouldBe contentAsString(
         Future.successful(controllerUnderTest.getGlobalErrorPage(testFakeRequest, testMessages))
       )
     }
@@ -202,7 +212,7 @@ class ReportableEventsControllerSpec
       when(mockSessionService.fetch[RequestObject](any())(any(), any())).thenReturn(Future.successful(ersRequestObject))
 
       when(mockErsConnector.connectToEtmpSapRequest(anyString())(any(), any()))
-        .thenReturn(if (sapRequestRes) Future.successful("1234567890") else Future.failed(new RuntimeException))
+        .thenReturn(if (sapRequestRes) Future.successful(Right("1234567890")) else Future.successful(Left(new RuntimeException)))
 
       when(mockSessionService.fetch[ReportableEvents](refEq(REPORTABLE_EVENTS))(any(), any()))
         .thenReturn(
@@ -214,7 +224,7 @@ class ReportableEventsControllerSpec
         .thenReturn(if (ersMetaDataRes) Future.successful(ersMetaData) else Future.failed(new NoSuchElementException))
 
       when(mockSessionService.cache(refEq(mockErsUtil.REPORTABLE_EVENTS), any())(any(), any()))
-				.thenReturn(if (ersMetaDataCachedOk) Future.successful(null) else Future.failed(new Exception))
+				.thenReturn(if (ersMetaDataCachedOk) Future.successful(("", "")) else Future.failed(new Exception))
 
       when(mockSessionService.fetch[SchemeOrganiserDetails](refEq(mockErsUtil.SCHEME_ORGANISER_CACHE))(any(), any()))
         .thenReturn(
