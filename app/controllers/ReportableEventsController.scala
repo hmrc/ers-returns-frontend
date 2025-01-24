@@ -45,34 +45,31 @@ class ReportableEventsController @Inject() (val mcc: MessagesControllerComponent
   extends FrontendController(mcc) with I18nSupport with WithUnsafeDefaultFormBinding with Logging {
 
   def reportableEventsPage(): Action[AnyContent] = authAction.async { implicit request =>
-    sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT).flatMap { requestObj =>
-      updateErsMetaData(requestObj)(request, hc).flatMap { _ =>
-        showReportableEventsPage(requestObj)(request)
+    sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
+      .flatMap { requestObj =>
+          updateErsMetaData(requestObj)(request, hc)
+            .flatMap {
+              case Left(globalErrorPage: Result) => Future.successful(globalErrorPage)
+              case Right(_) => showReportableEventsPage(requestObj)(request)
+            }
       }
     }
-  }
 
   def updateErsMetaData(requestObject: RequestObject)
-                       (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Object] =
-    ersConnector.connectToEtmpSapRequest(requestObject.getSchemeReference).flatMap { sapNumber =>
-      sessionService.fetch[ErsMetaData](ersUtil.ERS_METADATA).map { metaData =>
-        val ersMetaData = ErsMetaData(
-          metaData.schemeInfo,
-          metaData.ipRef,
-          metaData.aoRef,
-          metaData.empRef,
-          metaData.agentRef,
-          Some(sapNumber)
-        )
-        sessionService.cache(ersUtil.ERS_METADATA, ersMetaData).recover { case e: Exception =>
-          logger.error(s"[ReportableEventsController][updateErsMetaData] save failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
-          getGlobalErrorPage
-        }
-      } recover { case e: NoSuchElementException =>
-        logger.error(s"[ReportableEventsController][updateErsMetaData] fetch failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
-        getGlobalErrorPage
+                       (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Either[Result, (String, String)]] =
+    ersConnector
+      .connectToEtmpSapRequest(requestObject.getSchemeReference)
+      .flatMap {
+        case Left(exception: Throwable) =>
+          logger.error(s"[ReportableEventsController][updateErsMetaData] save failed with exception" +
+            s" ${exception.getMessage}, timestamp: ${System.currentTimeMillis()}.")
+          Future.successful(Left(getGlobalErrorPage))
+        case Right(sapNumber: String) =>
+          for {
+            metaData: ErsMetaData <- sessionService.fetch[ErsMetaData](ersUtil.ERS_METADATA)
+            updatedMetadata: (String, String) <- sessionService.cache(ersUtil.ERS_METADATA, metaData.copy(sapNumber = Some(sapNumber)))
+          } yield Right(updatedMetadata)
       }
-    }
 
   def showReportableEventsPage(requestObject: RequestObject)
                               (implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
