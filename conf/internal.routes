@@ -1,4 +1,4 @@
 #Internal routes
 
-POST        /file-upload/callback                           controllers.internal.FileUploadCallbackController.callback(sessionId: String)
+POST        /file-upload/callback                           controllers.internal.FileUploadCallbackController.callback(scRef: String, sessionId: String)
 POST        /csv-file-upload/callback                       controllers.internal.CsvFileUploadCallbackController.callback(uploadId: UploadId, scRef: String, sessionId: String)

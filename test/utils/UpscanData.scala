@@ -75,7 +75,7 @@ trait UpscanData {
     )
   )
 
-  val uploadDetails  = UploadDetails(Instant.now(), "checksum", "fileMimeType", "fileName")
+  val uploadDetails  = UploadDetails(Instant.now(), "checksum", "fileMimeType", "fileName", 100)
   val readyCallback  = UpscanReadyCallback(Reference("Reference"), new URL("https://callbackUrl.com"), uploadDetails)
   val failedCallback = UpscanFailedCallback(Reference("Reference"), ErrorDetails("failureReason", "message"))
 

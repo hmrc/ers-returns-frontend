@@ -51,13 +51,14 @@ class UpscanServiceSpec
 
   def upscanService: UpscanService = app.injector.instanceOf[UpscanService]
   val mockUpscanConnector: UpscanConnector = mock[UpscanConnector]
+  val schemeRef = "schemeRef"
 
   "getUpscanFormDataOds" must {
     "get form data from Upscan Connector with an initiate request" in {
       implicit val request: Request[_] = FakeRequest("GET", "http://localhost:9290/")
       val hc = HeaderCarrier(sessionId = Some(SessionId("sessionid")))
       val callback =
-        controllers.internal.routes.FileUploadCallbackController.callback(hc.sessionId.get.value).absoluteURL()
+        controllers.internal.routes.FileUploadCallbackController.callback(schemeRef, hc.sessionId.get.value).absoluteURL()
       val success = controllers.routes.FileUploadController.success().absoluteURL()
       val failure = controllers.routes.FileUploadController.failure().absoluteURL()
       val expectedInitiateRequest = UpscanInitiateRequest(callback, success, failure, 1, 10485760)
@@ -69,7 +70,7 @@ class UpscanServiceSpec
       when(mockUpscanConnector.getUpscanFormData(initiateRequestCaptor.capture())(any[HeaderCarrier]))
         .thenReturn(Future.successful(upscanInitiateResponse))
 
-      upscanService.getUpscanFormDataOds(hc, request).futureValue
+      upscanService.getUpscanFormDataOds(schemeRef)(hc, request).futureValue
 
       initiateRequestCaptor.getAllValues contains expectedInitiateRequest
     }
