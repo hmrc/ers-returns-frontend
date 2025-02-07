@@ -43,7 +43,7 @@ function checkFileName() {
 
 function checkFileSize() {
     let actualFileSize = fileUploadInput.files[0].size;
-    let maxFileSize = (function() { if(fileType === "csv") {return 100000000;} else if(fileType === "ods") {return 10000000;} })();
+    let maxFileSize = (function() { if(fileType === "csv") {return 500000000;} else if(fileType === "ods") {return 10000000;} })();
     return actualFileSize < maxFileSize;
 }
 
