@@ -67,6 +67,6 @@ object UpscanCallback {
     }
 }
 
-case class UploadDetails(uploadTimestamp: Instant, checksum: String, fileMimeType: String, fileName: String)
+case class UploadDetails(uploadTimestamp: Instant, checksum: String, fileMimeType: String, fileName: String, size: Int)
 
 case class ErrorDetails(failureReason: String, message: String)

@@ -29,6 +29,15 @@ import scala.concurrent.{ExecutionContext, Future}
 class AuditEvents @Inject() (val auditConnector: DefaultAuditConnector)(implicit val ec: ExecutionContext)
     extends AuditService {
 
+  def auditFileSize(schemeRef: String, fileSize: String)(implicit hc: HeaderCarrier): Future[AuditResult] =
+    sendEvent(
+      "UploadFileSizeFromUpscanCallback",
+      Map(
+        "schemeRef" -> schemeRef,
+        "fileSize" -> fileSize
+      )
+    )
+
   def auditRunTimeError(exception: Throwable, contextInfo: String, rsc: ErsMetaData, bundle: String)(implicit
     hc: HeaderCarrier
   ): Unit =

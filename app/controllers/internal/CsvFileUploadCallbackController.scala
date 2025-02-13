@@ -33,7 +33,8 @@ import scala.util.control.NonFatal
 @Singleton
 class CsvFileUploadCallbackController @Inject() (val mcc: MessagesControllerComponents,
                                                  val ersConnector: ErsConnector,
-                                                 val sessionService: FrontendSessionService)
+                                                 val sessionService: FrontendSessionService,
+                                                 val fileSizeUtils: FileSizeUtils)
                                                 (implicit val ec: ExecutionContext, ersUtil: ERSUtil) extends FrontendController(mcc) with Logging {
 
   def callback(uploadId: UploadId, scRef: String, sessionId: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
@@ -49,6 +50,8 @@ class CsvFileUploadCallbackController @Inject() (val mcc: MessagesControllerComp
         valid = callback => {
           val uploadStatus: UploadStatus = callback match {
             case callback: UpscanReadyCallback    =>
+              val fileSize = callback.uploadDetails.size
+              fileSizeUtils.logFileSize(scRef, fileSize)
               UploadedSuccessfully(callback.uploadDetails.fileName, callback.downloadUrl.toExternalForm)
             case UpscanFailedCallback(_, details) =>
               logger.warn(

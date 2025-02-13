@@ -29,10 +29,11 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class FileUploadCallbackController @Inject() (val mcc: MessagesControllerComponents,
-                                              fileValidatorService: FileValidatorService)
+                                              fileValidatorService: FileValidatorService,
+                                              fileSizeUtils: FileSizeUtils)
                                              (implicit val ec: ExecutionContext) extends FrontendController(mcc) with Logging with Constants {
 
-  def callback(sessionId: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
+  def callback(scRef: String, sessionId: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
     request.body
       .validate[UpscanCallback]
       .fold(
@@ -45,6 +46,8 @@ class FileUploadCallbackController @Inject() (val mcc: MessagesControllerCompone
         valid = callback => {
           val uploadStatus = callback match {
             case callback: UpscanReadyCallback    =>
+              val fileSize = callback.uploadDetails.size
+              fileSizeUtils.logFileSize(scRef, fileSize)
               UploadedSuccessfully(callback.uploadDetails.fileName, callback.downloadUrl.toExternalForm)
             case UpscanFailedCallback(_, details) =>
               logger.warn(
