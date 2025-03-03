@@ -5,7 +5,7 @@ object AppDependencies {
 
   val pdfboxVersion    = "2.0.32"
   val openHtmlVersion  = "1.0.10"
-  val bootstrapVersion = "9.8.0"
+  val bootstrapVersion = "9.10.0"
   val mongoVersion     = "2.5.0"
 
   val compile: Seq[ModuleID] = Seq(
@@ -13,7 +13,7 @@ object AppDependencies {
     ws,
     "uk.gov.hmrc"             %% "bootstrap-frontend-play-30" % bootstrapVersion,
     "uk.gov.hmrc.mongo"       %% "hmrc-mongo-play-30"         % mongoVersion,
-    "uk.gov.hmrc"             %% "play-frontend-hmrc-play-30" % "11.11.0",
+    "uk.gov.hmrc"             %% "play-frontend-hmrc-play-30" % "11.12.0",
     "uk.gov.hmrc"             %% "play-partials-play-30"      % "10.0.0",
     "uk.gov.hmrc"             %% "domain-play-30"             % "10.0.0",
     "org.apache.pdfbox"       %  "pdfbox"                     % pdfboxVersion,
@@ -36,7 +36,7 @@ object AppDependencies {
     "com.vladsch.flexmark"    %  "flexmark-all"            % "0.64.8",
     "org.pegdown"             %  "pegdown"                 % "1.6.0",
     "org.jsoup"               %  "jsoup"                   % "1.18.3",
-    "org.wiremock"            %  "wiremock-standalone"     % "3.11.0"
+    "org.wiremock"            %  "wiremock-standalone"     % "3.12.1"
   ).map(_ % Test)
 
   val overrides: Seq[ModuleID] = Seq(
