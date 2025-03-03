@@ -47,7 +47,7 @@ class UpscanService @Inject()(applicationConfig: ApplicationConfig, upscanConnec
     val success = controllers.routes.CsvFileUploadController.success(uploadId)
     val failure = controllers.routes.CsvFileUploadController.failure()
     val upscanInitiateRequest =
-      UpscanInitiateRequest(callbackUrl, urlToString(success), urlToString(failure), 1, 104857600)
+      UpscanInitiateRequest(callbackUrl, urlToString(success), urlToString(failure), 1, 524288000) // scalastyle:off magic.number
     upscanConnector.getUpscanFormData(upscanInitiateRequest)
   }
 
@@ -59,7 +59,7 @@ class UpscanService @Inject()(applicationConfig: ApplicationConfig, upscanConnec
 
     val success = controllers.routes.FileUploadController.success()
     val failure = controllers.routes.FileUploadController.failure()
-    val upscanInitiateRequest = UpscanInitiateRequest(callbackUrl, urlToString(success), urlToString(failure), 1, 10485760)
+    val upscanInitiateRequest = UpscanInitiateRequest(callbackUrl, urlToString(success), urlToString(failure), 1, 524288000) // scalastyle:off magic.number
     upscanConnector.getUpscanFormData(upscanInitiateRequest)
   }
 
