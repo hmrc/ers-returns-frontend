@@ -16,7 +16,7 @@
 
 package controllers
 
-import controllers.internal.CsvFileUploadCallbackController
+import controllers.internal.{CsvFileUploadCallbackController, FileSizeUtils}
 import models.upscan._
 import org.apache.pekko.stream.Materializer
 import org.mockito.ArgumentCaptor
@@ -60,6 +60,8 @@ class CsvFileUploadCallbackControllerSpec
     ExecutionContext.global
   )
 
+  val fileSizeUtils: FileSizeUtils = mock[FileSizeUtils]
+
   implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
 
   implicit lazy val materializer: Materializer = app.materializer
@@ -70,7 +72,7 @@ class CsvFileUploadCallbackControllerSpec
   val url: URL = new URL("http://localhost:9000/myUrl")
 
   lazy val csvFileUploadCallbackController: CsvFileUploadCallbackController =
-    new CsvFileUploadCallbackController(mockMCC, mockErsConnector, mockSessionService) {
+    new CsvFileUploadCallbackController(mockMCC, mockErsConnector, mockSessionService, fileSizeUtils) {
       import scala.concurrent.duration._
       when(mockAppConfig.retryDelay).thenReturn(1.millisecond)
     }
@@ -86,7 +88,7 @@ class CsvFileUploadCallbackControllerSpec
     "update upload status to Uploaded Successfully" when {
       "callback is UpscanReadyCallback" in {
         val callbackCaptor = ArgumentCaptor.forClass(classOf[UploadStatus])
-        val body = UpscanReadyCallback(Reference("Reference"), url, UploadDetails(Instant.now(), "checkSum", "fileMimeType", "fileName"))
+        val body = UpscanReadyCallback(Reference("Reference"), url, UploadDetails(Instant.now(), "checkSum", "fileMimeType", "fileName", 100))
         val jsonBody = Json.toJson(body)
         when(mockSessionService.cache(meq(s"check-csv-files-${uploadId.value}"), callbackCaptor.capture)(any(), any()))
           .thenReturn(Future.successful(sessionPair))

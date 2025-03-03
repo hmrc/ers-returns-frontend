@@ -5,6 +5,7 @@ object AppDependencies {
 
   val pdfboxVersion    = "2.0.32"
   val openHtmlVersion  = "1.0.10"
+
   val bootstrapVersion = "9.10.0"
   val mongoVersion     = "2.5.0"
 

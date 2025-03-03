@@ -126,11 +126,11 @@ ers_not_found.message = Please check that you’ve have entered the correct web 
 #********************************************************************
 
 ers_start.page_title = Submit your {0} annual return
-ers_start.csop.intro_para = Use this service to submit your return at the end of the tax year. This service replaces form 35.
-ers_start.emi.intro_para = Use this service to submit your return at the end of the tax year. This service replaces form EMI40.
-ers_start.saye.intro_para = Use this service to submit your return at the end of the tax year. This service replaces form 34.
-ers_start.sip.intro_para = Use this service to submit your return at the end of the tax year. This service replaces form 39.
-ers_start.other.intro_para = Use this service to submit your return at the end of the tax year. This service replaces ‘form 42’.
+ers_start.csop.intro_para = Use this service to submit your return at the end of the tax year.
+ers_start.emi.intro_para = Use this service to submit your return at the end of the tax year.
+ers_start.saye.intro_para = Use this service to submit your return at the end of the tax year.
+ers_start.sip.intro_para = Use this service to submit your return at the end of the tax year.
+ers_start.other.intro_para = Use this service to submit your return at the end of the tax year.
 ers_start.sub_title = Before you start
 ers_start.large_files = If you have a .ods file that’s larger than 500MB or a .csv file that’s larger than 500MB
 ers_start.help = The person acting as the company secretary must have approved this return and must agree to any declaration you make within this service.

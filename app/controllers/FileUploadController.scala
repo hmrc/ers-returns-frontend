@@ -54,7 +54,7 @@ class FileUploadController @Inject() (val mcc: MessagesControllerComponents,
   def uploadFilePage(): Action[AnyContent] = authAction.async { implicit request =>
     (for {
       requestObject <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
-      response <- upscanService.getUpscanFormDataOds
+      response <- upscanService.getUpscanFormDataOds(requestObject.getSchemeReference)
       _ <- ersConnector.createCallbackRecord
     } yield Ok(upscanOdsFileUploadView(requestObject, response))) recover { case e: Throwable =>
       logger.error(s"[FileUploadController][uploadFilePage] failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.", e)
