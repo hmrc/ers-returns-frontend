@@ -74,7 +74,6 @@ class FrontendSessionService @Inject()(val sessionCache: FrontendSessionsReposit
     }
   }
 
-
   def fetchPartFromTrusteeDetailsList[A](index: Int)(implicit request: Request[_], formats: json.Format[A]): Future[Option[A]] = {
     sessionCache.getFromSession[JsValue](DataKey(TRUSTEES_CACHE)).map { optionalJson =>
       optionalJson.flatMap { json =>

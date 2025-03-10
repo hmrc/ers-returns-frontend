@@ -34,6 +34,7 @@ class UpscanService @Inject()(applicationConfig: ApplicationConfig, upscanConnec
   lazy val redirectUrlBase: String = applicationConfig.upscanRedirectBase
 
   private def urlToString(c: Call): String = redirectUrlBase + c.url
+  val uploadFileSizeLimit = applicationConfig.uploadFileSizeLimit
 
   def getUpscanFormDataCsv(uploadId: UploadId, scRef: String)(implicit
                                                               hc: HeaderCarrier,
@@ -43,11 +44,15 @@ class UpscanService @Inject()(applicationConfig: ApplicationConfig, upscanConnec
       hc.sessionId,
       sessionId => controllers.internal.routes.CsvFileUploadCallbackController.callback(uploadId, scRef, sessionId),
       isSecure)
-
+    logger.info(s"[UpscanService][getUpscanFormDataCsv] callbackUrl: $callbackUrl")
     val success = controllers.routes.CsvFileUploadController.success(uploadId)
+    logger.info(s"[UpscanService][getUpscanFormDataCsv] success : $success")
     val failure = controllers.routes.CsvFileUploadController.failure()
+    logger.info(s"[UpscanService][getUpscanFormDataCsv] failure: $failure")
     val upscanInitiateRequest =
-      UpscanInitiateRequest(callbackUrl, urlToString(success), urlToString(failure), 1, 524288000) // scalastyle:off magic.number
+      UpscanInitiateRequest(callbackUrl, urlToString(success), urlToString(failure), 1, uploadFileSizeLimit)
+
+    logger.info(s"[UpscanService][getUpscanFormDataCsv] upscanInitiateRequest: $upscanInitiateRequest")
     upscanConnector.getUpscanFormData(upscanInitiateRequest)
   }
 
@@ -59,7 +64,7 @@ class UpscanService @Inject()(applicationConfig: ApplicationConfig, upscanConnec
 
     val success = controllers.routes.FileUploadController.success()
     val failure = controllers.routes.FileUploadController.failure()
-    val upscanInitiateRequest = UpscanInitiateRequest(callbackUrl, urlToString(success), urlToString(failure), 1, 524288000) // scalastyle:off magic.number
+    val upscanInitiateRequest = UpscanInitiateRequest(callbackUrl, urlToString(success), urlToString(failure), 1, uploadFileSizeLimit)
     upscanConnector.getUpscanFormData(upscanInitiateRequest)
   }
 
