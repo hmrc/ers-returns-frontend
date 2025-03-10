@@ -132,7 +132,7 @@ ers_start.saye.intro_para = Use this service to submit your return at the end of
 ers_start.sip.intro_para = Use this service to submit your return at the end of the tax year.
 ers_start.other.intro_para = Use this service to submit your return at the end of the tax year.
 ers_start.sub_title = Before you start
-ers_start.large_files = If you have a .ods file that’s larger than 500MB or a .csv file that’s larger than 500MB
+ers_start.large_files = If you have a .ods file that’s larger than 200MB or a .csv file that’s larger than 200MB
 ers_start.help = The person acting as the company secretary must have approved this return and must agree to any declaration you make within this service.
 
 ers_start.you_need = Depending on your circumstances, you may need:
@@ -162,12 +162,12 @@ ers_start.other.bullet_3 = to know any alterations made to key features of the s
 ers_start.other.intro_para_2 = If relevant, the details of any other companies covered by this return can be entered manually or uploaded in a .csv file (as appropriate).
 
 ers_start.cant_use = You can’t use this service if you have a:
-ers_start.cant_use_bullet_1 = ODS file that’s larger than 500MB
-ers_start.cant_use_bullet_2 = CSV file that’s larger than 500MB
+ers_start.cant_use_bullet_1 = ODS file that’s larger than 200MB
+ers_start.cant_use_bullet_2 = CSV file that’s larger than 200MB
 
 ers_start.ifrelevant = If relevant:
-ers_start.relevant_bullet_1 = .ods files used to record events must be no larger than 500MB
-ers_start.relevant_bullet_2 = .csv files used to record events must be no larger than 500MB
+ers_start.relevant_bullet_1 = .ods files used to record events must be no larger than 200MB
+ers_start.relevant_bullet_2 = .csv files used to record events must be no larger than 200MB
 ers_start.csop.relevant_bullet_3 = group scheme member details can be entered manually or uploaded in a .csv file
 ers_start.emi.relevant_bullet_3 = qualifying subsidiary company details can be entered manually or uploaded in a .csv file
 ers_start.saye.relevant_bullet_3 = group scheme member details can be entered manually or uploaded in a .csv file
@@ -489,15 +489,15 @@ ers_signed_out.link = Sign in
 
 file_upload.title = Upload your ODS file
 file_upload.contact_us = Contact us on our feedback page
-file_upload.size_warning.link.before = If your file is larger than 500MB, you can’t use this service. Email
-file_upload.file_size = if your .ods file is larger than 500MB.
+file_upload.size_warning.link.before = If your file is larger than 200MB, you can’t use this service. Email
+file_upload.file_size = if your .ods file is larger than 200MB.
 file_upload.csop.info = Choose the {0} file you want to upload as part of your Company Share Option Plan annual return.
 file_upload.emi.info = Choose the {0} file you want to upload as part of your Enterprise Management Incentives annual return.
 file_upload.other.info = Choose the {0} file you want to upload as part of your Other annual return.
 file_upload.sip.info = Choose the {0} file you want to upload as part of your Share Incentive Plan annual return.
 file_upload.saye.info = Choose the {0} file you want to upload as part of your Save As You Earn annual return.
-file_upload.delay.csv = If your CSV file is larger than 500MB you will not be able to upload it. Email shareschemes@hmrc.gsi.gov.uk for any help with your submission.
-file_upload.delay.ods = If your ODS file is larger than 500MB you will not be able to upload it. Email shareschemes@hmrc.gsi.gov.uk for any help with your submission.
+file_upload.delay.csv = If your CSV file is larger than 200MB you will not be able to upload it. Email shareschemes@hmrc.gsi.gov.uk for any help with your submission.
+file_upload.delay.ods = If your ODS file is larger than 200MB you will not be able to upload it. Email shareschemes@hmrc.gsi.gov.uk for any help with your submission.
 
 file_upload_errors.title = Errors have been found
 file_upload_errors.para1 = Fix the errors before you use this service again or
@@ -530,7 +530,7 @@ ers_upload_successful.page_title = Successful upload
 csv_file_upload.upload_your_file_header = Upload your ‘{0}’ file
 csv_file_upload.upload_your_file = Upload the file {0}
 csv_file_upload.contact_us = Contact us on our feedback page
-csv_file_upload.file_size = if any of your files are larger than 500MB.
+csv_file_upload.file_size = if any of your files are larger than 200MB.
 csv_file_upload.you_have_uploaded = You have uploaded:
 csv_file_upload.summary_error = Choose a different file to upload
 
@@ -831,7 +831,7 @@ ers.file_problem.title = There is a problem with the file upload - Submit your E
 ers.file_problem.heading = There is a problem with the file upload
 ers.file_problem.paragraph = This may be because the file:
 ers.file_problem.invalidFileName = has the wrong name or the name is more than 240 characters
-ers.file_problem.fileTooLarge = is too large - there is a 500MB limit for CSV files and a 500MB limit for ODS files
+ers.file_problem.fileTooLarge = is too large - there is a 200MB limit for CSV files and a 200MB limit for ODS files
 ers.file_problem.fileTooSmall = is empty
 ers.file_problem.invalidFileType = is the wrong type - it should be a CSV or an ODS depending on what you have already selected
 ers.file_problem.invalidFileNameCharacters = contains invalid characters

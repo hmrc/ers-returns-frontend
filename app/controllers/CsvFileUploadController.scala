@@ -59,15 +59,12 @@ class CsvFileUploadController @Inject() (val mcc: MessagesControllerComponents,
       csvFilesList   <- sessionService.fetch[UpscanCsvFilesList](ersUtil.CSV_FILES_UPLOAD)
       currentCsvFile  = csvFilesList.ids.find(ids => ids.uploadStatus == NotStarted)
       if currentCsvFile.isDefined
-      upscanFormData <- upscanService.getUpscanFormDataCsv(currentCsvFile.get.uploadId, requestObject.getSchemeReference)
+        upscanFormData <- upscanService.getUpscanFormDataCsv(currentCsvFile.get.uploadId, requestObject.getSchemeReference)
     } yield {
       Ok(upscanCsvFileUploadView(requestObject, upscanFormData, currentCsvFile.get.fileId, useCsopV5Templates(requestObject.taxYear)))
     }).recover {
-      case ex: NoSuchElementException =>
-        logger.warn(s"[CsvFileUploadController][uploadFilePage] Attempting to load upload page when no files are ready to upload: ${ex.getMessage}, timestamp: ${System.currentTimeMillis()}")
-        getGlobalErrorPage
-      case e: Throwable =>
-        logger.error(s"[CsvFileUploadController][uploadFilePage] Failed to display csv upload page with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.", e)
+      case ex: Exception =>
+        logger.error(s"[CsvFileUploadController][uploadFilePage] Attempting to load upload page failed when no files are ready to upload: ${ex.getMessage}", ex)
         getGlobalErrorPage
     }
   }
@@ -103,7 +100,8 @@ class CsvFileUploadController @Inject() (val mcc: MessagesControllerComponents,
     processValidationResults()
   }
 
-  def processValidationResults()(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] =
+  def processValidationResults()(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
+    logger.info("In [CsvFileUploadController][processValidationResults]")
     (for {
       all <- sessionService.fetch[ErsMetaData](ersUtil.ERS_METADATA)
       result <- removePresubmissionData(all.schemeInfo)
@@ -111,8 +109,10 @@ class CsvFileUploadController @Inject() (val mcc: MessagesControllerComponents,
       logger.error(s"[CsvFileUploadController][processValidationResults] Failed to fetch metadata data with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
       getGlobalErrorPage
     }
+  }
 
-  def removePresubmissionData(schemeInfo: SchemeInfo)(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] =
+  def removePresubmissionData(schemeInfo: SchemeInfo)(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
+    logger.info("In [CsvFileUploadController][removePresubmissionData] calling removePresubmissionData()")
     ersConnector.removePresubmissionData(schemeInfo).flatMap { result =>
       result.status match {
         case OK => extractCsvCallbackData(schemeInfo)
@@ -124,8 +124,10 @@ class CsvFileUploadController @Inject() (val mcc: MessagesControllerComponents,
       logger.error(s"[CsvFileUploadController][removePresubmissionData] Failed to remove presubmission data with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
       getGlobalErrorPage
     }
+  }
 
-  def extractCsvCallbackData(schemeInfo: SchemeInfo)(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] =
+  def extractCsvCallbackData(schemeInfo: SchemeInfo)(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
+    logger.info(s"[CsvFileUploadController][extractCsvCallbackData] schemeInfo: $SchemeInfo")
     sessionService.fetch[UpscanCsvFilesList](ersUtil.CSV_FILES_UPLOAD).flatMap { data =>
       sessionService
         .fetchAll()
@@ -140,7 +142,9 @@ class CsvFileUploadController @Inject() (val mcc: MessagesControllerComponents,
         }
         .withRetry(allCsvFilesCacheRetryAmount)(_.isDefined)
         .flatMap { files =>
+          logger.info(s"[CsvFileUploadController][extractCsvCallbackData] files: $files")
           val csvFilesCallbackList: UpscanCsvFilesCallbackList = UpscanCsvFilesCallbackList(files.get)
+          logger.info(s"[CsvFileUploadController][extractCsvCallbackData] csvFilesCallbackList: $csvFilesCallbackList")
           sessionService.cache(ersUtil.CHECK_CSV_FILES, csvFilesCallbackList).flatMap { _ =>
             if (csvFilesCallbackList.files.nonEmpty && csvFilesCallbackList.areAllFilesComplete()) {
               if (csvFilesCallbackList.areAllFilesSuccessful()) {
@@ -166,6 +170,7 @@ class CsvFileUploadController @Inject() (val mcc: MessagesControllerComponents,
       logger.error(s"[CsvFileUploadController][extractCsvCallbackData] Failed to fetch CsvFilesCallbackList with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.", e)
       getGlobalErrorPage
     }
+  }
 
   def checkFileNames(csvCallbackData: List[UploadedSuccessfully], schemeInfo: SchemeInfo)
                     (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] =
