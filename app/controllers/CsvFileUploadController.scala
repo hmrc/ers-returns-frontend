@@ -100,7 +100,7 @@ class CsvFileUploadController @Inject() (val mcc: MessagesControllerComponents,
     processValidationResults()
   }
 
-  def processValidationResults()(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
+  def processValidationResults()(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] =
     (for {
       all <- sessionService.fetch[ErsMetaData](ersUtil.ERS_METADATA)
       result <- removePresubmissionData(all.schemeInfo)
@@ -108,9 +108,8 @@ class CsvFileUploadController @Inject() (val mcc: MessagesControllerComponents,
       logger.error(s"[CsvFileUploadController][processValidationResults] Failed to fetch metadata data with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
       getGlobalErrorPage
     }
-  }
 
-  def removePresubmissionData(schemeInfo: SchemeInfo)(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
+  def removePresubmissionData(schemeInfo: SchemeInfo)(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] =
     ersConnector.removePresubmissionData(schemeInfo).flatMap { result =>
       result.status match {
         case OK => extractCsvCallbackData(schemeInfo)
@@ -122,7 +121,6 @@ class CsvFileUploadController @Inject() (val mcc: MessagesControllerComponents,
       logger.error(s"[CsvFileUploadController][removePresubmissionData] Failed to remove presubmission data with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
       getGlobalErrorPage
     }
-  }
 
   def extractCsvCallbackData(schemeInfo: SchemeInfo)(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
     sessionService.fetch[UpscanCsvFilesList](ersUtil.CSV_FILES_UPLOAD).flatMap { data =>
