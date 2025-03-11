@@ -101,7 +101,6 @@ class CsvFileUploadController @Inject() (val mcc: MessagesControllerComponents,
   }
 
   def processValidationResults()(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
-    logger.info("In [CsvFileUploadController][processValidationResults]")
     (for {
       all <- sessionService.fetch[ErsMetaData](ersUtil.ERS_METADATA)
       result <- removePresubmissionData(all.schemeInfo)
@@ -112,7 +111,6 @@ class CsvFileUploadController @Inject() (val mcc: MessagesControllerComponents,
   }
 
   def removePresubmissionData(schemeInfo: SchemeInfo)(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
-    logger.info("In [CsvFileUploadController][removePresubmissionData] calling removePresubmissionData()")
     ersConnector.removePresubmissionData(schemeInfo).flatMap { result =>
       result.status match {
         case OK => extractCsvCallbackData(schemeInfo)
@@ -127,7 +125,6 @@ class CsvFileUploadController @Inject() (val mcc: MessagesControllerComponents,
   }
 
   def extractCsvCallbackData(schemeInfo: SchemeInfo)(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
-    logger.info(s"[CsvFileUploadController][extractCsvCallbackData] schemeInfo: $SchemeInfo")
     sessionService.fetch[UpscanCsvFilesList](ersUtil.CSV_FILES_UPLOAD).flatMap { data =>
       sessionService
         .fetchAll()

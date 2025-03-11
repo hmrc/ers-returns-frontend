@@ -44,7 +44,6 @@ class UpscanService @Inject()(applicationConfig: ApplicationConfig, upscanConnec
       hc.sessionId,
       sessionId => controllers.internal.routes.CsvFileUploadCallbackController.callback(uploadId, scRef, sessionId),
       isSecure)
-    logger.info(s"[UpscanService][getUpscanFormDataCsv] callbackUrl: $callbackUrl")
     val success = controllers.routes.CsvFileUploadController.success(uploadId)
     logger.info(s"[UpscanService][getUpscanFormDataCsv] success : $success")
     val failure = controllers.routes.CsvFileUploadController.failure()
