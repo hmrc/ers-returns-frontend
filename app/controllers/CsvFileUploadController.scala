@@ -63,8 +63,11 @@ class CsvFileUploadController @Inject() (val mcc: MessagesControllerComponents,
     } yield {
       Ok(upscanCsvFileUploadView(requestObject, upscanFormData, currentCsvFile.get.fileId, useCsopV5Templates(requestObject.taxYear)))
     }).recover {
-      case ex: Exception =>
-        logger.error(s"[CsvFileUploadController][uploadFilePage] Attempting to load upload page failed when no files are ready to upload: ${ex.getMessage}", ex)
+      case ex: NoSuchElementException =>
+        logger.warn(s"[CsvFileUploadController][uploadFilePage] Attempting to load upload page when no files are ready to upload: ${ex.getMessage}, timestamp: ${System.currentTimeMillis()}")
+        getGlobalErrorPage
+      case e: Throwable =>
+        logger.error(s"[CsvFileUploadController][uploadFilePage] Failed to display csv upload page with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.", e)
         getGlobalErrorPage
     }
   }
@@ -122,7 +125,7 @@ class CsvFileUploadController @Inject() (val mcc: MessagesControllerComponents,
       getGlobalErrorPage
     }
 
-  def extractCsvCallbackData(schemeInfo: SchemeInfo)(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
+  def extractCsvCallbackData(schemeInfo: SchemeInfo)(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] =
     sessionService.fetch[UpscanCsvFilesList](ersUtil.CSV_FILES_UPLOAD).flatMap { data =>
       sessionService
         .fetchAll()
@@ -165,7 +168,6 @@ class CsvFileUploadController @Inject() (val mcc: MessagesControllerComponents,
       logger.error(s"[CsvFileUploadController][extractCsvCallbackData] Failed to fetch CsvFilesCallbackList with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.", e)
       getGlobalErrorPage
     }
-  }
 
   def checkFileNames(csvCallbackData: List[UploadedSuccessfully], schemeInfo: SchemeInfo)
                     (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] =
