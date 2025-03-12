@@ -89,7 +89,7 @@ class ErsReceiptPdfBuilderServiceSpec
 
         // pdf fields which depend on input
         output.contains("My scheme") shouldBe true
-        output.contains("testbundle") shouldBe true
+        output.contains("XA1100000000000") shouldBe true
         output.contains(expectedOutputDate) shouldBe true
       }
     }

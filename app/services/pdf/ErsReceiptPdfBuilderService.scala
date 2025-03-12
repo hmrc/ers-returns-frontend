@@ -83,7 +83,7 @@ class ErsReceiptPdfBuilderService @Inject() (val countryCodes: CountryCodes)(imp
        |<p style="margin-top: 0.3em; padding-left: 0.05em">${ersSummary.metaData.schemeInfo.schemeName}</p>
        |
        |<h2 style="margin-bottom: 0em;">${messages("ers.pdf.unique_scheme_ref")}</h2>
-       |<p style="margin-top: 0.3em; padding-left: 0.05em">${ersSummary.bundleRef}</p>
+       |<p style="margin-top: 0.3em; padding-left: 0.05em">${ersSummary.metaData.schemeInfo.schemeRef}</p>
        |
        |<h2 style="margin-bottom: 0em;">${messages("ers.pdf.tax_year")}</h2>
        |<p style="margin-top: 0.3em; padding-left: 0.05em">${ersSummary.metaData.schemeInfo.taxYear}</p>

@@ -6,7 +6,7 @@ object AppDependencies {
   val pdfboxVersion    = "2.0.32"
   val openHtmlVersion  = "1.0.10"
 
-  val bootstrapVersion = "9.10.0"
+  val bootstrapVersion = "9.11.0"
   val mongoVersion     = "2.5.0"
 
   val compile: Seq[ModuleID] = Seq(
@@ -36,7 +36,7 @@ object AppDependencies {
     "org.scalatestplus"       %% "mockito-5-10"            % "3.2.18.0",
     "com.vladsch.flexmark"    %  "flexmark-all"            % "0.64.8",
     "org.pegdown"             %  "pegdown"                 % "1.6.0",
-    "org.jsoup"               %  "jsoup"                   % "1.18.3",
+    "org.jsoup"               %  "jsoup"                   % "1.19.1",
     "org.wiremock"            %  "wiremock-standalone"     % "3.12.1"
   ).map(_ % Test)
 
