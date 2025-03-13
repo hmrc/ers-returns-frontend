@@ -852,6 +852,7 @@ ers.pdf.scheme = Scheme name
 ers.pdf.refcode = Reference code
 ers.pdf.unique_scheme_ref = Unique scheme reference
 ers.pdf.date_and_time = Time and date of submission
+ers.pdf.submission_ref = Submission reference
 ers.pdf.summary_information = Summary information
 ers.taxYear.text = to
 ers.pdf.header = HM Revenue &amp; Customs
