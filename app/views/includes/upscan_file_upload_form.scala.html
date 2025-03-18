@@ -28,6 +28,7 @@
         postTarget: String,
         headerMsg: String,
         schemeId: String,
+        schemeName: String,
         fileId: String,
         useCsopV5Templates: Boolean = false
 )(implicit messages: Messages, ersUtil: ERSUtil)
@@ -35,9 +36,27 @@
 @expectedFileName = @{if(schemeId == "1" && useCsopV5Templates) {ersUtil.getPageElement(schemeId, ersUtil.PAGE_CHECK_CSV_FILE,fileId+".file_name.v5")} else ersUtil.getPageElement(schemeId, ersUtil.PAGE_CHECK_CSV_FILE,fileId+".file_name")}
 
 <form method="post" action="@postTarget" enctype="multipart/form-data">
+
+    <span class ="govuk-caption-l">
+		@schemeName
+	</span>
+
     @hmrcPageHeading(PageHeading(
         text = headerMsg
     ))
+
+    <p class = "govuk-body">@messages("file_upload.paragraph")</p>
+    <ul class ="govuk-list govuk-list--bullet">
+        <li>
+            @if(fileType == ".csv") {
+                @messages("file_upload.bulletOne.csv")
+            } else {
+                @messages("file_upload.bulletOne.ods")
+            }
+        </li>
+        <li>@messages("file_upload.bulletTwo", schemeName)</li>
+    </ul>
+    <br>
 
     @for(field <- formFields) {
         <input type="hidden" name="@field._1" value="@field._2"/>

@@ -36,8 +36,12 @@ function checkFileName() {
     if (fileType === "csv") {
         let expectedFileName = document.getElementsByTagName('label').item(0).getAttribute('data-file-name');
         return {fileName: actualFileName === expectedFileName, fileNameLength: true, fileNameCharacters: true};
+    } else if (fileType === "ods") {
+        let lowerName = actualFileName.toLowerCase();
+        let isOdsFile = lowerName.endsWith(".ods");
+        return {fileName: isOdsFile, fileNameLength: actualFileName.length < 240, fileNameCharacters: actualFileName.match("[/^~\"|#?,\\]\\[£$&:@*\\\\+%{}<>\\/]|]") == null};
     } else {
-        return {fileName: true, fileNameLength: actualFileName.length < 240, fileNameCharacters: actualFileName.match("[/^~\"|#?,\\]\\[£$&:@*\\\\+%{}<>\\/]|]") == null};
+        return {fileName: true, fileNameLength: true, fileNameCharacters: true};
     }
 }
 

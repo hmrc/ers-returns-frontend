@@ -26,8 +26,14 @@ ers.scheme.CSOP = CSOP
 ers.scheme.EMI = EMI
 ers.scheme.SIP = SIP
 ers.scheme.SAYE = SAYE
-ers.scheme.Other = ARALL
+ers.scheme.OTHER = ARALL
 ers.scheme.title = Cynllun {0}
+
+ers.schemeDisplay.CSOP = Cynllun Opsiwn Prynu Cyfranddaliadau Cwmni
+ers.schemeDisplay.SAYE = Cynilo Wrth Ennill
+ers.schemeDisplay.EMI = Cymelliadau Rheoli Mentrau
+ers.schemeDisplay.SIP = Cynllun Cymell Cyfranddaliadau
+ers.schemeDisplay.OTHER = Arall
 
 ers.start.page_title = Cyflwyno eich Datganiad Blynyddol – Gwarantau ar Sail Cyflogaeth – GOV.UK
 ers.reportable_events.page_title = Digwyddiadau i’w nodi – Gwarantau ar Sail Cyflogaeth – GOV.UK
@@ -386,6 +392,10 @@ ers_signed_out.link = Mewngofnodi
 ers_upload_form.processing_alert = Rydym yn gwirio eich ffeil am wallau. Peidiwch ag adnewyddu’r dudalen.
 
 file_upload.title = Uwchlwythwch eich ffeil ODS
+file_upload.paragraph = Mae’n rhaid i’ch ffeil fod:
+file_upload.bulletOne.ods = yn ffeil ODS
+file_upload.bulletOne.csv = yn ffeil CSV
+file_upload.bulletTwo = ar gyfer cynllun {0}
 file_upload.contact_us = Cysylltwch â ni ar ein tudalen adborth
 file_upload.size_warning.link.before =Os yw’ch ffeil yn fwy na 200MB, ni allwch ddefnyddio’r gwasanaeth hwn. E-bostiwch
 file_upload.file_size = os yw’ch ffeil ODS yn fwy na 200MB.

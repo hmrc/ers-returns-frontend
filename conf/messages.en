@@ -30,8 +30,14 @@ ers.scheme.CSOP = CSOP
 ers.scheme.EMI = EMI
 ers.scheme.SIP = SIP
 ers.scheme.SAYE = SAYE
-ers.scheme.Other = OTHER
+ers.scheme.OTHER = OTHER
 ers.scheme.title = {0} scheme
+
+ers.schemeDisplay.CSOP = Company Share Option Plan
+ers.schemeDisplay.SAYE = Save As You Earn Scheme
+ers.schemeDisplay.EMI = Enterprise Management Incentives Plan
+ers.schemeDisplay.SIP = Share Incentive Plan
+ers.schemeDisplay.OTHER = Other schemes and arrangements
 
 #********************************************************************
 # File upload messages
@@ -315,7 +321,7 @@ ers_group_file_check.other.intro_para = Choose the comma separated values (.csv)
 ers_group_file_check.choose_file_button = Choose your file
 ers_group_file_check.remove_file_link = Remove file
 ers_group_file_check.check_file_button = Upload file
-ers_group_file_check.upload_a_file = Upload a file
+ers_group_file_check.upload_a_file = Upload the file
 ers_group_file_check.file_name = No file selected.
 ers_group_file_check.format_errors = File contains formatting errors.
 ers_group_file_check.file_type_error = The attached file is in the wrong format. We’re only able to accept .csv files.
@@ -488,6 +494,10 @@ ers_signed_out.link = Sign in
 #********************************************************************
 
 file_upload.title = Upload your ODS file
+file_upload.paragraph = Your file must be:
+file_upload.bulletOne.ods = an ODS file
+file_upload.bulletOne.csv = a CSV file
+file_upload.bulletTwo = for a {0} scheme
 file_upload.contact_us = Contact us on our feedback page
 file_upload.size_warning.link.before = If your file is larger than 200MB, you can’t use this service. Email
 file_upload.file_size = if your .ods file is larger than 200MB.

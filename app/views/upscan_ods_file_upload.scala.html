@@ -32,6 +32,7 @@
 @(requestObject: RequestObject, upscanInitiateResponse: UpscanInitiateResponse)(implicit request: Request[_], messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 
 @schemeId = @{requestObject.getSchemeId}
+@schemeName = @{requestObject.getSchemeHeadingName}
 
 @scripts = {
 	<script src='@routes.Assets.versioned("/javascripts/file-upload.js")' @{CSPNonce.attr}></script>
@@ -59,6 +60,7 @@
 		upscanInitiateResponse.postTarget,
 		messages("file_upload.title"),
 		schemeId,
+		schemeName,
 		fileId = ""
 	)
 
