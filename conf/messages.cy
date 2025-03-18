@@ -700,6 +700,7 @@ ers.pdf.scheme = Enw’r cynllun
 ers.pdf.refcode = Cyfeirnod
 ers.pdf.unique_scheme_ref = Cyfeirnod unigryw y cynllun
 ers.pdf.date_and_time = Amser a dyddiad cyflwyno
+ers.pdf.submission_ref = Cyfeirnod Cyflwyno
 ers.pdf.summary_information = Gwybodaeth gryno
 ers.pdf.header = Cyllid a Thollau EF
 ers.pdf.title = Derbynneb am gyflwyno
