@@ -91,6 +91,9 @@ class ErsReceiptPdfBuilderService @Inject() (val countryCodes: CountryCodes)(imp
        |<h2 style="margin-bottom: 0em;">${messages("ers.pdf.date_and_time")}</h2>
        |<p style="margin-top: 0.3em; padding-left: 0.05em">${DateUtils.convertDate(dateSubmitted)}</p>
        |
+       |<h2 style="margin-bottom: 0em;">${messages("ers.pdf.submission_ref")}</h2>
+       |<p style="margin-top: 0.3em; padding-left: 0.05em">${ersSummary.bundleRef}</p>
+       |
        |</div>
        |<footer>
        |<div style="text-align: center; padding-top: 19em;">
