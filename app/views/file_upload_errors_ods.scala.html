@@ -31,10 +31,6 @@
 
 	@reference(requestObject.getPageTitle)
 
-
-
-	@maybeExpected.zip(maybeActual).headOption match {
-		case Some((expectedScheme, actualScheme)) => {
 			@hmrcPageHeading(PageHeading(
 				text = messages("file_upload_errors.scheme_mismatch.title")
 			))
@@ -57,27 +53,5 @@
 					@Html(messages("file_upload_errors.scheme_mismatch.view_other_link_text"))
 				</li>
 			</ul>
-		}
-		case None => {
-			@hmrcPageHeading(PageHeading(
-				text = messages("file_upload_errors.title")
-			))
 
-			@govukInsetText(InsetText(
-				content = {
-					val href = if(fileType == ersUtil.OPTION_ODS) routes.FileUploadController.uploadFilePage().url else routes.CheckCsvFilesController.checkCsvFilesPage().url
-					HtmlContent(s"""${messages("file_upload_errors.para1")} <a href="$href">${messages("file_upload_errors.upload_link")}</a>.""")
-				}
-			))
-
-			<h2 class="govuk-heading-m">
-				@Html(messages("file_upload_errors.go_fix"))
-			</h2>
-
-			<p class="govuk-body">
-				<a class="govuk-link" href="/check-your-ers-files">@Html(messages("file_upload_errors.check_file"))</a>
-				@Html(messages("file_upload_errors.info"))
-			</p>
-		}
-	}
 }

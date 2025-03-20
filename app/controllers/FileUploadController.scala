@@ -145,6 +145,23 @@ class FileUploadController @Inject() (val mcc: MessagesControllerComponents,
             s"Wrong CSOP template used for tax year.")
           Redirect(routes.FileUploadController.templateFailure())
 
+        case ACCEPTED if res.body.contains("Sheet Name isn't as expected") =>
+        val maybeSchemes = """expected:\s*(\S+)\s*parsed:\s*(\S+)""".r.findFirstMatchIn(res.body).map { m =>
+          (m.group(1), m.group(2))
+        }
+          maybeSchemes match {
+            case Some((expected, actual)) =>
+              Redirect(
+                routes.FileUploadController.validationFailure()
+              ).flashing(
+                "expectedScheme" -> expected.toUpperCase,
+                "actualScheme" -> actual.toUpperCase
+              )
+
+            case None =>
+              Redirect(routes.FileUploadController.validationFailure())
+          }
+
         case ACCEPTED =>
           logger.warn(s"[FileUploadController][handleValidationResponse] Validation is not successful for schemeRef: $schemeRef, timestamp: ${System.currentTimeMillis()}.")
           Redirect(routes.FileUploadController.validationFailure())
@@ -157,6 +174,9 @@ class FileUploadController @Inject() (val mcc: MessagesControllerComponents,
   }
 
   def validationFailure(): Action[AnyContent] = authAction.async { implicit request =>
+    val expectedScheme = request.flash.get("expectedScheme")
+    val actualScheme = request.flash.get("actualScheme")
+
     logger.info("[FileUploadController][validationFailure] Validation Failure: " + (System.currentTimeMillis() / 1000))
     (for {
       requestObject <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
