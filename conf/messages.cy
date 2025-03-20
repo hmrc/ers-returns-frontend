@@ -432,6 +432,17 @@ file_upload_errors.saye.guidance = <a href = "https://www.gov.uk/government/publ
 file_upload_errors.emi.guidance = <a href = "https://www.gov.uk/government/publications/enterprise-management-incentives-end-of-year-template">Defnyddiwch y dogfennau arweiniad Cymhellion Rheoli Mentrau</a> i’ch helpu i gywiro’r gwallau.
 file_upload_errors.sip.guidance = <a href = "https://www.gov.uk/government/publications/share-incentive-plan-end-of-year-template">Defnyddiwch y dogfennau arweiniad Cynllun Cymell Cyfranddaliadau</a> i’ch helpu i gywiro’r gwallau.
 file_upload_errors.other.guidance = <a href = "https://www.gov.uk/government/publications/other-employment-related-securities-schemes-and-arrangements-end-of-year-return-template">Defnyddiwch y dogfennau arweiniad Cynlluniau a threfniadau eraill gwarantau ar sail cyflogaeth</a> i’ch helpu i gywiro’r gwallau.
+
+file_upload_errors.scheme_mismatch.title = Bu problem wrth uwchlwytho’r ffeil
+file_upload_errors.scheme_mismatch.line1 = Gwnaethoch ddewis cyflwyno datganiad diwedd blwyddyn ar gyfer cynllun {0}, ond mae’r ffeil y gwnaethoch ei huwchlwytho ar gyfer cynllun {1}.
+file_upload_errors.scheme_mismatch.line2 = Er mwyn cyflwyno datganiad diwedd blwyddyn ar gyfer cynllun {0}, mae’n rhaid i chi wneud un o’r canlynol:
+file_upload_errors.scheme_mismatch.bullet1 = uwchlwytho ffeil a grëwyd o dempled ar gyfer {0}
+file_upload_errors.scheme_mismatch.bullet2 = uwchlwytho ffeil a grëwyd gan ddefnyddio’r nodiadau arweiniad ar gyfer {0}
+file_upload_errors.scheme_mismatch.you_can = Gallwch wneud y canlynol:
+file_upload_errors.scheme_mismatch.retry_link = rhoi cynnig arall arni, gan ddefnyddio ffeil ar gyfer {0}
+file_upload_errors.scheme_mismatch.view_other_link = bwrw golwg dros eich cynlluniau a’ch trefniadau
+file_upload_errors.scheme_mismatch.view_other_link_text = er mwyn dewis cynllun gwahanol
+
 ers_upload_successful.page_title = Uwchlwytho llwyddiannus
 csv_file_upload.upload_your_file_header = Uwchlwytho’ch ffeil ‘{0}’
 csv_file_upload.upload_your_file = Uwchlwytho’ch ffeil {0}

@@ -25,59 +25,29 @@
 		hmrcPageHeading: HmrcPageHeading
 )
 
-@(requestObject: RequestObject, fileType: String, maybeExpected: Option[String] = None, maybeActual: Option[String] = None)(implicit request: Request[_], messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
+@(requestObject: RequestObject, fileType: String)(implicit request: Request[_], messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 
 @govuk_wrapper(title = messages("file_upload_errors.title") + " " + messages("ers.title.postfix")) {
 
 	@reference(requestObject.getPageTitle)
 
+	@hmrcPageHeading(PageHeading(
+		text = messages("file_upload_errors.title")
+	))
 
-
-	@maybeExpected.zip(maybeActual).headOption match {
-		case Some((expectedScheme, actualScheme)) => {
-			@hmrcPageHeading(PageHeading(
-				text = messages("file_upload_errors.scheme_mismatch.title")
-			))
-			<p class="govuk-body">
-				@messages("file_upload_errors.scheme_mismatch.line1", expectedScheme, actualScheme)
-			</p>
-			<p class="govuk-body">
-				@messages("file_upload_errors.scheme_mismatch.line2", expectedScheme)
-			</p>
-			<ul class="govuk-list govuk-list--bullet">
-				<li>@messages("file_upload_errors.scheme_mismatch.bullet1", expectedScheme)</li>
-				<li>@messages("file_upload_errors.scheme_mismatch.bullet2", expectedScheme)</li>
-			</ul>
-			<p class="govuk-body">
-				@messages("file_upload_errors.scheme_mismatch.you_can")
-			</p>
-			<ul class="govuk-list govuk-list--bullet">
-				<li><a class="govuk-link" href="/check-your-ers-files">@Html(messages("file_upload_errors.scheme_mismatch.retry_link", expectedScheme))</a></li>
-				<li><a class="govuk-link" href="/check-your-ers-files">@Html(messages("file_upload_errors.scheme_mismatch.view_other_link"))</a>
-					@Html(messages("file_upload_errors.scheme_mismatch.view_other_link_text"))
-				</li>
-			</ul>
+	@govukInsetText(InsetText(
+		content = {
+			val href = if(fileType == ersUtil.OPTION_ODS) routes.FileUploadController.uploadFilePage().url else routes.CheckCsvFilesController.checkCsvFilesPage().url
+			HtmlContent(s"""${messages("file_upload_errors.para1")} <a href="$href">${messages("file_upload_errors.upload_link")}</a>.""")
 		}
-		case None => {
-			@hmrcPageHeading(PageHeading(
-				text = messages("file_upload_errors.title")
-			))
+	))
 
-			@govukInsetText(InsetText(
-				content = {
-					val href = if(fileType == ersUtil.OPTION_ODS) routes.FileUploadController.uploadFilePage().url else routes.CheckCsvFilesController.checkCsvFilesPage().url
-					HtmlContent(s"""${messages("file_upload_errors.para1")} <a href="$href">${messages("file_upload_errors.upload_link")}</a>.""")
-				}
-			))
+	<h2 class="govuk-heading-m">
+		@Html(messages("file_upload_errors.go_fix"))
+	</h2>
 
-			<h2 class="govuk-heading-m">
-				@Html(messages("file_upload_errors.go_fix"))
-			</h2>
-
-			<p class="govuk-body">
-				<a class="govuk-link" href="/check-your-ers-files">@Html(messages("file_upload_errors.check_file"))</a>
-				@Html(messages("file_upload_errors.info"))
-			</p>
-		}
-	}
+	<p class="govuk-body">
+		<a class="govuk-link" href="/check-your-ers-files">@Html(messages("file_upload_errors.check_file"))</a>
+		@Html(messages("file_upload_errors.info"))
+	</p>
 }

@@ -41,6 +41,7 @@ class FileUploadController @Inject() (val mcc: MessagesControllerComponents,
                                       val upscanService: UpscanService,
                                       globalErrorView: views.html.global_error,
                                       fileUploadErrorsView: views.html.file_upload_errors,
+                                      fileUploadErrorsOdsView: views.html.file_upload_errors_ods,
                                       templateFailureView: views.html.template_version_problem,
                                       upscanOdsFileUploadView: views.html.upscan_ods_file_upload,
                                       fileUploadProblemView: views.html.file_upload_problem,
@@ -140,27 +141,26 @@ class FileUploadController @Inject() (val mcc: MessagesControllerComponents,
           sessionService.cache(ersUtil.VALIDATED_SHEETS, res.body)
           Redirect(controllers.schemeOrganiser.routes.SchemeOrganiserBasedInUkController.questionPage())
 
-        case ACCEPTED if appConfig.csopV5Enabled && schemeInfo.schemeType == "CSOP" && res.body.contains("Incorrect ERS Template") =>
-          logger.warn(s"[FileUploadController][handleValidationResponse] Validation is not successful for schemeRef: $schemeRef, timestamp: ${System.currentTimeMillis()}." +
-            s"Wrong CSOP template used for tax year.")
-          Redirect(routes.FileUploadController.templateFailure())
-
         case ACCEPTED if res.body.contains("Sheet Name isn't as expected") =>
-        val maybeSchemes = """expected:\s*(\S+)\s*parsed:\s*(\S+)""".r.findFirstMatchIn(res.body).map { m =>
-          (m.group(1), m.group(2))
-        }
-          maybeSchemes match {
+          val userSchemes = """expected:\s*(\S+)\s*parsed:\s*(\S+)""".r.findFirstMatchIn(res.body).map { m =>
+            (m.group(1), m.group(2))
+          }
+          userSchemes match {
             case Some((expected, actual)) =>
-              Redirect(
-                routes.FileUploadController.validationFailure()
-              ).flashing(
-                "expectedScheme" -> expected.toUpperCase,
-                "actualScheme" -> actual.toUpperCase
+              Redirect(routes.FileUploadController.validationFailure()).withSession(
+                request.session +
+                  ("expectedScheme" -> expected.toUpperCase) +
+                  ("actualScheme" -> actual.toUpperCase)
               )
 
             case None =>
               Redirect(routes.FileUploadController.validationFailure())
           }
+
+        case ACCEPTED if appConfig.csopV5Enabled && schemeInfo.schemeType == "CSOP" && res.body.contains("Incorrect ERS Template") =>
+          logger.warn(s"[FileUploadController][handleValidationResponse] Validation is not successful for schemeRef: $schemeRef, timestamp: ${System.currentTimeMillis()}." +
+            s"Wrong CSOP template used for tax year.")
+          Redirect(routes.FileUploadController.templateFailure())
 
         case ACCEPTED =>
           logger.warn(s"[FileUploadController][handleValidationResponse] Validation is not successful for schemeRef: $schemeRef, timestamp: ${System.currentTimeMillis()}.")
@@ -174,15 +174,19 @@ class FileUploadController @Inject() (val mcc: MessagesControllerComponents,
   }
 
   def validationFailure(): Action[AnyContent] = authAction.async { implicit request =>
-    val expectedScheme = request.flash.get("expectedScheme")
-    val actualScheme = request.flash.get("actualScheme")
+    val expectedScheme = request.session.get("expectedScheme")
+    val actualScheme = request.session.get("actualScheme")
 
     logger.info("[FileUploadController][validationFailure] Validation Failure: " + (System.currentTimeMillis() / 1000))
     (for {
       requestObject <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
       fileType <- sessionService.fetch[CheckFileType](ersUtil.FILE_TYPE_CACHE)
     } yield {
-      Ok(fileUploadErrorsView(requestObject, fileType.checkFileType.getOrElse("")))
+      if (expectedScheme.isDefined && actualScheme.isDefined) {
+        Ok(fileUploadErrorsOdsView(requestObject, fileType.checkFileType.getOrElse(""), expectedScheme, actualScheme))
+      } else {
+        Ok(fileUploadErrorsView(requestObject, fileType.checkFileType.getOrElse("")))
+      }
     }) recover {
       case e: Throwable =>
         logger.error(s"[FileUploadController][validationFailure] failed with Exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.", e)
