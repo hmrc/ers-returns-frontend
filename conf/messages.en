@@ -161,10 +161,6 @@ ers_start.other.bullet_2 = the scheme organiser’s company name and address, Co
 ers_start.other.bullet_3 = to know any alterations made to key features of the scheme and know whether there’s been a variation in the share capital
 ers_start.other.intro_para_2 = If relevant, the details of any other companies covered by this return can be entered manually or uploaded in a .csv file (as appropriate).
 
-ers_start.cant_use = You can’t use this service if you have a:
-ers_start.cant_use_bullet_1 = ODS file that’s larger than 200MB
-ers_start.cant_use_bullet_2 = CSV file that’s larger than 200MB
-
 ers_start.ifrelevant = If relevant:
 ers_start.relevant_bullet_1 = .ods files used to record events must be no larger than 200MB
 ers_start.relevant_bullet_2 = .csv files used to record events must be no larger than 200MB
@@ -496,8 +492,6 @@ file_upload.emi.info = Choose the {0} file you want to upload as part of your En
 file_upload.other.info = Choose the {0} file you want to upload as part of your Other annual return.
 file_upload.sip.info = Choose the {0} file you want to upload as part of your Share Incentive Plan annual return.
 file_upload.saye.info = Choose the {0} file you want to upload as part of your Save As You Earn annual return.
-file_upload.delay.csv = If your CSV file is larger than 200MB you will not be able to upload it. Email shareschemes@hmrc.gsi.gov.uk for any help with your submission.
-file_upload.delay.ods = If your ODS file is larger than 200MB you will not be able to upload it. Email shareschemes@hmrc.gsi.gov.uk for any help with your submission.
 
 file_upload_errors.title = Errors have been found
 file_upload_errors.para1 = Fix the errors before you use this service again or
@@ -831,7 +825,7 @@ ers.file_problem.title = There is a problem with the file upload - Submit your E
 ers.file_problem.heading = There is a problem with the file upload
 ers.file_problem.paragraph = This may be because the file:
 ers.file_problem.invalidFileName = has the wrong name or the name is more than 240 characters
-ers.file_problem.fileTooLarge = is too large - there is a 200MB limit for CSV files and a 200MB limit for ODS files
+ers.file_problem.fileTooLarge = is too large - there is a {0}MB limit for CSV and ODS files
 ers.file_problem.fileTooSmall = is empty
 ers.file_problem.invalidFileType = is the wrong type - it should be a CSV or an ODS depending on what you have already selected
 ers.file_problem.invalidFileNameCharacters = contains invalid characters
