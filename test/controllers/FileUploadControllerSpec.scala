@@ -257,6 +257,27 @@ class FileUploadControllerSpec
     }
 
     "redirect the user to FileUploadController.validationFailure()" when {
+      "When the user tries to upload the wrong .ods scheme type" in {
+        when(mockAppConfig.csopV5Enabled).thenReturn(false)
+        when(mockSessionService.fetch[RequestObject](anyString())(any(), any())).thenReturn(Future.successful(ersRequestObject))
+        when(mockErsConnector.getCallbackRecord(any(), any)).thenReturn(Future.successful(Some(uploadedSuccessfully)))
+        when(mockErsConnector.removePresubmissionData(any())(any[RequestWithOptionalAuthContext[AnyContent]], any()))
+          .thenReturn(Future.successful(HttpResponse(OK, "")))
+        when(mockSessionService.fetch[ErsMetaData](any())(any(), any())).thenReturn(Future.successful(validErsMetaData))
+        when(mockErsConnector.validateFileData(meq(uploadedSuccessfully), any[SchemeInfo])(any[RequestWithOptionalAuthContext[AnyContent]], any()))
+          .thenReturn(Future.successful(HttpResponse(ACCEPTED, "Sheet Name isn't as expected, expected: SAYE parsed: SIP")))
+
+        setAuthMocks()
+        val result = TestFileUploadController.validationResults()(testFakeRequest)
+        status(result) mustBe SEE_OTHER
+        redirectLocation(result) mustBe Some(routes.FileUploadController.validationFailure().url)
+
+        val updatedSession = session(result)
+        updatedSession.data("expectedScheme") mustBe "SAYE"
+        updatedSession.data("actualScheme") mustBe "SIP"
+      }
+
+
       "Ers Meta Data is returned, callback record is uploaded successfully, remove presubmission data returns OK and validate file data returns Accepted" in {
         when(mockSessionService.fetch[RequestObject](anyString())(any(), any())).thenReturn(Future.successful(ersRequestObject))
         when(mockErsConnector.getCallbackRecord(any(), any)).thenReturn(Future.successful(Some(uploadedSuccessfully)))
@@ -289,7 +310,7 @@ class FileUploadControllerSpec
       }
     }
 
-    "redirect the user to FileUploadController.validationFailure()" when {
+    "redirect the user to FileUploadController.templateFailure()" when {
       "Ers Meta Data is returned, callback record is uploaded successfully, remove presubmission data returns OK, validate file data returns Accepted, for CSOP with Incorrect ERS Template validation error, csopV5Enabled = true" in {
         when(mockAppConfig.csopV5Enabled).thenReturn(true)
         when(mockSessionService.fetch[RequestObject](anyString())(any(), any())).thenReturn(Future.successful(ersRequestObject))
@@ -303,7 +324,7 @@ class FileUploadControllerSpec
         setAuthMocks()
         val result = TestFileUploadController.validationResults()(testFakeRequest)
         status(result) mustBe SEE_OTHER
-        redirectLocation(result) mustBe Some(routes.FileUploadController.validationFailure().url)
+        redirectLocation(result) mustBe Some(routes.FileUploadController.templateFailure().url)
       }
     }
 
