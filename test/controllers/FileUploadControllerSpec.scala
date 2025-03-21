@@ -88,6 +88,7 @@ class FileUploadControllerSpec
   implicit val mockActorSystem: ActorSystem = app.injector.instanceOf[ActorSystem]
   val globalErrorView: global_error = app.injector.instanceOf[global_error]
   val fileUploadErrorsView: file_upload_errors = app.injector.instanceOf[file_upload_errors]
+  val fileUploadErrorsOdsView: file_upload_errors_ods = app.injector.instanceOf[file_upload_errors_ods]
   val templateFailureView: template_version_problem = app.injector.instanceOf[template_version_problem]
   val upscanOdsFileUploadView: upscan_ods_file_upload = app.injector.instanceOf[upscan_ods_file_upload]
   val fileUploadProblemView: file_upload_problem = app.injector.instanceOf[file_upload_problem]
@@ -102,6 +103,7 @@ class FileUploadControllerSpec
         mockUpscanService,
         globalErrorView,
         fileUploadErrorsView,
+        fileUploadErrorsOdsView,
         templateFailureView,
         upscanOdsFileUploadView,
         fileUploadProblemView,
@@ -287,7 +289,7 @@ class FileUploadControllerSpec
       }
     }
 
-    "redirect the user to FileUploadController.templateFailure()" when {
+    "redirect the user to FileUploadController.validationFailure()" when {
       "Ers Meta Data is returned, callback record is uploaded successfully, remove presubmission data returns OK, validate file data returns Accepted, for CSOP with Incorrect ERS Template validation error, csopV5Enabled = true" in {
         when(mockAppConfig.csopV5Enabled).thenReturn(true)
         when(mockSessionService.fetch[RequestObject](anyString())(any(), any())).thenReturn(Future.successful(ersRequestObject))
@@ -301,7 +303,7 @@ class FileUploadControllerSpec
         setAuthMocks()
         val result = TestFileUploadController.validationResults()(testFakeRequest)
         status(result) mustBe SEE_OTHER
-        redirectLocation(result) mustBe Some(routes.FileUploadController.templateFailure().url)
+        redirectLocation(result) mustBe Some(routes.FileUploadController.validationFailure().url)
       }
     }
 

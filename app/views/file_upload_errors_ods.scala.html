@@ -50,7 +50,7 @@ hmrcPageHeading: HmrcPageHeading
                     @messages("file_upload_errors.scheme_mismatch.you_can")
                 </p>
                 <ul class="govuk-list govuk-list--bullet">
-                    <li><a class="govuk-link" href="/check-your-ers-files">@Html(messages("file_upload_errors.scheme_mismatch.retry_link",
+                    <li><a class="govuk-link" href="@routes.FileUploadController.uploadFilePage().url">@Html(messages("file_upload_errors.scheme_mismatch.retry_link",
                         expectedScheme))</a></li>
                     <li><a class="govuk-link" href="/check-your-ers-files">@Html(messages("file_upload_errors.scheme_mismatch.view_other_link"))</a>
                         @Html(messages("file_upload_errors.scheme_mismatch.view_other_link_text"))

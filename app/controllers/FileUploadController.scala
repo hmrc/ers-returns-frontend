@@ -153,14 +153,14 @@ class FileUploadController @Inject() (val mcc: MessagesControllerComponents,
                   ("actualScheme" -> actual.toUpperCase)
               )
 
-            case None =>
-              Redirect(routes.FileUploadController.validationFailure())
-          }
+            case None if appConfig.csopV5Enabled && schemeInfo.schemeType == "CSOP" && res.body.contains("Incorrect ERS Template") =>
+                logger.warn(s"[FileUploadController][handleValidationResponse] Validation is not successful for schemeRef: $schemeRef, timestamp: ${System.currentTimeMillis()}." +
+                  s"Wrong CSOP template used for tax year.")
+                Redirect(routes.FileUploadController.templateFailure())
 
-        case ACCEPTED if appConfig.csopV5Enabled && schemeInfo.schemeType == "CSOP" && res.body.contains("Incorrect ERS Template") =>
-          logger.warn(s"[FileUploadController][handleValidationResponse] Validation is not successful for schemeRef: $schemeRef, timestamp: ${System.currentTimeMillis()}." +
-            s"Wrong CSOP template used for tax year.")
-          Redirect(routes.FileUploadController.templateFailure())
+            case None =>
+                Redirect(routes.FileUploadController.validationFailure())
+          }
 
         case ACCEPTED =>
           logger.warn(s"[FileUploadController][handleValidationResponse] Validation is not successful for schemeRef: $schemeRef, timestamp: ${System.currentTimeMillis()}.")
