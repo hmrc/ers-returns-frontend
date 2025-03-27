@@ -598,7 +598,7 @@ ers_alt_amends.sip.option_2 = Addasiadau i gymhwystra unigolion i ymuno â’r c
 ers_alt_amends.sip.option_3 =Addasiadau i ddyfarniadau cyfranddaliadau sy’n bodoli eisoes, o ganlyniad i ailstrwythuro cwmni
 ers_alt_amends.sip.option_4 = Newid ymddiriedolwr
 ers_alt_amends.sip.option_5 = Arall
-ers_alt_amends.sip.alert = Mae cyfarwyddwr y cwmni neu ysgrifennydd y cwmni yn datgan nad yw’r addasiad wedi achosi i ofynion Rhannau 2 i 9 o Atodlen 2 o Ddeddf Treth Incwm (Enillion a Phensiynau) 2003 i beidio â chael eu bodloni mewn perthynas â'r Cynllun Cymell Cyfranddaliadau.
+ers_alt_amends.sip.alert = Mae cyfarwyddwr y cwmni neu ysgrifennydd y cwmni yn datgan nad yw’r addasiad wedi achosi i ofynion Rhannau 2 i 9 o Atodlen 2 o Ddeddf Treth Incwm (Enillion a Phensiynau) 2003 i beidio â chael eu bodloni mewn perthynas â’r Cynllun Cymell Cyfranddaliadau.
 ers_alt_amends.sip.err.message = Dewiswch yr holl addasiadau sy’n berthnasol
 ers_alt_amends.continue = Derbyn a mynd yn eich blaen
 
