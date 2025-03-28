@@ -308,6 +308,24 @@ class FileUploadControllerSpec
         status(result) mustBe SEE_OTHER
         redirectLocation(result) mustBe Some(routes.FileUploadController.validationFailure().url)
       }
+
+      "JSON parsing of ExpectedAndActualScheme fails" in {
+        val schemeInfo = ersRequestObject.copy(schemeType = Some("EMI"))
+
+        when(mockAppConfig.csopV5Enabled).thenReturn(true)
+        when(mockSessionService.fetch[RequestObject](anyString())(any(), any())).thenReturn(Future.successful(schemeInfo))
+        when(mockErsConnector.getCallbackRecord(any(), any)).thenReturn(Future.successful(Some(uploadedSuccessfully)))
+        when(mockErsConnector.removePresubmissionData(any())(any[RequestWithOptionalAuthContext[AnyContent]], any()))
+          .thenReturn(Future.successful(HttpResponse(OK, "")))
+        when(mockSessionService.fetch[ErsMetaData](any())(any(), any())).thenReturn(Future.successful(validErsMetaData))
+        when(mockErsConnector.validateFileData(meq(uploadedSuccessfully), any[SchemeInfo])(any[RequestWithOptionalAuthContext[AnyContent]], any()))
+          .thenReturn(Future.successful(HttpResponse(ACCEPTED, "Sheet Name isn't as expected, invalid JSON")))
+
+        setAuthMocks()
+        val result = TestFileUploadController.validationResults()(testFakeRequest)
+        status(result) mustBe SEE_OTHER
+        redirectLocation(result) mustBe Some(routes.FileUploadController.validationFailure().url)
+      }
     }
 
     "redirect the user to FileUploadController.templateFailure()" when {
@@ -423,6 +441,23 @@ class FileUploadControllerSpec
           contentAsString(result) must include(testMessages("file_upload_errors.title"))
         }
       }
+    }
+
+    "return fileUploadErrorsOdsView when expectedScheme and actualScheme are present in session" in {
+      val fakeRequestWithSession = testFakeRequest.withSession(
+        "expectedScheme" -> "SAYE",
+        "actualScheme" -> "SIP"
+      )
+
+      when(mockSessionService.fetch[RequestObject](any())(any(), any()))
+        .thenReturn(Future.successful(ersRequestObject))
+      when(mockSessionService.fetch[CheckFileType](refEq("check-file-type"))(any(), any()))
+        .thenReturn(Future.successful(CheckFileType(Some("ods"))))
+
+      val result = TestFileUploadController.validationFailure()(fakeRequestWithSession)
+      status(result) must be(OK)
+      contentAsString(result) must include("SAYE")
+      contentAsString(result) must include("SIP")
     }
 
     "return fileUploadErrorsView" in {
