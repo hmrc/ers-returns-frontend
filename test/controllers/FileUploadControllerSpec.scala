@@ -265,7 +265,7 @@ class FileUploadControllerSpec
           .thenReturn(Future.successful(HttpResponse(OK, "")))
         when(mockSessionService.fetch[ErsMetaData](any())(any(), any())).thenReturn(Future.successful(validErsMetaData))
         when(mockErsConnector.validateFileData(meq(uploadedSuccessfully), any[SchemeInfo])(any[RequestWithOptionalAuthContext[AnyContent]], any()))
-          .thenReturn(Future.successful(HttpResponse(ACCEPTED, "Sheet Name isn't as expected, expected: SAYE parsed: SIP")))
+          .thenReturn(Future.successful(HttpResponse(ACCEPTED, """{"message": "Sheet Name isn't as expected", "expected": "SAYE", "actual": "SIP"}""")))
 
         setAuthMocks()
         val result = TestFileUploadController.validationResults()(testFakeRequest)
@@ -319,7 +319,7 @@ class FileUploadControllerSpec
           .thenReturn(Future.successful(HttpResponse(OK, "")))
         when(mockSessionService.fetch[ErsMetaData](any())(any(), any())).thenReturn(Future.successful(validErsMetaData))
         when(mockErsConnector.validateFileData(meq(uploadedSuccessfully), any[SchemeInfo])(any[RequestWithOptionalAuthContext[AnyContent]], any()))
-          .thenReturn(Future.successful(HttpResponse(ACCEPTED, "Incorrect ERS Template")))
+          .thenReturn(Future.successful(HttpResponse(ACCEPTED, "Sheet Name isn't as expected, Incorrect ERS Template")))
 
         setAuthMocks()
         val result = TestFileUploadController.validationResults()(testFakeRequest)
