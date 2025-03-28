@@ -32,7 +32,7 @@ import utils._
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
 @Singleton
 class FileUploadController @Inject() (val mcc: MessagesControllerComponents,
@@ -142,23 +142,23 @@ class FileUploadController @Inject() (val mcc: MessagesControllerComponents,
           Redirect(controllers.schemeOrganiser.routes.SchemeOrganiserBasedInUkController.questionPage())
 
         case ACCEPTED if res.body.contains("Sheet Name isn't as expected") =>
-          val userSchemes = """expected:\s*(\S+)\s*parsed:\s*(\S+)""".r.findFirstMatchIn(res.body).map { m =>
-            (m.group(1), m.group(2))
-          }
+
+          val userSchemes = Try(res.json.as[ExpectedAndActualScheme])
+
           userSchemes match {
-            case Some((expected, actual)) =>
+            case Success(value) =>
               Redirect(routes.FileUploadController.validationFailure()).withSession(
                 request.session +
-                  ("expectedScheme" -> expected.toUpperCase) +
-                  ("actualScheme" -> actual.toUpperCase)
+                  ("expectedScheme" -> value.expected.toUpperCase) +
+                  ("actualScheme" -> value.actual.toUpperCase)
               )
 
-            case None if appConfig.csopV5Enabled && schemeInfo.schemeType == "CSOP" && res.body.contains("Incorrect ERS Template") =>
+            case Failure(exception) if appConfig.csopV5Enabled && schemeInfo.schemeType == "CSOP" && res.body.contains("Incorrect ERS Template") =>
                 logger.warn(s"[FileUploadController][handleValidationResponse] Validation is not successful for schemeRef: $schemeRef, timestamp: ${System.currentTimeMillis()}." +
                   s"Wrong CSOP template used for tax year.")
                 Redirect(routes.FileUploadController.templateFailure())
 
-            case None =>
+            case Failure(exception) =>
                 Redirect(routes.FileUploadController.validationFailure())
           }
 
