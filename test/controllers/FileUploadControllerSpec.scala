@@ -454,6 +454,7 @@ class FileUploadControllerSpec
       when(mockSessionService.fetch[CheckFileType](refEq("check-file-type"))(any(), any()))
         .thenReturn(Future.successful(CheckFileType(Some("ods"))))
 
+      setAuthMocks()
       val result = TestFileUploadController.validationFailure()(fakeRequestWithSession)
       status(result) must be(OK)
       contentAsString(result) must include("SAYE")
