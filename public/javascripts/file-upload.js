@@ -14,16 +14,11 @@ const fileType = (function() {
 })();
 
 function ensureUploadButtonIs(status) {
-    if(status === "disabled") {
-        if(uploadFileButton.attributes.getNamedItem("disabled") === null) {
-            uploadFileButton.setAttribute("disabled", "disabled");
-            uploadFileButton.classList.add("govuk-button--disabled");
-        }
-    } else if (status === "enabled") {
+       if (status === "enabled") {
         if(uploadFileButton.attributes.getNamedItem("disabled") !== null) {
             uploadFileButton.removeAttribute("disabled");
             uploadFileButton.classList.remove("govuk-button--disabled");
-        }
+       }
     }
 }
 
@@ -131,7 +126,15 @@ fileUploadInput.addEventListener('input', () => {
     handleErrors(fileChecks);
 });
 
-uploadFileButton.addEventListener('click', () => {
+uploadFileButton.addEventListener('click', (e) => {
+  let actualFileName = fileUploadInput.files[0];
+  if(actualFileName == undefined){
+  e.preventDefault()
+  makeErrorSummary("appear");
+  addErrorToSummary("ers.file.upload.empty.error");
+  addErrorMessageToFileUpload("ers.file.upload.empty.error");
+  return false
+  }
     document.getElementById('progress-spinner').classList.remove('govuk-!-display-none');
     document.getElementById('warning-text').setAttribute("role", "alert")
 });
