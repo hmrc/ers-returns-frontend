@@ -139,7 +139,7 @@ ers_start.sip.intro_para = Use this service to submit your return at the end of 
 ers_start.other.intro_para = Use this service to submit your return at the end of the tax year.
 ers_start.sub_title = Before you start
 ers_start.large_files = If you have a .ods file that’s larger than 200MB or a .csv file that’s larger than 200MB
-ers_start.help = The person acting as the company secretary must have approved this return and must agree to any declaration you make within this service.
+ers_start.help = A company director or company secretary must have approved the return and must agree to any declaration you make in this service.
 
 ers_start.you_need = Depending on your circumstances, you may need:
 ers_start.csop.bullet_1 = to record any events related to the scheme in an ODS or CSV spreadsheet
@@ -166,10 +166,6 @@ ers_start.other.bullet_1 = to record any events related to the scheme in an ODS 
 ers_start.other.bullet_2 = the scheme organiser’s company name and address, Company Registration Number and Corporation Tax reference (and those of any participating group scheme members)
 ers_start.other.bullet_3 = to know any alterations made to key features of the scheme and know whether there’s been a variation in the share capital
 ers_start.other.intro_para_2 = If relevant, the details of any other companies covered by this return can be entered manually or uploaded in a .csv file (as appropriate).
-
-ers_start.cant_use = You can’t use this service if you have a:
-ers_start.cant_use_bullet_1 = ODS file that’s larger than 200MB
-ers_start.cant_use_bullet_2 = CSV file that’s larger than 200MB
 
 ers_start.ifrelevant = If relevant:
 ers_start.relevant_bullet_1 = .ods files used to record events must be no larger than 200MB
@@ -459,7 +455,7 @@ ers_summary_declaration.section = Section
 ers_summary_declaration.your_answers = Your answers
 ers_summary_declaration.title = Check the information you provided before submitting your return
 ers_summary_declaration.button = Accept and submit
-ers_summary_declaration.alert = The person acting as the company secretary must agree that the information submitted is correct and complete.
+ers_summary_declaration.alert = A company director or company secretary must agree that the information submitted is correct and complete.
 ers_summary_declaration.csop.organiser = Scheme organiser details
 ers_summary_declaration.saye.organiser = Scheme organiser
 ers_summary_declaration.emi.organiser = Employer company details
@@ -506,8 +502,6 @@ file_upload.emi.info = Choose the {0} file you want to upload as part of your En
 file_upload.other.info = Choose the {0} file you want to upload as part of your Other annual return.
 file_upload.sip.info = Choose the {0} file you want to upload as part of your Share Incentive Plan annual return.
 file_upload.saye.info = Choose the {0} file you want to upload as part of your Save As You Earn annual return.
-file_upload.delay.csv = If your CSV file is larger than 200MB you will not be able to upload it. Email shareschemes@hmrc.gsi.gov.uk for any help with your submission.
-file_upload.delay.ods = If your ODS file is larger than 200MB you will not be able to upload it. Email shareschemes@hmrc.gsi.gov.uk for any help with your submission.
 
 file_upload_errors.title = Errors have been found
 file_upload_errors.para1 = Fix the errors before you use this service again or
@@ -735,7 +729,7 @@ ers_alt_amends.csop.option_2 = Alterations to the eligibility of individuals to 
 ers_alt_amends.csop.option_3 = Alterations arising from an exchange of share options on a company reorganisation
 ers_alt_amends.csop.option_4 = A variation in the share capital of which the shares form a part
 ers_alt_amends.csop.option_5 = Other
-ers_alt_amends.csop.alert = The person acting as the company secretary, declares that the alteration or the variation in any share capital hasn’t caused the requirements of parts 2 to 6 of Schedule 4 Income Tax (Earnings and Pensions) Act 2003 not to be met in relation to the Company Share Option Plan.
+ers_alt_amends.csop.alert = A company director or company secretary, declares that the alteration or the variation in any share capital hasn’t caused the requirements of parts 2 to 6 of Schedule 4 Income Tax (Earnings and Pensions) Act 2003 not to be met in relation to the Company Share Option Plan.
 ers_alt_amends.csop.err.message = Select all of the alterations or variations that apply
 
 ers_alt_amends.saye.title = Select scheme alterations and variations
@@ -746,7 +740,7 @@ ers_alt_amends.saye.option_2 = Alterations to the eligibility of individuals to 
 ers_alt_amends.saye.option_3 = Alterations arising from an exchange of share options on a company reorganisation
 ers_alt_amends.saye.option_4 = A variation in the share capital of which the shares form a part
 ers_alt_amends.saye.option_5 = Other
-ers_alt_amends.saye.alert = The company secretary, or the person acting as company secretary, declares that the alteration or the variation in any share capital hasn’t caused the requirements of parts 2-6 of Schedule 4 Income Tax (Earnings and Pensions) Act 2003 not to be met in relation to the Save As You Earn scheme.
+ers_alt_amends.saye.alert = A company director or company secretary, declares that the alteration or the variation in any share capital hasn’t caused the requirements of parts 2 to 7 of Schedule 3 Income Tax (Earnings and Pensions) Act 2003 not to be met in relation to the Save As You Earn scheme.
 ers_alt_amends.saye.err.message = Select all of the alterations or variations that apply
 
 
@@ -763,7 +757,7 @@ ers_alt_amends.sip.option_2 = Alterations to the eligibility of individuals to j
 ers_alt_amends.sip.option_3 = Alterations to existing share awards as the result of a company reconstruction
 ers_alt_amends.sip.option_4 = A change of trustee
 ers_alt_amends.sip.option_5 = Other
-ers_alt_amends.sip.alert = The company secretary, or the person acting as company secretary, declares that the alteration hasn’t caused the requirements of parts 2-6 of Schedule 2 Income Tax (Earnings and Pensions) Act 2003 not to be met in relation to the Share Incentive Plan.
+ers_alt_amends.sip.alert = A company director or company secretary, declares that the alteration hasn’t caused the requirements of parts 2 to 9 of Schedule 2 Income Tax (Earnings and Pensions) Act 2003 not to be met in relation to the Share Incentive Plan.
 ers_alt_amends.sip.err.message = Select all of the alterations that apply
 
 ers_alt_amends.continue = Accept and continue
@@ -851,7 +845,7 @@ ers.file_problem.title = There is a problem with the file upload - Submit your E
 ers.file_problem.heading = There is a problem with the file upload
 ers.file_problem.paragraph = This may be because the file:
 ers.file_problem.invalidFileName = has the wrong name or the name is more than 240 characters
-ers.file_problem.fileTooLarge = is too large - there is a 200MB limit for CSV files and a 200MB limit for ODS files
+ers.file_problem.fileTooLarge = is too large - there is a {0}MB limit for CSV and ODS files
 ers.file_problem.fileTooSmall = is empty
 ers.file_problem.invalidFileType = is the wrong type - it should be a CSV or an ODS depending on what you have already selected
 ers.file_problem.invalidFileNameCharacters = contains invalid characters
@@ -872,6 +866,7 @@ ers.pdf.scheme = Scheme name
 ers.pdf.refcode = Reference code
 ers.pdf.unique_scheme_ref = Unique scheme reference
 ers.pdf.date_and_time = Time and date of submission
+ers.pdf.submission_ref = Submission reference
 ers.pdf.summary_information = Summary information
 ers.taxYear.text = to
 ers.pdf.header = HM Revenue &amp; Customs
