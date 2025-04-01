@@ -176,6 +176,7 @@ class FileUploadController @Inject() (val mcc: MessagesControllerComponents,
   def validationFailure(): Action[AnyContent] = authAction.async { implicit request =>
     val expectedScheme = request.session.get("expectedScheme")
     val actualScheme = request.session.get("actualScheme")
+    val empRef: String = request.authData.empRef.encodedValue
 
     logger.info("[FileUploadController][validationFailure] Validation Failure: " + (System.currentTimeMillis() / 1000))
     (for {
@@ -183,7 +184,7 @@ class FileUploadController @Inject() (val mcc: MessagesControllerComponents,
       fileType <- sessionService.fetch[CheckFileType](ersUtil.FILE_TYPE_CACHE)
     } yield {
       if (expectedScheme.isDefined && actualScheme.isDefined) {
-        Ok(fileUploadErrorsOdsView(requestObject, fileType.checkFileType.getOrElse(""), expectedScheme, actualScheme))
+        Ok(fileUploadErrorsOdsView(requestObject, fileType.checkFileType.getOrElse(""), empRef, expectedScheme, actualScheme))
       } else {
         Ok(fileUploadErrorsView(requestObject, fileType.checkFileType.getOrElse("")))
       }
