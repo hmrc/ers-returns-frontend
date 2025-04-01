@@ -530,7 +530,7 @@ file_upload_errors.sip.guidance = <a href = "https://www.gov.uk/government/publi
 file_upload_errors.other.guidance = <a href = "https://www.gov.uk/government/publications/other-employment-related-securities-schemes-and-arrangements-end-of-year-return-template">Use the Other employment related securities schemes and arrangements guidance documents</a> to help you fix the errors.
 
 file_upload_errors.scheme_mismatch.title = There is a problem with the file upload
-file_upload_errors.scheme_mismatch.line1 = You chose to submit an end of year return for a {0} scheme but the file you uploaded is for a {1} scheme
+file_upload_errors.scheme_mismatch.line1 = You chose to submit an end of year return for a {0} scheme but the file you uploaded is for a {1} scheme.
 file_upload_errors.scheme_mismatch.line2 = To submit an end of year return for a {0} scheme you must either:
 file_upload_errors.scheme_mismatch.bullet1 = upload a file created from a {0} template
 file_upload_errors.scheme_mismatch.bullet2 = upload a file created by using a {0} guidance notes
