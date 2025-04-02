@@ -29,6 +29,7 @@
         headerMsg: String,
         schemeId: String,
         schemeName: String,
+        schemeNameWithArticle: String,
         fileId: String,
         useCsopV5Templates: Boolean = false
 )(implicit messages: Messages, ersUtil: ERSUtil)
@@ -54,7 +55,7 @@
                 @messages("file_upload.bulletOne.ods")
             }
         </li>
-        <li>@messages("file_upload.bulletTwo", schemeName)</li>
+        <li>@messages("file_upload.bulletTwo", schemeNameWithArticle)</li>
     </ul>
     <br>
 

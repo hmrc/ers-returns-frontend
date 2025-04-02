@@ -35,29 +35,34 @@ hmrcPageHeading: HmrcPageHeading
 
             @expectedScheme.zip(actualScheme).headOption match {
                 case Some((expectedScheme, actualScheme)) => {
+                    @defining(requestObject.copy(schemeType = Some(expectedScheme))) { expectedRequestObject =>
+                    @defining(requestObject.copy(schemeType = Some(actualScheme))) { actualRequestObject =>
+
+
                     @hmrcPageHeading(PageHeading(
                         text = messages("file_upload_errors.scheme_mismatch.title")
                     ))
                     <p class="govuk-body">
-                        @messages("file_upload_errors.scheme_mismatch.line1", expectedScheme, actualScheme)
+                        @messages("file_upload_errors.scheme_mismatch.line1", expectedRequestObject.getSchemeWithArticle(expectedScheme), actualRequestObject.getSchemeWithArticle(actualScheme))
                     </p>
                     <p class="govuk-body">
-                        @messages("file_upload_errors.scheme_mismatch.line2", expectedScheme)
+                        @messages("file_upload_errors.scheme_mismatch.line2", expectedRequestObject.getSchemeWithArticle(expectedScheme))
                     </p>
                     <ul class="govuk-list govuk-list--bullet">
-                        <li>@messages("file_upload_errors.scheme_mismatch.bullet1", expectedScheme)</li>
-                        <li>@messages("file_upload_errors.scheme_mismatch.bullet2", expectedScheme)</li>
+                        <li>@messages("file_upload_errors.scheme_mismatch.bullet1", expectedRequestObject.getSchemeWithArticle(expectedScheme))</li>
+                        <li>@messages("file_upload_errors.scheme_mismatch.bullet2", expectedRequestObject.getSchemeWithArticle(expectedScheme))</li>
                     </ul>
                     <p class="govuk-body">
                         @messages("file_upload_errors.scheme_mismatch.you_can")
                     </p>
                     <ul class="govuk-list govuk-list--bullet">
                         <li><a class="govuk-link" href="@routes.FileUploadController.uploadFilePage().url">@Html(messages("file_upload_errors.scheme_mismatch.retry_link",
-                            expectedScheme))</a></li>
+                            expectedRequestObject.getSchemeWithArticle(expectedScheme)))</a></li>
                         <li><a class="govuk-link" href="@schemeLink">@Html(messages("file_upload_errors.scheme_mismatch.view_other_link"))</a>
                             @Html(messages("file_upload_errors.scheme_mismatch.view_other_link_text"))
                         </li>
                     </ul>
+                    }}
                 }
                 case None => {
                     @hmrcPageHeading(PageHeading(
