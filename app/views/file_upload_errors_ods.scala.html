@@ -27,7 +27,7 @@ hmrcPageHeading: HmrcPageHeading
 
 @(requestObject: RequestObject, fileType: String, empRef: String, expectedScheme: Option[String] = None, actualScheme: Option[String] = None)(implicit request: Request[_], messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 
-@defining(Some(s"https://www.tax.service/ers/org/$empRef/schemes").getOrElse(routes.FileUploadController.uploadFilePage().url)) { schemeLink =>
+@defining(Some(s"https://www.tax.service.gov.uk/ers/org/$empRef/schemes").getOrElse(routes.FileUploadController.uploadFilePage().url)) { schemeLink =>
 
     @govuk_wrapper(title = messages("file_upload_errors.title") + " " + messages("ers.title.postfix")) {
 

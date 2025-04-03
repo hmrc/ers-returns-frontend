@@ -176,7 +176,7 @@ class FileUploadController @Inject() (val mcc: MessagesControllerComponents,
   def validationFailure(): Action[AnyContent] = authAction.async { implicit request =>
     val expectedScheme = request.session.get("expectedScheme")
     val actualScheme = request.session.get("actualScheme")
-    val empRef: String = request.authData.empRef.encodedValue
+    val empRef: String = request.authData.empRef.value
 
     logger.info("[FileUploadController][validationFailure] Validation Failure: " + (System.currentTimeMillis() / 1000))
     (for {
