@@ -42,7 +42,6 @@ ers.reportable_events.page_title = Reportable events – Employment Related Secu
 ers.choose_file_type.page_title = Choose file type – Employment Related Securities – GOV.UK
 ers.choose_csv_files.page_title = Choose the .csv files – Employment Related Securities – GOV.UK
 
-ers.upload_ods_file.page_title = Upload the .ods file – Employment Related Securities – GOV.UK
 ers.title.postfix = – Employment Related Securities – GOV.UK
 
 ers.reference.info = Scheme information you have selected

@@ -1,5 +1,5 @@
 @*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,12 @@
 	<script src='@routes.Assets.versioned("/javascripts/welsh-translation.js")' @{CSPNonce.attr}></script>
 }
 
-@govuk_wrapper(title = messages("ers.upload_ods_file.page_title"), Some(scripts)) {
+
+@pageTitle = @{
+	messages("file_upload.title") + " " + messages("ers.title.postfix")
+}
+
+@govuk_wrapper(title = pageTitle, Some(scripts)) {
 
 	@reference(requestObject.getPageTitle)
 

@@ -33,7 +33,6 @@ ers.start.page_title = Cyflwyno eich Datganiad Blynyddol – Gwarantau ar Sail C
 ers.reportable_events.page_title = Digwyddiadau i’w nodi – Gwarantau ar Sail Cyflogaeth – GOV.UK
 ers.choose_file_type.page_title =Dewis math o ffeil – Gwarantau ar Sail Cyflogaeth – GOV.UK
 ers.choose_csv_files.page_title = Dewis a gwirio’r ffeiliau .csv – Gwarantau ar Sail Cyflogaeth – GOV.UK
-ers.upload_ods_file.page_title = Uwchlwytho’r ffeil .ods – Gwarantau ar Sail Cyflogaeth – GOV.UK
 ers.title.postfix =– Gwarantau ar Sail Cyflogaeth – GOV.UK
 ers.reference.info = Gwybodaeth rydych wedi’i dewis
 ers.csop.is_group_scheme.page_title = Cynlluniau grŵp
