@@ -31,6 +31,8 @@
 @(requestObject: RequestObject, upscanInitiateResponse: UpscanInitiateResponse, fileId: String, useCsopV5Templates: Boolean)(implicit request: Request[_], messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 
 @schemeId = @{requestObject.getSchemeId}
+@schemeName = @{requestObject.getSchemeHeadingName}
+@schemeNameWithArticle = @{requestObject.getSchemeHeadingNameWithArticle}
 
 @scripts = {
     <script src='@routes.Assets.versioned("/javascripts/file-upload.js")' @{CSPNonce.attr}></script>
@@ -67,6 +69,8 @@
         upscanInitiateResponse.postTarget,
         uploadFileHeader,
         schemeId,
+        schemeName,
+        schemeNameWithArticle,
         fileId,
         useCsopV5Templates
     )
