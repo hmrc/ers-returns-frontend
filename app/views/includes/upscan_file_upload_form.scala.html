@@ -23,21 +23,42 @@
         govukWarningText: GovukWarningText
 )
 
-@(      fileType: String,
+@(
+        fileType: String,
         formFields: Map[String, String],
         postTarget: String,
-        headerMsg: String,
+        headingText: String,
+        headingCaption: String,
         schemeId: String,
         fileId: String,
         useCsopV5Templates: Boolean = false
 )(implicit messages: Messages, ersUtil: ERSUtil)
 
-@expectedFileName = @{if(schemeId == "1" && useCsopV5Templates) {ersUtil.getPageElement(schemeId, ersUtil.PAGE_CHECK_CSV_FILE,fileId+".file_name.v5")} else ersUtil.getPageElement(schemeId, ersUtil.PAGE_CHECK_CSV_FILE,fileId+".file_name")}
+@expectedFileName = @{
+    if (schemeId == "1" && useCsopV5Templates) {
+        ersUtil.getPageElement(schemeId, ersUtil.PAGE_CHECK_CSV_FILE,fileId+".file_name.v5")
+    } else {
+        ersUtil.getPageElement(schemeId, ersUtil.PAGE_CHECK_CSV_FILE,fileId+".file_name")
+    }
+}
 
 <form method="post" action="@postTarget" enctype="multipart/form-data">
-    @hmrcPageHeading(PageHeading(
-        text = headerMsg
-    ))
+
+    @hmrcPageHeading(
+        PageHeading(
+            text = headingText,
+            section = Some(headingCaption)
+        )
+    )
+
+    @govukWarningText(
+        WarningText(
+            iconFallbackText = Some(messages("ers.warning")),
+            content = Text(
+                messages("file_upload.warning", {fileType.substring(1).toUpperCase})
+            )
+        )
+    )
 
     @for(field <- formFields) {
         <input type="hidden" name="@field._1" value="@field._2"/>

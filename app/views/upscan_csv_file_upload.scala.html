@@ -37,15 +37,13 @@
     <script src='@routes.Assets.versioned("/javascripts/welsh-translation.js")' @{CSPNonce.attr}></script>
 }
 
-@uploadFileHeader = @{
-  messages("csv_file_upload.upload_your_file_header",
-    messages(ersUtil.getPageElement(schemeId, ersUtil.PAGE_CHECK_CSV_FILE,fileId+".description"))
-  )
-}
+@uploadFileHeading = @{messages("csv_file_upload.upload_your_file_heading")}
 
 @pageTitle = @{
-  uploadFileHeader + " " + messages("ers.title.postfix")
+  uploadFileHeading + " " + messages("ers.title.postfix")
 }
+
+@headingCaption = @{requestObject.getSchemeNameForDisplay + " scheme"}
 
 @govuk_wrapper(title = pageTitle, Some(scripts)) {
     @reference(requestObject.getPageTitle)
@@ -61,14 +59,16 @@
         classes = "govuk-!-display-none"
     ))
 
+
     @upscan_file_upload_form(
-        ".csv",
-        upscanInitiateResponse.formFields,
-        upscanInitiateResponse.postTarget,
-        uploadFileHeader,
-        schemeId,
-        fileId,
-        useCsopV5Templates
+        fileType = ".csv",
+        formFields = upscanInitiateResponse.formFields,
+        postTarget = upscanInitiateResponse.postTarget,
+        headingText = uploadFileHeading,
+        headingCaption = ersUtil.getPageElement(schemeId, ersUtil.PAGE_CHECK_CSV_FILE, fileId+ ".description"),
+        schemeId = schemeId,
+        fileId = fileId,
+        useCsopV5Templates = useCsopV5Templates
     )
 
 }

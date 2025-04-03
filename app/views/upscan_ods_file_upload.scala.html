@@ -20,18 +20,21 @@
 @import views.html.helper.CSPNonce
 @import views.html.includes.upscan_file_upload_form
 @import views.html.templates._
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
 @this(
 		govuk_wrapper: govuk_wrapper,
 		upscan_file_upload_form: upscan_file_upload_form,
 		govukErrorSummary: GovukErrorSummary,
 		govukBackLink: GovukBackLink,
-		govukInsetText: GovukInsetText
+		govukInsetText: GovukInsetText,
+		govukWarningText: GovukWarningText
 )
 
 @(requestObject: RequestObject, upscanInitiateResponse: UpscanInitiateResponse)(implicit request: Request[_], messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 
 @schemeId = @{requestObject.getSchemeId}
+@headingCaption = @{requestObject.getSchemeNameForDisplay + " scheme"}
 
 @scripts = {
 	<script src='@routes.Assets.versioned("/javascripts/file-upload.js")' @{CSPNonce.attr}></script>
@@ -54,12 +57,13 @@
 	))
 
   	@upscan_file_upload_form(
-		".ods",
-		upscanInitiateResponse.formFields,
-		upscanInitiateResponse.postTarget,
-		messages("file_upload.title"),
-		schemeId,
-		fileId = ""
+		fileType = ".ods",
+		formFields = upscanInitiateResponse.formFields,
+		postTarget = upscanInitiateResponse.postTarget,
+		headingText = messages("file_upload.title"),
+		headingCaption = headingCaption,
+		schemeId = schemeId,
+		fileId = "",
 	)
 
 }
