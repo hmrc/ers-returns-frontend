@@ -46,6 +46,5 @@ trait ViewSpecBase extends PlaySpec with GuiceOneAppPerSuite {
 
   def asDocument(html: Html): Document = Jsoup.parse(html.toString())
 
-
 }
 

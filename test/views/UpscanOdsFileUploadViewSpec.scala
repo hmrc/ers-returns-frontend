@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 package views
 
 import config.ApplicationConfig
@@ -58,7 +57,7 @@ class UpscanOdsFileUploadViewSpec extends ViewSpecBase {
 
   "upscan_ods_file_upload view" should {
 
-    "should show expected elements for CSOP page" in {
+    "show expected elements for CSOP page" in {
       val odsRequestObject = testOdsRequestObject.copy(schemeType = Some("CSOP"))
       val doc = asDocument(view(odsRequestObject, upscanInitiateResponse))
 
@@ -67,7 +66,7 @@ class UpscanOdsFileUploadViewSpec extends ViewSpecBase {
       hasExpectedHeaderAndUploadElements(doc)
     }
 
-    "should show expected elements for EMI page" in {
+    "show expected elements for EMI page" in {
       val odsRequestObject = testOdsRequestObject.copy(schemeType = Some("EMI"))
       val doc = asDocument(view(odsRequestObject, upscanInitiateResponse))
 
@@ -76,7 +75,7 @@ class UpscanOdsFileUploadViewSpec extends ViewSpecBase {
       hasExpectedHeaderAndUploadElements(doc)
     }
 
-    "should show expected elements for SAYE page" in {
+    "show expected elements for SAYE page" in {
       val odsRequestObject = testOdsRequestObject.copy(schemeType = Some("SAYE"))
       val doc = asDocument(view(odsRequestObject, upscanInitiateResponse))
 
@@ -85,7 +84,7 @@ class UpscanOdsFileUploadViewSpec extends ViewSpecBase {
       hasExpectedHeaderAndUploadElements(doc)
     }
 
-    "should show expected elements for SIP page" in {
+    "show expected elements for SIP page" in {
       val odsRequestObject = testOdsRequestObject.copy(schemeType = Some("SIP"))
       val doc = asDocument(view(odsRequestObject, upscanInitiateResponse))
 
@@ -94,7 +93,7 @@ class UpscanOdsFileUploadViewSpec extends ViewSpecBase {
       hasExpectedHeaderAndUploadElements(doc)
     }
 
-    "should show expected elements for OTHER page" in {
+    "show expected elements for OTHER page" in {
       val odsRequestObject = testOdsRequestObject.copy(schemeType = Some("Other"))
       val doc = asDocument(view(odsRequestObject, upscanInitiateResponse))
 
