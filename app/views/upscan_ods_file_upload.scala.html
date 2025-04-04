@@ -23,15 +23,18 @@
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 
 @this(
-		govuk_wrapper: govuk_wrapper,
-		upscan_file_upload_form: upscan_file_upload_form,
-		govukErrorSummary: GovukErrorSummary,
-		govukBackLink: GovukBackLink,
-		govukInsetText: GovukInsetText,
-		govukWarningText: GovukWarningText
+	govuk_wrapper: govuk_wrapper,
+	upscan_file_upload_form: upscan_file_upload_form,
+	govukErrorSummary: GovukErrorSummary,
+	govukBackLink: GovukBackLink,
+	govukInsetText: GovukInsetText,
+	govukWarningText: GovukWarningText
 )
 
-@(requestObject: RequestObject, upscanInitiateResponse: UpscanInitiateResponse)(implicit request: Request[_], messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
+@(
+	requestObject: RequestObject,
+	upscanInitiateResponse: UpscanInitiateResponse
+)(implicit request: Request[_], messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 
 @schemeId = @{requestObject.getSchemeId}
 @headingCaption = @{requestObject.getSchemeNameForDisplay + " scheme"}
