@@ -21,14 +21,19 @@
 @import views.html.templates.reference
 
 @this(
-        govuk_wrapper: govuk_wrapper,
-        upscan_file_upload_form: upscan_file_upload_form,
-        govukErrorSummary: GovukErrorSummary,
-        govukBackLink: GovukBackLink,
-        govukInsetText: GovukInsetText
+    govuk_wrapper: govuk_wrapper,
+    upscan_file_upload_form: upscan_file_upload_form,
+    govukErrorSummary: GovukErrorSummary,
+    govukBackLink: GovukBackLink,
+    govukInsetText: GovukInsetText
 )
 
-@(requestObject: RequestObject, upscanInitiateResponse: UpscanInitiateResponse, fileId: String, useCsopV5Templates: Boolean)(implicit request: Request[_], messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
+@(
+    requestObject: RequestObject,
+    upscanInitiateResponse: UpscanInitiateResponse,
+    fileId: String,
+    useCsopV5Templates: Boolean
+)(implicit request: Request[_], messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 
 @schemeId = @{requestObject.getSchemeId}
 

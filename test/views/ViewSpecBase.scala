@@ -30,7 +30,7 @@ import play.twirl.api.Html
 import scala.concurrent.ExecutionContext
 
 
-trait ViewSpecBase extends PlaySpec with GuiceOneAppPerSuite {
+trait ViewSpecBase extends PlaySpec with GuiceOneAppPerSuite  {
 
   def injector: Injector = app.injector
 
@@ -45,6 +45,13 @@ trait ViewSpecBase extends PlaySpec with GuiceOneAppPerSuite {
   def testMessages: Messages = messagesApi.preferred(fakeRequest)
 
   def asDocument(html: Html): Document = Jsoup.parse(html.toString())
+
+  def firstElementByClassText(document: Document, cssClass: String): String = {
+    document.getElementsByClass(cssClass).first().text()
+  }
+  def firstElementByClassOwnText(document: Document, cssClass: String): String = {
+    document.getElementsByClass(cssClass).first().ownText()
+  }
 
 }
 

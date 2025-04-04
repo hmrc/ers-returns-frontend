@@ -26,7 +26,7 @@ import play.api.test.FakeRequest
 import utils.ERSUtil
 import views.html.upscan_ods_file_upload
 
-class UpscanOdsFileUploadViewSpec extends ViewSpecBase {
+class UpscanOdsFileUploadViewSpec extends ViewSpecBase with UploadFixtures {
 
   private val view = app.injector.instanceOf[upscan_ods_file_upload]
 
@@ -35,26 +35,6 @@ class UpscanOdsFileUploadViewSpec extends ViewSpecBase {
   implicit val request: FakeRequest[AnyContentAsEmpty.type] = fakeRequest
   implicit val messages: Messages = testMessages
 
-  private val upscanInitiateResponse =
-    UpscanInitiateResponse(
-      fileReference = Reference("a1a47ace-cf71-4ad7-b2b1-2f22c1097aef"),
-      postTarget = "http://localhost:9570/upscan/upload-proxy",
-      formFields = Map("not" -> "used")
-    )
-
-  private val testOdsRequestObject =
-    RequestObject(
-      aoRef = Some("123PA12345678"),
-      taxYear = Some("2014/15"),
-      ersSchemeRef = Some("XA1100000000000"),
-      schemeName = Some("MyScheme"),
-      schemeType = None,
-      agentRef = None,
-      empRef = None,
-      ts = None,
-      hmac = Some("qlQmNGgreJRqJroWUUu0MxLq2oo=")
-    )
-
   "upscan_ods_file_upload view" should {
 
     "show expected elements for CSOP page" in {
@@ -62,7 +42,7 @@ class UpscanOdsFileUploadViewSpec extends ViewSpecBase {
       val doc = asDocument(view(odsRequestObject, upscanInitiateResponse))
 
       doc.getElementById("scheme-reference").text() mustBe "CSOP - Company Share Option Plan scheme - XA1100000000000 - 2014 to 2015"
-      doc.getElementsByClass("hmrc-caption govuk-caption-xl").first().ownText() mustBe "Company Share Option Plan scheme"
+      firstElementByClassOwnText(doc,"hmrc-caption govuk-caption-xl") mustBe "Company Share Option Plan scheme"
       hasExpectedHeaderAndUploadElements(doc)
     }
 
@@ -71,7 +51,7 @@ class UpscanOdsFileUploadViewSpec extends ViewSpecBase {
       val doc = asDocument(view(odsRequestObject, upscanInitiateResponse))
 
       doc.getElementById("scheme-reference").text() mustBe "EMI - Enterprise Management Incentives scheme - XA1100000000000 - 2014 to 2015"
-      doc.getElementsByClass("hmrc-caption govuk-caption-xl").first().ownText() mustBe "Enterprise Management Incentives scheme"
+      firstElementByClassOwnText(doc,"hmrc-caption govuk-caption-xl") mustBe "Enterprise Management Incentives scheme"
       hasExpectedHeaderAndUploadElements(doc)
     }
 
@@ -80,7 +60,7 @@ class UpscanOdsFileUploadViewSpec extends ViewSpecBase {
       val doc = asDocument(view(odsRequestObject, upscanInitiateResponse))
 
       doc.getElementById("scheme-reference").text() mustBe "SAYE - Save As You Earn scheme - XA1100000000000 - 2014 to 2015"
-      doc.getElementsByClass("hmrc-caption govuk-caption-xl").first().ownText() mustBe "Save As You Earn scheme"
+      firstElementByClassOwnText(doc,"hmrc-caption govuk-caption-xl") mustBe "Save As You Earn scheme"
       hasExpectedHeaderAndUploadElements(doc)
     }
 
@@ -89,7 +69,7 @@ class UpscanOdsFileUploadViewSpec extends ViewSpecBase {
       val doc = asDocument(view(odsRequestObject, upscanInitiateResponse))
 
       doc.getElementById("scheme-reference").text() mustBe "SIP - Share Incentive Plan scheme - XA1100000000000 - 2014 to 2015"
-      doc.getElementsByClass("hmrc-caption govuk-caption-xl").first().ownText() mustBe "Share Incentive Plan scheme"
+      firstElementByClassOwnText(doc,"hmrc-caption govuk-caption-xl") mustBe "Share Incentive Plan scheme"
       hasExpectedHeaderAndUploadElements(doc)
     }
 
@@ -98,16 +78,16 @@ class UpscanOdsFileUploadViewSpec extends ViewSpecBase {
       val doc = asDocument(view(odsRequestObject, upscanInitiateResponse))
 
       doc.getElementById("scheme-reference").text() mustBe "OTHER - Other scheme - XA1100000000000 - 2014 to 2015"
-      doc.getElementsByClass("hmrc-caption govuk-caption-xl").first().ownText() mustBe "Other scheme"
+      firstElementByClassOwnText(doc, "hmrc-caption govuk-caption-xl") mustBe "Other scheme"
       hasExpectedHeaderAndUploadElements(doc)
     }
 
     def hasExpectedHeaderAndUploadElements(doc: Document): Unit = {
-      doc.getElementsByClass("govuk-heading-xl").first().text() mustBe "Upload your ODS file"
-      doc.getElementsByClass("govuk-warning-text").first().text() mustBe "! Warning You must save a copy of your ODS file for your records."
-      doc.getElementsByClass("govuk-form-group").first().text() mustBe "Upload a file"
+      firstElementByClassText(doc, "govuk-heading-xl") mustBe "Upload your ODS file"
+      firstElementByClassText(doc, "govuk-warning-text") mustBe "! Warning You must save a copy of your ODS file for your records."
+      firstElementByClassText(doc, "govuk-form-group") mustBe "Upload a file"
       doc.getElementsByClass("govuk-file-upload").size() mustBe 1
-      doc.getElementsByClass("govuk-button").text() mustBe "Upload file"
+      firstElementByClassText(doc, "govuk-button") mustBe "Upload file"
     }
 
   }
