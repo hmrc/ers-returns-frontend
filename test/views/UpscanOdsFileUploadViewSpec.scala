@@ -17,8 +17,6 @@
 package views
 
 import config.ApplicationConfig
-import models.RequestObject
-import models.upscan.{Reference, UpscanInitiateResponse}
 import org.jsoup.nodes.Document
 import play.api.i18n.Messages
 import play.api.mvc.AnyContentAsEmpty
@@ -42,7 +40,7 @@ class UpscanOdsFileUploadViewSpec extends ViewSpecBase with UploadFixtures {
       val doc = asDocument(view(odsRequestObject, upscanInitiateResponse))
 
       doc.getElementById("scheme-reference").text() mustBe "CSOP - Company Share Option Plan scheme - XA1100000000000 - 2014 to 2015"
-      firstElementByClassOwnText(doc,"hmrc-caption govuk-caption-xl") mustBe "Company Share Option Plan scheme"
+      firstElementByClassOwnText(doc, "hmrc-caption govuk-caption-xl") mustBe "Company Share Option Plan scheme"
       hasExpectedHeaderAndUploadElements(doc)
     }
 
@@ -51,7 +49,7 @@ class UpscanOdsFileUploadViewSpec extends ViewSpecBase with UploadFixtures {
       val doc = asDocument(view(odsRequestObject, upscanInitiateResponse))
 
       doc.getElementById("scheme-reference").text() mustBe "EMI - Enterprise Management Incentives scheme - XA1100000000000 - 2014 to 2015"
-      firstElementByClassOwnText(doc,"hmrc-caption govuk-caption-xl") mustBe "Enterprise Management Incentives scheme"
+      firstElementByClassOwnText(doc, "hmrc-caption govuk-caption-xl") mustBe "Enterprise Management Incentives scheme"
       hasExpectedHeaderAndUploadElements(doc)
     }
 
@@ -60,7 +58,7 @@ class UpscanOdsFileUploadViewSpec extends ViewSpecBase with UploadFixtures {
       val doc = asDocument(view(odsRequestObject, upscanInitiateResponse))
 
       doc.getElementById("scheme-reference").text() mustBe "SAYE - Save As You Earn scheme - XA1100000000000 - 2014 to 2015"
-      firstElementByClassOwnText(doc,"hmrc-caption govuk-caption-xl") mustBe "Save As You Earn scheme"
+      firstElementByClassOwnText(doc, "hmrc-caption govuk-caption-xl") mustBe "Save As You Earn scheme"
       hasExpectedHeaderAndUploadElements(doc)
     }
 
@@ -69,7 +67,7 @@ class UpscanOdsFileUploadViewSpec extends ViewSpecBase with UploadFixtures {
       val doc = asDocument(view(odsRequestObject, upscanInitiateResponse))
 
       doc.getElementById("scheme-reference").text() mustBe "SIP - Share Incentive Plan scheme - XA1100000000000 - 2014 to 2015"
-      firstElementByClassOwnText(doc,"hmrc-caption govuk-caption-xl") mustBe "Share Incentive Plan scheme"
+      firstElementByClassOwnText(doc, "hmrc-caption govuk-caption-xl") mustBe "Share Incentive Plan scheme"
       hasExpectedHeaderAndUploadElements(doc)
     }
 

@@ -17,8 +17,6 @@
 package views
 
 import config.ApplicationConfig
-import models.RequestObject
-import models.upscan.{Reference, UpscanInitiateResponse}
 import org.jsoup.nodes.Document
 import play.api.i18n.Messages
 import play.api.mvc.AnyContentAsEmpty
