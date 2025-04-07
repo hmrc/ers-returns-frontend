@@ -48,8 +48,6 @@
   uploadFileHeading + " " + messages("ers.title.postfix")
 }
 
-@headingCaption = @{requestObject.getSchemeNameForDisplay + " scheme"}
-
 @govuk_wrapper(title = pageTitle, Some(scripts)) {
     @reference(requestObject.getPageTitle)
 
