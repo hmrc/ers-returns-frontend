@@ -482,7 +482,7 @@ ers_signed_out.link = Sign in
 # Upload messages
 #********************************************************************
 
-file_upload.title = Upload your ODS file
+file_upload.heading = Upload your ODS file
 file_upload.contact_us = Contact us on our feedback page
 file_upload.size_warning.link.before = If your file is larger than 200MB, you can’t use this service. Email
 file_upload.file_size = if your .ods file is larger than 200MB.

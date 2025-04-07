@@ -87,6 +87,7 @@ class UpscanOdsFileUploadViewSpec extends ViewSpecBase with FileUploadFixtures {
     firstElementByClassText(doc, "govuk-warning-text") mustBe "! Warning You must save a copy of your ODS file for your records."
     firstElementByClassText(doc, "govuk-form-group") mustBe "Upload a file"
     doc.getElementsByClass("govuk-file-upload").size() mustBe 1
+    doc.title() mustBe "Upload your ODS file – Employment Related Securities – GOV.UK"
     firstElementByClassText(doc, "govuk-button") mustBe "Upload file"
   }
 

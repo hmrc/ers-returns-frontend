@@ -46,7 +46,7 @@
 
 
 @pageTitle = @{
-	messages("file_upload.title") + " " + messages("ers.title.postfix")
+	messages("file_upload.heading") + " " + messages("ers.title.postfix")
 }
 
 @govuk_wrapper(title = pageTitle, Some(scripts)) {
@@ -68,7 +68,7 @@
 		fileType = ".ods",
 		formFields = upscanInitiateResponse.formFields,
 		postTarget = upscanInitiateResponse.postTarget,
-		headingText = messages("file_upload.title"),
+		headingText = messages("file_upload.heading"),
 		headingCaption = headingCaption,
 		schemeId = schemeId,
 		fileId = "",
