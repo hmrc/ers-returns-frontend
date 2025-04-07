@@ -147,6 +147,7 @@ class FileUploadController @Inject() (val mcc: MessagesControllerComponents,
 
           userSchemes match {
             case Success(value) =>
+              logger.warn(s"[FileUploadController][handleValidationResponse] Validation is not successful for schemeRef: $schemeRef, timestamp: ${System.currentTimeMillis()}.")
               Redirect(routes.FileUploadController.validationFailure()).withSession(
                 request.session +
                   ("expectedScheme" -> value.expected.toUpperCase) +
@@ -177,6 +178,7 @@ class FileUploadController @Inject() (val mcc: MessagesControllerComponents,
     val expectedScheme = request.session.get("expectedScheme")
     val actualScheme = request.session.get("actualScheme")
     val empRef: String = request.authData.empRef.value
+    val schemeUrl: String = s"https://www.tax.service.gov.uk/ers/org/$empRef/schemes"
 
     logger.info("[FileUploadController][validationFailure] Validation Failure: " + (System.currentTimeMillis() / 1000))
     (for {
@@ -184,7 +186,7 @@ class FileUploadController @Inject() (val mcc: MessagesControllerComponents,
       fileType <- sessionService.fetch[CheckFileType](ersUtil.FILE_TYPE_CACHE)
     } yield {
       if (expectedScheme.isDefined && actualScheme.isDefined) {
-        Ok(fileUploadErrorsOdsView(requestObject, fileType.checkFileType.getOrElse(""), empRef, expectedScheme, actualScheme))
+        Ok(fileUploadErrorsOdsView(requestObject, fileType.checkFileType.getOrElse(""), schemeUrl, expectedScheme, actualScheme))
       } else {
         Ok(fileUploadErrorsView(requestObject, fileType.checkFileType.getOrElse("")))
       }

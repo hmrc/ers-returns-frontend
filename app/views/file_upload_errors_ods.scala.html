@@ -17,6 +17,7 @@
 @import _root_.config.ApplicationConfig
 @import _root_.utils.ERSUtil
 @import views.html.templates.reference
+@import models.RequestObject
 
 @this(
 govuk_wrapper: govuk_wrapper,
@@ -25,46 +26,42 @@ govukInsetText: GovukInsetText,
 hmrcPageHeading: HmrcPageHeading
 )
 
-@(requestObject: RequestObject, fileType: String, empRef: String, expectedScheme: Option[String] = None, actualScheme: Option[String] = None)(implicit request: Request[_], messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
-
-@defining(Some(s"https://www.tax.service.gov.uk/ers/org/$empRef/schemes").getOrElse(routes.FileUploadController.uploadFilePage().url)) { schemeLink =>
+@(requestObject: RequestObject, fileType: String, schemeUrl: String, expectedScheme: Option[String] = None, actualScheme: Option[String] = None)(implicit request: Request[_], messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 
     @govuk_wrapper(title = messages("file_upload_errors.title") + " " + messages("ers.title.postfix")) {
 
             @reference(requestObject.getPageTitle)
 
-            @expectedScheme.zip(actualScheme).headOption match {
+            (expectedScheme, actualScheme) match {
                 case Some((expectedScheme, actualScheme)) => {
-                    @defining(requestObject.copy(schemeType = Some(expectedScheme))) { expectedRequestObject =>
-                    @defining(requestObject.copy(schemeType = Some(actualScheme))) { actualRequestObject =>
-
 
                     @hmrcPageHeading(PageHeading(
                         text = messages("file_upload_errors.scheme_mismatch.title")
                     ))
                     <p class="govuk-body">
-                        @messages("file_upload_errors.scheme_mismatch.line1", expectedRequestObject.getSchemeWithArticle(expectedScheme), actualRequestObject.getSchemeWithArticle(actualScheme))
+                        @messages("file_upload_errors.scheme_mismatch.line1", RequestObject.getSchemeWithArticle(expectedScheme), RequestObject.getSchemeWithArticle(actualScheme))
                     </p>
                     <p class="govuk-body">
-                        @messages("file_upload_errors.scheme_mismatch.line2", expectedRequestObject.getSchemeWithArticle(expectedScheme))
+                        @messages("file_upload_errors.scheme_mismatch.line2", RequestObject.getSchemeWithArticle(expectedScheme))
                     </p>
                     <ul class="govuk-list govuk-list--bullet">
-                        <li>@messages("file_upload_errors.scheme_mismatch.bullet1", expectedRequestObject.getSchemeWithArticle(expectedScheme))</li>
-                        <li>@messages("file_upload_errors.scheme_mismatch.bullet2", expectedRequestObject.getSchemeWithArticle(expectedScheme))</li>
+                        <li>@messages("file_upload_errors.scheme_mismatch.bullet1", RequestObject.getSchemeWithArticle(expectedScheme))</li>
+                        <li>@messages("file_upload_errors.scheme_mismatch.bullet2", RequestObject.getSchemeWithArticle(expectedScheme))</li>
                     </ul>
                     <p class="govuk-body">
                         @messages("file_upload_errors.scheme_mismatch.you_can")
                     </p>
                     <ul class="govuk-list govuk-list--bullet">
                         <li><a class="govuk-link" href="@routes.FileUploadController.uploadFilePage().url">@Html(messages("file_upload_errors.scheme_mismatch.retry_link",
-                            expectedRequestObject.getSchemeWithArticle(expectedScheme)))</a></li>
-                        <li><a class="govuk-link" href="@schemeLink">@Html(messages("file_upload_errors.scheme_mismatch.view_other_link"))</a>
+                            RequestObject.getSchemeWithArticle(expectedScheme)))</a></li>
+                        <li><a class="govuk-link" href="@schemeUrl">@Html(messages("file_upload_errors.scheme_mismatch.view_other_link"))</a>
                             @Html(messages("file_upload_errors.scheme_mismatch.view_other_link_text"))
                         </li>
                     </ul>
-                    }}
+
                 }
-                case None => {
+
+                case _ => {
                     @hmrcPageHeading(PageHeading(
                     text = messages("file_upload_errors.title")
                     ))
@@ -82,10 +79,10 @@ hmrcPageHeading: HmrcPageHeading
                     </h2>
 
                     <p class="govuk-body">
-                        <a class="govuk-link" href="@schemeLink">@Html(messages("file_upload_errors.check_file"))</a>
+                        <a class="govuk-link" href="@schemeUrl">@Html(messages("file_upload_errors.check_file"))</a>
                         @Html(messages("file_upload_errors.info"))
                     </p>
+
                 }
             }
     }
-}
