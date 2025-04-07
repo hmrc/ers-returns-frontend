@@ -14,21 +14,13 @@ const fileType = (function() {
 })();
 
 function ensureUploadButtonIs(status) {
-    if(status === "disabled") {
-        if(uploadFileButton.attributes.getNamedItem("disabled") === null) {
-            uploadFileButton.setAttribute("disabled", "disabled");
-            uploadFileButton.classList.add("govuk-button--disabled");
-        }
-    } else if (status === "enabled") {
+       if (status === "enabled") {
         if(uploadFileButton.attributes.getNamedItem("disabled") !== null) {
             uploadFileButton.removeAttribute("disabled");
             uploadFileButton.classList.remove("govuk-button--disabled");
-        }
+       }
     }
 }
-
-// When page is refreshed, input becomes empty and therefore submit button should be disabled.
-ensureUploadButtonIs("disabled");
 
 // File checks
 function checkFileName() {
@@ -106,23 +98,19 @@ function handleErrors(fileChecks) {
             makeErrorSummary("disappear");
             clearFileUploadErrorMessage();
         } else {
-            ensureUploadButtonIs("disabled");
             makeErrorSummary("appear");
             addErrorToSummary("ers.file.upload."+fileType+".file.large");
             addErrorMessageToFileUpload("ers.file.upload."+fileType+".file.large");
         }
     } else if (fileChecks.validFileName.fileName === false) {
-        ensureUploadButtonIs("disabled");
         makeErrorSummary("appear");
         addErrorToSummary("ers.file.upload.wrong.file");
         addErrorMessageToFileUpload("ers.file.upload.wrong.file");
     } else if (fileChecks.validFileName.fileNameLength === false) {
-        ensureUploadButtonIs("disabled");
         makeErrorSummary("appear");
         addErrorToSummary("ers.file.upload.ods.too.long");
         addErrorMessageToFileUpload("ers.file.upload.ods.too.long");
     } else if (fileChecks.validFileName.fileNameCharacters === false) {
-        ensureUploadButtonIs("disabled");
         makeErrorSummary("appear");
         addErrorToSummary("ers.file.upload.ods.invalid.characters");
         addErrorMessageToFileUpload("ers.file.upload.ods.invalid.characters");
@@ -135,7 +123,26 @@ fileUploadInput.addEventListener('input', () => {
     handleErrors(fileChecks);
 });
 
-uploadFileButton.addEventListener('click', () => {
+uploadFileButton.addEventListener('click', (e) => {
+    let actualFileName = fileUploadInput.files[0];
+    if(!actualFileName) {
+        e.preventDefault()
+        makeErrorSummary("appear");
+        addErrorToSummary("ers.file.upload.empty.error");
+        addErrorMessageToFileUpload("ers.file.upload.empty.error");
+        return false
+    }
+
+    //Prevent submitting the page if there is popup error on page
+    let errorSummaries = document.getElementsByClassName('govuk-error-summary');
+    if (errorSummaries.length > 0) {
+        let errorSummary = errorSummaries[0];
+        if(errorSummary.className != "govuk-error-summary govuk-!-display-none"){
+            e.preventDefault()
+            return false
+        }
+    }
+
     document.getElementById('progress-spinner').classList.remove('govuk-!-display-none');
     document.getElementById('warning-text').setAttribute("role", "alert")
 });
