@@ -128,7 +128,6 @@ class UpscanCsvFileUploadViewSpec extends ViewSpecBase with FileUploadFixtures {
         hasExpectedHeaderAndUploadElements(doc)
       }
 
-
       "show expected elements for EMI page when fileId is `file3`" in {
         val doc = asDocument(view(requestObjectWithEmiScheme, upscanInitiateResponse, "file3", false))
 
@@ -138,6 +137,15 @@ class UpscanCsvFileUploadViewSpec extends ViewSpecBase with FileUploadFixtures {
         hasExpectedHeaderAndUploadElements(doc)
       }
 
+
+      "show expected elements for EMI page when fileId is `file4`" in {
+        val doc = asDocument(view(requestObjectWithEmiScheme, upscanInitiateResponse, "file4", false))
+
+        doc.getElementById("scheme-reference").text() mustBe expectedSchemeReference
+        firstElementByClassOwnText(doc, "hmrc-caption govuk-caption-xl") mustBe "Taxable exercise of options"
+        firstElementByClassText(doc, "govuk-form-group") mustBe "Upload the file EMI40_Taxable_V4.csv"
+        hasExpectedHeaderAndUploadElements(doc)
+      }
     }
 
     "showing the SIP page" should {
