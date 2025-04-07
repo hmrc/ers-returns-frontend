@@ -51,7 +51,6 @@ class FileUploadController @Inject() (val mcc: MessagesControllerComponents,
                                       val actorSystem: ActorSystem)
   extends FrontendController(mcc) with I18nSupport with Retryable with Logging {
 
-  // note: upload-ods-file route
   def uploadFilePage(): Action[AnyContent] = authAction.async { implicit request =>
     (for {
       requestObject <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)

@@ -398,7 +398,7 @@ file_upload_errors.check_file = Defnyddiwch wasanaeth gwirio ffeiliau CThEF
 file_upload_errors.info = i gael adroddiad manwl.
 ers.error.unauthorise = Nid ydych wedi’ch awdurdodi i fwrw golwg ar y dudalen hon
 
-file_upload.warning = TODO WELSH -> You must save a copy of your {0} file for your records.
+file_upload.warning = Mae’n rhaid i chi argraffu neu gadw copi o’ch ffeil {0} ar gyfer eich cofnodion.
 
 file_upload_errors.inset.csop.text = Mae’n rhaid i’r ffeil ddefnyddio’r fersiwn cywir o’r templed ODS ar gyfer y flwyddyn dreth.
 file_upload_errors.inset.csop.link.text = Mae templedi datganiad diwedd blwyddyn ar gael ar gyfer Cynlluniau Opsiwn Prynu Cyfranddaliadau Cwmni
