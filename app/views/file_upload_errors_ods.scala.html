@@ -32,8 +32,8 @@ hmrcPageHeading: HmrcPageHeading
 
             @reference(requestObject.getPageTitle)
 
-            (expectedScheme, actualScheme) match {
-                case Some((expectedScheme, actualScheme)) => {
+            @(expectedScheme, actualScheme) match {
+                case (Some(exp), Some(act)) => {
 
                     @hmrcPageHeading(PageHeading(
                         text = messages("file_upload_errors.scheme_mismatch.title")
@@ -63,7 +63,7 @@ hmrcPageHeading: HmrcPageHeading
 
                 case _ => {
                     @hmrcPageHeading(PageHeading(
-                    text = messages("file_upload_errors.title")
+                        text = messages("file_upload_errors.title")
                     ))
 
                     @govukInsetText(InsetText(
