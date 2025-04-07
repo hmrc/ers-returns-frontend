@@ -24,7 +24,7 @@ import play.api.test.FakeRequest
 import utils.ERSUtil
 import views.html.upscan_ods_file_upload
 
-class UpscanOdsFileUploadViewSpec extends ViewSpecBase with UploadFixtures {
+class UpscanOdsFileUploadViewSpec extends ViewSpecBase with FileUploadFixtures {
 
   private val view = app.injector.instanceOf[upscan_ods_file_upload]
 
@@ -36,7 +36,7 @@ class UpscanOdsFileUploadViewSpec extends ViewSpecBase with UploadFixtures {
   "upscan_ods_file_upload view" should {
 
     "show expected elements for CSOP page" in {
-      val odsRequestObject = testOdsRequestObject.copy(schemeType = Some("CSOP"))
+      val odsRequestObject = testRequestObject.copy(schemeType = Some("CSOP"))
       val doc = asDocument(view(odsRequestObject, upscanInitiateResponse))
 
       doc.getElementById("scheme-reference").text() mustBe "CSOP - Company Share Option Plan scheme - XA1100000000000 - 2014 to 2015"
@@ -45,7 +45,7 @@ class UpscanOdsFileUploadViewSpec extends ViewSpecBase with UploadFixtures {
     }
 
     "show expected elements for EMI page" in {
-      val odsRequestObject = testOdsRequestObject.copy(schemeType = Some("EMI"))
+      val odsRequestObject = testRequestObject.copy(schemeType = Some("EMI"))
       val doc = asDocument(view(odsRequestObject, upscanInitiateResponse))
 
       doc.getElementById("scheme-reference").text() mustBe "EMI - Enterprise Management Incentives scheme - XA1100000000000 - 2014 to 2015"
@@ -54,7 +54,7 @@ class UpscanOdsFileUploadViewSpec extends ViewSpecBase with UploadFixtures {
     }
 
     "show expected elements for SAYE page" in {
-      val odsRequestObject = testOdsRequestObject.copy(schemeType = Some("SAYE"))
+      val odsRequestObject = testRequestObject.copy(schemeType = Some("SAYE"))
       val doc = asDocument(view(odsRequestObject, upscanInitiateResponse))
 
       doc.getElementById("scheme-reference").text() mustBe "SAYE - Save As You Earn scheme - XA1100000000000 - 2014 to 2015"
@@ -63,7 +63,7 @@ class UpscanOdsFileUploadViewSpec extends ViewSpecBase with UploadFixtures {
     }
 
     "show expected elements for SIP page" in {
-      val odsRequestObject = testOdsRequestObject.copy(schemeType = Some("SIP"))
+      val odsRequestObject = testRequestObject.copy(schemeType = Some("SIP"))
       val doc = asDocument(view(odsRequestObject, upscanInitiateResponse))
 
       doc.getElementById("scheme-reference").text() mustBe "SIP - Share Incentive Plan scheme - XA1100000000000 - 2014 to 2015"
@@ -72,7 +72,7 @@ class UpscanOdsFileUploadViewSpec extends ViewSpecBase with UploadFixtures {
     }
 
     "show expected elements for OTHER page" in {
-      val odsRequestObject = testOdsRequestObject.copy(schemeType = Some("Other"))
+      val odsRequestObject = testRequestObject.copy(schemeType = Some("Other"))
       val doc = asDocument(view(odsRequestObject, upscanInitiateResponse))
 
       doc.getElementById("scheme-reference").text() mustBe "OTHER - Other scheme - XA1100000000000 - 2014 to 2015"
@@ -80,14 +80,14 @@ class UpscanOdsFileUploadViewSpec extends ViewSpecBase with UploadFixtures {
       hasExpectedHeaderAndUploadElements(doc)
     }
 
-    def hasExpectedHeaderAndUploadElements(doc: Document): Unit = {
-      firstElementByClassText(doc, "govuk-heading-xl") mustBe "Upload your ODS file"
-      firstElementByClassText(doc, "govuk-warning-text") mustBe "! Warning You must save a copy of your ODS file for your records."
-      firstElementByClassText(doc, "govuk-form-group") mustBe "Upload a file"
-      doc.getElementsByClass("govuk-file-upload").size() mustBe 1
-      firstElementByClassText(doc, "govuk-button") mustBe "Upload file"
-    }
+  }
 
+  private def hasExpectedHeaderAndUploadElements(doc: Document): Unit = {
+    firstElementByClassText(doc, "govuk-heading-xl") mustBe "Upload your ODS file"
+    firstElementByClassText(doc, "govuk-warning-text") mustBe "! Warning You must save a copy of your ODS file for your records."
+    firstElementByClassText(doc, "govuk-form-group") mustBe "Upload a file"
+    doc.getElementsByClass("govuk-file-upload").size() mustBe 1
+    firstElementByClassText(doc, "govuk-button") mustBe "Upload file"
   }
 
 }

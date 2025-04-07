@@ -19,7 +19,7 @@ package views
 import models.RequestObject
 import models.upscan.{Reference, UpscanInitiateResponse}
 
-trait UploadFixtures {
+trait FileUploadFixtures {
 
   val upscanInitiateResponse: UpscanInitiateResponse =
     UpscanInitiateResponse(
@@ -28,7 +28,7 @@ trait UploadFixtures {
       formFields = Map("not" -> "used")
     )
 
-  val testOdsRequestObject: RequestObject =
+  val testRequestObject: RequestObject =
     RequestObject(
       aoRef = Some("123PA12345678"),
       taxYear = Some("2014/15"),
