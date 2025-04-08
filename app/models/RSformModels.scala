@@ -250,18 +250,6 @@ case class RequestObject(
   def getSchemeHeadingName(implicit messages: Messages): String =
     schemeType.map(schemeName => messages(s"ers.schemeDisplay.${schemeName.toUpperCase}")).getOrElse("")
 
-  def getSchemeHeadingNameWithArticle(implicit messages: Messages): String =
-    schemeType.map { schemeName =>
-      val schemeTypeFormatted = messages(s"ers.schemeDisplay.${schemeName.toUpperCase}")
-      if (messages.lang.code == "en" && (schemeName.toUpperCase == "OTHER" || schemeName.toUpperCase == "EMI")) {
-        s"an $schemeTypeFormatted"
-      } else if (messages.lang.code == "cy") {
-        s"$schemeTypeFormatted"
-      } else {
-        s"a $schemeTypeFormatted"
-      }
-    }.getOrElse("")
-
   def getEmpRef: String = empRef.getOrElse("")
 
   def getTS: String = ts.getOrElse("")
@@ -295,10 +283,9 @@ case class RequestObject(
 object RequestObject {
   implicit val formatRequestObject: OFormat[RequestObject] = Json.format[RequestObject]
 
-    def getSchemeWithArticle(schemeType: Option[String])(implicit messages: Messages): String = {
-      val schemeStr = schemeType.getOrElse("")
-      val schemeTypeFormatted = messages(s"ers.scheme.$schemeStr")
-      if (messages.lang.code == "en" && (schemeStr == "OTHER" || schemeStr == "EMI")) {
+    def getSchemeWithArticle(schemeType: String)(implicit messages: Messages): String = { // TODO test?
+      val schemeTypeFormatted = messages(s"ers.scheme.$schemeType")
+      if (messages.lang.code == "en" && (schemeType == "OTHER" || schemeType == "EMI")) {
         s"an $schemeTypeFormatted"
       } else if (messages.lang.code == "cy") {
         s"$schemeTypeFormatted"
@@ -306,6 +293,17 @@ object RequestObject {
         s"a $schemeTypeFormatted"
       }
     }
+
+  def getSchemeHeadingNameWithArticle(schemeName: String)(implicit messages: Messages): String = { // TODO test?
+    val schemeTypeFormatted = messages(s"ers.schemeDisplay.${schemeName.toUpperCase}")
+    if (messages.lang.code == "en" && (schemeName.toUpperCase == "OTHER" || schemeName.toUpperCase == "EMI")) {
+      s"an $schemeTypeFormatted"
+    } else if (messages.lang.code == "cy") {
+      s"$schemeTypeFormatted"
+    } else {
+      s"a $schemeTypeFormatted"
+    }
+  }
 
 }
 

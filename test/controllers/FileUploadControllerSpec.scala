@@ -457,7 +457,7 @@ class FileUploadControllerSpec
       setAuthMocks()
       val result = TestFileUploadController.validationFailure()(fakeRequestWithSession)
       status(result) must be(OK)
-      contentAsString(result) must include("SAYE")
+      contentAsString(result) must include("SAYE") // TODO these tests could be a lot better
       contentAsString(result) must include("SIP")
     }
 

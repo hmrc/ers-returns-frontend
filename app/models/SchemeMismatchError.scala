@@ -18,13 +18,13 @@ package models
 
 import play.api.libs.json.{Json, OFormat}
 
-case class ExpectedAndActualScheme(
-                                  message: String,
-                                  expected: String,
-                                  actual: String
-                                  )
+case class SchemeMismatchError(
+                                 errorMessage: String,
+                                 expectedSchemeType: String,
+                                 requestSchemeType: String
+                               )
 
-object ExpectedAndActualScheme {
-  implicit val format: OFormat[ExpectedAndActualScheme] = Json.format[ExpectedAndActualScheme]
+object SchemeMismatchError {
+  implicit val format: OFormat[SchemeMismatchError] = Json.format[SchemeMismatchError]
 }
 
