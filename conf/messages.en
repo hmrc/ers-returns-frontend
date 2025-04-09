@@ -42,7 +42,6 @@ ers.reportable_events.page_title = Reportable events – Employment Related Secu
 ers.choose_file_type.page_title = Choose file type – Employment Related Securities – GOV.UK
 ers.choose_csv_files.page_title = Choose the .csv files – Employment Related Securities – GOV.UK
 
-ers.upload_ods_file.page_title = Upload the .ods file – Employment Related Securities – GOV.UK
 ers.title.postfix = – Employment Related Securities – GOV.UK
 
 ers.reference.info = Scheme information you have selected
@@ -486,7 +485,7 @@ ers_signed_out.link = Sign in
 # Upload messages
 #********************************************************************
 
-file_upload.title = Upload your ODS file
+file_upload.heading = Upload your ODS file
 file_upload.contact_us = Contact us on our feedback page
 file_upload.size_warning.link.before = If your file is larger than 200MB, you can’t use this service. Email
 file_upload.file_size = if your .ods file is larger than 200MB.
@@ -495,6 +494,8 @@ file_upload.emi.info = Choose the {0} file you want to upload as part of your En
 file_upload.other.info = Choose the {0} file you want to upload as part of your Other annual return.
 file_upload.sip.info = Choose the {0} file you want to upload as part of your Share Incentive Plan annual return.
 file_upload.saye.info = Choose the {0} file you want to upload as part of your Save As You Earn annual return.
+
+file_upload.warning = You must save a copy of your {0} file for your records.
 
 file_upload_errors.title = Errors have been found
 file_upload_errors.para1 = Fix the errors before you use this service again or
@@ -524,7 +525,7 @@ file_upload_errors.other.guidance = <a href = "https://www.gov.uk/government/pub
 
 ers_upload_successful.page_title = Successful upload
 
-csv_file_upload.upload_your_file_header = Upload your ‘{0}’ file
+csv_file_upload.upload_your_file_heading = Upload your CSV file
 csv_file_upload.upload_your_file = Upload the file {0}
 csv_file_upload.contact_us = Contact us on our feedback page
 csv_file_upload.file_size = if any of your files are larger than 200MB.
