@@ -72,7 +72,7 @@ class UpscanOdsFileUploadViewSpec extends ViewSpecBase with FileUploadFixtures {
     }
 
     "show expected elements for OTHER page" in {
-      val odsRequestObject = testRequestObject.copy(schemeType = Some("Other"))
+      val odsRequestObject = testRequestObject.copy(schemeType = Some("OTHER"))
       val doc = asDocument(view(odsRequestObject, upscanInitiateResponse))
 
       doc.getElementById("scheme-reference").text() mustBe "OTHER - Other scheme - XA1100000000000 - 2014 to 2015"
