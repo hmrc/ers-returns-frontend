@@ -9,6 +9,13 @@ ers.emi = Enterprise Management Incentives
 ers.saye = Save As You Earn
 ers.sip = Share Incentive Plan
 ers.other = Other
+
+ers.csop.caption = Company Share Option Plan scheme
+ers.emi.caption = Enterprise Management Incentives scheme
+ers.saye.caption = Save As You Earn scheme
+ers.sip.caption = Share Incentive Plan scheme
+ers.other.caption = Other scheme
+
 ers.header = Submit your ERS annual return
 ers.app_title = Submit your ERS annual return
 ers.finish = Finished
