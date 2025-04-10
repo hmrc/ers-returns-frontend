@@ -5,6 +5,13 @@ ers.emi = Cymhellion Rheoli Mentrau
 ers.saye =Cynilo Wrth Ennill
 ers.sip = Cymell Cyfranddaliadau
 ers.other = Arall
+
+ers.csop.caption = Cynllun Opsiwn Prynu Cyfranddaliadau Cwmni
+ers.emi.caption = Cynllun Cymhellion Rheoli Mentrau
+ers.saye.caption = Cynllun Cynilo Wrth Ennill
+ers.sip.caption = Cynllun Cymell Cyfranddaliadau
+ers.other.caption = Cynllun Arall
+
 ers.header = Cyflwyno eich Datganiad Blynyddol ar gyfer ERS
 ers.app_title = Cyflwyno eich Datganiad Blynyddol ar gyfer ERS
 ers.finish = Wedi gorffen
