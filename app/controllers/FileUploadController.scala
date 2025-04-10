@@ -32,7 +32,7 @@ import utils._
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success, Try}
+import scala.util.Try
 
 @Singleton
 class FileUploadController @Inject()(val mcc: MessagesControllerComponents,
@@ -166,7 +166,7 @@ class FileUploadController @Inject()(val mcc: MessagesControllerComponents,
         Redirect(routes.FileUploadController.validationFailure()).withSession(
           request.session +
             ("expectedScheme" -> schemeMismatchError.expectedSchemeType.toUpperCase) +
-            ("actualScheme" -> schemeMismatchError.requestSchemeType.toUpperCase)
+            ("requestScheme" -> schemeMismatchError.requestSchemeType.toUpperCase)
         )
 
       case None if appConfig.csopV5Enabled && schemeInfo.schemeType == "CSOP" && response.body.contains("Incorrect ERS Template") =>
@@ -188,10 +188,10 @@ class FileUploadController @Inject()(val mcc: MessagesControllerComponents,
       fileType <- sessionService.fetch[CheckFileType](ersUtil.FILE_TYPE_CACHE)
     } yield {
 
-      (request.session.get("expectedScheme"), request.session.get("actualScheme")) match {
-        case (Some(expected), Some(actual)) =>
+      (request.session.get("expectedScheme"), request.session.get("requestScheme")) match {
+        case (Some(expectedScheme), Some(requestScheme)) =>
           val schemeUrl: String = request.authData.getDassPortalLink(appConfig)
-          Ok(fileUploadErrorsOdsView(requestObject, fileType.checkFileType.getOrElse(""), schemeUrl, expected, actual))
+          Ok(fileUploadErrorsOdsView(requestObject, fileType.checkFileType.getOrElse(""), schemeUrl, expectedScheme, requestScheme))
         case _ =>
           Ok(fileUploadErrorsView(requestObject, fileType.checkFileType.getOrElse("")))
       }

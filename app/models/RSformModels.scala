@@ -283,15 +283,19 @@ case class RequestObject(
 object RequestObject {
   implicit val formatRequestObject: OFormat[RequestObject] = Json.format[RequestObject]
 
-    def getSchemeWithArticle(schemeType: String)(implicit messages: Messages): String = { // TODO test
-      if (messages.lang.code == "en" && getSchemeFirstLetter(schemeType)) {
-        s"an $schemeType"
-      } else if (messages.lang.code == "cy") {
-        s"$schemeType"
-      } else {
+  def getSchemeWithArticle(schemeType: String)(implicit messages: Messages): String = {
+    messages.lang.code match { // TODO test
+      case "en" =>
+        val article = if (getSchemeFirstLetter(schemeType)) "an" else "a"
+        s"$article $schemeType"
+
+      case "cy" =>
+        if (schemeType == "OTHER") "Arall" else schemeType
+
+      case _ =>
         s"a $schemeType"
-      }
     }
+  }
 
   def getSchemeFirstLetter(scheme: String): Boolean = { // TODO test
     val trimmed = scheme.trim.toUpperCase

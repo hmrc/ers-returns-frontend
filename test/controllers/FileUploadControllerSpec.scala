@@ -274,7 +274,7 @@ class FileUploadControllerSpec
 
         val updatedSession = session(result)
         updatedSession.data("expectedScheme") mustBe "SAYE"
-        updatedSession.data("actualScheme") mustBe "SIP"
+        updatedSession.data("requestScheme") mustBe "SIP"
       }
 
 
@@ -309,7 +309,7 @@ class FileUploadControllerSpec
         redirectLocation(result) mustBe Some(routes.FileUploadController.validationFailure().url)
       }
 
-      "JSON parsing of ExpectedAndActualScheme fails" in {
+      "there is a SchemeMismatchError from the response JSON" in {
         val schemeInfo = ersRequestObject.copy(schemeType = Some("EMI"))
 
         when(mockAppConfig.csopV5Enabled).thenReturn(true)
@@ -443,10 +443,10 @@ class FileUploadControllerSpec
       }
     }
 
-    "return fileUploadErrorsOdsView when expectedScheme and actualScheme are present in session" in {
+    "return fileUploadErrorsOdsView when expectedScheme and requestScheme are present in session" in {
       val fakeRequestWithSession = testFakeRequest.withSession(
         "expectedScheme" -> "SAYE",
-        "actualScheme" -> "SIP"
+        "requestScheme" -> "SIP"
       )
 
       when(mockSessionService.fetch[RequestObject](any())(any(), any()))
