@@ -209,7 +209,7 @@ class UpscanCsvFileUploadViewSpec extends ViewSpecBase with FileUploadFixtures {
 
     "showing the Other page" should {
 
-      val requestObjectWithEmiScheme = testRequestObject.copy(schemeType = Some("Other"))
+      val requestObjectWithEmiScheme = testRequestObject.copy(schemeType = Some("OTHER"))
       val expectedSchemeReference = "OTHER - Other scheme - XA1100000000000 - 2014 to 2015"
 
       "show expected elements for Other page when fileId is `file0`" in {
