@@ -32,7 +32,6 @@
 
 @schemeId = @{requestObject.getSchemeId}
 @schemeName = @{requestObject.getSchemeHeadingName}
-@schemeNameWithArticle = @{requestObject.getSchemeHeadingNameWithArticle}
 
 @scripts = {
     <script src='@routes.Assets.versioned("/javascripts/file-upload.js")' @{CSPNonce.attr}></script>
@@ -70,7 +69,6 @@
         uploadFileHeader,
         schemeId,
         schemeName,
-        schemeNameWithArticle,
         fileId,
         useCsopV5Templates
     )

@@ -16,7 +16,8 @@
 
 package models
 
-import uk.gov.hmrc.auth.core.AffinityGroup.Agent
+import config.ApplicationConfig
+import uk.gov.hmrc.auth.core.AffinityGroup.{Agent, Organisation}
 import uk.gov.hmrc.auth.core.{AffinityGroup, Enrolment}
 import uk.gov.hmrc.domain.EmpRef
 
@@ -28,4 +29,18 @@ case class ERSAuthData(
 
 	def getEnrolment(key: String): Option[Enrolment] = enrolments.find(_.key.equalsIgnoreCase(key))
 	def isAgent: Boolean = (affinityGroup contains Agent) || getEnrolment("HMRC-AGENT-AGENT").isDefined
+
+	def getDassPortalLink(applicationConfig: ApplicationConfig): String = {
+		affinityGroup match {
+			case Some(Agent) =>
+				s"${applicationConfig.dassGatewayAgentPath}"
+
+			case Some(Organisation) =>
+				val empRefValue: String = empRef.value
+				s"${applicationConfig.dassGatewayOrgHost}/$empRefValue/${applicationConfig.dassGatewayOrgPath}"
+
+			case _ =>
+				throw new Exception(s"[ERSAuthData][getDassPortalLink] DASS portal link not valid for current affinity group")
+		}
+	}
 }

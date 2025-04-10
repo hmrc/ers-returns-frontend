@@ -15,6 +15,7 @@
  *@
 
 @import _root_.utils.ERSUtil
+@import models.RequestObject
 
 @this(
         govukFileUpload: GovukFileUpload,
@@ -29,13 +30,9 @@
         headerMsg: String,
         schemeId: String,
         schemeName: String,
-        schemeNameWithArticle: String,
         fileId: String,
         useCsopV5Templates: Boolean = false
 )(implicit messages: Messages, ersUtil: ERSUtil)
-
-@* for schemeNameWithArticle, call to the RequestObject helper with schemeName  *@
-
 
 @expectedFileName = @{if(schemeId == "1" && useCsopV5Templates) {ersUtil.getPageElement(schemeId, ersUtil.PAGE_CHECK_CSV_FILE,fileId+".file_name.v5")} else ersUtil.getPageElement(schemeId, ersUtil.PAGE_CHECK_CSV_FILE,fileId+".file_name")}
 
@@ -58,7 +55,7 @@
                 @messages("file_upload.bulletOne.ods")
             }
         </li>
-        <li>@messages("file_upload.bulletTwo", schemeNameWithArticle)</li> @* TODO does this need to be passed in in both views? why is method getSchemeHeadingNameWithArticle if it's in a list? *@
+        <li>@messages("file_upload.bulletTwo", RequestObject.getSchemeWithArticle(schemeName))</li>
     </ul>
     <br>
 

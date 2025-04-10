@@ -283,26 +283,19 @@ case class RequestObject(
 object RequestObject {
   implicit val formatRequestObject: OFormat[RequestObject] = Json.format[RequestObject]
 
-    def getSchemeWithArticle(schemeType: String)(implicit messages: Messages): String = { // TODO test?
-      val schemeTypeFormatted = messages(s"ers.scheme.$schemeType")
-      if (messages.lang.code == "en" && (schemeType == "OTHER" || schemeType == "EMI")) {
-        s"an $schemeTypeFormatted"
+    def getSchemeWithArticle(schemeType: String)(implicit messages: Messages): String = { // TODO test
+      if (messages.lang.code == "en" && getSchemeFirstLetter(schemeType)) {
+        s"an $schemeType"
       } else if (messages.lang.code == "cy") {
-        s"$schemeTypeFormatted"
+        s"$schemeType"
       } else {
-        s"a $schemeTypeFormatted"
+        s"a $schemeType"
       }
     }
 
-  def getSchemeHeadingNameWithArticle(schemeName: String)(implicit messages: Messages): String = { // TODO test?
-    val schemeTypeFormatted = messages(s"ers.schemeDisplay.${schemeName.toUpperCase}")
-    if (messages.lang.code == "en" && (schemeName.toUpperCase == "OTHER" || schemeName.toUpperCase == "EMI")) {
-      s"an $schemeTypeFormatted"
-    } else if (messages.lang.code == "cy") {
-      s"$schemeTypeFormatted"
-    } else {
-      s"a $schemeTypeFormatted"
-    }
+  def getSchemeFirstLetter(scheme: String): Boolean = { // TODO test
+    val trimmed = scheme.trim.toUpperCase
+    trimmed.nonEmpty && "AEIOU".contains(trimmed.charAt(0))
   }
 
 }

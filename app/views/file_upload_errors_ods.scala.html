@@ -30,8 +30,8 @@
     requestObject: RequestObject,
     fileType: String,
     schemeUrl: String,
-    expectedSchemeTypeType: Option[String] = None,
-    requestSchemeType: Option[String] = None
+    expectedSchemeType: String,
+    requestSchemeType: String
 )(implicit request: Request[_], messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 
     @govuk_wrapper(title = messages("file_upload_errors.title") + " " + messages("ers.title.postfix")) {
@@ -39,7 +39,7 @@
             @reference(requestObject.getPageTitle)
 
             @(expectedSchemeType, requestSchemeType) match {
-                case (Some(exp), Some(act)) => {
+                case (exp, act) => {
 
                     @hmrcPageHeading(PageHeading(
                         text = messages("file_upload_errors.scheme_mismatch.title")

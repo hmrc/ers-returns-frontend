@@ -188,17 +188,14 @@ class FileUploadController @Inject()(val mcc: MessagesControllerComponents,
       fileType <- sessionService.fetch[CheckFileType](ersUtil.FILE_TYPE_CACHE)
     } yield {
 
-      val expectedScheme = request.session.get("expectedScheme") // note better to define things in the scope they're used
-      val actualScheme = request.session.get("actualScheme")
-
-      if (expectedScheme.isDefined && actualScheme.isDefined) {
-        val empRef: String = request.authData.empRef.value
-        val schemeUrl: String = s"https://www.tax.service.gov.uk/ers/org/$empRef/schemes" // TODO derive this from config
-
-        Ok(fileUploadErrorsOdsView(requestObject, fileType.checkFileType.getOrElse(""), schemeUrl, expectedScheme, actualScheme))
-      } else {
-        Ok(fileUploadErrorsView(requestObject, fileType.checkFileType.getOrElse("")))
+      (request.session.get("expectedScheme"), request.session.get("actualScheme")) match {
+        case (Some(expected), Some(actual)) =>
+          val schemeUrl: String = request.authData.getDassPortalLink(appConfig)
+          Ok(fileUploadErrorsOdsView(requestObject, fileType.checkFileType.getOrElse(""), schemeUrl, expected, actual))
+        case _ =>
+          Ok(fileUploadErrorsView(requestObject, fileType.checkFileType.getOrElse("")))
       }
+
     }) recover {
       case e: Throwable =>
         logger.error(s"[FileUploadController][validationFailure] failed with Exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.", e)
