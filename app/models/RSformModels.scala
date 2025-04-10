@@ -247,6 +247,9 @@ case class RequestObject(
   def getSchemeNameForDisplay(implicit messages: Messages): String =
     if (schemeName.isDefined) messages(s"ers.${getSchemeType.toLowerCase}") else ""
 
+  def getSchemeNameCaptionForDisplay(implicit messages: Messages): String =
+    if (schemeName.isDefined) messages(s"ers.${getSchemeType.toLowerCase}.caption") else ""
+
   def getEmpRef: String = empRef.getOrElse("")
 
   def getTS: String = ts.getOrElse("")
