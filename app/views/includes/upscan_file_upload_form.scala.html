@@ -1,5 +1,5 @@
 @*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,17 +24,28 @@
         govukWarningText: GovukWarningText
 )
 
-@(      fileType: String,
+@(
+        fileType: String,
         formFields: Map[String, String],
         postTarget: String,
-        headerMsg: String,
+        headingText: String,
+        headingCaption: String,
         schemeId: String,
         schemeName: String,
         fileId: String,
         useCsopV5Templates: Boolean = false
 )(implicit messages: Messages, ersUtil: ERSUtil)
 
-@expectedFileName = @{if(schemeId == "1" && useCsopV5Templates) {ersUtil.getPageElement(schemeId, ersUtil.PAGE_CHECK_CSV_FILE,fileId+".file_name.v5")} else ersUtil.getPageElement(schemeId, ersUtil.PAGE_CHECK_CSV_FILE,fileId+".file_name")}
+@expectedFileName = @{
+    if (schemeId == "1" && useCsopV5Templates) {
+        ersUtil.getPageElement(schemeId, ersUtil.PAGE_CHECK_CSV_FILE,fileId+".file_name.v5")
+    } else {
+        ersUtil.getPageElement(schemeId, ersUtil.PAGE_CHECK_CSV_FILE,fileId+".file_name")
+    }
+}
+
+@* Derive message key for warning text from file type *@
+@csvOrOdsFileTypeKey = @{fileType.substring(1).toUpperCase}
 
 <form method="post" action="@postTarget" enctype="multipart/form-data">
 
@@ -45,6 +56,22 @@
     @hmrcPageHeading(PageHeading(
         text = headerMsg
     ))
+
+    @hmrcPageHeading(
+        PageHeading(
+            text = headingText,
+            section = Some(headingCaption)
+        )
+    )
+
+    @govukWarningText(
+        WarningText(
+            iconFallbackText = Some(messages("ers.warning")),
+            content = Text(
+                messages("file_upload.warning", csvOrOdsFileTypeKey)
+            )
+        )
+    )
 
     <p class = "govuk-body">@messages("file_upload.paragraph")</p>
     <ul class ="govuk-list govuk-list--bullet">

@@ -1,5 +1,5 @@
 @*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,14 +21,19 @@
 @import views.html.templates.reference
 
 @this(
-        govuk_wrapper: govuk_wrapper,
-        upscan_file_upload_form: upscan_file_upload_form,
-        govukErrorSummary: GovukErrorSummary,
-        govukBackLink: GovukBackLink,
-        govukInsetText: GovukInsetText
+    govuk_wrapper: govuk_wrapper,
+    upscan_file_upload_form: upscan_file_upload_form,
+    govukErrorSummary: GovukErrorSummary,
+    govukBackLink: GovukBackLink,
+    govukInsetText: GovukInsetText
 )
 
-@(requestObject: RequestObject, upscanInitiateResponse: UpscanInitiateResponse, fileId: String, useCsopV5Templates: Boolean)(implicit request: Request[_], messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
+@(
+    requestObject: RequestObject,
+    upscanInitiateResponse: UpscanInitiateResponse,
+    fileId: String,
+    useCsopV5Templates: Boolean
+)(implicit request: Request[_], messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 
 @schemeId = @{requestObject.getSchemeId}
 @schemeName = @{requestObject.getSchemeHeadingName}
@@ -38,14 +43,10 @@
     <script src='@routes.Assets.versioned("/javascripts/welsh-translation.js")' @{CSPNonce.attr}></script>
 }
 
-@uploadFileHeader = @{
-  messages("csv_file_upload.upload_your_file_header",
-    messages(ersUtil.getPageElement(schemeId, ersUtil.PAGE_CHECK_CSV_FILE,fileId+".description"))
-  )
-}
+@uploadFileHeading = @{messages("csv_file_upload.upload_your_file_heading")}
 
 @pageTitle = @{
-  uploadFileHeader + " " + messages("ers.title.postfix")
+  uploadFileHeading + " " + messages("ers.title.postfix")
 }
 
 @govuk_wrapper(title = pageTitle, Some(scripts)) {
@@ -62,15 +63,16 @@
         classes = "govuk-!-display-none"
     ))
 
+
     @upscan_file_upload_form(
-        ".csv",
-        upscanInitiateResponse.formFields,
-        upscanInitiateResponse.postTarget,
-        uploadFileHeader,
-        schemeId,
-        schemeName,
-        fileId,
-        useCsopV5Templates
+        fileType = ".csv",
+        formFields = upscanInitiateResponse.formFields,
+        postTarget = upscanInitiateResponse.postTarget,
+        headingText = uploadFileHeading,
+        headingCaption = ersUtil.getPageElement(schemeId, ersUtil.PAGE_CHECK_CSV_FILE, fileId+ ".description"),
+        schemeId = schemeId,
+        fileId = fileId,
+        useCsopV5Templates = useCsopV5Templates
     )
 
 }
