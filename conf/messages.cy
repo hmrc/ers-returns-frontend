@@ -26,7 +26,7 @@ ers.scheme.CSOP = CSOP
 ers.scheme.EMI = EMI
 ers.scheme.SIP = SIP
 ers.scheme.SAYE = SAYE
-ers.scheme.Other = ARALL
+ers.scheme.OTHER = ARALL
 ers.scheme.title = Cynllun {0}
 
 ers.start.page_title = Cyflwyno eich Datganiad Blynyddol – Gwarantau ar Sail Cyflogaeth – GOV.UK
