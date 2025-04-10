@@ -191,7 +191,7 @@ class FileUploadController @Inject()(val mcc: MessagesControllerComponents,
       (request.session.get("expectedScheme"), request.session.get("requestScheme")) match {
         case (Some(expectedScheme), Some(requestScheme)) =>
           val schemeUrl: String = request.authData.getDassPortalLink(appConfig)
-          Ok(fileUploadErrorsOdsView(requestObject, fileType.checkFileType.getOrElse(""), schemeUrl, expectedScheme, requestScheme))
+          Ok(fileUploadErrorsOdsView(requestObject, schemeUrl, expectedScheme, requestScheme))
         case _ =>
           Ok(fileUploadErrorsView(requestObject, fileType.checkFileType.getOrElse("")))
       }
