@@ -284,7 +284,7 @@ object RequestObject {
   implicit val formatRequestObject: OFormat[RequestObject] = Json.format[RequestObject]
 
   def getSchemeWithArticle(schemeType: String)(implicit messages: Messages): String = {
-    messages.lang.code match { // TODO test
+    messages.lang.code match {
       case "en" =>
         val article = if (getSchemeFirstLetter(schemeType)) "an" else "a"
         s"$article $schemeType"
@@ -297,7 +297,7 @@ object RequestObject {
     }
   }
 
-  def getSchemeFirstLetter(scheme: String): Boolean = { // TODO test
+  def getSchemeFirstLetter(scheme: String): Boolean = {
     val trimmed = scheme.trim.toUpperCase
     trimmed.nonEmpty && "AEIOU".contains(trimmed.charAt(0))
   }
