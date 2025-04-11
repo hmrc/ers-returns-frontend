@@ -289,18 +289,15 @@ object RequestObject {
   def getSchemeWithArticle(schemeType: String)(implicit messages: Messages): String = {
     messages.lang.code match {
       case "en" =>
-        val article = if (getSchemeFirstLetter(schemeType)) "an" else "a"
+        val article = if (startsWithVowel(schemeType)) "an" else "a"
         s"$article $schemeType"
 
-      case "cy" =>
-        if (schemeType == "OTHER") "Arall" else schemeType
-
       case _ =>
-        s"a $schemeType"
+        if (schemeType == "OTHER") messages(s"ers.scheme.$schemeType") else schemeType
     }
   }
 
-  def getSchemeFirstLetter(scheme: String): Boolean = {
+  def startsWithVowel(scheme: String): Boolean = {
     val trimmed = scheme.trim.toUpperCase
     trimmed.nonEmpty && "AEIOU".contains(trimmed.charAt(0))
   }

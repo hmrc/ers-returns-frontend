@@ -33,7 +33,7 @@ case class ERSAuthData(
 	def getDassPortalLink(applicationConfig: ApplicationConfig): String = {
 		affinityGroup match {
 			case Some(Agent) =>
-				s"${applicationConfig.dassGatewayAgentPath}"
+				s"${applicationConfig.dassGatewayAgentHost}${applicationConfig.dassGatewayAgentPath}"
 
 			case Some(Organisation) =>
 				val empRefValue: String = empRef.value

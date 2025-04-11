@@ -141,7 +141,7 @@ class FileUploadController @Inject()(val mcc: MessagesControllerComponents,
           sessionService.cache(ersUtil.VALIDATED_SHEETS, res.body)
           Redirect(controllers.schemeOrganiser.routes.SchemeOrganiserBasedInUkController.questionPage())
 
-        case ACCEPTED if res.body.contains("Incorrect ERS Template - Sheet Name isn't as expected") =>
+        case ACCEPTED if res.body.contains("Incorrect ERS Template") =>
           sheetMismatch(res, schemeInfo)
 
         case ACCEPTED =>
@@ -169,7 +169,7 @@ class FileUploadController @Inject()(val mcc: MessagesControllerComponents,
             ("requestScheme" -> schemeMismatchError.requestSchemeType.toUpperCase)
         )
 
-      case None if appConfig.csopV5Enabled && schemeInfo.schemeType == "CSOP" && response.body.contains("Incorrect ERS Template") =>
+      case None if appConfig.csopV5Enabled && schemeInfo.schemeType == "CSOP" =>
         logger.warn(s"[FileUploadController][handleValidationResponse] Validation is not successful for schemeRef:" +
           s" ${schemeInfo.schemeRef}, timestamp: ${System.currentTimeMillis()}. Wrong CSOP template used for tax year.")
 

@@ -135,19 +135,19 @@ class RequestObjectSpec extends AnyWordSpecLike with Matchers with GuiceOneAppPe
     }
   }
 
-  "RequestObject.getSchemeFirstLetter" should {
+  "RequestObject.startsWithVowel" should {
     "return true if the scheme starts with a vowel" in {
-      RequestObject.getSchemeFirstLetter("EMI") mustBe true
-      RequestObject.getSchemeFirstLetter("OTHER") mustBe true
+      RequestObject.startsWithVowel("EMI") mustBe true
+      RequestObject.startsWithVowel("OTHER") mustBe true
     }
 
     "return false is the scheme starts with a consonant" in {
-      RequestObject.getSchemeFirstLetter("CSOP") mustBe false
-      RequestObject.getSchemeFirstLetter("SIP") mustBe false
+      RequestObject.startsWithVowel("CSOP") mustBe false
+      RequestObject.startsWithVowel("SIP") mustBe false
     }
 
     "return false is the scheme is empty" in {
-      RequestObject.getSchemeFirstLetter("") mustBe false
+      RequestObject.startsWithVowel("") mustBe false
     }
   }
 
@@ -164,10 +164,10 @@ class RequestObjectSpec extends AnyWordSpecLike with Matchers with GuiceOneAppPe
       result mustBe "a CSOP"
     }
 
-    "return 'Arall' for scheme = 'OTHER' when lang code is 'cy'" in {
+    "return 'ARALL' for scheme = 'OTHER' when lang code is 'cy'" in {
       implicit val messages: Messages = welshMessages
       val result = RequestObject.getSchemeWithArticle("OTHER")
-      result mustBe "Arall"
+      result mustBe "ARALL"
     }
 
     "default to 'a <scheme>' for unknown lang codes" in {

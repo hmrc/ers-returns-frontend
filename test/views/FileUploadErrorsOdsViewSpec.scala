@@ -17,7 +17,6 @@
 package views
 
 import config.ApplicationConfig
-import models.RequestObject
 import org.jsoup.nodes.Document
 import org.scalatest.matchers.must.Matchers
 import play.api.i18n.Messages
