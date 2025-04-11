@@ -160,7 +160,6 @@ class FileUploadController @Inject()(val mcc: MessagesControllerComponents,
 
     Try(response.json.as[SchemeMismatchError]).toOption match {
       case Some(schemeMismatchError) =>
-        val expectedScheme = request.session.get("expectedScheme")
         logger.warn(s"[FileUploadController][handleValidationResponse] Validation is not successful for schemeRef:" +
           s" ${schemeInfo.schemeRef}, timestamp: ${System.currentTimeMillis()}.")
 

@@ -309,7 +309,6 @@ class FileUploadControllerSpec
         setAuthMocks()
         val result = TestFileUploadController.validationResults()(testFakeRequest)
         val updatedSession = session(result)
-        println("Updated session: " + updatedSession.data)
         updatedSession.get("expectedScheme") mustBe Some("CSOP")
         updatedSession.get("requestScheme") mustBe Some("SAYE")
         status(result) mustBe SEE_OTHER
