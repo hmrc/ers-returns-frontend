@@ -16,6 +16,7 @@
 
 package controllers.auth
 
+import config.ApplicationConfig
 import models.{ERSAuthData, ErsMetaData, RequestObject, SchemeInfo}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
@@ -27,7 +28,7 @@ import play.api.i18n.MessagesApi
 import play.api.mvc._
 import play.api.test.Helpers.{redirectLocation, status, stubBodyParser}
 import play.api.test.{DefaultAwaitTimeout, FakeRequest}
-import uk.gov.hmrc.auth.core.AffinityGroup.Agent
+import uk.gov.hmrc.auth.core.AffinityGroup.{Agent, Organisation}
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.domain.EmpRef
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -210,4 +211,29 @@ class AuthFunctionalitySpec
 			result.empRef shouldBe EmpRef("1234", "5678")
 		}
 	}
+
+  "getDassPortalLink" should {
+    "return the agent portal link when affinity group is 'Agent'" in {
+      val fakeApplicationConfig = mock[ApplicationConfig]
+      when(fakeApplicationConfig.dassGatewayAgentHost).thenReturn("http://agent.example.com")
+      when(fakeApplicationConfig.dassGatewayAgentPath).thenReturn("/ers/agent/schemes")
+      val authdataAgent = ERSAuthData(enrolments = Set.empty, affinityGroup = Some(Agent))
+      authdataAgent.getDassPortalLink(fakeApplicationConfig) shouldBe "http://agent.example.com/ers/agent/schemes"
+    }
+
+    "return the organisation portal link when affinity group is 'Organisation'" in {
+      val fakeApplicationConfig = mock[ApplicationConfig]
+      when(fakeApplicationConfig.dassGatewayOrgHost).thenReturn("http://organisation.example.com")
+      when(fakeApplicationConfig.dassGatewayOrgPath).thenReturn("schemes")
+      val testEmpRef = EmpRef("123", "4567")
+      val authdataOrg = ERSAuthData(enrolments = Set.empty, affinityGroup = Some(Organisation), empRef = testEmpRef)
+      authdataOrg.getDassPortalLink(fakeApplicationConfig) shouldBe "http://organisation.example.com/123/4567/schemes"
+    }
+
+    "throw an exception when the affinity group is not 'Agent' or 'Organisation'" in {
+      val fakeApplicationConfig = mock[ApplicationConfig]
+      val authdataInvalid = ERSAuthData(enrolments = Set.empty, affinityGroup = None)
+      an [Exception] should be thrownBy authdataInvalid.getDassPortalLink(fakeApplicationConfig)
+    }
+  }
 }
