@@ -5,6 +5,13 @@ ers.emi = Cymhellion Rheoli Mentrau
 ers.saye =Cynilo Wrth Ennill
 ers.sip = Cymell Cyfranddaliadau
 ers.other = Arall
+
+ers.csop.caption = Cynllun Opsiwn Prynu Cyfranddaliadau Cwmni
+ers.emi.caption = Cynllun Cymhellion Rheoli Mentrau
+ers.saye.caption = Cynllun Cynilo Wrth Ennill
+ers.sip.caption = Cynllun Cymell Cyfranddaliadau
+ers.other.caption = Cynllun Arall
+
 ers.header = Cyflwyno eich Datganiad Blynyddol ar gyfer ERS
 ers.app_title = Cyflwyno eich Datganiad Blynyddol ar gyfer ERS
 ers.finish = Wedi gorffen
@@ -33,7 +40,6 @@ ers.start.page_title = Cyflwyno eich Datganiad Blynyddol – Gwarantau ar Sail C
 ers.reportable_events.page_title = Digwyddiadau i’w nodi – Gwarantau ar Sail Cyflogaeth – GOV.UK
 ers.choose_file_type.page_title =Dewis math o ffeil – Gwarantau ar Sail Cyflogaeth – GOV.UK
 ers.choose_csv_files.page_title = Dewis a gwirio’r ffeiliau .csv – Gwarantau ar Sail Cyflogaeth – GOV.UK
-ers.upload_ods_file.page_title = Uwchlwytho’r ffeil .ods – Gwarantau ar Sail Cyflogaeth – GOV.UK
 ers.title.postfix =– Gwarantau ar Sail Cyflogaeth – GOV.UK
 ers.reference.info = Gwybodaeth rydych wedi’i dewis
 ers.csop.is_group_scheme.page_title = Cynlluniau grŵp
@@ -429,7 +435,7 @@ ers_signed_out.info = Er eich diogelwch, gwnaethom eich allgofnodi.
 ers_signed_out.link = Mewngofnodi
 ers_upload_form.processing_alert = Rydym yn gwirio eich ffeil am wallau. Peidiwch ag adnewyddu’r dudalen.
 
-file_upload.title = Uwchlwythwch eich ffeil ODS
+file_upload.heading = Uwchlwythwch eich ffeil ODS
 file_upload.contact_us = Cysylltwch â ni ar ein tudalen adborth
 file_upload.size_warning.link.before =Os yw’ch ffeil yn fwy na 200MB, ni allwch ddefnyddio’r gwasanaeth hwn. E-bostiwch
 file_upload.file_size = os yw’ch ffeil ODS yn fwy na 200MB.
@@ -445,6 +451,8 @@ file_upload_errors.go_fix =Mae angen i chi gywiro’ch gwallau
 file_upload_errors.check_file = Defnyddiwch wasanaeth gwirio ffeiliau CThEF
 file_upload_errors.info = i gael adroddiad manwl.
 ers.error.unauthorise = Nid ydych wedi’ch awdurdodi i fwrw golwg ar y dudalen hon
+
+file_upload.warning = Mae’n rhaid i chi argraffu neu gadw copi o’ch ffeil {0} ar gyfer eich cofnodion.
 
 file_upload_errors.inset.csop.text = Mae’n rhaid i’r ffeil ddefnyddio’r fersiwn cywir o’r templed ODS ar gyfer y flwyddyn dreth.
 file_upload_errors.inset.csop.link.text = Mae templedi datganiad diwedd blwyddyn ar gael ar gyfer Cynlluniau Opsiwn Prynu Cyfranddaliadau Cwmni
@@ -465,7 +473,7 @@ file_upload_errors.emi.guidance = <a href = "https://www.gov.uk/government/publi
 file_upload_errors.sip.guidance = <a href = "https://www.gov.uk/government/publications/share-incentive-plan-end-of-year-template">Defnyddiwch y dogfennau arweiniad Cynllun Cymell Cyfranddaliadau</a> i’ch helpu i gywiro’r gwallau.
 file_upload_errors.other.guidance = <a href = "https://www.gov.uk/government/publications/other-employment-related-securities-schemes-and-arrangements-end-of-year-return-template">Defnyddiwch y dogfennau arweiniad Cynlluniau a threfniadau eraill gwarantau ar sail cyflogaeth</a> i’ch helpu i gywiro’r gwallau.
 ers_upload_successful.page_title = Uwchlwytho llwyddiannus
-csv_file_upload.upload_your_file_header = Uwchlwytho’ch ffeil ‘{0}’
+csv_file_upload.upload_your_file_heading = Uwchlwytho’ch ffeil CSV
 csv_file_upload.upload_your_file = Uwchlwytho’ch ffeil {0}
 csv_file_upload.contact_us = Cysylltwch â ni ar ein tudalen adborth
 csv_file_upload.file_size = os yw unrhyw un o’ch ffeiliau’n fwy na 200MB.

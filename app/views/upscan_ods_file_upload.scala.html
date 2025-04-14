@@ -1,5 +1,5 @@
 @*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,23 +22,32 @@
 @import views.html.templates._
 
 @this(
-		govuk_wrapper: govuk_wrapper,
-		upscan_file_upload_form: upscan_file_upload_form,
-		govukErrorSummary: GovukErrorSummary,
-		govukBackLink: GovukBackLink,
-		govukInsetText: GovukInsetText
+	govuk_wrapper: govuk_wrapper,
+	upscan_file_upload_form: upscan_file_upload_form,
+	govukErrorSummary: GovukErrorSummary,
+	govukBackLink: GovukBackLink,
+	govukInsetText: GovukInsetText
 )
 
-@(requestObject: RequestObject, upscanInitiateResponse: UpscanInitiateResponse)(implicit request: Request[_], messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
+@(
+	requestObject: RequestObject,
+	upscanInitiateResponse: UpscanInitiateResponse
+)(implicit request: Request[_], messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 
 @schemeId = @{requestObject.getSchemeId}
+@headingCaption = @{requestObject.getSchemeNameCaptionForDisplay}
 
 @scripts = {
 	<script src='@routes.Assets.versioned("/javascripts/file-upload.js")' @{CSPNonce.attr}></script>
 	<script src='@routes.Assets.versioned("/javascripts/welsh-translation.js")' @{CSPNonce.attr}></script>
 }
 
-@govuk_wrapper(title = messages("ers.upload_ods_file.page_title"), Some(scripts)) {
+
+@pageTitle = @{
+	messages("file_upload.heading") + " " + messages("ers.title.postfix")
+}
+
+@govuk_wrapper(title = pageTitle, Some(scripts)) {
 
 	@reference(requestObject.getPageTitle)
 
@@ -54,12 +63,13 @@
 	))
 
   	@upscan_file_upload_form(
-		".ods",
-		upscanInitiateResponse.formFields,
-		upscanInitiateResponse.postTarget,
-		messages("file_upload.title"),
-		schemeId,
-		fileId = ""
+		fileType = ".ods",
+		formFields = upscanInitiateResponse.formFields,
+		postTarget = upscanInitiateResponse.postTarget,
+		headingText = messages("file_upload.heading"),
+		headingCaption = headingCaption,
+		schemeId = schemeId,
+		fileId = "",
 	)
 
 }
