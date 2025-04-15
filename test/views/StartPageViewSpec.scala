@@ -236,6 +236,13 @@ class StartPageViewSpec extends ViewSpecBase with FileUploadFixtures {
     )
     expectedElements(insetText, expectedInsetText)
 
+    val links = doc.getElementById("content").select("a")
+    val firstLink = links.get(0).attr("href")
+    val secondLink = links.get(1).attr("href")
+
+    firstLink mustBe "https://www.gov.uk/government/collections/employment-related-securities-detailed-information"
+    secondLink mustBe "https://www.gov.uk/guidance/spreadsheet-checking-service-employment-related-securities-ers"
+
     val buttons = doc.getElementsByClass("govuk-button")
     buttons.size() mustBe 1
     buttons.get(0).text mustBe "Start now"
