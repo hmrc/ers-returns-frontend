@@ -245,6 +245,6 @@ class StartPageViewSpec extends ViewSpecBase with FileUploadFixtures {
 
     val buttons = doc.getElementsByClass("govuk-button")
     buttons.size() mustBe 1
-    buttons.getFirst.text mustBe "Start now"
+    buttons.get(0).text mustBe "Start now"
   }
 }
