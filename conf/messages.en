@@ -196,10 +196,6 @@ ers_start.circumstances_bullet_1 = to record any events related to the scheme in
 ers_start.circumstances_bullet_2 = to know any alterations made to key features of the plan
 ers_start.csop.circumstances_bullet_1 = to record any events related to the scheme in an ODS or CSV spreadsheet
 
-ers_start.sip.template = If you have events to report you can <a class="govuk-link" href="https://SIP_Awaiting_link.gov.uk">get a template and guidance notes</a> to help you to complete your end of year return.
-ers_start.emi.template = If you have events to report you can <a class="govuk-link" href="https://EMI_Awaiting_link.gov.uk">get a template and guidance notes</a> to help you to complete your end of year return.
-ers_start.saye.template = If you have events to report you can <a class="govuk-link" href="https://SAYE_Awaiting_link.gov.uk">get a template and guidance notes</a> to help you to complete your end of year return.
-ers_start.csop.template = If you have events to report you can <a class="govuk-link" href="https://CSOP_Awaiting_link.gov.uk">get a template and guidance notes</a> to help you to complete your end of year return.
 
 ers_start.events.template = If you have events to report you can <a class="govuk-link" href="https://www.gov.uk/government/collections/employment-related-securities-detailed-information">get a template and guidance notes</a> to help you to complete your end of year return.
 ers_start.check_files_1 = You can <a class="govuk-link" href="https://www.gov.uk/guidance/spreadsheet-checking-service-employment-related-securities-ers">check your employment related securities file</a> for formatting errors before you submit your annual return.
