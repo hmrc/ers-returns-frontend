@@ -159,7 +159,7 @@ ers_start.sip.trustee_bullet_2 = cyfeiriad yr ymddiriedolwr
 ers_start.circumstances_lead_in = Yn dibynnu ar eich amgylchiadau:
 ers_start.csop.circumstances_bullet_1 = mae’n bosibl y bydd angen i chi gofnodi unrhyw ddigwyddiadau sy’n berthnasol i’r cynllun mewn taenlen ODS neu CSV
 ers_start.circumstances_bullet_1 = mae’n bosibl y bydd angen i chi gofnodi unrhyw ddigwyddiadau sy’n berthnasol i’r cynllun mewn taenlen ODS neu CSV
-ers_start.csop.circumstances_bullet_1 = cofnod o unrhyw ddigwyddiadau i’w hadrodd mewn taenlen ODS neu CSV
+ers_start.csop.circumstances_bullet_1 = mae’n bosibl y bydd angen i chi gofnodi unrhyw ddigwyddiadau sy’n berthnasol i’r cynllun mewn taenlen ODS neu CSV
 ers_start.circumstances_bullet_2 = mae’n bosibl y bydd angen i chi wybod am unrhyw addasiadau a wnaed i nodweddion allweddol y cynllun
 
 ers_start.other.bullet_1 = cofnodi unrhyw ddigwyddiadau sy’n berthnasol i’r cynllun mewn taenlen ODS neu CSV
