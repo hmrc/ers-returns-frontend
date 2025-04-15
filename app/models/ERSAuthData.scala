@@ -31,16 +31,10 @@ case class ERSAuthData(
 	def isAgent: Boolean = (affinityGroup contains Agent) || getEnrolment("HMRC-AGENT-AGENT").isDefined
 
 	def getDassPortalLink(applicationConfig: ApplicationConfig): String = {
-		affinityGroup match {
-			case Some(Agent) =>
-				s"${applicationConfig.dassGatewayAgentHost}${applicationConfig.dassGatewayAgentPath}"
-
-			case Some(Organisation) =>
-				val empRefValue: String = empRef.value
-				s"${applicationConfig.dassGatewayOrgHost}/$empRefValue/${applicationConfig.dassGatewayOrgPath}"
-
-			case _ =>
-				throw new Exception(s"[ERSAuthData][getDassPortalLink] DASS portal link not valid for current affinity group")
+		if (isAgent) {
+			s"${applicationConfig.dassGatewayAgentHost}${applicationConfig.dassGatewayAgentPath}"
+		} else {
+			s"${applicationConfig.dassGatewayOrgHost}/${empRef.value}/${applicationConfig.dassGatewayOrgPath}"
 		}
 	}
 }
