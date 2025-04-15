@@ -288,7 +288,9 @@ class FileUploadControllerSpec
         status(result) mustBe SEE_OTHER
         redirectLocation(result) mustBe Some(routes.FileUploadController.validationFailure().url)
       }
+    }
 
+    "redirect the user to FileUploadController.odsSchemeMismatchFailure()" when {
       "Ers Meta Data is returned, callback record is uploaded successfully, remove presubmission data returns OK, validate file data returns Accepted, where a SchemeMismatchError occurs" in {
         when(mockSessionService.fetch[RequestObject](anyString())(any(), any())).thenReturn(Future.successful(ersRequestObject))
         when(mockErsConnector.getCallbackRecord(any(), any)).thenReturn(Future.successful(Some(uploadedSuccessfully)))
@@ -308,11 +310,11 @@ class FileUploadControllerSpec
 
         setAuthMocks()
         val result = TestFileUploadController.validationResults()(testFakeRequest)
-        val updatedSession = session(result)
-        updatedSession.get("expectedScheme") mustBe Some("CSOP")
-        updatedSession.get("requestScheme") mustBe Some("SAYE")
+        val updatedFlash = flash(result)
+        updatedFlash.get("expectedScheme") mustBe Some("CSOP")
+        updatedFlash.get("requestScheme") mustBe Some("SAYE")
         status(result) mustBe SEE_OTHER
-        redirectLocation(result) mustBe Some(routes.FileUploadController.validationFailure().url)
+        redirectLocation(result) mustBe Some(routes.FileUploadController.odsSchemeMismatchFailure().url)
       }
     }
 
@@ -430,21 +432,6 @@ class FileUploadControllerSpec
       }
     }
 
-    "return fileUploadErrorsOdsView when expectedScheme and requestScheme are present in session" in {
-      when(mockSessionService.fetch[RequestObject](any())(any(), any()))
-        .thenReturn(Future.successful(ersRequestObject))
-      when(mockSessionService.fetch[CheckFileType](refEq("check-file-type"))(any(), any()))
-        .thenReturn(Future.successful(CheckFileType(Some("ods"))))
-      setAuthMocks()
-      val requestWithSession = testFakeRequest.withSession(
-        "expectedScheme" -> "SAYE",
-        "requestScheme" -> "CSOP"
-      )
-      val result = TestFileUploadController.validationFailure()(requestWithSession)
-      status(result) must be(OK)
-      contentAsString(result) must include(testMessages("file_upload_errors.scheme_mismatch.title"))
-    }
-
     "return fileUploadErrorsView" in {
       when(mockSessionService.fetch[RequestObject](any())(any(), any()))
         .thenReturn(Future.successful(ersRequestObject))
@@ -454,6 +441,23 @@ class FileUploadControllerSpec
       val result = TestFileUploadController.validationFailure()(testFakeRequest)
       status(result) must be(OK)
       contentAsString(result) must include(testMessages("file_upload_errors.title"))
+    }
+  }
+
+  "odsSchemeMismatchFailure" must {
+    "return fileUploadErrorsOdsView when expectedScheme and requestScheme are present in session" in {
+      when(mockSessionService.fetch[RequestObject](any())(any(), any()))
+        .thenReturn(Future.successful(ersRequestObject))
+      when(mockSessionService.fetch[CheckFileType](refEq("check-file-type"))(any(), any()))
+        .thenReturn(Future.successful(CheckFileType(Some("ods"))))
+      setAuthMocks()
+      val requestWithSession = testFakeRequest.withFlash(
+        "expectedScheme" -> "SAYE",
+        "requestScheme" -> "CSOP"
+      )
+      val result = TestFileUploadController.odsSchemeMismatchFailure()(requestWithSession)
+      status(result) must be(OK)
+      contentAsString(result) must include(testMessages("file_upload_errors.scheme_mismatch.title"))
     }
   }
 

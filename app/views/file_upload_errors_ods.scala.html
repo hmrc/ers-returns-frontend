@@ -32,7 +32,7 @@
     requestSchemeType: String
 )(implicit request: Request[_], messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 
-    @govuk_wrapper(title = messages("file_upload_errors.title") + " " + messages("ers.title.postfix")) {
+    @govuk_wrapper(title = messages("file_upload_errors.scheme_mismatch.title") + " " + messages("ers.title.postfix")) {
 
         @reference(requestObject.getPageTitle)
 

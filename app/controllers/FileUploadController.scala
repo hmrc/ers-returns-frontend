@@ -163,11 +163,11 @@ class FileUploadController @Inject()(val mcc: MessagesControllerComponents,
         logger.warn(s"[FileUploadController][handleValidationResponse] Validation is not successful for schemeRef:" +
           s" ${schemeInfo.schemeRef}, timestamp: ${System.currentTimeMillis()}.")
 
-        Redirect(routes.FileUploadController.validationFailure()).withSession(
-          request.session +
-            ("expectedScheme" -> schemeMismatchError.expectedSchemeType.toUpperCase) +
-            ("requestScheme" -> schemeMismatchError.requestSchemeType.toUpperCase)
-        )
+        Redirect(routes.FileUploadController.odsSchemeMismatchFailure())
+          .flashing(
+            "expectedScheme" -> schemeMismatchError.expectedSchemeType.toUpperCase,
+            "requestScheme" -> schemeMismatchError.requestSchemeType.toUpperCase
+          )
 
       case None if appConfig.csopV5Enabled && schemeInfo.schemeType == "CSOP" =>
         logger.warn(s"[FileUploadController][handleValidationResponse] Validation is not successful for schemeRef:" +
@@ -181,24 +181,39 @@ class FileUploadController @Inject()(val mcc: MessagesControllerComponents,
   }
 
   def validationFailure(): Action[AnyContent] = authAction.async { implicit request =>
-
     logger.info("[FileUploadController][validationFailure] Validation Failure: " + (System.currentTimeMillis() / 1000))
     (for {
       requestObject <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
       fileType <- sessionService.fetch[CheckFileType](ersUtil.FILE_TYPE_CACHE)
     } yield {
+      Ok(fileUploadErrorsView(requestObject, fileType.checkFileType.getOrElse("")))
+    }) recover {
+      case e: Throwable =>
+        logger.error(s"[FileUploadController][validationFailure] failed with Exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.", e)
+        getGlobalErrorPage
+    }
+  }
 
-      (request.session.get("expectedScheme"), request.session.get("requestScheme")) match {
+  def odsSchemeMismatchFailure(): Action[AnyContent] = authAction.async { implicit request =>
+
+    logger.info("[FileUploadController][odsSchemeMismatchFailure] Scheme Mismatch Failure: " + (System.currentTimeMillis() / 1000))
+    (for {
+      requestObject <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
+
+    } yield {
+
+      (request.flash.get("expectedScheme"), request.flash.get("requestScheme")) match {
         case (Some(expectedScheme), Some(requestScheme)) =>
           val schemeUrl: String = request.authData.getDassPortalLink(appConfig)
           Ok(fileUploadErrorsOdsView(requestObject, schemeUrl, expectedScheme, requestScheme))
         case _ =>
-          Ok(fileUploadErrorsView(requestObject, fileType.checkFileType.getOrElse("")))
+          logger.warn("[odsSchemeMismatchFailure] Missing expected/request scheme in flash scope")
+          getGlobalErrorPage
       }
 
     }) recover {
       case e: Throwable =>
-        logger.error(s"[FileUploadController][validationFailure] failed with Exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.", e)
+        logger.error(s"[FileUploadController][odsSchemeMismatchFailure] failed with Exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.", e)
         getGlobalErrorPage
     }
   }
