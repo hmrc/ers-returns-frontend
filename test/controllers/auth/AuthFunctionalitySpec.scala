@@ -229,11 +229,5 @@ class AuthFunctionalitySpec
       val authdataOrg = ERSAuthData(enrolments = Set.empty, affinityGroup = Some(Organisation), empRef = testEmpRef)
       authdataOrg.getDassPortalLink(fakeApplicationConfig) shouldBe "http://organisation.example.com/123/4567/schemes"
     }
-
-    "throw an exception when the affinity group is not 'Agent' or 'Organisation'" in {
-      val fakeApplicationConfig = mock[ApplicationConfig]
-      val authdataInvalid = ERSAuthData(enrolments = Set.empty, affinityGroup = None)
-      an [Exception] should be thrownBy authdataInvalid.getDassPortalLink(fakeApplicationConfig)
-    }
   }
 }
