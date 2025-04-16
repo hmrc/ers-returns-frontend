@@ -122,7 +122,7 @@ class ReturnServiceControllerSpec
       status(result) shouldBe Status.OK
       val document = Jsoup.parse(contentAsString(result))
       document.getElementsByTag("h1").text() should include(
-        Messages("ers_start.page_title", ersRequestObject.getSchemeName)
+        Messages("ers_start.page_heading", ersRequestObject.getSchemeName)
       )
     }
   }

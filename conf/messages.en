@@ -137,17 +137,26 @@ ers_not_found.message = Please check that you’ve have entered the correct web 
 # Submit returns
 #********************************************************************
 
-ers_start.page_title = Submit your {0} annual return
+ers_start.sip.caption = Share Incentive Plan scheme
+ers_start.csop.caption = Company Share Option Plan scheme
+ers_start.emi.caption = Enterprise Management Incentives scheme
+ers_start.saye.caption = Save As You Earn Plan scheme
+ers_start.other.caption = Other schemes and arrangements
+
+ers_start.page_title = Submit your annual return – Employment Related Securities – GOV.UK
+ers_start.page_heading = Submit your annual return
 ers_start.csop.intro_para = Use this service to submit your return at the end of the tax year.
 ers_start.emi.intro_para = Use this service to submit your return at the end of the tax year.
 ers_start.saye.intro_para = Use this service to submit your return at the end of the tax year.
 ers_start.sip.intro_para = Use this service to submit your return at the end of the tax year.
 ers_start.other.intro_para = Use this service to submit your return at the end of the tax year.
 ers_start.sub_title = Before you start
+ers_start.sub_title_1 = What you will need
+
 ers_start.large_files = If you have a .ods file that’s larger than 200MB or a .csv file that’s larger than 200MB
 ers_start.help = A company director or company secretary must have approved the return and must agree to any declaration you make in this service.
 
-ers_start.you_need = Depending on your circumstances, you may need:
+ers_start.you_can = You can use this service to:
 ers_start.csop.bullet_1 = to record any events related to the scheme in an ODS or CSV spreadsheet
 ers_start.csop.bullet_2 = the scheme organiser’s company name and address, Company Registration Number and Corporation Tax reference (and those of any participating group scheme members)
 ers_start.csop.bullet_3 = to know any alterations made to key features of the scheme and know whether there’s been a variation in the share capital
@@ -162,11 +171,49 @@ ers_start.saye.bullet_2 = the scheme organiser’s company name and address, Com
 ers_start.saye.bullet_3 = to know any alterations made to key features of the scheme and know whether there’s been a variation in the share capital
 ers_start.saye.intro_para_2 = If relevant, group scheme member details can be entered manually or uploaded in a .csv file (as appropriate).
 
-ers_start.sip.bullet_1 = to record any events related to the scheme in an ODS or CSV spreadsheet
-ers_start.sip.bullet_2 = the establishing company’s name and address, Company Registration Number and Corporation Tax reference (and those of any participating group plan members)
-ers_start.sip.bullet_3 = the name and address of any trustees
-ers_start.sip.bullet_4 = to know any alterations made to key features of the plan
+ers_start.return_bullet_1 = submit your annual return at the end of the tax year
+ers_start.return_bullet_2 = submit a nil return
+
+ers_start.sip.return_bullet_3 = the name and address of any trustees
+ers_start.sip.return_bullet_4 = to know any alterations made to key features of the plan
 ers_start.sip.intro_para_2 = If relevant, group plan member details can be entered manually or uploaded in a .csv file (as appropriate).
+
+ers_start.emi.company_lead_in = For the employer company and any qualifying subsidiary companies, you will need to provide the company’s:
+ers_start.sip.company_lead_in = For the establishing company and any participating group plan members, you will need to provide the company’s:
+ers_start.saye.company_lead_in = For the scheme organiser and any participating group scheme members, you will need to provide the company’s:
+ers_start.csop.company_lead_in = For the scheme organiser and any participating group scheme members, you will need to provide the company’s:
+ers_start.other.company_lead_in = For the establishing company and any participating group scheme members, you will need to provide the company’s:
+
+ers_start.sip.company_bullet_1 = name
+ers_start.sip.company_bullet_2 = address
+ers_start.sip.company_bullet_3 = Company Registration Number
+ers_start.sip.company_bullet_4 = Corporation Tax reference
+
+ers_start.sip.trustee_lead_in = You must provide details for at least one trustee. You will need:
+ers_start.sip.trustee_bullet_1 = the name of the trustee
+ers_start.sip.trustee_bullet_2 = the trustee’s address
+
+ers_start.sip.submit_lead_in = You must provide details for at least one trustee. You will need:
+ers_start.sip.submit_bullet_1 = the name of the trustee
+ers_start.sip.trustee_bullet_2 = the trustee’s address
+
+ers_start.circumstances_lead_in = Depending on your circumstances, you may also need:
+ers_start.circumstances_bullet_1 = to record any events related to the scheme in an ODS or CSV spreadsheet
+ers_start.circumstances_bullet_2 = to know any alterations made to key features of the plan
+ers_start.csop.circumstances_bullet_1 = to record any events related to the scheme in an ODS or CSV spreadsheet
+
+
+ers_start.events.template = If you have events to report you can <a class="govuk-link" href="https://www.gov.uk/government/collections/employment-related-securities-detailed-information">get a template and guidance notes</a> to help you to complete your end of year return.
+ers_start.check_files_1 = You can <a class="govuk-link" href="https://www.gov.uk/guidance/spreadsheet-checking-service-employment-related-securities-ers">check your employment related securities file</a> for formatting errors before you submit your annual return.
+
+ers_start.after_title = After you submit your annual return
+ers_start.after_para_1 = You must keep a record of your employment related securities annual return for your company records. You will not be able to get a copy of this from HMRC at a later date.
+
+ers_start.sip.keep_lead_in = The records you must keep are:
+ers_start.sip.keep_bullet_1 = your completed CSV or ODS file for this tax year
+ers_start.sip.keep_bullet_2 = your submission receipt
+
+ers_start.save_copy = You can print or save a copy of your submission receipt after you submit your annual return.
 
 ers_start.other.bullet_1 = to record any events related to the scheme in an ODS or CSV spreadsheet
 ers_start.other.bullet_2 = the scheme organiser’s company name and address, Company Registration Number and Corporation Tax reference (and those of any participating group scheme members)
