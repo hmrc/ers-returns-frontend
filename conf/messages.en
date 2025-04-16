@@ -483,6 +483,8 @@ ers_confirmation.instructions_1.link = view your schemes and arrangements
 ers_confirmation.instructions_1.end = to submit a different annual return.
 ers_confirmation.feedback = What did you think of this service?
 ers_confirmation.feedback_time = (takes 30 seconds)
+ers-confirmation.submission_on = on
+ers-confirmation.submission_date = Submitted at
 
 ers_signed_out.info = For your security, we signed you out.
 ers_signed_out.link = Sign in

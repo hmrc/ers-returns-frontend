@@ -19,11 +19,11 @@
 @import views.html.templates.reference
 
 @this(
-govuk_wrapper: govuk_wrapper,
-govukPanel: GovukPanel,
-govukButton: GovukButton,
-govukWarningText : GovukWarningText,
-govukInsetText: GovukInsetText
+		govuk_wrapper: govuk_wrapper,
+		govukPanel: GovukPanel,
+		govukButton: GovukButton,
+		govukWarningText : GovukWarningText,
+		govukInsetText: GovukInsetText
 )
 
 @(requestObject: RequestObject, dateSubmitted: String, bundle: String, taxYear: String, url: String)(implicit request: Request[_], messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
@@ -92,4 +92,11 @@ govukInsetText: GovukInsetText
 		</a>
 		@Html(messages("ers_confirmation.feedback_time"))
 	</p>
+
+	@if(false) {
+	<p class="govuk-body govuk-!-font-weight-bold">
+		@Html(bundle)
+		@Html(messages("ers-confirmation.submission_date")) @DateUtils.convertDate(dateSubmitted).
+	</p>
+	}
 }
