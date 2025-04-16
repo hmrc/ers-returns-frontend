@@ -142,7 +142,7 @@ class FileUploadController @Inject()(val mcc: MessagesControllerComponents,
           Redirect(controllers.schemeOrganiser.routes.SchemeOrganiserBasedInUkController.questionPage())
 
         case ACCEPTED if res.body.contains("Incorrect ERS Template") =>
-          sheetMismatch(res, schemeInfo)
+          handleIncorrectErsTemplate(res, schemeInfo)
 
         case ACCEPTED =>
           logger.warn(s"[FileUploadController][handleValidationResponse] Validation is not successful for schemeRef: $schemeRef, timestamp: ${System.currentTimeMillis()}.")
@@ -155,12 +155,12 @@ class FileUploadController @Inject()(val mcc: MessagesControllerComponents,
     }
   }
 
-  private def sheetMismatch(response: HttpResponse, schemeInfo: SchemeInfo)
+  private def handleIncorrectErsTemplate(response: HttpResponse, schemeInfo: SchemeInfo)
                    (implicit request: RequestWithOptionalAuthContext[AnyContent]) : Result = {
 
     Try(response.json.as[SchemeMismatchError]).toOption match {
       case Some(schemeMismatchError) =>
-        logger.warn(s"[FileUploadController][handleValidationResponse] Validation is not successful for schemeRef:" +
+        logger.warn(s"[FileUploadController][handleIncorrectErsTemplate] The request scheme type does not match the expected scheme type for schemeRef:" +
           s" ${schemeInfo.schemeRef}, timestamp: ${System.currentTimeMillis()}.")
 
         Redirect(routes.FileUploadController.odsSchemeMismatchFailure())
@@ -170,7 +170,7 @@ class FileUploadController @Inject()(val mcc: MessagesControllerComponents,
           )
 
       case None if appConfig.csopV5Enabled && schemeInfo.schemeType == "CSOP" =>
-        logger.warn(s"[FileUploadController][handleValidationResponse] Validation is not successful for schemeRef:" +
+        logger.warn(s"[FileUploadController][handleIncorrectErsTemplate] Validation is not successful for schemeRef:" +
           s" ${schemeInfo.schemeRef}, timestamp: ${System.currentTimeMillis()}. Wrong CSOP template used for tax year.")
 
         Redirect(routes.FileUploadController.templateFailure())
