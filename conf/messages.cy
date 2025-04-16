@@ -392,7 +392,7 @@ ers_signed_out.info = Er eich diogelwch, gwnaethom eich allgofnodi.
 ers_signed_out.link = Mewngofnodi
 ers_upload_form.processing_alert = Rydym yn gwirio eich ffeil am wallau. Peidiwch ag adnewyddu’r dudalen.
 
-file_upload.heading = Uwchlwythwch eich ffeil ODS
+file_upload.heading = Uwchlwytho’ch ffeil ODS
 file_upload.contact_us = Cysylltwch â ni ar ein tudalen adborth
 file_upload.size_warning.link.before =Os yw’ch ffeil yn fwy na 200MB, ni allwch ddefnyddio’r gwasanaeth hwn. E-bostiwch
 file_upload.file_size = os yw’ch ffeil ODS yn fwy na 200MB.
