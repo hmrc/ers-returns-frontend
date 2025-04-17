@@ -163,11 +163,11 @@ class FileUploadController @Inject()(val mcc: MessagesControllerComponents,
         logger.warn(s"[FileUploadController][handleIncorrectErsTemplate] The request scheme type does not match the expected scheme type for schemeRef:" +
           s" ${schemeInfo.schemeRef}, timestamp: ${System.currentTimeMillis()}.")
 
-        Redirect(routes.FileUploadController.odsSchemeMismatchFailure())
-          .flashing(
-            "expectedScheme" -> schemeMismatchError.expectedSchemeType.toUpperCase,
-            "requestScheme" -> schemeMismatchError.requestSchemeType.toUpperCase
-          )
+        Redirect(routes.FileUploadController.odsSchemeMismatchFailure()).withSession(
+          request.session +
+            ("expectedScheme" -> schemeMismatchError.expectedSchemeType.toUpperCase) +
+            ("requestScheme" -> schemeMismatchError.requestSchemeType.toUpperCase)
+        )
 
       case None if appConfig.csopV5Enabled && schemeInfo.schemeType == "CSOP" =>
         logger.warn(s"[FileUploadController][handleIncorrectErsTemplate] Validation is not successful for schemeRef:" +
@@ -202,7 +202,7 @@ class FileUploadController @Inject()(val mcc: MessagesControllerComponents,
 
     } yield {
 
-      (request.flash.get("expectedScheme"), request.flash.get("requestScheme")) match {
+      (request.session.get("expectedScheme"), request.session.get("requestScheme")) match {
         case (Some(expectedScheme), Some(requestScheme)) =>
           val schemeUrl: String = request.authData.getDassPortalLink(appConfig)
           Ok(fileUploadErrorsOdsView(requestObject, schemeUrl, expectedScheme, requestScheme))

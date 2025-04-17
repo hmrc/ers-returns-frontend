@@ -310,9 +310,9 @@ class FileUploadControllerSpec
 
         setAuthMocks()
         val result = TestFileUploadController.validationResults()(testFakeRequest)
-        val updatedFlash = flash(result)
-        updatedFlash.get("expectedScheme") mustBe Some("CSOP")
-        updatedFlash.get("requestScheme") mustBe Some("SAYE")
+        val updatedSession = session(result)
+        updatedSession.get("expectedScheme") mustBe Some("CSOP")
+        updatedSession.get("requestScheme") mustBe Some("SAYE")
         status(result) mustBe SEE_OTHER
         redirectLocation(result) mustBe Some(routes.FileUploadController.odsSchemeMismatchFailure().url)
       }
@@ -451,7 +451,7 @@ class FileUploadControllerSpec
       when(mockSessionService.fetch[CheckFileType](refEq("check-file-type"))(any(), any()))
         .thenReturn(Future.successful(CheckFileType(Some("ods"))))
       setAuthMocks()
-      val requestWithSession = testFakeRequest.withFlash(
+      val requestWithSession = testFakeRequest.withSession(
         "expectedScheme" -> "SAYE",
         "requestScheme" -> "CSOP"
       )

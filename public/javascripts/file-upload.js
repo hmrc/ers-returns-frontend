@@ -33,7 +33,7 @@ function checkFileName() {
         let isOdsFile = lowerName.endsWith(".ods");
         return {fileName: isOdsFile, fileNameLength: actualFileName.length < 240, fileNameCharacters: actualFileName.match("[/^~\"|#?,\\]\\[£$&:@*\\\\+%{}<>\\/]|]") == null};
     } else {
-        return {fileName: true, fileNameLength: actualFileName.length < 240, fileNameCharacters: actualFileName.match("[/^~\"|#?,\\]\\[£$&:@*\\\\+%{}<>\\/]|]") == null};
+        return {fileName: false, fileNameLength: false, fileNameCharacters: false};
     }
 }
 
