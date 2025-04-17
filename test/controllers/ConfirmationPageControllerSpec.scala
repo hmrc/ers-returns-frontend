@@ -252,17 +252,18 @@ class ConfirmationPageControllerSpec
       contentAsString(result)   should include(testMessages("ers.global_errors.message"))
     }
 
-    "show the page without re-submitting if a bundleRef already exists" in {
+    "show the confirmation page without re-submitting if a bundleRef already exists" in {
       when(mockAppConfig.portalDomain).thenReturn("/")
-      val controllerUnderTest = buildFakeConfirmationPageController(presubmission = Future.failed(new RuntimeException))
+      val controllerUnderTest = buildFakeConfirmationPageController()
       val authRequest =
-        buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET").withSession(("bundleRef", "123456")))
+        buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET").withSession(
+          ("bundleRef", "123456"),
+          ("dateTimeSubmitted", "8 April 2016, 4:50pm")
+        ))
       val result = controllerUnderTest.showConfirmationPage()(authRequest, hc)
 
-      contentAsString(result) shouldBe contentAsString(
-        Future(controllerUnderTest.getGlobalErrorPage(testFakeRequest, testMessages))
-      )
-      contentAsString(result)   should include(testMessages("ers.global_errors.message"))
+      status(result) shouldBe Status.OK
+      contentAsString(result)   should include(testMessages("ers_confirmation.submitted"))
     }
 
   }
