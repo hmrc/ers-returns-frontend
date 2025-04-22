@@ -62,11 +62,10 @@ class ApplicationConfig @Inject() (config: ServicesConfig) {
   lazy val portalDomain: String = config.getString("portal.domain")
   lazy val hmacToken: String = config.getString("hmac.hmac_token")
   lazy val hmacOnSwitch: Boolean = config.getBoolean("hmac.hmac_switch")
-  lazy val dassGatewayAgentHost: String = config.getString("govuk-tax.dass-gateway.host")
-  lazy val dassGatewayAgentPath: String = config.getString("govuk-tax.dass-gateway.path")
-  lazy val dassGatewayOrgHost: String = config.getString("govuk-tax.business-tax-account.host")
-  lazy val dassGatewayOrgLink: String = s"${dassGatewayOrgHost}/ers/org"
-  lazy val dassGatewayOrgPath: String = config.getString("govuk-tax.business-tax-account.path")
+  lazy val dassGatewayHost: String = config.getString("govuk-tax.dass-gateway.host")
+  lazy val dassGatewayAgentPath: String = config.getString("govuk-tax.dass-gateway.agent-path")
+  lazy val dassGatewayOrgLink: String = s"${dassGatewayHost}/ers/org"
+  lazy val dassGatewayOrgPath: String = config.getString("govuk-tax.dass-gateway.org-path")
 
   lazy val ampersandRegex: Regex = "(?!&amp;)(?:&)".r
 

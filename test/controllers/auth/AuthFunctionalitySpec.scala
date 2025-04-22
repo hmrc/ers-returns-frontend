@@ -215,7 +215,7 @@ class AuthFunctionalitySpec
   "getDassPortalLink" should {
     "return the agent portal link when affinity group is 'Agent'" in {
       val fakeApplicationConfig = mock[ApplicationConfig]
-      when(fakeApplicationConfig.dassGatewayAgentHost).thenReturn("http://agent.example.com")
+      when(fakeApplicationConfig.dassGatewayHost).thenReturn("http://agent.example.com")
       when(fakeApplicationConfig.dassGatewayAgentPath).thenReturn("/ers/agent/schemes")
       val authdataAgent = ERSAuthData(enrolments = Set.empty, affinityGroup = Some(Agent))
       authdataAgent.getDassPortalLink(fakeApplicationConfig) shouldBe "http://agent.example.com/ers/agent/schemes"

@@ -32,7 +32,7 @@ case class ERSAuthData(
 
 	def getDassPortalLink(applicationConfig: ApplicationConfig): String = {
 		if (isAgent) {
-			s"${applicationConfig.dassGatewayAgentHost}${applicationConfig.dassGatewayAgentPath}"
+			s"${applicationConfig.dassGatewayHost}${applicationConfig.dassGatewayAgentPath}"
 		} else {
 			s"${applicationConfig.dassGatewayOrgLink}/${empRef.value}/${applicationConfig.dassGatewayOrgPath}"
 		}
