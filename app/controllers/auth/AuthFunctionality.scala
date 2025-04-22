@@ -90,6 +90,7 @@ class AuthAction @Inject() (override val authConnector: DefaultAuthConnector,
         }
       } recover {
       case _: NoActiveSession         =>
+        logger.warn(s"[AuthFunctionality][invokeBlock] No Active session: ${request.uri}")
         Redirect(signInUrl, loginParams(request.queryString.map { case (k, v) => k -> v.headOption.getOrElse("") }))
       case er: AuthorisationException =>
         logger.error(s"[AuthFunctionality][invokeBlock] Auth exception: $er")

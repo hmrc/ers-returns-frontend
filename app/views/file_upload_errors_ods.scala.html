@@ -1,0 +1,67 @@
+@*
+ * Copyright 2024 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import _root_.config.ApplicationConfig
+@import views.html.templates.reference
+@import models.RequestObject
+
+@this(
+    govuk_wrapper: govuk_wrapper,
+    govukBackLink: GovukBackLink,
+    hmrcPageHeading: HmrcPageHeading
+)
+
+@(
+    requestObject: RequestObject,
+    schemeUrl: String,
+    expectedSchemeType: String,
+    requestSchemeType: String
+)(implicit request: Request[_], messages: Messages, appConfig: ApplicationConfig)
+
+    @govuk_wrapper(title = messages("file_upload_errors.scheme_mismatch.title") + " " + messages("ers.title.postfix")) {
+
+        @reference(requestObject.getPageTitle)
+
+        @govukBackLink(BackLink(
+            content = Text(messages("ers.back")),
+            href = routes.FileUploadController.uploadFilePage().url,
+        ))
+
+        @hmrcPageHeading(PageHeading(
+            text = messages("file_upload_errors.scheme_mismatch.title")
+        ))
+        <p class="govuk-body">
+            @messages("file_upload_errors.scheme_mismatch.line1", RequestObject.getSchemeWithArticle(expectedSchemeType), RequestObject.getSchemeWithArticle(requestSchemeType))
+        </p>
+        <p class="govuk-body">
+            @messages("file_upload_errors.scheme_mismatch.line2", RequestObject.getSchemeWithArticle(expectedSchemeType))
+        </p>
+        <ul class="govuk-list govuk-list--bullet">
+            <li>@messages("file_upload_errors.scheme_mismatch.bullet1", RequestObject.getSchemeWithArticle(expectedSchemeType))</li>
+            <li>@messages("file_upload_errors.scheme_mismatch.bullet2", RequestObject.getSchemeWithArticle(expectedSchemeType))</li>
+        </ul>
+        <p class="govuk-body">
+            @messages("file_upload_errors.scheme_mismatch.you_can")
+        </p>
+        <ul class="govuk-list govuk-list--bullet">
+            <li><a class="govuk-link" href="@routes.FileUploadController.uploadFilePage().url">@Html(messages("file_upload_errors.scheme_mismatch.retry_link",
+                RequestObject.getSchemeWithArticle(expectedSchemeType)))</a></li>
+            <li><a class="govuk-link" href="@schemeUrl">@Html(messages("file_upload_errors.scheme_mismatch.view_other_link"))</a>
+                @Html(messages("file_upload_errors.scheme_mismatch.view_other_link_text"))
+            </li>
+        </ul>
+
+    }
