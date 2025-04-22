@@ -3,7 +3,7 @@
     border: inherit;
     font-size: inherit;
     padding: inherit;
-    color: #1d70b8;
+    color: #1d70b8 !important;
     cursor: pointer;
     text-decoration: underline;
 }
