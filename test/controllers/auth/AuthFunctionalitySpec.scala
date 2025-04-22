@@ -223,11 +223,11 @@ class AuthFunctionalitySpec
 
     "return the organisation portal link when affinity group is 'Organisation'" in {
       val fakeApplicationConfig = mock[ApplicationConfig]
-      when(fakeApplicationConfig.dassGatewayOrgHost).thenReturn("http://organisation.example.com")
+      when(fakeApplicationConfig.dassGatewayOrgLink).thenReturn("http://organisation.example.com/ers/org")
       when(fakeApplicationConfig.dassGatewayOrgPath).thenReturn("schemes")
       val testEmpRef = EmpRef("123", "4567")
       val authdataOrg = ERSAuthData(enrolments = Set.empty, affinityGroup = Some(Organisation), empRef = testEmpRef)
-      authdataOrg.getDassPortalLink(fakeApplicationConfig) shouldBe "http://organisation.example.com/123/4567/schemes"
+      authdataOrg.getDassPortalLink(fakeApplicationConfig) shouldBe "http://organisation.example.com/ers/org/123/4567/schemes"
     }
   }
 }
