@@ -36,6 +36,7 @@
 )(implicit request: Request[_], messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 
 @schemeId = @{requestObject.getSchemeId}
+@schemeName = @{requestObject.getSchemeHeadingName}
 
 @scripts = {
     <script src='@routes.Assets.versioned("/javascripts/file-upload.js")' @{CSPNonce.attr}></script>
@@ -70,6 +71,7 @@
         headingText = uploadFileHeading,
         headingCaption = ersUtil.getPageElement(schemeId, ersUtil.PAGE_CHECK_CSV_FILE, fileId+ ".description"),
         schemeId = schemeId,
+        schemeName = schemeName,
         fileId = fileId,
         useCsopV5Templates = useCsopV5Templates
     )

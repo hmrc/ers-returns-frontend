@@ -250,6 +250,9 @@ case class RequestObject(
   def getSchemeNameCaptionForDisplay(implicit messages: Messages): String =
     if (schemeName.isDefined) messages(s"ers.${getSchemeType.toLowerCase}.caption") else ""
 
+  def getSchemeHeadingName(implicit messages: Messages): String =
+    schemeType.map(schemeName => messages(s"ers.schemeDisplay.${schemeName.toUpperCase}")).getOrElse("")
+
   def getEmpRef: String = empRef.getOrElse("")
 
   def getTS: String = ts.getOrElse("")
@@ -282,6 +285,23 @@ case class RequestObject(
 
 object RequestObject {
   implicit val formatRequestObject: OFormat[RequestObject] = Json.format[RequestObject]
+
+  def getSchemeWithArticle(schemeType: String)(implicit messages: Messages): String = {
+    messages.lang.code match {
+      case "en" =>
+        val article = if (startsWithVowel(schemeType)) "an" else "a"
+        s"$article $schemeType"
+
+      case _ => // cy
+        if (schemeType == "OTHER") messages(s"ers.scheme.$schemeType") else schemeType
+    }
+  }
+
+  def startsWithVowel(scheme: String): Boolean = {
+    val trimmed = scheme.trim.toUpperCase
+    trimmed.nonEmpty && "AEIOU".contains(trimmed.charAt(0))
+  }
+
 }
 
 case class AddTrustee(addTrustee: Boolean)
