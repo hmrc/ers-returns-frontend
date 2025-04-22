@@ -15,7 +15,6 @@
  *@
 
 @import _root_.config.ApplicationConfig
-@import _root_.utils.ERSUtil
 @import views.html.templates.reference
 @import models.RequestObject
 
@@ -30,7 +29,7 @@
     schemeUrl: String,
     expectedSchemeType: String,
     requestSchemeType: String
-)(implicit request: Request[_], messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
+)(implicit request: Request[_], messages: Messages, appConfig: ApplicationConfig)
 
     @govuk_wrapper(title = messages("file_upload_errors.scheme_mismatch.title") + " " + messages("ers.title.postfix")) {
 

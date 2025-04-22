@@ -34,7 +34,7 @@ case class ERSAuthData(
 		if (isAgent) {
 			s"${applicationConfig.dassGatewayAgentHost}${applicationConfig.dassGatewayAgentPath}"
 		} else {
-			s"${applicationConfig.dassGatewayOrgHost}/${empRef.value}/${applicationConfig.dassGatewayOrgPath}"
+			s"${applicationConfig.dassGatewayOrgLink}/${empRef.value}/${applicationConfig.dassGatewayOrgPath}"
 		}
 	}
 }

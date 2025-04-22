@@ -292,7 +292,7 @@ object RequestObject {
         val article = if (startsWithVowel(schemeType)) "an" else "a"
         s"$article $schemeType"
 
-      case _ =>
+      case _ => // cy
         if (schemeType == "OTHER") messages(s"ers.scheme.$schemeType") else schemeType
     }
   }
