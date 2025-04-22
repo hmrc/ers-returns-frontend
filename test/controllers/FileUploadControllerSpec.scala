@@ -29,6 +29,7 @@ import org.scalatestplus.play.PlaySpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.i18n
 import play.api.i18n.{MessagesApi, MessagesImpl}
+import play.api.libs.json.Json
 import play.api.mvc._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -88,6 +89,7 @@ class FileUploadControllerSpec
   implicit val mockActorSystem: ActorSystem = app.injector.instanceOf[ActorSystem]
   val globalErrorView: global_error = app.injector.instanceOf[global_error]
   val fileUploadErrorsView: file_upload_errors = app.injector.instanceOf[file_upload_errors]
+  val fileUploadErrorsOdsView: file_upload_errors_ods = app.injector.instanceOf[file_upload_errors_ods]
   val templateFailureView: template_version_problem = app.injector.instanceOf[template_version_problem]
   val upscanOdsFileUploadView: upscan_ods_file_upload = app.injector.instanceOf[upscan_ods_file_upload]
   val fileUploadProblemView: file_upload_problem = app.injector.instanceOf[file_upload_problem]
@@ -102,6 +104,7 @@ class FileUploadControllerSpec
         mockUpscanService,
         globalErrorView,
         fileUploadErrorsView,
+        fileUploadErrorsOdsView,
         templateFailureView,
         upscanOdsFileUploadView,
         fileUploadProblemView,
@@ -287,16 +290,43 @@ class FileUploadControllerSpec
       }
     }
 
+    "redirect the user to FileUploadController.odsSchemeMismatchFailure()" when {
+      "Ers Meta Data is returned, callback record is uploaded successfully, remove presubmission data returns OK, validate file data returns Accepted, where a SchemeMismatchError occurs" in {
+        when(mockSessionService.fetch[RequestObject](anyString())(any(), any())).thenReturn(Future.successful(ersRequestObject))
+        when(mockErsConnector.getCallbackRecord(any(), any)).thenReturn(Future.successful(Some(uploadedSuccessfully)))
+        when(mockErsConnector.removePresubmissionData(any())(any(), any()))
+          .thenReturn(Future.successful(HttpResponse(OK, "")))
+        when(mockSessionService.fetch[ErsMetaData](any())(any(), any())).thenReturn(Future.successful(validErsMetaData))
+        when(mockErsConnector.validateFileData(meq(uploadedSuccessfully), any[SchemeInfo])(any(), any()))
+          .thenReturn(Future.successful(HttpResponse(
+            status = ACCEPTED,
+            json = Json.obj(
+              "errorMessage" -> "Incorrect ERS Template - Sheet Name isn't as expected",
+              "expectedSchemeType" -> "CSOP",
+              "requestSchemeType" -> "SAYE"
+            ),
+            headers = Map("Content-Type" -> Seq("application/json"))
+          )))
+
+        setAuthMocks()
+        val result = TestFileUploadController.validationResults()(testFakeRequest)
+        val updatedSession = session(result)
+        updatedSession.get("expectedScheme") mustBe Some("CSOP")
+        updatedSession.get("requestScheme") mustBe Some("SAYE")
+        status(result) mustBe SEE_OTHER
+        redirectLocation(result) mustBe Some(routes.FileUploadController.odsSchemeMismatchFailure().url)
+      }
+    }
+
     "redirect the user to FileUploadController.templateFailure()" when {
       "Ers Meta Data is returned, callback record is uploaded successfully, remove presubmission data returns OK, validate file data returns Accepted, for CSOP with Incorrect ERS Template validation error, csopV5Enabled = true" in {
         when(mockAppConfig.csopV5Enabled).thenReturn(true)
         when(mockSessionService.fetch[RequestObject](anyString())(any(), any())).thenReturn(Future.successful(ersRequestObject))
         when(mockErsConnector.getCallbackRecord(any(), any)).thenReturn(Future.successful(Some(uploadedSuccessfully)))
-        when(mockErsConnector.removePresubmissionData(any())(any[RequestWithOptionalAuthContext[AnyContent]], any()))
-          .thenReturn(Future.successful(HttpResponse(OK, "")))
+        when(mockErsConnector.removePresubmissionData(any())(any(), any())).thenReturn(Future.successful(HttpResponse(OK, "")))
         when(mockSessionService.fetch[ErsMetaData](any())(any(), any())).thenReturn(Future.successful(validErsMetaData))
         when(mockErsConnector.validateFileData(meq(uploadedSuccessfully), any[SchemeInfo])(any[RequestWithOptionalAuthContext[AnyContent]], any()))
-          .thenReturn(Future.successful(HttpResponse(ACCEPTED, "Incorrect ERS Template")))
+          .thenReturn(Future.successful(HttpResponse(ACCEPTED, "Incorrect ERS Template - Sheet Name isn't as expected")))
 
         setAuthMocks()
         val result = TestFileUploadController.validationResults()(testFakeRequest)
@@ -403,11 +433,31 @@ class FileUploadControllerSpec
     }
 
     "return fileUploadErrorsView" in {
-      val result = TestFileUploadController.validationFailure().apply(testFakeRequest)
-
+      when(mockSessionService.fetch[RequestObject](any())(any(), any()))
+        .thenReturn(Future.successful(ersRequestObject))
+      when(mockSessionService.fetch[CheckFileType](refEq("check-file-type"))(any(), any()))
+        .thenReturn(Future.successful(CheckFileType(Some("ods"))))
+      setAuthMocks()
+      val result = TestFileUploadController.validationFailure()(testFakeRequest)
       status(result) must be(OK)
       contentAsString(result) must include(testMessages("file_upload_errors.title"))
-      contentAsString(result) must include(testMessages("file_upload_errors.para1"))
+    }
+  }
+
+  "odsSchemeMismatchFailure" must {
+    "return fileUploadErrorsOdsView when expectedScheme and requestScheme are present in session" in {
+      when(mockSessionService.fetch[RequestObject](any())(any(), any()))
+        .thenReturn(Future.successful(ersRequestObject))
+      when(mockSessionService.fetch[CheckFileType](refEq("check-file-type"))(any(), any()))
+        .thenReturn(Future.successful(CheckFileType(Some("ods"))))
+      setAuthMocks()
+      val requestWithSession = testFakeRequest.withSession(
+        "expectedScheme" -> "SAYE",
+        "requestScheme" -> "CSOP"
+      )
+      val result = TestFileUploadController.odsSchemeMismatchFailure()(requestWithSession)
+      status(result) must be(OK)
+      contentAsString(result) must include(testMessages("file_upload_errors.scheme_mismatch.title"))
     }
   }
 

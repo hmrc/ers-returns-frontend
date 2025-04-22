@@ -16,6 +16,7 @@
 
 package models
 
+import config.ApplicationConfig
 import uk.gov.hmrc.auth.core.AffinityGroup.Agent
 import uk.gov.hmrc.auth.core.{AffinityGroup, Enrolment}
 import uk.gov.hmrc.domain.EmpRef
@@ -28,4 +29,12 @@ case class ERSAuthData(
 
 	def getEnrolment(key: String): Option[Enrolment] = enrolments.find(_.key.equalsIgnoreCase(key))
 	def isAgent: Boolean = (affinityGroup contains Agent) || getEnrolment("HMRC-AGENT-AGENT").isDefined
+
+	def getDassPortalLink(applicationConfig: ApplicationConfig): String = {
+		if (isAgent) {
+			s"${applicationConfig.dassGatewayHost}${applicationConfig.dassGatewayAgentPath}"
+		} else {
+			s"${applicationConfig.dassGatewayOrgLink}/${empRef.value}/${applicationConfig.dassGatewayOrgPath}"
+		}
+	}
 }
