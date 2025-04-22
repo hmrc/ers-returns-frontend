@@ -213,21 +213,18 @@ class AuthFunctionalitySpec
 	}
 
   "getDassPortalLink" should {
+
+    val appConfig = fakeApplication().injector.instanceOf[ApplicationConfig]
+
     "return the agent portal link when affinity group is 'Agent'" in {
-      val fakeApplicationConfig = mock[ApplicationConfig]
-      when(fakeApplicationConfig.dassGatewayHost).thenReturn("http://agent.example.com")
-      when(fakeApplicationConfig.dassGatewayAgentPath).thenReturn("/ers/agent/schemes")
       val authdataAgent = ERSAuthData(enrolments = Set.empty, affinityGroup = Some(Agent))
-      authdataAgent.getDassPortalLink(fakeApplicationConfig) shouldBe "http://agent.example.com/ers/agent/schemes"
+      authdataAgent.getDassPortalLink(appConfig) shouldBe "http://localhost:8088/ers/agent/clients"
     }
 
     "return the organisation portal link when affinity group is 'Organisation'" in {
-      val fakeApplicationConfig = mock[ApplicationConfig]
-      when(fakeApplicationConfig.dassGatewayOrgLink).thenReturn("http://organisation.example.com/ers/org")
-      when(fakeApplicationConfig.dassGatewayOrgPath).thenReturn("schemes")
       val testEmpRef = EmpRef("123", "4567")
       val authdataOrg = ERSAuthData(enrolments = Set.empty, affinityGroup = Some(Organisation), empRef = testEmpRef)
-      authdataOrg.getDassPortalLink(fakeApplicationConfig) shouldBe "http://organisation.example.com/ers/org/123/4567/schemes"
+      authdataOrg.getDassPortalLink(appConfig) shouldBe "http://localhost:8088/ers/org/123/4567/schemes"
     }
   }
 }
