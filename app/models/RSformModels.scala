@@ -298,7 +298,7 @@ object RequestObject {
   }
 
   def getSchemeTypeForOdsSchemeMismatch(schemeType: String)(implicit messages: Messages): String = {
-    s"${messages(s"ers.scheme.${schemeType.toUpperCase}")} "
+    s"${messages(s"ers.scheme.${schemeType.toUpperCase}")}"
   }
 
   def startsWithVowel(scheme: String): Boolean = {
