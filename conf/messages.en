@@ -40,6 +40,12 @@ ers.scheme.SAYE = SAYE
 ers.scheme.OTHER = OTHER
 ers.scheme.title = {0} scheme
 
+ers.schemeDisplay.CSOP = Company Share Option Plan
+ers.schemeDisplay.SAYE = Save As You Earn Scheme
+ers.schemeDisplay.EMI = Enterprise Management Incentives Plan
+ers.schemeDisplay.SIP = Share Incentive Plan
+ers.schemeDisplay.OTHER = Other schemes and arrangements
+
 #********************************************************************
 # File upload messages
 #********************************************************************
@@ -364,7 +370,7 @@ ers_group_file_check.other.intro_para = Choose the comma separated values (.csv)
 ers_group_file_check.choose_file_button = Choose your file
 ers_group_file_check.remove_file_link = Remove file
 ers_group_file_check.check_file_button = Upload file
-ers_group_file_check.upload_a_file = Upload a file
+ers_group_file_check.upload_a_file = Upload the file
 ers_group_file_check.file_name = No file selected.
 ers_group_file_check.format_errors = File contains formatting errors.
 ers_group_file_check.file_type_error = The attached file is in the wrong format. We’re only able to accept .csv files.
@@ -541,6 +547,11 @@ ers_signed_out.link = Sign in
 # Upload messages
 #********************************************************************
 
+file_upload.title = Upload your ODS file
+file_upload.paragraph = Your file must be:
+file_upload.bulletOne.ods = an ODS file
+file_upload.bulletOne.csv = a CSV file
+file_upload.bulletTwo = for {0} scheme
 file_upload.heading = Upload your ODS file
 file_upload.contact_us = Contact us on our feedback page
 file_upload.size_warning.link.before = If your file is larger than 200MB, you can’t use this service. Email
@@ -578,6 +589,16 @@ file_upload_errors.saye.guidance = <a href = "https://www.gov.uk/government/publ
 file_upload_errors.emi.guidance = <a href = "https://www.gov.uk/government/publications/enterprise-management-incentives-end-of-year-template">Use the Enterprise Management Incentives guidance documents</a> to help you fix the errors.
 file_upload_errors.sip.guidance = <a href = "https://www.gov.uk/government/publications/share-incentive-plan-end-of-year-template">Use the Share Incentive Plan guidance documents</a> to help you fix the errors.
 file_upload_errors.other.guidance = <a href = "https://www.gov.uk/government/publications/other-employment-related-securities-schemes-and-arrangements-end-of-year-return-template">Use the Other employment related securities schemes and arrangements guidance documents</a> to help you fix the errors.
+
+file_upload_errors.scheme_mismatch.title = There is a problem with the file upload
+file_upload_errors.scheme_mismatch.line1 = You chose to submit an end of year return for {0} scheme but the file you uploaded is for {1} scheme.
+file_upload_errors.scheme_mismatch.line2 = To submit an end of year return for {0} scheme you must either:
+file_upload_errors.scheme_mismatch.bullet1 = upload a file created from {0} template
+file_upload_errors.scheme_mismatch.bullet2 = upload a file created by using {0} guidance notes
+file_upload_errors.scheme_mismatch.you_can = You can:
+file_upload_errors.scheme_mismatch.retry_link = try again with a file for {0} scheme
+file_upload_errors.scheme_mismatch.view_other_link = view your schemes and arrangements
+file_upload_errors.scheme_mismatch.view_other_link_text = to choose a different scheme
 
 ers_upload_successful.page_title = Successful upload
 

@@ -36,6 +36,12 @@ ers.scheme.SAYE = SAYE
 ers.scheme.OTHER = ARALL
 ers.scheme.title = Cynllun {0}
 
+ers.schemeDisplay.CSOP = Cynllun Opsiwn Prynu Cyfranddaliadau Cwmni
+ers.schemeDisplay.SAYE = Cynilo Wrth Ennill
+ers.schemeDisplay.EMI = Cymelliadau Rheoli Mentrau
+ers.schemeDisplay.SIP = Cynllun Cymell Cyfranddaliadau
+ers.schemeDisplay.OTHER = Arall
+
 ers.start.page_title = Cyflwyno eich Datganiad Blynyddol – Gwarantau ar Sail Cyflogaeth – GOV.UK
 ers.reportable_events.page_title = Digwyddiadau i’w nodi – Gwarantau ar Sail Cyflogaeth – GOV.UK
 ers.choose_file_type.page_title =Dewis math o ffeil – Gwarantau ar Sail Cyflogaeth – GOV.UK
@@ -439,6 +445,12 @@ ers_signed_out.info = Er eich diogelwch, gwnaethom eich allgofnodi.
 ers_signed_out.link = Mewngofnodi
 ers_upload_form.processing_alert = Rydym yn gwirio eich ffeil am wallau. Peidiwch ag adnewyddu’r dudalen.
 
+file_upload.title = Uwchlwythwch eich ffeil ODS
+file_upload.paragraph = Mae’n rhaid i’ch ffeil fod:
+file_upload.bulletOne.ods = yn ffeil ODS
+file_upload.bulletOne.csv = yn ffeil CSV
+file_upload.bulletTwo = ar gyfer cynllun {0}
+file_upload.heading = Uwchlwythwch eich ffeil ODS
 file_upload.heading = Uwchlwytho’ch ffeil ODS
 file_upload.contact_us = Cysylltwch â ni ar ein tudalen adborth
 file_upload.size_warning.link.before =Os yw’ch ffeil yn fwy na 200MB, ni allwch ddefnyddio’r gwasanaeth hwn. E-bostiwch
@@ -476,6 +488,17 @@ file_upload_errors.saye.guidance = <a href = "https://www.gov.uk/government/publ
 file_upload_errors.emi.guidance = <a href = "https://www.gov.uk/government/publications/enterprise-management-incentives-end-of-year-template">Defnyddiwch y dogfennau arweiniad Cymhellion Rheoli Mentrau</a> i’ch helpu i gywiro’r gwallau.
 file_upload_errors.sip.guidance = <a href = "https://www.gov.uk/government/publications/share-incentive-plan-end-of-year-template">Defnyddiwch y dogfennau arweiniad Cynllun Cymell Cyfranddaliadau</a> i’ch helpu i gywiro’r gwallau.
 file_upload_errors.other.guidance = <a href = "https://www.gov.uk/government/publications/other-employment-related-securities-schemes-and-arrangements-end-of-year-return-template">Defnyddiwch y dogfennau arweiniad Cynlluniau a threfniadau eraill gwarantau ar sail cyflogaeth</a> i’ch helpu i gywiro’r gwallau.
+
+file_upload_errors.scheme_mismatch.title = Bu problem wrth uwchlwytho’r ffeil
+file_upload_errors.scheme_mismatch.line1 = Gwnaethoch ddewis cyflwyno datganiad diwedd blwyddyn ar gyfer cynllun {0}, ond mae’r ffeil y gwnaethoch ei huwchlwytho ar gyfer cynllun {1}.
+file_upload_errors.scheme_mismatch.line2 = Er mwyn cyflwyno datganiad diwedd blwyddyn ar gyfer cynllun {0}, mae’n rhaid i chi wneud un o’r canlynol:
+file_upload_errors.scheme_mismatch.bullet1 = uwchlwytho ffeil a grëwyd o dempled ar gyfer {0}
+file_upload_errors.scheme_mismatch.bullet2 = uwchlwytho ffeil a grëwyd gan ddefnyddio’r nodiadau arweiniad ar gyfer {0}
+file_upload_errors.scheme_mismatch.you_can = Gallwch wneud y canlynol:
+file_upload_errors.scheme_mismatch.retry_link = rhoi cynnig arall arni, gan ddefnyddio ffeil ar gyfer {0}
+file_upload_errors.scheme_mismatch.view_other_link = bwrw golwg dros eich cynlluniau a’ch trefniadau
+file_upload_errors.scheme_mismatch.view_other_link_text = er mwyn dewis cynllun gwahanol
+
 ers_upload_successful.page_title = Uwchlwytho llwyddiannus
 csv_file_upload.upload_your_file_heading = Uwchlwytho’ch ffeil CSV
 csv_file_upload.upload_your_file = Uwchlwytho’ch ffeil {0}

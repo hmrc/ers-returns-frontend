@@ -85,7 +85,7 @@ class UpscanOdsFileUploadViewSpec extends ViewSpecBase with FileUploadFixtures {
   private def hasExpectedHeaderAndUploadElements(doc: Document): Unit = {
     firstElementByClassText(doc, "govuk-heading-xl") mustBe "Upload your ODS file"
     firstElementByClassText(doc, "govuk-warning-text") mustBe "! Warning You must save a copy of your ODS file for your records."
-    firstElementByClassText(doc, "govuk-form-group") mustBe "Upload a file"
+    firstElementByClassText(doc, "govuk-form-group") mustBe "Upload the file"
     doc.getElementsByClass("govuk-file-upload").size() mustBe 1
     doc.title() mustBe "Upload your ODS file – Employment Related Securities – GOV.UK"
     firstElementByClassText(doc, "govuk-button") mustBe "Upload file"

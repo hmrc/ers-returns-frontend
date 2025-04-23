@@ -16,6 +16,7 @@
 
 package controllers.auth
 
+import config.ApplicationConfig
 import models.{ERSAuthData, ErsMetaData, RequestObject, SchemeInfo}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
@@ -27,7 +28,7 @@ import play.api.i18n.MessagesApi
 import play.api.mvc._
 import play.api.test.Helpers.{redirectLocation, status, stubBodyParser}
 import play.api.test.{DefaultAwaitTimeout, FakeRequest}
-import uk.gov.hmrc.auth.core.AffinityGroup.Agent
+import uk.gov.hmrc.auth.core.AffinityGroup.{Agent, Organisation}
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.domain.EmpRef
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -210,4 +211,20 @@ class AuthFunctionalitySpec
 			result.empRef shouldBe EmpRef("1234", "5678")
 		}
 	}
+
+  "getDassPortalLink" should {
+
+    val appConfig = fakeApplication().injector.instanceOf[ApplicationConfig]
+
+    "return the agent portal link when affinity group is 'Agent'" in {
+      val authdataAgent = ERSAuthData(enrolments = Set.empty, affinityGroup = Some(Agent))
+      authdataAgent.getDassPortalLink(appConfig) shouldBe "http://localhost:8088/ers/agent/clients"
+    }
+
+    "return the organisation portal link when affinity group is 'Organisation'" in {
+      val testEmpRef = EmpRef("123", "4567")
+      val authdataOrg = ERSAuthData(enrolments = Set.empty, affinityGroup = Some(Organisation), empRef = testEmpRef)
+      authdataOrg.getDassPortalLink(appConfig) shouldBe "http://localhost:8088/ers/org/123/4567/schemes"
+    }
+  }
 }
