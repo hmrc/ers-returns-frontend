@@ -297,6 +297,10 @@ object RequestObject {
     }
   }
 
+  def getSchemeTypeForOdsSchemeMismatch(schemeType: String)(implicit messages: Messages): String = {
+    s"${messages(s"ers.scheme.${schemeType.toUpperCase}")} "
+  }
+
   def startsWithVowel(scheme: String): Boolean = {
     val trimmed = scheme.trim.toUpperCase
     trimmed.nonEmpty && "AEIOU".contains(trimmed.charAt(0))

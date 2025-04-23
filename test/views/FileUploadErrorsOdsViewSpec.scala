@@ -46,7 +46,7 @@ class FileUploadErrorsOdsViewSpec extends ViewSpecBase with FileUploadFixtures w
         firstParagraph = "You chose to submit an end of year return for a CSOP scheme but the file you uploaded is for an EMI scheme.",
         secondParagraph = "To submit an end of year return for a CSOP scheme you must either:",
         firstBullet = "upload a file created from a CSOP template",
-        secondBullet = "upload a file created by using a CSOP guidance notes",
+        secondBullet = "upload a file created by using the CSOP guidance notes",
         thirdBullet = "try again with a file for a CSOP scheme",
         schemeRef = "CSOP - Company Share Option Plan scheme - XA1100000000000 - 2014 to 2015"
       )
@@ -61,7 +61,7 @@ class FileUploadErrorsOdsViewSpec extends ViewSpecBase with FileUploadFixtures w
         firstParagraph = "You chose to submit an end of year return for a SIP scheme but the file you uploaded is for an EMI scheme.",
         secondParagraph = "To submit an end of year return for a SIP scheme you must either:",
         firstBullet = "upload a file created from a SIP template",
-        secondBullet = "upload a file created by using a SIP guidance notes",
+        secondBullet = "upload a file created by using the SIP guidance notes",
         thirdBullet = "try again with a file for a SIP scheme",
         schemeRef = "SIP - Share Incentive Plan scheme - XA1100000000000 - 2014 to 2015"
       )
@@ -76,7 +76,7 @@ class FileUploadErrorsOdsViewSpec extends ViewSpecBase with FileUploadFixtures w
         firstParagraph = "You chose to submit an end of year return for a SAYE scheme but the file you uploaded is for an EMI scheme.",
         secondParagraph = "To submit an end of year return for a SAYE scheme you must either:",
         firstBullet = "upload a file created from a SAYE template",
-        secondBullet = "upload a file created by using a SAYE guidance notes",
+        secondBullet = "upload a file created by using the SAYE guidance notes",
         thirdBullet = "try again with a file for a SAYE scheme",
         schemeRef = "SAYE - Save As You Earn scheme - XA1100000000000 - 2014 to 2015"
       )
@@ -91,7 +91,7 @@ class FileUploadErrorsOdsViewSpec extends ViewSpecBase with FileUploadFixtures w
         firstParagraph = "You chose to submit an end of year return for an OTHER scheme but the file you uploaded is for an EMI scheme.",
         secondParagraph = "To submit an end of year return for an OTHER scheme you must either:",
         firstBullet = "upload a file created from an OTHER template",
-        secondBullet = "upload a file created by using an OTHER guidance notes",
+        secondBullet = "upload a file created by using the OTHER guidance notes",
         thirdBullet = "try again with a file for an OTHER scheme",
         schemeRef = "OTHER - Other scheme - XA1100000000000 - 2014 to 2015"
       )
@@ -106,7 +106,7 @@ class FileUploadErrorsOdsViewSpec extends ViewSpecBase with FileUploadFixtures w
         firstParagraph = "You chose to submit an end of year return for an EMI scheme but the file you uploaded is for an OTHER scheme.",
         secondParagraph = "To submit an end of year return for an EMI scheme you must either:",
         firstBullet = "upload a file created from an EMI template",
-        secondBullet = "upload a file created by using an EMI guidance notes",
+        secondBullet = "upload a file created by using the EMI guidance notes",
         thirdBullet = "try again with a file for an EMI scheme",
         schemeRef = "EMI - Enterprise Management Incentives scheme - XA1100000000000 - 2014 to 2015"
       )
