@@ -232,7 +232,7 @@ case class RequestObject(
     )
 
   def getPageTitle(implicit messages: Messages): String =
-    s"${messages(s"ers.scheme.$getSchemeType")} " +
+    s"${messages(s"ers.scheme.${getSchemeType.toUpperCase}")} " +
       s"- ${messages("ers.scheme.title", getSchemeNameForDisplay)} " +
       s"- $getSchemeReference - ${DateUtils.getFullTaxYear(getTaxYear)}"
 
