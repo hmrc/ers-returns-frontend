@@ -29,73 +29,15 @@
 
 @schemeId = @{requestObject.getSchemeId}
 
-@govuk_wrapper(title = messages("ers_start.page_title")) {
+@govuk_wrapper(title = messages("ers.start.page_title")) {
 
     @reference(requestObject.getPageTitle)
 
-    <h1 class="govuk-heading-l">
-        <span class="govuk-caption-l">@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_START, "caption"))</span>
-        <span class="govuk-heading-xl">@Html(messages("ers_start.page_heading", requestObject.getSchemeNameForDisplay))</span>
-    </h1>
-
-    <p class="govuk-body">@Html(messages("ers_start.you_can"))</p>
-
-    <ul class="govuk-list govuk-list--bullet">
-        <li>@Html(messages("ers_start.return_bullet_1"))</li>
-        <li>@Html(messages("ers_start.return_bullet_2"))</li>
-    </ul>
-
-    <h2 class="govuk-heading-m">@Html(messages("ers_start.sub_title"))</h2>
-
-    @govukInsetText(InsetText(
-        content = Text(messages("ers_start.help"))
+    @hmrcPageHeading(PageHeading(
+        text = messages("ers_start.page_title", requestObject.getSchemeNameForDisplay)
     ))
 
-    <p class="govuk-body">@Html(messages("ers_start.events.template"))</p>
-    <p class="govuk-body">@Html(messages("ers_start.check_files_1"))</p>
-
-    <h2 class="govuk-heading-m">@Html(messages("ers_start.sub_title_1"))</h2>
-
-    <p class="govuk-body">@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_START, "company_lead_in"))</p>
-    <ul class="govuk-list govuk-list--bullet">
-        <li>@Html(messages("ers_start.sip.company_bullet_1"))</li>
-        <li>@Html(messages("ers_start.sip.company_bullet_2"))</li>
-        <li>@Html(messages("ers_start.sip.company_bullet_3"))</li>
-        <li>@Html(messages("ers_start.sip.company_bullet_4"))</li>
-    </ul>
-
-    @if(schemeId == ersUtil.SCHEME_SIP) {
-        <p class="govuk-body">@Html(messages("ers_start.sip.trustee_lead_in"))</p>
-        <ul class="govuk-list govuk-list--bullet">
-            <li>@Html(messages("ers_start.sip.trustee_bullet_1"))</li>
-            <li>@Html(messages("ers_start.sip.trustee_bullet_2"))</li>
-        </ul>
-    }
-
-    <p class="govuk-body">@Html(messages("ers_start.circumstances_lead_in"))</p>
-    <ul class="govuk-list govuk-list--bullet">
-        @if(schemeId == ersUtil.SCHEME_EMI || schemeId == ersUtil.SCHEME_SAYE || schemeId == ersUtil.SCHEME_SIP || schemeId == ersUtil.SCHEME_OTHER) {
-            <li>@Html(messages("ers_start.circumstances_bullet_1"))</li>
-        }
-
-        @if(schemeId == ersUtil.SCHEME_CSOP) {
-            <li>@Html(messages("ers_start.csop.circumstances_bullet_1"))</li>
-        }
-            <li>@Html(messages("ers_start.circumstances_bullet_2"))</li>
-        </ul>
-
-        <h2 class="govuk-heading-m">@Html(messages("ers_start.after_title"))</h2>
-        <p class="govuk-body">@Html(messages("ers_start.after_para_1"))</p>
-
-    <p class="govuk-body">@Html(messages("ers_start.sip.keep_lead_in"))</p>
-    <ul class="govuk-list govuk-list--bullet">
-        <li>@Html(messages("ers_start.sip.keep_bullet_1"))</li>
-        <li>@Html(messages("ers_start.sip.keep_bullet_2"))</li>
-    </ul>
-
-    @govukInsetText(InsetText(
-        content = Text(messages("ers_start.save_copy"))
-    ))
+    <p id="lead-paragraph" class="govuk-body">@ersUtil.getPageElement(schemeId, ersUtil.PAGE_START, "intro_para")</p>
 
     @govukButton(Button(
         href = Some(routes.ReportableEventsController.reportableEventsPage().url),
@@ -103,5 +45,24 @@
         content = Text(messages("ers_start.start_now_button")),
         attributes = Map("id" -> "start-button")
     ))
+
+    <h2 class="govuk-heading-m">@Html(messages("ers_start.sub_title"))</h2>
+
+    @govukInsetText(InsetText(
+        content = Text(messages("ers_start.help"))
+    ))
+
+    <p class="govuk-body">@Html(messages("ers_start.you_need"))</p>
+
+    <ul class="govuk-list govuk-list--bullet">
+        <li>@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_START, "bullet_1"))</li>
+        <li>@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_START, "bullet_2"))</li>
+        @if(schemeId == ersUtil.SCHEME_CSOP || schemeId == ersUtil.SCHEME_SAYE || schemeId == ersUtil.SCHEME_SIP || schemeId == ersUtil.SCHEME_OTHER) {
+        <li>@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_START, "bullet_3"))</li>
+        }
+        @if(schemeId == ersUtil.SCHEME_SIP) {
+        <li>@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_START, "bullet_4"))</li>
+        }
+    </ul>
 
 }
