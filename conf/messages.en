@@ -41,8 +41,8 @@ ers.scheme.OTHER = OTHER
 ers.scheme.title = {0} scheme
 
 ers.schemeDisplay.CSOP = Company Share Option Plan
-ers.schemeDisplay.SAYE = Save As You Earn Scheme
-ers.schemeDisplay.EMI = Enterprise Management Incentives Plan
+ers.schemeDisplay.SAYE = Save As You Earn
+ers.schemeDisplay.EMI = Enterprise Management Incentives
 ers.schemeDisplay.SIP = Share Incentive Plan
 ers.schemeDisplay.OTHER = Other schemes and arrangements
 
