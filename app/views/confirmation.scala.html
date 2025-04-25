@@ -22,7 +22,8 @@
 		govuk_wrapper: govuk_wrapper,
 		govukPanel: GovukPanel,
 		govukButton: GovukButton,
-		govukWarningText : GovukWarningText
+		govukWarningText : GovukWarningText,
+		govukInsetText: GovukInsetText
 )
 
 @(requestObject: RequestObject, dateSubmitted: String, bundle: String, taxYear: String, url: String)(implicit request: Request[_], messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
@@ -44,15 +45,38 @@
 	</h2>
 
 	<p class="govuk-body">
-		<a id="download-confirmation-button" class="govuk-link" href="@Some(routes.PdfGenerationController.buildPdfForBundle(bundle, dateSubmitted).url)" target="_blank">
-			@Html(messages("ers_confirmation.download_confirmation", 15))
-		</a>
+		@Html(messages("ers_confirmation.para_1"))
 	</p>
 
-	@govukWarningText(WarningText(
-		iconFallbackText = Some("Warning"),
+	<p class="govuk-body">
+		@Html(messages("ers_confirmation.ListOne.heading"))
+	</p>
+
+	<ul class="govuk-list govuk-list--bullet">
+		<li>@Html(messages("ers_confirmation.ListOne.bulletOne"))</li>
+		<li>@Html(messages("ers_confirmation.ListOne.bulletTwo"))</li>
+	</ul>
+
+	@govukInsetText(InsetText(
 		content = Text(messages("ers_confirmation.warning"))
 	))
+
+	<p class="govuk-body">
+		@Html(messages("ers_confirmation.ListTwo.heading"))
+	</p>
+
+	<ul class="govuk-list govuk-list--bullet">
+		<li>
+			<a id="download-confirmation-button" class="govuk-link" href="@Some(routes.PdfGenerationController.buildPdfForBundle(bundle, dateSubmitted).url)" target="_blank">
+				@Html(messages("ers_confirmation.ListTwo.link", 15))
+			</a>
+		</li>
+		<li>@Html(messages("ers_confirmation.ListTwo.bulletTwo"))</li>
+	</ul>
+
+	<p class="govuk-body">
+		@Html(messages("ers_confirmation.para_2"))
+	</p>
 
 	<p class="govuk-body">
 		@Html(messages("ers_confirmation.instructions_1.start"))
@@ -60,22 +84,6 @@
 			@Html(messages("ers_confirmation.instructions_1.link"))
 		</a>
 		@Html(messages("ers_confirmation.instructions_1.end"))
-	</p>
-
-	<h2 class="govuk-heading-m">
-		@Html(messages("ers_confirmation.sub_heading_2"))
-	</h2>
-
-	<p class="govuk-body">
-		@Html(messages("ers_confirmation.instructions_2"))
-	</p>
-
-	<p class="govuk-body govuk-!-font-weight-bold">
-		@Html(bundle)
-	</p>
-
-	<p class="govuk-body">
-		@Html(messages("ers-confirmation.submission_date")) @DateUtils.convertDate(dateSubmitted).
 	</p>
 
 	<p class="govuk-body">
