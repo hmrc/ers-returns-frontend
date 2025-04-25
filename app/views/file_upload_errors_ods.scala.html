@@ -51,7 +51,7 @@
         </p>
         <ul class="govuk-list govuk-list--bullet">
             <li>@messages("file_upload_errors.scheme_mismatch.bullet1", RequestObject.getSchemeWithArticle(expectedSchemeType))</li>
-            <li>@messages("file_upload_errors.scheme_mismatch.bullet2", RequestObject.getSchemeWithArticle(expectedSchemeType))</li>
+            <li>@messages("file_upload_errors.scheme_mismatch.bullet2", RequestObject.getSchemeTypeForOdsSchemeMismatch(expectedSchemeType))</li>
         </ul>
         <p class="govuk-body">
             @messages("file_upload_errors.scheme_mismatch.you_can")
