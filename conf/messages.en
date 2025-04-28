@@ -184,10 +184,10 @@ ers_start.saye.company_lead_in = For the scheme organiser and any participating 
 ers_start.csop.company_lead_in = For the scheme organiser and any participating group scheme members, you will need to provide the company’s:
 ers_start.other.company_lead_in = For the establishing company and any participating group scheme members, you will need to provide the company’s:
 
-ers_start.sip.company_bullet_1 = name
-ers_start.sip.company_bullet_2 = address
-ers_start.sip.company_bullet_3 = Company Registration Number
-ers_start.sip.company_bullet_4 = Corporation Tax reference
+ers_start.company_bullet_1 = name
+ers_start.company_bullet_2 = address
+ers_start.company_bullet_3 = Company Registration Number
+ers_start.company_bullet_4 = Corporation Tax reference
 
 ers_start.sip.trustee_lead_in = You must provide details for at least one trustee. You will need:
 ers_start.sip.trustee_bullet_1 = the name of the trustee
