@@ -138,7 +138,7 @@ ers_start.emi.bullet_2 =y manylion canlynol ar gyfer cwmni’r cyflogwr - enw a 
 ers_start.emi.intro_para_2 = Os yw’n berthnasol, gellir nodi manylion is-gwmni cymwys â llaw neu drwy eu huwchlwytho mewn ffeil .csv (fel sy’n briodol).
 
 ers_start.emi.company_lead_in = Bydd angen i chi roi manylion y cwmni sefydlu ac unrhyw is-gwmnïau cymwys. Mae hyn yn cynnwys:
-ers_start.csop.company_lead_in = Ar gyfer trefnydd y cynllun, ac unrhyw aelodau’r cynllun grŵp sy’n cymryd rhan, bydd angen i chi roi’r wybodaeth ganlynol:
+ers_start.csop.company_lead_in = Bydd angen i chi roi manylion trefnydd y cynllun ac unrhyw aelodau’r cynllun grŵp sy’n cymryd rhan. Mae hyn yn cynnwys:
 ers_start.sip.company_lead_in = Bydd angen i chi roi manylion y cwmni sefydlu ac unrhyw aelodau’r cynllun grŵp sy’n cymryd rhan. Mae hyn cynnwys:
 ers_start.saye.company_lead_in = Bydd angen i chi roi manylion y cwmni ar gyfer trefnydd y cynllun ac unrhyw aelodau’r cynllun grŵp sy’n cymryd rhan. Mae hyn yn cynnwys:
 ers_start.other.company_lead_in = Bydd angen i chi roi manylion y cwmni sefydlu ac unrhyw aelodau’r cynllun grŵp sy’n cymryd rhan. Mae hyn cynnwys:
