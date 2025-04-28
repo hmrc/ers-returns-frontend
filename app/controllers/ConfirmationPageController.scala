@@ -58,6 +58,7 @@ class ConfirmationPageController @Inject()(val mcc: MessagesControllerComponents
       val schemeRef: String = requestObject.getSchemeReference
       val sessionBundleRef: String = request.session.get(BUNDLE_REF).getOrElse("")
       val sessionDateTimeSubmitted: String = request.session.get(DATE_TIME_SUBMITTED).getOrElse("")
+      val url: String = request.authData.getDassPortalLink(appConfig)
       if (sessionBundleRef == "") {
         sessionService.fetch[ErsMetaData](ersUtil.ERS_METADATA).flatMap { all =>
           if (all.sapNumber.isEmpty)
@@ -87,7 +88,7 @@ class ConfirmationPageController @Inject()(val mcc: MessagesControllerComponents
       } else {
         sessionService.fetch[ErsMetaData](ersUtil.ERS_METADATA).flatMap { all =>
           logger.info(s"[ConfirmationPageController][showConfirmationPage] Preventing resubmission of confirmation page, timestamp: ${System.currentTimeMillis()}.")
-          Future(Ok(confirmationView(requestObject, sessionDateTimeSubmitted, sessionBundleRef.filter(_.isDigit), all.schemeInfo.taxYear, appConfig.portalDomain)))
+          Future(Ok(confirmationView(requestObject, sessionDateTimeSubmitted, sessionBundleRef.filter(_.isDigit), all.schemeInfo.taxYear, url)))
         }
       }
     } recoverWith { case e: Throwable =>
@@ -128,7 +129,7 @@ class ConfirmationPageController @Inject()(val mcc: MessagesControllerComponents
           }
 
           logger.info(s"[ConfirmationPageController][saveAndSubmit] Submission completed for schemeInfo: ${all.schemeInfo.toString}, bundle: $bundle ")
-          val url: String = appConfig.portalDomain
+          val url: String = request.authData.getDassPortalLink(appConfig)
 
           sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT).map { requestObject =>
             Ok(confirmationView(requestObject, dateTimeSubmitted, bundle.filter(_.isDigit), all.schemeInfo.taxYear, url))
