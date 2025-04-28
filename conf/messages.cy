@@ -153,19 +153,18 @@ ers_start.sip.bullet_3 =enw a chyfeiriad unrhyw ymddiriedolwyr
 ers_start.sip.bullet_4 = gwybod am unrhyw addasiadau sydd wedi eu gwneud i nodweddion allweddol y cynllun
 ers_start.sip.intro_para_2 = Os yw’n berthnasol, gellir nodi manylion aelodau’r plan grŵp â llaw neu drwy eu huwchlwytho mewn ffeil .csv (fel sy’n briodol).
 
-ers_start.sip.company_bullet_1 = enw
-ers_start.sip.company_bullet_2 = cyfeiriad
+ers_start.sip.company_bullet_1 = enw’r cwmni
+ers_start.sip.company_bullet_2 = cyfeiriad y cwmni
 ers_start.sip.company_bullet_3 = Rhif Cofrestru’r Cwmni
-ers_start.sip.company_bullet_4 = Cyfeirnod Treth Gorfforaeth
+ers_start.sip.company_bullet_4 = Cyfeirnod Treth Gorfforaeth y cwmni
 
 ers_start.sip.trustee_lead_in = Mae’n rhaid i chi roi manylion ar gyfer o leiaf un ymddiriedolwr. Bydd angen y canlynol arnoch:
 ers_start.sip.trustee_bullet_1 = enw’r ymddiriedolwr
 ers_start.sip.trustee_bullet_2 = cyfeiriad yr ymddiriedolwr
 
 ers_start.circumstances_lead_in = Yn dibynnu ar eich amgylchiadau:
-ers_start.csop.circumstances_bullet_1 = mae’n bosibl y bydd angen i chi gofnodi unrhyw ddigwyddiadau sy’n berthnasol i’r cynllun mewn taenlen ODS neu CSV
 ers_start.circumstances_bullet_1 = mae’n bosibl y bydd angen i chi gofnodi unrhyw ddigwyddiadau sy’n berthnasol i’r cynllun mewn taenlen ODS neu CSV
-ers_start.csop.circumstances_bullet_1 = mae’n bosibl y bydd angen i chi gofnodi unrhyw ddigwyddiadau sy’n berthnasol i’r cynllun mewn taenlen ODS neu CSV
+ers_start.csop.circumstances_bullet_1 = mae’n bosibl y bydd angen i chi gofnodi unrhyw ddigwyddiadau sy’n berthnasol i’r cwmni mewn taenlen ODS neu CSV
 ers_start.circumstances_bullet_2 = mae’n bosibl y bydd angen i chi wybod am unrhyw addasiadau a wnaed i nodweddion allweddol y cynllun
 
 ers_start.other.bullet_1 = cofnodi unrhyw ddigwyddiadau sy’n berthnasol i’r cynllun mewn taenlen ODS neu CSV
