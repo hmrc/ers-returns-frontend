@@ -12,7 +12,7 @@ object AppDependencies {
     ws,
     "uk.gov.hmrc"             %% "bootstrap-frontend-play-30" % bootstrapVersion,
     "uk.gov.hmrc.mongo"       %% "hmrc-mongo-play-30"         % mongoVersion,
-    "uk.gov.hmrc"             %% "play-frontend-hmrc-play-30" % "12.0.0",
+    "uk.gov.hmrc"             %% "play-frontend-hmrc-play-30" % "12.1.0",
     "uk.gov.hmrc"             %% "play-partials-play-30"      % "10.0.0",
     "uk.gov.hmrc"             %% "domain-play-30"             % "10.0.0",
     "org.apache.pdfbox"       %  "pdfbox"                     % pdfboxVersion,
@@ -24,7 +24,7 @@ object AppDependencies {
     "com.openhtmltopdf"       %  "openhtmltopdf-svg-support"  % openHtmlVersion,
     "commons-codec"           %  "commons-codec"              % "1.18.0",
     "org.codehaus.janino"     %  "janino"                     % "3.1.12",
-    "commons-io"              %  "commons-io"                 % "2.18.0"
+    "commons-io"              %  "commons-io"                 % "2.19.0"
   )
 
   val test: Seq[ModuleID]      = Seq(
@@ -34,8 +34,8 @@ object AppDependencies {
     "org.scalatestplus"       %% "mockito-5-10"            % "3.2.18.0",
     "com.vladsch.flexmark"    %  "flexmark-all"            % "0.64.8",
     "org.pegdown"             %  "pegdown"                 % "1.6.0",
-    "org.jsoup"               %  "jsoup"                   % "1.19.1",
-    "org.wiremock"            %  "wiremock-standalone"     % "3.12.1"
+    "org.jsoup"               %  "jsoup"                   % "1.20.1",
+    "org.wiremock"            %  "wiremock-standalone"     % "3.13.0"
   ).map(_ % Test)
 
   val overrides: Seq[ModuleID] = Seq(
