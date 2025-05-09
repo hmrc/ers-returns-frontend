@@ -564,12 +564,13 @@ file_upload.saye.info = Choose the {0} file you want to upload as part of your S
 
 file_upload.warning = You must save a copy of your {0} file for your records.
 
-file_upload_errors.title = Errors have been found
-file_upload_errors.para1 = Fix the errors before you use this service again or
-file_upload_errors.upload_link = choose a different file to upload
-file_upload_errors.go_fix = You need to fix your errors
-file_upload_errors.check_file = Use HMRC’s file check service
-file_upload_errors.info = to get a detailed report.
+file_upload_errors.title = There are errors in your file
+file_upload_errors.heading = There are errors in your file
+file_upload_errors.para = You need to correct the errors before you can upload the file.
+file_upload_errors.info = You can:
+file_upload_errors.link =  to help correct the errors
+file_upload_errors.bullet1 =  use the file checking service
+file_upload_errors.bullet2 =  try again with a different file
 ers.error.unauthorise = You’re not authorised to view this page
 file_upload_errors.inset.csop.text = The file must use the correct version of the ODS template for the tax year.
 file_upload_errors.inset.csop.link.text = Get end of year return templates for Company Share Option Plan schemes

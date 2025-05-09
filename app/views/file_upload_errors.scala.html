@@ -32,22 +32,25 @@
 	@reference(requestObject.getPageTitle)
 
 	@hmrcPageHeading(PageHeading(
-		text = messages("file_upload_errors.title")
+		text = messages("file_upload_errors.heading")
 	))
 
-	@govukInsetText(InsetText(
-		content = {
-			val href = if(fileType == ersUtil.OPTION_ODS) routes.FileUploadController.uploadFilePage().url else routes.CheckCsvFilesController.checkCsvFilesPage().url
-			HtmlContent(s"""${messages("file_upload_errors.para1")} <a href="$href">${messages("file_upload_errors.upload_link")}</a>.""")
-		}
-	))
+	<p class="govuk-body">@messages("file_upload_errors.para")</p>
 
-	<h2 class="govuk-heading-m">
-		@Html(messages("file_upload_errors.go_fix"))
-	</h2>
+	<p class="govuk-body">@Html(messages("file_upload_errors.info"))</p>
 
-	<p class="govuk-body">
-		<a class="govuk-link" href="/check-your-ers-files">@Html(messages("file_upload_errors.check_file"))</a>
-		@Html(messages("file_upload_errors.info"))
-	</p>
+	<ul class="govuk-list govuk-list--bullet">
+		<li>
+			<a class="govuk-link" href="/check-your-ers-files">@Html(messages("file_upload_errors.bullet1"))</a>
+				@Html(messages("file_upload_errors.link"))
+			</a>
+		</li>
+		<li>
+			@defining(if(fileType == ersUtil.OPTION_ODS) routes.FileUploadController.uploadFilePage().url else routes.CheckCsvFilesController.checkCsvFilesPage().url) { href =>
+			<a href="@href" class="govuk-link">
+				@Html(messages("file_upload_errors.bullet2")) }
+			</a>
+		</li>
+	</ul>
+
 }
