@@ -46,9 +46,8 @@
 			</a>
 		</li>
 		<li>
-			@defining(if(fileType == ersUtil.OPTION_ODS) routes.FileUploadController.uploadFilePage().url else routes.CheckCsvFilesController.checkCsvFilesPage().url) { href =>
-			<a href="@href" class="govuk-link">
-				@Html(messages("file_upload_errors.bullet2")) }
+			<a class="govuk-link" href=@routes.CheckFileTypeController.checkFileTypePage().url>
+				@Html(messages("file_upload_errors.bullet2"))
 			</a>
 		</li>
 	</ul>
