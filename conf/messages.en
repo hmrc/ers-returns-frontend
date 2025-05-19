@@ -53,7 +53,7 @@ ers.schemeDisplay.OTHER = Other schemes and arrangements
 ers.start.page_title = Submit your annual return – Employment Related Securities – GOV.UK
 ers.reportable_events.page_title = Reportable events – Employment Related Securities – GOV.UK
 ers.choose_file_type.page_title = Choose file type – Employment Related Securities – GOV.UK
-ers.choose_csv_files.page_title = Choose the .csv files – Employment Related Securities – GOV.UK
+ers.choose_csv_files.page_title = Choose the CSV files – Employment Related Securities – GOV.UK
 
 ers.title.postfix = – Employment Related Securities – GOV.UK
 
@@ -153,30 +153,30 @@ ers_start.other.intro_para = Use this service to submit your return at the end o
 ers_start.sub_title = Before you start
 ers_start.sub_title_1 = What you will need
 
-ers_start.large_files = If you have a .ods file that’s larger than 200MB or a .csv file that’s larger than 200MB
+ers_start.large_files = If you have a ODS file that’s larger than 200MB or a CSV file that’s larger than 200MB
 ers_start.help = A company director or company secretary must have approved the return and must agree to any declaration you make in this service.
 
 ers_start.you_can = You can use this service to:
 ers_start.csop.bullet_1 = to record any events related to the scheme in an ODS or CSV spreadsheet
 ers_start.csop.bullet_2 = the scheme organiser’s company name and address, Company Registration Number and Corporation Tax reference (and those of any participating group scheme members)
 ers_start.csop.bullet_3 = to know any alterations made to key features of the scheme and know whether there’s been a variation in the share capital
-ers_start.csop.intro_para_2 = If relevant, group scheme member details can be entered manually or uploaded in a .csv file (as appropriate).
+ers_start.csop.intro_para_2 = If relevant, group scheme member details can be entered manually or uploaded in a CSV file (as appropriate).
 
 ers_start.emi.bullet_1 = to record any events related to the scheme in an ODS or CSV spreadsheet
 ers_start.emi.bullet_2 = the employer company’s name and address, Company Registration Number and Corporation Tax reference (and those of any qualifying subsidiary companies)
-ers_start.emi.intro_para_2 = If relevant, qualifying subsidiary company details can be entered manually or uploaded in a .csv file (as appropriate).
+ers_start.emi.intro_para_2 = If relevant, qualifying subsidiary company details can be entered manually or uploaded in a CSV file (as appropriate).
 
 ers_start.saye.bullet_1 = to record any events related to the scheme in an ODS or CSV spreadsheet
 ers_start.saye.bullet_2 = the scheme organiser’s company name and address, Company Registration Number and Corporation Tax reference (and those of any participating group scheme members)
 ers_start.saye.bullet_3 = to know any alterations made to key features of the scheme and know whether there’s been a variation in the share capital
-ers_start.saye.intro_para_2 = If relevant, group scheme member details can be entered manually or uploaded in a .csv file (as appropriate).
+ers_start.saye.intro_para_2 = If relevant, group scheme member details can be entered manually or uploaded in a CSV file (as appropriate).
 
 ers_start.return_bullet_1 = submit your annual return at the end of the tax year
 ers_start.return_bullet_2 = submit a nil return
 
 ers_start.sip.return_bullet_3 = the name and address of any trustees
 ers_start.sip.return_bullet_4 = to know any alterations made to key features of the plan
-ers_start.sip.intro_para_2 = If relevant, group plan member details can be entered manually or uploaded in a .csv file (as appropriate).
+ers_start.sip.intro_para_2 = If relevant, group plan member details can be entered manually or uploaded in a CSV file (as appropriate).
 
 ers_start.emi.company_lead_in = For the employer company and any qualifying subsidiary companies, you will need to provide the company’s:
 ers_start.sip.company_lead_in = For the establishing company and any participating group plan members, you will need to provide the company’s:
@@ -218,16 +218,16 @@ ers_start.save_copy = You can print or save a copy of your submission receipt af
 ers_start.other.bullet_1 = to record any events related to the scheme in an ODS or CSV spreadsheet
 ers_start.other.bullet_2 = the scheme organiser’s company name and address, Company Registration Number and Corporation Tax reference (and those of any participating group scheme members)
 ers_start.other.bullet_3 = to know any alterations made to key features of the scheme and know whether there’s been a variation in the share capital
-ers_start.other.intro_para_2 = If relevant, the details of any other companies covered by this return can be entered manually or uploaded in a .csv file (as appropriate).
+ers_start.other.intro_para_2 = If relevant, the details of any other companies covered by this return can be entered manually or uploaded in a CSV file (as appropriate).
 
 ers_start.ifrelevant = If relevant:
-ers_start.relevant_bullet_1 = .ods files used to record events must be no larger than 200MB
-ers_start.relevant_bullet_2 = .csv files used to record events must be no larger than 200MB
-ers_start.csop.relevant_bullet_3 = group scheme member details can be entered manually or uploaded in a .csv file
-ers_start.emi.relevant_bullet_3 = qualifying subsidiary company details can be entered manually or uploaded in a .csv file
-ers_start.saye.relevant_bullet_3 = group scheme member details can be entered manually or uploaded in a .csv file
-ers_start.sip.relevant_bullet_3 = group plan member details can be entered manually or uploaded in a .csv file
-ers_start.other.relevant_bullet_3 = the details of any other companies covered by this return can be entered manually or uploaded in a .csv file
+ers_start.relevant_bullet_1 = ODS files used to record events must be no larger than 200MB
+ers_start.relevant_bullet_2 = CSV files used to record events must be no larger than 200MB
+ers_start.csop.relevant_bullet_3 = group scheme member details can be entered manually or uploaded in a CSV file
+ers_start.emi.relevant_bullet_3 = qualifying subsidiary company details can be entered manually or uploaded in a CSV file
+ers_start.saye.relevant_bullet_3 = group scheme member details can be entered manually or uploaded in a CSV file
+ers_start.sip.relevant_bullet_3 = group plan member details can be entered manually or uploaded in a CSV file
+ers_start.other.relevant_bullet_3 = the details of any other companies covered by this return can be entered manually or uploaded in a CSV file
 ers_start.filesize = Email <a class="govuk-link" href="mailto:shareschemes@hmrc.gsi.gov.uk">shareschemes@hmrc.gsi.gov.uk</a> and we’ll help you with your submission.
 ers_start.start_now_button = Start now
 
@@ -345,7 +345,7 @@ ers_group_scheme_type.sip.info = How do you want to add your group plan details?
 ers_group_scheme_type.other.title = Other company details
 ers_group_scheme_type.other.info = How do you want to add the company details?
 
-ers_group_scheme_type.option_1 = Upload a comma separated values (.csv) file
+ers_group_scheme_type.option_1 = Upload a comma-separated values (CSV) file
 ers_group_scheme_type.csop.option_2 = Manually enter the company details
 ers_group_scheme_type.emi.option_2 = Manually enter the subsidiary company details
 ers_group_scheme_type.saye.option_2 = Manually enter the company details
@@ -353,19 +353,19 @@ ers_group_scheme_type.sip.option_2 = Manually enter the company details
 ers_group_scheme_type.other.option_2 = Manually enter the covered company details
 
 ers_group_file_check.csop.title = Upload the group scheme details
-ers_group_file_check.csop.intro_para = Choose the comma separated values (.csv) file that you want to upload.
+ers_group_file_check.csop.intro_para = Choose the comma-separated values (CSV) file that you want to upload.
 
 ers_group_file_check.emi.title = Upload your qualifying subsidiary company details
-ers_group_file_check.emi.intro_para = Choose the comma separated values (.csv) file that you want to upload.
+ers_group_file_check.emi.intro_para = Choose the comma-separated values (CSV) file that you want to upload.
 
 ers_group_file_check.saye.title = Upload your group scheme details
-ers_group_file_check.saye.intro_para = Choose the comma separated values (.csv) file that you want to upload.
+ers_group_file_check.saye.intro_para = Choose the comma-separated values (CSV) file that you want to upload.
 
 ers_group_file_check.sip.title = Upload your group plan details
-ers_group_file_check.sip.intro_para = Choose the comma separated values (.csv) file that you want to upload.
+ers_group_file_check.sip.intro_para = Choose the comma-separated values (CSV) file that you want to upload.
 
 ers_group_file_check.other.title = Upload your covered company details
-ers_group_file_check.other.intro_para = Choose the comma separated values (.csv) file that you want to upload.
+ers_group_file_check.other.intro_para = Choose the comma-separated values (CSV) file that you want to upload.
 
 ers_group_file_check.choose_file_button = Choose your file
 ers_group_file_check.remove_file_link = Remove file
@@ -373,7 +373,7 @@ ers_group_file_check.check_file_button = Upload file
 ers_group_file_check.upload_a_file = Upload the file
 ers_group_file_check.file_name = No file selected.
 ers_group_file_check.format_errors = File contains formatting errors.
-ers_group_file_check.file_type_error = The attached file is in the wrong format. We’re only able to accept .csv files.
+ers_group_file_check.file_type_error = The attached file is in the wrong format. We’re only able to accept CSV files.
 ers_group_file_check.no_file_error = No file selected. Please choose your file.
 
 #********************************************************************
@@ -392,11 +392,11 @@ ers_group_summary.crn = Company Registration Number
 ers_group_summary.ctr = Corporation Tax reference
 ers_group_summary.action = Action
 ers_group_summary.notice = Notice a mistake?
-ers_group_summary.csop.notice_info = If there’s a mistake in any of the company details shown, you’ll need to correct them in the .csv file and
-ers_group_summary.saye.notice_info = If there’s a mistake in any of the company details shown, you’ll need to correct them in the .csv file and
-ers_group_summary.emi.notice_info = If there’s a mistake in any of the subsidiary company details shown, you’ll need to correct them in the .csv file and
-ers_group_summary.sip.notice_info = If there’s a mistake in any of the group plan details shown, you’ll need to correct them in the .csv file and
-ers_group_summary.other.notice_info = If there’s a mistake in any of the covered company details shown, you’ll need to correct them in the .csv file and
+ers_group_summary.csop.notice_info = If there’s a mistake in any of the company details shown, you’ll need to correct them in the CSV file and
+ers_group_summary.saye.notice_info = If there’s a mistake in any of the company details shown, you’ll need to correct them in the CSV file and
+ers_group_summary.emi.notice_info = If there’s a mistake in any of the subsidiary company details shown, you’ll need to correct them in the CSV file and
+ers_group_summary.sip.notice_info = If there’s a mistake in any of the group plan details shown, you’ll need to correct them in the CSV file and
+ers_group_summary.other.notice_info = If there’s a mistake in any of the covered company details shown, you’ll need to correct them in the CSV file and
 ers_group_summary.notice_info2 = upload the file again
 ers_group_summary.csop.add_company = Add a company
 ers_group_summary.saye.add_company = Add a company
@@ -555,7 +555,7 @@ file_upload.bulletTwo = for {0} scheme
 file_upload.heading = Upload your ODS file
 file_upload.contact_us = Contact us on our feedback page
 file_upload.size_warning.link.before = If your file is larger than 200MB, you can’t use this service. Email
-file_upload.file_size = if your .ods file is larger than 200MB.
+file_upload.file_size = if your ODS file is larger than 200MB.
 file_upload.csop.info = Choose the {0} file you want to upload as part of your Company Share Option Plan annual return.
 file_upload.emi.info = Choose the {0} file you want to upload as part of your Enterprise Management Incentives annual return.
 file_upload.other.info = Choose the {0} file you want to upload as part of your Other annual return.
@@ -614,8 +614,8 @@ csv_file_upload.summary_error = Choose a different file to upload
 # Type messages
 #********************************************************************
 
-ers_scheme_type.page_title = ERS scheme or arrangement
-ers_scheme_type.question = Which type of ERS scheme or arrangement is this file for?
+ers_scheme_type.page_title = ERS Scheme or arrangement
+ers_scheme_type.question = What type of ERS Scheme or arrangement is this file for?
 ers_scheme_type.csop = Company Share Option Plan (CSOP - Form 35)
 ers_scheme_type.emi = Enterprise Management Incentives (EMI - Form EMI40)
 ers_scheme_type.saye = Save As You Earn (SAYE - Form 34)
@@ -623,28 +623,28 @@ ers_scheme_type.sip = Share Incentive Plan (SIP - Form 39)
 ers_scheme_type.other = Other (Form 42)
 ers_scheme_type.continue = Continue
 ers_scheme_type.back = Back
-ers_scheme_type.select_scheme_type = Select the type of ERS scheme or arrangement
+ers_scheme_type.select_scheme_type = Select the type of ERS Scheme or arrangement
 
 
-ers_check_file_type.title = Which type of file are you using to report events?
+ers_check_file_type.title = What type of file are you using to report events?
 ers_check_file_type.question = What type of file do you want to check?
-ers_check_file_type.option_1 = Comma separated values (.csv)
-ers_check_file_type.option_2 = OpenDocument Spreadsheet (.ods)
+ers_check_file_type.option_1 = Comma-separated values (CSV)
+ers_check_file_type.option_2 = Open Document Spreadsheet (ODS)
 ers_check_file_type.err.message = Select if you are using CSV or ODS file type.
 
-ers_check_csv_file.title = Choose the .csv files you need to upload as part of your annual return
-ers_check_csv_file.sip.intro = Choose the comma separated values (.csv) files you need to upload as part of your Share Incentive Plan annual return.
-ers_check_csv_file.emi.intro = Choose the comma separated values (.csv) files you need to upload as part of your Enterprise Management Incentives annual return.
-ers_check_csv_file.other.intro = Choose the comma seperated values (.csv) files you need to upload as part of your Other annual return.
-ers_check_csv_file.csop.intro = Choose the comma seperated values (.csv) files you need to upload as part of your Company Share Option Plan annual return.
-ers_check_csv_file.saye.intro = Choose the comma seperated values (.csv) files you need to upload as part of your Save As You Earn annual return.
+ers_check_csv_file.title = Choose the CSV files you need to upload as part of your annual return
+ers_check_csv_file.sip.intro = Choose the comma-separated values (CSV) files you need to upload as part of your Share Incentive Plan annual return.
+ers_check_csv_file.emi.intro = Choose the comma-separated values (CSV) files you need to upload as part of your Enterprise Management Incentives annual return.
+ers_check_csv_file.other.intro = Choose the comma-separated values (CSV) files you need to upload as part of your Other annual return.
+ers_check_csv_file.csop.intro = Choose the comma-separated values (CSV) files you need to upload as part of your Company Share Option Plan annual return.
+ers_check_csv_file.saye.intro = Choose the comma-separated values (CSV) files you need to upload as part of your Save As You Earn annual return.
 
 ers_check_csv_file.continue = Continue
 ers_check_csv_file.check_file_button = Check for errors
-ers_check_csv_file.file_type_error = This isn’t a .csv file.
+ers_check_csv_file.file_type_error = This isn’t a CSV file.
 ers_check_csv_file.no_file_error = No files selected. Please choose your files.
 ers_check_csv_file.clear_all_link = Clear all
-ers_check_csv_file.err.message = Select the .csv files you need to upload as part of your annual return
+ers_check_csv_file.err.message = Select the CSV files you need to upload as part of your annual return
 ers_check_csv_options.hint = Select all that apply
 
 ers_check_csv_file.csop.file0.description = Options granted
@@ -704,7 +704,7 @@ ers_check_csv_file.other.file8.description = Securities sold for more than marke
 ers_check_csv_file.other.file8.file_name = Other_Sold_V4.csv
 
 ers_check_file.title = Choose and check your spreadsheet
-ers_check_file.instruction = Choose the OpenDocument Spreadsheet (ODS, .ods file) that you want to check for formatting errors.
+ers_check_file.instruction = Choose the Open Document Spreadsheet (ODS, ODS file) that you want to check for formatting errors.
 ers_check_file.formatting_errors_link = What are formatting errors?
 ers_check_file.formatting_errors_help = Formatting errors are created when information isn’t entered correctly or structural changes are made to a spreadsheet. For example, a number has been entered where a letter was needed or a column has been removed.
 ers_check_file.file_header_bar = File name
@@ -724,12 +724,12 @@ ers_error_report.sub_heading = What happens next?
 ers_error_report.view_as_html1 = You can also
 ers_error_report.view_as_html2 = view this error report as a web page
 ers_error_report.instructions1 = Correct the formatting errors in your spreadsheet before you check it again or '
-ers_error_report.instructions2 = check a different ERS scheme or arrangement spreadsheet
+ers_error_report.instructions2 = check a different ERS Scheme or arrangement spreadsheet
 
 ers_file_format_successful.page_title = Check complete
 ers_file_format_successful.sub_heading = What happens next?
 ers_file_format_successful.instructions = Check your spreadsheets whenever you update them. Regular checks allow you to identify and then correct formatting errors.
-ers_file_format_successful.return_to_start_page_link = Check another ERS scheme or arrangement spreadsheet
+ers_file_format_successful.return_to_start_page_link = Check another ERS Scheme or arrangement spreadsheet
 ers_file_format_successful.banner = &#10004 There are no formatting errors in your spreadsheet
 
 ers_service_unavailable.page_title = Check your ERS files
