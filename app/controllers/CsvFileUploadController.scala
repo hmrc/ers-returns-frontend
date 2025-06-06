@@ -42,6 +42,7 @@ class CsvFileUploadController @Inject() (val mcc: MessagesControllerComponents,
                                          val sessionService: FrontendSessionService,
                                          globalErrorView: views.html.global_error,
                                          upscanCsvFileUploadView: views.html.upscan_csv_file_upload,
+                                         fileSizeLimitErrorView: views.html.file_size_limit_error,
                                          fileUploadErrorsView: views.html.file_upload_errors,
                                          fileUploadProblemView: views.html.file_upload_problem,
                                          authAction: AuthAction)
@@ -246,11 +247,18 @@ class CsvFileUploadController @Inject() (val mcc: MessagesControllerComponents,
   }
 
   def failure(): Action[AnyContent] = authAction.async { implicit request =>
-    val errorCode      = request.getQueryString("errorCode").getOrElse("Unknown")
-    val errorMessage   = request.getQueryString("errorMessage").getOrElse("Unknown")
-    val errorRequestId = request.getQueryString("errorRequestId").getOrElse("Unknown")
-    logger.error(s"Upscan Failure. errorCode: $errorCode, errorMessage: $errorMessage, errorRequestId: $errorRequestId")
-    Future.successful(getFileUploadProblemPage())
+
+    val code = request.getQueryString("errorCode")
+
+    if (code.isDefined && code.get.equals("EntityTooLarge")) {
+      Future.successful(BadRequest(fileSizeLimitErrorView()))
+    } else {
+      val errorCode      = code.getOrElse("Unknown")
+      val errorMessage   = request.getQueryString("errorMessage").getOrElse("Unknown")
+      val errorRequestId = request.getQueryString("errorRequestId").getOrElse("Unknown")
+      logger.error(s"Upscan Failure. errorCode: $errorCode, errorMessage: $errorMessage, errorRequestId: $errorRequestId")
+      Future.successful(getFileUploadProblemPage())
+    }
   }
 
   def getFileUploadProblemPage()(implicit request: Request[_], messages: Messages): Result =

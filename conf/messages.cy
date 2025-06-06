@@ -808,3 +808,12 @@ ers.file_problem.fileTooSmall = yn wag
 ers.file_problem.invalidFileType = mae’r ffeil wedi’i chadw ar ffurf anghywir – dylai fod ar ffurf CSV neu ODS yn dibynnu ar yr hyn rydych eisoes wedi’i ddewis
 ers.file_problem.invalidFileNameCharacters = mae’r ffeil yn cynnwys cymeriadau annilys
 ers.file_problem.tryAgain = Rhowch gynnig arall arni
+
+
+file_size_limit_error.title = TODO WELSH -  There is a problem - Employment Related Securities – GOV.UK
+file_size_limit_error.heading = TODO WELSH -  There is a problem
+file_size_limit_error.para_1 = TODO WELSH -   Your file is larger than {0}
+file_size_limit_error.para_2 = TODO WELSH -  You cannot upload a file that is larger than {0}
+file_size_limit_error.para_3_1 = TODO WELSH -  You can email
+file_size_limit_error.link = TODO WELSH -  shareschemes@hmrc.gov.uk
+file_size_limit_error.para_3_2 = TODO WELSH -  for help with your submission.
