@@ -9,7 +9,6 @@ GET         /errors-have-been-found-ods                     controllers.FileUplo
 GET         /problem-with-file-upload                       controllers.FileUploadController.odsSchemeMismatchFailure()
 GET         /file-upload/failure                             controllers.FileUploadController.failure()
 GET         /there-is-a-problem                             controllers.FileUploadController.templateFailure()
-GET         /file-upload/failure                            controllers.FileUploadController.failure()
 GET         /if-there-are-no-errors-ods                     controllers.FileUploadController.success()
 
 GET         /upload-csv                                     controllers.CsvFileUploadController.uploadFilePage()

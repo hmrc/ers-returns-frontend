@@ -34,6 +34,7 @@ import play.api.i18n
 import play.api.i18n.{MessagesApi, MessagesImpl}
 import play.api.libs.json.{JsObject, Json}
 import play.api.mvc._
+import play.api.mvc.request.RequestTarget
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import services.UpscanService
@@ -41,7 +42,7 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.mongo.cache.CacheItem
 import utils.Fixtures.ersRequestObject
 import utils._
-import views.html.{file_upload_errors, file_upload_problem, global_error, upscan_csv_file_upload}
+import views.html._
 
 import java.time.{Instant, ZonedDateTime}
 import scala.concurrent.{ExecutionContext, Future}
@@ -69,13 +70,14 @@ class CsvFileUploadControllerSpec
     ExecutionContext.global
   )
 
-  implicit lazy val testMessages: MessagesImpl        = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
-  implicit lazy val mat: Materializer                 = app.materializer
-  implicit val mockActorSystem: ActorSystem                    = app.injector.instanceOf[ActorSystem]
-  val globalErrorView: global_error                   = app.injector.instanceOf[global_error]
+  implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
+  implicit lazy val mat: Materializer = app.materializer
+  implicit val mockActorSystem: ActorSystem = app.injector.instanceOf[ActorSystem]
+  val globalErrorView: global_error = app.injector.instanceOf[global_error]
   val upscanCsvFileUploadView: upscan_csv_file_upload = app.injector.instanceOf[upscan_csv_file_upload]
-  val fileUploadErrorsView: file_upload_errors        = app.injector.instanceOf[file_upload_errors]
-  val fileUploadProblemView: file_upload_problem      = app.injector.instanceOf[file_upload_problem]
+  val fileUploadErrorsView: file_upload_errors = app.injector.instanceOf[file_upload_errors]
+  val fileUploadProblemView: file_upload_problem = app.injector.instanceOf[file_upload_problem]
+  val fileSizeLimitErrorView: views.html.file_size_limit_error = app.injector.instanceOf[file_size_limit_error]
 
   val mockUpscanService: UpscanService   = mock[UpscanService]
 
@@ -87,6 +89,7 @@ class CsvFileUploadControllerSpec
       mockSessionService,
       globalErrorView,
       upscanCsvFileUploadView,
+      fileSizeLimitErrorView,
       fileUploadErrorsView,
       fileUploadProblemView,
       testAuthAction
@@ -128,6 +131,7 @@ class CsvFileUploadControllerSpec
         when(
           mockSessionService.fetch[UpscanCsvFilesCallbackList](meq("check-csv-files"))(any(), any())
         ) thenReturn Future.successful(upscanCsvFilesCallbackList)
+
         when(mockUpscanService.getUpscanFormDataCsv(UploadId(anyString()), any())(any(), any()))
           .thenReturn(Future.failed(new Exception("Expected exception")))
 
@@ -145,7 +149,7 @@ class CsvFileUploadControllerSpec
         contentAsString(result) should include(testMessages("ers.global_errors.title"))
       }
 
-      "there is no files to upload" in {
+      "there are no files to upload" in {
         val upscanCsvFilesCallbackList: UpscanCsvFilesCallbackList = UpscanCsvFilesCallbackList(
           List(
             UpscanCsvFilesCallback(testUploadId, "file1", InProgress)
@@ -236,6 +240,14 @@ class CsvFileUploadControllerSpec
       val result = contentAsString(csvFileUploadController.failure().apply(FakeRequest("GET", "")))
       assert(result.contains(testMessages("ers.file_problem.heading")))
     }
+
+
+    "redirect to the file size limit error page" in {
+      val request = FakeRequest().withTarget(RequestTarget("123", "/file-upload/failure", Map("errorCode" -> Seq("EntityTooLarge"))))
+      val result = contentAsString(csvFileUploadController.failure().apply(request))
+      assert(result.contains(testMessages("There is a problem - Employment Related Securities – GOV.UK")))
+    }
+
   }
 
   "calling validationFailure" should {
@@ -274,6 +286,7 @@ class CsvFileUploadControllerSpec
         mockSessionService,
         globalErrorView,
         upscanCsvFileUploadView,
+        fileSizeLimitErrorView,
         fileUploadErrorsView,
         fileUploadProblemView,
         testAuthAction
@@ -351,6 +364,7 @@ class CsvFileUploadControllerSpec
         mockSessionService,
         globalErrorView,
         upscanCsvFileUploadView,
+        fileSizeLimitErrorView,
         fileUploadErrorsView,
         fileUploadProblemView,
         testAuthAction
@@ -387,6 +401,7 @@ class CsvFileUploadControllerSpec
         mockSessionService,
         globalErrorView,
         upscanCsvFileUploadView,
+        fileSizeLimitErrorView,
         fileUploadErrorsView,
         fileUploadProblemView,
         testAuthAction
@@ -462,6 +477,7 @@ class CsvFileUploadControllerSpec
         mockSessionService,
         globalErrorView,
         upscanCsvFileUploadView,
+        fileSizeLimitErrorView,
         fileUploadErrorsView,
         fileUploadProblemView,
         testAuthAction
@@ -526,6 +542,7 @@ class CsvFileUploadControllerSpec
         mockSessionService,
         globalErrorView,
         upscanCsvFileUploadView,
+        fileSizeLimitErrorView,
         fileUploadErrorsView,
         fileUploadProblemView,
         testAuthAction
@@ -692,6 +709,7 @@ class CsvFileUploadControllerSpec
         mockSessionService,
         globalErrorView,
         upscanCsvFileUploadView,
+        fileSizeLimitErrorView,
         fileUploadErrorsView,
         fileUploadProblemView,
         testAuthAction
@@ -769,6 +787,7 @@ class CsvFileUploadControllerSpec
         mockSessionService,
         globalErrorView,
         upscanCsvFileUploadView,
+        fileSizeLimitErrorView,
         fileUploadErrorsView,
         fileUploadProblemView,
         testAuthAction
