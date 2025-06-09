@@ -60,7 +60,7 @@ class CsvFileUploadController @Inject() (val mcc: MessagesControllerComponents,
       csvFilesList   <- sessionService.fetch[UpscanCsvFilesList](ersUtil.CSV_FILES_UPLOAD)
       currentCsvFile  = csvFilesList.ids.find(ids => ids.uploadStatus == NotStarted)
       if currentCsvFile.isDefined
-        upscanFormData <- upscanService.getUpscanFormDataCsv(currentCsvFile.get.uploadId, requestObject.getSchemeReference)
+      upscanFormData <- upscanService.getUpscanFormDataCsv(currentCsvFile.get.uploadId, requestObject.getSchemeReference)
     } yield {
       Ok(upscanCsvFileUploadView(requestObject, upscanFormData, currentCsvFile.get.fileId, useCsopV5Templates(requestObject.taxYear)))
     }).recover {
@@ -247,16 +247,16 @@ class CsvFileUploadController @Inject() (val mcc: MessagesControllerComponents,
   }
 
   def failure(): Action[AnyContent] = authAction.async { implicit request =>
+    val errorCode      = request.getQueryString("errorCode").getOrElse("Unknown")
+    val errorMessage   = request.getQueryString("errorMessage").getOrElse("Unknown")
+    val errorRequestId = request.getQueryString("errorRequestId").getOrElse("Unknown")
 
-    val code = request.getQueryString("errorCode")
+    logger.error(s"Upscan Failure. errorCode: $errorCode, errorMessage: $errorMessage, errorRequestId: $errorRequestId")
 
-    if (code.isDefined && code.get.equals("EntityTooLarge")) {
-      Future.successful(BadRequest(fileSizeLimitErrorView()))
+    if (errorCode == "EntityTooLarge") {
+      val backLinkUrl = routes.CsvFileUploadController.uploadFilePage().url
+      Future.successful(BadRequest(fileSizeLimitErrorView(backLinkUrl)))
     } else {
-      val errorCode      = code.getOrElse("Unknown")
-      val errorMessage   = request.getQueryString("errorMessage").getOrElse("Unknown")
-      val errorRequestId = request.getQueryString("errorRequestId").getOrElse("Unknown")
-      logger.error(s"Upscan Failure. errorCode: $errorCode, errorMessage: $errorMessage, errorRequestId: $errorRequestId")
       Future.successful(getFileUploadProblemPage())
     }
   }

@@ -6,7 +6,7 @@ GET         /assets/*file                               	    controllers.Assets.
 
 GET         /upload-ods-file                                 controllers.FileUploadController.uploadFilePage()
 GET         /errors-have-been-found-ods                     controllers.FileUploadController.validationFailure()
-GET         /problem-with-file-upload                       controllers.FileUploadController.odsSchemeMismatchFailure()
+GET         /problem-with-file-upload                        controllers.FileUploadController.odsSchemeMismatchFailure()
 GET         /file-upload/failure                             controllers.FileUploadController.failure()
 GET         /there-is-a-problem                             controllers.FileUploadController.templateFailure()
 GET         /if-there-are-no-errors-ods                     controllers.FileUploadController.success()
