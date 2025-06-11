@@ -245,7 +245,7 @@ class CsvFileUploadControllerSpec
     "redirect to the file size limit error page" in {
       val request = FakeRequest().withTarget(RequestTarget("123", "/file-upload/failure", Map("errorCode" -> Seq("EntityTooLarge"))))
       val result = contentAsString(csvFileUploadController.failure().apply(request))
-      assert(result.contains(testMessages("There is a problem - Employment Related Securities – GOV.UK")))
+      assert(result.contains(testMessages("There is a problem – Employment Related Securities – GOV.UK")))
     }
 
   }

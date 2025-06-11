@@ -810,7 +810,7 @@ ers.file_problem.invalidFileNameCharacters = mae’r ffeil yn cynnwys cymeriadau
 ers.file_problem.tryAgain = Rhowch gynnig arall arni
 
 
-file_size_limit_error.title = Mae problem - Gwarantau ar Sail Cyflogaeth – GOV.UK
+file_size_limit_error.title = Mae problem
 file_size_limit_error.heading = Mae problem
 file_size_limit_error.para_1 = Mae’ch ffeil yn fwy na {0}.
 file_size_limit_error.para_2 = Ni allwch uwchlwytho ffeil sy’n fwy na {0}

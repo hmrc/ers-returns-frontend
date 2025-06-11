@@ -26,8 +26,6 @@
 
 @hrefLink = {@messages("file_size_limit_error.link")}
 
-
-@* Todo title *@
 @govuk_wrapper(title = messages("file_size_limit_error.title") + " " + messages("ers.title.postfix")) {
 
     @govukBackLink(
@@ -44,16 +42,13 @@
         )
     )
 
-
     <p class="govuk-body">@messages("file_size_limit_error.para_1", appConfig.uploadFileSizeInMB)MB.</p>
 
     <p class="govuk-body">@messages("file_size_limit_error.para_2", appConfig.uploadFileSizeInMB)MB.</p>
 
-
     <p class="govuk-body">@messages("file_size_limit_error.para_3_1")
-        <a href=mailto:@hrefLink class="govuk-link"> @messages("file_size_limit_error.link")</a>
+        <a href=mailto:@hrefLink class="govuk-link share-schemes-link"> @messages("file_size_limit_error.link")</a>
         @messages("file_size_limit_error.para_3_2")
     </p>
-
 
 }
