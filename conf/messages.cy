@@ -810,10 +810,10 @@ ers.file_problem.invalidFileNameCharacters = mae’r ffeil yn cynnwys cymeriadau
 ers.file_problem.tryAgain = Rhowch gynnig arall arni
 
 
-file_size_limit_error.title = TODO WELSH -  There is a problem - Employment Related Securities – GOV.UK
-file_size_limit_error.heading = TODO WELSH -  There is a problem
-file_size_limit_error.para_1 = TODO WELSH -   Your file is larger than {0}
-file_size_limit_error.para_2 = TODO WELSH -  You cannot upload a file that is larger than {0}
-file_size_limit_error.para_3_1 = TODO WELSH -  You can email
-file_size_limit_error.link = TODO WELSH -  shareschemes@hmrc.gov.uk
-file_size_limit_error.para_3_2 = TODO WELSH -  for help with your submission.
+file_size_limit_error.title = Mae problem - Gwarantau ar Sail Cyflogaeth – GOV.UK
+file_size_limit_error.heading = Mae problem
+file_size_limit_error.para_1 = Mae’ch ffeil yn fwy na {0}.
+file_size_limit_error.para_2 = Ni allwch uwchlwytho ffeil sy’n fwy na {0}
+file_size_limit_error.para_3_1 = Gallwch anfon e-bost at
+file_size_limit_error.link = shareschemes@hmrc.gov.uk
+file_size_limit_error.para_3_2 = i gael help gyda’ch cyflwyniad.
