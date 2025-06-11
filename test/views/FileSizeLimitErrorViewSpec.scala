@@ -18,19 +18,31 @@ package views
 
 import config.ApplicationConfig
 import org.jsoup.nodes.Document
+import org.mockito.Mockito.{spy, when}
+import play.api.Application
 import play.api.i18n.Messages
+import play.api.inject.bind
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.FakeRequest
+import uk.gov.hmrc.mongo.MongoComponent
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import views.html.file_size_limit_error
 
 import scala.jdk.CollectionConverters.CollectionHasAsScala
 
 class FileSizeLimitErrorViewSpec extends ViewSpecBase {
 
-  val view = app.injector.instanceOf[file_size_limit_error]
+  val oneHundredMbInBytes = 104857600
+
+   val application: Application = new GuiceApplicationBuilder()
+    .configure("file-size.uploadSizeLimit" -> oneHundredMbInBytes)
+    .build()
 
   implicit val request = FakeRequest("GET", "/foo")
-  implicit val appConfig: ApplicationConfig = app.injector.instanceOf[ApplicationConfig]
   implicit val messages: Messages = testMessages
+  implicit val appConfig: ApplicationConfig = application.injector.instanceOf[ApplicationConfig]
+
+  val view = application.injector.instanceOf[file_size_limit_error]
 
   "file size limit error view" should {
 
@@ -59,8 +71,8 @@ class FileSizeLimitErrorViewSpec extends ViewSpecBase {
 
       paragraphs.size mustBe 3
       paragraphs mustBe List(
-        "Your file is larger than 0MB.",
-        "You cannot upload a file that is larger than 0MB.",
+        "Your file is larger than 100MB.",
+        "You cannot upload a file that is larger than 100MB.",
         "You can email shareschemes@hmrc.gov.uk for help with your submission."
       )
 
