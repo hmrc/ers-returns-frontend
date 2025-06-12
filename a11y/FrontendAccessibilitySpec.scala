@@ -100,6 +100,7 @@ class FrontendAccessibilitySpec extends AutomaticAccessibilitySpec {
     case manual_is_the_company_in_uk: manual_is_the_company_in_uk => render(manual_is_the_company_in_uk)
     case scheme_organiser_summary: scheme_organiser_summary => render(scheme_organiser_summary)
     case file_upload_errors_ods : file_upload_errors_ods => render(file_upload_errors_ods)
+    case file_size_limit_error: file_size_limit_error => render(file_size_limit_error)
   }
 
   runAccessibilityTests()

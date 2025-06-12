@@ -808,3 +808,12 @@ ers.file_problem.fileTooSmall = yn wag
 ers.file_problem.invalidFileType = mae’r ffeil wedi’i chadw ar ffurf anghywir – dylai fod ar ffurf CSV neu ODS yn dibynnu ar yr hyn rydych eisoes wedi’i ddewis
 ers.file_problem.invalidFileNameCharacters = mae’r ffeil yn cynnwys cymeriadau annilys
 ers.file_problem.tryAgain = Rhowch gynnig arall arni
+
+
+file_size_limit_error.title = Mae problem
+file_size_limit_error.heading = Mae problem
+file_size_limit_error.para_1 = Mae’ch ffeil yn fwy na {0}.
+file_size_limit_error.para_2 = Ni allwch uwchlwytho ffeil sy’n fwy na {0}
+file_size_limit_error.para_3_1 = Gallwch anfon e-bost at
+file_size_limit_error.link = shareschemes@hmrc.gov.uk
+file_size_limit_error.para_3_2 = i gael help gyda’ch cyflwyniad.

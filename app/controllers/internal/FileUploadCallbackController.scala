@@ -33,7 +33,7 @@ class FileUploadCallbackController @Inject() (val mcc: MessagesControllerCompone
                                               fileSizeUtils: FileSizeUtils)
                                              (implicit val ec: ExecutionContext) extends FrontendController(mcc) with Logging with Constants {
 
-  def callback(scRef: String, sessionId: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
+  def callback(schemeRef: String, sessionId: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
     request.body
       .validate[UpscanCallback]
       .fold(
@@ -47,7 +47,7 @@ class FileUploadCallbackController @Inject() (val mcc: MessagesControllerCompone
           val uploadStatus = callback match {
             case callback: UpscanReadyCallback    =>
               val fileSize = callback.uploadDetails.size
-              fileSizeUtils.logFileSize(scRef, fileSize)
+              fileSizeUtils.logFileSize(schemeRef, fileSize)
               UploadedSuccessfully(callback.uploadDetails.fileName, callback.downloadUrl.toExternalForm)
             case UpscanFailedCallback(_, details) =>
               logger.warn(
