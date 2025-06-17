@@ -803,7 +803,6 @@ ers.file_problem.title = Bu problem wrth uwchlwytho’r ffeil - Gwarantau ar Sai
 ers.file_problem.heading = Bu problem wrth uwchlwytho’r ffeil
 ers.file_problem.paragraph = Gall hyn fod oherwydd y canlynol:
 ers.file_problem.invalidFileName = mae gan y ffeil yr enw anghywir neu mae’r enw yn fwy na 240 o gymeriadau
-ers.file_problem.fileTooLarge = yn rhy fawr – mae terfyn o {0}MB ar gyfer ffeiliau CSV ac ODS
 ers.file_problem.fileTooSmall = yn wag
 ers.file_problem.invalidFileType = mae’r ffeil wedi’i chadw ar ffurf anghywir – dylai fod ar ffurf CSV neu ODS yn dibynnu ar yr hyn rydych eisoes wedi’i ddewis
 ers.file_problem.invalidFileNameCharacters = mae’r ffeil yn cynnwys cymeriadau annilys
