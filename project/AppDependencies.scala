@@ -4,7 +4,7 @@ import sbt.*
 object AppDependencies {
   val pdfboxVersion    = "2.0.33"
   val openHtmlVersion  = "1.0.10"
-  val bootstrapVersion = "9.11.0"
+  val bootstrapVersion = "9.13.0"
   val mongoVersion     = "2.6.0"
 
   val compile: Seq[ModuleID] = Seq(

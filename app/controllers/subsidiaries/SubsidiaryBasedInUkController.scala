@@ -69,7 +69,7 @@ class SubsidiaryBasedInUkController @Inject()(val mcc: MessagesControllerCompone
   val cacheKey: String = ersUtil.SUBSIDIARY_COMPANY_BASED
   implicit val format: Format[CompanyBasedInUk] = CompanyBasedInUk.format
 
-  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier, request: Request[_]): Future[Result] = {
+  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier, request: RequestHeader): Future[Result] = {
     for {
       subsidiaryBasedInUk <-  if (edit) {
         sessionService.fetchCompaniesOptionally().map {

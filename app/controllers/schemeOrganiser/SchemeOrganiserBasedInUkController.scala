@@ -50,7 +50,7 @@ class SchemeOrganiserBasedInUkController @Inject()(val mcc: MessagesControllerCo
   val cacheKey: String = ersUtil.SCHEME_ORGANISER_BASED
   implicit val format: Format[CompanyBasedInUk] = CompanyBasedInUk.format
 
-  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier, request: Request[_]): Future[Result] = {
+  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier, request: RequestHeader): Future[Result] = {
     for {
       subsidiaryBasedInUk <- if (edit) {
         sessionService.fetch[CompanyDetails](ersUtil.SCHEME_ORGANISER_CACHE).map {

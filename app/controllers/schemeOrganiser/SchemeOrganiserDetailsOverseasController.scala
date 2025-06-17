@@ -51,7 +51,7 @@ class SchemeOrganiserDetailsOverseasController @Inject()(val mcc: MessagesContro
 
   implicit val format: Format[Company] = Company.format
 
-  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier, request: Request[_]): Future[Result] = {
+  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier, request: RequestHeader): Future[Result] = {
     if (edit) {
       Future.successful(Redirect(controllers.schemeOrganiser.routes.SchemeOrganiserAddressOverseasController.editCompany(index)))
     } else {

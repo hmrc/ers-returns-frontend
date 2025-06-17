@@ -32,7 +32,7 @@ class CompanyDetailsService @Inject()(
   private def filterOutDeletedCompany(companyList: CompanyDetailsList, indexToDelete: Int): List[CompanyDetails] =
     companyList.companies.zipWithIndex.filterNot(_._2 == indexToDelete).map(_._1)
 
-  def deleteCompany(companies: CompanyDetailsList, index: Int)(implicit request: Request[_]): Future[Boolean] = {
+  def deleteCompany(companies: CompanyDetailsList, index: Int)(implicit request: RequestHeader): Future[Boolean] = {
     val activeCompanies = CompanyDetailsList(filterOutDeletedCompany(companies, index))
     (for {
         _ <- sessionService.cache(ersUtil.SUBSIDIARY_COMPANIES_CACHE, activeCompanies)
@@ -46,7 +46,7 @@ class CompanyDetailsService @Inject()(
     }
   }
 
-  def updateSubsidiaryCompanyCache(index: Int)(implicit request: Request[_]): Unit = {
+  def updateSubsidiaryCompanyCache(index: Int)(implicit request: RequestHeader): Unit = {
     try {
       sessionService.fetch[Company](ersUtil.SUBSIDIARY_COMPANY_NAME_CACHE).map(name =>
         sessionService.fetchCompaniesOptionally().map(cachedCompanies => {
@@ -60,7 +60,7 @@ class CompanyDetailsService @Inject()(
     }
   }
 
-  def updateSchemeOrganiserCache(implicit request: Request[_]): Unit = {
+  def updateSchemeOrganiserCache(implicit request: RequestHeader): Unit = {
     try {
       sessionService.fetch[Company](ersUtil.SCHEME_ORGANISER_NAME_CACHE).map(name =>
         sessionService.fetch[CompanyAddress](ersUtil.SCHEME_ORGANISER_ADDRESS_CACHE).map(address =>

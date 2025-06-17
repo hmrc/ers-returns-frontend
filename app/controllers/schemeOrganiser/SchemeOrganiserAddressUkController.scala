@@ -52,7 +52,7 @@ class SchemeOrganiserAddressUkController @Inject()(val mcc: MessagesControllerCo
 
   implicit val format: Format[CompanyAddress] = CompanyAddress.format
 
-  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier, request: Request[_]): Future[Result] = {
+  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier, request: RequestHeader): Future[Result] = {
     if (edit) {
       Future.successful(Redirect(controllers.schemeOrganiser.routes.SchemeOrganiserController.schemeOrganiserSummaryPage()))
     } else {

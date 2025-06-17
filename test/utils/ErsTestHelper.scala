@@ -40,7 +40,6 @@ import services.{CompanyDetailsService, FileValidatorService, FrontendSessionSer
 import uk.gov.hmrc.http.client.{HttpClientV2, RequestBuilder}
 import uk.gov.hmrc.http.{HeaderCarrier, SessionKeys}
 import uk.gov.hmrc.mongo.cache.CacheItem
-import uk.gov.hmrc.play.bootstrap.http.HttpClientV2Provider
 
 import java.time.Instant
 import java.util.UUID
@@ -90,7 +89,7 @@ trait ErsTestHelper extends MockitoSugar with AuthHelper with ERSFakeApplication
   val OPTION_UPLOAD_SPREADSHEET  = "1"
   val TRUSTEES_CACHE             = "trustees"
 
-  val mockHttp: HttpClientV2Provider = mock[HttpClientV2Provider]
+  val mockHttp: HttpClientV2 = mock[HttpClientV2]
   val mockHttpClient: HttpClientV2 = mock[HttpClientV2]
   val mockRequestBuilder: RequestBuilder = mock[RequestBuilder]
   implicit val mockAppConfig: ApplicationConfig = mock[ApplicationConfig]

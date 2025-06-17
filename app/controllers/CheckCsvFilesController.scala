@@ -73,7 +73,7 @@ class CheckCsvFilesController @Inject() (val mcc: MessagesControllerComponents,
       )
 
   def performCsvFilesPageSelected(formData: CsvFilesList)
-                                 (implicit request: Request[_]): Future[Result] = {
+                                 (implicit request: RequestHeader): Future[Result] = {
     val csvFilesCallbackList: UpscanCsvFilesList = createCacheData(formData.files)
     if (csvFilesCallbackList.ids.isEmpty) {
       reloadWithError()
@@ -101,7 +101,7 @@ class CheckCsvFilesController @Inject() (val mcc: MessagesControllerComponents,
         .flashing("csv-file-not-selected-error" -> messages(ersUtil.PAGE_CHECK_CSV_FILE + ".err.message"))
     )
 
-  def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result =
+  def getGlobalErrorPage(implicit request: RequestHeader, messages: Messages): Result =
     Ok(
       globalErrorView(
         "ers.global_errors.title",

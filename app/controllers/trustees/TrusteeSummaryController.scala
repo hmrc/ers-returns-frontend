@@ -106,7 +106,7 @@ class TrusteeSummaryController @Inject()(val mcc: MessagesControllerComponents,
     }
   }
 
-  def getGlobalErrorPage(status: Status = InternalServerError)(implicit request: Request[_], messages: Messages): Result =
+  def getGlobalErrorPage(status: Status = InternalServerError)(implicit request: RequestHeader, messages: Messages): Result =
     status(
       globalErrorView(
         "ers.global_errors.title",

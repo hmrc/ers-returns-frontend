@@ -156,7 +156,7 @@ class SummaryDeclarationController @Inject() (val mcc: MessagesControllerCompone
     getEntry[CompanyDetailsList](cacheItem, DataKey(ersUtil.SUBSIDIARY_COMPANIES_CACHE))
       .getOrElse(CompanyDetailsList(List[CompanyDetails]()))
 
-  def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result =
+  def getGlobalErrorPage(implicit request: RequestHeader, messages: Messages): Result =
     InternalServerError(
       globalErrorView(
         "ers.global_errors.title",

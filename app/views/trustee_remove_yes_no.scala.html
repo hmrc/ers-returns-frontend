@@ -27,7 +27,7 @@
     hmrcPageHeading: HmrcPageHeading
 )
 
-@(form: Form[_], requestObject: RequestObject, trusteeName: String, index: Int)(implicit request: Request[_], messages: Messages, appConfig: ApplicationConfig)
+@(form: Form[_], requestObject: RequestObject, trusteeName: String, index: Int)(implicit request: RequestHeader, messages: Messages, appConfig: ApplicationConfig)
 
 @govuk_wrapper(title = messages("ers_trustee_remove.title")) {
 

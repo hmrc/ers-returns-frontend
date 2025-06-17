@@ -224,7 +224,7 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
     continueFromGroupPlanSummaryPage(scheme)
   }
 
-  def continueFromGroupPlanSummaryPage(scheme: String)(implicit request: Request[_]): Future[Result] = {
+  def continueFromGroupPlanSummaryPage(scheme: String)(implicit request: RequestHeader): Future[Result] = {
     RsFormMappings.addSubsidiaryForm().bindFromRequest().fold(
       _ => {
         for {
@@ -253,7 +253,7 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
     )
   }
 
-  def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result =
+  def getGlobalErrorPage(implicit request: RequestHeader, messages: Messages): Result =
     InternalServerError(
       globalErrorView(
         "ers.global_errors.title",

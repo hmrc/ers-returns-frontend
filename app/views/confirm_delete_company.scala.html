@@ -30,7 +30,7 @@
         formWithCSRF: FormWithCSRF
 )
 
-@(requestObject: RequestObject, index: Int, form: Form[_], finalCompany: Boolean, companyName: String)(implicit request: Request[_], messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
+@(requestObject: RequestObject, index: Int, form: Form[_], finalCompany: Boolean, companyName: String)(implicit request: RequestHeader, messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 
 @schemeId = @{requestObject.getSchemeId}
 

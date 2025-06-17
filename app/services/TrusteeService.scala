@@ -29,7 +29,7 @@ class TrusteeService @Inject()(ersUtil: ERSUtil,
                                sessionService: FrontendSessionService
                               )(implicit ec: ExecutionContext) extends Logging {
 
-  def updateTrusteeCache(index: Int)(implicit request: Request[_]): Future[Unit] = {
+  def updateTrusteeCache(index: Int)(implicit request: RequestHeader): Future[Unit] = {
     (for {
       name <- sessionService.fetch[TrusteeName](ersUtil.TRUSTEE_NAME_CACHE)
       cachedTrustees <- sessionService.fetchTrusteesOptionally()
@@ -56,7 +56,7 @@ class TrusteeService @Inject()(ersUtil: ERSUtil,
       }
     }).distinct
 
-  def deleteTrustee(index: Int)(implicit request: Request[_]): Future[Boolean] = {
+  def deleteTrustee(index: Int)(implicit request: RequestHeader): Future[Boolean] = {
     (for {
       cachedTrusteeList <- sessionService.fetch[TrusteeDetailsList](ersUtil.TRUSTEES_CACHE)
       trusteeDetailsList = TrusteeDetailsList(filterDeletedTrustee(cachedTrusteeList, index))

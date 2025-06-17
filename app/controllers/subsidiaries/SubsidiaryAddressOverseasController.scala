@@ -53,7 +53,7 @@ class SubsidiaryAddressOverseasController  @Inject()(val mcc: MessagesController
   val cacheKey: String = ersUtil.SUBSIDIARY_COMPANY_ADDRESS_CACHE
   implicit val format: Format[CompanyAddress] = CompanyAddress.format
 
-  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier, request: Request[_]): Future[Result] = {
+  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier, request: RequestHeader): Future[Result] = {
     if (edit) {
       Future.successful(Redirect(controllers.subsidiaries.routes.GroupSchemeController.groupPlanSummaryPage()))
     } else {

@@ -44,7 +44,7 @@ trait TrusteeBaseController[A] extends FrontendController with I18nSupport with 
   implicit val ec: ExecutionContext
   implicit val format: Format[A]
 
-  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier, request: Request[_]): Future[Result]
+  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier, request: RequestHeader): Future[Result]
 
   def form(implicit request: Request[AnyContent]): Form[A]
 
@@ -119,7 +119,7 @@ trait TrusteeBaseController[A] extends FrontendController with I18nSupport with 
       }
   }
 
-  def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result = {
+  def getGlobalErrorPage(implicit request: RequestHeader, messages: Messages): Result = {
     Ok(globalErrorView(
       "ers.global_errors.title",
       "ers.global_errors.heading",

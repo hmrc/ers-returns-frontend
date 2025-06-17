@@ -38,21 +38,21 @@ class FrontendSessionService @Inject()(val sessionCache: FrontendSessionsReposit
                                        fileValidatorService: FileValidatorService,
                                        applicationConfig: ApplicationConfig)(implicit ec: ExecutionContext) extends PageBuilder with Logging with Constants {
 
-  def cache[T](key: String, body: T)(implicit request: Request[_], formats: json.Format[T]): Future[(String, String)] =
+  def cache[T](key: String, body: T)(implicit request: RequestHeader, formats: json.Format[T]): Future[(String, String)] =
     sessionCache.putSession[T](DataKey(key), body).recoverWith {
       case ex: Exception =>
         logger.error(s"Failed to cache data for key $key", ex)
         Future.failed(ex)
     }
 
-  def remove(key: String)(implicit request: Request[_]): Future[Unit] =
+  def remove(key: String)(implicit request: RequestHeader): Future[Unit] =
     sessionCache.deleteFromSession(DataKey(key)).recoverWith {
       case ex: Exception =>
         logger.error(s"Failed to remove data for key $key from cache, Exception: ${ex.getMessage}", ex)
         Future.failed(ex)
     }
 
-  def fetch[T](key: String)(implicit request: Request[_], formats: json.Format[T]): Future[T] = {
+  def fetch[T](key: String)(implicit request: RequestHeader, formats: json.Format[T]): Future[T] = {
     sessionCache.getFromSession[JsValue](DataKey(key)).map { result =>
       result.get.as[T] //to be picked up in tech debt review
     } recoverWith {
@@ -66,7 +66,7 @@ class FrontendSessionService @Inject()(val sessionCache: FrontendSessionsReposit
     }
   }
 
-  def fetchTrusteesOptionally()(implicit request: Request[_], formats: json.Format[TrusteeDetailsList]): Future[TrusteeDetailsList] = {
+  def fetchTrusteesOptionally()(implicit request: RequestHeader, formats: json.Format[TrusteeDetailsList]): Future[TrusteeDetailsList] = {
     fetch[TrusteeDetailsList](TRUSTEES_CACHE).recoverWith {
       case _: Exception =>
         logger.info(s"[FrontendSessionService][fetchTrusteesOptionally] No trustees were found")

@@ -69,7 +69,7 @@ class SubsidiaryDetailsOverseasController @Inject()(val mcc: MessagesControllerC
 
   implicit val format: Format[Company] = Company.format
 
-  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier, request: Request[_]): Future[Result] = {
+  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier, request: RequestHeader): Future[Result] = {
     if (edit) {
       Future.successful(Redirect(controllers.subsidiaries.routes.SubsidiaryAddressOverseasController.editCompany(index)))
     } else {

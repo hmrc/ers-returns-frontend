@@ -50,7 +50,7 @@ class TrusteeAddressOverseasController @Inject()(val mcc: MessagesControllerComp
 
   val cacheKey: String = ersUtil.TRUSTEE_ADDRESS_CACHE
 
-  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier, request: Request[_]): Future[Result] = {
+  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier, request: RequestHeader): Future[Result] = {
     if (edit) {
       Future.successful(Redirect(controllers.trustees.routes.TrusteeSummaryController.trusteeSummaryPage()))
     } else {

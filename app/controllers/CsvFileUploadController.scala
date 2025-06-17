@@ -253,14 +253,14 @@ class CsvFileUploadController @Inject() (val mcc: MessagesControllerComponents,
     Future.successful(getFileUploadProblemPage())
   }
 
-  def getFileUploadProblemPage()(implicit request: Request[_], messages: Messages): Result =
+  def getFileUploadProblemPage()(implicit request: RequestHeader, messages: Messages): Result =
     BadRequest(
       fileUploadProblemView(
         "ers.file_problem.title"
       )(request, messages, appConfig)
     )
 
-  def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result =
+  def getGlobalErrorPage(implicit request: RequestHeader, messages: Messages): Result =
     InternalServerError(
       globalErrorView(
         "ers.global_errors.title",

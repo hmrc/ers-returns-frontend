@@ -189,7 +189,7 @@ class ConfirmationPageControllerSpec
 
     "return OK if there are no exceptions thrown and confirmation date time already exists" in {
       val mockedSession = mock[Session]
-      val mockedRequest = mock[Request[_]]
+      val mockedRequest = mock[RequestHeader]
 
       when(
         mockedSession.get(anyString())

@@ -50,7 +50,7 @@ class TrusteeBasedInUkController @Inject()(val mcc: MessagesControllerComponents
 
   val cacheKey: String = ersUtil.TRUSTEE_BASED_CACHE
 
-  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier, request: Request[_]): Future[Result] = {
+  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier, request: RequestHeader): Future[Result] = {
     for {
       trusteeBasedInUk <-  if (edit) {
         sessionService.fetchTrusteesOptionally().map {

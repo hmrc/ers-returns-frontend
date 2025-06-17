@@ -85,7 +85,6 @@ class ReturnServiceControllerSpec
 
   before {
     mreset(mockHttp, mockHttpClient)
-    when(mockHttp.get()).thenReturn(mockHttpClient)
     when(mockHttpClient.post(any())(any())).thenReturn(mockRequestBuilder)
     when(mockHttpClient.get(any())(any())).thenReturn(mockRequestBuilder)
     when(mockRequestBuilder.setHeader(any())).thenReturn(mockRequestBuilder)
