@@ -18,14 +18,10 @@ package views
 
 import config.ApplicationConfig
 import org.jsoup.nodes.Document
-import org.mockito.Mockito.{spy, when}
 import play.api.Application
 import play.api.i18n.Messages
-import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.FakeRequest
-import uk.gov.hmrc.mongo.MongoComponent
-import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import views.html.file_size_limit_error
 
 import scala.jdk.CollectionConverters.CollectionHasAsScala
@@ -71,8 +67,8 @@ class FileSizeLimitErrorViewSpec extends ViewSpecBase {
 
       paragraphs.size mustBe 3
       paragraphs mustBe List(
-        "Your file is larger than 100MB.",
-        "You cannot upload a file that is larger than 100MB.",
+        "Your file is larger than 104.857MB.",
+        "You cannot upload a file that is larger than 104.857MB.",
         "You can email shareschemes@hmrc.gov.uk for help with your submission."
       )
 
