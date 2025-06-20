@@ -50,6 +50,9 @@ class ConfirmationPageController @Inject()(val mcc: MessagesControllerComponents
   extends FrontendController(mcc) with I18nSupport with Metrics with JsonParser with Logging {
 
   def confirmationPage(): Action[AnyContent] = authAction.async { implicit request =>
+    sessionService.fetch[ErsMetaData](ersUtil.ERS_METADATA).map { ele =>
+      logger.info(s"[ConfirmationPageController][confirmationPage] Fetched request object with SAP Number: ${ele.sapNumber}")
+    }
     showConfirmationPage()(request, hc)
   }
 
@@ -65,6 +68,8 @@ class ConfirmationPageController @Inject()(val mcc: MessagesControllerComponents
             logger.error(s"[ConfirmationPageController][showConfirmationPage] Did cache util fail for scheme $schemeRef all.sapNumber is empty: $all")
           val submissionJson = getSubmissionJson(all.schemeInfo.schemeRef, all.schemeInfo.schemeType, all.schemeInfo.taxYear, "EOY-RETURN")
           ersConnector.connectToEtmpSummarySubmit(all.sapNumber.get, submissionJson).flatMap { bundle =>
+            println("all.sapNumber==-================================================"+all.sapNumber)
+
             sessionService.getAllData(bundle, all).flatMap { alldata =>
               if (alldata.isNilReturn == ersUtil.OPTION_NIL_RETURN) {
                 saveAndSubmit(alldata, all, bundle)

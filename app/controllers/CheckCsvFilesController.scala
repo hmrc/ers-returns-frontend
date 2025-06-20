@@ -43,6 +43,9 @@ class CheckCsvFilesController @Inject() (val mcc: MessagesControllerComponents,
   extends FrontendController(mcc) with I18nSupport with WithUnsafeDefaultFormBinding with Logging {
 
   def checkCsvFilesPage(): Action[AnyContent] = authAction.async { implicit request =>
+    sessionService.fetch[ErsMetaData](ersUtil.ERS_METADATA).map { ele =>
+      logger.info(s"[CheckCsvFilesController][checkCsvFilesPage()] Fetched request object with SAP Number: ${ele.sapNumber}")
+    }
     showCheckCsvFilesPage()(request)
   }
 
