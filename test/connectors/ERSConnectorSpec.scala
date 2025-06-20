@@ -624,7 +624,7 @@ class ERSConnectorSpec
           .thenReturn(Future.successful(successfulResponse))
 
         val result = await(ersConnectorMockHttp.connectToEtmpSapRequest(schemeRef)(requestWithAuth, hc))
-        result shouldBe sapNumber
+        result shouldBe Right(sapNumber)
       }
     }
 

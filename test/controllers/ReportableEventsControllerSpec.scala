@@ -87,7 +87,13 @@ class ReportableEventsControllerSpec
       when(mockSessionService.fetch[RequestObject](any())(any(), any())).thenReturn(Future.successful(ersRequestObject))
 
       when(mockErsConnector.connectToEtmpSapRequest(anyString())(any(), any()))
-        .thenReturn(if (sapRequestRes) Future.successful("1234567890") else Future.failed(new RuntimeException))
+        .thenReturn(
+          if (sapRequestRes)
+            Future.successful(Right("1234567890"))
+          else
+            Future.successful(Left(new RuntimeException("ETMP call failed")))
+        )
+
 
       when(mockSessionService.fetch[ReportableEvents](refEq(REPORTABLE_EVENTS))(any(), any()))
         .thenReturn(
@@ -202,7 +208,12 @@ class ReportableEventsControllerSpec
       when(mockSessionService.fetch[RequestObject](any())(any(), any())).thenReturn(Future.successful(ersRequestObject))
 
       when(mockErsConnector.connectToEtmpSapRequest(anyString())(any(), any()))
-        .thenReturn(if (sapRequestRes) Future.successful("1234567890") else Future.failed(new RuntimeException))
+        .thenReturn(
+          if (sapRequestRes)
+            Future.successful(Right("1234567890"))
+          else
+            Future.successful(Left(new RuntimeException("ETMP call failed")))
+        )
 
       when(mockSessionService.fetch[ReportableEvents](refEq(REPORTABLE_EVENTS))(any(), any()))
         .thenReturn(
