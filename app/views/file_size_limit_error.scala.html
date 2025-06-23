@@ -1,0 +1,54 @@
+@*
+ * Copyright 2025 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import _root_.config.ApplicationConfig
+
+@this(
+    govuk_wrapper: govuk_wrapper,
+    govukBackLink: GovukBackLink,
+    hmrcPageHeading: HmrcPageHeading
+)
+
+@(backLinkUrl: String)(implicit request: Request[_], messages: Messages, appConfig: ApplicationConfig)
+
+@hrefLink = {@messages("file_size_limit_error.link")}
+
+@govuk_wrapper(title = messages("file_size_limit_error.title") + " " + messages("ers.title.postfix")) {
+
+    @govukBackLink(
+        BackLink(
+            content = Text(messages("ers.back")),
+            href = backLinkUrl
+        )
+    )
+
+    @hmrcPageHeading(
+        PageHeading(
+            text = messages("file_size_limit_error.heading"),
+            headingClasses = Some("govuk-heading-xl"),
+        )
+    )
+
+    <p class="govuk-body">@messages("file_size_limit_error.para_1", appConfig.uploadFileSizeInMB)MB.</p>
+
+    <p class="govuk-body">@messages("file_size_limit_error.para_2", appConfig.uploadFileSizeInMB)MB.</p>
+
+    <p class="govuk-body">@messages("file_size_limit_error.para_3_1")
+        <a href=mailto:@hrefLink class="govuk-link share-schemes-link"> @messages("file_size_limit_error.link")</a>
+        @messages("file_size_limit_error.para_3_2")
+    </p>
+
+}

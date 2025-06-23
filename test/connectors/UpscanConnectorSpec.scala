@@ -28,8 +28,9 @@ import play.api.http.Status._
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.test.Helpers.await
-import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
+import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, UpstreamErrorResponse}
 import utils.WireMockHelper
+
 import scala.concurrent.duration.SECONDS
 
 class UpscanConnectorSpec
@@ -77,10 +78,10 @@ class UpscanConnectorSpec
                 .withStatus(BAD_REQUEST)
             )
         )
-        val exception = intercept[UpstreamErrorResponse] {
+        val exception = intercept[BadRequestException] {
           await(connector.getUpscanFormData(request), 1, SECONDS)
         }
-        exception.statusCode shouldBe 400
+        exception.responseCode shouldBe 400
       }
 
       "upscan returns 5xx response" in {

@@ -46,7 +46,7 @@ trait TrusteeBaseController[A] extends FrontendController with I18nSupport with 
 
   def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier, request: RequestHeader): Future[Result]
 
-  def form(implicit request: RequestHeader): Form[A]
+  def form(implicit request: Request[AnyContent]): Form[A]
 
   def view(requestObject: RequestObject, index: Int, form: Form[A], edit: Boolean = false)
           (implicit request: Request[AnyContent], hc: HeaderCarrier): Html

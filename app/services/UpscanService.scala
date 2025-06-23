@@ -36,18 +36,22 @@ class UpscanService @Inject()(applicationConfig: ApplicationConfig, upscanConnec
   private def urlToString(c: Call): String = redirectUrlBase + c.url
   val uploadFileSizeLimit = applicationConfig.uploadFileSizeLimit
 
-  def getUpscanFormDataCsv(uploadId: UploadId, scRef: String)(implicit
+  def getUpscanFormDataCsv(uploadId: UploadId, schemeRef: String)(implicit
                                                               hc: HeaderCarrier,
                                                               request: RequestHeader
   ): Future[UpscanInitiateResponse] = {
     val callbackUrl = generateCallbackUrl(
       hc.sessionId,
-      sessionId => controllers.internal.routes.CsvFileUploadCallbackController.callback(uploadId, scRef, sessionId),
-      isSecure)
+      sessionId => controllers.internal.routes.CsvFileUploadCallbackController.callback(uploadId, schemeRef, sessionId),
+      isSecure
+    )
+
     val success = controllers.routes.CsvFileUploadController.success(uploadId)
     logger.info(s"[UpscanService][getUpscanFormDataCsv] success : $success")
+
     val failure = controllers.routes.CsvFileUploadController.failure()
     logger.info(s"[UpscanService][getUpscanFormDataCsv] failure: $failure")
+
     val upscanInitiateRequest =
       UpscanInitiateRequest(callbackUrl, urlToString(success), urlToString(failure), 1, uploadFileSizeLimit)
 
@@ -55,11 +59,12 @@ class UpscanService @Inject()(applicationConfig: ApplicationConfig, upscanConnec
     upscanConnector.getUpscanFormData(upscanInitiateRequest)
   }
 
-  def getUpscanFormDataOds(scRef: String)(implicit hc: HeaderCarrier, request: RequestHeader): Future[UpscanInitiateResponse] = {
+  def getUpscanFormDataOds(schemeRef: String)(implicit hc: HeaderCarrier, request: RequestHeader): Future[UpscanInitiateResponse] = {
     val callbackUrl = generateCallbackUrl(
       hc.sessionId,
-      sessionId => controllers.internal.routes.FileUploadCallbackController.callback(scRef, sessionId),
-      isSecure)
+      sessionId => controllers.internal.routes.FileUploadCallbackController.callback(schemeRef, sessionId),
+      isSecure
+    )
 
     val success = controllers.routes.FileUploadController.success()
     val failure = controllers.routes.FileUploadController.failure()

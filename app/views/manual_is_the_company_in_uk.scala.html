@@ -34,7 +34,7 @@
         hmrcPageHeading: HmrcPageHeading
 )
 
-@(requestObject: RequestObject, index: Int, companyBasedInUkForm: Form[models.CompanyBasedInUk], edit: Boolean, schemeOrganiser: Boolean)(implicit request: Request[AnyRef], flash: Flash, messages: Messages, ersUtil: ERSUtil, countryCodes: CountryCodes, appConfig: ApplicationConfig)
+@(requestObject: RequestObject, index: Int, companyBasedInUkForm: Form[models.CompanyBasedInUk], edit: Boolean, schemeOrganiser: Boolean)(implicit request: RequestHeader, flash: Flash, messages: Messages, ersUtil: ERSUtil, countryCodes: CountryCodes, appConfig: ApplicationConfig)
 
 @schemeId = @{requestObject.getSchemeId}
 

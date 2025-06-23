@@ -90,7 +90,6 @@ trait ErsTestHelper extends MockitoSugar with AuthHelper with ERSFakeApplication
   val TRUSTEES_CACHE             = "trustees"
 
   val mockHttp: HttpClientV2 = mock[HttpClientV2]
-  val mockHttpClient: HttpClientV2 = mock[HttpClientV2]
   val mockRequestBuilder: RequestBuilder = mock[RequestBuilder]
   implicit val mockAppConfig: ApplicationConfig = mock[ApplicationConfig]
   val mockErsConnector: ErsConnector = mock[ErsConnector]

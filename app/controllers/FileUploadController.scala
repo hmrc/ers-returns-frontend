@@ -42,6 +42,7 @@ class FileUploadController @Inject()(val mcc: MessagesControllerComponents,
                                      globalErrorView: views.html.global_error,
                                      fileUploadErrorsView: views.html.file_upload_errors,
                                      fileUploadErrorsOdsView: views.html.file_upload_errors_ods,
+                                     fileSizeLimitErrorView: views.html.file_size_limit_error,
                                      templateFailureView: views.html.template_version_problem,
                                      upscanOdsFileUploadView: views.html.upscan_ods_file_upload,
                                      fileUploadProblemView: views.html.file_upload_problem,
@@ -235,8 +236,15 @@ class FileUploadController @Inject()(val mcc: MessagesControllerComponents,
     val errorCode = request.getQueryString("errorCode").getOrElse("Unknown")
     val errorMessage = request.getQueryString("errorMessage").getOrElse("Unknown")
     val errorRequestId = request.getQueryString("errorRequestId").getOrElse("Unknown")
+
     logger.error(s"Upscan Failure. errorCode: $errorCode, errorMessage: $errorMessage, errorRequestId: $errorRequestId")
-    Future.successful(getFileUploadProblemPage())
+
+    if (errorCode == "EntityTooLarge") {
+      val backLinkUrl = routes.FileUploadController.uploadFilePage().url
+      Future.successful(BadRequest(fileSizeLimitErrorView(backLinkUrl)))
+    } else {
+      Future.successful(getFileUploadProblemPage())
+    }
   }
 
   def getFileUploadProblemPage()(implicit request: RequestHeader, messages: Messages): Result =

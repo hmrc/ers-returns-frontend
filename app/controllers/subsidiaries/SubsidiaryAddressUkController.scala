@@ -62,7 +62,7 @@ def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarri
     }
   }
 
-def form(implicit request: RequestHeader): Form[CompanyAddress] = RsFormMappings.companyAddressUkForm()
+def form(implicit request: Request[AnyContent]): Form[CompanyAddress] = RsFormMappings.companyAddressUkForm()
 
 def view(requestObject: RequestObject, index: Int, companyAddressUkForm: Form[CompanyAddress], edit: Boolean = false)
   (implicit request: Request[AnyContent], hc: HeaderCarrier): Html = {

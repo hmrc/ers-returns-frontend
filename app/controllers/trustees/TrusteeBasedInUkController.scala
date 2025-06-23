@@ -69,7 +69,7 @@ class TrusteeBasedInUkController @Inject()(val mcc: MessagesControllerComponents
     }
   }
 
-  def form(implicit request: RequestHeader): Form[TrusteeBasedInUk] = RsFormMappings.trusteeBasedInUkForm()
+  def form(implicit request: Request[AnyContent]): Form[TrusteeBasedInUk] = RsFormMappings.trusteeBasedInUkForm()
 
   def view(requestObject: RequestObject, index: Int, trusteeBasedInUkForm: Form[TrusteeBasedInUk], edit: Boolean = false)
                    (implicit request: Request[AnyContent], hc: HeaderCarrier): Html = {

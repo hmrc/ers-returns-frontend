@@ -33,7 +33,7 @@
     hmrcPageHeading: HmrcPageHeading
 )
 
-@(requestObject: RequestObject, index: Int, trusteeDetails: Form[models.TrusteeAddress], edit: Boolean = false)(implicit request: Request[AnyRef], messages: Messages, countryCodes: CountryCodes, appConfig: ApplicationConfig)
+@(requestObject: RequestObject, index: Int, trusteeDetails: Form[models.TrusteeAddress], edit: Boolean = false)(implicit request: RequestHeader, messages: Messages, countryCodes: CountryCodes, appConfig: ApplicationConfig)
 
 @govuk_wrapper(title = messages("ers_trustee_address.title")) {
 

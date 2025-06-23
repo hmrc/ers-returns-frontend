@@ -77,7 +77,7 @@ class SubsidiaryDetailsUkController @Inject()(val mcc: MessagesControllerCompone
     }
   }
 
-  def form(implicit request: RequestHeader): Form[Company] = RsFormMappings.companyNameForm()
+  def form(implicit request: Request[AnyContent]): Form[Company] = RsFormMappings.companyNameForm()
 
   def view(requestObject: RequestObject, index: Int, companyNameUKForm: Form[Company], edit: Boolean = false)
           (implicit request: Request[AnyContent], hc: HeaderCarrier): Html = {

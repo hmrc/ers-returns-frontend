@@ -70,7 +70,7 @@ class SchemeOrganiserBasedInUkController @Inject()(val mcc: MessagesControllerCo
     }
   }
 
-  def form(implicit request: RequestHeader): Form[CompanyBasedInUk] = RsFormMappings.companyBasedInUkForm()
+  def form(implicit request: Request[AnyContent]): Form[CompanyBasedInUk] = RsFormMappings.companyBasedInUkForm()
 
   def view(requestObject: RequestObject, index: Int, companyBasedInUkForm: Form[CompanyBasedInUk], edit: Boolean = false)
           (implicit request: Request[AnyContent], hc: HeaderCarrier): Html = {

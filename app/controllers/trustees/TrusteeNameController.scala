@@ -57,7 +57,7 @@ class TrusteeNameController @Inject()(val mcc: MessagesControllerComponents,
     }
   }
 
-  def form(implicit request: RequestHeader): Form[TrusteeName] = RsFormMappings.trusteeNameForm()
+  def form(implicit request: Request[AnyContent]): Form[TrusteeName] = RsFormMappings.trusteeNameForm()
 
   def view(requestObject: RequestObject, index: Int, trusteeNameForm: Form[TrusteeName], edit: Boolean = false)
           (implicit request: Request[AnyContent], hc: HeaderCarrier): Html = {

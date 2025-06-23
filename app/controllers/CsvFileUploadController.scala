@@ -42,6 +42,7 @@ class CsvFileUploadController @Inject() (val mcc: MessagesControllerComponents,
                                          val sessionService: FrontendSessionService,
                                          globalErrorView: views.html.global_error,
                                          upscanCsvFileUploadView: views.html.upscan_csv_file_upload,
+                                         fileSizeLimitErrorView: views.html.file_size_limit_error,
                                          fileUploadErrorsView: views.html.file_upload_errors,
                                          fileUploadProblemView: views.html.file_upload_problem,
                                          authAction: AuthAction)
@@ -59,7 +60,7 @@ class CsvFileUploadController @Inject() (val mcc: MessagesControllerComponents,
       csvFilesList   <- sessionService.fetch[UpscanCsvFilesList](ersUtil.CSV_FILES_UPLOAD)
       currentCsvFile  = csvFilesList.ids.find(ids => ids.uploadStatus == NotStarted)
       if currentCsvFile.isDefined
-        upscanFormData <- upscanService.getUpscanFormDataCsv(currentCsvFile.get.uploadId, requestObject.getSchemeReference)
+      upscanFormData <- upscanService.getUpscanFormDataCsv(currentCsvFile.get.uploadId, requestObject.getSchemeReference)
     } yield {
       Ok(upscanCsvFileUploadView(requestObject, upscanFormData, currentCsvFile.get.fileId, useCsopV5Templates(requestObject.taxYear)))
     }).recover {
@@ -249,8 +250,15 @@ class CsvFileUploadController @Inject() (val mcc: MessagesControllerComponents,
     val errorCode      = request.getQueryString("errorCode").getOrElse("Unknown")
     val errorMessage   = request.getQueryString("errorMessage").getOrElse("Unknown")
     val errorRequestId = request.getQueryString("errorRequestId").getOrElse("Unknown")
+
     logger.error(s"Upscan Failure. errorCode: $errorCode, errorMessage: $errorMessage, errorRequestId: $errorRequestId")
-    Future.successful(getFileUploadProblemPage())
+
+    if (errorCode == "EntityTooLarge") {
+      val backLinkUrl = routes.CsvFileUploadController.uploadFilePage().url
+      Future.successful(BadRequest(fileSizeLimitErrorView(backLinkUrl)))
+    } else {
+      Future.successful(getFileUploadProblemPage())
+    }
   }
 
   def getFileUploadProblemPage()(implicit request: RequestHeader, messages: Messages): Result =
