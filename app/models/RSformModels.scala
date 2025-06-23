@@ -18,7 +18,7 @@ package models
 
 import play.api.i18n.Messages
 import play.api.libs.json.{Json, OFormat}
-import play.api.mvc.Request
+import play.api.mvc.RequestHeader
 import utils.{CountryCodes, DateUtils}
 
 import java.time.ZonedDateTime

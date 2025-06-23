@@ -21,7 +21,7 @@ import config.ApplicationConfig
 import connectors.UpscanConnector
 import models.upscan.{UploadId, UpscanInitiateRequest, UpscanInitiateResponse}
 import play.api.Logging
-import play.api.mvc.{Call, Request}
+import play.api.mvc.{Call, RequestHeader}
 import uk.gov.hmrc.http.{HeaderCarrier, SessionId}
 
 import javax.inject.Singleton

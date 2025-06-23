@@ -53,7 +53,6 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
                                      ) extends FrontendController(mcc) with I18nSupport with WithUnsafeDefaultFormBinding with Logging with Constants with CacheHelper {
 
   implicit val ec: ExecutionContext = mcc.executionContext
-
   private val form: Form[Boolean] = yesNoFormProvider.withPrefix("delete-company")
 
   private def getRequestObjAndCompanyDetails()(implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[(RequestObject, Int, CompanyDetailsList)] =
@@ -224,7 +223,7 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
     continueFromGroupPlanSummaryPage(scheme)
   }
 
-  def continueFromGroupPlanSummaryPage(scheme: String)(implicit request: RequestHeader): Future[Result] = {
+  def continueFromGroupPlanSummaryPage(scheme: String)(implicit request: Request[_]): Future[Result] = {
     RsFormMappings.addSubsidiaryForm().bindFromRequest().fold(
       _ => {
         for {

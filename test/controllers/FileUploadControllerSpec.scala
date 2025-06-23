@@ -169,7 +169,7 @@ class FileUploadControllerSpec
       }
 
       "Session service returns an exception creating callback record" in {
-        when(mockUpscanService.getUpscanFormDataOds(anyString())(any[HeaderCarrier], any[Request[_]]))
+        when(mockUpscanService.getUpscanFormDataOds(anyString())(any[HeaderCarrier], any[RequestHeader]))
           .thenReturn(Future.successful(upscanInitiateResponse))
         when(mockErsConnector.createCallbackRecord(any(), any()))
           .thenReturn(Future.failed(new Exception("Expected exception")))

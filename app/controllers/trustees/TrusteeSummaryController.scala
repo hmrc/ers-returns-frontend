@@ -99,8 +99,8 @@ class TrusteeSummaryController @Inject()(val mcc: MessagesControllerComponents,
           Future.successful(Redirect(controllers.routes.AltAmendsController.altActivityPage()))
         }
       }
-    ).recover {
-      e: Exception =>
+    ) recover {
+      case e: Exception =>
         logger.error(s"[TrusteeSummaryController][continueFromTrusteeSummaryPage] Error on Trustee Summary page: ${e.getMessage}")
         getGlobalErrorPage()
     }

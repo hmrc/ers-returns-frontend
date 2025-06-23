@@ -22,7 +22,7 @@ import controllers.auth.AuthAction
 import models.{CompanyBasedInUk, CompanyDetails, RequestObject, RsFormMappings}
 import play.api.data.Form
 import play.api.libs.json.Format
-import play.api.mvc.{AnyContent, MessagesControllerComponents, Request, Result}
+import play.api.mvc.{AnyContent, MessagesControllerComponents, Request, RequestHeader, Result}
 import play.twirl.api.Html
 import services.FrontendSessionService
 import uk.gov.hmrc.http.HeaderCarrier
@@ -70,7 +70,7 @@ class SchemeOrganiserBasedInUkController @Inject()(val mcc: MessagesControllerCo
     }
   }
 
-  def form(implicit request: Request[AnyContent]): Form[CompanyBasedInUk] = RsFormMappings.companyBasedInUkForm()
+  def form(implicit request: RequestHeader): Form[CompanyBasedInUk] = RsFormMappings.companyBasedInUkForm()
 
   def view(requestObject: RequestObject, index: Int, companyBasedInUkForm: Form[CompanyBasedInUk], edit: Boolean = false)
           (implicit request: Request[AnyContent], hc: HeaderCarrier): Html = {

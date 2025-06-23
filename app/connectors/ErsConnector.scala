@@ -25,10 +25,9 @@ import play.api.Logging
 import play.api.http.Status._
 import play.api.libs.json.{JsError, JsObject, JsSuccess, JsValue, Json}
 import play.api.mvc.AnyContent
-import uk.gov.hmrc.http.HttpReads.Implicits
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.client.HttpClientV2
-import uk.gov.hmrc.http.{HeaderCarrier, HttpReads, HttpResponse, StringContextOps}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps}
 
 import java.util.concurrent.TimeUnit
 import javax.inject.{Inject, Singleton}
@@ -39,11 +38,8 @@ class ErsConnector @Inject() (http: HttpClientV2, appConfig: ApplicationConfig)(
 
   lazy val ersUrl: String = appConfig.ersUrl
   lazy val validatorUrl: String = appConfig.validatorUrl
-  implicit val rds: HttpReads[HttpResponse] = Implicits.readRaw
-//  val httpReads     = HttpReads.Implicits.readRaw
 
-  def connectToEtmpSapRequest(schemeRef: String
-                               )(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[String] = {
+  def connectToEtmpSapRequest(schemeRef: String)(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[String] = {
     val empRef: String = request.authData.empRef.encodedValue
     val url: String = s"$ersUrl/ers/$empRef/sapRequest/" + schemeRef
     val startTime = System.currentTimeMillis()

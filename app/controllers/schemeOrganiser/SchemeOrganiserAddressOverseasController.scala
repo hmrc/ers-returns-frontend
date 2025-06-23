@@ -22,7 +22,7 @@ import controllers.auth.AuthAction
 import models.{CompanyAddress, RequestObject, RsFormMappings}
 import play.api.data.Form
 import play.api.libs.json.Format
-import play.api.mvc.{AnyContent, MessagesControllerComponents, Request, Result}
+import play.api.mvc.{AnyContent, MessagesControllerComponents, Request, RequestHeader, Result}
 import play.twirl.api.Html
 import services.{CompanyDetailsService, FrontendSessionService}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -61,7 +61,7 @@ class SchemeOrganiserAddressOverseasController @Inject()(val mcc: MessagesContro
       }
     }
 
-  def form(implicit request: Request[AnyContent]): Form[CompanyAddress] = RsFormMappings.companyAddressOverseasForm()
+  def form(implicit request: RequestHeader): Form[CompanyAddress] = RsFormMappings.companyAddressOverseasForm()
 
   def view(requestObject: RequestObject, index: Int, companyAddressOverseasForm: Form[CompanyAddress], edit: Boolean = false)
           (implicit request: Request[AnyContent], hc: HeaderCarrier): Html = {

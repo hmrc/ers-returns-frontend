@@ -23,7 +23,7 @@ import play.api.Logging
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.libs.json.Format
-import play.api.mvc.{Action, AnyContent, Request, Result}
+import play.api.mvc.{Action, AnyContent, Request, RequestHeader, Result}
 import play.twirl.api.Html
 import services.FrontendSessionService
 import uk.gov.hmrc.http.HeaderCarrier
@@ -45,7 +45,7 @@ trait SchemeOrganiserBaseController[A] extends FrontendController with I18nSuppo
 
   def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier, request: RequestHeader): Future[Result]
 
-  def form(implicit request: Request[AnyContent]): Form[A]
+  def form(implicit request: RequestHeader): Form[A]
 
   def view(requestObject: RequestObject, index: Int, form: Form[A], edit: Boolean = false)
           (implicit request: Request[AnyContent], hc: HeaderCarrier): Html

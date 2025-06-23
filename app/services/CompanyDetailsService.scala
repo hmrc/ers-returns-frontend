@@ -18,7 +18,7 @@ package services
 
 import models._
 import play.api.Logging
-import play.api.mvc.Request
+import play.api.mvc.RequestHeader
 import utils.ERSUtil
 
 import javax.inject.Inject

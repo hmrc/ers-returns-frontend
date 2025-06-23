@@ -17,7 +17,7 @@
 package repositories
 
 import config.ApplicationConfig
-import play.api.mvc.Request
+import play.api.mvc.RequestHeader
 import uk.gov.hmrc.http.SessionKeys
 import uk.gov.hmrc.mongo.cache.{CacheItem, SessionCacheRepository}
 import uk.gov.hmrc.mongo.{CurrentTimestampSupport, MongoComponent}

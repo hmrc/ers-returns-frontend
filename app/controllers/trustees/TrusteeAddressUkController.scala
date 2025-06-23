@@ -22,7 +22,7 @@ import controllers.auth.AuthAction
 import models.{RequestObject, RsFormMappings, TrusteeAddress}
 import play.api.data.Form
 import play.api.libs.json.Format
-import play.api.mvc.{AnyContent, MessagesControllerComponents, Request, Result}
+import play.api.mvc.{AnyContent, MessagesControllerComponents, Request, RequestHeader, Result}
 import play.twirl.api.Html
 import services.{FrontendSessionService, TrusteeService}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -60,7 +60,7 @@ class TrusteeAddressUkController @Inject()(val mcc: MessagesControllerComponents
     }
   }
 
-  def form(implicit request: Request[AnyContent]): Form[TrusteeAddress] = RsFormMappings.trusteeAddressUkForm()
+  def form(implicit request: RequestHeader): Form[TrusteeAddress] = RsFormMappings.trusteeAddressUkForm()
 
   def view(requestObject: RequestObject, index: Int, trusteeAddressForm: Form[TrusteeAddress], edit: Boolean = false)
           (implicit request: Request[AnyContent], hc: HeaderCarrier): Html = {
