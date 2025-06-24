@@ -52,7 +52,7 @@ trait SchemeOrganiserBaseController[A] extends FrontendController with I18nSuppo
 
   def questionPage(index: Int): Action[AnyContent] = authAction.async {
     implicit request =>
-            sessionService.fetch[ErsMetaData](ersUtil.ERS_METADATA).map { ele =>
+      sessionService.fetch[ErsMetaData](ersUtil.ERS_METADATA).map { ele =>
         logger.info(s"[SchemeOrganiserBaseController][questionPage] Fetched request object with SAP Number: ${ele.sapNumber}")
       }
       sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT).flatMap { requestObject =>

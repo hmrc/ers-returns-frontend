@@ -68,7 +68,7 @@ class ConfirmationPageController @Inject()(val mcc: MessagesControllerComponents
             logger.error(s"[ConfirmationPageController][showConfirmationPage] Did cache util fail for scheme $schemeRef all.sapNumber is empty: $all")
           val submissionJson = getSubmissionJson(all.schemeInfo.schemeRef, all.schemeInfo.schemeType, all.schemeInfo.taxYear, "EOY-RETURN")
           ersConnector.connectToEtmpSummarySubmit(all.sapNumber.get, submissionJson).flatMap { bundle =>
-                       sessionService.getAllData(bundle, all).flatMap { alldata =>
+            sessionService.getAllData(bundle, all).flatMap { alldata =>
               if (alldata.isNilReturn == ersUtil.OPTION_NIL_RETURN) {
                 saveAndSubmit(alldata, all, bundle)
               } else {
