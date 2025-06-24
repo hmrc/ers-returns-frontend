@@ -16,8 +16,9 @@
 
 package utils
 
-import models.ERSAuthData
+import models.{ERSAuthData, ErsMetaData, SchemeInfo}
 import org.mockito.ArgumentMatchers
+import org.mockito.ArgumentMatchers.{any, refEq}
 import org.mockito.Mockito._
 import org.mockito.stubbing.OngoingStubbing
 import org.scalatestplus.mockito.MockitoSugar
@@ -27,6 +28,7 @@ import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.domain.EmpRef
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 
+import java.time.ZonedDateTime
 import scala.concurrent.Future
 
 trait AuthHelper extends MockitoSugar {
@@ -79,4 +81,4 @@ trait AuthHelper extends MockitoSugar {
           ArgumentMatchers.any()
         )
     ) thenReturn Future.failed(MissingBearerToken("No authenticated bearer token"))
-}
+  }
