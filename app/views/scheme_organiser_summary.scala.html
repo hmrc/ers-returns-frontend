@@ -14,7 +14,7 @@
  * limitations under the License.
  *@
 
-@import _root_.utils.{CountryCodes, ERSUtil}
+@import _root_.utils.ERSUtil
 @import config.ApplicationConfig
 @import views.html.templates.reference
 
@@ -27,8 +27,8 @@
         hmrcPageHeading: HmrcPageHeading
 )
 
-@(requestObject: RequestObject, schemeOrganiser: CompanyDetails)(implicit request: RequestHeader, flash: Flash,
-        messages: Messages, countryCodes: CountryCodes, ersUtil: ERSUtil, appConfig: ApplicationConfig)
+@(requestObject: RequestObject, schemeOrganiser: CompanyDetails)(implicit request: RequestHeader,
+        messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 
 @schemeId = @{
     requestObject.getSchemeId

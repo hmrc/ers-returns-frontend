@@ -14,7 +14,6 @@
  * limitations under the License.
  *@
 
-@import _root_.utils.{CountryCodes, ERSUtil}
 @import config.ApplicationConfig
 @import models.RsFormMappings.companyBasedInUkFields
 @import uk.gov.hmrc.govukfrontend.views.html.components.implicits._
@@ -34,7 +33,7 @@
         hmrcPageHeading: HmrcPageHeading
 )
 
-@(requestObject: RequestObject, index: Int, companyBasedInUkForm: Form[models.CompanyBasedInUk], edit: Boolean, schemeOrganiser: Boolean)(implicit request: RequestHeader, flash: Flash, messages: Messages, ersUtil: ERSUtil, countryCodes: CountryCodes, appConfig: ApplicationConfig)
+@(requestObject: RequestObject, index: Int, companyBasedInUkForm: Form[models.CompanyBasedInUk], edit: Boolean, schemeOrganiser: Boolean)(implicit request: RequestHeader, messages: Messages, appConfig: ApplicationConfig)
 
 @schemeId = @{requestObject.getSchemeId}
 

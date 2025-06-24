@@ -15,7 +15,6 @@
  *@
 
 @import _root_.config.ApplicationConfig
-@import _root_.utils.ERSUtil
 @import views.html.templates.reference
 
 @this(
@@ -25,7 +24,7 @@
 		hmrcPageHeading: HmrcPageHeading
 )
 
-@(requestObject: RequestObject, fileType: String)(implicit request: RequestHeader, messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
+@(requestObject: RequestObject, fileType: String)(implicit request: RequestHeader, messages: Messages, appConfig: ApplicationConfig)
 
 @govuk_wrapper(title = messages("file_upload_errors.title") + " " + messages("ers.title.postfix")) {
 

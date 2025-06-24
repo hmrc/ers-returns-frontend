@@ -15,7 +15,6 @@
  *@
 
 @import _root_.config.ApplicationConfig
-@import _root_.utils.ERSUtil
 @import views.html.templates.reference
 
 @this(
@@ -25,7 +24,7 @@
 		hmrcPageHeading: HmrcPageHeading
 )
 
-@(requestObject: RequestObject, taxYear: String, csopV5required: Boolean = false)(implicit request: RequestHeader, messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
+@(requestObject: RequestObject, taxYear: String, csopV5required: Boolean = false)(implicit request: RequestHeader, messages: Messages, appConfig: ApplicationConfig)
 
 @govuk_wrapper(title = messages("file_upload_errors.problem.title") + " " + messages("ers.title.postfix")) {
 
@@ -52,7 +51,6 @@
 				<a class="govuk-link" href="https://www.gov.uk/government/publications/company-share-option-plan-end-of-year-return-template">@messages("file_upload_errors.problem.message.bullet.1.link")</a>
 				@messages("file_upload_errors.problem.message.bullet.1.text")
 			</li>
-
 			<li><a class="govuk-link" href="@routes.FileUploadController.uploadFilePage().url">@Html(messages("file_upload_errors.problem.message.bullet.2"))</a> @messages("file_upload_errors.problem.message.bullet.3")</li>
 		</ul>
 	</p>
