@@ -76,7 +76,7 @@ class ErsConnector @Inject() (http: HttpClientV2, appConfig: ApplicationConfig)(
 
     http
       .post(url"$url")
-      .withBody(Json.toJson(payload))
+      .withBody(payload)
       .execute[HttpResponse]
       .map {
         res =>
