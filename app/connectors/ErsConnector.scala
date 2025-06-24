@@ -57,13 +57,10 @@ class ErsConnector @Inject() (val http: HttpClientV2Provider, appConfig: Applica
             val sapNumber: String = (response.json \ "SAP Number").as[String]
             Right(sapNumber)
           case _  =>
-            val error = new Exception(
-              s"SAP request failed with status ${response.status}, timestamp: ${System.currentTimeMillis()}."
-            )
             logger.error(
-              s"[ErsConnector][connectToEtmpSapRequest] ${error}"
+              s"[ErsConnector][connectToEtmpSapRequest] SAP request failed with status ${response.status}, timestamp: ${System.currentTimeMillis()}."
             )
-            Left(throw error)
+            Left(throw new Exception)
         }
       }
       .recover { case e: Exception =>
