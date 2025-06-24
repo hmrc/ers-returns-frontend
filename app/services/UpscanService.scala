@@ -21,7 +21,7 @@ import config.ApplicationConfig
 import connectors.UpscanConnector
 import models.upscan.{UploadId, UpscanInitiateRequest, UpscanInitiateResponse}
 import play.api.Logging
-import play.api.mvc.{Call, Request}
+import play.api.mvc.{Call, RequestHeader}
 import uk.gov.hmrc.http.{HeaderCarrier, SessionId}
 
 import javax.inject.Singleton
@@ -37,8 +37,8 @@ class UpscanService @Inject()(applicationConfig: ApplicationConfig, upscanConnec
   val uploadFileSizeLimit = applicationConfig.uploadFileSizeLimit
 
   def getUpscanFormDataCsv(uploadId: UploadId, schemeRef: String)(implicit
-                                                                  hc: HeaderCarrier,
-                                                                  request: Request[_]
+                                                              hc: HeaderCarrier,
+                                                              request: RequestHeader
   ): Future[UpscanInitiateResponse] = {
     val callbackUrl = generateCallbackUrl(
       hc.sessionId,
@@ -59,7 +59,7 @@ class UpscanService @Inject()(applicationConfig: ApplicationConfig, upscanConnec
     upscanConnector.getUpscanFormData(upscanInitiateRequest)
   }
 
-  def getUpscanFormDataOds(schemeRef: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[UpscanInitiateResponse] = {
+  def getUpscanFormDataOds(schemeRef: String)(implicit hc: HeaderCarrier, request: RequestHeader): Future[UpscanInitiateResponse] = {
     val callbackUrl = generateCallbackUrl(
       hc.sessionId,
       sessionId => controllers.internal.routes.FileUploadCallbackController.callback(schemeRef, sessionId),
@@ -74,7 +74,7 @@ class UpscanService @Inject()(applicationConfig: ApplicationConfig, upscanConnec
 
   private def generateCallbackUrl(sessionIdOption: Option[SessionId],
                                   routeFunction: String => Call,
-                                  isSecure: Boolean)(implicit request: Request[_]): String = {
+                                  isSecure: Boolean)(implicit request: RequestHeader): String = {
 
     sessionIdOption match {
       case Some(sessionId) =>

@@ -158,7 +158,7 @@ class CheckCsvFilesControllerSpec
         testAuthAction
       ) {
         override def performCsvFilesPageSelected(formData: CsvFilesList)(implicit
-          request: Request[_]
+          request: RequestHeader
         ): Future[Result] = Future.successful(Ok)
       }
 

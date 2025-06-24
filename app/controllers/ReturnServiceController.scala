@@ -46,7 +46,7 @@ class ReturnServiceController @Inject() (val mcc: MessagesControllerComponents,
   lazy val accessThreshold: Int = appConfig.accessThreshold
   val accessDeniedUrl = "/outage-ers-frontend/index.html"
 
-  def cacheParams(ersRequestObject: RequestObject)(implicit request: Request[_]): Future[Result] = {
+  def cacheParams(ersRequestObject: RequestObject)(implicit request: RequestHeader): Future[Result] = {
     implicit val formatRSParams: OFormat[RequestObject] = Json.format[RequestObject]
     logger.debug("Request Object created --> " + ersRequestObject)
     val futureResult = for {
@@ -100,7 +100,7 @@ class ReturnServiceController @Inject() (val mcc: MessagesControllerComponents,
     }
   }
 
-  def showInitialStartPage(requestObject: RequestObject)(implicit request: Request[_]): Result = {
+  def showInitialStartPage(requestObject: RequestObject)(implicit request: RequestHeader): Result = {
     val sessionData = s"${requestObject.getSchemeId} - ${requestObject.getPageTitle}"
     Ok(startView(requestObject)).withSession(
       request.session + ("screenSchemeInfo" -> sessionData) - BUNDLE_REF - DATE_TIME_SUBMITTED
@@ -113,10 +113,10 @@ class ReturnServiceController @Inject() (val mcc: MessagesControllerComponents,
     }
   }
 
-  def showUnauthorisedPage(implicit request: Request[_]): Future[Result] =
+  def showUnauthorisedPage(implicit request: RequestHeader): Future[Result] =
     Future.successful(Unauthorized(unauthorisedView()))
 
-  def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result =
+  def getGlobalErrorPage(implicit request: RequestHeader, messages: Messages): Result =
     Ok(
       globalErrorView(
         "ers.global_errors.title",
