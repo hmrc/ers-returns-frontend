@@ -2,7 +2,7 @@ import play.sbt.PlayImport.*
 import sbt.*
 
 object AppDependencies {
-  val pdfboxVersion    = "2.0.34"
+  val pdfboxVersion    = "3.0.3"
   val openHtmlVersion  = "1.0.10"
   val bootstrapVersion = "9.13.0"
   val mongoVersion     = "2.6.0"
