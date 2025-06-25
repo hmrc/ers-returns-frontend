@@ -27,7 +27,7 @@
         govukWarningText: GovukWarningText
 )
 
-@(requestObject: RequestObject, reportableEvents: String, fileType: String, filename: String, fileCount: Int = 0, groupScheme: String, schemeOrganiser: SchemeOrganiserDetails, companies: CompanyDetailsList, altAmendsActivity: String, altAmends: AlterationAmends, trustees: TrusteeDetailsList)(implicit request: Request[_], messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
+@(requestObject: RequestObject, reportableEvents: String, fileType: String, filename: String, fileCount: Int = 0, groupScheme: String, schemeOrganiser: SchemeOrganiserDetails, companies: CompanyDetailsList, altAmendsActivity: String, altAmends: AlterationAmends, trustees: TrusteeDetailsList)(implicit request: RequestHeader, messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 
 @schemeId = @{requestObject.getSchemeId}
 

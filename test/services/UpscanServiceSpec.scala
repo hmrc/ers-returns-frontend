@@ -30,7 +30,7 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.mvc.{Call, Request}
+import play.api.mvc.{Call, RequestHeader}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.{HeaderCarrier, SessionId}
 
@@ -55,7 +55,7 @@ class UpscanServiceSpec
 
   "getUpscanFormDataOds" must {
     "get form data from Upscan Connector with an initiate request" in {
-      implicit val request: Request[_] = FakeRequest("GET", "http://localhost:9290/")
+      implicit val request: RequestHeader = FakeRequest("GET", "http://localhost:9290/")
       val hc = HeaderCarrier(sessionId = Some(SessionId("sessionid")))
       val callback =
         controllers.internal.routes.FileUploadCallbackController.callback(schemeRef, hc.sessionId.get.value).absoluteURL()
@@ -78,7 +78,7 @@ class UpscanServiceSpec
 
   "getUpscanFormDataCsv" must {
     "get form data from Upscan Connector with an initiate and uploadId" in {
-      implicit val request: Request[_] = FakeRequest("GET", "http://localhost:9290/")
+      implicit val request: RequestHeader = FakeRequest("GET", "http://localhost:9290/")
       val uploadId = UploadId("TestUploadId")
       val scRef = "ScRef"
       val hc = HeaderCarrier(sessionId = Some(SessionId("sessionid")))
@@ -108,7 +108,7 @@ class UpscanServiceSpec
         val routeFunction: String => Call = sessionId => Call("GET", s"/callback/$sessionId")
         val isSecure = false
 
-        implicit val fakeRequest: Request[_] = FakeRequest()
+        implicit val fakeRequest: RequestHeader = FakeRequest()
 
         val result = upscanService.invokePrivate(generateCallbackUrl(sessionIdOption, routeFunction, isSecure, fakeRequest))
 
@@ -123,7 +123,7 @@ class UpscanServiceSpec
         val routeFunction: String => Call = _ => Call("GET", "/callback")
         val isSecure = false
 
-        val fakeRequest: Request[_] = FakeRequest()
+        val fakeRequest: RequestHeader = FakeRequest()
 
         an[IllegalStateException] should be thrownBy upscanService.invokePrivate(generateCallbackUrl(sessionIdOption, routeFunction, isSecure, fakeRequest))
       }

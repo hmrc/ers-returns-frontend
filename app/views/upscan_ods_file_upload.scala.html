@@ -32,7 +32,7 @@
 @(
 	requestObject: RequestObject,
 	upscanInitiateResponse: UpscanInitiateResponse
-)(implicit request: Request[_], messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
+)(implicit request: RequestHeader, messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 
 @schemeId = @{requestObject.getSchemeId}
 @headingCaption = @{requestObject.getSchemeNameCaptionForDisplay}

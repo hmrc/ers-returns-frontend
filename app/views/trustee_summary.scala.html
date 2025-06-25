@@ -29,7 +29,7 @@
         hmrcPageHeading: HmrcPageHeading
 )
 
-@(requestObject: RequestObject, trustees: TrusteeDetailsList, formHasError: Boolean = false)(implicit request: Request[_], messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
+@(requestObject: RequestObject, trustees: TrusteeDetailsList, formHasError: Boolean = false)(implicit request: RequestHeader, messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 
 @summaryBuilder(trustee: TrusteeDetails, index: Int) = @{
     val trusteeNameSummary = Seq(

@@ -25,7 +25,6 @@ import play.api.i18n.Messages
 object RsFormMappings {
 
   import fieldValidationPatterns._
-
   val postcodeMinLength: Int      = 6
   val postcodeMaxLength: Int      = 8
   /*

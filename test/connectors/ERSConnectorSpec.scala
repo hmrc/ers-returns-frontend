@@ -34,9 +34,11 @@ import play.api.i18n.{MessagesApi, MessagesImpl}
 import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents}
 import play.api.test.Helpers._
+import uk.gov.hmrc.http.HttpReads.Implicits._
+import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
-import uk.gov.hmrc.play.bootstrap.http.HttpClientV2Provider
 import utils.{ERSFakeApplicationConfig, ErsTestHelper, UpscanData, WireMockHelper}
+
 import java.net.URL
 import java.time.ZonedDateTime
 import scala.concurrent.{ExecutionContext, Future}
@@ -69,7 +71,7 @@ class ERSConnectorSpec
   implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
   implicit lazy val mat: Materializer = app.materializer
   implicit lazy val authContext: ERSAuthData = defaultErsAuthData
-  lazy val testHttp: HttpClientV2Provider = app.injector.instanceOf[HttpClientV2Provider]
+  lazy val testHttp: HttpClientV2 = app.injector.instanceOf[HttpClientV2]
   override val requestWithAuth: RequestWithOptionalAuthContext[AnyContent] =
     RequestWithOptionalAuthContext(testFakeRequest.withSession("sessionId" -> "someSessionId"), defaultErsAuthData)
   lazy val schemeInfo: SchemeInfo = SchemeInfo("XA1100000000000", ZonedDateTime.now, "1", "2016", "EMI", "EMI")
@@ -81,7 +83,6 @@ class ERSConnectorSpec
 
   lazy val ersConnectorMockHttp: ErsConnector = new ErsConnector(mockHttp, mockAppConfig) {
     override lazy val ersUrl = "http://localhost:9226"
-    //    override lazy val validatorUrl = "ers-file-validator"
     override lazy val validatorUrl = "http://localhost:9226"
   }
 
@@ -92,11 +93,10 @@ class ERSConnectorSpec
   override def beforeEach(): Unit = {
     super.beforeEach()
 
-    mreset(mockHttp, mockHttpClient, mockRequestBuilder)
-    when(mockHttp.get()).thenReturn(mockHttpClient)
-    when(mockHttpClient.get(any())(any())).thenReturn(mockRequestBuilder)
-    when(mockHttpClient.post(any())(any())).thenReturn(mockRequestBuilder)
-    when(mockHttpClient.put(any())(any())).thenReturn(mockRequestBuilder)
+    mreset(mockHttp, mockRequestBuilder)
+    when(mockHttp.get(any())(any())).thenReturn(mockRequestBuilder)
+    when(mockHttp.post(any())(any())).thenReturn(mockRequestBuilder)
+    when(mockHttp.put(any())(any())).thenReturn(mockRequestBuilder)
     when(mockRequestBuilder.setHeader(any())).thenReturn(mockRequestBuilder)
     when(mockRequestBuilder.withBody(any())(any(), any(), any())).thenReturn(mockRequestBuilder)
   }
@@ -110,7 +110,8 @@ class ERSConnectorSpec
     "call file validator using empref from auth context" in {
 
       val stringCaptor: ArgumentCaptor[URL] = ArgumentCaptor.forClass(classOf[URL])
-      when(mockHttpClient.post(stringCaptor.capture())(any())).thenReturn(mockRequestBuilder)
+      when(mockHttp.post(stringCaptor.capture())(any())).thenReturn(mockRequestBuilder)
+      when(mockRequestBuilder.withBody(any())(any(), any(), any())).thenReturn(mockRequestBuilder)
       when(mockRequestBuilder.execute(any[HttpReads[HttpResponse]], any())).thenReturn(Future(HttpResponse(status = OK, body = "")))
 
       val result = await(ersConnectorMockHttp.validateFileData(uploadedSuccessfully, schemeInfo)(requestWithAuth, hc))
@@ -186,7 +187,8 @@ class ERSConnectorSpec
     "call file validator using empref from auth context" in {
       val stringCaptor: ArgumentCaptor[URL] = ArgumentCaptor.forClass(classOf[URL])
 
-      when(mockHttpClient.post(stringCaptor.capture())(any())).thenReturn(mockRequestBuilder)
+      when(mockHttp.post(stringCaptor.capture())(any())).thenReturn(mockRequestBuilder)
+      when(mockRequestBuilder.withBody(any())(any(), any(), any())).thenReturn(mockRequestBuilder)
       when(mockRequestBuilder.execute(any[HttpReads[HttpResponse]], any())).thenReturn(Future(HttpResponse(status = OK, body = "")))
 
       val result = await(ersConnectorMockHttp.validateFileData(uploadedSuccessfully, schemeInfo)(requestWithAuth, hc))
@@ -354,7 +356,7 @@ class ERSConnectorSpec
 
     "throw an exception" when {
       "an exception occurs during the PUT request" in {
-        when(mockHttp.get().put(any()) (any()).execute[HttpResponse])
+        when(mockHttp.put(any()) (any()).execute[HttpResponse])
           .thenReturn(Future.failed(new Exception("Test exception")))
 
         an[Exception] should be thrownBy await(ersConnectorMockHttp.updateCallbackRecord(UploadedSuccessfully("fileId", "downloadUrl"), "sessionId")(hc))
@@ -605,7 +607,7 @@ class ERSConnectorSpec
       "an exception occurs during the POST request" in {
         val sap = "sap123"
         val payload = Json.obj("key" -> "value")
-        when(mockHttp.get().post(any()) (any()).execute[HttpResponse])
+        when(mockHttp.post(any()) (any()).execute[HttpResponse])
           .thenReturn(Future.failed(new Exception("Test exception")))
 
         an[Exception] should be thrownBy await(ersConnectorMockHttp.connectToEtmpSummarySubmit(sap, payload)(requestWithAuth, hc))

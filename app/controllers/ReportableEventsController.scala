@@ -124,7 +124,7 @@ class ReportableEventsController @Inject() (val mcc: MessagesControllerComponent
           }
       )
 
-  def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result =
+  def getGlobalErrorPage(implicit request: RequestHeader, messages: Messages): Result =
     InternalServerError(
       globalErrorView(
         "ers.global_errors.title",
