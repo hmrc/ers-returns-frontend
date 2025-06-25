@@ -47,15 +47,13 @@ class UpscanService @Inject()(applicationConfig: ApplicationConfig, upscanConnec
     )
 
     val success = controllers.routes.CsvFileUploadController.success(uploadId)
-    logger.info(s"[UpscanService][getUpscanFormDataCsv] success : $success")
+    logger.info(s"[UpscanService][getUpscanFormDataCsv] success : $uploadId")
 
     val failure = controllers.routes.CsvFileUploadController.failure()
-    logger.info(s"[UpscanService][getUpscanFormDataCsv] failure: $failure")
+    logger.info(s"[UpscanService][getUpscanFormDataCsv] failure: $uploadId")
 
     val upscanInitiateRequest =
       UpscanInitiateRequest(callbackUrl, urlToString(success), urlToString(failure), 1, uploadFileSizeLimit)
-
-    logger.info(s"[UpscanService][getUpscanFormDataCsv] upscanInitiateRequest: $upscanInitiateRequest")
     upscanConnector.getUpscanFormData(upscanInitiateRequest)
   }
 
@@ -78,9 +76,7 @@ class UpscanService @Inject()(applicationConfig: ApplicationConfig, upscanConnec
 
     sessionIdOption match {
       case Some(sessionId) =>
-        val url = routeFunction(sessionId.value).absoluteURL(isSecure)
-        logger.debug(s"[UpscanService][generateCallbackUrl] Generated callback URL: $url")
-        url
+        routeFunction(sessionId.value).absoluteURL(isSecure)
 
       case None =>
         val errMsg = "[UpscanService][generateCallbackUrl] Session ID is not available for generating callback URL"
