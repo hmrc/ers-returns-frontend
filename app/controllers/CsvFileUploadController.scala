@@ -141,9 +141,7 @@ class CsvFileUploadController @Inject() (val mcc: MessagesControllerComponents,
         }
         .withRetry(allCsvFilesCacheRetryAmount)(_.isDefined)
         .flatMap { files =>
-          logger.info(s"[CsvFileUploadController][extractCsvCallbackData] files: $files")
           val csvFilesCallbackList: UpscanCsvFilesCallbackList = UpscanCsvFilesCallbackList(files.get)
-          logger.info(s"[CsvFileUploadController][extractCsvCallbackData] csvFilesCallbackList: $csvFilesCallbackList")
           sessionService.cache(ersUtil.CHECK_CSV_FILES, csvFilesCallbackList).flatMap { _ =>
             if (csvFilesCallbackList.files.nonEmpty && csvFilesCallbackList.areAllFilesComplete()) {
               if (csvFilesCallbackList.areAllFilesSuccessful()) {
