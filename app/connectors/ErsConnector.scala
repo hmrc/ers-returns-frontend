@@ -39,7 +39,10 @@ class ErsConnector @Inject() (http: HttpClientV2, appConfig: ApplicationConfig)(
   lazy val ersUrl: String = appConfig.ersUrl
   lazy val validatorUrl: String = appConfig.validatorUrl
 
-  def connectToEtmpSapRequest(schemeRef: String)(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[String] = {
+  def   connectToEtmpSapRequest(
+                                 schemeRef: String
+                               )(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Either[Throwable, String]] = {
+
     val empRef: String = request.authData.empRef.encodedValue
     val url: String = s"$ersUrl/ers/$empRef/sapRequest/" + schemeRef
     val startTime = System.currentTimeMillis()
@@ -51,12 +54,12 @@ class ErsConnector @Inject() (http: HttpClientV2, appConfig: ApplicationConfig)(
         response.status match {
           case OK =>
             val sapNumber: String = (response.json \ "SAP Number").as[String]
-            sapNumber
+            Right(sapNumber)
           case _  =>
             logger.error(
               s"[ErsConnector][connectToEtmpSapRequest] SAP request failed with status ${response.status}, timestamp: ${System.currentTimeMillis()}."
             )
-            throw new Exception
+            Left(throw new Exception)
         }
       }
       .recover { case e: Exception =>
@@ -64,7 +67,7 @@ class ErsConnector @Inject() (http: HttpClientV2, appConfig: ApplicationConfig)(
           s"[ErsConnector][connectToEtmpSapRequest] connectToEtmpSapRequest failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}."
         )
         ersConnector(System.currentTimeMillis() - startTime, TimeUnit.MILLISECONDS)
-        throw new Exception
+        Left(throw e)
       }
   }
 
