@@ -33,18 +33,22 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class ReportableEventsController @Inject() (val mcc: MessagesControllerComponents,
-                                            val ersConnector: ErsConnector,
-                                            val sessionService: FrontendSessionService,
-                                            globalErrorView: views.html.global_error,
-                                            reportableEventsView: views.html.reportable_events,
-                                            authAction: AuthAction)
-                                           (implicit val ec: ExecutionContext,
-                                            val ersUtil: ERSUtil,
-                                            val appConfig: ApplicationConfig)
+class ReportableEventsController @Inject()(val mcc: MessagesControllerComponents,
+                                           val ersConnector: ErsConnector,
+                                           val sessionService: FrontendSessionService,
+                                           globalErrorView: views.html.global_error,
+                                           reportableEventsView: views.html.reportable_events,
+                                           authAction: AuthAction)
+                                          (implicit val ec: ExecutionContext,
+                                           val ersUtil: ERSUtil,
+                                           val appConfig: ApplicationConfig)
   extends FrontendController(mcc) with I18nSupport with WithUnsafeDefaultFormBinding with Logging {
 
   def reportableEventsPage(): Action[AnyContent] = authAction.async { implicit request =>
+    sessionService.fetch[ErsMetaData](ersUtil.ERS_METADATA).map { ele =>
+      logger.info(s"[ReportableEventsController][reportableEventsPage] Fetched request object with SAP Number: ${ele.sapNumber}")
+
+    }
     sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT).flatMap { requestObj =>
       updateErsMetaData(requestObj)(request, hc).flatMap { _ =>
         showReportableEventsPage(requestObj)(request)

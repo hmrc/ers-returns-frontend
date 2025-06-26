@@ -16,7 +16,7 @@
 
 package controllers
 
-import models.{CheckFileType, RequestObject, RsFormMappings}
+import models.{CheckFileType, ErsMetaData, RequestObject, RsFormMappings, SchemeInfo}
 import org.apache.pekko.stream.Materializer
 import org.jsoup.Jsoup
 import org.mockito.ArgumentMatchers._
@@ -32,14 +32,15 @@ import play.api.i18n.{MessagesApi, MessagesImpl}
 import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import utils.Fixtures.ersRequestObject
+import utils.Fixtures.{EMIMetaData, ersRequestObject}
 import utils.{ERSFakeApplicationConfig, ErsTestHelper, Fixtures}
 import views.html.{check_file_type, global_error}
 
+import java.time.ZonedDateTime
 import scala.concurrent.{ExecutionContext, Future}
 
 class CheckFileTypeControllerSpec
-    extends AnyWordSpecLike
+  extends AnyWordSpecLike
     with Matchers
     with OptionValues
     with ERSFakeApplicationConfig
@@ -66,9 +67,10 @@ class CheckFileTypeControllerSpec
   "Check File Type Page GET" should {
 
     def buildFakeCheckingServiceController(
-      fileType: Future[CheckFileType] = Future.successful(CheckFileType(Some("csv"))),
-      requestObject: Future[RequestObject] = Future.successful(ersRequestObject)
-    ): CheckFileTypeController = new CheckFileTypeController(
+                                            fileType: Future[CheckFileType] = Future.successful(CheckFileType(Some("csv"))),
+                                            requestObject: Future[RequestObject] = Future.successful(ersRequestObject),
+                                            requestMeta: Future[ErsMetaData] = Future.successful(EMIMetaData)
+                                          ): CheckFileTypeController = new CheckFileTypeController(
       mockMCC,
       mockSessionService,
       globalErrorView,
@@ -77,6 +79,7 @@ class CheckFileTypeControllerSpec
     ) {
       when(mockSessionService.fetch[CheckFileType](refEq("check-file-type"))(any(), any())).thenReturn(fileType)
       when(mockSessionService.fetch[RequestObject](refEq(ERS_REQUEST_OBJECT))(any(), any())).thenReturn(requestObject)
+      when(mockSessionService.fetch[ErsMetaData](refEq(ERS_META_DATA))(any(), any())).thenReturn(requestMeta)
     }
 
     "give a redirect status (to company authentication frontend) on GET if user is not authenticated" in {
@@ -133,11 +136,11 @@ class CheckFileTypeControllerSpec
   "Check File Type Page POST" should {
     def buildFakeCheckingServiceController(successfulCache: Boolean = true,
                                            requestObject: Future[RequestObject] = Future.successful(ersRequestObject)): CheckFileTypeController =
-			new CheckFileTypeController(mockMCC, mockSessionService, globalErrorView, checkFileTypeView, testAuthActionGov){
-      when(mockSessionService.cache(matches("check-file-type"), any())(any(), any())).thenReturn(
-        if (successfulCache) Future.successful(sessionPair) else Future.failed(new Exception("error")))
-      when(mockSessionService.fetch[RequestObject](refEq(ERS_REQUEST_OBJECT))(any(), any())).thenReturn(requestObject)
-    }
+      new CheckFileTypeController(mockMCC, mockSessionService, globalErrorView, checkFileTypeView, testAuthActionGov) {
+        when(mockSessionService.cache(matches("check-file-type"), any())(any(), any())).thenReturn(
+          if (successfulCache) Future.successful(sessionPair) else Future.failed(new Exception("error")))
+        when(mockSessionService.fetch[RequestObject](refEq(ERS_REQUEST_OBJECT))(any(), any())).thenReturn(requestObject)
+      }
 
     "give a redirect status (to company authentication frontend) on GET if user is not authenticated" in {
       setUnauthorisedMocks()
@@ -182,7 +185,7 @@ class CheckFileTypeControllerSpec
 
     "if no form errors with file type = ods and save success" in {
       val controllerUnderTest = buildFakeCheckingServiceController()
-      val checkFileTypeData   = Map("checkFileType" -> "ods")
+      val checkFileTypeData = Map("checkFileType" -> "ods")
       val form = RsFormMappings.schemeTypeForm().bind(checkFileTypeData)
       val request = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
 
