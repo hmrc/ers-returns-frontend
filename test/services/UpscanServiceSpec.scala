@@ -85,7 +85,7 @@ class UpscanServiceSpec
       val callback = controllers.internal.routes.CsvFileUploadCallbackController.callback(uploadId, scRef, "sessionid").absoluteURL()
       val success = controllers.routes.CsvFileUploadController.success(uploadId).absoluteURL()
       val failure = controllers.routes.CsvFileUploadController.failure().absoluteURL()
-      val expectedInitiateRequest = UpscanInitiateRequest(callback, success, failure, 1, 209715200) // scalastyle:off magic.number
+      val expectedInitiateRequest = UpscanInitiateRequest(callback, success, failure, 1, 209715200)
 
       val upscanInitiateResponse =
         UpscanInitiateResponse(Reference("reference"), "postTarget", formFields = Map.empty[String, String])
