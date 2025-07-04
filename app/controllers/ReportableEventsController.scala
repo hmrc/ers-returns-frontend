@@ -46,7 +46,8 @@ class ReportableEventsController @Inject()(val mcc: MessagesControllerComponents
 
   def reportableEventsPage(): Action[AnyContent] = authAction.async { implicit request =>
     sessionService.fetch[ErsMetaData](ersUtil.ERS_METADATA).map { ele =>
-      logger.info(s"[ReportableEventsController][reportableEventsPage] Fetched request object with SAP Number: ${ele.sapNumber}")
+      logger.info(s"[ReportableEventsController][reportableEventsPage] Fetched request object with SAP Number: ${ele.sapNumber} " +
+        s"and schemeRef:${ele.schemeInfo.schemeRef}")
 
     }
     sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT).flatMap { requestObj =>

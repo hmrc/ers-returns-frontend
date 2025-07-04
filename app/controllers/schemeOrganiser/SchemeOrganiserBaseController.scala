@@ -18,7 +18,7 @@ package controllers.schemeOrganiser
 
 import config.ApplicationConfig
 import controllers.auth.{AuthAction, RequestWithOptionalAuthContext}
-import models.{CompanyDetails, RequestObject}
+import models.{CompanyDetails, RequestObject,ErsMetaData}
 import play.api.Logging
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, Messages}
@@ -29,7 +29,6 @@ import services.FrontendSessionService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.ERSUtil
-import models._
 import scala.concurrent.{ExecutionContext, Future}
 
 trait SchemeOrganiserBaseController[A] extends FrontendController with I18nSupport with Logging {
@@ -53,7 +52,8 @@ trait SchemeOrganiserBaseController[A] extends FrontendController with I18nSuppo
   def questionPage(index: Int): Action[AnyContent] = authAction.async {
     implicit request =>
       sessionService.fetch[ErsMetaData](ersUtil.ERS_METADATA).map { ele =>
-        logger.info(s"[SchemeOrganiserBaseController][questionPage] Fetched request object with SAP Number: ${ele.sapNumber}")
+        logger.info(s"[SchemeOrganiserBaseController][questionPage] Fetched request object with SAP Number: ${ele.sapNumber} " +
+          s"and schemeRef:${ele.schemeInfo.schemeRef}")
       }
       sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT).flatMap { requestObject =>
         showQuestionPage(requestObject, index)
