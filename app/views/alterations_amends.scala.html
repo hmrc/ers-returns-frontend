@@ -28,7 +28,7 @@
         govukInsetText: GovukInsetText
 )
 
-@(requestObject: RequestObject, altAmends: AltAmends)(implicit request: Request[_], flash: Flash, messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
+@(requestObject: RequestObject, altAmends: AltAmends)(implicit request: RequestHeader, flash: Flash, messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 
 @schemeId = @{requestObject.getSchemeId}
 

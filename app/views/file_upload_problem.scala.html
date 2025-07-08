@@ -21,7 +21,7 @@
         hmrcPageHeading: HmrcPageHeading
 )
 
-@(pageTitle: String)(implicit request: Request[_], messages: Messages, appConfig: ApplicationConfig)
+@(pageTitle: String)(implicit request: RequestHeader, messages: Messages, appConfig: ApplicationConfig)
 
 @govuk_wrapper(title = messages(pageTitle)) {
 
@@ -33,9 +33,6 @@
  <ul class="govuk-list govuk-list--bullet">
   <li>
    @messages("ers.file_problem.invalidFileName")
-  </li>
-  <li>
-  @messages("ers.file_problem.fileTooLarge", appConfig.uploadFileSizeInMB)
   </li>
   <li>
   @messages("ers.file_problem.fileTooSmall")

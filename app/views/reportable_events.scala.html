@@ -27,7 +27,7 @@
 		govukButton: GovukButton
 )
 
-@(requestObject: RequestObject, activity: Option[String], reportableEvents: Form[models.ReportableEvents])(implicit request: Request[_], messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
+@(requestObject: RequestObject, activity: Option[String], reportableEvents: Form[models.ReportableEvents])(implicit request: RequestHeader, messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 
 @schemeId = @{requestObject.getSchemeId}
 

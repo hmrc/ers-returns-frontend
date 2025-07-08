@@ -19,7 +19,6 @@
 @import views.html.includes.countries
 @import views.html.templates.reference
 
-
 @this(
     govuk_wrapper: govuk_wrapper,
     countriesSelect: countries,
@@ -32,7 +31,7 @@
     hmrcPageHeading: HmrcPageHeading
 )
 
-@(requestObject: RequestObject, index: Int, trusteeBasedInUkForm: Form[models.TrusteeBasedInUk], edit: Boolean = false)(implicit request: Request[AnyRef], messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
+@(requestObject: RequestObject, index: Int, trusteeBasedInUkForm: Form[models.TrusteeBasedInUk], edit: Boolean = false)(implicit request: RequestHeader, messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 
 @schemeId = @{requestObject.getSchemeId}
 

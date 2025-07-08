@@ -38,7 +38,7 @@ import controllers.auth.AuthAction
 import models.{CompanyBasedInUk, RequestObject, RsFormMappings}
 import play.api.data.Form
 import play.api.libs.json.Format
-import play.api.mvc.{AnyContent, MessagesControllerComponents, Request, Result}
+import play.api.mvc.{AnyContent, MessagesControllerComponents, Request, RequestHeader, Result}
 import play.twirl.api.Html
 import services.FrontendSessionService
 import uk.gov.hmrc.http.HeaderCarrier
@@ -49,7 +49,6 @@ import utils.{CountryCodes, ERSUtil}
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
-
 
 class SubsidiaryBasedInUkController @Inject()(val mcc: MessagesControllerComponents,
                                               val authConnector: DefaultAuthConnector,
@@ -69,7 +68,7 @@ class SubsidiaryBasedInUkController @Inject()(val mcc: MessagesControllerCompone
   val cacheKey: String = ersUtil.SUBSIDIARY_COMPANY_BASED
   implicit val format: Format[CompanyBasedInUk] = CompanyBasedInUk.format
 
-  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier, request: Request[_]): Future[Result] = {
+  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier, request: RequestHeader): Future[Result] = {
     for {
       subsidiaryBasedInUk <-  if (edit) {
         sessionService.fetchCompaniesOptionally().map {

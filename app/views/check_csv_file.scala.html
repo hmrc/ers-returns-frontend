@@ -27,7 +27,7 @@
         govukButton: GovukButton
 )
 
-@(requestObject: RequestObject, csvFilesList: CsvFilesList)(implicit request: Request[_], flash: Flash, messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
+@(requestObject: RequestObject, csvFilesList: CsvFilesList)(implicit request: RequestHeader, flash: Flash, messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 
 @schemeId = @{requestObject.getSchemeId}
 

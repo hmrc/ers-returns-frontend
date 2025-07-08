@@ -29,7 +29,7 @@
     schemeUrl: String,
     expectedSchemeType: String,
     requestSchemeType: String
-)(implicit request: Request[_], messages: Messages, appConfig: ApplicationConfig)
+)(implicit request: RequestHeader, messages: Messages, appConfig: ApplicationConfig)
 
     @govuk_wrapper(title = messages("file_upload_errors.scheme_mismatch.title") + " " + messages("ers.title.postfix")) {
 

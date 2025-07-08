@@ -53,7 +53,6 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
                                      ) extends FrontendController(mcc) with I18nSupport with WithUnsafeDefaultFormBinding with Logging with Constants with CacheHelper {
 
   implicit val ec: ExecutionContext = mcc.executionContext
-
   private val form: Form[Boolean] = yesNoFormProvider.withPrefix("delete-company")
 
   private def getRequestObjAndCompanyDetails()(implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[(RequestObject, Int, CompanyDetailsList)] =
@@ -257,7 +256,7 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
     )
   }
 
-  def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result =
+  def getGlobalErrorPage(implicit request: RequestHeader, messages: Messages): Result =
     InternalServerError(
       globalErrorView(
         "ers.global_errors.title",

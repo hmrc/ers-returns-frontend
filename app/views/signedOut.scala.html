@@ -23,7 +23,7 @@
         govukButton: GovukButton
 )
 
-@(loginScreenUrl: String)(implicit request: Request[AnyContent], messages: Messages, appConfig: ApplicationConfig)
+@(loginScreenUrl: String)(implicit request: RequestHeader, messages: Messages, appConfig: ApplicationConfig)
 
 @govuk_wrapper(title = messages("ers.app_title"), disableSignOut = true){
 

@@ -21,7 +21,7 @@ import config.ApplicationConfig
 import connectors.UpscanConnector
 import models.upscan.{UploadId, UpscanInitiateRequest, UpscanInitiateResponse}
 import play.api.Logging
-import play.api.mvc.{Call, Request}
+import play.api.mvc.{Call, RequestHeader}
 import uk.gov.hmrc.http.{HeaderCarrier, SessionId}
 
 import javax.inject.Singleton
@@ -36,30 +36,33 @@ class UpscanService @Inject()(applicationConfig: ApplicationConfig, upscanConnec
   private def urlToString(c: Call): String = redirectUrlBase + c.url
   val uploadFileSizeLimit = applicationConfig.uploadFileSizeLimit
 
-  def getUpscanFormDataCsv(uploadId: UploadId, scRef: String)(implicit
+  def getUpscanFormDataCsv(uploadId: UploadId, schemeRef: String)(implicit
                                                               hc: HeaderCarrier,
-                                                              request: Request[_]
+                                                              request: RequestHeader
   ): Future[UpscanInitiateResponse] = {
     val callbackUrl = generateCallbackUrl(
       hc.sessionId,
-      sessionId => controllers.internal.routes.CsvFileUploadCallbackController.callback(uploadId, scRef, sessionId),
-      isSecure)
+      sessionId => controllers.internal.routes.CsvFileUploadCallbackController.callback(uploadId, schemeRef, sessionId),
+      isSecure
+    )
+
     val success = controllers.routes.CsvFileUploadController.success(uploadId)
-    logger.info(s"[UpscanService][getUpscanFormDataCsv] success : $success")
+    logger.info(s"[UpscanService][getUpscanFormDataCsv] success : $uploadId")
+
     val failure = controllers.routes.CsvFileUploadController.failure()
-    logger.info(s"[UpscanService][getUpscanFormDataCsv] failure: $failure")
+    logger.info(s"[UpscanService][getUpscanFormDataCsv] failure: $uploadId")
+
     val upscanInitiateRequest =
       UpscanInitiateRequest(callbackUrl, urlToString(success), urlToString(failure), 1, uploadFileSizeLimit)
-
-    logger.info(s"[UpscanService][getUpscanFormDataCsv] upscanInitiateRequest: $upscanInitiateRequest")
     upscanConnector.getUpscanFormData(upscanInitiateRequest)
   }
 
-  def getUpscanFormDataOds(scRef: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[UpscanInitiateResponse] = {
+  def getUpscanFormDataOds(schemeRef: String)(implicit hc: HeaderCarrier, request: RequestHeader): Future[UpscanInitiateResponse] = {
     val callbackUrl = generateCallbackUrl(
       hc.sessionId,
-      sessionId => controllers.internal.routes.FileUploadCallbackController.callback(scRef, sessionId),
-      isSecure)
+      sessionId => controllers.internal.routes.FileUploadCallbackController.callback(schemeRef, sessionId),
+      isSecure
+    )
 
     val success = controllers.routes.FileUploadController.success()
     val failure = controllers.routes.FileUploadController.failure()
@@ -69,13 +72,11 @@ class UpscanService @Inject()(applicationConfig: ApplicationConfig, upscanConnec
 
   private def generateCallbackUrl(sessionIdOption: Option[SessionId],
                                   routeFunction: String => Call,
-                                  isSecure: Boolean)(implicit request: Request[_]): String = {
+                                  isSecure: Boolean)(implicit request: RequestHeader): String = {
 
     sessionIdOption match {
       case Some(sessionId) =>
-        val url = routeFunction(sessionId.value).absoluteURL(isSecure)
-        logger.debug(s"[UpscanService][generateCallbackUrl] Generated callback URL: $url")
-        url
+        routeFunction(sessionId.value).absoluteURL(isSecure)
 
       case None =>
         val errMsg = "[UpscanService][generateCallbackUrl] Session ID is not available for generating callback URL"

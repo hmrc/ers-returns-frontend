@@ -33,7 +33,7 @@
     upscanInitiateResponse: UpscanInitiateResponse,
     fileId: String,
     useCsopV5Templates: Boolean
-)(implicit request: Request[_], messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
+)(implicit request: RequestHeader, messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 
 @schemeId = @{requestObject.getSchemeId}
 @schemeName = @{requestObject.getSchemeHeadingName}

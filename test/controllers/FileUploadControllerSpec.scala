@@ -91,25 +91,27 @@ class FileUploadControllerSpec
   val fileUploadErrorsView: file_upload_errors = app.injector.instanceOf[file_upload_errors]
   val fileUploadErrorsOdsView: file_upload_errors_ods = app.injector.instanceOf[file_upload_errors_ods]
   val templateFailureView: template_version_problem = app.injector.instanceOf[template_version_problem]
+  val fileSizeLimitErrorView: file_size_limit_error = app.injector.instanceOf[file_size_limit_error]
   val upscanOdsFileUploadView: upscan_ods_file_upload = app.injector.instanceOf[upscan_ods_file_upload]
   val fileUploadProblemView: file_upload_problem = app.injector.instanceOf[file_upload_problem]
 
   implicit lazy val materializer: Materializer = app.materializer
 
   object TestFileUploadController
-      extends FileUploadController(
-        mockMCC,
-        mockErsConnector,
-        mockSessionService,
-        mockUpscanService,
-        globalErrorView,
-        fileUploadErrorsView,
-        fileUploadErrorsOdsView,
-        templateFailureView,
-        upscanOdsFileUploadView,
-        fileUploadProblemView,
-        testAuthAction
-      )
+    extends FileUploadController(
+      mockMCC,
+      mockErsConnector,
+      mockSessionService,
+      mockUpscanService,
+      globalErrorView,
+      fileUploadErrorsView,
+      fileUploadErrorsOdsView,
+      fileSizeLimitErrorView,
+      templateFailureView,
+      upscanOdsFileUploadView,
+      fileUploadProblemView,
+      testAuthAction
+    )
 
   when(mockSessionService.fetch[CheckFileType](refEq("check-file-type"))(any(), any()))
     .thenReturn(Future.successful(CheckFileType(Some("csv"))))
@@ -142,7 +144,7 @@ class FileUploadControllerSpec
       .thenReturn(Future.successful(ersRequestObject))
     "return OK" when {
       "Upscan form data is successfully returned and callback record is created in session cache" in {
-        when(mockUpscanService.getUpscanFormDataOds(anyString())(any[HeaderCarrier], any[Request[_]]))
+        when(mockUpscanService.getUpscanFormDataOds(anyString())(any[HeaderCarrier], any[RequestHeader]))
           .thenReturn(Future.successful(upscanInitiateResponse))
         when(mockErsConnector.createCallbackRecord(any(), any()))
           .thenReturn(Future.successful(CREATED))
@@ -157,7 +159,7 @@ class FileUploadControllerSpec
       "Upscan service returns an exception retrieving form data" in {
         reset(mockErsConnector)
         setAuthMocks()
-        when(mockUpscanService.getUpscanFormDataOds(anyString())(any[HeaderCarrier], any[Request[_]]))
+        when(mockUpscanService.getUpscanFormDataOds(anyString())(any[HeaderCarrier], any[RequestHeader]))
           .thenReturn(Future.failed(new Exception("Expected exception")))
         when(mockSessionService.fetch[RequestObject](meq(ERS_REQUEST_OBJECT))(any(), any()))
           .thenReturn(Future.successful(ersRequestObject))
@@ -169,7 +171,7 @@ class FileUploadControllerSpec
       }
 
       "Session service returns an exception creating callback record" in {
-        when(mockUpscanService.getUpscanFormDataOds(anyString())(any[HeaderCarrier], any[Request[_]]))
+        when(mockUpscanService.getUpscanFormDataOds(anyString())(any[HeaderCarrier], any[RequestHeader]))
           .thenReturn(Future.successful(upscanInitiateResponse))
         when(mockErsConnector.createCallbackRecord(any(), any()))
           .thenReturn(Future.failed(new Exception("Expected exception")))

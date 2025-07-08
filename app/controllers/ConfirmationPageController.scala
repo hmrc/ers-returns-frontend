@@ -140,7 +140,7 @@ class ConfirmationPageController @Inject()(val mcc: MessagesControllerComponents
               .withSession(request.session + (BUNDLE_REF -> bundle) + (DATE_TIME_SUBMITTED -> dateTimeSubmitted))
           }
         case _ =>
-          logger.info(s"[ConfirmationPageController][saveAndSubmit] Save meta data to backend returned status ${res.status}, timestamp: ${System.currentTimeMillis()}.")
+          logger.warn(s"[ConfirmationPageController][saveAndSubmit] Save meta data to backend returned status ${res.status}, timestamp: ${System.currentTimeMillis()}.")
           Future.successful(getGlobalErrorPage)
       }
     } recover { case e: Throwable =>
@@ -149,7 +149,7 @@ class ConfirmationPageController @Inject()(val mcc: MessagesControllerComponents
     }
   }
 
-  def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result =
+  def getGlobalErrorPage(implicit request: RequestHeader, messages: Messages): Result =
     Ok(
       globalErrorView(
         "ers.global_errors.title",
