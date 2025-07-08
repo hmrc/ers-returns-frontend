@@ -47,7 +47,7 @@ class SummaryDeclarationController @Inject() (val mcc: MessagesControllerCompone
   def summaryDeclarationPage(): Action[AnyContent] = authAction.async { implicit request =>
     sessionService.fetch[ErsMetaData](ersUtil.ERS_METADATA).map { ele =>
       logger.info(s"[SummaryDeclarationController][summaryDeclarationPage] Fetched request object with SAP Number: ${ele.sapNumber} " +
-        s"and schemeRef:${ele.schemeInfo.schemeRef}")
+        s"and schemeRef: ${ele.schemeInfo.schemeRef}")
     }
     sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT).flatMap { requestObject =>
       showSummaryDeclarationPage(requestObject)(request)

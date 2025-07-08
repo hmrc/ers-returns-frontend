@@ -26,6 +26,7 @@ import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.domain.EmpRef
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
+
 import scala.concurrent.Future
 
 trait AuthHelper extends MockitoSugar {
@@ -78,4 +79,4 @@ trait AuthHelper extends MockitoSugar {
           ArgumentMatchers.any()
         )
     ) thenReturn Future.failed(MissingBearerToken("No authenticated bearer token"))
-  }
+}

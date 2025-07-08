@@ -52,7 +52,7 @@ class ConfirmationPageController @Inject()(val mcc: MessagesControllerComponents
   def confirmationPage(): Action[AnyContent] = authAction.async { implicit request =>
     sessionService.fetch[ErsMetaData](ersUtil.ERS_METADATA).map { ele =>
       logger.info(s"[ConfirmationPageController][confirmationPage] Fetched request object with SAP Number: ${ele.sapNumber} " +
-        s"and schemeRef:${ele.schemeInfo.schemeRef}")
+        s"and schemeRef: ${ele.schemeInfo.schemeRef}")
     }
     showConfirmationPage()(request, hc)
   }

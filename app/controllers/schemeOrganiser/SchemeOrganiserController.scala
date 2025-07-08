@@ -51,7 +51,7 @@ class SchemeOrganiserController @Inject()(
     implicit request =>
       sessionService.fetch[ErsMetaData](ersUtil.ERS_METADATA).map { ele =>
         logger.info(s"[SchemeOrganiserController][schemeOrganiserSummaryPage] Fetched request object with SAP Number: ${ele.sapNumber} " +
-        s"and schemeRef:${ele.schemeInfo.schemeRef}")
+        s"and schemeRef: ${ele.schemeInfo.schemeRef}")
       }
       showSchemeOrganiserSummaryPage(request)
   }

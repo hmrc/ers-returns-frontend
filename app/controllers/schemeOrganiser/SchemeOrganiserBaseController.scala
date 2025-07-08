@@ -53,7 +53,7 @@ trait SchemeOrganiserBaseController[A] extends FrontendController with I18nSuppo
     implicit request =>
       sessionService.fetch[ErsMetaData](ersUtil.ERS_METADATA).map { ele =>
         logger.info(s"[SchemeOrganiserBaseController][questionPage] Fetched request object with SAP Number: ${ele.sapNumber} " +
-          s"and schemeRef:${ele.schemeInfo.schemeRef}")
+          s"and schemeRef: ${ele.schemeInfo.schemeRef}")
       }
       sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT).flatMap { requestObject =>
         showQuestionPage(requestObject, index)

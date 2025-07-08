@@ -56,7 +56,7 @@ class CsvFileUploadController @Inject() (val mcc: MessagesControllerComponents,
   def uploadFilePage(): Action[AnyContent] = authAction.async { implicit request =>
     sessionService.fetch[ErsMetaData](ersUtil.ERS_METADATA).map { ele =>
       logger.info(s"[CsvFileUploadController][uploadFilePage()] Fetched request object with SAP Number: ${ele.sapNumber} " +
-        s"and schemeRef:${ele.schemeInfo.schemeRef}")
+        s"and schemeRef: ${ele.schemeInfo.schemeRef}")
     }
     (for {
       requestObject  <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
