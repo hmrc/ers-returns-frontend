@@ -135,7 +135,18 @@ class ReturnServiceControllerSpec
       status(result) shouldBe Status.OK
     }
   }
-
+  "Calling ReturnServiceController.cacheParams when schemeRef is not present" should {
+    " redirect to the global error page" in {
+      val controllerUnderTest = buildFakeReturnServiceController()
+      when(mockSessionService.remove(any())(any())).thenReturn(Future.failed(new Exception("failed")))
+      val req = Fixtures.buildFakeRequestWithSessionIdCSOP("GET")
+      val result =
+        controllerUnderTest.cacheParams(ersRequestObject)(req)
+      contentAsString(result) shouldBe contentAsString(
+        Future(controllerUnderTest.getGlobalErrorPage(req, testMessages))
+      )
+    }
+  }
   //Start Page
   "Calling ReturnServiceController.startPage (GET) without authentication" should {
     "give a redirect status (to company authentication frontend)" in {
