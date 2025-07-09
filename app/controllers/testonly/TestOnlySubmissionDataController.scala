@@ -89,7 +89,7 @@ class TestOnlySubmissionDataController @Inject()(val mcc: MessagesControllerComp
       case _ => None
     }
 
-  private def getGlobalErrorPage()(implicit request: Request[_], messages: Messages): Result =
+  private def getGlobalErrorPage()(implicit request: RequestHeader, messages: Messages): Result =
     Ok(
       globalErrorView(
         "ers.global_errors.title",

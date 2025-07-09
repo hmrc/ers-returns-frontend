@@ -53,13 +53,18 @@ class ReportableEventsController @Inject()(val mcc: MessagesControllerComponents
     sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT).flatMap { requestObj =>
       updateErsMetaData(requestObj)(request, hc).flatMap { _ =>
         showReportableEventsPage(requestObj)(request)
+      }.recover{
+        case _ =>
+        getGlobalErrorPage
       }
     }
   }
 
+
   def updateErsMetaData(requestObject: RequestObject)
                        (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Object] =
-    ersConnector.connectToEtmpSapRequest(requestObject.getSchemeReference).flatMap { sapNumber =>
+    ersConnector.connectToEtmpSapRequest(requestObject.getSchemeReference).flatMap {
+      case Right(sapNumber) =>
       sessionService.fetch[ErsMetaData](ersUtil.ERS_METADATA).map { metaData =>
         val ersMetaData = ErsMetaData(
           metaData.schemeInfo,
@@ -77,6 +82,12 @@ class ReportableEventsController @Inject()(val mcc: MessagesControllerComponents
         logger.error(s"[ReportableEventsController][updateErsMetaData] fetch failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
         getGlobalErrorPage
       }
+      case Left(error) =>
+        Future.successful(getGlobalErrorPage)
+    }.recover {
+      case e: Exception =>
+        logger.error(s"[ReportableEventsController][updateErsMetaData] in recover with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
+        throw e
     }
 
   def showReportableEventsPage(requestObject: RequestObject)
@@ -118,7 +129,7 @@ class ReportableEventsController @Inject()(val mcc: MessagesControllerComponents
           }
       )
 
-  def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result =
+  def getGlobalErrorPage(implicit request: RequestHeader, messages: Messages): Result =
     InternalServerError(
       globalErrorView(
         "ers.global_errors.title",

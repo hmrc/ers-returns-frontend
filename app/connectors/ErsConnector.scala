@@ -25,42 +25,41 @@ import play.api.Logging
 import play.api.http.Status._
 import play.api.libs.json.{JsError, JsObject, JsSuccess, JsValue, Json}
 import play.api.mvc.AnyContent
-import uk.gov.hmrc.http.HttpReads.Implicits
-import uk.gov.hmrc.http.{HeaderCarrier, HttpReads, HttpResponse, StringContextOps}
-import uk.gov.hmrc.play.bootstrap.http.HttpClientV2Provider
+import uk.gov.hmrc.http.HttpReads.Implicits._
+import uk.gov.hmrc.http.client.HttpClientV2
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps}
+
 import java.util.concurrent.TimeUnit
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class ErsConnector @Inject() (val http: HttpClientV2Provider, appConfig: ApplicationConfig)(implicit
-                                                                                            ec: ExecutionContext) extends Logging with Metrics {
+class ErsConnector @Inject() (http: HttpClientV2, appConfig: ApplicationConfig)(implicit ec: ExecutionContext) extends Logging with Metrics {
 
   lazy val ersUrl: String = appConfig.ersUrl
   lazy val validatorUrl: String = appConfig.validatorUrl
-  implicit val rds: HttpReads[HttpResponse] = Implicits.readRaw
 
   def   connectToEtmpSapRequest(
                                  schemeRef: String
-                               )(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[String] = {
+                               )(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Either[Throwable, String]] = {
+
     val empRef: String = request.authData.empRef.encodedValue
     val url: String = s"$ersUrl/ers/$empRef/sapRequest/" + schemeRef
     val startTime = System.currentTimeMillis()
 
     http
-      .get()
       .get(url"$url")
       .execute[HttpResponse]
       .map { response =>
         response.status match {
           case OK =>
             val sapNumber: String = (response.json \ "SAP Number").as[String]
-            sapNumber
+            Right(sapNumber)
           case _  =>
             logger.error(
               s"[ErsConnector][connectToEtmpSapRequest] SAP request failed with status ${response.status}, timestamp: ${System.currentTimeMillis()}."
             )
-            throw new Exception
+            Left(throw new Exception)
         }
       }
       .recover { case e: Exception =>
@@ -68,21 +67,20 @@ class ErsConnector @Inject() (val http: HttpClientV2Provider, appConfig: Applica
           s"[ErsConnector][connectToEtmpSapRequest] connectToEtmpSapRequest failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}."
         )
         ersConnector(System.currentTimeMillis() - startTime, TimeUnit.MILLISECONDS)
-        throw new Exception
+        Left(throw e)
       }
   }
 
-  def connectToEtmpSummarySubmit(sap: String, payload: JsValue)(implicit
-                                                                request: RequestWithOptionalAuthContext[AnyContent],
-                                                                hc: HeaderCarrier
+  def connectToEtmpSummarySubmit(sap: String, payload: JsValue)(implicit request: RequestWithOptionalAuthContext[AnyContent],
+                                                                 hc: HeaderCarrier
   ): Future[String] = {
     val empRef: String = request.authData.empRef.encodedValue
     val url: String = s"$ersUrl/ers/$empRef/summarySubmit/" + sap
 
-    http.get()
+    http
       .post(url"$url")
       .withBody(payload)
-      .execute
+      .execute[HttpResponse]
       .map {
         res =>
           res.status match {
@@ -104,25 +102,21 @@ class ErsConnector @Inject() (val http: HttpClientV2Provider, appConfig: Applica
     val empRef: String = request.authData.empRef.encodedValue
     val url: String = s"$ersUrl/ers/$empRef/saveReturnData"
     http
-      .get()
       .post(url"$url")
       .withBody(Json.toJson(allData))
       .execute[HttpResponse]
   }
 
-  def validateFileData(callbackData: UploadedSuccessfully, schemeInfo: SchemeInfo)(implicit
-                                                                                   request: RequestWithOptionalAuthContext[AnyContent],
-                                                                                   hc: HeaderCarrier
+  def validateFileData(callbackData: UploadedSuccessfully, schemeInfo: SchemeInfo)(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier
   ): Future[HttpResponse] = {
     val empRef: String = request.authData.empRef.encodedValue
     val url: String = s"$validatorUrl/ers/$empRef/process-file"
     val startTime = System.currentTimeMillis()
     logger.debug("[ErsConnector][connectToEtmpSapRequest] validateFileData: Call to Validator: " + (System.currentTimeMillis() / 1000))
     http
-      .get()
       .post(url"$url")
       .withBody(Json.toJson(ValidatorData(callbackData, schemeInfo)))
-      .execute
+      .execute[HttpResponse]
       .map { res =>
         ersConnector(System.currentTimeMillis() - startTime, TimeUnit.MILLISECONDS)
         res.status match {
@@ -151,10 +145,9 @@ class ErsConnector @Inject() (val http: HttpClientV2Provider, appConfig: Applica
     val url: String = s"$validatorUrl/ers/v2/$empRef/process-csv-file"
 
     http
-      .get()
       .post(url"$url")
       .withBody(Json.toJson(CsvValidatorData(callbackData, schemeInfo)))
-      .execute
+      .execute[HttpResponse]
       .map {
         res =>
           res.status match {
@@ -180,7 +173,6 @@ class ErsConnector @Inject() (val http: HttpClientV2Provider, appConfig: Applica
     val empRef: String = request.authData.empRef.encodedValue
     val url: String = s"$ersUrl/ers/$empRef/saveMetadata"
     http
-      .get()
       .post(url"$url")
       .withBody(Json.toJson(allData))
       .execute[HttpResponse]
@@ -193,10 +185,9 @@ class ErsConnector @Inject() (val http: HttpClientV2Provider, appConfig: Applica
     val empRef: String = request.authData.empRef.encodedValue
     val url: String = s"$ersUrl/ers/$empRef/check-for-presubmission/$validatedSheets"
     http
-      .get()
       .post(url"$url")
       .withBody(Json.toJson(schemeInfo))
-      .execute
+      .execute[HttpResponse]
   }
 
   def removePresubmissionData(
@@ -205,7 +196,6 @@ class ErsConnector @Inject() (val http: HttpClientV2Provider, appConfig: Applica
     val empRef: String = request.authData.empRef.encodedValue
     val url: String = s"$ersUrl/ers/$empRef/removePresubmissionData"
     http
-      .get()
       .post(url"$url")
       .withBody(Json.toJson(schemeInfo))
       .execute[HttpResponse]
@@ -217,7 +207,6 @@ class ErsConnector @Inject() (val http: HttpClientV2Provider, appConfig: Applica
     val empRef: String = request.authData.empRef.encodedValue
     val url: String = s"$ersUrl/ers/$empRef/retrieve-submission-data"
     http
-      .get()
       .post(url"$url")
       .withBody(Json.toJson(data))
       .execute[HttpResponse]
@@ -228,9 +217,8 @@ class ErsConnector @Inject() (val http: HttpClientV2Provider, appConfig: Applica
       ifSome = { sessionId =>
         val url: String = s"$validatorUrl/ers/$sessionId/create-callback"
         http
-          .get()
           .post(url"$url")
-          .execute
+          .execute[HttpResponse]
           .map {
             case response if response.status == CREATED => CREATED
             case response =>
@@ -249,7 +237,6 @@ class ErsConnector @Inject() (val http: HttpClientV2Provider, appConfig: Applica
   def updateCallbackRecord(uploadStatus: UploadStatus, sessionId: String)(implicit hc: HeaderCarrier): Future[Int] = {
     val url: String = s"$validatorUrl/ers/$sessionId/update-callback"
     http
-      .get()
       .put(url"$url")
       .withBody(Json.toJson(uploadStatus))
       .execute[HttpResponse]
@@ -266,7 +253,6 @@ class ErsConnector @Inject() (val http: HttpClientV2Provider, appConfig: Applica
       ifSome = { sessionId =>
         val url: String = s"$validatorUrl/ers/$sessionId/get-callback"
         http
-          .get()
           .get(url"$url")
           .execute[HttpResponse]
           .map {

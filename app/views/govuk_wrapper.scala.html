@@ -32,7 +32,7 @@
         hmrcTimeoutDialogHelper: HmrcTimeoutDialogHelper
 )
 
-@(title: String, scriptElement: Option[Html] = None, isUserResearchBannerVisible: Boolean = false, disableSignOut: Boolean = false)(contentBlock: Html)(implicit request: Request[_], messages: Messages, applicationConfig: ApplicationConfig)
+@(title: String, scriptElement: Option[Html] = None, isUserResearchBannerVisible: Boolean = false, disableSignOut: Boolean = false)(contentBlock: Html)(implicit request: RequestHeader, messages: Messages, applicationConfig: ApplicationConfig)
 
 @head = {
     <meta name="format-detection" content="telephone=no"/>

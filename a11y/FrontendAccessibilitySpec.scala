@@ -19,7 +19,7 @@ import models._
 import org.scalacheck.Arbitrary
 import play.api.data.Form
 import play.api.data.Forms.boolean
-import play.api.mvc.{AnyContent, Request}
+import play.api.mvc.RequestHeader
 import play.twirl.api.Html
 import uk.gov.hmrc.scalatestaccessibilitylinter.views.AutomaticAccessibilitySpec
 import utils.{CountryCodes, CountryCodesImpl, ERSUtil}
@@ -29,7 +29,7 @@ class FrontendAccessibilitySpec extends AutomaticAccessibilitySpec {
 
   private val booleanForm: Form[Boolean] = Form("value" -> boolean)
 
-  implicit val arbitraryRequest: Arbitrary[Request[AnyRef]] = fixed(fakeRequest)
+  implicit val arbitraryRequest: Arbitrary[RequestHeader] = fixed(fakeRequest)
   implicit val arbConfig: Arbitrary[ApplicationConfig] = fixed(app.injector.instanceOf[ApplicationConfig])
   implicit val arbErsUtil: Arbitrary[ERSUtil] = fixed(app.injector.instanceOf[ERSUtil])
   implicit val arbRequestObject: Arbitrary[RequestObject] = fixed(RequestObject(Some("aoRef"), Some("2014/15"),
@@ -51,7 +51,6 @@ class FrontendAccessibilitySpec extends AutomaticAccessibilitySpec {
   override implicit val arbAsciiString: Arbitrary[String] = fixed("/")
 
   val viewPackageName = "views.html"
-
   val layoutClasses: Seq[Class[_]] = Seq(classOf[govuk_wrapper])
 
   override def renderViewByClass: PartialFunction[Any, Html] = {
@@ -61,7 +60,7 @@ class FrontendAccessibilitySpec extends AutomaticAccessibilitySpec {
     case check_file_type: check_file_type => render(check_file_type)
     case confirmation: confirmation =>
       val arbDateString: Arbitrary[String] = fixed("05 December 2023, 10:06AM")
-      render(confirmation)(arbRequestObject, arbDateString, arbAsciiString, arbAsciiString, arbAsciiString, arbRequest, arbMessages, arbErsUtil, arbConfig)
+      render(confirmation)(arbRequestObject, arbDateString, arbAsciiString, arbAsciiString, arbAsciiString, arbitraryRequest, arbMessages, arbErsUtil, arbConfig)
     case confirm_delete_company: confirm_delete_company => render(confirm_delete_company)
     case file_upload_errors: file_upload_errors => render(file_upload_errors)
     case file_upload_problem: file_upload_problem => render(file_upload_problem)
@@ -72,7 +71,7 @@ class FrontendAccessibilitySpec extends AutomaticAccessibilitySpec {
     case page_not_found_template: page_not_found_template => render(page_not_found_template)
     case reportable_events: reportable_events => render(reportable_events)
     case signedOut: signedOut =>
-      implicit val arbitraryRequest: Arbitrary[Request[AnyContent]] = fixed(fakeRequest)
+      implicit val arbitraryRequest: Arbitrary[RequestHeader] = fixed(fakeRequest)
       render(signedOut)
     case summary: summary =>
       implicit val arbAsciiString: Arbitrary[String] = fixed("1")
@@ -93,13 +92,14 @@ class FrontendAccessibilitySpec extends AutomaticAccessibilitySpec {
     case upscan_csv_file_upload: upscan_csv_file_upload => render(upscan_csv_file_upload)
     case upscan_ods_file_upload: upscan_ods_file_upload => render(upscan_ods_file_upload)
     case start: start => render(start)
-    case manual_address_overseas: manual_address_overseas => render(manual_address_overseas)(implicitly, implicitly, arbCompanyAddressOverseas, implicitly, implicitly, implicitly, implicitly, implicitly, implicitly, implicitly, implicitly)
-    case manual_address_uk: manual_address_uk => render(manual_address_uk)(implicitly, implicitly, arbCompanyAddressUk, implicitly, implicitly, implicitly, implicitly, implicitly, implicitly, implicitly, implicitly)
+    case manual_address_overseas: manual_address_overseas => render(manual_address_overseas)(implicitly, implicitly, arbCompanyAddressOverseas, implicitly, implicitly, implicitly, implicitly, implicitly, implicitly)
+    case manual_address_uk: manual_address_uk => render(manual_address_uk)(implicitly, implicitly, arbCompanyAddressUk, implicitly, implicitly, implicitly, implicitly, implicitly)
     case manual_company_details_overseas: manual_company_details_overseas => render(manual_company_details_overseas)
     case manual_company_details_uk: manual_company_details_uk => render(manual_company_details_uk)
     case manual_is_the_company_in_uk: manual_is_the_company_in_uk => render(manual_is_the_company_in_uk)
     case scheme_organiser_summary: scheme_organiser_summary => render(scheme_organiser_summary)
     case file_upload_errors_ods : file_upload_errors_ods => render(file_upload_errors_ods)
+    case file_size_limit_error: file_size_limit_error => render(file_size_limit_error)
   }
 
   runAccessibilityTests()

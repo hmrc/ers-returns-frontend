@@ -162,7 +162,7 @@ class AltAmendsController @Inject() (val mcc: MessagesControllerComponents,
         )
     }
 
-  def getGlobalErrorPage(implicit request: Request[_], messages: Messages): Result =
+  def getGlobalErrorPage(implicit request: RequestHeader, messages: Messages): Result =
     Ok(
       globalErrorView(
         "ers.global_errors.title",

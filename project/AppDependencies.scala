@@ -2,7 +2,7 @@ import play.sbt.PlayImport.*
 import sbt.*
 
 object AppDependencies {
-  val pdfboxVersion    = "2.0.33"
+  val pdfboxVersion    = "2.0.34"
   val openHtmlVersion  = "1.0.10"
   val bootstrapVersion = "9.13.0"
   val mongoVersion     = "2.6.0"
@@ -14,11 +14,11 @@ object AppDependencies {
     "uk.gov.hmrc.mongo"       %% "hmrc-mongo-play-30"         % mongoVersion,
     "uk.gov.hmrc"             %% "play-frontend-hmrc-play-30" % "12.1.0",
     "uk.gov.hmrc"             %% "play-partials-play-30"      % "10.1.0",
-    "uk.gov.hmrc"             %% "domain-play-30"             % "10.0.0",
+    "uk.gov.hmrc"             %% "domain-play-30"             % "11.0.0",
     "org.apache.pdfbox"       %  "pdfbox"                     % pdfboxVersion,
     "org.apache.pdfbox"       %  "xmpbox"                     % pdfboxVersion,
-    "org.apache.xmlgraphics"  %  "batik-transcoder"           % "1.18",
-    "org.apache.xmlgraphics"  %  "batik-codec"                % "1.18",
+    "org.apache.xmlgraphics"  %  "batik-transcoder"           % "1.19",
+    "org.apache.xmlgraphics"  %  "batik-codec"                % "1.19",
     "com.openhtmltopdf"       %  "openhtmltopdf-core"         % openHtmlVersion,
     "com.openhtmltopdf"       %  "openhtmltopdf-pdfbox"       % openHtmlVersion,
     "com.openhtmltopdf"       %  "openhtmltopdf-svg-support"  % openHtmlVersion,
@@ -33,8 +33,8 @@ object AppDependencies {
     "org.scalatest"           %% "scalatest"               % "3.2.19",
     "org.scalatestplus"       %% "mockito-5-10"            % "3.2.18.0",
     "com.vladsch.flexmark"    %  "flexmark-all"            % "0.64.8",
-    "org.jsoup"               %  "jsoup"                   % "1.20.1",
-    "org.wiremock"            %  "wiremock-standalone"     % "3.13.0"
+    "org.jsoup"               %  "jsoup"                   % "1.21.1",
+    "org.wiremock"            %  "wiremock-standalone"     % "3.13.1"
   ).map(_ % Test)
 
   val overrides: Seq[ModuleID] = Seq(

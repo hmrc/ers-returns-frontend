@@ -22,7 +22,7 @@ import controllers.auth.AuthAction
 import models.{CompanyBasedInUk, CompanyDetails, RequestObject, RsFormMappings}
 import play.api.data.Form
 import play.api.libs.json.Format
-import play.api.mvc.{AnyContent, MessagesControllerComponents, Request, Result}
+import play.api.mvc.{AnyContent, MessagesControllerComponents, Request, RequestHeader, Result}
 import play.twirl.api.Html
 import services.FrontendSessionService
 import uk.gov.hmrc.http.HeaderCarrier
@@ -50,7 +50,7 @@ class SchemeOrganiserBasedInUkController @Inject()(val mcc: MessagesControllerCo
   val cacheKey: String = ersUtil.SCHEME_ORGANISER_BASED
   implicit val format: Format[CompanyBasedInUk] = CompanyBasedInUk.format
 
-  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier, request: Request[_]): Future[Result] = {
+  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier, request: RequestHeader): Future[Result] = {
     for {
       subsidiaryBasedInUk <- if (edit) {
         sessionService.fetch[CompanyDetails](ersUtil.SCHEME_ORGANISER_CACHE).map {
