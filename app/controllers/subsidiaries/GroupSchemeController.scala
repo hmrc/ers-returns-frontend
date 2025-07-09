@@ -124,6 +124,10 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
 
   def groupSchemePage(): Action[AnyContent] = authAction.async {
     implicit request =>
+      sessionService.fetch[ErsMetaData](ersUtil.ERS_METADATA).map { ele =>
+        logger.info(s"[GroupSchemeController][groupSchemePage] Fetched request object with SAP Number: ${ele.sapNumber} " +
+        s"and schemeRef: ${ele.schemeInfo.schemeRef}")
+      }
       sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT).flatMap { requestObject =>
         showGroupSchemePage(requestObject)(request)
       }
