@@ -142,10 +142,10 @@ class FileUploadController @Inject()(val mcc: MessagesControllerComponents,
           sessionService.cache(ersUtil.VALIDATED_SHEETS, res.body)
           Redirect(controllers.schemeOrganiser.routes.SchemeOrganiserBasedInUkController.questionPage())
 
-        case ACCEPTED if res.body.contains("Incorrect ERS Template") =>
+        case BAD_REQUEST if res.body.contains("Incorrect ERS Template") =>
           handleIncorrectErsTemplate(res, schemeInfo)
 
-        case ACCEPTED =>
+        case BAD_REQUEST =>
           logger.warn(s"[FileUploadController][handleValidationResponse] Validation is not successful for schemeRef: $schemeRef, timestamp: ${System.currentTimeMillis()}.")
           Redirect(routes.FileUploadController.validationFailure())
 

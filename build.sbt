@@ -43,5 +43,3 @@ lazy val scoverageSettings =
     ScoverageKeys.coverageFailOnMinimum := true,
     ScoverageKeys.coverageHighlighting := true
   )
-
-addCommandAlias("scalastyleAll", "all scalastyle Test/scalastyle")
