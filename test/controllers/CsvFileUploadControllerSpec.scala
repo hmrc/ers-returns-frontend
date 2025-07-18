@@ -738,7 +738,7 @@ class CsvFileUploadControllerSpec
       when(
         mockErsConnector.validateCsvFileData(any[List[UploadedSuccessfully]](), any[SchemeInfo]())(any(), any())
       ).thenReturn(
-        Future.successful(HttpResponse(ACCEPTED, ""))
+        Future.successful(HttpResponse(BAD_REQUEST, ""))
       )
 
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))

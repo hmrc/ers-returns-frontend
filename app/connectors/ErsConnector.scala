@@ -120,10 +120,11 @@ class ErsConnector @Inject() (http: HttpClientV2, appConfig: ApplicationConfig)(
       .map { res =>
         ersConnector(System.currentTimeMillis() - startTime, TimeUnit.MILLISECONDS)
         res.status match {
-          case OK         => res
-          case ACCEPTED   => res
-          case NO_CONTENT => res
-          case _          =>
+          case OK           => res
+          case ACCEPTED     => res
+          case BAD_REQUEST  => res
+          case NO_CONTENT   => res
+          case _            =>
             logger.error(s"[ErsConnector][validateFileData] Received status code ${res.status} from file validator")
             throw new Exception(s"[ErsConnector][validateFileData] Received status code ${res.status} from file validator")
         }
@@ -151,10 +152,11 @@ class ErsConnector @Inject() (http: HttpClientV2, appConfig: ApplicationConfig)(
       .map {
         res =>
           res.status match {
-            case OK => res
-            case ACCEPTED => res
-            case NO_CONTENT => res
-            case _ =>
+            case OK           => res
+            case ACCEPTED     => res
+            case BAD_REQUEST  => res
+            case NO_CONTENT   => res
+            case _            =>
               logger.error(s"[ErsConnector][validateCsvFileData] Received status code ${res.status} from file validator")
               throw new Exception(s"[ErsConnector][validateCsvFileData] Received status code ${res.status} from file validator")
           }
