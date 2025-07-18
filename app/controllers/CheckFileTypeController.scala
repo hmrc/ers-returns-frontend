@@ -42,6 +42,10 @@ class CheckFileTypeController @Inject() (val mcc: MessagesControllerComponents,
   extends FrontendController(mcc) with I18nSupport with WithUnsafeDefaultFormBinding with Logging {
 
   def checkFileTypePage(): Action[AnyContent] = authActionGovGateway.async { implicit request =>
+    sessionService.fetch[ErsMetaData](ersUtil.ERS_METADATA).map { ele =>
+      logger.info(s"[CheckFileTypeController][checkFileTypePage()] Fetched request object with SAP Number: ${ele.sapNumber} " +
+        s"and schemeRef: ${ele.schemeInfo.schemeRef}")
+    }
     showCheckFileTypePage()(request)
   }
 
