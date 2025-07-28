@@ -138,4 +138,4 @@ GET 		/confirmation                                    controllers.ConfirmationP
 GET 		/confirmation/:bundle 		                    controllers.PdfGenerationController.buildPdfForBundle(bundle: String, dateSubmitted: String)
 
 GET         /language/:lang                                 controllers.LanguageSwitchController.switchToLanguage(lang: String)
-GET         /keep-alive                                     controllers.ApplicationController.keepAliveTest()
+GET         /keep-alive                                     controllers.ApplicationController.keepAlive()

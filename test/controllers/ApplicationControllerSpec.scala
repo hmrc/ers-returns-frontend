@@ -157,7 +157,7 @@ class ApplicationControllerSpec extends PlaySpec with ErsTestHelper with GuiceOn
     when(mockSessionService.cache(any(), any())(any(), any()))
       .thenReturn(Future.successful(sessionPair))
 
-    val result = testController.keepAliveTest.apply(FakeRequest())
+    val result = testController.keepAlive.apply(FakeRequest())
 
     status(result) mustBe OK
     contentAsString(result) must include("OK")
@@ -168,7 +168,7 @@ class ApplicationControllerSpec extends PlaySpec with ErsTestHelper with GuiceOn
     when(mockSessionService.fetch[ErsMetaData](any())(any(), any()))
       .thenReturn(Future.successful(null))
 
-    val result = testController.keepAliveTest.apply(FakeRequest())
+    val result = testController.keepAlive.apply(FakeRequest())
 
     status(result) mustBe INTERNAL_SERVER_ERROR
     contentAsString(result) must include("Unexpected error")
@@ -179,7 +179,7 @@ class ApplicationControllerSpec extends PlaySpec with ErsTestHelper with GuiceOn
     when(mockSessionService.fetch[ErsMetaData](any())(any(), any()))
       .thenReturn(Future.failed(new RuntimeException("DB failure")))
 
-    val result = testController.keepAliveTest.apply(FakeRequest())
+    val result = testController.keepAlive.apply(FakeRequest())
 
     status(result) mustBe INTERNAL_SERVER_ERROR
     contentAsString(result) must include("Unexpected error")
