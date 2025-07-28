@@ -17,7 +17,9 @@
 package controllers
 
 import controllers.auth.{AuthActionGovGateway, RequestWithOptionalAuthContext}
+import models.{ErsMetaData, SchemeInfo}
 import org.apache.pekko.stream.Materializer
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.play.PlaySpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
@@ -29,7 +31,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import utils.ErsTestHelper
 import views.html.{not_authorised, signedOut, unauthorised}
-
+import java.time.ZonedDateTime
 import scala.concurrent.{ExecutionContext, Future}
 
 class ApplicationControllerSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPerSuite {
@@ -65,6 +67,7 @@ class ApplicationControllerSpec extends PlaySpec with ErsTestHelper with GuiceOn
     unauthorisedView,
     signedOutView,
     notAuthorisedView,
+    mockSessionService,
     testAuthActionGov
   )
 
@@ -131,4 +134,55 @@ class ApplicationControllerSpec extends PlaySpec with ErsTestHelper with GuiceOn
       contentAsString(result) must include("For your security, we signed you out")
     }
   }
+
+"keepAliveTest" should {
+  "return 200 OK when session data is found and cached" in {
+
+    val testOptString: Option[String] = Some("test")
+
+    val schemeInfo: SchemeInfo = SchemeInfo(
+      testOptString.get,
+      ZonedDateTime.now,
+      testOptString.get,
+      testOptString.get,
+      testOptString.get,
+      "CSOP"
+    )
+    val validErsMetaData: ErsMetaData =
+      ErsMetaData(schemeInfo, "ipRef", Some("aoRef"), "empRef", Some("agentRef"), Some("sapNumber"))
+
+    when(mockSessionService.fetch[ErsMetaData](any())(any(), any()))
+      .thenReturn(Future.successful(validErsMetaData))
+
+    when(mockSessionService.cache(any(), any())(any(), any()))
+      .thenReturn(Future.successful(sessionPair))
+
+    val result = testController.keepAliveTest.apply(FakeRequest())
+
+    status(result) mustBe OK
+    contentAsString(result) must include("OK")
+  }
+
+
+  "return 500 Internal Server Error when no session data is found" in {
+    when(mockSessionService.fetch[ErsMetaData](any())(any(), any()))
+      .thenReturn(Future.successful(null))
+
+    val result = testController.keepAliveTest.apply(FakeRequest())
+
+    status(result) mustBe INTERNAL_SERVER_ERROR
+    contentAsString(result) must include("Unexpected error")
+  }
+
+
+  "return 500 Internal Server Error on unexpected exception" in {
+    when(mockSessionService.fetch[ErsMetaData](any())(any(), any()))
+      .thenReturn(Future.failed(new RuntimeException("DB failure")))
+
+    val result = testController.keepAliveTest.apply(FakeRequest())
+
+    status(result) mustBe INTERNAL_SERVER_ERROR
+    contentAsString(result) must include("Unexpected error")
+  }
+}
 }

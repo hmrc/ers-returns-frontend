@@ -18,8 +18,11 @@ package controllers
 
 import config.ApplicationConfig
 import controllers.auth.AuthActionGovGateway
+import models.ErsMetaData
 import play.api.i18n.I18nSupport
+import play.api.i18n.Lang.logger
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import services.FrontendSessionService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.ERSUtil
 
@@ -31,6 +34,7 @@ class ApplicationController @Inject() (val mcc: MessagesControllerComponents,
                                        unauthorisedView: views.html.unauthorised,
                                        signedOutView: views.html.signedOut,
                                        notAuthorisedView: views.html.not_authorised,
+                                       val sessionService: FrontendSessionService,
                                        authAction: AuthActionGovGateway)
                                       (implicit val ec: ExecutionContext,
                                        val ersUtil: ERSUtil,
@@ -49,5 +53,20 @@ class ApplicationController @Inject() (val mcc: MessagesControllerComponents,
   def timedOut(): Action[AnyContent] = Action { implicit request =>
     val loginScreenUrl = appConfig.portalDomain
     Ok(signedOutView(loginScreenUrl))
+  }
+  def keepAliveTest: Action[AnyContent] = Action.async { implicit request =>
+    sessionService.fetch[ErsMetaData](ersUtil.ERS_METADATA).flatMap {
+      case data: ErsMetaData =>
+        sessionService.cache(ersUtil.ERS_METADATA, data).map { _ =>
+          Ok("OK")
+        }
+      case _ =>
+        logger.warn("No session data found for ERS_METADATA in keepAliveTest")
+        Future.failed(new Exception("no Session"))
+    }.recover {
+      case ex =>
+        logger.error("Unexpected error in keepAliveTest", ex)
+        InternalServerError("Unexpected error (test)")
+    }
   }
 }
