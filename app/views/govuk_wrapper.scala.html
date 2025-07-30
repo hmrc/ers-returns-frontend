@@ -43,7 +43,7 @@
             timeoutUrl = Some(applicationConfig.timeOut),
             timeout = Some(applicationConfig.timeOutSeconds),
             countdown = Some(applicationConfig.timeOutCountDownSeconds),
-            keepAliveUrl = Some("/submit-your-ers-annual-return/keep-alive")
+            keepAliveUrl = Some(controllers.routes.ApplicationController.keepAlive().url)
         )
     }
 }
