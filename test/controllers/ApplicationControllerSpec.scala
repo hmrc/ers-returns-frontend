@@ -48,17 +48,17 @@ class ApplicationControllerSpec extends PlaySpec with ErsTestHelper with GuiceOn
 
   implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
 
-  implicit lazy val materializer: Materializer     = app.materializer
-  val unauthorisedView: unauthorised               = app.injector.instanceOf[unauthorised]
-  val signedOutView: signedOut                     = app.injector.instanceOf[signedOut]
+  implicit lazy val materializer: Materializer = app.materializer
+  val unauthorisedView: unauthorised = app.injector.instanceOf[unauthorised]
+  val signedOutView: signedOut = app.injector.instanceOf[signedOut]
   val notAuthorisedView: views.html.not_authorised = app.injector.instanceOf[not_authorised]
 
   override val testAuthActionGov: AuthActionGovGateway =
     new AuthActionGovGateway(mockAuthConnector, mockAppConfig, defaultParser)(ec) {
       override def invokeBlock[A](
-        request: Request[A],
-        block: RequestWithOptionalAuthContext[A] => Future[Result]
-      ): Future[Result] =
+                                   request: Request[A],
+                                   block: RequestWithOptionalAuthContext[A] => Future[Result]
+                                 ): Future[Result] =
         block(RequestWithOptionalAuthContext(request, defaultErsAuthData))
     }
 
@@ -135,54 +135,79 @@ class ApplicationControllerSpec extends PlaySpec with ErsTestHelper with GuiceOn
     }
   }
 
-"keepAliveTest" should {
-  "return 200 OK when session data is found and cached" in {
+  "keepAlive" should {
+    "return 200 OK when session data is found and cached" in {
 
-    val testOptString: Option[String] = Some("test")
+      val testOptString: Option[String] = Some("test")
 
-    val schemeInfo: SchemeInfo = SchemeInfo(
-      testOptString.get,
-      ZonedDateTime.now,
-      testOptString.get,
-      testOptString.get,
-      testOptString.get,
-      "CSOP"
-    )
-    val validErsMetaData: ErsMetaData =
-      ErsMetaData(schemeInfo, "ipRef", Some("aoRef"), "empRef", Some("agentRef"), Some("sapNumber"))
+      val schemeInfo: SchemeInfo = SchemeInfo(
+        testOptString.get,
+        ZonedDateTime.now,
+        testOptString.get,
+        testOptString.get,
+        testOptString.get,
+        "CSOP"
+      )
+      val validErsMetaData: ErsMetaData =
+        ErsMetaData(schemeInfo, "ipRef", Some("aoRef"), "empRef", Some("agentRef"), Some("sapNumber"))
 
-    when(mockSessionService.fetch[ErsMetaData](any())(any(), any()))
-      .thenReturn(Future.successful(validErsMetaData))
+      when(mockSessionService.fetch[ErsMetaData](any())(any(), any()))
+        .thenReturn(Future.successful(validErsMetaData))
 
-    when(mockSessionService.cache(any(), any())(any(), any()))
-      .thenReturn(Future.successful(sessionPair))
+      when(mockSessionService.cache(any(), any())(any(), any()))
+        .thenReturn(Future.successful(sessionPair))
 
-    val result = testController.keepAlive.apply(FakeRequest())
+      val result = testController.keepAlive.apply(FakeRequest())
 
-    status(result) mustBe OK
-    contentAsString(result) must include("OK")
+      status(result) mustBe OK
+      contentAsString(result) must include("OK")
+    }
+
+    "return 500 Internal Server Error when no session data is found" in {
+      when(mockSessionService.fetch[ErsMetaData](any())(any(), any()))
+        .thenReturn(Future.successful(null))
+
+      val result = testController.keepAlive.apply(FakeRequest())
+
+      status(result) mustBe INTERNAL_SERVER_ERROR
+      contentAsString(result) must include("Unexpected error")
+    }
+
+    "return 500 Internal Server Error on unexpected exception" in {
+      when(mockSessionService.fetch[ErsMetaData](any())(any(), any()))
+        .thenReturn(Future.failed(new RuntimeException("DB failure")))
+
+      val result = testController.keepAlive.apply(FakeRequest())
+
+      status(result) mustBe INTERNAL_SERVER_ERROR
+      contentAsString(result) must include("Unexpected error")
+    }
+
+    "return 500 Internal Server Error when session data is fetched but caching fails" in {
+      val testOptString: Option[String] = Some("test")
+
+      val schemeInfo: SchemeInfo = SchemeInfo(
+        testOptString.get,
+        ZonedDateTime.now,
+        testOptString.get,
+        testOptString.get,
+        testOptString.get,
+        "CSOP"
+      )
+
+      val validErsMetaData: ErsMetaData =
+        ErsMetaData(schemeInfo, "ipRef", Some("aoRef"), "empRef", Some("agentRef"), Some("sapNumber"))
+
+      when(mockSessionService.fetch[ErsMetaData](any())(any(), any()))
+        .thenReturn(Future.successful(validErsMetaData))
+
+      when(mockSessionService.cache(any(), any())(any(), any()))
+        .thenReturn(Future.failed(new RuntimeException("Cache write failure")))
+
+      val result = testController.keepAlive.apply(FakeRequest())
+
+      status(result) mustBe INTERNAL_SERVER_ERROR
+      contentAsString(result) must include("Unexpected error")
+    }
   }
-
-
-  "return 500 Internal Server Error when no session data is found" in {
-    when(mockSessionService.fetch[ErsMetaData](any())(any(), any()))
-      .thenReturn(Future.successful(null))
-
-    val result = testController.keepAlive.apply(FakeRequest())
-
-    status(result) mustBe INTERNAL_SERVER_ERROR
-    contentAsString(result) must include("Unexpected error")
-  }
-
-
-  "return 500 Internal Server Error on unexpected exception" in {
-    when(mockSessionService.fetch[ErsMetaData](any())(any(), any()))
-      .thenReturn(Future.failed(new RuntimeException("DB failure")))
-
-    val result = testController.keepAlive.apply(FakeRequest())
-
-    status(result) mustBe INTERNAL_SERVER_ERROR
-    contentAsString(result) must include("Unexpected error")
-  }
-}
 }

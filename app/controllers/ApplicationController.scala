@@ -54,6 +54,7 @@ class ApplicationController @Inject() (val mcc: MessagesControllerComponents,
     val loginScreenUrl = appConfig.portalDomain
     Ok(signedOutView(loginScreenUrl))
   }
+
   def keepAlive: Action[AnyContent] = Action.async { implicit request =>
     sessionService.fetch[ErsMetaData](ersUtil.ERS_METADATA).flatMap {
       case data: ErsMetaData =>
@@ -61,11 +62,11 @@ class ApplicationController @Inject() (val mcc: MessagesControllerComponents,
           Ok("OK")
         }
       case _ =>
-        logger.warn("No session data found for ERS_METADATA in keepAlive")
+        logger.warn("[ApplicationController][keepAlive] No session data found for ERS_METADATA in keepAlive")
         Future.failed(new Exception("no Session"))
     }.recover {
       case ex =>
-        logger.error("Unexpected error in keepAlive", ex)
+        logger.error("[ApplicationController][keepAlive] Unexpected error in keepAlive", ex)
         InternalServerError("Unexpected error (test)")
     }
   }
