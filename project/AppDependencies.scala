@@ -4,8 +4,8 @@ import sbt.*
 object AppDependencies {
   val pdfboxVersion    = "2.0.34"
   val openHtmlVersion  = "1.0.10"
-  val bootstrapVersion = "9.13.0"
-  val mongoVersion     = "2.6.0"
+  val bootstrapVersion = "9.19.0"
+  val mongoVersion     = "2.7.0"
 
   val compile: Seq[ModuleID] = Seq(
     guice,
@@ -24,7 +24,7 @@ object AppDependencies {
     "com.openhtmltopdf"       %  "openhtmltopdf-svg-support"  % openHtmlVersion,
     "commons-codec"           %  "commons-codec"              % "1.18.0",
     "org.codehaus.janino"     %  "janino"                     % "3.1.12",
-    "commons-io"              %  "commons-io"                 % "2.19.0"
+    "commons-io"              %  "commons-io"                 % "2.20.0"
   )
 
   val test: Seq[ModuleID]      = Seq(
