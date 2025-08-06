@@ -216,10 +216,12 @@ class CsvFileUploadController @Inject() (val mcc: MessagesControllerComponents,
           )
           sessionService.cache(ersUtil.VALIDATED_SHEETS, res.body)
           Future.successful(Redirect(controllers.schemeOrganiser.routes.SchemeOrganiserBasedInUkController.questionPage()))
-        case ACCEPTED =>
+
+        case BAD_REQUEST =>
           logger.warn(s"[CsvFileUploadController][validateCsv] Validation is not successful for schemeRef: ${schemeInfo.schemeRef}, " +
               s"timestamp: ${System.currentTimeMillis()}.")
           Future.successful(Redirect(controllers.routes.CsvFileUploadController.validationFailure()))
+
         case _ =>
           logger.error(s"[CsvFileUploadController][validateCsv] Validate file data failed with Status ${res.status}, timestamp: ${System.currentTimeMillis()}.")
           Future.successful(getGlobalErrorPage)
