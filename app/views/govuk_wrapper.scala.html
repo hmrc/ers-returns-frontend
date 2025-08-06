@@ -42,7 +42,8 @@
             signOutUrl = applicationConfig.signOut,
             timeoutUrl = Some(applicationConfig.timeOut),
             timeout = Some(applicationConfig.timeOutSeconds),
-            countdown = Some(applicationConfig.timeOutCountDownSeconds)
+            countdown = Some(applicationConfig.timeOutCountDownSeconds),
+            keepAliveUrl = Some(controllers.routes.ApplicationController.keepAlive().url)
         )
     }
 }
