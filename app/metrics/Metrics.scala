@@ -23,20 +23,6 @@ import java.util.concurrent.TimeUnit
 trait Metrics {
   val registry = new MetricRegistry
 
-  def csvValidationTimer(diff: Long, unit: TimeUnit): Unit = registry.timer("csv-validation-timer").update(diff, unit)
-
-  def odsValidationTimer(diff: Long, unit: TimeUnit): Unit = registry.timer("ods-validation-timer").update(diff, unit)
-
-  def fileUploadSize(n: Long): Unit = registry.histogram("file-upload-size").update(n)
-
-  def cacheTimeStore(diff: Long, unit: TimeUnit): Unit = registry.timer("store-cache-timer").update(diff, unit)
-
-  def cacheTimeFetch(diff: Long, unit: TimeUnit): Unit = registry.timer("fetch-cache-timer").update(diff, unit)
-
-  def accessThresholdGranted(): Unit = registry.counter("access-threshold-granted").inc()
-
-  def accessThresholdDenied(): Unit = registry.counter("access-threshold-denied").inc()
-
   def ersConnector(diff: Long, unit: TimeUnit): Unit = registry.timer("validator-connector").update(diff, unit)
 
   def submitReturnToBackend(diff: Long, unit: TimeUnit): Unit =
