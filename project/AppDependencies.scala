@@ -33,7 +33,7 @@ object AppDependencies {
     "org.scalatest"           %% "scalatest"               % "3.2.19",
     "org.scalatestplus"       %% "mockito-5-10"            % "3.2.18.0",
     "com.vladsch.flexmark"    %  "flexmark-all"            % "0.64.8",
-    "org.jsoup"               %  "jsoup"                   % "1.21.1",
+    "org.jsoup"               %  "jsoup"                   % "1.21.2",
     "org.wiremock"            %  "wiremock-standalone"     % "3.13.1"
   ).map(_ % Test)
 

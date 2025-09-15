@@ -27,16 +27,18 @@ import org.scalatest.{BeforeAndAfterEach, OptionValues}
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.i18n
-import play.api.i18n.{MessagesApi, MessagesImpl}
+import play.api.i18n.{Messages, MessagesApi, MessagesImpl}
 import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents}
 import play.api.test.Helpers.stubBodyParser
-import services.pdf.ErsReceiptPdfBuilderService
+import play.i18n.Lang
+import services.pdf.{DecoratorController, ErsReceiptPdfBuilderService}
 import utils._
 
+import java.io.ByteArrayOutputStream
 import scala.concurrent.ExecutionContext
 
 class ErsReceiptPdfBuilderServiceSpec
-    extends AnyWordSpecLike
+  extends AnyWordSpecLike
     with Matchers
     with OptionValues
     with MockitoSugar
@@ -54,7 +56,6 @@ class ErsReceiptPdfBuilderServiceSpec
     cc.fileMimeTypes,
     ExecutionContext.global
   )
-
   implicit lazy val mat: Materializer = app.materializer
   implicit val ersUtil: ERSUtil = mockErsUtil
   val testErsReceiptPdfBuilderService = new ErsReceiptPdfBuilderService(mockCountryCodes)
@@ -94,5 +95,42 @@ class ErsReceiptPdfBuilderServiceSpec
         output.contains("testbundle") shouldBe true
       }
     }
+  }
+
+  "correctly generate a non-empty PDF" in {
+    val testHtml =
+      """
+        |<html>
+        | <head><title>ERS PDF</title></head>
+        | <body>
+        |   <h1>Scheme name - EMI</h1>
+        |   <p>Submission reference : XA1100000000000</p>
+        | </body>
+        |</html>
+        |""".stripMargin
+    val pdfStream: ByteArrayOutputStream = testErsReceiptPdfBuilderService.buildPdf(testHtml)
+    val pdfBytes = pdfStream.toByteArray
+
+    pdfBytes.length should be > 0
+  }
+
+  "return HTML with correct header message" in {
+
+    val testMessages: MessagesImpl = MessagesImpl(Lang.defaultLang(), mockMCC.messagesApi)
+    val output = testErsReceiptPdfBuilderService.pdfHeader(testMessages)
+
+    output.contains("</div><hr/>") shouldBe true
+    output should include(testMessages("ers.pdf.header"))
+
+  }
+
+  "return the decorated string from a single decorator HTML with correct header message" in {
+    implicit val fakeDecorator: DecoratorController = new DecoratorController(Array()) {
+      override def decorate(implicit messages: Messages): String = "<p>Summary</p>"
+    }
+    val output = testErsReceiptPdfBuilderService.addSummary()
+
+    output.contains("Summary") shouldBe true
+
   }
 }
