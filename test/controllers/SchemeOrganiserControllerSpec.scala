@@ -60,6 +60,8 @@ class SchemeOrganiserControllerSpec
   val globalErrorView: global_error            = app.injector.instanceOf[global_error]
   val schemeOrganiserSummaryView: scheme_organiser_summary = app.injector.instanceOf[scheme_organiser_summary]
 
+  val companyDetails = CompanyDetails("First company", "20 Garden View", None, None, None, None, None, None, None, true)
+
   "calling Scheme Organiser summary page" should {
 
     val failure: Future[Nothing] = Future.failed(new Exception("failure"))
@@ -159,6 +161,19 @@ class SchemeOrganiserControllerSpec
     // Raised https://jira.tools.tax.service.gov.uk/browse/DDCE-4841 to fix
 
     "display scheme organiser summary page pre-filled" in {
+      setAuthMocks()
+      val controllerUnderTest = buildFakeSchemeOrganiserSummaryController(schemeOrganiserSummaryCached = true)
+      val authRequest         = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdSIP("GET"))
+
+      val result = controllerUnderTest.showSchemeOrganiserSummaryPage(authRequest)
+      status(result) shouldBe Status.OK
+
+    }
+
+    "return Ok with schemeOrganiserSummaryView" in {
+
+      when(mockSessionService.fetchSchemeOrganiserOptionally()(any(),any()))
+        .thenReturn(Future.successful(Some(companyDetails)))
       setAuthMocks()
       val controllerUnderTest = buildFakeSchemeOrganiserSummaryController(schemeOrganiserSummaryCached = true)
       val authRequest         = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdSIP("GET"))

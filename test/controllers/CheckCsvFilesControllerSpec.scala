@@ -121,6 +121,20 @@ class CheckCsvFilesControllerSpec
       val result = checkCsvFilesController.showCheckCsvFilesPage()(authRequest)
       status(result) shouldBe OK
     }
+
+    "show CheckCsvFilesPage returns correct view" in {
+      when(
+        mockSessionService.fetch[RequestObject](any())(any(), any())
+      ) thenReturn Future.successful(ersRequestObject)
+
+      when(mockSessionService.remove(any())(any())).thenReturn(Future.successful(()))
+      when(mockErsUtil.getCsvFilesList(any())).thenReturn(List(CsvFiles("file.csv")))
+
+      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+
+      val result = checkCsvFilesController.showCheckCsvFilesPage()(authRequest)
+      status(result) shouldBe OK
+    }
   }
 
   "calling checkCsvFilesPage" should {
