@@ -21,15 +21,15 @@ import org.apache.pekko.stream.Materializer
 import org.jsoup.Jsoup
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{reset => mreset, _}
-import org.scalatest.{BeforeAndAfter, OptionValues}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
+import org.scalatest.{BeforeAndAfter, OptionValues}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status
 import play.api.i18n
 import play.api.i18n.{Messages, MessagesApi, MessagesImpl}
 import play.api.libs.json.JsObject
-import play.api.mvc.{AnyContent, AnyContentAsEmpty, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents}
+import play.api.mvc._
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.http.HttpResponse
@@ -62,16 +62,16 @@ class ReturnServiceControllerSpec
   implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
 
   implicit lazy val mat: Materializer = app.materializer
-  val globalErrorView: global_error   = app.injector.instanceOf[global_error]
-  val unauthorisedView: unauthorised  = app.injector.instanceOf[unauthorised]
+  val globalErrorView: global_error = app.injector.instanceOf[global_error]
+  val unauthorisedView: unauthorised = app.injector.instanceOf[unauthorised]
   val startView: start = app.injector.instanceOf[start]
   val hundred = 100
 
   lazy val ExpectedRedirectionUrlIfNotSignedIn = "/gg/sign-in?continue=/submit-your-ers-return"
-  lazy val schemeInfo: SchemeInfo              = SchemeInfo("XA1100000000000", ZonedDateTime.now, "1", "2016", "EMI", "EMI")
-  lazy val rsc: ErsMetaData                    =
+  lazy val schemeInfo: SchemeInfo = SchemeInfo("XA1100000000000", ZonedDateTime.now, "1", "2016", "EMI", "EMI")
+  lazy val rsc: ErsMetaData =
     new ErsMetaData(schemeInfo, "ipRef", Some("aoRef"), "empRef", Some("agentRef"), Some("sapNumber"))
-  lazy val rscAsRequestObject: RequestObject   = RequestObject(
+  lazy val rscAsRequestObject: RequestObject = RequestObject(
     Some("aoRef"),
     Some("2014/15"),
     Some("AA0000000000000"),
@@ -129,7 +129,7 @@ class ReturnServiceControllerSpec
   "Calling ReturnServiceController.cacheParams with no matching cache storage for the given schemeId and schemeRef" should {
     "create a new cache object and redirect to the initial start page" in {
       val controllerUnderTest = buildFakeReturnServiceController()
-      val result              =
+      val result =
         controllerUnderTest.cacheParams(ersRequestObject)(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
       status(result) shouldBe Status.OK
     }
@@ -151,7 +151,7 @@ class ReturnServiceControllerSpec
     "give a redirect status (to company authentication frontend)" in {
       setUnauthorisedMocks()
       val controllerUnderTest = buildFakeReturnServiceController()
-      val result              = controllerUnderTest.startPage().apply(FakeRequest("GET", ""))
+      val result = controllerUnderTest.startPage().apply(FakeRequest("GET", ""))
       status(result) shouldBe Status.SEE_OTHER
     }
   }
@@ -160,9 +160,17 @@ class ReturnServiceControllerSpec
     "without authentication should redirect to to company authentication frontend" in {
       setUnauthorisedMocks()
       implicit val fakeRequest: FakeRequest[AnyContentAsEmpty.type] = Fixtures.buildFakeRequestWithSessionId("?")
-      val controllerUnderTest  = buildFakeReturnServiceController(accessThresholdValue = 0)
-      val result               = controllerUnderTest.hmacCheck()(fakeRequest)
+      val controllerUnderTest = buildFakeReturnServiceController(accessThresholdValue = 0)
+      val result = controllerUnderTest.hmacCheck()(fakeRequest)
       Helpers.redirectLocation(result).get.startsWith(mockAppConfig.ggSignInUrl) shouldBe true
+    }
+
+    "with authentication should returns Ok status" in {
+      setAuthMocks()
+      implicit val fakeRequest: FakeRequest[AnyContentAsEmpty.type] = Fixtures.buildFakeRequestWithSessionId("?")
+      val controllerUnderTest = buildFakeReturnServiceController(accessThresholdValue = 0)
+      val result = controllerUnderTest.hmacCheck()(fakeRequest)
+      status(result) shouldBe OK
     }
   }
 
@@ -170,11 +178,30 @@ class ReturnServiceControllerSpec
     "without authentication should redirect to to company authentication frontend" in {
       setUnauthorisedMocks()
       implicit val fakeRequest: FakeRequest[AnyContentAsEmpty.type] = Fixtures.buildFakeRequestWithSessionId("?")
-      val controllerUnderTest  = buildFakeReturnServiceController(accessThresholdValue = 0)
-      val result               = controllerUnderTest.startPage()(fakeRequest)
+      val controllerUnderTest = buildFakeReturnServiceController(accessThresholdValue = 0)
+      val result = controllerUnderTest.startPage()(fakeRequest)
       Helpers.redirectLocation(result).get.startsWith(mockAppConfig.ggSignInUrl) shouldBe true
     }
+
+    "with authentication should redirect to to company authentication frontend" in {
+      setAuthMocks()
+      implicit val fakeRequest: FakeRequest[AnyContentAsEmpty.type] = Fixtures.buildFakeRequestWithSessionId("?")
+      val controllerUnderTest = buildFakeReturnServiceController(accessThresholdValue = 0)
+      val result = controllerUnderTest.startPage()(fakeRequest)
+      status(result) shouldBe OK
+    }
   }
+
+  "Calling ReturnServiceController.showUnauthorisedPage" should {
+    "returns unauthorised view" in {
+      setUnauthorisedMocks()
+      implicit val fakeRequest: FakeRequest[AnyContentAsEmpty.type] = Fixtures.buildFakeRequestWithSessionId("?")
+      val controllerUnderTest = buildFakeReturnServiceController(accessThresholdValue = 0)
+      val result = controllerUnderTest.showUnauthorisedPage(fakeRequest)
+      status(result) shouldBe UNAUTHORIZED
+    }
+  }
+
 
   "getRequestParameters" should {
     "correctly extract and construct a RequestObject from request query parameters" in {

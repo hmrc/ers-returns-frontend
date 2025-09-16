@@ -15,13 +15,6 @@ Service Manager: `sm2 --start ERS_RETURNS_ALL`
 
 Start local tests: `./run_all_tests.sh`
 
-For the accessibility tests Node v12 or above is needed. Details can be found [here](https://github.com/hmrc/sbt-accessibility-linter).
-
-Run the tests with command:
-```
-sbt clean A11y/test
-```
-
 | Repositories      | Link                                                 |
 |-------------------|------------------------------------------------------|
 | Backend           | https://github.com/hmrc/ers-returns                  |

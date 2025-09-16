@@ -15,14 +15,9 @@ object AppDependencies {
     "uk.gov.hmrc"             %% "play-frontend-hmrc-play-30" % "12.1.0",
     "uk.gov.hmrc"             %% "play-partials-play-30"      % "10.1.0",
     "uk.gov.hmrc"             %% "domain-play-30"             % "11.0.0",
-    "org.apache.pdfbox"       %  "pdfbox"                     % pdfboxVersion,
-    "org.apache.pdfbox"       %  "xmpbox"                     % pdfboxVersion,
-    "org.apache.xmlgraphics"  %  "batik-transcoder"           % "1.19",
-    "org.apache.xmlgraphics"  %  "batik-codec"                % "1.19",
-    "com.openhtmltopdf"       %  "openhtmltopdf-core"         % openHtmlVersion,
     "com.openhtmltopdf"       %  "openhtmltopdf-pdfbox"       % openHtmlVersion,
     "com.openhtmltopdf"       %  "openhtmltopdf-svg-support"  % openHtmlVersion,
-    "commons-codec"           %  "commons-codec"              % "1.18.0",
+    "commons-codec"           %  "commons-codec"              % "1.19.0",
     "org.codehaus.janino"     %  "janino"                     % "3.1.12",
     "commons-io"              %  "commons-io"                 % "2.20.0"
   )
@@ -30,17 +25,8 @@ object AppDependencies {
   val test: Seq[ModuleID]      = Seq(
     "uk.gov.hmrc"             %% "bootstrap-test-play-30"  % bootstrapVersion,
     "uk.gov.hmrc.mongo"       %% "hmrc-mongo-test-play-30" % mongoVersion,
-    "org.scalatest"           %% "scalatest"               % "3.2.19",
-    "org.scalatestplus"       %% "mockito-5-10"            % "3.2.18.0",
-    "com.vladsch.flexmark"    %  "flexmark-all"            % "0.64.8",
-    "org.jsoup"               %  "jsoup"                   % "1.21.1",
-    "org.wiremock"            %  "wiremock-standalone"     % "3.13.1"
+    "org.scalatest"           %% "scalatest"               % "3.2.19"
   ).map(_ % Test)
-
-  val overrides: Seq[ModuleID] = Seq(
-    "org.scala-lang.modules" %% "scala-parser-combinators" % "2.4.0",
-    "com.ibm.icu"            %  "icu4j"                    % "69.1"   //To resolve dependency clash between flexmark v0.64.4+ and play-language to run accessibility tests, remove when versions align
-  )
 
   def apply(): Seq[ModuleID] = compile ++ test
 }

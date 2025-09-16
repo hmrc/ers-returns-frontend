@@ -23,7 +23,7 @@ import play.api.Logging
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.libs.json.Format
-import play.api.mvc.{Action, AnyContent, Request, RequestHeader, Result}
+import play.api.mvc._
 import play.twirl.api.Html
 import services.{FrontendSessionService, TrusteeService}
 import uk.gov.hmrc.http.HeaderCarrier

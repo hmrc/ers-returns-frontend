@@ -18,17 +18,18 @@ package controllers.schemeOrganiser
 
 import config.ApplicationConfig
 import controllers.auth.{AuthAction, RequestWithOptionalAuthContext}
-import models.{CompanyDetails, RequestObject,ErsMetaData}
+import models.{CompanyDetails, ErsMetaData, RequestObject}
 import play.api.Logging
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.libs.json.Format
-import play.api.mvc.{Action, AnyContent, Request, RequestHeader, Result}
+import play.api.mvc._
 import play.twirl.api.Html
 import services.FrontendSessionService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.ERSUtil
+
 import scala.concurrent.{ExecutionContext, Future}
 
 trait SchemeOrganiserBaseController[A] extends FrontendController with I18nSupport with Logging {

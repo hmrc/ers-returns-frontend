@@ -16,7 +16,7 @@
 
 package controllers
 
-import models.{CheckFileType, ErsMetaData, RequestObject, RsFormMappings, SchemeInfo}
+import models.{CheckFileType, ErsMetaData, RequestObject, RsFormMappings}
 import org.apache.pekko.stream.Materializer
 import org.jsoup.Jsoup
 import org.mockito.ArgumentMatchers._
@@ -36,7 +36,6 @@ import utils.Fixtures.{EMIMetaData, ersRequestObject}
 import utils.{ERSFakeApplicationConfig, ErsTestHelper, Fixtures}
 import views.html.{check_file_type, global_error}
 
-import java.time.ZonedDateTime
 import scala.concurrent.{ExecutionContext, Future}
 
 class CheckFileTypeControllerSpec
