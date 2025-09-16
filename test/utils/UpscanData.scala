@@ -16,11 +16,11 @@
 
 package utils
 
+import models.upscan._
+import play.api.libs.json._
+
 import java.net.URL
 import java.time.Instant
-
-import models.upscan._
-import play.api.libs.json.{JsObject, JsString, JsValue, Json, OWrites}
 
 trait UpscanData {
 

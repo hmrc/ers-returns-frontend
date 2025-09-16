@@ -17,7 +17,6 @@
 package controllers.testonly
 
 import connectors.ErsConnector
-import controllers.testonly.TestOnlySubmissionDataController
 import org.apache.pekko.stream.Materializer
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._

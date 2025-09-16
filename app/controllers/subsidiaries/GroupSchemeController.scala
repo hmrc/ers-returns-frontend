@@ -25,12 +25,11 @@ import play.api.Logging
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.mvc._
-import services.FrontendSessionService
+import services.{CompanyDetailsService, FrontendSessionService}
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils._
-import services.CompanyDetailsService
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}

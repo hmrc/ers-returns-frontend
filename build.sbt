@@ -1,4 +1,3 @@
-import uk.gov.hmrc.*
 import uk.gov.hmrc.DefaultBuildSettings.*
 import uk.gov.hmrc.versioning.SbtGitVersioning.autoImport.majorVersion
 
@@ -11,7 +10,6 @@ lazy val microservice = Project("ers-returns-frontend", file("."))
     defaultSettings(),
     scalaVersion := "2.13.16",
     libraryDependencies ++= AppDependencies(),
-    dependencyOverrides ++= AppDependencies.overrides,
     Test / parallelExecution := false,
     Test / fork := false,
     Runtime / fork := true,

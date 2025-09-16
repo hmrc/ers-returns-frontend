@@ -112,7 +112,7 @@ case class CompanyDetails(
   def updatePart[A](part: A): CompanyDetails = {
     part match {
       case name: Company => replaceName(name)
-      case basedInUk: CompanyBasedInUk => replaceBasedInUk(basedInUk)
+      case companyBasedInUk: CompanyBasedInUk => replaceBasedInUk(companyBasedInUk)
       case address: CompanyAddress => replaceAddress(address)
       case _ => this
     }

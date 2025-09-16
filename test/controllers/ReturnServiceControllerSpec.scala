@@ -164,6 +164,14 @@ class ReturnServiceControllerSpec
       val result = controllerUnderTest.hmacCheck()(fakeRequest)
       Helpers.redirectLocation(result).get.startsWith(mockAppConfig.ggSignInUrl) shouldBe true
     }
+
+    "with authentication should returns Ok status" in {
+      setAuthMocks()
+      implicit val fakeRequest: FakeRequest[AnyContentAsEmpty.type] = Fixtures.buildFakeRequestWithSessionId("?")
+      val controllerUnderTest = buildFakeReturnServiceController(accessThresholdValue = 0)
+      val result = controllerUnderTest.hmacCheck()(fakeRequest)
+      status(result) shouldBe OK
+    }
   }
 
   "Calling ReturnServiceController.startPage" should {
@@ -180,16 +188,6 @@ class ReturnServiceControllerSpec
       implicit val fakeRequest: FakeRequest[AnyContentAsEmpty.type] = Fixtures.buildFakeRequestWithSessionId("?")
       val controllerUnderTest = buildFakeReturnServiceController(accessThresholdValue = 0)
       val result = controllerUnderTest.startPage()(fakeRequest)
-      status(result) shouldBe OK
-    }
-  }
-
-  "Calling ReturnServiceController.hmacCheck" should {
-    "with authentication should returns 200" in {
-      setAuthMocks()
-      implicit val fakeRequest: FakeRequest[AnyContentAsEmpty.type] = Fixtures.buildFakeRequestWithSessionId("?")
-      val controllerUnderTest = buildFakeReturnServiceController(accessThresholdValue = 0)
-      val result = controllerUnderTest.hmacCheck()(fakeRequest)
       status(result) shouldBe OK
     }
   }

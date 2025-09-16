@@ -38,7 +38,7 @@ import controllers.auth.AuthAction
 import models.{Company, RequestObject, RsFormMappings}
 import play.api.data.Form
 import play.api.libs.json.Format
-import play.api.mvc.{AnyContent, MessagesControllerComponents, Request, RequestHeader, Result}
+import play.api.mvc._
 import play.twirl.api.Html
 import services.FrontendSessionService
 import uk.gov.hmrc.http.HeaderCarrier

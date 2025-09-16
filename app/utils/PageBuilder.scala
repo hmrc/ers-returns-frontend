@@ -180,6 +180,7 @@ trait PageBuilder {
 								condition match {
 									case OPTION_ODS => routes.FileUploadController.uploadFilePage().toString
 									case OPTION_CSV => routes.CheckCsvFilesController.checkCsvFilesPage().toString
+                  case _ => DEFAULT
 								}
 							case OPTION_NIL_RETURN => routes.ReportableEventsController.reportableEventsPage().toString
 						}
@@ -209,6 +210,7 @@ trait PageBuilder {
 								condition match {
 									case OPTION_ODS => routes.FileUploadController.uploadFilePage().toString
 									case OPTION_CSV => routes.CheckCsvFilesController.checkCsvFilesPage().toString
+                  case _ => DEFAULT
 								}
 							case OPTION_NIL_RETURN => routes.ReportableEventsController.reportableEventsPage().toString
 						}
@@ -234,6 +236,7 @@ trait PageBuilder {
 								condition match {
 									case OPTION_ODS => routes.FileUploadController.uploadFilePage().toString
 									case OPTION_CSV => routes.CheckCsvFilesController.checkCsvFilesPage().toString
+                  case _ => DEFAULT
 								}
 							case OPTION_NIL_RETURN => routes.ReportableEventsController.reportableEventsPage().toString
 						}
@@ -266,6 +269,7 @@ trait PageBuilder {
 								condition match {
 									case OPTION_ODS => routes.FileUploadController.uploadFilePage().toString
 									case OPTION_CSV => routes.CheckCsvFilesController.checkCsvFilesPage().toString
+                  case _ => DEFAULT
 								}
 							case OPTION_NIL_RETURN => routes.ReportableEventsController.reportableEventsPage().toString
 						}
@@ -296,6 +300,7 @@ trait PageBuilder {
 								condition match {
 									case OPTION_ODS => routes.FileUploadController.uploadFilePage().toString
 									case OPTION_CSV => routes.CheckCsvFilesController.checkCsvFilesPage().toString
+                  case _ => DEFAULT
 								}
 							case OPTION_NIL_RETURN => routes.ReportableEventsController.reportableEventsPage().toString
 						}
