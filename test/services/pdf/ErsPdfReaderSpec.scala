@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,7 @@
 
 package services.pdf
 
-import org.apache.pdfbox.cos.COSDocument
-import org.apache.pdfbox.io.RandomAccessFile
+import org.apache.pdfbox.io.RandomAccessReadBuffer
 import org.apache.pdfbox.pdfparser.PDFParser
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.text.PDFTextStripper
@@ -28,7 +27,7 @@ import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import utils.ERSFakeApplicationConfig
 
-import java.io.File
+import java.io.FileInputStream
 
 class ErsPdfReaderSpec
   extends AnyWordSpecLike
@@ -38,24 +37,25 @@ class ErsPdfReaderSpec
     with ERSFakeApplicationConfig
     with GuiceOneAppPerSuite {
 
-  var pdfStripper: PDFTextStripper   = mock[PDFTextStripper]
-  var pdDoc: PDDocument              = mock[PDDocument]
-  var cosDocCOSDocument: COSDocument = mock[COSDocument]
-  var file: File                     = new File("test/resources/pdfFiles/confirmation.pdf")
-  var parsedText: String             = ""
-
-  try {
-    val parser: PDFParser = new PDFParser(new RandomAccessFile(file, "r"))
-    parser.parse()
-    val cosDoc            = parser.getDocument
-    pdfStripper = new PDFTextStripper()
-    pdDoc = new PDDocument(cosDoc)
-    parsedText = pdfStripper.getText(pdDoc)
-  } catch {
-    case e: Exception => throw new Exception
+  def readPDF(path: String): String = {
+    val file = new FileInputStream(path)
+    val readBuffer = new RandomAccessReadBuffer(file)
+    val parser = new PDFParser(readBuffer)
+    val cosDoc = parser.parse().getDocument
+    val pdDoc = new PDDocument(cosDoc)
+    try {
+      val strip = new PDFTextStripper
+      strip.getText(pdDoc)
+    } catch {
+      case e: Exception => throw new Exception
+    }finally {
+      pdDoc.close()
+      file.close()
+    }
   }
 
   "confirmation pdf file" should {
+    val parsedText = readPDF("test/resources/pdfFiles/confirmation.pdf")
     "contain hmrc header" in {
       parsedText should include("HM Revenue & Customs")
       parsedText should include("Enterprise Management Incentives")
