@@ -25,7 +25,7 @@ import play.api.i18n.Messages
 object RsFormMappings {
 
   import fieldValidationPatterns._
-  val postcodeMinLength: Int      = 6
+  val postcodeMinLength: Int      = 5
   val postcodeMaxLength: Int      = 8
   /*
    * scheme type Form definition.
@@ -293,22 +293,7 @@ object RsFormMappings {
   def validInputCharacters(field: String, regXValue: String): Boolean = field.matches(regXValue)
 
   def isValidPostcode(input: Option[String]): Boolean = input match {
-    case Some(postcode) => postcode.toUpperCase.matches(postCodeRegx) && isValidLengthIfPopulated(postcode, postcodeMinLength, postcodeMaxLength)
-    case None => true //Postcode is assumed to be optional so return true if missing
-  }
-
-  def isValidPostcodeSchemeOrganiser(input: Option[String]): Boolean = input match {
-    case Some(postcode) => postcode.toUpperCase.replaceAll(" ","").matches(fieldValidationPatterns.onlyCharsAndDigitsRegex)
-    case None => true //Postcode is assumed to be optional so return true if missing
-  }
-
-  def isValidLengthPostcode(input: Option[String]): Boolean = input match {
-    case Some(postcode) => isValidLengthIfPopulated(postcode, postcodeMinLength, postcodeMaxLength)
-    case None           => true //Postcode is assumed to be optional so return true if missing
-  }
-
-  def isValidFormatPostcodeSchemeOrganiser(input: Option[String]): Boolean = input match {
-    case Some(postcode) => postcode.toUpperCase.matches(fieldValidationPatterns.postCodeRegx)
+    case Some(postcode) => postcode.trim.toUpperCase.matches(postCodeRegx) && isValidLengthIfPopulated(postcode, postcodeMinLength, postcodeMaxLength)
     case None => true //Postcode is assumed to be optional so return true if missing
   }
 
@@ -384,8 +369,7 @@ object fieldValidationPatterns {
   
   val countryCodeRegx = "^[A-Z]{2}$"
 
-  val postCodeRegx =
-    """(GIR 0AA)|((([A-Z-[QVX]][0-9][0-9]?)|(([A-Z-[QVX]][A-Z-[IJZ]][0-9][0-9]?)|(([A-Z-[QVX‌​]][0-9][A-HJKSTUW])|([A-Z-[QVX]][A-Z-[IJZ]][0-9][ABEHMNPRVWXY]))))\s?[0-9][A-Z-[C‌​IKMOV]]{2})"""
+  val postCodeRegx = """^(GIR 0AA|[A-PR-UWYZ][A-HK-Y]?[0-9][0-9A-HJKSTUW]? ?[0-9][ABD-HJLNP-UW-Z]{2})$"""
 
   val yesNoRegPattern = "^([1-2]{1})$"
 
