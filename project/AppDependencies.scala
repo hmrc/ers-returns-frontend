@@ -16,7 +16,7 @@ object AppDependencies {
     "uk.gov.hmrc"             %% "play-partials-play-30"      % "10.1.0",
     "uk.gov.hmrc"             %% "domain-play-30"             % "11.0.0",
     "io.github.openhtmltopdf" %  "openhtmltopdf-pdfbox"       % "1.1.31",
-    "com.openhtmltopdf"       %  "openhtmltopdf-svg-support"  % openHtmlVersion,
+    "com.openhtmltopdf"       %  "openhtmltopdf-svg-support"  % openHtmlVersion exclude ("xalan", "xalan"),
     "commons-codec"           %  "commons-codec"              % "1.19.0",
     "org.codehaus.janino"     %  "janino"                     % "3.1.12",
     "commons-io"              %  "commons-io"                 % "2.20.0"
