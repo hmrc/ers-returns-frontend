@@ -19,7 +19,7 @@ object AppDependencies {
     "commons-codec"           %  "commons-codec"              % "1.19.0",
     "org.codehaus.janino"     %  "janino"                     % "3.1.12",
     "commons-io"              %  "commons-io"                 % "2.20.0",
-    "com.openhtmltopdf"       %  "openhtmltopdf-svg-support"  % openHtmlVersion exclude ("xalan", "xalan") exclude("org.apache.xmlgraphics", "batik-bridge")
+    "com.openhtmltopdf"       %  "openhtmltopdf-svg-support"  % openHtmlVersion exclude ("xalan", "xalan")
   )
 
   val test: Seq[ModuleID]      = Seq(
