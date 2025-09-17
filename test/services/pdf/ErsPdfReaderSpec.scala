@@ -46,7 +46,9 @@ class ErsPdfReaderSpec
     try {
       val strip = new PDFTextStripper
       strip.getText(pdDoc)
-    } finally {
+    } catch {
+      case e: Exception => throw new Exception
+    }finally {
       pdDoc.close()
       file.close()
     }
