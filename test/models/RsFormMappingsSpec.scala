@@ -224,7 +224,16 @@ class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPer
       assert(validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.postcode"))
     }
 
-      "accept postcode if space is missing space" in {
+      "accept a valid 5 digit postcode without space" in {
+        val postData = Json.obj(
+          companyAddressFields.addressLine1 -> "Address Line 1",
+          companyAddressFields.addressLine5 -> "M11AE"
+        )
+        val validatedForm = companyAddressUkForm().bind(postData, Form.FromJsonMaxChars)
+        assert(validatedForm.errors.isEmpty)
+      }
+
+      "accept postcode if space is missing" in {
         val postData = Json.obj(
           companyAddressFields.addressLine1 -> "Address Line 1",
           companyAddressFields.addressLine5 -> "EC1A1BB"
@@ -357,7 +366,7 @@ class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPer
         assert(validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.postcode"))
       }
 
-      "return an error if postcode has double space between segments" in {
+      "return an error if postcode has double spaces between segments" in {
         val postData = Json.obj(companyAddressFields.addressLine1 -> "Address Line 1",
           companyAddressFields.addressLine5 -> "DN5  1PT")
         val validatedForm = companyAddressUkForm().bind(postData, Form.FromJsonMaxChars)
@@ -710,6 +719,80 @@ class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPer
       val validatedForm = trusteeAddressUkForm().bind(postData, Form.FromJsonMaxChars)
       assert(validatedForm.errors.head.key == trusteeAddressFields.addressLine5)
       assert(validatedForm.errors.head.messages.head == Messages("ers_trustee_details.err.postcode"))
+    }
+
+    "accept a valid 5 digit postcode without space" in {
+      val postData = Json.obj(
+        trusteeAddressFields.addressLine1 -> "Address Line 1",
+        trusteeAddressFields.addressLine5 -> "M11AE"
+      )
+      val validatedForm = trusteeAddressUkForm().bind(postData, Form.FromJsonMaxChars)
+      assert(validatedForm.errors.isEmpty)
+    }
+
+    "accept a valid UK postcodes" in {
+      val validUKPostcodes = Seq(
+        "EC1A 1BB",
+        "W1A 0AX",
+        "M1 1AE",
+        "B33 8TH",
+        "CR2 6XH",
+        "DN55 1PT",
+        "GIR 0AA", // Special case
+        "SW1A 1AA",
+        "L1 8JQ",
+        "BS98 1TL",
+        "BX1 1LT",
+        "BX9 1AS",
+        "BX5 5AT"
+      )
+      validUKPostcodes.foreach { postcode =>
+        val postData = Json.obj(
+          trusteeAddressFields.addressLine1 -> "Address Line 1",
+          trusteeAddressFields.addressLine5 -> postcode
+        )
+        val validatedForm = trusteeAddressUkForm().bind(postData, Form.FromJsonMaxChars)
+        assert(validatedForm.errors.isEmpty)
+      }
+    }
+
+    "return an error if postcode has invalid area letters Q, V, X" in {
+      val invalidAreaPostcodes = Seq("Q1A 1BB", "V1A 1BB", "X1A 1BB")
+      invalidAreaPostcodes.foreach { postcode =>
+        val postData = Json.obj(
+          trusteeAddressFields.addressLine1 -> "Address Line 1",
+          trusteeAddressFields.addressLine5 -> postcode
+        )
+        val validatedForm = trusteeAddressUkForm().bind(postData, Form.FromJsonMaxChars)
+        assert(validatedForm.errors.head.key == trusteeAddressFields.addressLine5, s"Failed for postcode: $postcode")
+        assert(validatedForm.errors.head.messages.head == Messages("ers_trustee_details.err.postcode"), s"Unexpected error message for postcode: $postcode")
+      }
+    }
+
+    "return an error if postcode has invalid second letter I, J, Z" in {
+      val invalidAreaPostcodes = Seq("AI1A 1BB", "AJ2A 1BB", "AZ3A 1BB")
+      invalidAreaPostcodes.foreach { postcode =>
+        val postData = Json.obj(
+          trusteeAddressFields.addressLine1 -> "Address Line 1",
+          trusteeAddressFields.addressLine5 -> postcode
+        )
+        val validatedForm = trusteeAddressUkForm().bind(postData, Form.FromJsonMaxChars)
+        assert(validatedForm.errors.head.key == trusteeAddressFields.addressLine5, s"Failed for postcode: $postcode")
+        assert(validatedForm.errors.head.messages.head == Messages("ers_trustee_details.err.postcode"), s"Unexpected error message for postcode: $postcode")
+      }
+    }
+
+    "return an error if postcode has invalid inward code letters C,I,K,M,O,V" in {
+      val invalidAreaPostcodes = Seq("EC1A 1CB", "EC1A 1IB", "EC1A 1KB","EC1A 1MB", "EC1A 1OB", "EC1A 1VB")
+      invalidAreaPostcodes.foreach { postcode =>
+        val postData = Json.obj(
+          trusteeAddressFields.addressLine1 -> "Address Line 1",
+          trusteeAddressFields.addressLine5 -> postcode
+        )
+        val validatedForm = trusteeAddressUkForm().bind(postData, Form.FromJsonMaxChars)
+        assert(validatedForm.errors.head.key == trusteeAddressFields.addressLine5, s"Failed for postcode: $postcode")
+        assert(validatedForm.errors.head.messages.head == Messages("ers_trustee_details.err.postcode"), s"Unexpected error message for postcode: $postcode")
+      }
     }
   }
 
