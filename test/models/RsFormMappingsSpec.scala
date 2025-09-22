@@ -260,7 +260,6 @@ class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPer
         assert(validatedForm.errors.isEmpty)
       }
 
-      //Added postcode.trim in isValidPostcode for leading/trailing spaces in postcode
       "accept a valid postcode with leading/trailing spaces" in {
         val postData = Json.obj(
           companyAddressFields.addressLine1 -> "Address Line 1",
@@ -270,7 +269,7 @@ class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPer
         assert(validatedForm.errors.isEmpty)
       }
 
-      "accept a valid UK postcodes" in {
+      "accept valid UK postcodes" in {
         val validUKPostcodes = Seq(
           "EC1A 1BB",
           "W1A 0AX",
@@ -296,14 +295,13 @@ class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPer
         }
       }
 
-      "return an error if postcode GIR0AA is without space" in {
+      "accept postcode GIR0AA without space" in {
         val postData = Json.obj(
           companyAddressFields.addressLine1 -> "Address Line 1",
           companyAddressFields.addressLine5 -> "GIR0AA"
         )
         val validatedForm = companyAddressUkForm().bind(postData, Form.FromJsonMaxChars)
-        assert(validatedForm.errors.head.key == companyAddressFields.addressLine5)
-        assert(validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.postcode"))
+        assert(validatedForm.errors.isEmpty)
       }
 
       "return an error if postcode has invalid separator" in {
@@ -730,7 +728,7 @@ class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPer
       assert(validatedForm.errors.isEmpty)
     }
 
-    "accept a valid UK postcodes" in {
+    "accept valid UK postcodes" in {
       val validUKPostcodes = Seq(
         "EC1A 1BB",
         "W1A 0AX",
