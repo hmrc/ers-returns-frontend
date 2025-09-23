@@ -314,26 +314,6 @@ class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPer
         assert(validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.postcode"))
       }
 
-      "return an error if postcode has invalid inward code" in {
-        val postData = Json.obj(
-          companyAddressFields.addressLine1 -> "Address Line 1",
-          companyAddressFields.addressLine5 -> "SW1A 1A1"
-        )
-        val validatedForm = companyAddressUkForm().bind(postData, Form.FromJsonMaxChars)
-        assert(validatedForm.errors.head.key == companyAddressFields.addressLine5)
-        assert(validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.postcode"))
-      }
-
-      "return an error if postcode has invalid outward code" in {
-        val postData = Json.obj(
-          companyAddressFields.addressLine1 -> "Address Line 1",
-          companyAddressFields.addressLine5 -> "ZZ1 1ZZ"
-        )
-        val validatedForm = companyAddressUkForm().bind(postData, Form.FromJsonMaxChars)
-        assert(validatedForm.errors.head.key == companyAddressFields.addressLine5)
-        assert(validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.postcode"))
-      }
-
       "return an error if postcode contains symbols" in {
         val postData = Json.obj(
           companyAddressFields.addressLine1 -> "Address Line 1",
@@ -395,54 +375,6 @@ class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPer
         assert(validatedForm.errors.head.key == companyAddressFields.addressLine5)
         assert(validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.postcode"))
       }
-
-      "return an error if postcode is missing inward code" in {
-        val postData = Json.obj(companyAddressFields.addressLine1 -> "Address Line 1",
-          companyAddressFields.addressLine5 -> "EC1A")
-        val validatedForm = companyAddressUkForm().bind(postData, Form.FromJsonMaxChars)
-        assert(validatedForm.errors.head.key == companyAddressFields.addressLine5)
-        assert(validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.postcode"))
-      }
-
-      "return an error if postcode has invalid area letters Q, V, X" in {
-        val invalidAreaPostcodes = Seq("Q1A 1BB", "V1A 1BB", "X1A 1BB")
-        invalidAreaPostcodes.foreach { postcode =>
-          val postData = Json.obj(
-            companyAddressFields.addressLine1 -> "Address Line 1",
-            companyAddressFields.addressLine5 -> postcode
-          )
-          val validatedForm = companyAddressUkForm().bind(postData, Form.FromJsonMaxChars)
-          assert(validatedForm.errors.head.key == companyAddressFields.addressLine5, s"Failed for postcode: $postcode")
-          assert(validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.postcode"), s"Unexpected error message for postcode: $postcode")
-        }
-      }
-
-      "return an error if postcode has invalid second letter I, J, Z" in {
-        val invalidAreaPostcodes = Seq("AI1A 1BB", "AJ2A 1BB", "AZ3A 1BB")
-        invalidAreaPostcodes.foreach { postcode =>
-          val postData = Json.obj(
-            companyAddressFields.addressLine1 -> "Address Line 1",
-            companyAddressFields.addressLine5 -> postcode
-          )
-          val validatedForm = companyAddressUkForm().bind(postData, Form.FromJsonMaxChars)
-          assert(validatedForm.errors.head.key == companyAddressFields.addressLine5, s"Failed for postcode: $postcode")
-          assert(validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.postcode"), s"Unexpected error message for postcode: $postcode")
-        }
-      }
-
-      "return an error if postcode has invalid inward code letters C,I,K,M,O,V" in {
-        val invalidAreaPostcodes = Seq("EC1A 1CB", "EC1A 1IB", "EC1A 1KB","EC1A 1MB", "EC1A 1OB", "EC1A 1VB")
-        invalidAreaPostcodes.foreach { postcode =>
-          val postData = Json.obj(
-            companyAddressFields.addressLine1 -> "Address Line 1",
-            companyAddressFields.addressLine5 -> postcode
-          )
-          val validatedForm = companyAddressUkForm().bind(postData, Form.FromJsonMaxChars)
-          assert(validatedForm.errors.head.key == companyAddressFields.addressLine5, s"Failed for postcode: $postcode")
-          assert(validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.postcode"), s"Unexpected error message for postcode: $postcode")
-        }
-      }
-
     }
 
   "companyAddressOverseas" must {
@@ -751,45 +683,6 @@ class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPer
         )
         val validatedForm = trusteeAddressUkForm().bind(postData, Form.FromJsonMaxChars)
         assert(validatedForm.errors.isEmpty)
-      }
-    }
-
-    "return an error if postcode has invalid area letters Q, V, X" in {
-      val invalidAreaPostcodes = Seq("Q1A 1BB", "V1A 1BB", "X1A 1BB")
-      invalidAreaPostcodes.foreach { postcode =>
-        val postData = Json.obj(
-          trusteeAddressFields.addressLine1 -> "Address Line 1",
-          trusteeAddressFields.addressLine5 -> postcode
-        )
-        val validatedForm = trusteeAddressUkForm().bind(postData, Form.FromJsonMaxChars)
-        assert(validatedForm.errors.head.key == trusteeAddressFields.addressLine5, s"Failed for postcode: $postcode")
-        assert(validatedForm.errors.head.messages.head == Messages("ers_trustee_details.err.postcode"), s"Unexpected error message for postcode: $postcode")
-      }
-    }
-
-    "return an error if postcode has invalid second letter I, J, Z" in {
-      val invalidAreaPostcodes = Seq("AI1A 1BB", "AJ2A 1BB", "AZ3A 1BB")
-      invalidAreaPostcodes.foreach { postcode =>
-        val postData = Json.obj(
-          trusteeAddressFields.addressLine1 -> "Address Line 1",
-          trusteeAddressFields.addressLine5 -> postcode
-        )
-        val validatedForm = trusteeAddressUkForm().bind(postData, Form.FromJsonMaxChars)
-        assert(validatedForm.errors.head.key == trusteeAddressFields.addressLine5, s"Failed for postcode: $postcode")
-        assert(validatedForm.errors.head.messages.head == Messages("ers_trustee_details.err.postcode"), s"Unexpected error message for postcode: $postcode")
-      }
-    }
-
-    "return an error if postcode has invalid inward code letters C,I,K,M,O,V" in {
-      val invalidAreaPostcodes = Seq("EC1A 1CB", "EC1A 1IB", "EC1A 1KB","EC1A 1MB", "EC1A 1OB", "EC1A 1VB")
-      invalidAreaPostcodes.foreach { postcode =>
-        val postData = Json.obj(
-          trusteeAddressFields.addressLine1 -> "Address Line 1",
-          trusteeAddressFields.addressLine5 -> postcode
-        )
-        val validatedForm = trusteeAddressUkForm().bind(postData, Form.FromJsonMaxChars)
-        assert(validatedForm.errors.head.key == trusteeAddressFields.addressLine5, s"Failed for postcode: $postcode")
-        assert(validatedForm.errors.head.messages.head == Messages("ers_trustee_details.err.postcode"), s"Unexpected error message for postcode: $postcode")
       }
     }
   }

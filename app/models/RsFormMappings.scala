@@ -369,7 +369,7 @@ object fieldValidationPatterns {
   
   val countryCodeRegx = "^[A-Z]{2}$"
 
-  val postCodeRegx = """^(GIR ?0AA|[A-PR-UWYZ][A-HK-Y]?[0-9][0-9A-HJKSTUW]? ?[0-9][ABD-HJLNP-UW-Z]{2})$"""
+  val postCodeRegx = """^(GIR ?0AA|[A-Z]{1,2}[0-9][0-9A-Z]? ?[0-9][A-Z]{2})$"""
 
   val yesNoRegPattern = "^([1-2]{1})$"
 
