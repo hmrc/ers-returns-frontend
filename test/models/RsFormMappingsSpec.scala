@@ -223,7 +223,159 @@ class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPer
       assert(validatedForm.errors.head.key == companyAddressFields.addressLine5)
       assert(validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.postcode"))
     }
-  }
+
+      "accept a valid 5 digit postcode without space" in {
+        val postData = Json.obj(
+          companyAddressFields.addressLine1 -> "Address Line 1",
+          companyAddressFields.addressLine5 -> "M11AE"
+        )
+        val validatedForm = companyAddressUkForm().bind(postData, Form.FromJsonMaxChars)
+        assert(validatedForm.errors.isEmpty)
+      }
+
+      "accept postcode if space is missing" in {
+        val postData = Json.obj(
+          companyAddressFields.addressLine1 -> "Address Line 1",
+          companyAddressFields.addressLine5 -> "EC1A1BB"
+        )
+        val validatedForm = companyAddressUkForm().bind(postData, Form.FromJsonMaxChars)
+        assert(validatedForm.errors.isEmpty)
+      }
+
+      "accept a valid postcode with lowercase" in {
+        val postData = Json.obj(
+          companyAddressFields.addressLine1 -> "Address Line 1",
+          companyAddressFields.addressLine5 ->"sw1a 1aa"
+        )
+        val validatedForm = companyAddressUkForm().bind(postData, Form.FromJsonMaxChars)
+        assert(validatedForm.errors.isEmpty)
+      }
+
+      "accept a valid postcode with mixed case" in {
+        val postData = Json.obj(
+          companyAddressFields.addressLine1 -> "Address Line 1",
+          companyAddressFields.addressLine5 ->"Sw1A 1aA"
+        )
+        val validatedForm = companyAddressUkForm().bind(postData, Form.FromJsonMaxChars)
+        assert(validatedForm.errors.isEmpty)
+      }
+
+      "accept a valid postcode with leading/trailing spaces" in {
+        val postData = Json.obj(
+          companyAddressFields.addressLine1 -> "Address Line 1",
+          companyAddressFields.addressLine5 -> " M1 1AE "
+        )
+        val validatedForm = companyAddressUkForm().bind(postData, Form.FromJsonMaxChars)
+        assert(validatedForm.errors.isEmpty)
+      }
+
+      "accept valid UK postcodes" in {
+        val validUKPostcodes = Seq(
+          "EC1A 1BB",
+          "W1A 0AX",
+          "M1 1AE",
+          "B33 8TH",
+          "CR2 6XH",
+          "DN55 1PT",
+          "GIR 0AA", // Special case
+          "SW1A 1AA",
+          "L1 8JQ",
+          "BS98 1TL",
+          "BX1 1LT",
+          "BX9 1AS",
+          "BX5 5AT"
+        )
+        validUKPostcodes.foreach { postcode =>
+          val postData = Json.obj(
+            companyAddressFields.addressLine1 -> "Address Line 1",
+            companyAddressFields.addressLine5 -> postcode
+          )
+          val validatedForm = companyAddressUkForm().bind(postData, Form.FromJsonMaxChars)
+          assert(validatedForm.errors.isEmpty)
+        }
+      }
+
+      "accept postcode GIR0AA without space" in {
+        val postData = Json.obj(
+          companyAddressFields.addressLine1 -> "Address Line 1",
+          companyAddressFields.addressLine5 -> "GIR0AA"
+        )
+        val validatedForm = companyAddressUkForm().bind(postData, Form.FromJsonMaxChars)
+        assert(validatedForm.errors.isEmpty)
+      }
+
+      "return an error if postcode has invalid separator" in {
+        val postData = Json.obj(
+          companyAddressFields.addressLine1 -> "Address Line 1",
+          companyAddressFields.addressLine5 -> "W1A-0AX"
+        )
+        val validatedForm = companyAddressUkForm().bind(postData, Form.FromJsonMaxChars)
+        assert(validatedForm.errors.head.key == companyAddressFields.addressLine5)
+        assert(validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.postcode"))
+      }
+
+      "return an error if postcode contains symbols" in {
+        val postData = Json.obj(
+          companyAddressFields.addressLine1 -> "Address Line 1",
+          companyAddressFields.addressLine5 ->  "CR2 6X#"
+        )
+        val validatedForm = companyAddressUkForm().bind(postData, Form.FromJsonMaxChars)
+        assert(validatedForm.errors.head.key == companyAddressFields.addressLine5)
+        assert(validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.postcode"))
+      }
+
+      "return an error if postCode size too small" in {
+        val postData = Json.obj(
+          companyAddressFields.addressLine1 -> "Address Line 1",
+          companyAddressFields.addressLine5 ->  "A1"
+        )
+        val validatedForm = companyAddressUkForm().bind(postData, Form.FromJsonMaxChars)
+        assert(validatedForm.errors.head.key == companyAddressFields.addressLine5)
+        assert(validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.postcode"))
+      }
+
+      "return an error if postcode contains tab character" in {
+        val postData = Json.obj(
+          companyAddressFields.addressLine1 -> "Address Line 1",
+          companyAddressFields.addressLine5 ->  "EC1A\t1BB"
+        )
+        val validatedForm = companyAddressUkForm().bind(postData, Form.FromJsonMaxChars)
+        assert(validatedForm.errors.head.key == companyAddressFields.addressLine5)
+        assert(validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.postcode"))
+      }
+
+      "return an error if postcode has double spaces between segments" in {
+        val postData = Json.obj(companyAddressFields.addressLine1 -> "Address Line 1",
+          companyAddressFields.addressLine5 -> "DN5  1PT")
+        val validatedForm = companyAddressUkForm().bind(postData, Form.FromJsonMaxChars)
+        assert(validatedForm.errors.head.key == companyAddressFields.addressLine5)
+        assert(validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.postcode"))
+      }
+
+      "return an error if postcode is numeric only" in {
+        val postData = Json.obj(companyAddressFields.addressLine1 -> "Address Line 1",
+          companyAddressFields.addressLine5 -> "123456")
+        val validatedForm = companyAddressUkForm().bind(postData, Form.FromJsonMaxChars)
+        assert(validatedForm.errors.head.key == companyAddressFields.addressLine5)
+        assert(validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.postcode"))
+      }
+
+      "return an error if postcode is alphabetic only" in {
+        val postData = Json.obj(companyAddressFields.addressLine1 -> "Address Line 1",
+          companyAddressFields.addressLine5 -> "ABCDE")
+        val validatedForm = companyAddressUkForm().bind(postData, Form.FromJsonMaxChars)
+        assert(validatedForm.errors.head.key == companyAddressFields.addressLine5)
+        assert(validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.postcode"))
+      }
+
+      "return an error if postcode has extra segment" in {
+        val postData = Json.obj(companyAddressFields.addressLine1 -> "Address Line 1",
+          companyAddressFields.addressLine5 -> "EC1A 1BB 1AA")
+        val validatedForm = companyAddressUkForm().bind(postData, Form.FromJsonMaxChars)
+        assert(validatedForm.errors.head.key == companyAddressFields.addressLine5)
+        assert(validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.postcode"))
+      }
+    }
 
   "companyAddressOverseas" must {
     "return an error if addressLine1 missing" in {
@@ -497,6 +649,41 @@ class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPer
       val validatedForm = trusteeAddressUkForm().bind(postData, Form.FromJsonMaxChars)
       assert(validatedForm.errors.head.key == trusteeAddressFields.addressLine5)
       assert(validatedForm.errors.head.messages.head == Messages("ers_trustee_details.err.postcode"))
+    }
+
+    "accept a valid 5 digit postcode without space" in {
+      val postData = Json.obj(
+        trusteeAddressFields.addressLine1 -> "Address Line 1",
+        trusteeAddressFields.addressLine5 -> "M11AE"
+      )
+      val validatedForm = trusteeAddressUkForm().bind(postData, Form.FromJsonMaxChars)
+      assert(validatedForm.errors.isEmpty)
+    }
+
+    "accept valid UK postcodes" in {
+      val validUKPostcodes = Seq(
+        "EC1A 1BB",
+        "W1A 0AX",
+        "M1 1AE",
+        "B33 8TH",
+        "CR2 6XH",
+        "DN55 1PT",
+        "GIR 0AA", // Special case
+        "SW1A 1AA",
+        "L1 8JQ",
+        "BS98 1TL",
+        "BX1 1LT",
+        "BX9 1AS",
+        "BX5 5AT"
+      )
+      validUKPostcodes.foreach { postcode =>
+        val postData = Json.obj(
+          trusteeAddressFields.addressLine1 -> "Address Line 1",
+          trusteeAddressFields.addressLine5 -> postcode
+        )
+        val validatedForm = trusteeAddressUkForm().bind(postData, Form.FromJsonMaxChars)
+        assert(validatedForm.errors.isEmpty)
+      }
     }
   }
 
