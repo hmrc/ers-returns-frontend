@@ -3,8 +3,8 @@ import sbt.*
 
 object AppDependencies {
   val openHtmlVersion  = "1.1.31"
-  val bootstrapVersion = "9.19.0"
-  val mongoVersion     = "2.7.0"
+  val bootstrapVersion = "10.2.0"
+  val mongoVersion     = "2.9.0"
 
   val compile: Seq[ModuleID] = Seq(
     "uk.gov.hmrc"             %% "bootstrap-frontend-play-30" % bootstrapVersion,
@@ -19,7 +19,7 @@ object AppDependencies {
     "io.github.openhtmltopdf" %  "openhtmltopdf-svg-support"  % openHtmlVersion
   )
 
-  val test: Seq[ModuleID]      = Seq(
+  private val test: Seq[ModuleID]      = Seq(
     "uk.gov.hmrc"             %% "bootstrap-test-play-30"  % bootstrapVersion,
     "uk.gov.hmrc.mongo"       %% "hmrc-mongo-test-play-30" % mongoVersion
   ).map(_ % Test)
