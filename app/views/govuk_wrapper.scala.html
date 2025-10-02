@@ -16,7 +16,7 @@
 
 @import config.ApplicationConfig
 @import uk.gov.hmrc.hmrcfrontend.views.html.helpers._
-@import uk.gov.hmrc.hmrcfrontend.views.viewmodels.hmrcstandardpage._
+@import uk.gov.hmrc.hmrcfrontend.views.viewmodels.hmrcstandardpage.{Banners => hmrcStandardPageBanners, _}
 @import uk.gov.hmrc.hmrcfrontend.views.viewmodels.userresearchbanner.UserResearchBanner
 @import views.html.helper.CSPNonce
 
@@ -71,7 +71,7 @@
             serviceUrl = Some(controllers.routes.ReturnServiceController.startPage().url),
             signOutUrl = if(!disableSignOut) Some(applicationConfig.signOut) else None,
         ),
-        banners = Banners(
+        banners = hmrcStandardPageBanners(
             userResearchBanner = if(isUserResearchBannerVisible) Some(UserResearchBanner(url = applicationConfig.urBannerLink)) else None,
         ),
         templateOverrides = TemplateOverrides(

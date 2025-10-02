@@ -9,7 +9,7 @@ object AppDependencies {
   val compile: Seq[ModuleID] = Seq(
     "uk.gov.hmrc"             %% "bootstrap-frontend-play-30" % bootstrapVersion,
     "uk.gov.hmrc.mongo"       %% "hmrc-mongo-play-30"         % mongoVersion,
-    "uk.gov.hmrc"             %% "play-frontend-hmrc-play-30" % "12.1.0",
+    "uk.gov.hmrc"             %% "play-frontend-hmrc-play-30" % "12.15.0",
     "uk.gov.hmrc"             %% "play-partials-play-30"      % "10.1.0",
     "uk.gov.hmrc"             %% "domain-play-30"             % "11.0.0",
     "io.github.openhtmltopdf" %  "openhtmltopdf-pdfbox"       % openHtmlVersion,
