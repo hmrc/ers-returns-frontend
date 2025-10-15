@@ -263,7 +263,7 @@ ers_scheme_organiser.addressLine4.label = County (optional)
 
 ers_scheme_organiser.postcode = Postcode (optional)
 ers_scheme_organiser.postcode.hint = For example, AA1 1AA
-ers_scheme_organiser.country = Country (optional)
+ers_scheme_organiser.country = Country
 ers_scheme_organiser.company_reg_number = Company Registration Number (optional)
 ers_scheme_organiser.company_reg_number.hint = This should be the same as what is listed on the Companies House register. It’s either 8 numbers or 2 letters and 6 numbers.
 ers_scheme_organiser.corporation_tax_ref = Corporation Tax reference (optional)
@@ -448,7 +448,7 @@ ers_manual_company_details.addressLine4 = Fourth line of address
 ers_manual_company_details.postcode = Postcode (optional)
 ers_manual_company_details.postcode.hint = For example, AA1 1AA
 ers_manual_company_details.postcode_zipcode = Postcode/ZIP code
-ers_manual_company_details.country = Country (optional)
+ers_manual_company_details.country = Country
 ers_manual_company_details.company_reg_number = Company Registration Number (optional)
 ers_manual_company_details.company_reg_number.hint = This should be the same as what is listed on the Companies House register. It’s either 8 numbers or 2 letters and 6 numbers.
 ers_manual_company_details.corporation_tax_ref = Corporation Tax reference (optional)
@@ -491,7 +491,7 @@ ers_company_address.line2 = Address line 2 (optional)
 ers_company_address.line3 = Address line 3 (optional)
 ers_company_address.line4 = Address line 4 (optional)
 ers_company_address.line5 = Address line 5 (optional)
-ers_company_address.country = Country (optional)
+ers_company_address.country = Country
 
 ers_manual_address_overseas.title = What is the company’s address?
 
@@ -864,7 +864,7 @@ ers_trustee_address.line2 = Address line 2 (optional)
 ers_trustee_address.line3 = Address line 3 (optional)
 ers_trustee_address.line4 = Address line 4 (optional)
 ers_trustee_address.line5 = Address line 5 (optional)
-ers_trustee_address.country = Country (optional)
+ers_trustee_address.country = Country
 
 ers_trustee_details.err.summary.name_required = Enter the trustee’s name
 ers_trustee_details.err.summary.name_size = Reduce the number of characters entered for the trustee’s name
