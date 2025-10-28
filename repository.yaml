@@ -5,3 +5,4 @@ type: Service
 service-type: Frontend
 test-repositories:
   - ers-returns-acceptance-tests
+  - ers-returns-perf-tests
