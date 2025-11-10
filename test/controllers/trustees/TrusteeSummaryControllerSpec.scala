@@ -17,6 +17,7 @@
 package controllers.trustees
 
 import models._
+import org.jsoup.Jsoup
 import org.mockito.ArgumentMatchers.{eq => meq, _}
 import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
@@ -26,7 +27,7 @@ import org.scalatest.{BeforeAndAfterEach, OptionValues}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status
 import play.api.i18n
-import play.api.i18n.{MessagesApi, MessagesImpl}
+import play.api.i18n.{Messages, MessagesApi, MessagesImpl}
 import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -144,6 +145,10 @@ class TrusteeSummaryControllerSpec extends AnyWordSpecLike
       val controllerUnderTest = new TrusteeSummaryController(mockMCC, mockErsConnector, mockTrusteeService,  mockSessionService, globalErrorView, trusteeSummaryView, testAuthAction)
 
       val result = controllerUnderTest.trusteeSummaryPage().apply(Fixtures.buildFakeRequestWithSessionIdOTHER("GET"))
+      val document = Jsoup.parse(contentAsString(result))
+
+      document.getElementsByClass("govuk-heading-xl").text shouldBe Messages("ers_trustee_summary.title")
+
 
       status(result) shouldBe Status.OK
     }
@@ -184,6 +189,9 @@ class TrusteeSummaryControllerSpec extends AnyWordSpecLike
       val controllerUnderTest = new TrusteeSummaryController(mockMCC, mockErsConnector, mockTrusteeService,  mockSessionService, globalErrorView, trusteeSummaryView, testAuthAction)
 
       val result = controllerUnderTest.showTrusteeSummaryPage()(authRequest)
+      val document = Jsoup.parse(contentAsString(result))
+
+      document.getElementsByClass("govuk-heading-xl").text shouldBe Messages("ers_trustee_summary.title")
 
       status(result) shouldBe Status.OK
     }
