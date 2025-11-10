@@ -135,8 +135,6 @@ class TrusteeSummaryControllerSpec extends AnyWordSpecLike
       status(result) shouldBe Status.SEE_OTHER
     }
 
-    // These tests are going to the error page. It succeeds because the only check is that a 200 is returned and global error page is returning a 200 -.-
-    // Raised https://jira.tools.tax.service.gov.uk/browse/DDCE-4841 to fix
     "give a status OK on GET if user is authenticated" in {
       setAuthMocks()
       when(mockSessionService.fetch[RequestObject](refEq(ERS_REQUEST_OBJECT))(any(), any())).thenReturn(Future.successful(ersRequestObject))
@@ -176,8 +174,6 @@ class TrusteeSummaryControllerSpec extends AnyWordSpecLike
       )
     }
 
-    // These tests are going to the error page. It succeeds because the only check is that a 200 is returned and global error page is returning a 200 -.-
-    // Raised https://jira.tools.tax.service.gov.uk/browse/DDCE-4841 to fix
     "display trustee summary page pre-filled" in {
       setAuthMocks()
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdSIP("GET"))
@@ -224,8 +220,6 @@ class TrusteeSummaryControllerSpec extends AnyWordSpecLike
       headers(result) should contain(("Location" -> "http://localhost:9949/gg/sign-in?continue=http%3A%2F%2Flocalhost%3A9290%2Fsubmit-your-ers-annual-return&origin=ers-returns-frontend"))
     }
 
-    // These tests are going to the error page. It succeeds because the only check is that a 200 is returned and global error page is returning a 200 -.-
-    // Raised https://jira.tools.tax.service.gov.uk/browse/DDCE-4841 to fix
     "continue button give a status BadRequest on POST if user is authenticated and form data missing" in {
       setAuthMocks()
       when(mockSessionService.fetch[RequestObject](refEq(ERS_REQUEST_OBJECT))(any(), any())).thenReturn(Future.successful(ersRequestObject))
