@@ -17,6 +17,7 @@
 package controllers.trustees
 
 import models._
+import org.apache.pekko.http.scaladsl.model.headers.LinkParams.title
 import org.jsoup.Jsoup
 import org.mockito.ArgumentMatchers.{eq => meq, _}
 import org.mockito.Mockito._
@@ -230,6 +231,9 @@ class TrusteeSummaryControllerSpec extends AnyWordSpecLike
       val result = controllerUnderTest.trusteeSummaryContinue().apply(Fixtures.buildFakeRequestWithSessionIdSIP("GET"))
 
       status(result) shouldBe Status.BAD_REQUEST
+
+      contentAsString(result) should include(testMessages("ers_trustee.add.err"))
+      contentAsString(result) should include(testMessages("ers_trustee_summary.title"))
     }
 
     "continue button should redirect on POST if user is authenticated and addTrustee = true" in {
