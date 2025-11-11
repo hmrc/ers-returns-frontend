@@ -157,15 +157,17 @@ class SchemeOrganiserControllerSpec
       )
     }
 
-    // These tests are going to the error page. It succeeds because the only check is that a 200 is returned and global error page is returning a 200 -.-
-    // Raised https://jira.tools.tax.service.gov.uk/browse/DDCE-4841 to fix
 
-    "display scheme organiser summary page pre-filled" in {
+    "display ers errors page if no company details in session cache" in {
       setAuthMocks()
       val controllerUnderTest = buildFakeSchemeOrganiserSummaryController(schemeOrganiserSummaryCached = true)
       val authRequest         = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdSIP("GET"))
 
       val result = controllerUnderTest.showSchemeOrganiserSummaryPage(authRequest)
+
+      contentAsString(result) shouldBe contentAsString(
+        Future(controllerUnderTest.getGlobalErrorPage(testFakeRequest, testMessages))
+      )
       status(result) shouldBe Status.OK
 
     }

@@ -17,6 +17,8 @@
 package controllers.trustees
 
 import models._
+import org.apache.pekko.http.scaladsl.model.headers.LinkParams.title
+import org.jsoup.Jsoup
 import org.mockito.ArgumentMatchers.{eq => meq, _}
 import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
@@ -26,7 +28,7 @@ import org.scalatest.{BeforeAndAfterEach, OptionValues}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status
 import play.api.i18n
-import play.api.i18n.{MessagesApi, MessagesImpl}
+import play.api.i18n.{Messages, MessagesApi, MessagesImpl}
 import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -134,8 +136,6 @@ class TrusteeSummaryControllerSpec extends AnyWordSpecLike
       status(result) shouldBe Status.SEE_OTHER
     }
 
-    // These tests are going to the error page. It succeeds because the only check is that a 200 is returned and global error page is returning a 200 -.-
-    // Raised https://jira.tools.tax.service.gov.uk/browse/DDCE-4841 to fix
     "give a status OK on GET if user is authenticated" in {
       setAuthMocks()
       when(mockSessionService.fetch[RequestObject](refEq(ERS_REQUEST_OBJECT))(any(), any())).thenReturn(Future.successful(ersRequestObject))
@@ -144,6 +144,10 @@ class TrusteeSummaryControllerSpec extends AnyWordSpecLike
       val controllerUnderTest = new TrusteeSummaryController(mockMCC, mockErsConnector, mockTrusteeService,  mockSessionService, globalErrorView, trusteeSummaryView, testAuthAction)
 
       val result = controllerUnderTest.trusteeSummaryPage().apply(Fixtures.buildFakeRequestWithSessionIdOTHER("GET"))
+      val document = Jsoup.parse(contentAsString(result))
+
+      document.getElementsByClass("govuk-heading-xl").text shouldBe Messages("ers_trustee_summary.title")
+
 
       status(result) shouldBe Status.OK
     }
@@ -171,8 +175,6 @@ class TrusteeSummaryControllerSpec extends AnyWordSpecLike
       )
     }
 
-    // These tests are going to the error page. It succeeds because the only check is that a 200 is returned and global error page is returning a 200 -.-
-    // Raised https://jira.tools.tax.service.gov.uk/browse/DDCE-4841 to fix
     "display trustee summary page pre-filled" in {
       setAuthMocks()
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdSIP("GET"))
@@ -184,6 +186,9 @@ class TrusteeSummaryControllerSpec extends AnyWordSpecLike
       val controllerUnderTest = new TrusteeSummaryController(mockMCC, mockErsConnector, mockTrusteeService,  mockSessionService, globalErrorView, trusteeSummaryView, testAuthAction)
 
       val result = controllerUnderTest.showTrusteeSummaryPage()(authRequest)
+      val document = Jsoup.parse(contentAsString(result))
+
+      document.getElementsByClass("govuk-heading-xl").text shouldBe Messages("ers_trustee_summary.title")
 
       status(result) shouldBe Status.OK
     }
@@ -216,8 +221,6 @@ class TrusteeSummaryControllerSpec extends AnyWordSpecLike
       headers(result) should contain(("Location" -> "http://localhost:9949/gg/sign-in?continue=http%3A%2F%2Flocalhost%3A9290%2Fsubmit-your-ers-annual-return&origin=ers-returns-frontend"))
     }
 
-    // These tests are going to the error page. It succeeds because the only check is that a 200 is returned and global error page is returning a 200 -.-
-    // Raised https://jira.tools.tax.service.gov.uk/browse/DDCE-4841 to fix
     "continue button give a status BadRequest on POST if user is authenticated and form data missing" in {
       setAuthMocks()
       when(mockSessionService.fetch[RequestObject](refEq(ERS_REQUEST_OBJECT))(any(), any())).thenReturn(Future.successful(ersRequestObject))
@@ -228,6 +231,9 @@ class TrusteeSummaryControllerSpec extends AnyWordSpecLike
       val result = controllerUnderTest.trusteeSummaryContinue().apply(Fixtures.buildFakeRequestWithSessionIdSIP("GET"))
 
       status(result) shouldBe Status.BAD_REQUEST
+
+      contentAsString(result) should include(testMessages("ers_trustee.add.err"))
+      contentAsString(result) should include(testMessages("ers_trustee_summary.title"))
     }
 
     "continue button should redirect on POST if user is authenticated and addTrustee = true" in {
