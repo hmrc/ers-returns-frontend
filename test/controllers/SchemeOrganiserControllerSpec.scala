@@ -158,7 +158,7 @@ class SchemeOrganiserControllerSpec
     }
 
 
-    "display ers errors page if scheme organiser summary page pre-filled" in {
+    "display ers errors page if no company details in session cache" in {
       setAuthMocks()
       val controllerUnderTest = buildFakeSchemeOrganiserSummaryController(schemeOrganiserSummaryCached = true)
       val authRequest         = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdSIP("GET"))
