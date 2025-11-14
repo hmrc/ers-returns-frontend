@@ -4,7 +4,7 @@ const fileUploadInput = document.getElementById('fileToUpload');
 const fileUploadDivWrapper = fileUploadInput.parentElement;
 const uploadFileButton = document.getElementById('submit');
 const fileType = (function() {
-    if (document.URL.includes("csv")) {
+    if (document.URL.includes("csv") || document.URL.includes("CSV")) {
         return "csv";
     } else if (document.URL.includes("ods")) {
         return "ods";
@@ -27,7 +27,7 @@ function checkFileName() {
     let actualFileName = fileUploadInput.files[0].name;
     if (fileType === "csv") {
         let expectedFileName = document.getElementsByTagName('label').item(0).getAttribute('data-file-name');
-        return {fileName: actualFileName === expectedFileName, fileNameLength: true, fileNameCharacters: true};
+        return {fileName: actualFileName.toUpperCase() === expectedFileName.toUpperCase(), fileNameLength: true, fileNameCharacters: true};
     } else if (fileType === "ods") {
         let lowerName = actualFileName.toLowerCase();
         let isOdsFile = lowerName.endsWith(".ods");

@@ -26,7 +26,7 @@
 
     <logger name="uk.gov.hmrc.audit" level="OFF"/>
 
-    <root level="WARN">
+    <root level="INFO">
         <appender-ref ref="ASYNCSTDOUT"/>
     </root>
 </configuration>
