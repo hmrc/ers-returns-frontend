@@ -39,6 +39,27 @@ class ErsConnector @Inject() (http: HttpClientV2, appConfig: ApplicationConfig)(
   lazy val ersUrl: String = appConfig.ersUrl
   lazy val validatorUrl: String = appConfig.validatorUrl
 
+  // --- helper to normalise filename extensions for CSV validation ---
+
+  private def normaliseExtension(name: String): String = {
+    val dotIndex = name.lastIndexOf('.')
+    if (dotIndex > 0) {
+      val base = name.substring(0, dotIndex)
+      val ext  = name.substring(dotIndex).toLowerCase   // .CSV -> .csv
+      base + ext
+    } else {
+      name
+    }
+  }
+
+  private def normaliseUploadedSuccessfully(upload: UploadedSuccessfully): UploadedSuccessfully = {
+    val normalisedName = normaliseExtension(upload.name)
+    if (upload.name != normalisedName) {
+      logger.info(s"[ErsConnector][normaliseUploadedSuccessfully] Normalising uploaded file name from '${upload.name}' to '$normalisedName'")
+    }
+    upload.copy(name = normalisedName)
+  }
+
   def   connectToEtmpSapRequest(
                                  schemeRef: String
                                )(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Either[Throwable, String]] = {
@@ -72,7 +93,7 @@ class ErsConnector @Inject() (http: HttpClientV2, appConfig: ApplicationConfig)(
   }
 
   def connectToEtmpSummarySubmit(sap: String, payload: JsValue)(implicit request: RequestWithOptionalAuthContext[AnyContent],
-                                                                 hc: HeaderCarrier
+                                                                hc: HeaderCarrier
   ): Future[String] = {
     val empRef: String = request.authData.empRef.encodedValue
     val url: String = s"$ersUrl/ers/$empRef/summarySubmit/" + sap
@@ -145,9 +166,13 @@ class ErsConnector @Inject() (http: HttpClientV2, appConfig: ApplicationConfig)(
     val empRef: String = request.authData.empRef.encodedValue
     val url: String = s"$validatorUrl/ers/v2/$empRef/process-csv-file"
 
+    val normalisedCallbackData: List[UploadedSuccessfully] = callbackData.map(normaliseUploadedSuccessfully)
+    logger.info(s"[ErsConnector][validateCsvFileData] Sending CSV files to validator with names: " +
+        normalisedCallbackData.map(_.name).mkString(", "))
+
     http
       .post(url"$url")
-      .withBody(Json.toJson(CsvValidatorData(callbackData, schemeInfo)))
+      .withBody(Json.toJson(CsvValidatorData(normalisedCallbackData, schemeInfo)))
       .execute[HttpResponse]
       .map {
         res =>

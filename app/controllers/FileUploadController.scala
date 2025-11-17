@@ -80,7 +80,7 @@ class FileUploadController @Inject()(val mcc: MessagesControllerComponents,
         if (file.name.contains(".csv") || file.name.contains(".CSV")) {
           logger.info("[FileUploadController][success] User uploaded a csv file instead of an ods file")
           Future(getFileUploadProblemPage())
-        } else if (!file.name.contains(".ods") && !file.name.contains(".ods")) {
+        } else if (!file.name.contains(".ods") && !file.name.contains(".ODS")) {
           logger.info("[FileUploadController][success] User uploaded a non ods file")
           Future(getFileUploadProblemPage())
         } else {

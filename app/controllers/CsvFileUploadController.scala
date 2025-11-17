@@ -83,7 +83,6 @@ class CsvFileUploadController @Inject() (val mcc: MessagesControllerComponents,
     case _ => false
   }
 
-
   def success(uploadId: UploadId): Action[AnyContent] = authAction.async { implicit request =>
     logger.info(s"[CsvFileUploadController][success] Upload form submitted for ID: $uploadId")
     (for {
@@ -110,7 +109,7 @@ class CsvFileUploadController @Inject() (val mcc: MessagesControllerComponents,
 
   def processValidationResults()(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] =
     (for {
-      all <- sessionService.fetch[ErsMetaData](ersUtil.ERS_METADATA)
+      all    <- sessionService.fetch[ErsMetaData](ersUtil.ERS_METADATA)
       result <- removePresubmissionData(all.schemeInfo)
     } yield result) recover { case e: Exception =>
       logger.error(s"[CsvFileUploadController][processValidationResults] Failed to fetch metadata data with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
@@ -173,7 +172,13 @@ class CsvFileUploadController @Inject() (val mcc: MessagesControllerComponents,
     }
 
   def checkFileNames(csvCallbackData: List[UploadedSuccessfully], schemeInfo: SchemeInfo)
-                    (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] =
+                    (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
+
+    def stripExtension(name: String): String = {
+      val dotIndex = name.lastIndexOf('.')
+      if (dotIndex > 0) name.substring(0, dotIndex) else name
+    }
+
     sessionService.fetch[UpscanCsvFilesList](ersUtil.CSV_FILES_UPLOAD).flatMap { list =>
       val uploadedWithCorrectName: Boolean = list.ids
         .map(expectedFile => expectedFile.fileId)
@@ -187,15 +192,30 @@ class CsvFileUploadController @Inject() (val mcc: MessagesControllerComponents,
           val expectedNameCsopV5 =
             ersUtil.getPageElement(schemeInfo.schemeId, ersUtil.PAGE_CHECK_CSV_FILE, names._1 + ".file_name.v5")
           val uploadedName = names._2
-          if (schemeInfo.schemeType == "CSOP" && uploadedName.contains("V5")) {
-            (expectedNameCsopV5, uploadedName)
-          } else {
-            (expectedName, uploadedName)
-          }
+
+          logger.info(
+            s"[CsvFileUploadController][checkFileNames] Comparing expectedName='$expectedName', expectedNameCsopV5='$expectedNameCsopV5', uploadedName='${uploadedName}' " +
+              s"for schemeRef: ${schemeInfo.schemeRef}"
+          )
+
+          val (expectedToUse, uploadedToUse) =
+            if (schemeInfo.schemeType == "CSOP" && uploadedName.toUpperCase.contains("V5")) {
+              (expectedNameCsopV5, uploadedName)
+            } else {
+              (expectedName, uploadedName)
+            }
+
+          (
+            stripExtension(expectedToUse),
+            stripExtension(uploadedToUse)
+          )
         }
-        .forall(names => names._1 == names._2)
+        .forall { case (expectedBase, uploadedBase) =>
+          expectedBase.equalsIgnoreCase(uploadedBase)
+        }
+
       if (uploadedWithCorrectName) {
-        validateCsv(csvCallbackData, schemeInfo) //HERE IS CALL TO FILE-VALIDATOR
+        validateCsv(csvCallbackData, schemeInfo)
       } else {
         logger.info(s"[CsvFileUploadController][checkFileNames] User uploaded the wrong file: $uploadedWithCorrectName")
         Future(getFileUploadProblemPage())
@@ -204,10 +224,38 @@ class CsvFileUploadController @Inject() (val mcc: MessagesControllerComponents,
       logger.error(s"[CsvFileUploadController][checkFileNames] Failed to fetch CsvFilesCallbackList with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.", e)
       getGlobalErrorPage
     }
+  }
 
   def validateCsv(csvCallbackData: List[UploadedSuccessfully], schemeInfo: SchemeInfo)
-                 (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] =
-    ersConnector.validateCsvFileData(csvCallbackData, schemeInfo).flatMap { res =>
+                 (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
+
+    def normaliseExtension(name: String): String = {
+      val dotIndex = name.lastIndexOf('.')
+      if (dotIndex > 0) {
+        val base = name.substring(0, dotIndex)
+        val ext  = name.substring(dotIndex).toLowerCase // force extension to lowercase
+        base + ext
+      } else {
+        name
+      }
+    }
+
+    val normalisedCallbackData: List[UploadedSuccessfully] =
+      csvCallbackData.map { uploaded =>
+        val normalisedName = normaliseExtension(uploaded.name)
+        if (!uploaded.name.equals(normalisedName)) {
+          logger.info(
+            s"[CsvFileUploadController][validateCsv] Normalising uploaded file name from '${uploaded.name}' to '$normalisedName' " +
+              s"for schemeRef: ${schemeInfo.schemeRef}"
+          )
+        }
+        uploaded.copy(name = normalisedName)
+      }
+
+    ersConnector.validateCsvFileData(normalisedCallbackData, schemeInfo).flatMap { res =>
+      logger.info(
+        s"[CsvFileUploadController][validateCsv] Validator response status: ${res.status}, body (first 500): ${res.body.take(500)}"
+      )
       res.status match {
         case OK       =>
           logger.info(
@@ -218,18 +266,25 @@ class CsvFileUploadController @Inject() (val mcc: MessagesControllerComponents,
           Future.successful(Redirect(controllers.schemeOrganiser.routes.SchemeOrganiserBasedInUkController.questionPage()))
 
         case BAD_REQUEST =>
-          logger.warn(s"[CsvFileUploadController][validateCsv] Validation is not successful for schemeRef: ${schemeInfo.schemeRef}, " +
-              s"timestamp: ${System.currentTimeMillis()}.")
+          logger.warn(
+            s"[CsvFileUploadController][validateCsv] Validation is not successful for schemeRef: ${schemeInfo.schemeRef}, " +
+              s"timestamp: ${System.currentTimeMillis()}. Request used normalised file names: ${normalisedCallbackData.map(_.name).mkString(", ")}"
+          )
           Future.successful(Redirect(controllers.routes.CsvFileUploadController.validationFailure()))
 
         case _ =>
-          logger.error(s"[CsvFileUploadController][validateCsv] Validate file data failed with Status ${res.status}, timestamp: ${System.currentTimeMillis()}.")
+          logger.error(
+            s"[CsvFileUploadController][validateCsv] Validate file data failed with Status ${res.status}, timestamp: ${System.currentTimeMillis()}."
+          )
           Future.successful(getGlobalErrorPage)
       }
     } recover { case e: Exception =>
-      logger.error(s"[CsvFileUploadController][validateCsv] Failed to fetch CsvFilesCallbackList with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
+      logger.error(
+        s"[CsvFileUploadController][validateCsv] Failed to validate CSV file data with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}."
+      )
       getGlobalErrorPage
     }
+  }
 
   def validationFailure(): Action[AnyContent] = authAction.async { implicit request =>
     processValidationFailure()(request)
@@ -245,7 +300,7 @@ class CsvFileUploadController @Inject() (val mcc: MessagesControllerComponents,
     }).recover {
       case e: Exception =>
         logger.error(s"[CsvFileUploadController][processValidationFailure] failed to save callback data list with exception ${e.getMessage}, " +
-            s"timestamp: ${System.currentTimeMillis()}.")
+          s"timestamp: ${System.currentTimeMillis()}.")
         getGlobalErrorPage
     }
   }
