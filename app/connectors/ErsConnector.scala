@@ -39,13 +39,11 @@ class ErsConnector @Inject() (http: HttpClientV2, appConfig: ApplicationConfig)(
   lazy val ersUrl: String = appConfig.ersUrl
   lazy val validatorUrl: String = appConfig.validatorUrl
 
-  // --- helper to normalise filename extensions for CSV validation ---
-
   private def normaliseExtension(name: String): String = {
     val dotIndex = name.lastIndexOf('.')
     if (dotIndex > 0) {
       val base = name.substring(0, dotIndex)
-      val ext  = name.substring(dotIndex).toLowerCase   // .CSV -> .csv
+      val ext  = name.substring(dotIndex).toLowerCase
       base + ext
     } else {
       name
