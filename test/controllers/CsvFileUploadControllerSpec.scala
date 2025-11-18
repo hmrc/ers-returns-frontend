@@ -49,7 +49,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Random
 
 class CsvFileUploadControllerSpec
-    extends AnyWordSpecLike
+  extends AnyWordSpecLike
     with Matchers
     with OptionValues
     with ERSFakeApplicationConfig
@@ -124,7 +124,7 @@ class CsvFileUploadControllerSpec
       "upscanService throws an exception" in {
         val upscanCsvFilesCallbackList: UpscanCsvFilesCallbackList = UpscanCsvFilesCallbackList(
           List(
-            UpscanCsvFilesCallback(testUploadId, "file1", NotStarted),
+            UpscanCsvFilesCallback(testUploadId, "file1", InProgress),
             UpscanCsvFilesCallback(UploadId("ID2"), "file4", NotStarted)
           )
         )
@@ -615,7 +615,9 @@ class CsvFileUploadControllerSpec
           )).as[JsObject], Instant.now(), Instant.now())
         )
       )
-      when(mockSessionService.cache(any(), any())(any(), any())).thenReturn(Future.successful(sessionPair))
+      when(
+        mockSessionService.cache(any(), any())(any(), any())
+      ).thenReturn(Future.successful(sessionPair))
 
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
       await(csvFileUploadControllerWithRetry(3).extractCsvCallbackData(Fixtures.EMISchemeInfo)(authRequest, hc))
@@ -717,6 +719,12 @@ class CsvFileUploadControllerSpec
         override lazy val allCsvFilesCacheRetryAmount: Int = 1
       }
 
+    def uploadedWithName(name: String): UploadedSuccessfully =
+      new UploadedSuccessfully(
+        name,
+        "http://somedownloadlink.com/034099340"
+      )
+
     "redirect to schemeOrganiserPage if validating is successful" in {
       reset(mockErsConnector)
       when(
@@ -725,9 +733,13 @@ class CsvFileUploadControllerSpec
         Future.successful(HttpResponse(OK, ""))
       )
 
-      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+      val authRequest            = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+      val uploadedSuccessfully   = uploadedWithName("CSOP_OptionsGranted_V4.ODS")
+      val uploadedList           = List(uploadedSuccessfully)
+      val schemeInfo: SchemeInfo = mock[SchemeInfo]
+
       val result      =
-        csvFileUploadController.validateCsv(mock[List[UploadedSuccessfully]], mock[SchemeInfo])(authRequest, hc)
+        csvFileUploadController.validateCsv(uploadedList, schemeInfo)(authRequest, hc)
       status(result)         shouldBe SEE_OTHER
       result.futureValue.header
         .headers("Location") shouldBe controllers.schemeOrganiser.routes.SchemeOrganiserBasedInUkController.questionPage().toString
@@ -741,9 +753,13 @@ class CsvFileUploadControllerSpec
         Future.successful(HttpResponse(BAD_REQUEST, ""))
       )
 
-      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+      val authRequest            = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+      val uploadedSuccessfully   = uploadedWithName("CSOP_OptionsGranted_V4.ODS")
+      val uploadedList           = List(uploadedSuccessfully)
+      val schemeInfo: SchemeInfo = mock[SchemeInfo]
+
       val result      =
-        csvFileUploadController.validateCsv(mock[List[UploadedSuccessfully]], mock[SchemeInfo])(authRequest, hc)
+        csvFileUploadController.validateCsv(uploadedList, schemeInfo)(authRequest, hc)
       status(result)                                shouldBe SEE_OTHER
       result.futureValue.header.headers("Location") shouldBe controllers.routes.CsvFileUploadController.validationFailure().toString
     }
@@ -756,9 +772,13 @@ class CsvFileUploadControllerSpec
         Future.successful(HttpResponse(INTERNAL_SERVER_ERROR, ""))
       )
 
-      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+      val authRequest            = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+      val uploadedSuccessfully   = uploadedWithName("CSOP_OptionsGranted_V4.ODS")
+      val uploadedList           = List(uploadedSuccessfully)
+      val schemeInfo: SchemeInfo = mock[SchemeInfo]
+
       val result      =
-        csvFileUploadController.validateCsv(mock[List[UploadedSuccessfully]], mock[SchemeInfo])(authRequest, hc)
+        csvFileUploadController.validateCsv(uploadedList, schemeInfo)(authRequest, hc)
       status(result) shouldBe INTERNAL_SERVER_ERROR
     }
 
@@ -770,9 +790,13 @@ class CsvFileUploadControllerSpec
         Future.failed(new RuntimeException)
       )
 
-      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+      val authRequest            = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+      val uploadedSuccessfully   = uploadedWithName("CSOP_OptionsGranted_V4.ODS")
+      val uploadedList           = List(uploadedSuccessfully)
+      val schemeInfo: SchemeInfo = mock[SchemeInfo]
+
       contentAsString(
-        csvFileUploadController.validateCsv(mock[List[UploadedSuccessfully]], mock[SchemeInfo])(authRequest, hc)
+        csvFileUploadController.validateCsv(uploadedList, schemeInfo)(authRequest, hc)
       ) shouldBe contentAsString(Future(csvFileUploadController.getGlobalErrorPage(testFakeRequest, testMessages)))
     }
   }
