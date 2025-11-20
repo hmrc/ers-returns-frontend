@@ -233,7 +233,7 @@ class CsvFileUploadController @Inject() (val mcc: MessagesControllerComponents,
       val dotIndex = name.lastIndexOf('.')
       if (dotIndex > 0) {
         val base = name.substring(0, dotIndex)
-        val ext  = name.substring(dotIndex).toLowerCase // force extension to lowercase
+        val ext  = name.substring(dotIndex).toLowerCase
         base + ext
       } else {
         name
