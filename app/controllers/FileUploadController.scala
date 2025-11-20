@@ -77,10 +77,10 @@ class FileUploadController @Inject()(val mcc: MessagesControllerComponents,
       file <- futureCallbackData
     } yield file match {
       case Some(file: UploadedSuccessfully) =>
-        if (file.name.contains(".csv")) {
+        if (file.name.toLowerCase.contains(".csv")) {
           logger.info("[FileUploadController][success] User uploaded a csv file instead of an ods file")
           Future(getFileUploadProblemPage())
-        } else if (!file.name.contains(".ods")) {
+        } else if (!file.name.toLowerCase.contains(".ods")) {
           logger.info("[FileUploadController][success] User uploaded a non ods file")
           Future(getFileUploadProblemPage())
         } else {
