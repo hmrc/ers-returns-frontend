@@ -241,13 +241,11 @@ class CsvFileUploadControllerSpec
       assert(result.contains(testMessages("ers.file_problem.heading")))
     }
 
-
     "redirect to the file size limit error page" in {
       val request = FakeRequest().withTarget(RequestTarget("123", "/file-upload/failure", Map("errorCode" -> Seq("EntityTooLarge"))))
       val result = contentAsString(csvFileUploadController.failure().apply(request))
       assert(result.contains(testMessages("There is a problem – Employment Related Securities – GOV.UK")))
     }
-
   }
 
   "calling validationFailure" should {
@@ -824,6 +822,41 @@ class CsvFileUploadControllerSpec
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
       val result      = csvFileUploadController
         .checkFileNames(testCsvCallbackData, mockSchemeInfo)(authRequest, hc)
+      status(result)         shouldBe SEE_OTHER
+      result.futureValue.header
+        .headers("Location") shouldBe controllers.schemeOrganiser.routes.SchemeOrganiserBasedInUkController.questionPage().toString
+    }
+
+    "redirect to validateCsv even when uploaded file name differs only by case" in {
+      reset(mockErsConnector)
+
+      val testUploadedSuccessfully   = new UploadedSuccessfully(
+        "csop_optionsgranted_v4.CSV",
+        "http://somedownloadlink.com/034099340"
+      )
+      val testCsvCallbackData        = List[UploadedSuccessfully](testUploadedSuccessfully)
+      val testCacheFileIds           = List[UpscanIds](
+        new UpscanIds(new UploadId(Random.nextString(10)), "file0", InProgress)
+      )
+      val testUpscanCsvFileList      = new UpscanCsvFilesList(testCacheFileIds)
+      val mockSchemeInfo: SchemeInfo = mock[SchemeInfo]
+
+      when(
+        mockSessionService.fetch[UpscanCsvFilesList](any())(any(), any())
+      ) thenReturn Future.successful(testUpscanCsvFileList)
+
+      when(
+        mockErsUtil.getPageElement(any(), any(), any(), any())(any())
+      ) thenReturn "CSOP_OptionsGranted_V4.csv"
+
+      when(
+        mockErsConnector.validateCsvFileData(any[List[UploadedSuccessfully]](), any[SchemeInfo]())(any(), any())
+      ) thenReturn Future.successful(HttpResponse(OK, ""))
+
+      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+      val result      = csvFileUploadController
+        .checkFileNames(testCsvCallbackData, mockSchemeInfo)(authRequest, hc)
+
       status(result)         shouldBe SEE_OTHER
       result.futureValue.header
         .headers("Location") shouldBe controllers.schemeOrganiser.routes.SchemeOrganiserBasedInUkController.questionPage().toString

@@ -1,32 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-        <!-- Filter out assets calls clogging up console -->
-        <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
-            <evaluator>
-                <expression>return message.contains("/assets/");</expression>
-            </evaluator>
-            <OnMismatch>NEUTRAL</OnMismatch>
-            <OnMatch>DENY</OnMatch>
-        </filter>
 
+    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+        <file>logs/ers-returns-frontend.log</file>
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-            <pattern>
-                %date{ISO8601} %highlight(%-5level) %cyan(%logger{36}) %msg%n
-            </pattern>
+            <pattern>%date{ISO8601} level=[%level] logger=[%logger] thread=[%thread] message=[%message] %replace(exception=[%xException]){'^exception=\[\]$',''}%n</pattern>
         </encoder>
     </appender>
 
-    <appender name="ASYNCSTDOUT" class="ch.qos.logback.classic.AsyncAppender">
-        <appender-ref ref="STDOUT"/>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>%date{ISO8601} level=[%level] logger=[%logger] thread=[%thread] rid=[%X{X-Request-ID}] user=[%X{Authorization}] message=[%message] %replace(exception=[%xException]){'^exception=\[\]$',''}%n</pattern>
+        </encoder>
     </appender>
 
-    <logger name="play" level="INFO"/>
+    <appender name="CONNECTOR_LOG_FILE" class="ch.qos.logback.core.FileAppender">
+        <file>logs/connector.log</file>
+        <encoder>
+            <pattern>%message%n</pattern>
+        </encoder>
+    </appender>
 
-    <logger name="application" level="INFO"/>
+    <logger name="uk.gov" level="INFO"/>
 
-    <logger name="uk.gov.hmrc.audit" level="OFF"/>
+    <logger name="connector" level="INFO">
+        <appender-ref ref="STDOUT"/>
+    </logger>
 
-    <root level="WARN">
-        <appender-ref ref="ASYNCSTDOUT"/>
+    <logger name="com.google.inject" level="WARN"/>
+
+    <logger name="org.asynchttpclient.netty" level="INFO"/>
+
+    <root level="INFO">
+        <appender-ref ref="FILE"/>
+        <appender-ref ref="STDOUT"/>
     </root>
 </configuration>

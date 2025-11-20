@@ -31,6 +31,7 @@ import play.api.i18n
 import play.api.i18n.{MessagesApi, MessagesImpl}
 import play.api.libs.json.Json
 import play.api.mvc._
+import play.api.mvc.request.RequestTarget
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import services.UpscanService
@@ -186,8 +187,6 @@ class FileUploadControllerSpec
   "success" must {
     "return OK" when {
       "Callback record is returned with a successful upload and file name is cached" in {
-        when(mockSessionService.fetch[RequestObject](anyString())(any(), any()))
-          .thenReturn(Future.successful(ersRequestObject))
         when(mockErsConnector.getCallbackRecord(any(), any()))
           .thenReturn(Future.successful(Some(uploadedSuccessfully)))
         when(mockSessionService.cache(meq("file-name"), meq(uploadedSuccessfully.name))(any(), any()))
@@ -216,17 +215,49 @@ class FileUploadControllerSpec
 
     "return file upload problem page" when {
       "file name includes .csv" in {
-        when(mockSessionService.fetch[RequestObject](anyString())(any(), any()))
-          .thenReturn(Future.successful(ersRequestObject))
         when(mockErsConnector.getCallbackRecord(any(), any))
           .thenReturn(Future.successful(Some(uploadedSuccessfullyCsv)))
-        when(mockSessionService.cache(meq("file-name"), meq(uploadedSuccessfullyCsv.name))(any(), any()))
-          .thenReturn(Future.successful(sessionPair))
 
         setAuthMocks()
         val result = TestFileUploadController.success()(testFakeRequest)
         checkFileUploadProblemPage(result)
       }
+
+      "file name includes .CSV in upper case" in {
+        val upperCsv = uploadedSuccessfullyCsv.copy(name = uploadedSuccessfullyCsv.name.toUpperCase)
+
+        when(mockErsConnector.getCallbackRecord(any(), any))
+          .thenReturn(Future.successful(Some(upperCsv)))
+
+        setAuthMocks()
+        val result = TestFileUploadController.success()(testFakeRequest)
+        checkFileUploadProblemPage(result)
+      }
+
+      "file name does not contain an ods extension at all (e.g. txt)" in {
+        val uploadedTxt = uploadedSuccessfully.copy(name = "somefile.TXT")
+
+        when(mockErsConnector.getCallbackRecord(any(), any))
+          .thenReturn(Future.successful(Some(uploadedTxt)))
+
+        setAuthMocks()
+        val result = TestFileUploadController.success()(testFakeRequest)
+        checkFileUploadProblemPage(result)
+      }
+    }
+
+    "accept an ODS file regardless of case in the file extension" in {
+      val uploadedUpperOds = uploadedSuccessfully.copy(name = "Test_File.ODS")
+
+      when(mockErsConnector.getCallbackRecord(any(), any))
+        .thenReturn(Future.successful(Some(uploadedUpperOds)))
+      when(mockSessionService.cache(meq("file-name"), meq(uploadedUpperOds.name))(any(), any()))
+        .thenReturn(Future.successful(sessionPair))
+
+      setAuthMocks()
+      val result = TestFileUploadController.success()(testFakeRequest)
+      status(result) mustBe SEE_OTHER
+      redirectLocation(result) mustBe Some(routes.FileUploadController.validationResults().url)
     }
   }
 
@@ -408,6 +439,15 @@ class FileUploadControllerSpec
           contentAsString(result) must include(testMessages("ers.file_problem.heading"))
         }
       }
+
+      "redirect to the file size limit error page" in {
+        setAuthMocks()
+        val request = FakeRequest().withTarget(RequestTarget("123", "/file-upload/failure", Map("errorCode" -> Seq("EntityTooLarge"))))
+        failure(request) { result =>
+          status(result)          must equal(BAD_REQUEST)
+          contentAsString(result) must include(testMessages("There is a problem – Employment Related Securities – GOV.UK"))
+        }
+      }
     }
   }
 
@@ -466,7 +506,7 @@ class FileUploadControllerSpec
   "templateFailure" must {
     "be authorised" in {
       setUnauthorisedMocks()
-      validationFailure() { result =>
+      templateFailure() { result =>
         status(result) must equal(SEE_OTHER)
         redirectLocation(result).get must include("/gg/sign-in")
       }
