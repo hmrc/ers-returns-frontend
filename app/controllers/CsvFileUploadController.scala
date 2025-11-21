@@ -193,7 +193,7 @@ class CsvFileUploadController @Inject() (val mcc: MessagesControllerComponents,
             (expectedName, uploadedName)
           }
         }
-        .forall(names => names._1.toLowerCase == names._2.toLowerCase)
+        .forall(names => names._1 == names._2)
       if (uploadedWithCorrectName) {
         validateCsv(csvCallbackData, schemeInfo) //HERE IS CALL TO FILE-VALIDATOR
       } else {
