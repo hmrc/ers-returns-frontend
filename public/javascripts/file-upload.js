@@ -27,7 +27,8 @@ function checkFileName() {
     let actualFileName = fileUploadInput.files[0].name;
     let lowerName = actualFileName.toLowerCase();
         if (fileType.toLowerCase() === "csv".toLowerCase()) {
-            return {fileName: lowerName.endsWith(".csv"), fileNameLength: true, fileNameCharacters: true};
+            let expectedFileName = actualFileName === document.getElementsByTagName('label').item(0).getAttribute('data-file-name');
+            return {fileName: lowerName.endsWith(".csv") && expectedFileName, fileNameLength: true, fileNameCharacters: true};
         } else if (fileType.toLowerCase() === "ods".toLowerCase()) {
             return {fileName: lowerName.endsWith(".ods"), fileNameLength: actualFileName.length < 240, fileNameCharacters: actualFileName.match("[/^~\"|#?,\\]\\[£$&:@*\\\\+%{}<>\\/]|]") == null};
     } else {
