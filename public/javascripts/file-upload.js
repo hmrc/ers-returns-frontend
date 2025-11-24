@@ -24,13 +24,13 @@ function ensureUploadButtonIs(status) {
 
 // File checks
 function checkFileName() {
-    let actualFileName = fileUploadInput.files[0].name;
-    let lowerName = actualFileName.toLowerCase();
+    let uploadedFileName = fileUploadInput.files[0].name;
+    let lowerName = uploadedFileName.toLowerCase();
         if (fileType.toLowerCase() === "csv".toLowerCase()) {
-            let expectedFileName = actualFileName === document.getElementsByTagName('label').item(0).getAttribute('data-file-name');
+            let expectedFileName = lowerName === document.getElementsByTagName('label').item(0).getAttribute('data-file-name').toLowerCase();
             return {fileName: lowerName.endsWith(".csv") && expectedFileName, fileNameLength: true, fileNameCharacters: true};
         } else if (fileType.toLowerCase() === "ods".toLowerCase()) {
-            return {fileName: lowerName.endsWith(".ods"), fileNameLength: actualFileName.length < 240, fileNameCharacters: actualFileName.match("[/^~\"|#?,\\]\\[£$&:@*\\\\+%{}<>\\/]|]") == null};
+            return {fileName: lowerName.endsWith(".ods"), fileNameLength: uploadedFileName.length < 240, fileNameCharacters: uploadedFileName.match("[/^~\"|#?,\\]\\[£$&:@*\\\\+%{}<>\\/]|]") == null};
     } else {
         return {fileName: false, fileNameLength: false, fileNameCharacters: false};
     }
