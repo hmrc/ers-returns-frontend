@@ -48,7 +48,7 @@ class FileUploadCallbackController @Inject() (val mcc: MessagesControllerCompone
             case callback: UpscanReadyCallback    =>
               val fileSize = callback.uploadDetails.size
               fileSizeUtils.logFileSize(schemeRef, fileSize)
-              UploadedSuccessfully(callback.uploadDetails.fileName, callback.downloadUrl.toExternalForm)
+              UploadedSuccessfully(callback.uploadDetails.fileName, callback.downloadUrl.toExternalForm, mimeType = callback.uploadDetails.fileMimeType)
             case UpscanFailedCallback(_, details) =>
               logger.warn(
                 s"[FileUploadCallbackController][callback] Callback for session id: $sessionId failed. Reason: ${details.failureReason}. Message: ${details.message}"

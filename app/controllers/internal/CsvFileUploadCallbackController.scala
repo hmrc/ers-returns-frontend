@@ -52,7 +52,7 @@ class CsvFileUploadCallbackController @Inject() (val mcc: MessagesControllerComp
             case callback: UpscanReadyCallback    =>
               val fileSize = callback.uploadDetails.size
               fileSizeUtils.logFileSize(scRef, fileSize)
-              UploadedSuccessfully(callback.uploadDetails.fileName, callback.downloadUrl.toExternalForm)
+              UploadedSuccessfully(callback.uploadDetails.fileName, callback.downloadUrl.toExternalForm, mimeType = callback.uploadDetails.fileMimeType)
             case UpscanFailedCallback(_, details) =>
               logger.warn(
                 s"[CsvFileUploadCallbackController][callback] CSV Callback for upload id: ${uploadId.value} failed. Reason: ${details.failureReason}. Message: ${details.message}"
