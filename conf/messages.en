@@ -913,7 +913,7 @@ ers.global.errors.try.later = Try again later.
 #********************************************************************
 ers.file_problem.title = There is a problem with the file upload - Submit your ERS annual return – GOV.UK
 ers.file_problem.heading = There is a problem with the file upload
-ers.file_problem.paragraph = This may be because the file:
+ers.file_problem.paragraph = Problem with the mime type
 ers.file_problem.invalidFileName = has the wrong name or the name is more than 240 characters
 ers.file_problem.fileTooSmall = is empty
 ers.file_problem.invalidFileType = is the wrong type - it should be a CSV or an ODS depending on what you have already selected

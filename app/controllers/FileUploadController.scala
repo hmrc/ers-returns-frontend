@@ -79,7 +79,7 @@ class FileUploadController @Inject()(val mcc: MessagesControllerComponents,
         val mime = file.mimeType.toLowerCase
         if(mime != "application/vnd.oasis.opendocument.spreadsheet"){
           logger.info("[FileUploadController][success] wrong mime type")
-          Future.successful(getGlobalErrorPage) // test error page
+          Future.successful(getFileUploadProblemPage()) // test error page
         }
         else if (file.name.toLowerCase.contains(".csv")) {
           logger.info("[FileUploadController][success] User uploaded a csv file instead of an ods file")
