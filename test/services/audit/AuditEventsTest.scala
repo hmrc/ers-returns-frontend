@@ -32,7 +32,7 @@ import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
 import uk.gov.hmrc.play.audit.model.DataEvent
 import utils.ErsTestHelper
 
-import java.time.ZonedDateTime
+import java.time.Instant
 import scala.concurrent.Future
 
 class AuditEventsTest
@@ -48,7 +48,7 @@ class AuditEventsTest
   val rsc                                                   = new ErsMetaData(
     new SchemeInfo(
       schemeRef = "testSchemeRef",
-      timestamp = ZonedDateTime.now(),
+      timestamp = Instant.now,
       schemeId = "testSchemeId",
       taxYear = "testTaxYear",
       schemeName = "testSchemeName",

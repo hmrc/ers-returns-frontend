@@ -37,7 +37,7 @@ import utils.Fixtures.ersRequestObject
 import utils._
 import views.html.{global_error, summary}
 
-import java.time.{Instant, ZonedDateTime}
+import java.time.Instant
 import scala.concurrent.{ExecutionContext, Future}
 
 class SummaryDeclarationControllerSpec
@@ -67,7 +67,7 @@ class SummaryDeclarationControllerSpec
   val globalErrorView: global_error = app.injector.instanceOf[global_error]
   val summaryView: summary = app.injector.instanceOf[summary]
 
-  val schemeInfo: SchemeInfo = SchemeInfo("XA1100000000000", ZonedDateTime.now, "2", "2016", "EMI", "EMI")
+  val schemeInfo: SchemeInfo = SchemeInfo("XA1100000000000",Instant.now, "2", "2016", "EMI", "EMI")
   val rsc: ErsMetaData =
     new ErsMetaData(schemeInfo, "ipRef", Some("aoRef"), "empRef", Some("agentRef"), Some("sapNumber"))
 

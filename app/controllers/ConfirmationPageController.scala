@@ -31,6 +31,7 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.SessionKeys.{BUNDLE_REF, DATE_TIME_SUBMITTED}
 import utils._
 
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.concurrent.TimeUnit
 import javax.inject.{Inject, Singleton}
@@ -104,8 +105,7 @@ class ConfirmationPageController @Inject()(val mcc: MessagesControllerComponents
                    (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
 
     val jsonDateTimeFormat = DateTimeFormatter.ofPattern("d MMMM yyyy, h:mma")
-    val dateTimeSubmitted =
-      jsonDateTimeFormat.format(alldata.confirmationDateTime)
+    val dateTimeSubmitted = jsonDateTimeFormat.format(alldata.confirmationDateTime.atZone(ZoneId.of("Europe/London")))
 
     ersConnector.saveMetadata(alldata).flatMap { res =>
       res.status match {

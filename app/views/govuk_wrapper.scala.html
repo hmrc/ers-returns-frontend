@@ -62,7 +62,7 @@
 
 @scripts = {
     <script type="text/javascript" src='@controllers.routes.Assets.versioned("javascripts/iebacklink.js")' @{CSPNonce.attr}></script>
-    @scriptElement.getOrElse("")
+    @scriptElement.getOrElse(Html(""))
 }
 
 @hmrcStandardPage(
