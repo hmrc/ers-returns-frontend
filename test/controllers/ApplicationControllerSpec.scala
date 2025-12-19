@@ -32,7 +32,7 @@ import play.api.test.Helpers._
 import utils.ErsTestHelper
 import views.html.{not_authorised, signedOut, unauthorised}
 
-import java.time.Instant
+import java.time.ZonedDateTime
 import scala.concurrent.{ExecutionContext, Future}
 
 class ApplicationControllerSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPerSuite {
@@ -143,7 +143,7 @@ class ApplicationControllerSpec extends PlaySpec with ErsTestHelper with GuiceOn
 
       val schemeInfo: SchemeInfo = SchemeInfo(
         testOptString.get,
-        Instant.now,
+        ZonedDateTime.now,
         testOptString.get,
         testOptString.get,
         testOptString.get,
@@ -189,7 +189,7 @@ class ApplicationControllerSpec extends PlaySpec with ErsTestHelper with GuiceOn
 
       val schemeInfo: SchemeInfo = SchemeInfo(
         testOptString.get,
-        Instant.now,
+        ZonedDateTime.now,
         testOptString.get,
         testOptString.get,
         testOptString.get,

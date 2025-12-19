@@ -38,7 +38,7 @@ import utils.Fixtures.ersRequestObject
 import utils._
 import views.html.{confirmation, global_error}
 
-import java.time.Instant
+import java.time.ZonedDateTime
 import scala.concurrent.{ExecutionContext, Future}
 
 class ConfirmationPageControllerSpec
@@ -77,12 +77,12 @@ class ConfirmationPageControllerSpec
 
   "calling showConfirmationPage" should {
 
-    val schemeInfo           = SchemeInfo("XA1100000000000",Instant.now, "1", "2016", "EMI", "EMI")
+    val schemeInfo           = SchemeInfo("XA1100000000000", ZonedDateTime.now, "1", "2016", "EMI", "EMI")
     val rsc                  = ErsMetaData(schemeInfo, "ipRef", Some("aoRef"), "empRef", Some("agentRef"), Some("sapNumber"))
     val ersSummary           =
-      ErsSummary("testbundle", "1", None, Instant.now, rsc, None, None, None, None, None, None, None, None)
+      ErsSummary("testbundle", "1", None, ZonedDateTime.now, rsc, None, None, None, None, None, None, None, None)
     val ersSummaryNilReturn2 =
-      ErsSummary("testbundle", "2", None, Instant.now, rsc, None, None, None, None, None, None, None, None)
+      ErsSummary("testbundle", "2", None, ZonedDateTime.now, rsc, None, None, None, None, None, None, None, None)
 
     def buildFakeConfirmationPageController(
       isNilReturn: Boolean = false,
@@ -269,10 +269,10 @@ class ConfirmationPageControllerSpec
   }
 
   "calling saveAndSubmit" should {
-    val schemeInfo = SchemeInfo("XA1100000000000",Instant.now, "1", "2016", "EMI", "EMI")
+    val schemeInfo = SchemeInfo("XA1100000000000", ZonedDateTime.now(), "1", "2016", "EMI", "EMI")
     val rsc        = ErsMetaData(schemeInfo, "ipRef", Some("aoRef"), "empRef", Some("agentRef"), Some("sapNumber"))
     val ersSummary =
-      ErsSummary("testbundle", "1", None, Instant.now(), rsc, None, None, None, None, None, None, None, None)
+      ErsSummary("testbundle", "1", None, ZonedDateTime.now(), rsc, None, None, None, None, None, None, None, None)
 
     def buildFakeConfirmationPageController(
       saveMetadataRes: Boolean = true,

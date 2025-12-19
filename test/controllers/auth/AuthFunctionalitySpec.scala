@@ -34,7 +34,7 @@ import uk.gov.hmrc.domain.EmpRef
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.ErsTestHelper
 
-import java.time.Instant
+import java.time.ZonedDateTime
 import scala.concurrent.{ExecutionContext, Future}
 
 class AuthFunctionalitySpec
@@ -76,7 +76,7 @@ class AuthFunctionalitySpec
       empRef = testEmpRef
     )
 
-    lazy val schemeInfo: SchemeInfo   = SchemeInfo("XA1100000000000",Instant.now, "1", "2016", "EMI", "EMI")
+    lazy val schemeInfo: SchemeInfo   = SchemeInfo("XA1100000000000", ZonedDateTime.now, "1", "2016", "EMI", "EMI")
     val validErsMetaData: ErsMetaData =
       ErsMetaData(schemeInfo, "ipRef", Some("aoRef"), "1234/GA4567", Some("agentRef"), Some("sapNumber"))
     val reqObj: RequestObject = RequestObject(None, None, None, None, None, None, Some("1234/GA4567"), None, None)

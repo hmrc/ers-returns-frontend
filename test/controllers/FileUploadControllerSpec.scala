@@ -39,7 +39,7 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import utils.{ERSFakeApplicationConfig, ErsTestHelper, UpscanData}
 import views.html._
 
-import java.time.Instant
+import java.time.ZonedDateTime
 import scala.concurrent.{ExecutionContext, Future}
 
 class FileUploadControllerSpec
@@ -66,7 +66,7 @@ class FileUploadControllerSpec
   val testOptString: Option[String] = Some("test")
   val schemeInfo: SchemeInfo = SchemeInfo(
     testOptString.get,
-    Instant.now,
+    ZonedDateTime.now,
     testOptString.get,
     testOptString.get,
     testOptString.get,

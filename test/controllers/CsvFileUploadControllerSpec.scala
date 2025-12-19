@@ -44,7 +44,7 @@ import utils.Fixtures.ersRequestObject
 import utils._
 import views.html._
 
-import java.time.Instant
+import java.time.{Instant, ZonedDateTime}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Random
 
@@ -420,7 +420,7 @@ class CsvFileUploadControllerSpec
       when(
         mockSessionService.fetch[ErsMetaData](refEq(mockErsUtil.ERS_METADATA))(any(), any())
       ).thenReturn(
-        Future.successful(ErsMetaData(SchemeInfo("",Instant.now, "", "", "", ""), "", None, "", None, None))
+        Future.successful(ErsMetaData(SchemeInfo("", ZonedDateTime.now, "", "", "", ""), "", None, "", None, None))
       )
 
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
@@ -450,7 +450,7 @@ class CsvFileUploadControllerSpec
       when(
         mockSessionService.fetch[ErsMetaData](anyString())(any(), any())
       ).thenReturn(
-        Future.successful(ErsMetaData(SchemeInfo("",Instant.now, "", "", "", ""), "", None, "", None, None))
+        Future.successful(ErsMetaData(SchemeInfo("", ZonedDateTime.now, "", "", "", ""), "", None, "", None, None))
       )
 
       when(
