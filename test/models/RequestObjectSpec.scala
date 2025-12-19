@@ -25,7 +25,7 @@ import play.api.test.FakeRequest
 import utils.DateUtils
 import utils.Fixtures.ersRequestObject
 
-import java.time.{Instant, ZonedDateTime}
+import java.time.ZonedDateTime
 
 class RequestObjectSpec extends AnyWordSpecLike with Matchers with GuiceOneAppPerSuite with PrivateMethodTester {
 
@@ -123,7 +123,7 @@ class RequestObjectSpec extends AnyWordSpecLike with Matchers with GuiceOneAppPe
       val result             = requestObject.toErsMetaData
       val resultTimestamp    = result.schemeInfo.timestamp
       val adjustedSchemeInfo = result.schemeInfo.copy(timestamp = null)
-      val diff: Int = resultTimestamp.compareTo(Instant.now)
+      val diff: Int = resultTimestamp.compareTo(ZonedDateTime.now)
 
       diff must be < 100
       adjustedSchemeInfo mustBe expectedSchemeInfo

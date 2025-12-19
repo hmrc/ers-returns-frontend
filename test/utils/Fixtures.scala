@@ -22,7 +22,7 @@ import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import uk.gov.hmrc.domain.Generator
 
-import java.time.{Instant, LocalDateTime, ZoneId, ZonedDateTime}
+import java.time.{LocalDateTime, ZoneId, ZonedDateTime}
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.duration._
 
@@ -75,7 +75,7 @@ object Fixtures extends AuthHelper {
 
   val EMISchemeInfo: SchemeInfo = SchemeInfo(
     schemeRef = "XA1100000000000",
-    timestamp = Instant.now,
+    timestamp = timestamp,
     schemeId = "123AA12345678",
     taxYear = "2014/15",
     schemeName = "My scheme",
@@ -183,7 +183,7 @@ object Fixtures extends AuthHelper {
     "testbundle",
     "1",
     None,
-    ZonedDateTime.of(LocalDateTime.of(2016, 6, 8, 11, 5), ZoneId.systemDefault).toInstant,
+    ZonedDateTime.of(LocalDateTime.of(2016, 6, 8, 11, 5), ZoneId.systemDefault),
     metaData = EMIMetaData,
     None,
     None,

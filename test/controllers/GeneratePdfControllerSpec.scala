@@ -36,7 +36,7 @@ import utils.{ERSFakeApplicationConfig, ErsTestHelper, Fixtures}
 import views.html.global_error
 
 import java.io.ByteArrayOutputStream
-import java.time.Instant
+import java.time.ZonedDateTime
 import scala.concurrent.{ExecutionContext, Future}
 
 class GeneratePdfControllerSpec
@@ -62,11 +62,11 @@ class GeneratePdfControllerSpec
   val globalErrorView: global_error = app.injector.instanceOf[global_error]
 
   lazy val pdfBuilderMock: ErsReceiptPdfBuilderService = mock[ErsReceiptPdfBuilderService]
-  lazy val schemeInfo: SchemeInfo                      = SchemeInfo("XA1100000000000",Instant.now, "1", "2016", "EMI", "EMI")
+  lazy val schemeInfo: SchemeInfo                      = SchemeInfo("XA1100000000000", ZonedDateTime.now, "1", "2016", "EMI", "EMI")
   lazy val rsc: ErsMetaData                            =
     ErsMetaData(schemeInfo, "ipRef", Some("aoRef"), "empRef", Some("agentRef"), Some("sapNumber"))
   lazy val ersSummary: ErsSummary                      =
-    ErsSummary("testbundle", "2", None, Instant.now, rsc, None, None, None, None, None, None, None, None)
+    ErsSummary("testbundle", "2", None, ZonedDateTime.now, rsc, None, None, None, None, None, None, None, None)
 
   "pdf generation controller" should {
     "give a redirect status (to company authentication frontend) on GET if user is not authenticated" in {
