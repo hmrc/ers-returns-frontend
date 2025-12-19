@@ -37,7 +37,7 @@ import utils.Fixtures.ersRequestObject
 import utils.{ERSFakeApplicationConfig, ErsTestHelper, Fixtures}
 import views.html.{global_error, start, unauthorised}
 
-import java.time.ZonedDateTime
+import java.time.Instant
 import scala.concurrent.{ExecutionContext, Future}
 
 class ReturnServiceControllerSpec
@@ -68,7 +68,7 @@ class ReturnServiceControllerSpec
   val hundred = 100
 
   lazy val ExpectedRedirectionUrlIfNotSignedIn = "/gg/sign-in?continue=/submit-your-ers-return"
-  lazy val schemeInfo: SchemeInfo = SchemeInfo("XA1100000000000", ZonedDateTime.now, "1", "2016", "EMI", "EMI")
+  lazy val schemeInfo: SchemeInfo = SchemeInfo("XA1100000000000",Instant.now, "1", "2016", "EMI", "EMI")
   lazy val rsc: ErsMetaData =
     new ErsMetaData(schemeInfo, "ipRef", Some("aoRef"), "empRef", Some("agentRef"), Some("sapNumber"))
   lazy val rscAsRequestObject: RequestObject = RequestObject(
@@ -84,7 +84,9 @@ class ReturnServiceControllerSpec
   )
 
   before {
-    mreset(mockHttp, mockRequestBuilder)
+    mreset(mockHttp)
+    mreset(mockRequestBuilder)
+
     when(mockHttp.post(any())(any())).thenReturn(mockRequestBuilder)
     when(mockHttp.get(any())(any())).thenReturn(mockRequestBuilder)
     when(mockRequestBuilder.setHeader(any())).thenReturn(mockRequestBuilder)
