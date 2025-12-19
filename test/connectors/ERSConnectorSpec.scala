@@ -40,7 +40,7 @@ import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 import utils.{ERSFakeApplicationConfig, ErsTestHelper, UpscanData, WireMockHelper}
 
 import java.net.URL
-import java.time.ZonedDateTime
+import java.time.Instant
 import scala.concurrent.{ExecutionContext, Future}
 
 class ERSConnectorSpec
@@ -74,7 +74,7 @@ class ERSConnectorSpec
   lazy val testHttp: HttpClientV2 = app.injector.instanceOf[HttpClientV2]
   override val requestWithAuth: RequestWithOptionalAuthContext[AnyContent] =
     RequestWithOptionalAuthContext(testFakeRequest.withSession("sessionId" -> "someSessionId"), defaultErsAuthData)
-  lazy val schemeInfo: SchemeInfo = SchemeInfo("XA1100000000000", ZonedDateTime.now, "1", "2016", "EMI", "EMI")
+  lazy val schemeInfo: SchemeInfo = SchemeInfo("XA1100000000000",Instant.now, "1", "2016", "EMI", "EMI")
 
   lazy val ersConnector: ErsConnector = new ErsConnector(testHttp, mockAppConfig) {
     override lazy val ersUrl = "ers-returns"
@@ -86,14 +86,16 @@ class ERSConnectorSpec
     override lazy val validatorUrl = "http://localhost:9226"
   }
 
-  val mockSchemeInfo: SchemeInfo = SchemeInfo("schemeRef", ZonedDateTime.now, "1", "2020", "schemeType", "schemeName")
+  val mockSchemeInfo: SchemeInfo = SchemeInfo("schemeRef",Instant.now, "1", "2020", "schemeType", "schemeName")
   val ersMetaData: ErsMetaData = ErsMetaData(mockSchemeInfo, "Test", None, "None", None, None)
-  val mockErsSummary: ErsSummary = ErsSummary("","",None,ZonedDateTime.now,ersMetaData,None,None,None,None,None,None,None,None)
+  val mockErsSummary: ErsSummary = ErsSummary("", "", None, Instant.now, ersMetaData, None, None, None, None, None, None, None, None)
 
   override def beforeEach(): Unit = {
     super.beforeEach()
 
-    mreset(mockHttp, mockRequestBuilder)
+    mreset(mockHttp)
+    mreset(mockRequestBuilder)
+
     when(mockHttp.get(any())(any())).thenReturn(mockRequestBuilder)
     when(mockHttp.post(any())(any())).thenReturn(mockRequestBuilder)
     when(mockHttp.put(any())(any())).thenReturn(mockRequestBuilder)
@@ -103,7 +105,7 @@ class ERSConnectorSpec
 
   lazy val data: JsObject = Json.obj(
     "schemeRef" -> "XA1100000000000",
-    "confTime"  -> "2016-08-05T11:14:43"
+    "confTime" -> "2016-08-05T11:14:43"
   )
 
   "validateFileData" should {
@@ -356,7 +358,7 @@ class ERSConnectorSpec
 
     "throw an exception" when {
       "an exception occurs during the PUT request" in {
-        when(mockHttp.put(any()) (any()).execute[HttpResponse])
+        when(mockHttp.put(any())(any()).execute[HttpResponse])
           .thenReturn(Future.failed(new Exception("Test exception")))
 
         an[Exception] should be thrownBy await(ersConnectorMockHttp.updateCallbackRecord(UploadedSuccessfully("fileId", "downloadUrl"), "sessionId")(hc))
@@ -607,7 +609,7 @@ class ERSConnectorSpec
       "an exception occurs during the POST request" in {
         val sap = "sap123"
         val payload = Json.obj("key" -> "value")
-        when(mockHttp.post(any()) (any()).execute[HttpResponse])
+        when(mockHttp.post(any())(any()).execute[HttpResponse])
           .thenReturn(Future.failed(new Exception("Test exception")))
 
         an[Exception] should be thrownBy await(ersConnectorMockHttp.connectToEtmpSummarySubmit(sap, payload)(requestWithAuth, hc))
