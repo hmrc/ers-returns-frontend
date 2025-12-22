@@ -23,14 +23,14 @@ import java.time.Instant
 
 case class SchemeInfo(
                        schemeRef: String,
-                       timestamp: Instant = Instant.now(),
+                       timestamp: Instant,
                        schemeId: String,
                        taxYear: String,
                        schemeName: String,
                        schemeType: String
                      )
 
-object SchemeInfo {
+object SchemeInfo extends DateTimeFormats {
   implicit val format: OFormat[SchemeInfo] = Json.format[SchemeInfo]
 }
 

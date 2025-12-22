@@ -16,7 +16,7 @@
 
 package models
 
-import play.api.libs.json.{Format, Reads, Writes}
+import play.api.libs.json.{Format, JsNumber, Reads, Writes}
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 
 import java.time.Instant
@@ -38,7 +38,7 @@ trait DateTimeFormats {
       }
   }
 
-  private val dateTimeWrite: Writes[Instant] = MongoJavatimeFormats.instantWrites
+  private val dateTimeWrite: Writes[Instant] = (o: Instant) => JsNumber(o.toEpochMilli)
 
   implicit val dateTimeFormats: Format[Instant] = Format(dateTimeRead, dateTimeWrite)
 }
