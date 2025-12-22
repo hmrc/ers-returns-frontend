@@ -35,8 +35,6 @@
 
 @(requestObject: RequestObject, index: Int, companyBasedInUkForm: Form[models.CompanyBasedInUk], edit: Boolean, schemeOrganiser: Boolean)(implicit request: RequestHeader, messages: Messages, appConfig: ApplicationConfig)
 
-@schemeId = @{requestObject.getSchemeId}
-
 @formAction = @{(edit, schemeOrganiser) match {
     case (true, false) => controllers.subsidiaries.routes.SubsidiaryBasedInUkController.editQuestionSubmit(index)
     case (false, false) =>  controllers.subsidiaries.routes.SubsidiaryBasedInUkController.questionSubmit(index)

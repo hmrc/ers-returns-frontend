@@ -21,7 +21,7 @@ import play.api.libs.json.{Json, OFormat}
 import play.api.mvc.RequestHeader
 import utils.{CountryCodes, DateUtils}
 
-import java.time.ZonedDateTime
+import java.time.Instant
 
 case class RS_scheme(scheme: String)
 
@@ -214,7 +214,7 @@ case class RequestObject(
   private def toSchemeInfo: SchemeInfo =
     SchemeInfo(
       getSchemeReference,
-      ZonedDateTime.now,
+      Instant.now,
       getSchemeId,
       getTaxYear,
       getSchemeName,

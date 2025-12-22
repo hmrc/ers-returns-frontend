@@ -36,7 +36,7 @@ import utils.Fixtures.ersRequestObject
 import utils.{ERSFakeApplicationConfig, ErsTestHelper, Fixtures}
 import views.html.{global_error, reportable_events}
 
-import java.time.ZonedDateTime
+import java.time.Instant
 import scala.concurrent.{ExecutionContext, Future}
 
 class ReportableEventsControllerSpec
@@ -81,7 +81,7 @@ class ReportableEventsControllerSpec
       reportableEventsView,
       testAuthAction
     ) {
-      val schemeInfo: SchemeInfo   = SchemeInfo("XA1100000000000", ZonedDateTime.now, "1", "2016", "CSOP 2015/16", "CSOP")
+      val schemeInfo: SchemeInfo   = SchemeInfo("XA1100000000000",Instant.now, "1", "2016", "CSOP 2015/16", "CSOP")
       val ersMetaData: ErsMetaData = ErsMetaData(schemeInfo, "300.300.300.300", None, "", None, None)
 
       when(mockSessionService.fetch[RequestObject](any())(any(), any())).thenReturn(Future.successful(ersRequestObject))
@@ -202,7 +202,7 @@ class ReportableEventsControllerSpec
       reportableEventsView,
       testAuthAction
     ) {
-      val schemeInfo: SchemeInfo   = SchemeInfo("XA1100000000000", ZonedDateTime.now, "1", "2016", "CSOP 2015/16", "CSOP")
+      val schemeInfo: SchemeInfo   = SchemeInfo("XA1100000000000",Instant.now, "1", "2016", "CSOP 2015/16", "CSOP")
       val ersMetaData: ErsMetaData = ErsMetaData(schemeInfo, "300.300.300.300", None, "", None, None)
 
       when(mockSessionService.fetch[RequestObject](any())(any(), any())).thenReturn(Future.successful(ersRequestObject))

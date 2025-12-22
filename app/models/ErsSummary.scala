@@ -17,49 +17,33 @@
 package models
 
 import play.api.libs.json._
+import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 
-import java.time.{Instant, ZoneId, ZonedDateTime}
-import scala.util._
-
-trait LocalDateTimeFormat {
-  val validationError: JsonValidationError = JsonValidationError("Failed to find matching Json field Type")
-  // Overriding the default play 2.6 LocalDateTime format to allow backwards compatibility with play 2.5 services (ers-submissions)
-  implicit val dateFormatDefault: Format[ZonedDateTime] = new Format[ZonedDateTime] {
-    override def reads(json: JsValue): JsResult[ZonedDateTime] = json match {
-      case JsNumber(numberDate: BigDecimal) =>
-        Try(ZonedDateTime.ofInstant(Instant.ofEpochMilli(numberDate.toLong), ZoneId.systemDefault())) match {
-          case Success(date: ZonedDateTime) => JsSuccess(date)
-          case _                        => JsError(JsonValidationError(s"[LocalDateTimeFormat][JsNumber]: Failed to parse date ($numberDate) to LocalDateTime"))
-        }
-      case _                            => JsError(validationError)
-    }
-    override def writes(o: ZonedDateTime): JsValue = JsNumber(o.toInstant.toEpochMilli)
-  }
-}
+import java.time.Instant
 
 case class SchemeInfo(
-  schemeRef: String,
-  timestamp: ZonedDateTime = ZonedDateTime.now,
-  schemeId: String,
-  taxYear: String,
-  schemeName: String,
-  schemeType: String
-)
+                       schemeRef: String,
+                       timestamp: Instant,
+                       schemeId: String,
+                       taxYear: String,
+                       schemeName: String,
+                       schemeType: String
+                     )
 
-object SchemeInfo extends LocalDateTimeFormat {
-  implicit val format: OFormat[SchemeInfo]         = Json.format[SchemeInfo]
+object SchemeInfo extends DateTimeFormats {
+  implicit val format: OFormat[SchemeInfo] = Json.format[SchemeInfo]
 }
 
 case class ErsMetaData(
-  schemeInfo: SchemeInfo,
-  ipRef: String,
-  aoRef: Option[String],
-  empRef: String,
-  agentRef: Option[String],
-  sapNumber: Option[String]
-)
+                        schemeInfo: SchemeInfo,
+                        ipRef: String,
+                        aoRef: Option[String],
+                        empRef: String,
+                        agentRef: Option[String],
+                        sapNumber: Option[String]
+                      )
 
-object ErsMetaData extends LocalDateTimeFormat {
+object ErsMetaData {
   implicit val format: OFormat[ErsMetaData] = Json.format[ErsMetaData]
 }
 
@@ -69,8 +53,10 @@ case class AlterationAmends(
                              altAmendsExchange: Option[String],
                              altAmendsVariations: Option[String],
                              altAmendsOther: Option[String]
-                           ){
-  val checkIfEmpty: Boolean = List(altAmendsTerms, altAmendsEligibility, altAmendsExchange, altAmendsVariations, altAmendsOther).forall{_.isEmpty}
+                           ) {
+  val checkIfEmpty: Boolean = List(altAmendsTerms, altAmendsEligibility, altAmendsExchange, altAmendsVariations, altAmendsOther).forall {
+    _.isEmpty
+  }
 }
 
 object AlterationAmends {
@@ -78,17 +64,17 @@ object AlterationAmends {
 }
 
 case class CompanyDetails(
-                              companyName: String,
-                              addressLine1: String,
-                              addressLine2: Option[String],
-                              addressLine3: Option[String],
-                              addressLine4: Option[String],
-                              addressLine5: Option[String],
-                              country: Option[String],
-                              companyReg: Option[String],
-                              corporationRef: Option[String],
-                              basedInUk: Boolean
-                              ){
+                           companyName: String,
+                           addressLine1: String,
+                           addressLine2: Option[String],
+                           addressLine3: Option[String],
+                           addressLine4: Option[String],
+                           addressLine5: Option[String],
+                           country: Option[String],
+                           companyReg: Option[String],
+                           corporationRef: Option[String],
+                           basedInUk: Boolean
+                         ) {
 
   def replaceName(company: Company): CompanyDetails = {
     this.copy(companyName = company.companyName, companyReg = company.companyReg, corporationRef = company.corporationRef)
@@ -105,7 +91,7 @@ case class CompanyDetails(
       addressLine3 = companyAddress.addressLine3,
       addressLine4 = companyAddress.addressLine4,
       addressLine5 = companyAddress.addressLine5,
-      country      = companyAddress.country
+      country = companyAddress.country
     )
   }
 
@@ -147,10 +133,10 @@ object CompanyBasedInUk {
 }
 
 case class Company(
-                        companyName: String,
-                        companyReg: Option[String],
-                        corporationRef: Option[String]
-                      )
+                    companyName: String,
+                    companyReg: Option[String],
+                    corporationRef: Option[String]
+                  )
 
 object Company {
   implicit val format: OFormat[Company] = Json.format[Company]
@@ -158,13 +144,13 @@ object Company {
 
 
 case class CompanyAddress(
-                                   addressLine1: String,
-                                   addressLine2: Option[String],
-                                   addressLine3: Option[String],
-                                   addressLine4: Option[String],
-                                   addressLine5: Option[String],
-                                   country: Option[String]
-                                 )
+                           addressLine1: String,
+                           addressLine2: Option[String],
+                           addressLine3: Option[String],
+                           addressLine4: Option[String],
+                           addressLine5: Option[String],
+                           country: Option[String]
+                         )
 
 object CompanyAddress {
   implicit val format: OFormat[CompanyAddress] = Json.format[CompanyAddress]
@@ -175,29 +161,32 @@ case class CompanyDetailsList(companies: List[CompanyDetails])
 object CompanyDetailsList {
   implicit val format: OFormat[CompanyDetailsList] = Json.format[CompanyDetailsList]
 }
+
 case class GroupSchemeInfo(
-  groupScheme: Option[String],
-  groupSchemeType: Option[String]
-)
+                            groupScheme: Option[String],
+                            groupSchemeType: Option[String]
+                          )
+
 object GroupSchemeInfo {
   implicit val format: OFormat[GroupSchemeInfo] = Json.format[GroupSchemeInfo]
 }
 
 case class ErsSummary(
-  bundleRef: String,
-  isNilReturn: String,
-  fileType: Option[String],
-  confirmationDateTime: ZonedDateTime,
-  metaData: ErsMetaData,
-  altAmendsActivity: Option[AltAmendsActivity],
-  alterationAmends: Option[AlterationAmends],
-  groupService: Option[GroupSchemeInfo],
-  schemeOrganiser: Option[SchemeOrganiserDetails],
-  companies: Option[CompanyDetailsList],
-  trustees: Option[TrusteeDetailsList],
-  nofOfRows: Option[Int],
-  transferStatus: Option[String]
-)
-object ErsSummary extends LocalDateTimeFormat {
+                       bundleRef: String,
+                       isNilReturn: String,
+                       fileType: Option[String],
+                       confirmationDateTime: Instant,
+                       metaData: ErsMetaData,
+                       altAmendsActivity: Option[AltAmendsActivity],
+                       alterationAmends: Option[AlterationAmends],
+                       groupService: Option[GroupSchemeInfo],
+                       schemeOrganiser: Option[SchemeOrganiserDetails],
+                       companies: Option[CompanyDetailsList],
+                       trustees: Option[TrusteeDetailsList],
+                       nofOfRows: Option[Int],
+                       transferStatus: Option[String]
+                     )
+
+object ErsSummary extends MongoJavatimeFormats {
   implicit val format: OFormat[ErsSummary] = Json.format[ErsSummary]
 }
