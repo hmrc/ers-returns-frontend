@@ -26,11 +26,7 @@ import play.api.i18n.Messages
 import utils.CountryCodes
 
 class SchemeOrganiserDetailsDecoratorSpec
-    extends AnyWordSpecLike
-    with Matchers
-    with OptionValues
-    with MockitoSugar
-    with GuiceOneAppPerSuite {
+    extends AnyWordSpecLike with Matchers with OptionValues with MockitoSugar with GuiceOneAppPerSuite {
 
   implicit val messages: Messages    = mock[Messages]
   val mockCountryCodes: CountryCodes = app.injector.instanceOf[CountryCodes]
@@ -66,4 +62,5 @@ class SchemeOrganiserDetailsDecoratorSpec
       output.contains("<hr/>")          shouldBe true
     }
   }
+
 }

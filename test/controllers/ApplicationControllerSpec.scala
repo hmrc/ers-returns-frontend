@@ -49,17 +49,17 @@ class ApplicationControllerSpec extends PlaySpec with ErsTestHelper with GuiceOn
 
   implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
 
-  implicit lazy val materializer: Materializer = app.materializer
-  val unauthorisedView: unauthorised = app.injector.instanceOf[unauthorised]
-  val signedOutView: signedOut = app.injector.instanceOf[signedOut]
+  implicit lazy val materializer: Materializer     = app.materializer
+  val unauthorisedView: unauthorised               = app.injector.instanceOf[unauthorised]
+  val signedOutView: signedOut                     = app.injector.instanceOf[signedOut]
   val notAuthorisedView: views.html.not_authorised = app.injector.instanceOf[not_authorised]
 
   override val testAuthActionGov: AuthActionGovGateway =
     new AuthActionGovGateway(mockAuthConnector, mockAppConfig, defaultParser)(ec) {
       override def invokeBlock[A](
-                                   request: Request[A],
-                                   block: RequestWithOptionalAuthContext[A] => Future[Result]
-                                 ): Future[Result] =
+        request: Request[A],
+        block: RequestWithOptionalAuthContext[A] => Future[Result]
+      ): Future[Result] =
         block(RequestWithOptionalAuthContext(request, defaultErsAuthData))
     }
 
@@ -98,7 +98,7 @@ class ApplicationControllerSpec extends PlaySpec with ErsTestHelper with GuiceOn
     }
   }
 
-  //TODO content references ERS Checking for some reason - not changing just in case but needs investigating
+  // TODO content references ERS Checking for some reason - not changing just in case but needs investigating
   "get /not-authorised" must {
 
     "have a status of Unauthorised" in {
@@ -141,7 +141,7 @@ class ApplicationControllerSpec extends PlaySpec with ErsTestHelper with GuiceOn
 
       val testOptString: Option[String] = Some("test")
 
-      val schemeInfo: SchemeInfo = SchemeInfo(
+      val schemeInfo: SchemeInfo        = SchemeInfo(
         testOptString.get,
         Instant.now,
         testOptString.get,
@@ -160,7 +160,7 @@ class ApplicationControllerSpec extends PlaySpec with ErsTestHelper with GuiceOn
 
       val result = testController.keepAlive.apply(FakeRequest())
 
-      status(result) mustBe OK
+      status(result)        mustBe OK
       contentAsString(result) must include("OK")
     }
 
@@ -170,7 +170,7 @@ class ApplicationControllerSpec extends PlaySpec with ErsTestHelper with GuiceOn
 
       val result = testController.keepAlive.apply(FakeRequest())
 
-      status(result) mustBe INTERNAL_SERVER_ERROR
+      status(result)        mustBe INTERNAL_SERVER_ERROR
       contentAsString(result) must include("Unexpected error")
     }
 
@@ -180,7 +180,7 @@ class ApplicationControllerSpec extends PlaySpec with ErsTestHelper with GuiceOn
 
       val result = testController.keepAlive.apply(FakeRequest())
 
-      status(result) mustBe INTERNAL_SERVER_ERROR
+      status(result)        mustBe INTERNAL_SERVER_ERROR
       contentAsString(result) must include("Unexpected error")
     }
 
@@ -207,8 +207,9 @@ class ApplicationControllerSpec extends PlaySpec with ErsTestHelper with GuiceOn
 
       val result = testController.keepAlive.apply(FakeRequest())
 
-      status(result) mustBe INTERNAL_SERVER_ERROR
+      status(result)        mustBe INTERNAL_SERVER_ERROR
       contentAsString(result) must include("Unexpected error")
     }
   }
+
 }

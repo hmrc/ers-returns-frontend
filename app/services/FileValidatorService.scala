@@ -27,22 +27,32 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class FileValidatorService @Inject()(ersConnector: ErsConnector)(implicit ec: ExecutionContext) extends Logging {
+class FileValidatorService @Inject() (ersConnector: ErsConnector)(implicit ec: ExecutionContext) extends Logging {
 
-  def createCallbackRecord(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Int] =
+  def createCallbackRecord(implicit
+    request: RequestWithOptionalAuthContext[AnyContent],
+    hc: HeaderCarrier
+  ): Future[Int] =
     ersConnector.createCallbackRecord
 
   def updateCallbackRecord(uploadStatus: UploadStatus, sessionId: String)(implicit hc: HeaderCarrier): Future[Int] =
     ersConnector.updateCallbackRecord(uploadStatus, sessionId)
 
-  def getCallbackRecord(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Option[UploadStatus]] =
+  def getCallbackRecord(implicit
+    request: RequestWithOptionalAuthContext[AnyContent],
+    hc: HeaderCarrier
+  ): Future[Option[UploadStatus]] =
     ersConnector.getCallbackRecord
 
-  def getSuccessfulCallbackRecord(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Option[UploadedSuccessfully]] =
+  def getSuccessfulCallbackRecord(implicit
+    request: RequestWithOptionalAuthContext[AnyContent],
+    hc: HeaderCarrier
+  ): Future[Option[UploadedSuccessfully]] =
     getCallbackRecord.map {
       _.flatMap {
         case upload: UploadedSuccessfully => Some(upload)
-        case _ => None
+        case _                            => None
       }
     }
+
 }

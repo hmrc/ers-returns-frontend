@@ -37,32 +37,34 @@ object Fixtures extends AuthHelper {
 
   val buildFakeUser: ERSAuthData = defaultErsAuthData
 
-  def buildFakeRequestWithSessionId(method: String): FakeRequest[AnyContentAsEmpty.type]     =
+  def buildFakeRequestWithSessionId(method: String): FakeRequest[AnyContentAsEmpty.type] =
     FakeRequest()
-      .withSession(("sessionId" -> "FAKE_SESSION_ID"), ("screenSchemeInfo" -> "2 - EMI - MYScheme - XX12345678 - 2016"))
+      .withSession("sessionId" -> "FAKE_SESSION_ID", "screenSchemeInfo" -> "2 - EMI - MYScheme - XX12345678 - 2016")
 
-	def buildFakeRequestWithSessionIdCSOP(method: String): FakeRequest[AnyContentAsEmpty.type] = {
-	 FakeRequest().withSession(("sessionId" -> "FAKE_SESSION_ID"), ("screenSchemeInfo" -> "1 - CSOP - MYScheme - XX12345678 - 2016"))
-	}
+  def buildFakeRequestWithSessionIdCSOP(method: String): FakeRequest[AnyContentAsEmpty.type] =
+    FakeRequest().withSession(
+      "sessionId"        -> "FAKE_SESSION_ID",
+      "screenSchemeInfo" -> "1 - CSOP - MYScheme - XX12345678 - 2016"
+    )
 
   def buildFakeRequestWithSessionIdSAYE(method: String): FakeRequest[AnyContentAsEmpty.type] =
     FakeRequest().withSession(
-      ("sessionId"        -> "FAKE_SESSION_ID"),
-      ("screenSchemeInfo" -> "4 - SAYE - MYScheme - XX12345678 - 2016")
+      "sessionId"        -> "FAKE_SESSION_ID",
+      "screenSchemeInfo" -> "4 - SAYE - MYScheme - XX12345678 - 2016"
     )
 
-  def buildFakeRequestWithSessionIdSIP(method: String): FakeRequest[AnyContentAsEmpty.type]   =
+  def buildFakeRequestWithSessionIdSIP(method: String): FakeRequest[AnyContentAsEmpty.type] =
     FakeRequest()
-      .withSession(("sessionId" -> "FAKE_SESSION_ID"), ("screenSchemeInfo" -> "5 - SIP - MYScheme - XX12345678 - 2016"))
+      .withSession("sessionId" -> "FAKE_SESSION_ID", "screenSchemeInfo" -> "5 - SIP - MYScheme - XX12345678 - 2016")
 
-  def buildFakeRequestWithSessionIdEMI(method: String): FakeRequest[AnyContentAsEmpty.type]   =
+  def buildFakeRequestWithSessionIdEMI(method: String): FakeRequest[AnyContentAsEmpty.type] =
     FakeRequest()
-      .withSession(("sessionId" -> "FAKE_SESSION_ID"), ("screenSchemeInfo" -> "2 - EMI - MYScheme - XX12345678 - 2016"))
+      .withSession("sessionId" -> "FAKE_SESSION_ID", "screenSchemeInfo" -> "2 - EMI - MYScheme - XX12345678 - 2016")
 
   def buildFakeRequestWithSessionIdOTHER(method: String): FakeRequest[AnyContentAsEmpty.type] =
     FakeRequest().withSession(
-      ("sessionId"        -> "FAKE_SESSION_ID"),
-      ("screenSchemeInfo" -> "3 - OTHER - MYScheme - XX12345678 - 2016")
+      "sessionId"        -> "FAKE_SESSION_ID",
+      "screenSchemeInfo" -> "3 - OTHER - MYScheme - XX12345678 - 2016"
     )
 
   def buildFakeRequest(method: String) = FakeRequest()
@@ -91,7 +93,8 @@ object Fixtures extends AuthHelper {
     sapNumber = Some("sap-123456")
   )
 
-  val scheetName: String = "EMI40_Adjustments_V4"
+  val scheetName: String                    = "EMI40_Adjustments_V4"
+
   val data: Option[ListBuffer[Seq[String]]] = Some(
     ListBuffer(
       Seq(
@@ -179,6 +182,7 @@ object Fixtures extends AuthHelper {
   val groupScheme = GroupSchemeInfo(Some("1"), Some("emi"))
 
   val companiesList = CompanyDetailsList(List(companyDetails))
+
   val ersSummary    = ErsSummary(
     "testbundle",
     "1",
@@ -252,19 +256,24 @@ object Fixtures extends AuthHelper {
     Some("UK")
   )
 
-  val exampleTrustees: TrusteeDetailsList = TrusteeDetailsList(List(
-    TrusteeDetails(TrusteeName("John Bonson"), trusteeAddressUk),
-    TrusteeDetails(TrusteeName("Dave Daveson"), trusteeAddressOverseas)
-  ))
+  val exampleTrustees: TrusteeDetailsList = TrusteeDetailsList(
+    List(
+      TrusteeDetails(TrusteeName("John Bonson"), trusteeAddressUk),
+      TrusteeDetails(TrusteeName("Dave Daveson"), trusteeAddressOverseas)
+    )
+  )
 
-  val exampleCompanies: CompanyDetailsList = CompanyDetailsList(List(
-    CompanyDetails(Company("Company1", Some("AA123456"), Some("1234567890")), companyAddressUK),
+  val exampleCompanies: CompanyDetailsList = CompanyDetailsList(
+    List(
+      CompanyDetails(Company("Company1", Some("AA123456"), Some("1234567890")), companyAddressUK),
+      CompanyDetails(Company("Company2", Some("BB123456"), Some("0987654321")), companyAddressOverseas)
+    )
+  )
+
+  val exampleSchemeOrganiserUk: CompanyDetails =
+    CompanyDetails(Company("Company1", Some("AA123456"), Some("1234567890")), companyAddressUK)
+
+  val exampleSchemeOrganiserOverseas: CompanyDetails =
     CompanyDetails(Company("Company2", Some("BB123456"), Some("0987654321")), companyAddressOverseas)
-  ))
-
-  val exampleSchemeOrganiserUk: CompanyDetails = CompanyDetails(Company("Company1", Some("AA123456"), Some("1234567890")), companyAddressUK)
-
-  val exampleSchemeOrganiserOverseas: CompanyDetails =  CompanyDetails(Company("Company2", Some("BB123456"), Some("0987654321")), companyAddressOverseas)
-
 
 }

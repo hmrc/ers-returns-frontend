@@ -41,6 +41,7 @@ object UpscanCallback {
 
   implicit val uploadDetailsFormat: Format[UploadDetails] = Json.format[UploadDetails]
   implicit val errorDetailsFormat: Format[ErrorDetails]   = Json.format[ErrorDetails]
+
   implicit val formatURL: Format[URL]                     = new Format[URL] {
     override def reads(json: JsValue): JsResult[URL] = json match {
       case JsString(s) =>
@@ -65,6 +66,7 @@ object UpscanCallback {
       case JsDefined(value)              => JsError(s"Invalid type distriminator: $value")
       case JsUndefined()                 => JsError("Missing type distriminator")
     }
+
 }
 
 case class UploadDetails(uploadTimestamp: Instant, checksum: String, fileMimeType: String, fileName: String, size: Int)

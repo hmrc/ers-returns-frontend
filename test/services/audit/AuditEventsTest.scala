@@ -36,15 +36,11 @@ import java.time.Instant
 import scala.concurrent.Future
 
 class AuditEventsTest
-    extends AnyWordSpecLike
-    with Matchers
-    with OptionValues
-    with MockitoSugar
-    with ScalaFutures
-    with ErsTestHelper {
+    extends AnyWordSpecLike with Matchers with OptionValues with MockitoSugar with ScalaFutures with ErsTestHelper {
 
   val mockAuditConnector: DefaultAuditConnector             = mock[DefaultAuditConnector]
   implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
+
   val rsc                                                   = new ErsMetaData(
     new SchemeInfo(
       schemeRef = "testSchemeRef",
@@ -124,4 +120,5 @@ class AuditEventsTest
       expectedDataEvent.detail.take(2) shouldBe eventCaptor.getValue.asInstanceOf[DataEvent].detail.take(2)
     }
   }
+
 }

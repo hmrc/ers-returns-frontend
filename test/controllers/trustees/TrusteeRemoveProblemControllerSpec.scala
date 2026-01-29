@@ -28,7 +28,9 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status
 import play.api.i18n
 import play.api.i18n.{MessagesApi, MessagesImpl}
-import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents}
+import play.api.mvc.{
+  AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents
+}
 import play.api.test.Helpers.{contentAsString, defaultAwaitTimeout, status, stubBodyParser}
 import utils.Fixtures.ersRequestObject
 import utils.{ERSFakeApplicationConfig, ErsTestHelper, Fixtures}
@@ -36,13 +38,14 @@ import views.html.{global_error, trustee_remove_problem}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class TrusteeRemoveProblemControllerSpec extends AnyWordSpecLike
-  with Matchers
-  with OptionValues
-  with ERSFakeApplicationConfig
-  with ErsTestHelper
-  with GuiceOneAppPerSuite
-  with ScalaFutures {
+class TrusteeRemoveProblemControllerSpec
+    extends AnyWordSpecLike
+    with Matchers
+    with OptionValues
+    with ERSFakeApplicationConfig
+    with ErsTestHelper
+    with GuiceOneAppPerSuite
+    with ScalaFutures {
 
   implicit val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
     messagesActionBuilder,
@@ -66,7 +69,8 @@ class TrusteeRemoveProblemControllerSpec extends AnyWordSpecLike
   )(mockMCC.executionContext, mockAppConfig)
 
   "onPageLoad" should {
-    val authRequest: RequestWithOptionalAuthContext[AnyContent] = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdSIP("GET"))
+    val authRequest: RequestWithOptionalAuthContext[AnyContent] =
+      buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdSIP("GET"))
     setAuthMocks()
 
     "show trusteeRemoveProblemView" in {
@@ -82,7 +86,8 @@ class TrusteeRemoveProblemControllerSpec extends AnyWordSpecLike
     }
 
     "show getGlobalErrorPage if fetch failed" in {
-      when(mockSessionService.fetch[RequestObject](any())(any(), any())).thenReturn(Future.failed(new Exception("exception")))
+      when(mockSessionService.fetch[RequestObject](any())(any(), any()))
+        .thenReturn(Future.failed(new Exception("exception")))
 
       val result = testController.onPageLoad().apply(authRequest)
 
@@ -93,4 +98,5 @@ class TrusteeRemoveProblemControllerSpec extends AnyWordSpecLike
       contentAsString(result) should include(testMessages("ers.global_errors.message"))
     }
   }
+
 }

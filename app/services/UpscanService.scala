@@ -28,17 +28,17 @@ import javax.inject.Singleton
 import scala.concurrent.Future
 
 @Singleton
-class UpscanService @Inject()(applicationConfig: ApplicationConfig, upscanConnector: UpscanConnector) extends Logging {
+class UpscanService @Inject() (applicationConfig: ApplicationConfig, upscanConnector: UpscanConnector) extends Logging {
 
-  val isSecure: Boolean = applicationConfig.upscanProtocol == "https"
+  val isSecure: Boolean            = applicationConfig.upscanProtocol == "https"
   lazy val redirectUrlBase: String = applicationConfig.upscanRedirectBase
 
   private def urlToString(c: Call): String = redirectUrlBase + c.url
-  val uploadFileSizeLimit = applicationConfig.uploadFileSizeLimit
+  val uploadFileSizeLimit                  = applicationConfig.uploadFileSizeLimit
 
   def getUpscanFormDataCsv(uploadId: UploadId, schemeRef: String)(implicit
-                                                              hc: HeaderCarrier,
-                                                              request: RequestHeader
+    hc: HeaderCarrier,
+    request: RequestHeader
   ): Future[UpscanInitiateResponse] = {
     val callbackUrl = generateCallbackUrl(
       hc.sessionId,
@@ -57,22 +57,25 @@ class UpscanService @Inject()(applicationConfig: ApplicationConfig, upscanConnec
     upscanConnector.getUpscanFormData(upscanInitiateRequest)
   }
 
-  def getUpscanFormDataOds(schemeRef: String)(implicit hc: HeaderCarrier, request: RequestHeader): Future[UpscanInitiateResponse] = {
+  def getUpscanFormDataOds(
+    schemeRef: String
+  )(implicit hc: HeaderCarrier, request: RequestHeader): Future[UpscanInitiateResponse] = {
     val callbackUrl = generateCallbackUrl(
       hc.sessionId,
       sessionId => controllers.internal.routes.FileUploadCallbackController.callback(schemeRef, sessionId),
       isSecure
     )
 
-    val success = controllers.routes.FileUploadController.success()
-    val failure = controllers.routes.FileUploadController.failure()
-    val upscanInitiateRequest = UpscanInitiateRequest(callbackUrl, urlToString(success), urlToString(failure), 1, uploadFileSizeLimit)
+    val success               = controllers.routes.FileUploadController.success()
+    val failure               = controllers.routes.FileUploadController.failure()
+    val upscanInitiateRequest =
+      UpscanInitiateRequest(callbackUrl, urlToString(success), urlToString(failure), 1, uploadFileSizeLimit)
     upscanConnector.getUpscanFormData(upscanInitiateRequest)
   }
 
-  private def generateCallbackUrl(sessionIdOption: Option[SessionId],
-                                  routeFunction: String => Call,
-                                  isSecure: Boolean)(implicit request: RequestHeader): String = {
+  private def generateCallbackUrl(sessionIdOption: Option[SessionId], routeFunction: String => Call, isSecure: Boolean)(
+    implicit request: RequestHeader
+  ): String =
 
     sessionIdOption match {
       case Some(sessionId) =>
@@ -83,5 +86,5 @@ class UpscanService @Inject()(applicationConfig: ApplicationConfig, upscanConnec
         logger.error(errMsg)
         throw new IllegalStateException(errMsg)
     }
-  }
+
 }

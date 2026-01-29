@@ -33,7 +33,7 @@ class RequestObjectSpec extends AnyWordSpecLike with Matchers with GuiceOneAppPe
   implicit val messages: Messages = messagesApi.preferred(Seq(Lang.get("en").get))
 
   val englishMessages: Messages = messagesApi.preferred(Seq(Lang.get("en").get))
-  val welshMessages: Messages = messagesApi.preferred(Seq(Lang.get("cy").get))
+  val welshMessages: Messages   = messagesApi.preferred(Seq(Lang.get("cy").get))
 
   "RequestObject" should {
 
@@ -41,7 +41,7 @@ class RequestObjectSpec extends AnyWordSpecLike with Matchers with GuiceOneAppPe
 
       val expected =
         s"${messages(s"ers.scheme.${ersRequestObject.getSchemeType}")} - ${messages(s"ers.scheme.title", "Other")} - ${ersRequestObject.getSchemeReference} - ${DateUtils
-          .getFullTaxYear(ersRequestObject.getTaxYear)}"
+            .getFullTaxYear(ersRequestObject.getTaxYear)}"
 
       ersRequestObject.getPageTitle mustBe expected
     }
@@ -51,7 +51,7 @@ class RequestObjectSpec extends AnyWordSpecLike with Matchers with GuiceOneAppPe
 
       val expected =
         s"${messages(s"ers.scheme.${ersRequestObject.getSchemeType}")} - ${messages(s"ers.scheme.title", "Arall")} - ${ersRequestObject.getSchemeReference} - ${DateUtils
-          .getFullTaxYear(ersRequestObject.getTaxYear)}"
+            .getFullTaxYear(ersRequestObject.getTaxYear)}"
 
       ersRequestObject.getPageTitle mustBe expected
     }
@@ -71,7 +71,7 @@ class RequestObjectSpec extends AnyWordSpecLike with Matchers with GuiceOneAppPe
 
     "return an instance of SchemeInfo with the correct field" in {
 
-      val requestObject =
+      val requestObject       =
         RequestObject(
           None,
           Some("2016/17"),
@@ -84,13 +84,13 @@ class RequestObjectSpec extends AnyWordSpecLike with Matchers with GuiceOneAppPe
           None
         )
       val privateToSchemeInfo = PrivateMethod[SchemeInfo](Symbol("toSchemeInfo"))
-      val result = requestObject invokePrivate privateToSchemeInfo()
+      val result              = requestObject invokePrivate privateToSchemeInfo()
 
       result.schemeName mustBe "MyScheme"
-      result.schemeId mustBe "1"
+      result.schemeId   mustBe "1"
       result.schemeType mustBe "CSOP"
-      result.schemeRef mustBe "AA0000000000000"
-      result.taxYear mustBe "2016/17"
+      result.schemeRef  mustBe "AA0000000000000"
+      result.taxYear    mustBe "2016/17"
     }
 
     "return an instance of ErsMetaData with the correct field" in {
@@ -123,27 +123,27 @@ class RequestObjectSpec extends AnyWordSpecLike with Matchers with GuiceOneAppPe
       val result             = requestObject.toErsMetaData
       val resultTimestamp    = result.schemeInfo.timestamp
       val adjustedSchemeInfo = result.schemeInfo.copy(timestamp = null)
-      val diff: Int = resultTimestamp.compareTo(Instant.now)
+      val diff: Int          = resultTimestamp.compareTo(Instant.now)
 
-      diff must be < 100
+      diff                 must be < 100
       adjustedSchemeInfo mustBe expectedSchemeInfo
-      result.ipRef mustBe request.remoteAddress
-      result.aoRef mustBe None
-      result.empRef mustBe "empRef"
-      result.agentRef mustBe None
-      result.sapNumber mustBe None
+      result.ipRef       mustBe request.remoteAddress
+      result.aoRef       mustBe None
+      result.empRef      mustBe "empRef"
+      result.agentRef    mustBe None
+      result.sapNumber   mustBe None
     }
   }
 
   "RequestObject.startsWithVowel" should {
     "return true if the scheme starts with a vowel" in {
-      RequestObject.startsWithVowel("EMI") mustBe true
+      RequestObject.startsWithVowel("EMI")   mustBe true
       RequestObject.startsWithVowel("OTHER") mustBe true
     }
 
     "return false is the scheme starts with a consonant" in {
       RequestObject.startsWithVowel("CSOP") mustBe false
-      RequestObject.startsWithVowel("SIP") mustBe false
+      RequestObject.startsWithVowel("SIP")  mustBe false
     }
 
     "return false is the scheme is empty" in {
@@ -154,27 +154,28 @@ class RequestObjectSpec extends AnyWordSpecLike with Matchers with GuiceOneAppPe
   "RequestObject.getSchemeWithArticle" should {
     "prepend 'an' for schemes beginning with vowel when lang code is 'en'" in {
       implicit val messages: Messages = englishMessages
-      val result = RequestObject.getSchemeWithArticle("EMI")
+      val result                      = RequestObject.getSchemeWithArticle("EMI")
       result mustBe "an EMI"
     }
 
     "prepend 'a' for schemes beginning with consonant when lang code is 'en'" in {
       implicit val messages: Messages = englishMessages
-      val result = RequestObject.getSchemeWithArticle("CSOP")
+      val result                      = RequestObject.getSchemeWithArticle("CSOP")
       result mustBe "a CSOP"
     }
 
     "return 'ARALL' for scheme = 'OTHER' when lang code is 'cy'" in {
       implicit val messages: Messages = welshMessages
-      val result = RequestObject.getSchemeWithArticle("OTHER")
+      val result                      = RequestObject.getSchemeWithArticle("OTHER")
       result mustBe "ARALL"
     }
 
     "default to 'a <scheme>' for unknown lang codes" in {
-      val frenchMessages: Messages = messagesApi.preferred(Seq(Lang.get("fr").get))
+      val frenchMessages: Messages    = messagesApi.preferred(Seq(Lang.get("fr").get))
       implicit val messages: Messages = frenchMessages
-      val result = RequestObject.getSchemeWithArticle("CSOP")
+      val result                      = RequestObject.getSchemeWithArticle("CSOP")
       result mustBe "a CSOP"
     }
   }
+
 }

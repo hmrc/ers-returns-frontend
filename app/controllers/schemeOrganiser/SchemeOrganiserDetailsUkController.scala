@@ -33,17 +33,17 @@ import utils.{CountryCodes, ERSUtil}
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class SchemeOrganiserDetailsUkController @Inject()(val mcc: MessagesControllerComponents,
-                                                   val ersConnector: ErsConnector,
-                                                   val globalErrorView: views.html.global_error,
-                                                   val authAction: AuthAction,
-                                                   implicit val countryCodes: CountryCodes,
-                                                   implicit val ersUtil: ERSUtil,
-                                                   implicit val sessionService: FrontendSessionService,
-                                                   implicit val appConfig: ApplicationConfig,
-                                                   companyUKNameView: views.html.manual_company_details_uk
-                                                  )
-  extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with SchemeOrganiserBaseController[Company] {
+class SchemeOrganiserDetailsUkController @Inject() (
+  val mcc: MessagesControllerComponents,
+  val ersConnector: ErsConnector,
+  val globalErrorView: views.html.global_error,
+  val authAction: AuthAction,
+  implicit val countryCodes: CountryCodes,
+  implicit val ersUtil: ERSUtil,
+  implicit val sessionService: FrontendSessionService,
+  implicit val appConfig: ApplicationConfig,
+  companyUKNameView: views.html.manual_company_details_uk
+) extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with SchemeOrganiserBaseController[Company] {
 
   implicit val ec: ExecutionContext = mcc.executionContext
 
@@ -51,19 +51,22 @@ class SchemeOrganiserDetailsUkController @Inject()(val mcc: MessagesControllerCo
 
   implicit val format: Format[Company] = Company.format
 
-  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier, request: RequestHeader) = {
+  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier, request: RequestHeader) =
     if (edit) {
-      Future.successful(Redirect(controllers.schemeOrganiser.routes.SchemeOrganiserAddressUkController.editCompany(index)))
+      Future.successful(
+        Redirect(controllers.schemeOrganiser.routes.SchemeOrganiserAddressUkController.editCompany(index))
+      )
     } else {
       Future.successful(Redirect(controllers.schemeOrganiser.routes.SchemeOrganiserAddressUkController.questionPage()))
     }
-  }
 
-  def form(implicit request: Request[AnyContent]): Form[Company] = RsFormMappings.companyNameForm(isSchemeOrganiser = true)
+  def form(implicit request: Request[AnyContent]): Form[Company] =
+    RsFormMappings.companyNameForm(isSchemeOrganiser = true)
 
-  def view(requestObject: RequestObject, index: Int, companyNameUKForm: Form[Company], edit: Boolean = false)
-          (implicit request: Request[AnyContent], hc: HeaderCarrier): Html = {
+  def view(requestObject: RequestObject, index: Int, companyNameUKForm: Form[Company], edit: Boolean = false)(implicit
+    request: Request[AnyContent],
+    hc: HeaderCarrier
+  ): Html =
     companyUKNameView(requestObject, index, companyNameUKForm, edit, schemeOrganiser = true)
-  }
 
 }

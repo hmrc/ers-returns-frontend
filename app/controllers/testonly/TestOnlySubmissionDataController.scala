@@ -32,20 +32,22 @@ import scala.concurrent.{ExecutionContext, Future}
 
 // moved from SubmissionDataController as part of DDCE-2159
 @Singleton
-class TestOnlySubmissionDataController @Inject()(val mcc: MessagesControllerComponents,
-                                                 val ersConnector: ErsConnector,
-                                                 globalErrorView: views.html.global_error,
-                                                 authAction: AuthAction)
-                                                (implicit val ec: ExecutionContext,
-                                                 val ersUtil: ERSUtil,
-                                                 val appConfig: ApplicationConfig) extends FrontendController(mcc)
-  with I18nSupport with Logging {
+class TestOnlySubmissionDataController @Inject() (
+  val mcc: MessagesControllerComponents,
+  val ersConnector: ErsConnector,
+  globalErrorView: views.html.global_error,
+  authAction: AuthAction
+)(implicit val ec: ExecutionContext, val ersUtil: ERSUtil, val appConfig: ApplicationConfig)
+    extends FrontendController(mcc) with I18nSupport with Logging {
 
   def retrieveSubmissionData(): Action[AnyContent] = authAction.async { implicit request =>
     getRetrieveSubmissionData()
   }
 
-  def getRetrieveSubmissionData()(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
+  def getRetrieveSubmissionData()(implicit
+    request: RequestWithOptionalAuthContext[AnyContent],
+    hc: HeaderCarrier
+  ): Future[Result] = {
     logger.debug("Retrieve Submission Data Request")
 
     if (appConfig.enableRetrieveSubmissionData) {
@@ -58,7 +60,7 @@ class TestOnlySubmissionDataController @Inject()(val mcc: MessagesControllerComp
           .map { res =>
             res.status match {
               case OK => Ok(res.body)
-              case _ =>
+              case _  =>
                 logger.error(s"[SubmissionDataController][getRetrieveSubmissionData] retrieve status: ${res.status}")
                 getGlobalErrorPage()
             }
@@ -83,10 +85,10 @@ class TestOnlySubmissionDataController @Inject()(val mcc: MessagesControllerComp
         Some(
           Json.obj(
             "schemeRef" -> schemeRef,
-            "confTime" -> confTime
+            "confTime"  -> confTime
           )
         )
-      case _ => None
+      case _                                 => None
     }
 
   private def getGlobalErrorPage()(implicit request: RequestHeader, messages: Messages): Result =
@@ -108,4 +110,5 @@ class TestOnlySubmissionDataController @Inject()(val mcc: MessagesControllerComp
         )
       )
     )
+
 }

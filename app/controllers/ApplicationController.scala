@@ -30,23 +30,23 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class ApplicationController @Inject() (val mcc: MessagesControllerComponents,
-                                       unauthorisedView: views.html.unauthorised,
-                                       signedOutView: views.html.signedOut,
-                                       notAuthorisedView: views.html.not_authorised,
-                                       val sessionService: FrontendSessionService,
-                                       authAction: AuthActionGovGateway)
-                                      (implicit val ec: ExecutionContext,
-                                       val ersUtil: ERSUtil,
-                                       val appConfig: ApplicationConfig) extends FrontendController(mcc) with I18nSupport {
+class ApplicationController @Inject() (
+  val mcc: MessagesControllerComponents,
+  unauthorisedView: views.html.unauthorised,
+  signedOutView: views.html.signedOut,
+  notAuthorisedView: views.html.not_authorised,
+  val sessionService: FrontendSessionService,
+  authAction: AuthActionGovGateway
+)(implicit val ec: ExecutionContext, val ersUtil: ERSUtil, val appConfig: ApplicationConfig)
+    extends FrontendController(mcc) with I18nSupport {
 
   def unauthorised(): Action[AnyContent] = Action { implicit request =>
     Unauthorized(unauthorisedView())
   }
 
-  //TODO investigate why both of these are needed
+  // TODO investigate why both of these are needed
   def notAuthorised(): Action[AnyContent] = authAction.async { implicit request =>
-    //TODO the content of this page references ERS Checking - needs investigation
+    // TODO the content of this page references ERS Checking - needs investigation
     Future.successful(Unauthorized(notAuthorisedView.render(request, request2Messages, appConfig)))
   }
 
@@ -56,18 +56,21 @@ class ApplicationController @Inject() (val mcc: MessagesControllerComponents,
   }
 
   def keepAlive: Action[AnyContent] = Action.async { implicit request =>
-    sessionService.fetch[ErsMetaData](ersUtil.ERS_METADATA).flatMap {
-      case data: ErsMetaData =>
-        sessionService.cache(ersUtil.ERS_METADATA, data).map { _ =>
-          Ok("OK")
-        }
-      case _ =>
-        logger.warn("[ApplicationController][keepAlive] No session data found for ERS_METADATA in keepAlive")
-        Future.failed(new Exception("no Session"))
-    }.recover {
-      case ex =>
+    sessionService
+      .fetch[ErsMetaData](ersUtil.ERS_METADATA)
+      .flatMap {
+        case data: ErsMetaData =>
+          sessionService.cache(ersUtil.ERS_METADATA, data).map { _ =>
+            Ok("OK")
+          }
+        case _                 =>
+          logger.warn("[ApplicationController][keepAlive] No session data found for ERS_METADATA in keepAlive")
+          Future.failed(new Exception("no Session"))
+      }
+      .recover { case ex =>
         logger.error("[ApplicationController][keepAlive] Unexpected error in keepAlive", ex)
         InternalServerError("Unexpected error (test)")
-    }
+      }
   }
+
 }

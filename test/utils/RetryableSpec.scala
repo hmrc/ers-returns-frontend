@@ -44,9 +44,11 @@ class RetryableSpec
 
     implicit lazy val actorSystem: ActorSystem = app.actorSystem
     override val appConfig: ApplicationConfig  = mockAppConfig
+
     trait RetryTestUtil {
       def f: Future[Boolean]
     }
+
     val retryMock: RetryTestUtil               = mock[RetryTestUtil]
   }
 
@@ -92,4 +94,5 @@ class RetryableSpec
       verify(retryMock, times(1)).f
     }
   }
+
 }

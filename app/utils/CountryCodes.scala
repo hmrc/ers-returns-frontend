@@ -37,14 +37,13 @@ trait CountryCodes extends Logging {
 
   val jsonInputStream: Option[InputStream] = environment.resourceAsStream("country-codes.json")
 
-  private val json: JsValue = {
+  private val json: JsValue =
     jsonInputStream match {
       case Some(inputStream) => Json.parse(Source.fromInputStream(inputStream, "UTF-8").mkString)
       case _                 =>
         logger.error(s"Country codes file not found, timestamp: ${System.currentTimeMillis()}.")
         throw new Exception
     }
-  }
 
   val countries: String =
     Json.toJson(json.\\("country").toList.map(x => x.toString().replaceAll("\"", ""))).toString()
@@ -61,4 +60,5 @@ trait CountryCodes extends Logging {
 
   def getCountry(countryCode: String): Option[String] =
     countryCodesMap.get(countryCode)
+
 }

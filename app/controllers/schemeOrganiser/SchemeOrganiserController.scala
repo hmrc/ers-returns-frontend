@@ -31,54 +31,51 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class SchemeOrganiserController @Inject()(
-                                           val mcc: MessagesControllerComponents,
-                                           implicit val countryCodes: CountryCodes,
-                                           implicit val ersUtil: ERSUtil,
-                                           implicit val sessionService: FrontendSessionService,
-                                           implicit val appConfig: ApplicationConfig,
-                                           globalErrorView: views.html.global_error,
-                                           schemeOrganiserSummaryView: views.html.scheme_organiser_summary,
-                                           authAction: AuthAction
-                                         ) extends FrontendController(mcc)
-  with I18nSupport
-  with WithUnsafeDefaultFormBinding
-  with Logging {
+class SchemeOrganiserController @Inject() (
+  val mcc: MessagesControllerComponents,
+  implicit val countryCodes: CountryCodes,
+  implicit val ersUtil: ERSUtil,
+  implicit val sessionService: FrontendSessionService,
+  implicit val appConfig: ApplicationConfig,
+  globalErrorView: views.html.global_error,
+  schemeOrganiserSummaryView: views.html.scheme_organiser_summary,
+  authAction: AuthAction
+) extends FrontendController(mcc) with I18nSupport with WithUnsafeDefaultFormBinding with Logging {
 
   implicit val ec: ExecutionContext = mcc.executionContext
 
-  def schemeOrganiserSummaryPage: Action[AnyContent] = authAction.async {
-    implicit request =>
-      sessionService.fetch[ErsMetaData](ersUtil.ERS_METADATA).map { ele =>
-        logger.info(s"[SchemeOrganiserController][schemeOrganiserSummaryPage] Fetched request object with SAP Number: ${ele.sapNumber} " +
-        s"and schemeRef: ${ele.schemeInfo.schemeRef}")
-      }
-      showSchemeOrganiserSummaryPage(request)
+  def schemeOrganiserSummaryPage: Action[AnyContent] = authAction.async { implicit request =>
+    sessionService.fetch[ErsMetaData](ersUtil.ERS_METADATA).map { ele =>
+      logger.info(
+        s"[SchemeOrganiserController][schemeOrganiserSummaryPage] Fetched request object with SAP Number: ${ele.sapNumber} " +
+          s"and schemeRef: ${ele.schemeInfo.schemeRef}"
+      )
+    }
+    showSchemeOrganiserSummaryPage(request)
   }
 
-  def showSchemeOrganiserSummaryPage(implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] = {
+  def showSchemeOrganiserSummaryPage(implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
     (for {
-      requestObject <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
+      requestObject  <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
       companyDetails <- sessionService.fetchSchemeOrganiserOptionally()
     } yield
       if (companyDetails.isDefined) {
         Ok(schemeOrganiserSummaryView(requestObject, companyDetails.get))
       } else {
         Redirect(controllers.schemeOrganiser.routes.SchemeOrganiserBasedInUkController.questionPage())
-      }) recover {
-      case e: Exception =>
-        logger.error(s"[SchemeOrganiserController][showSchemeOrganiserSummaryPage] Get data from cache failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
-        getGlobalErrorPage
+      }) recover { case e: Exception =>
+      logger.error(
+        s"[SchemeOrganiserController][showSchemeOrganiserSummaryPage] Get data from cache failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}."
+      )
+      getGlobalErrorPage
     }
-  }
 
   def companySummaryContinue(): Action[AnyContent] = authAction.async {
     continueFromCompanySummaryPage()()
   }
 
-  def continueFromCompanySummaryPage()(): Future[Result] = {
+  def continueFromCompanySummaryPage()(): Future[Result] =
     Future(Redirect(controllers.subsidiaries.routes.GroupSchemeController.groupSchemePage()))
-  }
 
   def getGlobalErrorPage(implicit request: RequestHeader, messages: Messages): Result =
     Ok(
@@ -88,4 +85,5 @@ class SchemeOrganiserController @Inject()(
         "ers.global_errors.message"
       )(request, messages, appConfig)
     )
+
 }

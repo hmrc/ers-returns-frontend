@@ -22,7 +22,7 @@ import utils.{CountryCodes, ERSUtil}
 
 import javax.inject.Inject
 
-class DecoratorController @Inject()(val decorators: Array[Decorator])(implicit ERSUtil: ERSUtil) {
+class DecoratorController @Inject() (val decorators: Array[Decorator])(implicit ERSUtil: ERSUtil) {
 
   def addDecorator(decorator: Decorator): DecoratorController = new DecoratorController(decorators :+ decorator)
 

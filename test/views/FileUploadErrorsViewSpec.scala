@@ -29,16 +29,16 @@ class FileUploadErrorsViewSpec extends ViewSpecBase with FileUploadFixtures with
 
   private val view = app.injector.instanceOf[file_upload_errors]
 
-  implicit val ersUtil: ERSUtil = app.injector.instanceOf[ERSUtil]
-  implicit val appConfig: ApplicationConfig = app.injector.instanceOf[ApplicationConfig]
+  implicit val ersUtil: ERSUtil                             = app.injector.instanceOf[ERSUtil]
+  implicit val appConfig: ApplicationConfig                 = app.injector.instanceOf[ApplicationConfig]
   implicit val request: FakeRequest[AnyContentAsEmpty.type] = fakeRequest
-  implicit val messages: Messages = testMessages
+  implicit val messages: Messages                           = testMessages
 
   "file_upload_errors_ods view" should {
 
     "show expected elements when an invalid file is uploaded" in {
       val odsRequestObject = testRequestObject.copy(schemeType = Some("CSOP"))
-      val doc = asDocument(view(odsRequestObject, "ODS"))
+      val doc              = asDocument(view(odsRequestObject, "ODS"))
 
       hasExpectedContent(
         doc,
@@ -52,18 +52,29 @@ class FileUploadErrorsViewSpec extends ViewSpecBase with FileUploadFixtures with
 
   }
 
-  private def hasExpectedContent(doc: Document,
-                                 firstParagraph: String,
-                                 secondParagraph: String,
-                                 firstBullet: String,
-                                 secondBullet: String,
-                                 schemeRef: String): Unit = {
+  private def hasExpectedContent(
+    doc: Document,
+    firstParagraph: String,
+    secondParagraph: String,
+    firstBullet: String,
+    secondBullet: String,
+    schemeRef: String
+  ): Unit = {
     doc.getElementsByClass("govuk-body").get(1).text() mustBe firstParagraph
     doc.getElementsByClass("govuk-body").get(2).text() mustBe secondParagraph
-    doc.getElementsByClass("govuk-list govuk-list--bullet").get(0).getElementsByTag("li").get(0).text() mustBe firstBullet
-    doc.getElementsByClass("govuk-list govuk-list--bullet").get(0).getElementsByTag("li").get(1).text() mustBe secondBullet
-    doc.getElementById("scheme-reference").text() mustBe schemeRef
+    doc
+      .getElementsByClass("govuk-list govuk-list--bullet")
+      .get(0)
+      .getElementsByTag("li")
+      .get(0)
+      .text()                                          mustBe firstBullet
+    doc
+      .getElementsByClass("govuk-list govuk-list--bullet")
+      .get(0)
+      .getElementsByTag("li")
+      .get(1)
+      .text()                                          mustBe secondBullet
+    doc.getElementById("scheme-reference").text()      mustBe schemeRef
   }
 
 }
-

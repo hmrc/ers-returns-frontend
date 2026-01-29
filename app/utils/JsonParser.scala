@@ -19,6 +19,7 @@ package utils
 import play.api.libs.json.{JsArray, JsValue, Json}
 
 trait JsonParser {
+
   def getSubmissionJson(schemeRef: String, schemeType: String, taxYear: String, submissionType: String): JsValue = {
     val jsonString: String = "{\"ERSSubmission\" : {" +
       "\"acknowledgementReference\": \"" + ContentUtil.getAcknowledgementRef + "\", " +
@@ -30,13 +31,17 @@ trait JsonParser {
       "}}"
     Json.parse(jsonString)
   }
+
 }
 
 object JsonUtils {
+
   implicit class RichJsArray(array: JsArray) {
-    def applyOption(index: Int): Option[JsValue] = {
+
+    def applyOption(index: Int): Option[JsValue] =
       if (index >= 0 && index < array.value.size) Some(array.value(index))
       else None
-    }
+
   }
+
 }

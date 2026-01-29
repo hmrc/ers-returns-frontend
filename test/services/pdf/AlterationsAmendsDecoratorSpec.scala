@@ -24,7 +24,9 @@ import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.i18n.{Messages, MessagesApi}
-import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents}
+import play.api.mvc.{
+  AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents
+}
 import play.api.test.Helpers.stubBodyParser
 import utils.{ERSFakeApplicationConfig, ErsTestHelper}
 
@@ -91,4 +93,5 @@ class AlterationsAmendsDecoratorSpec
       output.contains(Messages("ers_alt_amends.csop.option_5"))          shouldBe true
     }
   }
+
 }

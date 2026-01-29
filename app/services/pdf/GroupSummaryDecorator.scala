@@ -27,4 +27,5 @@ class GroupSummaryDecorator(headingTitle: String, companiesList: Option[CompanyD
     } else {
       ""
     }
+
 }

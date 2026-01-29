@@ -22,27 +22,27 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import javax.inject.Inject
 
-case class FileSizeUtils @Inject()(val auditEvents: AuditEvents) extends Logging {
+case class FileSizeUtils @Inject() (val auditEvents: AuditEvents) extends Logging {
 
   def logFileSize(schemeRef: String, fileSize: Int)(implicit hc: HeaderCarrier): Unit = {
     auditEvents.auditFileSize(schemeRef, fileSize.toString)
-    logger.info(s"[FileSizeUtils][logFileSize]: schemeRef: ${schemeRef}, size: ${mapFileSizeToString(fileSize)}")
+    logger.info(s"[FileSizeUtils][logFileSize]: schemeRef: $schemeRef, size: ${mapFileSizeToString(fileSize)}")
   }
 
   def mapFileSizeToString(fileSize: Int): String = {
     val numberBytesInUnit = 1024.0
     fileSize match {
-      case size: Int if size < numberBytesInUnit =>
+      case size: Int if size < numberBytesInUnit                                                            =>
         f"$size%.2f bytes"
-      case size: Int if (Math.pow(numberBytesInUnit, 2.0) > size && size >= numberBytesInUnit) =>
+      case size: Int if Math.pow(numberBytesInUnit, 2.0) > size && size >= numberBytesInUnit                =>
         val fileSizeInKb = size / numberBytesInUnit
-        f"${fileSizeInKb}%.2f KB (${fileSize} bytes)"
-      case size: Int if (Math.pow(numberBytesInUnit, 3.0) > size && size >= Math.pow(numberBytesInUnit, 2.0)) =>
+        f"$fileSizeInKb%.2f KB ($fileSize bytes)"
+      case size: Int if Math.pow(numberBytesInUnit, 3.0) > size && size >= Math.pow(numberBytesInUnit, 2.0) =>
         val fileSizeInMb = size / Math.pow(numberBytesInUnit, 2.0)
-        f"${fileSizeInMb}%.2f MB (${fileSize} bytes)"
-      case size: Int if size >= Math.pow(numberBytesInUnit, 3.0) =>
+        f"$fileSizeInMb%.2f MB ($fileSize bytes)"
+      case size: Int if size >= Math.pow(numberBytesInUnit, 3.0)                                            =>
         val fileSizeInMb = size / Math.pow(numberBytesInUnit, 3.0)
-        f"${fileSizeInMb}%.2f GB (${fileSize} bytes)"
+        f"$fileSizeInMb%.2f GB ($fileSize bytes)"
     }
   }
 

@@ -27,19 +27,23 @@ case class UpscanInitiateResponse(
 case class Reference(value: String) extends AnyVal
 
 case class UploadForm(href: String, fields: Map[String, String])
+
 object Reference {
   implicit val referenceReader: Reads[Reference]  = Reads.StringReads.map(Reference(_))
   implicit val referenceWrites: Writes[Reference] = Writes[Reference](x => JsString(x.value))
 }
 
 case class PreparedUpload(reference: Reference, uploadRequest: UploadForm) {
+
   def toUpscanInitiateResponse: UpscanInitiateResponse = {
     val fileReference = reference
     val postTarget    = uploadRequest.href
     val formFields    = uploadRequest.fields
     UpscanInitiateResponse(fileReference, postTarget, formFields)
   }
+
 }
+
 object PreparedUpload {
   implicit val uploadFormFormat: Format[UploadForm] = Json.format[UploadForm]
   implicit val format: Format[PreparedUpload]       = Json.format[PreparedUpload]

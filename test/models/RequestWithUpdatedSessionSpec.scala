@@ -29,21 +29,22 @@ class RequestWithUpdatedSessionSpec extends AnyWordSpec with Matchers {
       .withSession("originalSessionKey" -> "originalValue")
 
     val updatedSessionId = "newSessionId"
-    val updatedRequest = RequestWithUpdatedSession(originalRequest, updatedSessionId)
+    val updatedRequest   = RequestWithUpdatedSession(originalRequest, updatedSessionId)
 
     "update the session with new sessionId" in {
-      updatedRequest.session.get("sessionId") shouldBe Some(updatedSessionId)
+      updatedRequest.session.get("sessionId")          shouldBe Some(updatedSessionId)
       updatedRequest.session.get("originalSessionKey") shouldBe Some("originalValue")
     }
 
     "inherit properties from the original request" in {
-      updatedRequest.body shouldBe originalRequest.body
+      updatedRequest.body       shouldBe originalRequest.body
       updatedRequest.connection shouldBe originalRequest.connection
-      updatedRequest.method shouldBe originalRequest.method
-      updatedRequest.uri shouldBe originalRequest.uri
-      updatedRequest.version shouldBe originalRequest.version
-      updatedRequest.headers shouldBe originalRequest.headers
-      updatedRequest.attrs shouldBe originalRequest.attrs
+      updatedRequest.method     shouldBe originalRequest.method
+      updatedRequest.uri        shouldBe originalRequest.uri
+      updatedRequest.version    shouldBe originalRequest.version
+      updatedRequest.headers    shouldBe originalRequest.headers
+      updatedRequest.attrs      shouldBe originalRequest.attrs
     }
   }
+
 }

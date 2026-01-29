@@ -31,8 +31,7 @@ import scala.io.Source
 
 @Singleton
 class ErsReceiptPdfBuilderService @Inject() (val countryCodes: CountryCodes)(implicit val ERSUtil: ERSUtil)
-    extends PdfDecoratorControllerFactory
-    with Logging {
+    extends PdfDecoratorControllerFactory with Logging {
 
   XRLog.listRegisteredLoggers.forEach((logger: String) => XRLog.setLevel(logger, java.util.logging.Level.WARNING))
 
@@ -74,9 +73,9 @@ class ErsReceiptPdfBuilderService @Inject() (val countryCodes: CountryCodes)(imp
        |<h1 style="padding-top: 3em;">${messages("ers.pdf.title")}</h1>
        |
        |<p style="padding-bottom: 1em; font-size: 14pt;">${messages(
-        "ers.pdf.confirmation.submitted",
-        ContentUtil.getSchemeAbbreviation(ersSummary.metaData.schemeInfo.schemeType)
-      )}</p>
+          "ers.pdf.confirmation.submitted",
+          ContentUtil.getSchemeAbbreviation(ersSummary.metaData.schemeInfo.schemeType)
+        )}</p>
        |<div style="display: block;">
        |
        |<h2 style="margin-bottom: 0em;">${messages("ers.pdf.scheme")}</h2>
@@ -110,8 +109,8 @@ class ErsReceiptPdfBuilderService @Inject() (val countryCodes: CountryCodes)(imp
     val startHtml   = s"""<div style="padding-bottom: 0.3em; margin-top: -1em;">"""
     val endHtml     =
       s"""<p style="padding-left: 0.5em; display: inline-block; font-size: 16pt; vertical-align: middle;">${messages(
-        "ers.pdf.header"
-      )}</p>
+          "ers.pdf.header"
+        )}</p>
             </div><hr/>"""
     val headingHtml = startHtml ++ crownIcon.getLines().mkString ++ endHtml
     crownIcon.close()

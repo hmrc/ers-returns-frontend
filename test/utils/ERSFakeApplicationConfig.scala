@@ -17,6 +17,7 @@
 package utils
 
 trait ERSFakeApplicationConfig {
+
   val config: Map[String, Any] = Map(
     "play.crypto.secret"                            -> "test",
     "govuk-tax.Test.login-callback.url"             -> "test",
@@ -33,4 +34,5 @@ trait ERSFakeApplicationConfig {
     "microservice.metrics.graphite.enabled"         -> false,
     "microservice.services.upscan.redirect-base"    -> "http://localhost:9000"
   )
+
 }

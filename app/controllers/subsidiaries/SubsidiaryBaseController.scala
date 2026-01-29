@@ -26,44 +26,50 @@ import scala.concurrent.Future
 
 trait SubsidiaryBaseController[A] extends SchemeOrganiserBaseController[A] {
 
- override def submissionHandler(requestObject: RequestObject, index: Int, edit: Boolean = false)
-                       (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
-    form.bindFromRequest().fold(
-      errors => {
-        Future.successful(BadRequest(view(requestObject, index, errors, edit)))
-      },
-      result => {
-        if (edit) {
-          sessionService.fetchCompaniesOptionally().flatMap { companies =>
-            val updatedCompany = companies.companies(index).updatePart(result)
-            val updatedCompanies = CompanyDetailsList(companies.companies.updated(index, updatedCompany))
-            sessionService.cache[CompanyDetailsList](sessionService.SUBSIDIARY_COMPANIES_CACHE, updatedCompanies).flatMap{ _ =>
+  override def submissionHandler(requestObject: RequestObject, index: Int, edit: Boolean = false)(implicit
+    request: RequestWithOptionalAuthContext[AnyContent],
+    hc: HeaderCarrier
+  ): Future[Result] =
+    form
+      .bindFromRequest()
+      .fold(
+        errors => Future.successful(BadRequest(view(requestObject, index, errors, edit))),
+        result =>
+          if (edit) {
+            sessionService.fetchCompaniesOptionally().flatMap { companies =>
+              val updatedCompany   = companies.companies(index).updatePart(result)
+              val updatedCompanies = CompanyDetailsList(companies.companies.updated(index, updatedCompany))
+              sessionService
+                .cache[CompanyDetailsList](sessionService.SUBSIDIARY_COMPANIES_CACHE, updatedCompanies)
+                .flatMap { _ =>
+                  nextPageRedirect(index, edit)
+                }
+            }
+          } else {
+            sessionService.cache[A](cacheKey, result).flatMap { _ =>
               nextPageRedirect(index, edit)
             }
           }
-        } else {
-          sessionService.cache[A](cacheKey, result).flatMap { _ =>
-            nextPageRedirect(index, edit)
-          }
-        }
-      }
-    ).recover {
-      case e: Exception =>
-        logger.error(s"[${this.getClass.getSimpleName}][submissionHandler] Error occurred while updating company cache: ${e.getMessage}")
+      )
+      .recover { case e: Exception =>
+        logger.error(
+          s"[${this.getClass.getSimpleName}][submissionHandler] Error occurred while updating company cache: ${e.getMessage}"
+        )
         getGlobalErrorPage
-    }
-  }
+      }
 
-  override def showQuestionPage(requestObject: RequestObject, index: Int, edit: Boolean = false)
-                               (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
+  override def showQuestionPage(requestObject: RequestObject, index: Int, edit: Boolean = false)(implicit
+    request: RequestWithOptionalAuthContext[AnyContent],
+    hc: HeaderCarrier
+  ): Future[Result] =
     sessionService.fetchPartFromCompanyDetailsList[A](index).map { previousAnswer: Option[A] =>
       val preparedForm = previousAnswer.fold(form)(form.fill(_))
       Ok(view(requestObject, index, preparedForm, edit))
-    } recover {
-      case e: Exception =>
-        logger.error(s"[${this.getClass.getSimpleName}][showQuestionPage] Get data from cache failed with exception ${e.getMessage}")
-        getGlobalErrorPage
+    } recover { case e: Exception =>
+      logger.error(
+        s"[${this.getClass.getSimpleName}][showQuestionPage] Get data from cache failed with exception ${e.getMessage}"
+      )
+      getGlobalErrorPage
     }
-  }
 
 }

@@ -29,7 +29,9 @@ import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.i18n.{MessagesApi, MessagesImpl}
 import play.api.libs.json._
-import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents}
+import play.api.mvc.{
+  AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents
+}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.api.{Environment, i18n}
@@ -65,11 +67,11 @@ class CsvFileUploadCallbackControllerSpec
   implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
 
   implicit lazy val materializer: Materializer = app.materializer
-  lazy val environment: Environment = app.injector.instanceOf[Environment]
+  lazy val environment: Environment            = app.injector.instanceOf[Environment]
 
   def request(body: JsValue): FakeRequest[JsValue] = FakeRequest().withBody(body)
-  val scRef = "scRef"
-  val url: URL = new URL("http://localhost:9000/myUrl")
+  val scRef                                        = "scRef"
+  val url: URL                                     = new URL("http://localhost:9000/myUrl")
 
   lazy val csvFileUploadCallbackController: CsvFileUploadCallbackController =
     new CsvFileUploadCallbackController(mockMCC, mockErsConnector, mockSessionService, fileSizeUtils) {
@@ -88,23 +90,30 @@ class CsvFileUploadCallbackControllerSpec
     "update upload status to Uploaded Successfully" when {
       "callback is UpscanReadyCallback" in {
         val callbackCaptor = ArgumentCaptor.forClass(classOf[UploadStatus])
-        val body = UpscanReadyCallback(Reference("Reference"), url, UploadDetails(Instant.now(), "checkSum", "fileMimeType", "fileName", 100))
-        val jsonBody = Json.toJson(body)
+        val body           = UpscanReadyCallback(
+          Reference("Reference"),
+          url,
+          UploadDetails(Instant.now(), "checkSum", "fileMimeType", "fileName", 100)
+        )
+        val jsonBody       = Json.toJson(body)
         when(mockSessionService.cache(meq(s"check-csv-files-${uploadId.value}"), callbackCaptor.capture)(any(), any()))
           .thenReturn(Future.successful(sessionPair))
-        val result = csvFileUploadCallbackController.callback(uploadId, scRef, sessionId)(request(jsonBody))
-        status(result) shouldBe OK
+        val result         = csvFileUploadCallbackController.callback(uploadId, scRef, sessionId)(request(jsonBody))
+        status(result)                                             shouldBe OK
         callbackCaptor.getValue.isInstanceOf[UploadedSuccessfully] shouldBe true
         verify(mockSessionService, times(1))
-          .cache(meq(s"check-csv-files-${uploadId.value}"), meq(callbackCaptor.getValue.asInstanceOf[UploadedSuccessfully]))(any(), any())
+          .cache(
+            meq(s"check-csv-files-${uploadId.value}"),
+            meq(callbackCaptor.getValue.asInstanceOf[UploadedSuccessfully])
+          )(any(), any())
       }
     }
 
     "update upload status to Failed" when {
       "callback is UpscanFailedCallback and upload is InProgress" in {
         val callbackCaptor = ArgumentCaptor.forClass(classOf[UploadStatus])
-        val body = UpscanFailedCallback(Reference("ref"), ErrorDetails("failed", "message"))
-        val jsonBody = Json.toJson(body)
+        val body           = UpscanFailedCallback(Reference("ref"), ErrorDetails("failed", "message"))
+        val jsonBody       = Json.toJson(body)
         when(mockSessionService.cache(meq(s"check-csv-files-${uploadId.value}"), callbackCaptor.capture)(any(), any()))
           .thenReturn(Future.successful(sessionPair))
         val result         = csvFileUploadCallbackController.callback(uploadId, scRef, sessionId)(request(jsonBody))
@@ -117,7 +126,7 @@ class CsvFileUploadCallbackControllerSpec
 
     "return InternalServerError" when {
       "updating the cache fails" in {
-        val body = UpscanFailedCallback(Reference("ref"), ErrorDetails("failed", "message"))
+        val body     = UpscanFailedCallback(Reference("ref"), ErrorDetails("failed", "message"))
         val jsonBody = Json.toJson(body)
         when(mockSessionService.cache(meq(s"check-csv-files-${uploadId.value}"), any[UploadStatus])(any(), any()))
           .thenReturn(Future.failed(new Exception("Test exception")))
@@ -126,7 +135,7 @@ class CsvFileUploadCallbackControllerSpec
         status(result) shouldBe INTERNAL_SERVER_ERROR
 
         verify(mockSessionService, times(1))
-          .cache(meq(s"check-csv-files-${uploadId.value}"), any[UploadStatus])(any(),any())
+          .cache(meq(s"check-csv-files-${uploadId.value}"), any[UploadStatus])(any(), any())
       }
 
       "callback data is not in the correct format" in {
@@ -138,4 +147,5 @@ class CsvFileUploadCallbackControllerSpec
       }
     }
   }
+
 }

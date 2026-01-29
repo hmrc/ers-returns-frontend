@@ -28,19 +28,20 @@ import java.time.temporal.ChronoUnit
 object DateUtils extends Logging {
 
   def getCurrentDateTime: String = {
-    val instant: Instant = Instant.now().truncatedTo(ChronoUnit.SECONDS)
+    val instant: Instant             = Instant.now().truncatedTo(ChronoUnit.SECONDS)
     val formatter: DateTimeFormatter = DateTimeFormatter.ISO_INSTANT
     formatter.format(instant)
   }
 
   def convertDate(date: String)(implicit messages: Messages): String = {
-    val locale: ULocale = new ULocale(messages.lang.code)
+    val locale: ULocale           = new ULocale(messages.lang.code)
     val timeOut: SimpleDateFormat = new SimpleDateFormat("h:mma", locale)
-    val dateOut = new SimpleDateFormat("E d MMMM yyyy", locale)
-    val dateFrm = new SimpleDateFormat("d MMMM yyyy, h:mma").parse(date)
+    val dateOut                   = new SimpleDateFormat("E d MMMM yyyy", locale)
+    val dateFrm                   = new SimpleDateFormat("d MMMM yyyy, h:mma").parse(date)
     s"${timeOut.format(dateFrm)} ${messages("ers-confirmation.submission_on")} ${dateOut.format(dateFrm)}"
   }
 
   def getFullTaxYear(taxYear: String)(implicit messages: Messages): String =
     s"${taxYear.take(4)} ${messages("ers.taxYear.text")} ${taxYear.take(2)}${taxYear.takeRight(2)}"
+
 }

@@ -111,4 +111,5 @@ trait PdfDecoratorControllerFactory extends PageBuilder {
     }
     map.toMap
   }
+
 }

@@ -29,15 +29,12 @@ import uk.gov.hmrc.play.audit.model.DataEvent
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class FileSizeUtilsSpec
-  extends AnyWordSpecLike
-  with Matchers
-  with MockitoSugar {
+class FileSizeUtilsSpec extends AnyWordSpecLike with Matchers with MockitoSugar {
 
   val mockAuditConnector: DefaultAuditConnector = mock[DefaultAuditConnector]
-  val mockAuditEvents: AuditEvents = new AuditEvents(mockAuditConnector)
-  implicit val hc: HeaderCarrier = HeaderCarrier()
-  val fileSizeUtils: FileSizeUtils = new FileSizeUtils(mockAuditEvents)
+  val mockAuditEvents: AuditEvents              = new AuditEvents(mockAuditConnector)
+  implicit val hc: HeaderCarrier                = HeaderCarrier()
+  val fileSizeUtils: FileSizeUtils              = new FileSizeUtils(mockAuditEvents)
 
   "logFileSize" should {
     "audit the file size with the scheme ref" in {
@@ -45,8 +42,8 @@ class FileSizeUtilsSpec
       val eventCaptor = ArgumentCaptor.forClass(classOf[DataEvent])
       verify(mockAuditConnector, times(1)).sendEvent(eventCaptor.capture())(any(), any())
       eventCaptor.getValue.asInstanceOf[DataEvent].auditSource shouldBe "ers-returns-frontend"
-      eventCaptor.getValue.asInstanceOf[DataEvent].auditType shouldBe "UploadFileSizeFromUpscanCallback"
-      eventCaptor.getValue.asInstanceOf[DataEvent].detail shouldBe Map("schemeRef" -> "1234", "fileSize" -> "100")
+      eventCaptor.getValue.asInstanceOf[DataEvent].auditType   shouldBe "UploadFileSizeFromUpscanCallback"
+      eventCaptor.getValue.asInstanceOf[DataEvent].detail      shouldBe Map("schemeRef" -> "1234", "fileSize" -> "100")
     }
   }
 
@@ -68,11 +65,11 @@ class FileSizeUtilsSpec
       (1181116006, "1.10 GB (1181116006 bytes)")
     )
 
-    fileSizeInBytesAndExpectedString.foreach {
-      fileSizeAndExpectedString: (Int, String) =>
-        s"return the expected string: ${fileSizeAndExpectedString._2} when parsed a file size of: ${fileSizeAndExpectedString._1}" in {
-          fileSizeUtils.mapFileSizeToString(fileSizeAndExpectedString._1) shouldBe fileSizeAndExpectedString._2
-        }
+    fileSizeInBytesAndExpectedString.foreach { fileSizeAndExpectedString: (Int, String) =>
+      s"return the expected string: ${fileSizeAndExpectedString._2} when parsed a file size of: ${fileSizeAndExpectedString._1}" in {
+        fileSizeUtils.mapFileSizeToString(fileSizeAndExpectedString._1) shouldBe fileSizeAndExpectedString._2
+      }
     }
   }
+
 }

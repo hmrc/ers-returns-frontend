@@ -34,7 +34,7 @@ import utils.WireMockHelper
 import scala.concurrent.duration.SECONDS
 
 class UpscanConnectorSpec
-  extends AnyWordSpecLike
+    extends AnyWordSpecLike
     with Matchers
     with OptionValues
     with GuiceOneAppPerSuite
@@ -43,8 +43,10 @@ class UpscanConnectorSpec
 
   lazy val connector: UpscanConnector         = app.injector.instanceOf[UpscanConnector]
   implicit val hc: HeaderCarrier              = HeaderCarrier()
+
   val request: UpscanInitiateRequest          =
     UpscanInitiateRequest("callbackUrl", "successRedirectUrl", "errorRedirectUrl", 1, 209715200)
+
   override def fakeApplication(): Application = new GuiceApplicationBuilder()
     .configure(
       "microservice.services.upscan.port" -> server.port()
@@ -100,4 +102,5 @@ class UpscanConnectorSpec
       }
     }
   }
+
 }

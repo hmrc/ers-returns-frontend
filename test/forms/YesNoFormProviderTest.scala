@@ -24,33 +24,33 @@ class YesNoFormProviderTest extends PlaySpec {
   val testFormProvider = new YesNoFormProvider
 
   "stringFormatter" must {
-    val errorKey = "error.required"
+    val errorKey  = "error.required"
     val formatter = testFormProvider.stringFormatter(errorKey)
 
     "successfully bind non-empty strings" in {
-      val key = "testKey"
+      val key   = "testKey"
       val value = "testValue"
-      val data = Map(key -> value)
+      val data  = Map(key -> value)
 
       formatter.bind(key, data) mustBe Right(value.trim)
     }
 
     "return an error for empty strings" in {
-      val key = "testKey"
+      val key  = "testKey"
       val data = Map(key -> "")
 
       formatter.bind(key, data) mustBe Left(Seq(FormError(key, errorKey)))
     }
 
     "return an error when key is not present" in {
-      val key = "testKey"
+      val key  = "testKey"
       val data = Map.empty[String, String]
 
       formatter.bind(key, data) mustBe Left(Seq(FormError(key, errorKey)))
     }
 
     "unbind a string to a key-value pair" in {
-      val key = "testKey"
+      val key   = "testKey"
       val value = "testValue"
 
       formatter.unbind(key, value) mustBe Map(key -> value)
@@ -59,49 +59,50 @@ class YesNoFormProviderTest extends PlaySpec {
 
   "booleanFormatter" must {
     val requiredKey = "error.required"
-    val invalidKey = "error.invalid"
-    val formatter = testFormProvider.booleanFormatter(requiredKey, invalidKey)
+    val invalidKey  = "error.invalid"
+    val formatter   = testFormProvider.booleanFormatter(requiredKey, invalidKey)
 
     "successfully bind 'true' to true" in {
-      val key = "testKey"
+      val key  = "testKey"
       val data = Map(key -> "true")
 
       formatter.bind(key, data) mustBe Right(true)
     }
 
     "successfully bind 'false' to false" in {
-      val key = "testKey"
+      val key  = "testKey"
       val data = Map(key -> "false")
 
       formatter.bind(key, data) mustBe Right(false)
     }
 
     "return an error for empty strings" in {
-      val key = "testKey"
+      val key  = "testKey"
       val data = Map(key -> "")
 
       formatter.bind(key, data) mustBe Left(Seq(FormError(key, requiredKey)))
     }
 
     "return an error for invalid boolean values" in {
-      val key = "testKey"
+      val key  = "testKey"
       val data = Map(key -> "maybe")
 
       formatter.bind(key, data) mustBe Left(Seq(FormError(key, invalidKey)))
     }
 
     "return an error when key is not present" in {
-      val key = "testKey"
+      val key  = "testKey"
       val data = Map.empty[String, String]
 
       formatter.bind(key, data) mustBe Left(Seq(FormError(key, requiredKey)))
     }
 
     "unbind a boolean to a key-value pair" in {
-      val key = "testKey"
+      val key   = "testKey"
       val value = true
 
       formatter.unbind(key, value) mustBe Map(key -> "true")
     }
   }
+
 }

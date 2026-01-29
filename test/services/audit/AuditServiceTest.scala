@@ -43,13 +43,13 @@ class AuditServiceTest extends AnyWordSpecLike with Matchers with MockitoSugar w
     detail = Map("test" -> "details")
   )
 
-  //TODO replace these with wiremock type tests?
+  // TODO replace these with wiremock type tests?
   "sendEvent" should {
     class TestAuditService(auditResult: AuditResult) extends AuditService {
       override val auditConnector: DefaultAuditConnector = mockAuditConnector
       override def buildEvent(transactionName: String, details: Map[String, String])(implicit
         hc: HeaderCarrier
-      ): DataEvent                                       = dataEvent
+      ): DataEvent = dataEvent
       when(auditConnector.sendEvent(any())(any(), any())).thenReturn(Future.successful(auditResult))
     }
 
@@ -100,4 +100,5 @@ class AuditServiceTest extends AnyWordSpecLike with Matchers with MockitoSugar w
       result.contains("dateTime") shouldBe true
     }
   }
+
 }

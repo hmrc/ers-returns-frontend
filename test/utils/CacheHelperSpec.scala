@@ -30,9 +30,10 @@ class CacheHelperSpec extends PlaySpec with MockitoSugar {
 
   "getEntry" must {
     "return Some(value) when JSON validation is successful" in {
-      val expectedValue = ReportableEvents(Some("2"))
-      val key = DataKey[ReportableEvents]("ReportableEvents")
-      val cacheItem = CacheItem("id", Json.obj("ReportableEvents" -> Json.toJson(expectedValue)), Instant.now(), Instant.now())
+      val expectedValue                           = ReportableEvents(Some("2"))
+      val key                                     = DataKey[ReportableEvents]("ReportableEvents")
+      val cacheItem                               =
+        CacheItem("id", Json.obj("ReportableEvents" -> Json.toJson(expectedValue)), Instant.now(), Instant.now())
       implicit val reads: Reads[ReportableEvents] = Json.reads[ReportableEvents]
 
       val result = CacheHelperTest.getEntry[ReportableEvents](cacheItem, key)
@@ -43,9 +44,9 @@ class CacheHelperSpec extends PlaySpec with MockitoSugar {
 
   it must {
     "return None when JSON validation fails" in {
-      val invalidJson = Json.obj("ReportableEvents" -> JsString("invalidData"))
-      val key = DataKey[ReportableEvents]("ReportableEvents")
-      val cacheItem = CacheItem("id", invalidJson, Instant.now(), Instant.now())
+      val invalidJson                             = Json.obj("ReportableEvents" -> JsString("invalidData"))
+      val key                                     = DataKey[ReportableEvents]("ReportableEvents")
+      val cacheItem                               = CacheItem("id", invalidJson, Instant.now(), Instant.now())
       implicit val reads: Reads[ReportableEvents] = Json.reads[ReportableEvents]
 
       val result = CacheHelperTest.getEntry[ReportableEvents](cacheItem, key)
@@ -53,4 +54,5 @@ class CacheHelperSpec extends PlaySpec with MockitoSugar {
       result mustBe None
     }
   }
+
 }

@@ -49,19 +49,21 @@ class UpscanServiceSpec
     .overrides(bind[UpscanConnector].toInstance(mockUpscanConnector))
     .build()
 
-  def upscanService: UpscanService = app.injector.instanceOf[UpscanService]
+  def upscanService: UpscanService         = app.injector.instanceOf[UpscanService]
   val mockUpscanConnector: UpscanConnector = mock[UpscanConnector]
-  val schemeRef = "schemeRef"
+  val schemeRef                            = "schemeRef"
 
   "getUpscanFormDataOds" must {
     "get form data from Upscan Connector with an initiate request" in {
       implicit val request: RequestHeader = FakeRequest("GET", "http://localhost:9290/")
-      val hc = HeaderCarrier(sessionId = Some(SessionId("sessionid")))
-      val callback =
-        controllers.internal.routes.FileUploadCallbackController.callback(schemeRef, hc.sessionId.get.value).absoluteURL()
-      val success = controllers.routes.FileUploadController.success().absoluteURL()
-      val failure = controllers.routes.FileUploadController.failure().absoluteURL()
-      val expectedInitiateRequest = UpscanInitiateRequest(callback, success, failure, 1, 209715200)
+      val hc                              = HeaderCarrier(sessionId = Some(SessionId("sessionid")))
+      val callback                        =
+        controllers.internal.routes.FileUploadCallbackController
+          .callback(schemeRef, hc.sessionId.get.value)
+          .absoluteURL()
+      val success                         = controllers.routes.FileUploadController.success().absoluteURL()
+      val failure                         = controllers.routes.FileUploadController.failure().absoluteURL()
+      val expectedInitiateRequest         = UpscanInitiateRequest(callback, success, failure, 1, 209715200)
 
       val upscanInitiateResponse =
         UpscanInitiateResponse(Reference("reference"), "postTarget", formFields = Map.empty[String, String])
@@ -79,13 +81,14 @@ class UpscanServiceSpec
   "getUpscanFormDataCsv" must {
     "get form data from Upscan Connector with an initiate and uploadId" in {
       implicit val request: RequestHeader = FakeRequest("GET", "http://localhost:9290/")
-      val uploadId = UploadId("TestUploadId")
-      val scRef = "ScRef"
-      val hc = HeaderCarrier(sessionId = Some(SessionId("sessionid")))
-      val callback = controllers.internal.routes.CsvFileUploadCallbackController.callback(uploadId, scRef, "sessionid").absoluteURL()
-      val success = controllers.routes.CsvFileUploadController.success(uploadId).absoluteURL()
-      val failure = controllers.routes.CsvFileUploadController.failure().absoluteURL()
-      val expectedInitiateRequest = UpscanInitiateRequest(callback, success, failure, 1, 209715200)
+      val uploadId                        = UploadId("TestUploadId")
+      val scRef                           = "ScRef"
+      val hc                              = HeaderCarrier(sessionId = Some(SessionId("sessionid")))
+      val callback                        =
+        controllers.internal.routes.CsvFileUploadCallbackController.callback(uploadId, scRef, "sessionid").absoluteURL()
+      val success                         = controllers.routes.CsvFileUploadController.success(uploadId).absoluteURL()
+      val failure                         = controllers.routes.CsvFileUploadController.failure().absoluteURL()
+      val expectedInitiateRequest         = UpscanInitiateRequest(callback, success, failure, 1, 209715200)
 
       val upscanInitiateResponse =
         UpscanInitiateResponse(Reference("reference"), "postTarget", formFields = Map.empty[String, String])
@@ -103,14 +106,15 @@ class UpscanServiceSpec
   "generateCallbackUrl" should {
     "return a valid URL" when {
       "a valid SessionId is provided" in {
-        val generateCallbackUrl = PrivateMethod[String](Symbol("generateCallbackUrl"))
-        val sessionIdOption = Some(SessionId("exampleSessionId"))
+        val generateCallbackUrl           = PrivateMethod[String](Symbol("generateCallbackUrl"))
+        val sessionIdOption               = Some(SessionId("exampleSessionId"))
         val routeFunction: String => Call = sessionId => Call("GET", s"/callback/$sessionId")
-        val isSecure = false
+        val isSecure                      = false
 
         implicit val fakeRequest: RequestHeader = FakeRequest()
 
-        val result = upscanService.invokePrivate(generateCallbackUrl(sessionIdOption, routeFunction, isSecure, fakeRequest))
+        val result =
+          upscanService.invokePrivate(generateCallbackUrl(sessionIdOption, routeFunction, isSecure, fakeRequest))
 
         result should endWith("/callback/exampleSessionId")
       }
@@ -118,15 +122,18 @@ class UpscanServiceSpec
 
     "throw an IllegalStateException" when {
       "SessionId is None" in {
-        val generateCallbackUrl = PrivateMethod[String](Symbol("generateCallbackUrl"))
-        val sessionIdOption = None
+        val generateCallbackUrl           = PrivateMethod[String](Symbol("generateCallbackUrl"))
+        val sessionIdOption               = None
         val routeFunction: String => Call = _ => Call("GET", "/callback")
-        val isSecure = false
+        val isSecure                      = false
 
         val fakeRequest: RequestHeader = FakeRequest()
 
-        an[IllegalStateException] should be thrownBy upscanService.invokePrivate(generateCallbackUrl(sessionIdOption, routeFunction, isSecure, fakeRequest))
+        an[IllegalStateException] should be thrownBy upscanService.invokePrivate(
+          generateCallbackUrl(sessionIdOption, routeFunction, isSecure, fakeRequest)
+        )
       }
     }
   }
+
 }

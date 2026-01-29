@@ -38,4 +38,5 @@ trait Decorator {
     val elements = content.map(item => s"""<p style="margin-top: 0.3em; padding-left: 0.05em">$item</p>""").mkString
     start + elements + "<hr/></div>"
   }
+
 }

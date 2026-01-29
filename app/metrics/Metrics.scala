@@ -27,4 +27,5 @@ trait Metrics {
 
   def submitReturnToBackend(diff: Long, unit: TimeUnit): Unit =
     registry.timer("submit-to-returns-connector").update(diff, unit)
+
 }

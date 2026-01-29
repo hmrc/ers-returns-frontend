@@ -31,48 +31,57 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
 
 @Singleton
-class CsvFileUploadCallbackController @Inject() (val mcc: MessagesControllerComponents,
-                                                 val ersConnector: ErsConnector,
-                                                 val sessionService: FrontendSessionService,
-                                                 val fileSizeUtils: FileSizeUtils)
-                                                (implicit val ec: ExecutionContext, ersUtil: ERSUtil) extends FrontendController(mcc) with Logging {
+class CsvFileUploadCallbackController @Inject() (
+  val mcc: MessagesControllerComponents,
+  val ersConnector: ErsConnector,
+  val sessionService: FrontendSessionService,
+  val fileSizeUtils: FileSizeUtils
+)(implicit val ec: ExecutionContext, ersUtil: ERSUtil)
+    extends FrontendController(mcc) with Logging {
 
-  def callback(uploadId: UploadId, scRef: String, sessionId: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
-    request.body
-      .validate[UpscanCallback]
-      .fold(
-        invalid = errors => {
-          logger.error(
-            s"[CsvFileUploadCallbackController][callback] Failed to validate UpscanCallback json with errors: $errors"
-          )
-          Future.successful(BadRequest)
-        },
-        valid = callback => {
-          val uploadStatus: UploadStatus = callback match {
-            case callback: UpscanReadyCallback    =>
-              val fileSize = callback.uploadDetails.size
-              fileSizeUtils.logFileSize(scRef, fileSize)
-              UploadedSuccessfully(callback.uploadDetails.fileName, callback.downloadUrl.toExternalForm)
-            case UpscanFailedCallback(_, details) =>
-              logger.warn(
-                s"[CsvFileUploadCallbackController][callback] CSV Callback for upload id: ${uploadId.value} failed. Reason: ${details.failureReason}. Message: ${details.message}"
-              )
-              Failed
-          }
-          logger.info(
-            s"[CsvFileUploadCallbackController][callback] Updating CSV callback for " +
-              s"upload id: ${uploadId.value} to ${uploadStatus.getClass.getSimpleName}"
-          )
-          sessionService.cache[UploadStatus](s"${ersUtil.CHECK_CSV_FILES}-${uploadId.value}", uploadStatus)(RequestWithUpdatedSession(request, sessionId), implicitly).map { _ =>
-            Ok
-          } recover { case NonFatal(e) =>
+  def callback(uploadId: UploadId, scRef: String, sessionId: String): Action[JsValue] =
+    Action.async(parse.json) { implicit request =>
+      request.body
+        .validate[UpscanCallback]
+        .fold(
+          invalid = errors => {
             logger.error(
-              s"[CsvFileUploadCallbackController][callback] Failed to update cache after Upscan callback for UploadID: ${uploadId.value}, ScRef: $scRef",
-              e
+              s"[CsvFileUploadCallbackController][callback] Failed to validate UpscanCallback json with errors: $errors"
             )
-            InternalServerError("Exception occurred when attempting to store data")
+            Future.successful(BadRequest)
+          },
+          valid = callback => {
+            val uploadStatus: UploadStatus = callback match {
+              case callback: UpscanReadyCallback    =>
+                val fileSize = callback.uploadDetails.size
+                fileSizeUtils.logFileSize(scRef, fileSize)
+                UploadedSuccessfully(callback.uploadDetails.fileName, callback.downloadUrl.toExternalForm)
+              case UpscanFailedCallback(_, details) =>
+                logger.warn(
+                  s"[CsvFileUploadCallbackController][callback] CSV Callback for upload id: ${uploadId.value} failed. Reason: ${details.failureReason}. Message: ${details.message}"
+                )
+                Failed
+            }
+            logger.info(
+              s"[CsvFileUploadCallbackController][callback] Updating CSV callback for " +
+                s"upload id: ${uploadId.value} to ${uploadStatus.getClass.getSimpleName}"
+            )
+            sessionService
+              .cache[UploadStatus](s"${ersUtil.CHECK_CSV_FILES}-${uploadId.value}", uploadStatus)(
+                RequestWithUpdatedSession(request, sessionId),
+                implicitly
+              )
+              .map { _ =>
+                Ok
+              } recover { case NonFatal(e) =>
+              logger.error(
+                s"[CsvFileUploadCallbackController][callback] Failed to update cache after Upscan callback for UploadID: ${uploadId.value}, ScRef: $scRef",
+                e
+              )
+              InternalServerError("Exception occurred when attempting to store data")
+            }
           }
-        }
-      )
-  }
+        )
+    }
+
 }

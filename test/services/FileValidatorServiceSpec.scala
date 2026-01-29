@@ -36,14 +36,14 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class FileValidatorServiceSpec extends PlaySpec with GuiceOneAppPerSuite with ScalaFutures with MockitoSugar {
 
-  val sessionId = "sessionId"
+  val sessionId                    = "sessionId"
   val request: Request[AnyContent] = FakeRequest()
-  implicit val hc: HeaderCarrier = HeaderCarrier().copy(sessionId = Some(SessionId(sessionId)))
+  implicit val hc: HeaderCarrier   = HeaderCarrier().copy(sessionId = Some(SessionId(sessionId)))
 
   val mockConnector: ErsConnector = mock[ErsConnector]
 
   implicit val executionContext: ExecutionContext = app.injector.instanceOf[ExecutionContext]
-  val testService = new FileValidatorService(mockConnector)
+  val testService                                 = new FileValidatorService(mockConnector)
 
   implicit val requestWithAuth: RequestWithOptionalAuthContext[AnyContent] =
     RequestWithOptionalAuthContext(request, defaultErsAuthData)
@@ -169,4 +169,5 @@ class FileValidatorServiceSpec extends PlaySpec with GuiceOneAppPerSuite with Sc
       }
     }
   }
+
 }

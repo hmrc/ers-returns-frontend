@@ -27,7 +27,9 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status
 import play.api.i18n
 import play.api.i18n.{MessagesApi, MessagesImpl}
-import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents}
+import play.api.mvc.{
+  AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents
+}
 import play.api.test.Helpers.{contentAsString, defaultAwaitTimeout, redirectLocation, status, stubBodyParser}
 import utils.Fixtures.{companyAddressUK, ersRequestObject}
 import utils.{ERSFakeApplicationConfig, ErsTestHelper, Fixtures}
@@ -35,14 +37,14 @@ import views.html.{global_error, manual_address_uk}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class SchemeOrganiserAddressUKControllerSpec extends AnyWordSpecLike
-
-  with Matchers
-  with OptionValues
-  with ERSFakeApplicationConfig
-  with ErsTestHelper
-  with GuiceOneAppPerSuite
-  with ScalaFutures {
+class SchemeOrganiserAddressUKControllerSpec
+    extends AnyWordSpecLike
+    with Matchers
+    with OptionValues
+    with ERSFakeApplicationConfig
+    with ErsTestHelper
+    with GuiceOneAppPerSuite
+    with ScalaFutures {
 
   implicit val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
     messagesActionBuilder,
@@ -56,8 +58,7 @@ class SchemeOrganiserAddressUKControllerSpec extends AnyWordSpecLike
 
   implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
 
-
-  val testController = new SchemeOrganiserAddressUkController (
+  val testController = new SchemeOrganiserAddressUkController(
     mockMCC,
     mockErsConnector,
     app.injector.instanceOf[global_error],
@@ -76,30 +77,33 @@ class SchemeOrganiserAddressUKControllerSpec extends AnyWordSpecLike
     when(mockSessionService.fetch[RequestObject](any())(any(), any())).thenReturn(Future.successful(ersRequestObject))
 
     "show the empty scheme organiser address UK question page when there is nothing to prefill" in {
-      when(mockSessionService.fetchPartFromCompanyDetails[CompanyDetailsList]()(any(), any())).thenReturn(Future.successful(None))
+      when(mockSessionService.fetchPartFromCompanyDetails[CompanyDetailsList]()(any(), any()))
+        .thenReturn(Future.successful(None))
       val result = testController.questionPage(1).apply(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
 
-      status(result) shouldBe Status.OK
+      status(result)        shouldBe Status.OK
       contentAsString(result) should include(testMessages("ers_manual_address_uk.title"))
       contentAsString(result) should include(testMessages("ers_company_address.line1"))
     }
 
     "show the prefilled scheme organiser address UK question page when there is data to prefill" in {
-      when(mockSessionService.fetchPartFromCompanyDetails[CompanyAddress]()(any(), any())).thenReturn(Future.successful(Some(companyAddressUK)))
+      when(mockSessionService.fetchPartFromCompanyDetails[CompanyAddress]()(any(), any()))
+        .thenReturn(Future.successful(Some(companyAddressUK)))
 
       val result = testController.questionPage(1).apply(authRequest)
 
-      status(result) shouldBe Status.OK
+      status(result)        shouldBe Status.OK
       contentAsString(result) should include(testMessages("ers_manual_address_uk.title"))
       contentAsString(result) should include(testMessages("ers_company_address.line1"))
       contentAsString(result) should include("UK 1")
     }
     "show the global error page if an exception occurs while retrieving cached data" in {
-      when(mockSessionService.fetchPartFromCompanyDetails[CompanyAddress]()(any(), any())).thenReturn(Future.failed(new RuntimeException("Failure scenario")))
+      when(mockSessionService.fetchPartFromCompanyDetails[CompanyAddress]()(any(), any()))
+        .thenReturn(Future.failed(new RuntimeException("Failure scenario")))
 
       val result = testController.questionPage(1).apply(authRequest)
 
-      status(result) shouldBe Status.OK
+      status(result)        shouldBe Status.OK
       contentAsString(result) should include(testMessages("ers.global_errors.title"))
       contentAsString(result) should include(testMessages("ers.global_errors.heading"))
       contentAsString(result) should include(testMessages("ers.global_errors.message"))
@@ -109,26 +113,34 @@ class SchemeOrganiserAddressUKControllerSpec extends AnyWordSpecLike
   "calling questionSubmit" should {
     "show scheme organiser address UK form page with errors if the form is incorrectly filled" in {
       val companyAddressUkData = Map("addressLine1" -> "")
-      val form = RsFormMappings.companyAddressUkForm().bind(companyAddressUkData)
-      implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*))
-      val result = testController.questionSubmit(1).apply(authRequest)
+      val form                 = RsFormMappings.companyAddressUkForm().bind(companyAddressUkData)
+      implicit val authRequest = buildRequestWithAuth(
+        Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
+      )
+      val result               = testController.questionSubmit(1).apply(authRequest)
 
-      status(result) shouldBe Status.BAD_REQUEST
+      status(result)        shouldBe Status.BAD_REQUEST
       contentAsString(result) should include(testMessages("ers_manual_address_uk.title"))
-      contentAsString(result) should include(testMessages("ers_manual_company_details.err.summary.address_line1_required"))
+      contentAsString(result) should include(
+        testMessages("ers_manual_company_details.err.summary.address_line1_required")
+      )
     }
 
     "successfully bind the form and redirect to the scheme Organiser Summary Page" in {
-      when(mockSessionService.cache[CompanyAddress](any(), any())(any(), any())).thenReturn(Future.successful(("","")))
+      when(mockSessionService.cache[CompanyAddress](any(), any())(any(), any())).thenReturn(Future.successful(("", "")))
       doNothing().when(mockCompanyDetailsService).updateSchemeOrganiserCache(any())
 
       val companyAddressUkData = Map("addressLine1" -> "123 Fake Street")
-      val form = RsFormMappings.companyAddressUkForm().bind(companyAddressUkData)
-      implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*))
-      val result = testController.questionSubmit(1).apply(authRequest)
+      val form                 = RsFormMappings.companyAddressUkForm().bind(companyAddressUkData)
+      implicit val authRequest = buildRequestWithAuth(
+        Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
+      )
+      val result               = testController.questionSubmit(1).apply(authRequest)
 
-      status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result).get shouldBe controllers.schemeOrganiser.routes.SchemeOrganiserController.schemeOrganiserSummaryPage().url
+      status(result)               shouldBe Status.SEE_OTHER
+      redirectLocation(result).get shouldBe controllers.schemeOrganiser.routes.SchemeOrganiserController
+        .schemeOrganiserSummaryPage()
+        .url
     }
   }
 
@@ -138,11 +150,12 @@ class SchemeOrganiserAddressUKControllerSpec extends AnyWordSpecLike
     when(mockSessionService.fetch[RequestObject](any())(any(), any())).thenReturn(Future.successful(ersRequestObject))
 
     "be the same as showQuestion for a specific index" in {
-      when(mockSessionService.fetchPartFromCompanyDetails[CompanyAddress]()(any(), any())).thenReturn(Future.successful(Some(companyAddressUK)))
+      when(mockSessionService.fetchPartFromCompanyDetails[CompanyAddress]()(any(), any()))
+        .thenReturn(Future.successful(Some(companyAddressUK)))
 
       val result = testController.editCompany(1).apply(authRequest)
 
-      status(result) shouldBe Status.OK
+      status(result)        shouldBe Status.OK
       contentAsString(result) should include(testMessages("ers_manual_address_uk.title"))
       contentAsString(result) should include(testMessages("ers_company_address.line1"))
       contentAsString(result) should include("1")

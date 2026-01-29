@@ -32,29 +32,28 @@ import utils.ERSUtil
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class TrusteeRemoveController @Inject()(val mcc: MessagesControllerComponents,
-                                        val authAction: AuthAction,
-                                        trusteeRemoveView: views.html.trustee_remove_yes_no,
-                                        yesNoFormProvider: YesNoFormProvider,
-                                        globalErrorView: views.html.global_error,
-                                        trusteeService: TrusteeService,
-                                        val sessionService: FrontendSessionService)
-                                       (implicit executionContext: ExecutionContext, appConfig: ApplicationConfig, ersUtil: ERSUtil)
-  extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with I18nSupport with Logging {
+class TrusteeRemoveController @Inject() (
+  val mcc: MessagesControllerComponents,
+  val authAction: AuthAction,
+  trusteeRemoveView: views.html.trustee_remove_yes_no,
+  yesNoFormProvider: YesNoFormProvider,
+  globalErrorView: views.html.global_error,
+  trusteeService: TrusteeService,
+  val sessionService: FrontendSessionService
+)(implicit executionContext: ExecutionContext, appConfig: ApplicationConfig, ersUtil: ERSUtil)
+    extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with I18nSupport with Logging {
 
   private val form: Form[Boolean] = yesNoFormProvider.withPrefix("ers_trustee_remove")
 
   def onPageLoad(index: Int): Action[AnyContent] = authAction.async { implicit request =>
     (for {
-      requestObject <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
+      requestObject      <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
       trusteeDetailsList <- sessionService.fetchTrusteesOptionally()
-    } yield {
-      Ok(trusteeRemoveView(form, requestObject, trusteeDetailsList.trustees(index).name, index))
-    }).recover {
+    } yield Ok(trusteeRemoveView(form, requestObject, trusteeDetailsList.trustees(index).name, index))).recover {
       case _: IndexOutOfBoundsException =>
         logger.warn(s"[TrusteeRemoveController][onPageLoad] Requested index $index not found")
         Redirect(controllers.trustees.routes.TrusteeSummaryController.trusteeSummaryPage())
-      case e: Throwable =>
+      case e: Throwable                 =>
         logger.error(s"[TrusteeRemoveController][onPageLoad] Get data from cache failed with exception ${e.getMessage}")
         getGlobalErrorPage
     }
@@ -62,42 +61,49 @@ class TrusteeRemoveController @Inject()(val mcc: MessagesControllerComponents,
 
   def onSubmit(index: Int): Action[AnyContent] = authAction.async { implicit request =>
     val requestObjectWithTrusteeList = for {
-      requestObject <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
+      requestObject      <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
       trusteeDetailsList <- sessionService.fetchTrusteesOptionally()
     } yield (requestObject, trusteeDetailsList)
 
     requestObjectWithTrusteeList.flatMap { case (requestObject, trusteeDetailsList) =>
-      form.bindFromRequest().fold(
-        formWithErrors => Future.successful(BadRequest(
-          trusteeRemoveView(
-            formWithErrors,
-            requestObject,
-            trusteeDetailsList.trustees(index).name,
-            index
-          )
-        )),
-        {
-          case true if trusteeDetailsList.trustees.size == 1 =>
-            Future.successful(Redirect(controllers.trustees.routes.TrusteeRemoveProblemController.onPageLoad()))
-          case true =>
-            trusteeService.deleteTrustee(index).map {
-              case true => Redirect(controllers.trustees.routes.TrusteeSummaryController.trusteeSummaryPage())
-              case _ =>
-                logger.error("s[TrusteeRemoveController][onSubmit] Error on submit")
-                getGlobalErrorPage
-            }
-          case _ =>
-            Future.successful(Redirect(controllers.trustees.routes.TrusteeSummaryController.trusteeSummaryPage()))
-        }
-      )
+      form
+        .bindFromRequest()
+        .fold(
+          formWithErrors =>
+            Future.successful(
+              BadRequest(
+                trusteeRemoveView(
+                  formWithErrors,
+                  requestObject,
+                  trusteeDetailsList.trustees(index).name,
+                  index
+                )
+              )
+            ),
+          {
+            case true if trusteeDetailsList.trustees.size == 1 =>
+              Future.successful(Redirect(controllers.trustees.routes.TrusteeRemoveProblemController.onPageLoad()))
+            case true                                          =>
+              trusteeService.deleteTrustee(index).map {
+                case true => Redirect(controllers.trustees.routes.TrusteeSummaryController.trusteeSummaryPage())
+                case _    =>
+                  logger.error("s[TrusteeRemoveController][onSubmit] Error on submit")
+                  getGlobalErrorPage
+              }
+            case _                                             =>
+              Future.successful(Redirect(controllers.trustees.routes.TrusteeSummaryController.trusteeSummaryPage()))
+          }
+        )
     }
   }
 
-  def getGlobalErrorPage(implicit request: RequestHeader, messages: Messages): Result = {
-    Ok(globalErrorView(
-      "ers.global_errors.title",
-      "ers.global_errors.heading",
-      "ers.global_errors.message"
-    )(request, messages, appConfig))
-  }
+  def getGlobalErrorPage(implicit request: RequestHeader, messages: Messages): Result =
+    Ok(
+      globalErrorView(
+        "ers.global_errors.title",
+        "ers.global_errors.heading",
+        "ers.global_errors.message"
+      )(request, messages, appConfig)
+    )
+
 }

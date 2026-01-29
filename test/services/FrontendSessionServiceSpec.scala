@@ -41,7 +41,14 @@ import utils.{ErsTestHelper, Fixtures}
 import java.time.Instant
 import scala.concurrent.Future
 
-class FrontendSessionServiceSpec extends AnyWordSpec with Matchers with ErsTestHelper with GuiceOneAppPerSuite with MockitoSugar with MongoSupport with BeforeAndAfter {
+class FrontendSessionServiceSpec
+    extends AnyWordSpec
+    with Matchers
+    with ErsTestHelper
+    with GuiceOneAppPerSuite
+    with MockitoSugar
+    with MongoSupport
+    with BeforeAndAfter {
 
   override lazy val fakeApplication: Application = new GuiceApplicationBuilder()
     .configure("metrics.enabled" -> "false")
@@ -53,9 +60,10 @@ class FrontendSessionServiceSpec extends AnyWordSpec with Matchers with ErsTestH
   implicit val fakeRequest: RequestWithOptionalAuthContext[AnyContent] = requestWithAuth
 
   val frontendSessionsRepository: FrontendSessionsRepository = mock[FrontendSessionsRepository]
-  val mockApplicationConfig: ApplicationConfig = mock[ApplicationConfig]
+  val mockApplicationConfig: ApplicationConfig               = mock[ApplicationConfig]
 
-  val testService = new FrontendSessionService(frontendSessionsRepository, mockFileValidatorService, mockApplicationConfig)
+  val testService =
+    new FrontendSessionService(frontendSessionsRepository, mockFileValidatorService, mockApplicationConfig)
 
   before {
     reset(frontendSessionsRepository)
@@ -97,14 +105,14 @@ class FrontendSessionServiceSpec extends AnyWordSpec with Matchers with ErsTestH
 
   "isNilReturn" should {
     "return true when the input is equal to OPTION_NIL_RETURN" in {
-      val nilReturn = "2" //OPTION_NIL_RETURN
-      val result = testService.isNilReturn(nilReturn)
+      val nilReturn = "2" // OPTION_NIL_RETURN
+      val result    = testService.isNilReturn(nilReturn)
       result shouldBe true
     }
 
     "return false when the input is not equal to OPTION_NIL_RETURN" in {
       val notNilReturn = "SomeOtherValue"
-      val result = testService.isNilReturn(notNilReturn)
+      val result       = testService.isNilReturn(notNilReturn)
       result shouldBe false
     }
   }
@@ -117,8 +125,9 @@ class FrontendSessionServiceSpec extends AnyWordSpec with Matchers with ErsTestH
 
     "return Some with the number of rows when nilReturn is not OPTION_NIL_RETURN and rows are available" in {
       val numberOfRows = Some(5)
-      when(mockFileValidatorService.getSuccessfulCallbackRecord(any(), any())).thenReturn(Future.successful(Some(UploadedSuccessfully("", "", numberOfRows))))
-      val result = testService.getNoOfRows("1").futureValue
+      when(mockFileValidatorService.getSuccessfulCallbackRecord(any(), any()))
+        .thenReturn(Future.successful(Some(UploadedSuccessfully("", "", numberOfRows))))
+      val result       = testService.getNoOfRows("1").futureValue
       result shouldBe numberOfRows
     }
 
@@ -131,24 +140,48 @@ class FrontendSessionServiceSpec extends AnyWordSpec with Matchers with ErsTestH
 
   "getGroupSchemeData" should {
     "fetch CompanyDetailsList when GroupSchemeInfo is present and groupScheme is OPTION_YES" in {
-      val schemeRef = "testSchemeRef"
-      val groupSchemeInfo = GroupSchemeInfo(Some("1"), None)
-      val companyDetailsList = CompanyDetailsList(List(CompanyDetails(companyName = "testCompanyName", addressLine1= "testAddressLine", None, None, None, None, country = Some("UK"), None, None, true)))
+      val schemeRef          = "testSchemeRef"
+      val groupSchemeInfo    = GroupSchemeInfo(Some("1"), None)
+      val companyDetailsList = CompanyDetailsList(
+        List(
+          CompanyDetails(
+            companyName = "testCompanyName",
+            addressLine1 = "testAddressLine",
+            None,
+            None,
+            None,
+            None,
+            country = Some("UK"),
+            None,
+            None,
+            true
+          )
+        )
+      )
 
-      when(frontendSessionsRepository.getFromSession[GroupSchemeInfo](DataKey(eqTo("group-scheme-controller")))(any(), any()))
+      when(
+        frontendSessionsRepository
+          .getFromSession[GroupSchemeInfo](DataKey(eqTo("group-scheme-controller")))(any(), any())
+      )
         .thenReturn(Future.successful(Some(groupSchemeInfo)))
-      when(frontendSessionsRepository.getFromSession[CompanyDetailsList](DataKey(eqTo("subsidiary-companies")))(any(), any()))
+      when(
+        frontendSessionsRepository
+          .getFromSession[CompanyDetailsList](DataKey(eqTo("subsidiary-companies")))(any(), any())
+      )
         .thenReturn(Future.successful(Some(companyDetailsList)))
 
       val result = testService.getGroupSchemeData(schemeRef).futureValue
-      result shouldBe(Some(groupSchemeInfo), Some(companyDetailsList))
+      result shouldBe (Some(groupSchemeInfo), Some(companyDetailsList))
     }
 
     "not fetch CompanyDetailsList when GroupSchemeInfo is present but groupScheme is not OPTION_YES" in {
-      val schemeRef = "testSchemeRef"
+      val schemeRef       = "testSchemeRef"
       val groupSchemeInfo = GroupSchemeInfo(Some("2"), None)
 
-      when(frontendSessionsRepository.getFromSession[GroupSchemeInfo](DataKey(eqTo("group-scheme-controller")))(any(), any()))
+      when(
+        frontendSessionsRepository
+          .getFromSession[GroupSchemeInfo](DataKey(eqTo("group-scheme-controller")))(any(), any())
+      )
         .thenReturn(Future.successful(Some(groupSchemeInfo)))
 
       val result = testService.getGroupSchemeData(schemeRef).futureValue
@@ -158,7 +191,10 @@ class FrontendSessionServiceSpec extends AnyWordSpec with Matchers with ErsTestH
     "not fetch CompanyDetailsList when GroupSchemeInfo is not present" in {
       val schemeRef = "testSchemeRef"
 
-      when(frontendSessionsRepository.getFromSession[GroupSchemeInfo](DataKey(eqTo("group-scheme-controller")))(any(), any()))
+      when(
+        frontendSessionsRepository
+          .getFromSession[GroupSchemeInfo](DataKey(eqTo("group-scheme-controller")))(any(), any())
+      )
         .thenReturn(Future.successful(None))
 
       val result = testService.getGroupSchemeData(schemeRef).futureValue
@@ -168,21 +204,24 @@ class FrontendSessionServiceSpec extends AnyWordSpec with Matchers with ErsTestH
 
   "getAltAmmendsData" should {
     "fetch AlterationAmends when AltAmendsActivity is present and altActivity is OPTION_YES" in {
-      val schemeRef = "testSchemeRef"
+      val schemeRef         = "testSchemeRef"
       val altAmendsActivity = AltAmendsActivity("1")
-      val alterationAmends = AlterationAmends(Some("1"), Some("1"), Some("1"), Some("1"), Some("1"))
+      val alterationAmends  = AlterationAmends(Some("1"), Some("1"), Some("1"), Some("1"), Some("1"))
 
       when(frontendSessionsRepository.getFromSession[AltAmendsActivity](DataKey(eqTo("alt-activity")))(any(), any()))
         .thenReturn(Future.successful(Some(altAmendsActivity)))
-      when(frontendSessionsRepository.getFromSession[AlterationAmends](DataKey(eqTo("alt-amends-cache-controller")))(any(), any()))
+      when(
+        frontendSessionsRepository
+          .getFromSession[AlterationAmends](DataKey(eqTo("alt-amends-cache-controller")))(any(), any())
+      )
         .thenReturn(Future.successful(Some(alterationAmends)))
 
       val result = testService.getAltAmmendsData(schemeRef).futureValue
-      result shouldBe(Some(altAmendsActivity), Some(alterationAmends))
+      result shouldBe (Some(altAmendsActivity), Some(alterationAmends))
     }
 
     "not fetch AlterationAmends when AltAmendsActivity is present but altActivity is not OPTION_YES" in {
-      val schemeRef = "testSchemeRef"
+      val schemeRef         = "testSchemeRef"
       val altAmendsActivity = AltAmendsActivity("2")
 
       when(frontendSessionsRepository.getFromSession[AltAmendsActivity](DataKey(eqTo("alt-activity")))(any(), any()))
@@ -205,7 +244,12 @@ class FrontendSessionServiceSpec extends AnyWordSpec with Matchers with ErsTestH
 
   "fetchAll" should {
     "return a CacheItem when data is found in the session" in {
-      val cacheItem: CacheItem = CacheItem("id", Json.toJson(Map("user1234" -> Json.toJson(Fixtures.ersSummary))).as[JsObject], Instant.now(), Instant.now())
+      val cacheItem: CacheItem = CacheItem(
+        "id",
+        Json.toJson(Map("user1234" -> Json.toJson(Fixtures.ersSummary))).as[JsObject],
+        Instant.now(),
+        Instant.now()
+      )
 
       when(frontendSessionsRepository.getAllFromSession()(any())).thenReturn(Future.successful(Some(cacheItem)))
 
@@ -235,8 +279,8 @@ class FrontendSessionServiceSpec extends AnyWordSpec with Matchers with ErsTestH
 
   "fetchOption" should {
     "return Some(data) when data is successfully found in the session" in {
-      val key = "testKey"
-      val cacheId = "testCacheId"
+      val key      = "testKey"
+      val cacheId  = "testCacheId"
       val testData = Some("testData")
 
       when(frontendSessionsRepository.getFromSession[String](DataKey(eqTo(key)))(any(), any()))
@@ -247,7 +291,7 @@ class FrontendSessionServiceSpec extends AnyWordSpec with Matchers with ErsTestH
     }
 
     "return None when no data is found for the key" in {
-      val key = "testKey"
+      val key     = "testKey"
       val cacheId = "testCacheId"
 
       when(frontendSessionsRepository.getFromSession[String](DataKey(eqTo(key)))(any(), any()))
@@ -258,8 +302,8 @@ class FrontendSessionServiceSpec extends AnyWordSpec with Matchers with ErsTestH
     }
 
     "return None and log an error when an unexpected exception occurs" in {
-      val key = "testKey"
-      val cacheId = "testCacheId"
+      val key       = "testKey"
+      val cacheId   = "testCacheId"
       val exception = new RuntimeException("Unexpected exception")
 
       when(frontendSessionsRepository.getFromSession[String](DataKey(eqTo(key)))(any(), any()))
@@ -272,8 +316,9 @@ class FrontendSessionServiceSpec extends AnyWordSpec with Matchers with ErsTestH
 
   "fetchPartFromTrusteeDetailsList" should {
     "return Some(data) when data is successfully found at the given index" in {
-      val index = 0
-      val trusteeDetails = Json.toJson(TrusteeDetails("First Trustee", "1 The Street", None, None, None, Some("UK"), None, true))
+      val index             = 0
+      val trusteeDetails    =
+        Json.toJson(TrusteeDetails("First Trustee", "1 The Street", None, None, None, Some("UK"), None, true))
       val trusteesCacheData = Json.toJson(Map("trustees" -> Json.arr(trusteeDetails)))
 
       when(frontendSessionsRepository.getFromSession[JsValue](DataKey(eqTo("trustees")))(any(), any()))
@@ -284,8 +329,9 @@ class FrontendSessionServiceSpec extends AnyWordSpec with Matchers with ErsTestH
     }
 
     "return None when no data is found at the given index" in {
-      val index = 1 // Assuming no data at this index
-      val trusteesCacheData = Json.toJson(Map("trustees" -> Json.arr(Json.obj("key" -> "value")))) // Single item in the array
+      val index             = 1 // Assuming no data at this index
+      val trusteesCacheData =
+        Json.toJson(Map("trustees" -> Json.arr(Json.obj("key" -> "value")))) // Single item in the array
 
       when(frontendSessionsRepository.getFromSession[JsValue](DataKey(eqTo("trustees")))(any(), any()))
         .thenReturn(Future.successful(Some(trusteesCacheData)))
@@ -295,7 +341,7 @@ class FrontendSessionServiceSpec extends AnyWordSpec with Matchers with ErsTestH
     }
 
     "return None and log an info message when an exception occurs" in {
-      val index = 0
+      val index     = 0
       val exception = new RuntimeException("Unexpected exception")
 
       when(frontendSessionsRepository.getFromSession[JsValue](DataKey(eqTo("trustees")))(any(), any()))
@@ -308,7 +354,9 @@ class FrontendSessionServiceSpec extends AnyWordSpec with Matchers with ErsTestH
 
   "fetchTrusteesOptionally" should {
     "return a TrusteeDetailsList when data is successfully fetched" in {
-      val trusteeDetailsList = TrusteeDetailsList(List(TrusteeDetails("First Trustee", "1 The Street", None, None, None, Some("UK"), None, true)))
+      val trusteeDetailsList = TrusteeDetailsList(
+        List(TrusteeDetails("First Trustee", "1 The Street", None, None, None, Some("UK"), None, true))
+      )
       when(frontendSessionsRepository.getFromSession[JsValue](DataKey(eqTo("trustees")))(any(), any()))
         .thenReturn(Future.successful(Some(Json.toJson(trusteeDetailsList))))
 
@@ -327,7 +375,7 @@ class FrontendSessionServiceSpec extends AnyWordSpec with Matchers with ErsTestH
 
   "fetch" should {
     "return data when it is successfully found in the session" in {
-      val key = "testKey"
+      val key      = "testKey"
       val testData = "testData"
 
       when(frontendSessionsRepository.getFromSession[JsValue](DataKey(eqTo(key)))(any(), any()))
@@ -350,7 +398,7 @@ class FrontendSessionServiceSpec extends AnyWordSpec with Matchers with ErsTestH
     }
 
     "throw Exception when an unexpected exception occurs" in {
-      val key = "testKey"
+      val key       = "testKey"
       val exception = new RuntimeException("Test exception")
 
       when(frontendSessionsRepository.getFromSession[String](DataKey(eqTo(key)))(any(), any()))
@@ -365,8 +413,8 @@ class FrontendSessionServiceSpec extends AnyWordSpec with Matchers with ErsTestH
 
   "cache" should {
     "successfully cache data" in {
-      val key = "testKey"
-      val testData = "testData"
+      val key              = "testKey"
+      val testData         = "testData"
       val expectedResponse = ("cacheId", "key")
 
       when(frontendSessionsRepository.putSession[String](DataKey(eqTo(key)), eqTo(testData))(any(), any()))
@@ -377,15 +425,15 @@ class FrontendSessionServiceSpec extends AnyWordSpec with Matchers with ErsTestH
     }
 
     "handle exceptions during caching" in {
-      val key = "testKey"
-      val testData = "testData"
+      val key       = "testKey"
+      val testData  = "testData"
       val exception = new RuntimeException("Cache operation failed")
 
       when(frontendSessionsRepository.putSession[String](DataKey(eqTo(key)), eqTo(testData))(any(), any()))
         .thenReturn(Future.failed(exception))
 
       val result = testService.cache(key, testData).failed.futureValue
-      result shouldBe a[RuntimeException]
+      result          shouldBe a[RuntimeException]
       result.getMessage should include("Cache operation failed")
     }
   }
@@ -401,22 +449,23 @@ class FrontendSessionServiceSpec extends AnyWordSpec with Matchers with ErsTestH
     }
 
     "handle exceptions during removal" in {
-      val key = "testKey"
+      val key       = "testKey"
       val exception = new RuntimeException("Removal operation failed")
 
       when(frontendSessionsRepository.deleteFromSession(DataKey(eqTo(key)))(any()))
         .thenReturn(Future.failed(exception))
 
       val result = testService.remove(key).failed.futureValue
-      result shouldBe a[RuntimeException]
+      result          shouldBe a[RuntimeException]
       result.getMessage should include("Removal operation failed")
     }
   }
 
   "fetchPartFromCompanyDetailsList" should {
     "return Some(data) when data is successfully found at the given index" in {
-      val index = 0
-      val companyDetails = Json.toJson(CompanyDetails("First Company", "UK line 1", None, None, None, None, None,None,None, true))
+      val index              = 0
+      val companyDetails     =
+        Json.toJson(CompanyDetails("First Company", "UK line 1", None, None, None, None, None, None, None, true))
       val companiesCacheData = Json.toJson(Map("companies" -> Json.arr(companyDetails)))
 
       when(frontendSessionsRepository.getFromSession[JsValue](DataKey(eqTo("subsidiary-companies")))(any(), any()))
@@ -427,8 +476,9 @@ class FrontendSessionServiceSpec extends AnyWordSpec with Matchers with ErsTestH
     }
 
     "return None when no data is found at the given index" in {
-      val index = 1 // Assuming no data at this index
-      val companiesCacheData = Json.toJson(Map("subsidiary-companies" -> Json.arr(Json.obj("key" -> "value")))) // Single item in the array
+      val index              = 1 // Assuming no data at this index
+      val companiesCacheData =
+        Json.toJson(Map("subsidiary-companies" -> Json.arr(Json.obj("key" -> "value")))) // Single item in the array
 
       when(frontendSessionsRepository.getFromSession[JsValue](DataKey(eqTo("subsidiary-companies")))(any(), any()))
         .thenReturn(Future.successful(Some(companiesCacheData)))
@@ -438,7 +488,7 @@ class FrontendSessionServiceSpec extends AnyWordSpec with Matchers with ErsTestH
     }
 
     "return None and log an info message when an exception occurs" in {
-      val index = 0
+      val index     = 0
       val exception = new RuntimeException("Unexpected exception")
 
       when(frontendSessionsRepository.getFromSession[JsValue](DataKey(eqTo("subsidiary-companies")))(any(), any()))
@@ -451,7 +501,9 @@ class FrontendSessionServiceSpec extends AnyWordSpec with Matchers with ErsTestH
 
   "fetchCompaniesOptionally" should {
     "return a CompanyDetailsList when data is successfully fetched" in {
-      val companiesDetailsList = CompanyDetailsList(List(CompanyDetails("First Company", "UK line 1", None, None, None, None, None,None,None, true)))
+      val companiesDetailsList = CompanyDetailsList(
+        List(CompanyDetails("First Company", "UK line 1", None, None, None, None, None, None, None, true))
+      )
       when(frontendSessionsRepository.getFromSession[JsValue](DataKey(eqTo("subsidiary-companies")))(any(), any()))
         .thenReturn(Future.successful(Some(Json.toJson(companiesDetailsList))))
 
@@ -460,7 +512,10 @@ class FrontendSessionServiceSpec extends AnyWordSpec with Matchers with ErsTestH
     }
 
     "return an empty CompanyDetailsList when fetching fails" in {
-      when(frontendSessionsRepository.getFromSession[CompanyDetailsList](DataKey(eqTo("subsidiary-companies")))(any(), any()))
+      when(
+        frontendSessionsRepository
+          .getFromSession[CompanyDetailsList](DataKey(eqTo("subsidiary-companies")))(any(), any())
+      )
         .thenReturn(Future.failed(new Exception("Fetching error")))
 
       val result = testService.fetchCompaniesOptionally().futureValue
@@ -468,12 +523,11 @@ class FrontendSessionServiceSpec extends AnyWordSpec with Matchers with ErsTestH
     }
   }
 
-
-
   "fetchPartFromCompanyDetails" should {
     "return Some(data) when data is successfully found at the given index" in {
 
-      val companyDetails = Json.toJson(CompanyDetails("First Company", "UK line 1", None, None, None, None, None,None,None, true))
+      val companyDetails   =
+        Json.toJson(CompanyDetails("First Company", "UK line 1", None, None, None, None, None, None, None, true))
       val companyCacheData = Json.toJson(companyDetails)
 
       when(frontendSessionsRepository.getFromSession[JsValue](DataKey(eqTo("scheme-organiser")))(any(), any()))
@@ -506,7 +560,7 @@ class FrontendSessionServiceSpec extends AnyWordSpec with Matchers with ErsTestH
 
   "fetchSchemeOrganiserOptionally" should {
     "return a CompanyDetails when data is successfully fetched" in {
-      val companyDetails = CompanyDetails("First Company", "UK line 1", None, None, None, None, None,None,None, true)
+      val companyDetails = CompanyDetails("First Company", "UK line 1", None, None, None, None, None, None, None, true)
       when(frontendSessionsRepository.getFromSession[JsValue](DataKey(eqTo("scheme-organiser")))(any(), any()))
         .thenReturn(Future.successful(Some(Json.toJson(companyDetails))))
 
@@ -522,4 +576,5 @@ class FrontendSessionServiceSpec extends AnyWordSpec with Matchers with ErsTestH
       result shouldBe None
     }
   }
+
 }

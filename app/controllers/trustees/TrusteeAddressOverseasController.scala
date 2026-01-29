@@ -33,24 +33,29 @@ import utils.{CountryCodes, ERSUtil}
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class TrusteeAddressOverseasController @Inject()(val mcc: MessagesControllerComponents,
-                                                 val ersConnector: ErsConnector,
-                                                 val globalErrorView: views.html.global_error,
-                                                 val authAction: AuthAction,
-                                                 val trusteeService: TrusteeService,
-                                                 val sessionService: FrontendSessionService,
-                                                 trusteeAddressOverseasView: views.html.trustee_address_overseas)
-                                                (implicit val ec: ExecutionContext,
-                                                 val ersUtil: ERSUtil,
-                                                 val appConfig: ApplicationConfig,
-                                                 val countryCodes: CountryCodes)
-  extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with TrusteeBaseController[TrusteeAddress] {
+class TrusteeAddressOverseasController @Inject() (
+  val mcc: MessagesControllerComponents,
+  val ersConnector: ErsConnector,
+  val globalErrorView: views.html.global_error,
+  val authAction: AuthAction,
+  val trusteeService: TrusteeService,
+  val sessionService: FrontendSessionService,
+  trusteeAddressOverseasView: views.html.trustee_address_overseas
+)(implicit
+  val ec: ExecutionContext,
+  val ersUtil: ERSUtil,
+  val appConfig: ApplicationConfig,
+  val countryCodes: CountryCodes
+) extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with TrusteeBaseController[TrusteeAddress] {
 
   implicit val format: Format[TrusteeAddress] = TrusteeAddress.format
 
   val cacheKey: String = ersUtil.TRUSTEE_ADDRESS_CACHE
 
-  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier, request: RequestHeader): Future[Result] = {
+  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit
+    hc: HeaderCarrier,
+    request: RequestHeader
+  ): Future[Result] =
     if (edit) {
       Future.successful(Redirect(controllers.trustees.routes.TrusteeSummaryController.trusteeSummaryPage()))
     } else {
@@ -58,13 +63,15 @@ class TrusteeAddressOverseasController @Inject()(val mcc: MessagesControllerComp
         Redirect(controllers.trustees.routes.TrusteeSummaryController.trusteeSummaryPage())
       }
     }
-  }
 
   def form(implicit request: Request[AnyContent]): Form[TrusteeAddress] = RsFormMappings.trusteeAddressOverseasForm()
 
-  def view(requestObject: RequestObject, index: Int, trusteeAddressOverseasForm: Form[TrusteeAddress], edit: Boolean = false)
-          (implicit request: Request[AnyContent], hc: HeaderCarrier): Html = {
+  def view(
+    requestObject: RequestObject,
+    index: Int,
+    trusteeAddressOverseasForm: Form[TrusteeAddress],
+    edit: Boolean = false
+  )(implicit request: Request[AnyContent], hc: HeaderCarrier): Html =
     trusteeAddressOverseasView(requestObject, index, trusteeAddressOverseasForm, edit)
-  }
 
 }

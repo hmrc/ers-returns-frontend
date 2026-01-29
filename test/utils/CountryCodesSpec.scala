@@ -23,7 +23,9 @@ import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Environment
 import play.api.i18n.MessagesApi
-import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents}
+import play.api.mvc.{
+  AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents
+}
 import play.api.test.Helpers.stubBodyParser
 
 import java.io.InputStream
@@ -67,11 +69,10 @@ class CountryCodesSpec
       countries should include("France")
     }
 
-    "not return a string of countries" in {
+    "not return a string of countries" in
       intercept[Exception] {
         TestCountryCodes.countries
       }
-    }
   }
 
   "CountryCode getCountry" should {

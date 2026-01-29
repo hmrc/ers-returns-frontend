@@ -20,11 +20,13 @@ import models.upscan.UploadedSuccessfully
 import play.api.libs.json.{Json, Writes}
 
 case class ValidatorData(callbackData: UploadedSuccessfully, schemeInfo: SchemeInfo)
+
 object ValidatorData {
   implicit val validatorDataWrites: Writes[ValidatorData] = Json.writes[ValidatorData]
 }
 
 case class CsvValidatorData(callbackData: List[UploadedSuccessfully], schemeInfo: SchemeInfo)
+
 object CsvValidatorData {
   implicit val csvValidatorDataWrites: Writes[CsvValidatorData] = Json.writes[CsvValidatorData]
 }

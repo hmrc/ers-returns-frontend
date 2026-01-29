@@ -28,7 +28,9 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status
 import play.api.i18n
 import play.api.i18n.{MessagesApi, MessagesImpl}
-import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents}
+import play.api.mvc.{
+  AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents
+}
 import play.api.test.Helpers.{contentAsString, defaultAwaitTimeout, redirectLocation, status, stubBodyParser}
 import utils.Fixtures.ersRequestObject
 import utils.{ERSFakeApplicationConfig, ErsTestHelper, Fixtures}
@@ -36,13 +38,14 @@ import views.html.{global_error, manual_is_the_company_in_uk}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class SchemeOrganiserBasedInUkControllerSpec extends AnyWordSpecLike
-  with Matchers
-  with OptionValues
-  with ERSFakeApplicationConfig
-  with ErsTestHelper
-  with GuiceOneAppPerSuite
-  with ScalaFutures {
+class SchemeOrganiserBasedInUkControllerSpec
+    extends AnyWordSpecLike
+    with Matchers
+    with OptionValues
+    with ERSFakeApplicationConfig
+    with ErsTestHelper
+    with GuiceOneAppPerSuite
+    with ScalaFutures {
 
   implicit val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
     messagesActionBuilder,
@@ -56,8 +59,7 @@ class SchemeOrganiserBasedInUkControllerSpec extends AnyWordSpecLike
 
   implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
 
-
-  val testController = new SchemeOrganiserBasedInUkController (
+  val testController = new SchemeOrganiserBasedInUkController(
     mockMCC,
     mockErsConnector,
     app.injector.instanceOf[global_error],
@@ -75,22 +77,24 @@ class SchemeOrganiserBasedInUkControllerSpec extends AnyWordSpecLike
     when(mockSessionService.fetch[RequestObject](any())(any(), any())).thenReturn(Future.successful(ersRequestObject))
 
     "show the empty scheme organiser based in UK question page when there is nothing to prefill" in {
-      when(mockSessionService.fetchPartFromCompanyDetails[CompanyBasedInUk]()(any(), any())).thenReturn(Future.successful(None))
+      when(mockSessionService.fetchPartFromCompanyDetails[CompanyBasedInUk]()(any(), any()))
+        .thenReturn(Future.successful(None))
 
       val result = testController.questionPage(1).apply(authRequest)
 
-      status(result) shouldBe Status.OK
+      status(result)        shouldBe Status.OK
       contentAsString(result) should include(testMessages("ers_manual_is_the_company_in_uk.title"))
       contentAsString(result) should include(testMessages("ers_manual_company_details.uk"))
       contentAsString(result) should include(testMessages("ers_manual_company_details.overseas"))
     }
 
     "show the prefilled scheme organiser based in UK question page when there is data to prefill" in {
-      when(mockSessionService.fetchPartFromCompanyDetails[CompanyBasedInUk]()(any(), any())).thenReturn(Future.successful(Some(CompanyBasedInUk(true))))
+      when(mockSessionService.fetchPartFromCompanyDetails[CompanyBasedInUk]()(any(), any()))
+        .thenReturn(Future.successful(Some(CompanyBasedInUk(true))))
 
       val result = testController.questionPage(1).apply(authRequest)
 
-      status(result) shouldBe Status.OK
+      status(result)        shouldBe Status.OK
       contentAsString(result) should include(testMessages("ers_manual_is_the_company_in_uk.title"))
       contentAsString(result) should include(testMessages("ers_manual_company_details.uk"))
       contentAsString(result) should include("value=\"0\"")
@@ -98,11 +102,12 @@ class SchemeOrganiserBasedInUkControllerSpec extends AnyWordSpecLike
     }
 
     "show the global error page if an exception occurs while retrieving cached data" in {
-      when(mockSessionService.fetchPartFromCompanyDetails[CompanyBasedInUk]()(any(), any())).thenReturn(Future.failed(new RuntimeException("Failure scenario")))
+      when(mockSessionService.fetchPartFromCompanyDetails[CompanyBasedInUk]()(any(), any()))
+        .thenReturn(Future.failed(new RuntimeException("Failure scenario")))
 
       val result = testController.questionPage(1).apply(authRequest)
 
-      status(result) shouldBe Status.OK
+      status(result)        shouldBe Status.OK
       contentAsString(result) should include(testMessages("ers.global_errors.title"))
       contentAsString(result) should include(testMessages("ers.global_errors.heading"))
       contentAsString(result) should include(testMessages("ers.global_errors.message"))
@@ -111,45 +116,58 @@ class SchemeOrganiserBasedInUkControllerSpec extends AnyWordSpecLike
 
   "calling handleQuestionSubmit" should {
     "show the scheme organiser based in UK form page with errors if the form is incorrectly filled" in {
-      val companyBasedData = Map("bool" -> "")
-      val form = RsFormMappings.companyBasedInUkForm().bind(companyBasedData)
-      implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*))
-      val result = testController.questionSubmit(1).apply(authRequest)
+      val companyBasedData     = Map("bool" -> "")
+      val form                 = RsFormMappings.companyBasedInUkForm().bind(companyBasedData)
+      implicit val authRequest = buildRequestWithAuth(
+        Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
+      )
+      val result               = testController.questionSubmit(1).apply(authRequest)
 
-      status(result) shouldBe Status.BAD_REQUEST
+      status(result)        shouldBe Status.BAD_REQUEST
       contentAsString(result) should include(testMessages("ers_manual_is_the_company_in_uk.title"))
       contentAsString(result) should include(testMessages("error.required"))
     }
   }
 
   "successfully bind the form and go to the scheme organiser address UK page if true" in {
-    when(mockSessionService.cache[CompanyBasedInUk](any(), any())(any(), any())).thenReturn(Future.successful(sessionPair))
-    when(mockSessionService.fetch[CompanyBasedInUk](refEq(mockErsUtil.SCHEME_ORGANISER_BASED))(any(), any())).thenReturn(Future.successful(CompanyBasedInUk(true)))
+    when(mockSessionService.cache[CompanyBasedInUk](any(), any())(any(), any()))
+      .thenReturn(Future.successful(sessionPair))
+    when(mockSessionService.fetch[CompanyBasedInUk](refEq(mockErsUtil.SCHEME_ORGANISER_BASED))(any(), any()))
+      .thenReturn(Future.successful(CompanyBasedInUk(true)))
     doNothing().when(mockCompanyDetailsService).updateSchemeOrganiserCache(any())
 
-    val companyBasedData = Map("basedInUk" -> "0")
-    val form = RsFormMappings.companyBasedInUkForm().bind(companyBasedData)
-    implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*))
-    val result = testController.questionSubmit(1).apply(authRequest)
+    val companyBasedData     = Map("basedInUk" -> "0")
+    val form                 = RsFormMappings.companyBasedInUkForm().bind(companyBasedData)
+    implicit val authRequest = buildRequestWithAuth(
+      Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
+    )
+    val result               = testController.questionSubmit(1).apply(authRequest)
 
-    status(result) shouldBe Status.SEE_OTHER
-    redirectLocation(result).get shouldBe controllers.schemeOrganiser.routes.SchemeOrganiserDetailsUkController.questionPage().url
+    status(result)               shouldBe Status.SEE_OTHER
+    redirectLocation(result).get shouldBe controllers.schemeOrganiser.routes.SchemeOrganiserDetailsUkController
+      .questionPage()
+      .url
   }
 
   "successfully bind the form and go to the scheme organiser address overseas page if false" in {
-    when(mockSessionService.cache[CompanyBasedInUk](any(), any())(any(), any())).thenReturn(Future.successful(sessionPair))
-    when(mockSessionService.fetch[CompanyBasedInUk](refEq(mockErsUtil.SCHEME_ORGANISER_BASED))(any(), any())).thenReturn(Future.successful(CompanyBasedInUk(false)))
+    when(mockSessionService.cache[CompanyBasedInUk](any(), any())(any(), any()))
+      .thenReturn(Future.successful(sessionPair))
+    when(mockSessionService.fetch[CompanyBasedInUk](refEq(mockErsUtil.SCHEME_ORGANISER_BASED))(any(), any()))
+      .thenReturn(Future.successful(CompanyBasedInUk(false)))
     doNothing().when(mockCompanyDetailsService).updateSchemeOrganiserCache(any())
 
-    val trusteeBasedData = Map("basedInUk" -> "1")
-    val form = RsFormMappings.companyBasedInUkForm().bind(trusteeBasedData)
-    implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*))
-    val result = testController.questionSubmit(1).apply(authRequest)
+    val trusteeBasedData     = Map("basedInUk" -> "1")
+    val form                 = RsFormMappings.companyBasedInUkForm().bind(trusteeBasedData)
+    implicit val authRequest = buildRequestWithAuth(
+      Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
+    )
+    val result               = testController.questionSubmit(1).apply(authRequest)
 
-    status(result) shouldBe Status.SEE_OTHER
-    redirectLocation(result).get shouldBe controllers.schemeOrganiser.routes.SchemeOrganiserDetailsOverseasController.questionPage().url
+    status(result)               shouldBe Status.SEE_OTHER
+    redirectLocation(result).get shouldBe controllers.schemeOrganiser.routes.SchemeOrganiserDetailsOverseasController
+      .questionPage()
+      .url
   }
-
 
   "calling editQuestion" should {
     implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
@@ -157,11 +175,12 @@ class SchemeOrganiserBasedInUkControllerSpec extends AnyWordSpecLike
     when(mockSessionService.fetch[RequestObject](any())(any(), any())).thenReturn(Future.successful(ersRequestObject))
 
     "be the same as showQuestion for a specific index" in {
-      when(mockSessionService.fetchPartFromCompanyDetails[CompanyBasedInUk]()(any(), any())).thenReturn(Future.successful(Some(CompanyBasedInUk(false))))
+      when(mockSessionService.fetchPartFromCompanyDetails[CompanyBasedInUk]()(any(), any()))
+        .thenReturn(Future.successful(Some(CompanyBasedInUk(false))))
 
       val result = testController.editCompany(1).apply(authRequest)
 
-      status(result) shouldBe Status.OK
+      status(result)        shouldBe Status.OK
       contentAsString(result) should include(testMessages("ers_manual_is_the_company_in_uk.title"))
     }
   }
@@ -171,33 +190,48 @@ class SchemeOrganiserBasedInUkControllerSpec extends AnyWordSpecLike
     when(mockSessionService.fetch[RequestObject](any())(any(), any())).thenReturn(Future.successful(ersRequestObject))
 
     "successfully bind the form and go to the edit version of the scheme organiser details UK page with the index preserved if the answer is true" in {
-      when(mockSessionService.cache[CompanyBasedInUk](any(), any())(any(), any())).thenReturn(Future.successful(sessionPair))
-      when(mockSessionService.fetch[CompanyBasedInUk](refEq(mockErsUtil.SCHEME_ORGANISER_BASED))(any(), any())).thenReturn(Future.successful(CompanyBasedInUk(true)))
-      when(mockSessionService.fetch[CompanyDetails](refEq(mockErsUtil.SCHEME_ORGANISER_CACHE))(any(), any())).thenReturn(Future.successful(Fixtures.exampleSchemeOrganiserUk))
+      when(mockSessionService.cache[CompanyBasedInUk](any(), any())(any(), any()))
+        .thenReturn(Future.successful(sessionPair))
+      when(mockSessionService.fetch[CompanyBasedInUk](refEq(mockErsUtil.SCHEME_ORGANISER_BASED))(any(), any()))
+        .thenReturn(Future.successful(CompanyBasedInUk(true)))
+      when(mockSessionService.fetch[CompanyDetails](refEq(mockErsUtil.SCHEME_ORGANISER_CACHE))(any(), any()))
+        .thenReturn(Future.successful(Fixtures.exampleSchemeOrganiserUk))
       doNothing().when(mockCompanyDetailsService).updateSchemeOrganiserCache(any())
 
-      val companyBasedData = Map("basedInUk" -> "0")
-      val form = RsFormMappings.companyBasedInUkForm().bind(companyBasedData)
-      implicit val authRequest: RequestWithOptionalAuthContext[AnyContent] = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*))
-      val result = testController.editQuestionSubmit(0).apply(authRequest)
+      val companyBasedData                                                 = Map("basedInUk" -> "0")
+      val form                                                             = RsFormMappings.companyBasedInUkForm().bind(companyBasedData)
+      implicit val authRequest: RequestWithOptionalAuthContext[AnyContent] = buildRequestWithAuth(
+        Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
+      )
+      val result                                                           = testController.editQuestionSubmit(0).apply(authRequest)
 
-      status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result).get shouldBe controllers.schemeOrganiser.routes.SchemeOrganiserDetailsUkController.editCompany(0).url
+      status(result)               shouldBe Status.SEE_OTHER
+      redirectLocation(result).get shouldBe controllers.schemeOrganiser.routes.SchemeOrganiserDetailsUkController
+        .editCompany(0)
+        .url
     }
 
     "successfully bind the form and go to the edit version of the scheme organiser details overseas page with the index preserved if the answer is false" in {
-      when(mockSessionService.cache[CompanyBasedInUk](any(), any())(any(), any())).thenReturn(Future.successful(sessionPair))
-      when(mockSessionService.fetch[CompanyBasedInUk](refEq(mockErsUtil.SCHEME_ORGANISER_BASED))(any(), any())).thenReturn(Future.successful(CompanyBasedInUk(false)))
-      when(mockSessionService.fetch[CompanyDetails](refEq(mockErsUtil.SCHEME_ORGANISER_CACHE))(any(), any())).thenReturn(Future.successful(Fixtures.exampleSchemeOrganiserOverseas))
+      when(mockSessionService.cache[CompanyBasedInUk](any(), any())(any(), any()))
+        .thenReturn(Future.successful(sessionPair))
+      when(mockSessionService.fetch[CompanyBasedInUk](refEq(mockErsUtil.SCHEME_ORGANISER_BASED))(any(), any()))
+        .thenReturn(Future.successful(CompanyBasedInUk(false)))
+      when(mockSessionService.fetch[CompanyDetails](refEq(mockErsUtil.SCHEME_ORGANISER_CACHE))(any(), any()))
+        .thenReturn(Future.successful(Fixtures.exampleSchemeOrganiserOverseas))
       doNothing().when(mockCompanyDetailsService).updateSchemeOrganiserCache(any())
 
-      val companyBasedData = Map("basedInUk" -> "0")
-      val form = RsFormMappings.companyBasedInUkForm().bind(companyBasedData)
-      implicit val authRequest: RequestWithOptionalAuthContext[AnyContent] = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*))
-      val result = testController.editQuestionSubmit(1).apply(authRequest)
+      val companyBasedData                                                 = Map("basedInUk" -> "0")
+      val form                                                             = RsFormMappings.companyBasedInUkForm().bind(companyBasedData)
+      implicit val authRequest: RequestWithOptionalAuthContext[AnyContent] = buildRequestWithAuth(
+        Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
+      )
+      val result                                                           = testController.editQuestionSubmit(1).apply(authRequest)
 
-      status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result).get shouldBe controllers.schemeOrganiser.routes.SchemeOrganiserDetailsOverseasController.editCompany(1).url
+      status(result)               shouldBe Status.SEE_OTHER
+      redirectLocation(result).get shouldBe controllers.schemeOrganiser.routes.SchemeOrganiserDetailsOverseasController
+        .editCompany(1)
+        .url
     }
   }
+
 }

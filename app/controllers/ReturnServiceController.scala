@@ -32,24 +32,23 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class ReturnServiceController @Inject() (val mcc: MessagesControllerComponents,
-                                         val sessionService: FrontendSessionService,
-                                         globalErrorView: views.html.global_error,
-                                         unauthorisedView: views.html.unauthorised,
-                                         startView: views.html.start,
-                                         authActionGovGateway: AuthActionGovGateway)
-                                        (implicit val ec: ExecutionContext,
-                                         val ersUtil: ERSUtil,
-                                         val appConfig: ApplicationConfig)
-  extends FrontendController(mcc) with I18nSupport with HMACUtil with Logging {
+class ReturnServiceController @Inject() (
+  val mcc: MessagesControllerComponents,
+  val sessionService: FrontendSessionService,
+  globalErrorView: views.html.global_error,
+  unauthorisedView: views.html.unauthorised,
+  startView: views.html.start,
+  authActionGovGateway: AuthActionGovGateway
+)(implicit val ec: ExecutionContext, val ersUtil: ERSUtil, val appConfig: ApplicationConfig)
+    extends FrontendController(mcc) with I18nSupport with HMACUtil with Logging {
 
   lazy val accessThreshold: Int = appConfig.accessThreshold
-  val accessDeniedUrl = "/outage-ers-frontend/index.html"
+  val accessDeniedUrl           = "/outage-ers-frontend/index.html"
 
   def cacheParams(ersRequestObject: RequestObject)(implicit request: RequestHeader): Future[Result] = {
     implicit val formatRSParams: OFormat[RequestObject] = Json.format[RequestObject]
     logger.debug("Request Object created --> " + ersRequestObject)
-    val futureResult = for {
+    val futureResult                                    = for {
       _ <- sessionService.remove(ersRequestObject.getSchemeReference)
       _ <- sessionService.cache(ersUtil.ERS_METADATA, ersRequestObject.toErsMetaData)
       _ <- sessionService.cache(ersUtil.ERS_REQUEST_OBJECT, ersRequestObject)
@@ -124,4 +123,5 @@ class ReturnServiceController @Inject() (val mcc: MessagesControllerComponents,
         "ers.global_errors.message"
       )(request, messages, appConfig)
     )
+
 }

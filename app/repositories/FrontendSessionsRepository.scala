@@ -26,15 +26,17 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class FrontendSessionsRepository @Inject()(mongoComponent: MongoComponent,
-                                           applicationConfig: ApplicationConfig)
-                                          (implicit ec: ExecutionContext) extends SessionCacheRepository(
-  mongoComponent = mongoComponent,
-  collectionName = "sessions",
-  ttl = applicationConfig.userSessionsTTL,
-  timestampSupport = new CurrentTimestampSupport,
-  sessionIdKey = SessionKeys.sessionId
-) {
+class FrontendSessionsRepository @Inject() (mongoComponent: MongoComponent, applicationConfig: ApplicationConfig)(
+  implicit ec: ExecutionContext
+) extends SessionCacheRepository(
+      mongoComponent = mongoComponent,
+      collectionName = "sessions",
+      ttl = applicationConfig.userSessionsTTL,
+      timestampSupport = new CurrentTimestampSupport,
+      sessionIdKey = SessionKeys.sessionId
+    ) {
+
   def getAllFromSession()(implicit request: RequestHeader): Future[Option[CacheItem]] =
     cacheRepo.findById(request)
+
 }

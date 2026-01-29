@@ -30,12 +30,12 @@ class FileSizeLimitErrorViewSpec extends ViewSpecBase {
 
   val oneHundredMbInBytes = 104857600
 
-   val application: Application = new GuiceApplicationBuilder()
+  val application: Application = new GuiceApplicationBuilder()
     .configure("file-size.uploadSizeLimit" -> oneHundredMbInBytes)
     .build()
 
-  implicit val request = FakeRequest("GET", "/foo")
-  implicit val messages: Messages = testMessages
+  implicit val request                      = FakeRequest("GET", "/foo")
+  implicit val messages: Messages           = testMessages
   implicit val appConfig: ApplicationConfig = application.injector.instanceOf[ApplicationConfig]
 
   val view = application.injector.instanceOf[file_size_limit_error]
@@ -44,29 +44,29 @@ class FileSizeLimitErrorViewSpec extends ViewSpecBase {
 
     "show expected page elements for CSV" in {
       val csvBackLink = controllers.routes.CsvFileUploadController.uploadFilePage().url
-      val doc = asDocument(view(csvBackLink))
+      val doc         = asDocument(view(csvBackLink))
       hasExpectedPageElements(doc, csvBackLink)
     }
 
     "show expected page elements for ODS" in {
-      val odsBackLink = controllers.routes.FileUploadController.uploadFilePage().url
+      val odsBackLink   = controllers.routes.FileUploadController.uploadFilePage().url
       val doc: Document = asDocument(view(odsBackLink))
       hasExpectedPageElements(doc, odsBackLink)
     }
 
     def hasExpectedPageElements(doc: Document, backLinkUrl: String): Unit = {
 
-      doc.title() mustBe "There is a problem – Employment Related Securities – GOV.UK"
+      doc.title()                                       mustBe "There is a problem – Employment Related Securities – GOV.UK"
       doc.getElementsByClass("govuk-heading-xl").text() mustBe "There is a problem"
 
       val backLink = doc.getElementsByClass("govuk-back-link")
-      backLink.size() mustBe 1
+      backLink.size()               mustBe 1
       backLink.first().attr("href") mustBe backLinkUrl
 
       val paragraphs = doc.getElementsByClass("govuk-body").asScala.toList.map(_.text())
 
       paragraphs.size mustBe 3
-      paragraphs mustBe List(
+      paragraphs      mustBe List(
         "Your file is larger than 104.857MB.",
         "You cannot upload a file that is larger than 104.857MB.",
         "You can email shareschemes@hmrc.gov.uk for help with your submission."
@@ -74,9 +74,10 @@ class FileSizeLimitErrorViewSpec extends ViewSpecBase {
 
       val shareSchemeLink = doc.getElementsByClass("share-schemes-link")
 
-      shareSchemeLink.size() mustBe 1
+      shareSchemeLink.size()               mustBe 1
       shareSchemeLink.first().attr("href") mustBe "mailto:shareschemes@hmrc.gov.uk"
     }
 
   }
+
 }

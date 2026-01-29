@@ -31,20 +31,21 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class CheckFileTypeController @Inject() (val mcc: MessagesControllerComponents,
-                                         val sessionService: FrontendSessionService,
-                                         globalErrorView: views.html.global_error,
-                                         checkFileTypeView: views.html.check_file_type,
-                                         authActionGovGateway: AuthActionGovGateway)
-                                        (implicit val ec: ExecutionContext,
-                                         val ersUtil: ERSUtil,
-                                         val appConfig: ApplicationConfig)
-  extends FrontendController(mcc) with I18nSupport with WithUnsafeDefaultFormBinding with Logging {
+class CheckFileTypeController @Inject() (
+  val mcc: MessagesControllerComponents,
+  val sessionService: FrontendSessionService,
+  globalErrorView: views.html.global_error,
+  checkFileTypeView: views.html.check_file_type,
+  authActionGovGateway: AuthActionGovGateway
+)(implicit val ec: ExecutionContext, val ersUtil: ERSUtil, val appConfig: ApplicationConfig)
+    extends FrontendController(mcc) with I18nSupport with WithUnsafeDefaultFormBinding with Logging {
 
   def checkFileTypePage(): Action[AnyContent] = authActionGovGateway.async { implicit request =>
     sessionService.fetch[ErsMetaData](ersUtil.ERS_METADATA).map { ele =>
-      logger.info(s"[CheckFileTypeController][checkFileTypePage()] Fetched request object with SAP Number: ${ele.sapNumber} " +
-        s"and schemeRef: ${ele.schemeInfo.schemeRef}")
+      logger.info(
+        s"[CheckFileTypeController][checkFileTypePage()] Fetched request object with SAP Number: ${ele.sapNumber} " +
+          s"and schemeRef: ${ele.schemeInfo.schemeRef}"
+      )
     }
     showCheckFileTypePage()(request)
   }
@@ -52,8 +53,9 @@ class CheckFileTypeController @Inject() (val mcc: MessagesControllerComponents,
   def showCheckFileTypePage()(implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
     (for {
       requestObject <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
-      fileType <- sessionService.fetch[CheckFileType](ersUtil.FILE_TYPE_CACHE)
-        .recover { case _: NoSuchElementException => CheckFileType(Some(""))}
+      fileType      <- sessionService
+                         .fetch[CheckFileType](ersUtil.FILE_TYPE_CACHE)
+                         .recover { case _: NoSuchElementException => CheckFileType(Some("")) }
     } yield Ok(
       checkFileTypeView(requestObject, fileType.checkFileType, RsFormMappings.checkFileTypeForm().fill(fileType))
     )).recover { case e: Throwable =>
@@ -101,4 +103,5 @@ class CheckFileTypeController @Inject() (val mcc: MessagesControllerComponents,
         "ers.global_errors.message"
       )(request, messages, appConfig)
     )
+
 }

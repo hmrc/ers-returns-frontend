@@ -50,18 +50,18 @@ import utils.{CountryCodes, ERSUtil}
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class SubsidiaryDetailsOverseasController @Inject()(val mcc: MessagesControllerComponents,
-                                                    val authConnector: DefaultAuthConnector,
-                                                    val ersConnector: ErsConnector,
-                                                    val globalErrorView: views.html.global_error,
-                                                    val authAction: AuthAction,
-                                                    implicit val countryCodes: CountryCodes,
-                                                    implicit val ersUtil: ERSUtil,
-                                                    implicit val sessionService: FrontendSessionService,
-                                                    implicit val appConfig: ApplicationConfig,
-                                                    companyOverseasDetailsView: views.html.manual_company_details_overseas
-                                                   )
-  extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with SubsidiaryBaseController[Company] {
+class SubsidiaryDetailsOverseasController @Inject() (
+  val mcc: MessagesControllerComponents,
+  val authConnector: DefaultAuthConnector,
+  val ersConnector: ErsConnector,
+  val globalErrorView: views.html.global_error,
+  val authAction: AuthAction,
+  implicit val countryCodes: CountryCodes,
+  implicit val ersUtil: ERSUtil,
+  implicit val sessionService: FrontendSessionService,
+  implicit val appConfig: ApplicationConfig,
+  companyOverseasDetailsView: views.html.manual_company_details_overseas
+) extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with SubsidiaryBaseController[Company] {
 
   implicit val ec: ExecutionContext = mcc.executionContext
 
@@ -69,19 +69,25 @@ class SubsidiaryDetailsOverseasController @Inject()(val mcc: MessagesControllerC
 
   implicit val format: Format[Company] = Company.format
 
-  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier, request: RequestHeader): Future[Result] = {
+  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit
+    hc: HeaderCarrier,
+    request: RequestHeader
+  ): Future[Result] =
     if (edit) {
-      Future.successful(Redirect(controllers.subsidiaries.routes.SubsidiaryAddressOverseasController.editCompany(index)))
+      Future.successful(
+        Redirect(controllers.subsidiaries.routes.SubsidiaryAddressOverseasController.editCompany(index))
+      )
     } else {
       Future.successful(Redirect(controllers.subsidiaries.routes.SubsidiaryAddressOverseasController.questionPage()))
     }
-  }
 
   def form(implicit request: Request[AnyContent]): Form[Company] = RsFormMappings.companyNameForm()
 
-  def view(requestObject: RequestObject, index: Int, companyNameOverseasForm: Form[Company], edit: Boolean = false)
-          (implicit request: Request[AnyContent], hc: HeaderCarrier): Html = {
+  def view(requestObject: RequestObject, index: Int, companyNameOverseasForm: Form[Company], edit: Boolean = false)(
+    implicit
+    request: Request[AnyContent],
+    hc: HeaderCarrier
+  ): Html =
     companyOverseasDetailsView(requestObject, index, companyNameOverseasForm, edit, schemeOrganiser = false)
-  }
 
 }

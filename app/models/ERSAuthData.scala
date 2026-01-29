@@ -27,14 +27,14 @@ case class ERSAuthData(
   empRef: EmpRef = EmpRef("", "")
 ) {
 
-	def getEnrolment(key: String): Option[Enrolment] = enrolments.find(_.key.equalsIgnoreCase(key))
-	def isAgent: Boolean = (affinityGroup contains Agent) || getEnrolment("HMRC-AGENT-AGENT").isDefined
+  def getEnrolment(key: String): Option[Enrolment] = enrolments.find(_.key.equalsIgnoreCase(key))
+  def isAgent: Boolean                             = (affinityGroup contains Agent) || getEnrolment("HMRC-AGENT-AGENT").isDefined
 
-	def getDassPortalLink(applicationConfig: ApplicationConfig): String = {
-		if (isAgent) {
-			s"${applicationConfig.dassGatewayHost}${applicationConfig.dassGatewayAgentPath}"
-		} else {
-			s"${applicationConfig.dassGatewayOrgLink}/${empRef.value}/${applicationConfig.dassGatewayOrgPath}"
-		}
-	}
+  def getDassPortalLink(applicationConfig: ApplicationConfig): String =
+    if (isAgent) {
+      s"${applicationConfig.dassGatewayHost}${applicationConfig.dassGatewayAgentPath}"
+    } else {
+      s"${applicationConfig.dassGatewayOrgLink}/${empRef.value}/${applicationConfig.dassGatewayOrgPath}"
+    }
+
 }

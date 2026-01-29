@@ -29,7 +29,9 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status
 import play.api.i18n
 import play.api.i18n.{MessagesApi, MessagesImpl}
-import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents}
+import play.api.mvc.{
+  AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents
+}
 import play.api.test.Helpers.{contentAsString, defaultAwaitTimeout, redirectLocation, status, stubBodyParser}
 import utils.Fixtures.{ersRequestObject, exampleTrustees}
 import utils.{ERSFakeApplicationConfig, ErsTestHelper, Fixtures}
@@ -37,13 +39,14 @@ import views.html.{global_error, trustee_remove_yes_no}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class TrusteeRemoveControllerSpec  extends AnyWordSpecLike
-  with Matchers
-  with OptionValues
-  with ERSFakeApplicationConfig
-  with ErsTestHelper
-  with GuiceOneAppPerSuite
-  with ScalaFutures {
+class TrusteeRemoveControllerSpec
+    extends AnyWordSpecLike
+    with Matchers
+    with OptionValues
+    with ERSFakeApplicationConfig
+    with ErsTestHelper
+    with GuiceOneAppPerSuite
+    with ScalaFutures {
 
   implicit val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
     messagesActionBuilder,
@@ -68,7 +71,8 @@ class TrusteeRemoveControllerSpec  extends AnyWordSpecLike
   )(mockMCC.executionContext, mockAppConfig, mockErsUtil)
 
   "onPageLoad" should {
-    val authRequest: RequestWithOptionalAuthContext[AnyContent] = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdSIP("GET"))
+    val authRequest: RequestWithOptionalAuthContext[AnyContent] =
+      buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdSIP("GET"))
     setAuthMocks()
 
     "show trusteeRemoveView" in {
@@ -87,7 +91,8 @@ class TrusteeRemoveControllerSpec  extends AnyWordSpecLike
 
     "show redirect to TrusteeSummaryController.trusteeSummaryPage if requested index does not exist in mongo" in {
       when(mockSessionService.fetch[RequestObject](any())(any(), any())).thenReturn(Future.successful(ersRequestObject))
-      when(mockSessionService.fetchTrusteesOptionally()(any(), any())).thenReturn(Future.successful(TrusteeDetailsList(List())))
+      when(mockSessionService.fetchTrusteesOptionally()(any(), any()))
+        .thenReturn(Future.successful(TrusteeDetailsList(List())))
 
       val result = testController.onPageLoad(10).apply(authRequest)
 
@@ -114,10 +119,13 @@ class TrusteeRemoveControllerSpec  extends AnyWordSpecLike
     setAuthMocks()
     "redirect to TrusteeRemoveProblemController.onPageLoad if only one trustee in list" in {
       val authRequest: RequestWithOptionalAuthContext[AnyContent] =
-        buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdSIP("POST").withFormUrlEncodedBody(("value", "true")))
+        buildRequestWithAuth(
+          Fixtures.buildFakeRequestWithSessionIdSIP("POST").withFormUrlEncodedBody(("value", "true"))
+        )
 
       when(mockSessionService.fetch[RequestObject](any())(any(), any())).thenReturn(Future.successful(ersRequestObject))
-      when(mockSessionService.fetchTrusteesOptionally()(any(), any())).thenReturn(Future.successful(TrusteeDetailsList(List(exampleTrustees.trustees.head))))
+      when(mockSessionService.fetchTrusteesOptionally()(any(), any()))
+        .thenReturn(Future.successful(TrusteeDetailsList(List(exampleTrustees.trustees.head))))
 
       val result = testController.onSubmit(0).apply(authRequest)
 
@@ -128,7 +136,9 @@ class TrusteeRemoveControllerSpec  extends AnyWordSpecLike
 
     "redirect to TrusteeSummaryController.trusteeSummaryPage if more than one trustee in list" in {
       val authRequest: RequestWithOptionalAuthContext[AnyContent] =
-        buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdSIP("POST").withFormUrlEncodedBody(("value", "true")))
+        buildRequestWithAuth(
+          Fixtures.buildFakeRequestWithSessionIdSIP("POST").withFormUrlEncodedBody(("value", "true"))
+        )
 
       when(mockSessionService.fetch[RequestObject](any())(any(), any())).thenReturn(Future.successful(ersRequestObject))
       when(mockSessionService.fetchTrusteesOptionally()(any(), any())).thenReturn(Future.successful(exampleTrustees))
@@ -143,7 +153,9 @@ class TrusteeRemoveControllerSpec  extends AnyWordSpecLike
 
     "show getGlobalErrorPage if deleteTrustee returned false" in {
       val authRequest: RequestWithOptionalAuthContext[AnyContent] =
-        buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdSIP("POST").withFormUrlEncodedBody(("value", "true")))
+        buildRequestWithAuth(
+          Fixtures.buildFakeRequestWithSessionIdSIP("POST").withFormUrlEncodedBody(("value", "true"))
+        )
 
       when(mockSessionService.fetch[RequestObject](any())(any(), any())).thenReturn(Future.successful(ersRequestObject))
       when(mockSessionService.fetchTrusteesOptionally()(any(), any())).thenReturn(Future.successful(exampleTrustees))
@@ -158,7 +170,9 @@ class TrusteeRemoveControllerSpec  extends AnyWordSpecLike
 
     "redirect to TrusteeSummaryController.trusteeSummaryPage if false submitted in form" in {
       val authRequest: RequestWithOptionalAuthContext[AnyContent] =
-        buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdSIP("POST").withFormUrlEncodedBody(("value", "false")))
+        buildRequestWithAuth(
+          Fixtures.buildFakeRequestWithSessionIdSIP("POST").withFormUrlEncodedBody(("value", "false"))
+        )
 
       when(mockSessionService.fetch[RequestObject](any())(any(), any())).thenReturn(Future.successful(ersRequestObject))
       when(mockSessionService.fetchTrusteesOptionally()(any(), any())).thenReturn(Future.successful(exampleTrustees))
@@ -188,4 +202,5 @@ class TrusteeRemoveControllerSpec  extends AnyWordSpecLike
       contentAsString(result) should include(testMessages("ers.no"))
     }
   }
+
 }
