@@ -54,9 +54,9 @@ trait ErsTestHelper extends MockitoSugar with AuthHelper with ERSFakeApplication
   val messagesActionBuilder: MessagesActionBuilder =
     new DefaultMessagesActionBuilderImpl(stubBodyParser[AnyContent](), stubMessagesApi())
 
-  val cc: ControllerComponents                     = stubControllerComponents()
-  val mockMaterializer: Materializer               = mock[Materializer]
-  val defaultParser                                = new Default()(mockMaterializer)
+  val cc: ControllerComponents       = stubControllerComponents()
+  val mockMaterializer: Materializer = mock[Materializer]
+  val defaultParser                  = new Default()(mockMaterializer)
 
   def buildRequestWithAuth(
     req: Request[AnyContent],
@@ -92,22 +92,22 @@ trait ErsTestHelper extends MockitoSugar with AuthHelper with ERSFakeApplication
   val OPTION_UPLOAD_SPREADSHEET  = "1"
   val TRUSTEES_CACHE             = "trustees"
 
-  val mockHttp: HttpClientV2                                                        = mock[HttpClientV2]
-  val mockRequestBuilder: RequestBuilder                                            = mock[RequestBuilder]
-  implicit val mockAppConfig: ApplicationConfig                                     = mock[ApplicationConfig]
-  val mockErsConnector: ErsConnector                                                = mock[ErsConnector]
-  implicit val mockErsUtil: ERSUtil                                                 = mock[ERSUtil]
-  val mockMetrics: Metrics                                                          = mock[Metrics]
-  val mockAuditEvents: AuditEvents                                                  = mock[AuditEvents]
-  val mockSessionRepository: FrontendSessionsRepository                             = mock[FrontendSessionsRepository]
-  val mockSessionService: FrontendSessionService                                    = mock[FrontendSessionService]
-  val mockFileValidatorService: FileValidatorService                                = mock[FileValidatorService]
-  val mockTrusteeService: TrusteeService                                            = mock[TrusteeService]
-  val mockCompanyDetailsService: CompanyDetailsService                              = mock[CompanyDetailsService]
-  implicit val mockCountryCodes: CountryCodes                                       = mock[CountryCodes]
-  val sessionPair: (String, String)                                                 = SessionKeys.sessionId -> sessionId
+  val mockHttp: HttpClientV2                            = mock[HttpClientV2]
+  val mockRequestBuilder: RequestBuilder                = mock[RequestBuilder]
+  implicit val mockAppConfig: ApplicationConfig         = mock[ApplicationConfig]
+  val mockErsConnector: ErsConnector                    = mock[ErsConnector]
+  implicit val mockErsUtil: ERSUtil                     = mock[ERSUtil]
+  val mockMetrics: Metrics                              = mock[Metrics]
+  val mockAuditEvents: AuditEvents                      = mock[AuditEvents]
+  val mockSessionRepository: FrontendSessionsRepository = mock[FrontendSessionsRepository]
+  val mockSessionService: FrontendSessionService        = mock[FrontendSessionService]
+  val mockFileValidatorService: FileValidatorService    = mock[FileValidatorService]
+  val mockTrusteeService: TrusteeService                = mock[TrusteeService]
+  val mockCompanyDetailsService: CompanyDetailsService  = mock[CompanyDetailsService]
+  implicit val mockCountryCodes: CountryCodes           = mock[CountryCodes]
+  val sessionPair: (String, String)                     = SessionKeys.sessionId -> sessionId
 
-  val testCacheItem: CacheItem                                                      = CacheItem(
+  val testCacheItem: CacheItem = CacheItem(
     "id",
     Json.toJson(Map("user1234" -> Json.toJson(Fixtures.ersSummary))).as[JsObject],
     Instant.now(),
@@ -117,7 +117,7 @@ trait ErsTestHelper extends MockitoSugar with AuthHelper with ERSFakeApplication
   def testCacheItem[A](key: String, data: A)(implicit writes: Writes[A]): CacheItem =
     CacheItem("id", Json.toJson(Map(key -> Json.toJson(data))).as[JsObject], Instant.now(), Instant.now())
 
-  def testCacheItems(data: Map[String, JsValue]): CacheItem                         =
+  def testCacheItems(data: Map[String, JsValue]): CacheItem =
     CacheItem("id", Json.toJson(data).as[JsObject], Instant.now(), Instant.now())
 
   def mergeCacheItems(items: Seq[CacheItem]): CacheItem = {

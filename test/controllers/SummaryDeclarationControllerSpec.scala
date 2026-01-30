@@ -69,7 +69,7 @@ class SummaryDeclarationControllerSpec
 
   val schemeInfo: SchemeInfo = SchemeInfo("XA1100000000000", Instant.now, "2", "2016", "EMI", "EMI")
 
-  val rsc: ErsMetaData       =
+  val rsc: ErsMetaData =
     new ErsMetaData(schemeInfo, "ipRef", Some("aoRef"), "empRef", Some("agentRef"), Some("sapNumber"))
 
   val schemeOrganiser: SchemeOrganiserDetails = new SchemeOrganiserDetails(
@@ -84,13 +84,13 @@ class SummaryDeclarationControllerSpec
     Option("1234567890")
   )
 
-  val schemeOrganiserString: String           = "Company Name, Add1, Add2, Add3, Add4, UK, AA111AA, AB123456, 1234567890"
-  val groupSchemeInfo: GroupSchemeInfo        = new GroupSchemeInfo(Option("1"), None)
+  val schemeOrganiserString: String    = "Company Name, Add1, Add2, Add3, Add4, UK, AA111AA, AB123456, 1234567890"
+  val groupSchemeInfo: GroupSchemeInfo = new GroupSchemeInfo(Option("1"), None)
 
-  val gscomp: CompanyDetails                  =
+  val gscomp: CompanyDetails =
     new CompanyDetails(Fixtures.companyName, "Address Line 1", None, None, None, None, Some("UK"), None, None, true)
 
-  val gscomps: CompanyDetailsList             = new CompanyDetailsList(List(gscomp))
+  val gscomps: CompanyDetailsList = new CompanyDetailsList(List(gscomp))
 
   val alterationAmends: AlterationAmends = new AlterationAmends(
     Option("1"),
@@ -100,11 +100,11 @@ class SummaryDeclarationControllerSpec
     Option("1")
   )
 
-  val reportableEvents: ReportableEvents               = new ReportableEvents(Some("1"))
-  val fileTypeCSV: CheckFileType                       = new CheckFileType(Some("csv"))
-  val fileTypeODS: CheckFileType                       = new CheckFileType(Some("ods"))
+  val reportableEvents: ReportableEvents = new ReportableEvents(Some("1"))
+  val fileTypeCSV: CheckFileType         = new CheckFileType(Some("csv"))
+  val fileTypeODS: CheckFileType         = new CheckFileType(Some("ods"))
 
-  val csvFileCallBackList: UpscanCsvFilesCallbackList  = UpscanCsvFilesCallbackList(
+  val csvFileCallBackList: UpscanCsvFilesCallbackList = UpscanCsvFilesCallbackList(
     List(
       UpscanCsvFilesCallback(
         UploadId("abcd"),
@@ -119,7 +119,7 @@ class SummaryDeclarationControllerSpec
   val trusteesList: TrusteeDetailsList                 = new TrusteeDetailsList(List(trustees))
   val fileNameODS: String                              = "test.osd"
 
-  val company: CompanyDetails                           =
+  val company: CompanyDetails =
     CompanyDetails(Fixtures.companyName, "Address Line 1", None, None, None, None, Some("UK"), None, None, true)
 
   lazy val companyDetailsList: CompanyDetailsList       = CompanyDetailsList(List(company, company))

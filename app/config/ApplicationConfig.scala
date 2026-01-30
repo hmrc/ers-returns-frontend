@@ -76,7 +76,7 @@ class ApplicationConfig @Inject() (config: ServicesConfig) {
     "cymraeg" -> Lang("cy")
   )
 
-  lazy val uploadFileSizeLimit: Int       = config.getInt("file-size.uploadSizeLimit")
-  lazy val uploadFileSizeInMB: Double     = uploadFileSizeLimit / 1000 / 1000.toDouble
+  lazy val uploadFileSizeLimit: Int   = config.getInt("file-size.uploadSizeLimit")
+  lazy val uploadFileSizeInMB: Double = uploadFileSizeLimit / 1000 / 1000.toDouble
 
 }

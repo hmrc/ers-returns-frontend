@@ -93,7 +93,7 @@ object Fixtures extends AuthHelper {
     sapNumber = Some("sap-123456")
   )
 
-  val scheetName: String                    = "EMI40_Adjustments_V4"
+  val scheetName: String = "EMI40_Adjustments_V4"
 
   val data: Option[ListBuffer[Seq[String]]] = Some(
     ListBuffer(
@@ -183,7 +183,7 @@ object Fixtures extends AuthHelper {
 
   val companiesList = CompanyDetailsList(List(companyDetails))
 
-  val ersSummary    = ErsSummary(
+  val ersSummary = ErsSummary(
     "testbundle",
     "1",
     None,

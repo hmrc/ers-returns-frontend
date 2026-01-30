@@ -63,9 +63,9 @@ class FileUploadControllerSpec
 
   implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
 
-  val testOptString: Option[String]   = Some("test")
+  val testOptString: Option[String] = Some("test")
 
-  val schemeInfo: SchemeInfo          = SchemeInfo(
+  val schemeInfo: SchemeInfo = SchemeInfo(
     testOptString.get,
     Instant.now,
     testOptString.get,
@@ -74,7 +74,7 @@ class FileUploadControllerSpec
     "CSOP"
   )
 
-  val validErsMetaData: ErsMetaData   =
+  val validErsMetaData: ErsMetaData =
     ErsMetaData(schemeInfo, "ipRef", Some("aoRef"), "empRef", Some("agentRef"), Some("sapNumber"))
 
   val ersRequestObject: RequestObject = RequestObject(

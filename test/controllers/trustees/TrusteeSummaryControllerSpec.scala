@@ -67,13 +67,13 @@ class TrusteeSummaryControllerSpec
   val globalErrorView: global_error       = app.injector.instanceOf[global_error]
   val trusteeSummaryView: trustee_summary = app.injector.instanceOf[trustee_summary]
 
-  val firstTrustee: TrusteeDetails  =
+  val firstTrustee: TrusteeDetails =
     TrusteeDetails("First Trustee", "1 The Street", None, None, None, Some("UK"), None, true)
 
   val secondTrustee: TrusteeDetails =
     TrusteeDetails("Second Trustee", "34 Some Road", None, None, None, Some("UK"), None, true)
 
-  val thirdTrustee: TrusteeDetails  =
+  val thirdTrustee: TrusteeDetails =
     TrusteeDetails("Third Trustee", "60 Window Close", None, None, None, Some("UK"), None, true)
 
   val trusteeList: List[TrusteeDetails] = List(

@@ -70,7 +70,7 @@ class GroupSchemeControllerSpec
   val company: CompanyDetails =
     CompanyDetails(Fixtures.companyName, "Address Line 1", None, None, None, None, None, None, None, false)
 
-  val company1: CompanyDetails                          =
+  val company1: CompanyDetails =
     CompanyDetails(
       Fixtures.companyName,
       "Address Line 1",

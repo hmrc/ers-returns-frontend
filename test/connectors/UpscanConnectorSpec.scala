@@ -41,10 +41,10 @@ class UpscanConnectorSpec
     with MockitoSugar
     with WireMockHelper {
 
-  lazy val connector: UpscanConnector         = app.injector.instanceOf[UpscanConnector]
-  implicit val hc: HeaderCarrier              = HeaderCarrier()
+  lazy val connector: UpscanConnector = app.injector.instanceOf[UpscanConnector]
+  implicit val hc: HeaderCarrier      = HeaderCarrier()
 
-  val request: UpscanInitiateRequest          =
+  val request: UpscanInitiateRequest =
     UpscanInitiateRequest("callbackUrl", "successRedirectUrl", "errorRedirectUrl", 1, 209715200)
 
   override def fakeApplication(): Application = new GuiceApplicationBuilder()

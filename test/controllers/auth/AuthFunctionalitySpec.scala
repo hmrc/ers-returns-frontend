@@ -80,12 +80,12 @@ class AuthFunctionalitySpec
       empRef = testEmpRef
     )
 
-    lazy val schemeInfo: SchemeInfo   = SchemeInfo("XA1100000000000", Instant.now, "1", "2016", "EMI", "EMI")
+    lazy val schemeInfo: SchemeInfo = SchemeInfo("XA1100000000000", Instant.now, "1", "2016", "EMI", "EMI")
 
     val validErsMetaData: ErsMetaData =
       ErsMetaData(schemeInfo, "ipRef", Some("aoRef"), "1234/GA4567", Some("agentRef"), Some("sapNumber"))
 
-    val reqObj: RequestObject         = RequestObject(None, None, None, None, None, None, Some("1234/GA4567"), None, None)
+    val reqObj: RequestObject = RequestObject(None, None, None, None, None, None, Some("1234/GA4567"), None, None)
 
     when(
       mockSessionService.fetch[RequestObject](ArgumentMatchers.any())(

@@ -52,7 +52,7 @@ class CheckCsvFilesControllerSpec
 
   val mockListCsvFilesCallback: UpscanCsvFilesList = mock[UpscanCsvFilesList](Mockito.RETURNS_DEEP_STUBS)
 
-  val mockMCC: MessagesControllerComponents        = DefaultMessagesControllerComponents(
+  val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
     messagesActionBuilder,
     DefaultActionBuilder(stubBodyParser[AnyContent]()),
     cc.parsers,
@@ -62,7 +62,7 @@ class CheckCsvFilesControllerSpec
     ExecutionContext.global
   )
 
-  val globalErrorView: global_error                = app.injector.instanceOf[global_error]
+  val globalErrorView: global_error = app.injector.instanceOf[global_error]
 
   implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
 
