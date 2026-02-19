@@ -18,7 +18,7 @@ package controllers.subsidiaries
 
 import models.{CompanyAddress, CompanyDetailsList, RequestObject, RsFormMappings}
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{doNothing, when}
+import org.mockito.Mockito.when
 import org.scalatest.OptionValues
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.should.Matchers
@@ -57,7 +57,7 @@ class SubsidiaryAddressUKControllerSpec extends AnyWordSpecLike
   implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
 
 
-  val testController = new SubsidiaryAddressUkController (
+  val testController = new SubsidiaryAddressUkController(
     mockMCC,
     mockAuthConnector,
     mockErsConnector,
@@ -120,8 +120,8 @@ class SubsidiaryAddressUKControllerSpec extends AnyWordSpecLike
     }
 
     "successfully bind the form and redirect to the scheme Organiser Summary Page" in {
-      when(mockSessionService.cache[CompanyAddress](any(), any())(any(), any())).thenReturn(Future.successful(("","")))
-      doNothing().when(mockCompanyDetailsService).updateSubsidiaryCompanyCache(any())(any())
+      when(mockSessionService.cache[CompanyAddress](any(), any())(any(), any())).thenReturn(Future.successful(("", "")))
+      when(mockCompanyDetailsService.updateSubsidiaryCompanyCache(any())(any())).thenReturn(Future(()))
 
       val companyAddressUkData = Map("addressLine1" -> "123 Fake Street")
       val form = RsFormMappings.companyAddressUkForm().bind(companyAddressUkData)
@@ -150,7 +150,6 @@ class SubsidiaryAddressUKControllerSpec extends AnyWordSpecLike
 
     }
   }
-
 
 
 }

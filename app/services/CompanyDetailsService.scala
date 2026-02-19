@@ -35,7 +35,7 @@ class CompanyDetailsService @Inject()(
   def deleteCompany(companies: CompanyDetailsList, index: Int)(implicit request: RequestHeader): Future[Boolean] = {
     val activeCompanies = CompanyDetailsList(filterOutDeletedCompany(companies, index))
     (for {
-        _ <- sessionService.cache(ersUtil.SUBSIDIARY_COMPANIES_CACHE, activeCompanies)
+      _ <- sessionService.cache(ersUtil.SUBSIDIARY_COMPANIES_CACHE, activeCompanies)
     } yield {
       if (activeCompanies.companies.isEmpty) sessionService.cache(ersUtil.GROUP_SCHEME_CACHE_CONTROLLER, GroupSchemeInfo(None, None))
       true
@@ -46,29 +46,34 @@ class CompanyDetailsService @Inject()(
     }
   }
 
-  def updateSubsidiaryCompanyCache(index: Int)(implicit request: RequestHeader): Unit = {
-    try {
-      sessionService.fetch[Company](ersUtil.SUBSIDIARY_COMPANY_NAME_CACHE).map(name =>
-        sessionService.fetchCompaniesOptionally().map(cachedCompanies => {
-          sessionService.fetch[CompanyAddress](ersUtil.SUBSIDIARY_COMPANY_ADDRESS_CACHE).map(address =>
-            CompanyDetailsList(replaceCompany(cachedCompanies.companies, index, CompanyDetails(name, address))))
-        }.map(companyDetailsList =>
-          sessionService.cache[CompanyDetailsList](ersUtil.SUBSIDIARY_COMPANIES_CACHE, companyDetailsList))))
-    } catch {
+  def updateSubsidiaryCompanyCache(index: Int)(implicit request: RequestHeader): Future[Unit] = {
+    (for {
+      name <- sessionService.fetch[Company](ersUtil.SUBSIDIARY_COMPANY_NAME_CACHE)
+      companyDetailsList <- {
+        for {
+          cachedCompanies <- sessionService.fetchCompaniesOptionally()
+          address <- sessionService.fetch[CompanyAddress](ersUtil.SUBSIDIARY_COMPANY_ADDRESS_CACHE)
+        } yield (CompanyDetailsList(replaceCompany(cachedCompanies.companies, index, CompanyDetails(name, address))))
+      }
+      _ <- sessionService.cache[CompanyDetailsList](ersUtil.SUBSIDIARY_COMPANIES_CACHE, companyDetailsList)
+    } yield ()).recoverWith {
       case ex: Throwable =>
         logger.error("[CompanyDetailsService][updateSubsidiaryCompanyCache] Error updating subsidiary company cache", ex)
+        Future.failed(ex)
     }
   }
 
-  def updateSchemeOrganiserCache(implicit request: RequestHeader): Unit = {
-    try {
-      sessionService.fetch[Company](ersUtil.SCHEME_ORGANISER_NAME_CACHE).map(name =>
-        sessionService.fetch[CompanyAddress](ersUtil.SCHEME_ORGANISER_ADDRESS_CACHE).map(address =>
-          sessionService.cache[CompanyDetails](ersUtil.SCHEME_ORGANISER_CACHE, CompanyDetails(name, address))))
-    } catch {
-      case ex: Throwable =>
-        logger.error("[CompanyDetailsService][updateSchemeOrganiserCache] Error updating scheme organiser cache", ex)
-    }
+  def updateSchemeOrganiserCache(implicit request: RequestHeader): Future[Unit] = {
+    (for {
+      name <- sessionService.fetch[Company](ersUtil.SCHEME_ORGANISER_NAME_CACHE)
+      address <- sessionService.fetch[CompanyAddress](ersUtil.SCHEME_ORGANISER_ADDRESS_CACHE)
+      _ <- sessionService.cache[CompanyDetails](ersUtil.SCHEME_ORGANISER_CACHE, CompanyDetails(name, address))
+    } yield ())
+      .recoverWith {
+        case ex: Throwable =>
+          logger.error("[CompanyDetailsService][updateSchemeOrganiserCache] Error updating scheme organiser cache", ex)
+          Future.failed(ex)
+      }
   }
 
   def replaceCompany(companies: List[CompanyDetails], index: Int, formData: CompanyDetails): List[CompanyDetails] =

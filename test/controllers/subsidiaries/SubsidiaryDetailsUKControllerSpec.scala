@@ -18,7 +18,7 @@ package controllers.subsidiaries
 
 import models.{Company, RequestObject, RsFormMappings}
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{doNothing, when}
+import org.mockito.Mockito.when
 import org.scalatest.OptionValues
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.should.Matchers
@@ -43,98 +43,99 @@ class SubsidiaryDetailsUKControllerSpec extends AnyWordSpecLike
   with GuiceOneAppPerSuite
   with ScalaFutures {
 
-    implicit val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
-      messagesActionBuilder,
-      DefaultActionBuilder(stubBodyParser[AnyContent]()),
-      cc.parsers,
-      fakeApplication().injector.instanceOf[MessagesApi],
-      cc.langs,
-      cc.fileMimeTypes,
-      ExecutionContext.global
-    )
+  implicit val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
+    messagesActionBuilder,
+    DefaultActionBuilder(stubBodyParser[AnyContent]()),
+    cc.parsers,
+    fakeApplication().injector.instanceOf[MessagesApi],
+    cc.langs,
+    cc.fileMimeTypes,
+    ExecutionContext.global
+  )
 
-    implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
+  implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
 
 
-    val testController = new SubsidiaryDetailsUkController(
-      mockMCC,
-      mockAuthConnector,
-      mockErsConnector,
-      app.injector.instanceOf[global_error],
-      testAuthAction,
-      mockCountryCodes,
-      mockErsUtil,
-      mockSessionService,
-      mockAppConfig,
-      app.injector.instanceOf[manual_company_details_uk]
-    )
-    "calling showQuestionPage" should {
-      implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
-      setAuthMocks()
-      when(mockSessionService.fetch[RequestObject](any())(any(), any())).thenReturn(Future.successful(ersRequestObject))
+  val testController = new SubsidiaryDetailsUkController(
+    mockMCC,
+    mockAuthConnector,
+    mockErsConnector,
+    app.injector.instanceOf[global_error],
+    testAuthAction,
+    mockCountryCodes,
+    mockErsUtil,
+    mockSessionService,
+    mockAppConfig,
+    app.injector.instanceOf[manual_company_details_uk]
+  )
 
-      "show the empty company name question page when there is nothing to prefill" in {
-        when(mockSessionService.fetchPartFromCompanyDetailsList[Company](any())(any(), any())).thenReturn(Future.successful(None))
+  "calling showQuestionPage" should {
+    implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+    setAuthMocks()
+    when(mockSessionService.fetch[RequestObject](any())(any(), any())).thenReturn(Future.successful(ersRequestObject))
 
-        val result = testController.questionPage(1).apply(authRequest)
+    "show the empty company name question page when there is nothing to prefill" in {
+      when(mockSessionService.fetchPartFromCompanyDetailsList[Company](any())(any(), any())).thenReturn(Future.successful(None))
 
-        status(result) shouldBe Status.OK
-        contentAsString(result) should include(testMessages("ers_manual_company_details_uk.title"))
-      }
+      val result = testController.questionPage(1).apply(authRequest)
 
-      "show the prefilled company name question page when there is data to prefill" in {
-        when(mockSessionService.fetchPartFromCompanyDetailsList[Company](any())(any(), any())).thenReturn(Future.successful(Some(Company("Test Company", Some("AA123456"), Some("1234567890")))))
-
-        val result = testController.questionPage(1).apply(authRequest)
-
-        status(result) shouldBe Status.OK
-        contentAsString(result) should include(testMessages("ers_manual_company_details_uk.title"))
-        contentAsString(result) should include("Test Company")
-        contentAsString(result) should include("AA123456")
-        contentAsString(result) should include("1234567890")
-
-      }
-
-      "show the global error page if an exception occurs while retrieving cached data" in {
-        when(mockSessionService.fetchPartFromCompanyDetailsList[Company](any())(any(), any())).thenReturn(Future.failed(new RuntimeException("Failure scenario")))
-
-        val result = testController.questionPage(1).apply(authRequest)
-
-        status(result) shouldBe Status.OK
-        contentAsString(result) should include(testMessages("ers.global_errors.title"))
-        contentAsString(result) should include(testMessages("ers.global_errors.heading"))
-        contentAsString(result) should include(testMessages("ers.global_errors.message"))
-      }
+      status(result) shouldBe Status.OK
+      contentAsString(result) should include(testMessages("ers_manual_company_details_uk.title"))
     }
 
-    "calling handleQuestionSubmit" should {
-      "show the company name form page with errors if the form is incorrectly filled" in {
-        val companyData = Map("bool" -> "")
-        val form = RsFormMappings.companyNameForm().bind( companyData)
-        implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*))
-        val result = testController.questionSubmit(1).apply(authRequest)
+    "show the prefilled company name question page when there is data to prefill" in {
+      when(mockSessionService.fetchPartFromCompanyDetailsList[Company](any())(any(), any())).thenReturn(Future.successful(Some(Company("Test Company", Some("AA123456"), Some("1234567890")))))
 
-        status(result) shouldBe Status.BAD_REQUEST
-        contentAsString(result) should include(testMessages("ers_manual_company_details_uk.title"))
-        contentAsString(result) should include(testMessages("error.required"))
-      }
+      val result = testController.questionPage(1).apply(authRequest)
 
-      "successfully bind the form and go to the company uk address page if the form is filled correctly" in {
-        when(mockSessionService.cache[Company](any(), any())(any(), any())).thenReturn(Future.successful(("","")))
-        doNothing().when(mockCompanyDetailsService).updateSubsidiaryCompanyCache(any())(any())
+      status(result) shouldBe Status.OK
+      contentAsString(result) should include(testMessages("ers_manual_company_details_uk.title"))
+      contentAsString(result) should include("Test Company")
+      contentAsString(result) should include("AA123456")
+      contentAsString(result) should include("1234567890")
 
-        val companyData = Map("companyName" -> "Test company")
-
-        val form = RsFormMappings.companyNameForm().bind(companyData)
-
-        implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*))
-        val result = testController.questionSubmit(1).apply(authRequest)
-
-        status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(result).get shouldBe controllers.subsidiaries.routes.SubsidiaryAddressUkController.questionPage().url
-
-      }
     }
+
+    "show the global error page if an exception occurs while retrieving cached data" in {
+      when(mockSessionService.fetchPartFromCompanyDetailsList[Company](any())(any(), any())).thenReturn(Future.failed(new RuntimeException("Failure scenario")))
+
+      val result = testController.questionPage(1).apply(authRequest)
+
+      status(result) shouldBe Status.OK
+      contentAsString(result) should include(testMessages("ers.global_errors.title"))
+      contentAsString(result) should include(testMessages("ers.global_errors.heading"))
+      contentAsString(result) should include(testMessages("ers.global_errors.message"))
+    }
+  }
+
+  "calling handleQuestionSubmit" should {
+    "show the company name form page with errors if the form is incorrectly filled" in {
+      val companyData = Map("bool" -> "")
+      val form = RsFormMappings.companyNameForm().bind(companyData)
+      implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*))
+      val result = testController.questionSubmit(1).apply(authRequest)
+
+      status(result) shouldBe Status.BAD_REQUEST
+      contentAsString(result) should include(testMessages("ers_manual_company_details_uk.title"))
+      contentAsString(result) should include(testMessages("error.required"))
+    }
+
+    "successfully bind the form and go to the company uk address page if the form is filled correctly" in {
+      when(mockSessionService.cache[Company](any(), any())(any(), any())).thenReturn(Future.successful(("", "")))
+      when(mockCompanyDetailsService.updateSubsidiaryCompanyCache(any())(any())).thenReturn(Future(()))
+
+      val companyData = Map("companyName" -> "Test company")
+
+      val form = RsFormMappings.companyNameForm().bind(companyData)
+
+      implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*))
+      val result = testController.questionSubmit(1).apply(authRequest)
+
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result).get shouldBe controllers.subsidiaries.routes.SubsidiaryAddressUkController.questionPage().url
+
+    }
+  }
 
   "calling editCompany" should {
     implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
@@ -142,7 +143,7 @@ class SubsidiaryDetailsUKControllerSpec extends AnyWordSpecLike
     when(mockSessionService.fetch[RequestObject](any())(any(), any())).thenReturn(Future.successful(ersRequestObject))
 
     "be the same as showQuestion for a specific index" in {
-      when(mockSessionService.fetchPartFromCompanyDetailsList[Company](any())(any(), any())).thenReturn(Future.successful(Some(Company("Test company",None,None))))
+      when(mockSessionService.fetchPartFromCompanyDetailsList[Company](any())(any(), any())).thenReturn(Future.successful(Some(Company("Test company", None, None))))
 
       val result = testController.editCompany(1).apply(authRequest)
 
@@ -158,9 +159,9 @@ class SubsidiaryDetailsUKControllerSpec extends AnyWordSpecLike
     when(mockSessionService.fetch[RequestObject](any())(any(), any())).thenReturn(Future.successful(ersRequestObject))
 
     "successfully bind the form and go to the edit version of the subsidiary address UK page with the index preserved if the form is filled correctly" in {
-      when(mockSessionService.cache[Company](any(), any())(any(), any())).thenReturn(Future.successful(("","")))
+      when(mockSessionService.cache[Company](any(), any())(any(), any())).thenReturn(Future.successful(("", "")))
       when(mockSessionService.fetchCompaniesOptionally()(any(), any())).thenReturn(Future.successful(Fixtures.exampleCompanies))
-      doNothing().when(mockCompanyDetailsService).updateSubsidiaryCompanyCache(any())(any())
+      when(mockCompanyDetailsService.updateSubsidiaryCompanyCache(any())(any())).thenReturn(Future(()))
 
       val companyAddressData = Map("companyName" -> "Test person")
       val form = RsFormMappings.companyAddressUkForm().bind(companyAddressData)
