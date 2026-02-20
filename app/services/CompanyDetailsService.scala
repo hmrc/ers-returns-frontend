@@ -49,12 +49,9 @@ class CompanyDetailsService @Inject()(
   def updateSubsidiaryCompanyCache(index: Int)(implicit request: RequestHeader): Future[Unit] = {
     (for {
       name <- sessionService.fetch[Company](ersUtil.SUBSIDIARY_COMPANY_NAME_CACHE)
-      companyDetailsList <- {
-        for {
-          cachedCompanies <- sessionService.fetchCompaniesOptionally()
-          address <- sessionService.fetch[CompanyAddress](ersUtil.SUBSIDIARY_COMPANY_ADDRESS_CACHE)
-        } yield (CompanyDetailsList(replaceCompany(cachedCompanies.companies, index, CompanyDetails(name, address))))
-      }
+      cachedCompanies <- sessionService.fetchCompaniesOptionally()
+      address <- sessionService.fetch[CompanyAddress](ersUtil.SUBSIDIARY_COMPANY_ADDRESS_CACHE)
+      companyDetailsList = CompanyDetailsList(replaceCompany(cachedCompanies.companies, index, CompanyDetails(name, address)))
       _ <- sessionService.cache[CompanyDetailsList](ersUtil.SUBSIDIARY_COMPANIES_CACHE, companyDetailsList)
     } yield ()).recoverWith {
       case ex: Throwable =>
