@@ -36,7 +36,6 @@ import views.html.{global_error, manual_address_uk}
 import scala.concurrent.{ExecutionContext, Future}
 
 class SubsidiaryAddressUKControllerSpec extends AnyWordSpecLike
-
   with Matchers
   with OptionValues
   with ERSFakeApplicationConfig
@@ -55,7 +54,6 @@ class SubsidiaryAddressUKControllerSpec extends AnyWordSpecLike
   )
 
   implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
-
 
   val testController = new SubsidiaryAddressUkController(
     mockMCC,
@@ -150,6 +148,5 @@ class SubsidiaryAddressUKControllerSpec extends AnyWordSpecLike
 
     }
   }
-
 
 }
