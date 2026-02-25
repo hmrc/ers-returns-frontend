@@ -17,8 +17,9 @@
 package controllers.subsidiaries
 
 import models.{CompanyAddress, CompanyDetailsList, RequestObject, RsFormMappings}
+import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.when
+import org.mockito.Mockito.{never, reset, verify, when}
 import org.scalatest.OptionValues
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.should.Matchers
@@ -28,7 +29,9 @@ import play.api.http.Status
 import play.api.i18n
 import play.api.i18n.{MessagesApi, MessagesImpl}
 import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents}
-import play.api.test.Helpers.{contentAsString, defaultAwaitTimeout, redirectLocation, status, stubBodyParser}
+import play.api.test.FakeRequest
+import play.api.test.Helpers.{contentAsString, defaultAwaitTimeout, headers, redirectLocation, status, stubBodyParser}
+import uk.gov.hmrc.http.HeaderCarrier
 import utils.Fixtures.{companyAddressOverseas, ersRequestObject}
 import utils.{ERSFakeApplicationConfig, ErsTestHelper, Fixtures}
 import views.html.{global_error, manual_address_overseas}
@@ -148,6 +151,38 @@ class SubsidiaryAddressOverseasControllerSpec extends AnyWordSpecLike
       contentAsString(result) should include(testMessages("ers_company_address.line1"))
       contentAsString(result) should include("Overseas 1")
 
+    }
+  }
+
+  "calling nextPageRedirect" should {
+
+    val request = FakeRequest()
+    val hc = HeaderCarrier()
+    val expectedRedirectUrl = "/submit-your-ers-annual-return/subsidiary-company-summary"
+
+    "redirect to groupPlanSummaryPage given edit parameter is true " in {
+      reset(mockCompanyDetailsService)
+      verify(mockCompanyDetailsService, never()).updateSubsidiaryCompanyCache(any())(any())
+
+      val result = testController.nextPageRedirect(0, edit = true)(hc, request)
+
+      status(result) shouldBe Status.SEE_OTHER
+      headers(result)(implicitly)("Location") shouldBe expectedRedirectUrl
+    }
+
+    "redirect to groupPlanSummaryPage given edit parameter is false and cache update fails" in {
+      reset(mockCompanyDetailsService)
+
+      val index = 0
+
+      when(mockCompanyDetailsService.updateSubsidiaryCompanyCache(ArgumentMatchers.eq(index))(any())).thenReturn {
+        Future.failed(new Exception("error"))
+      }
+
+      val result = testController.nextPageRedirect(index, edit = false)(hc, request)
+
+      status(result) shouldBe Status.SEE_OTHER
+      headers(result)(implicitly)("Location") shouldBe expectedRedirectUrl
     }
   }
 
