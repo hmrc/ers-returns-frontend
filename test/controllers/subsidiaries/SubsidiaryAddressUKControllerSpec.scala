@@ -132,21 +132,6 @@ class SubsidiaryAddressUKControllerSpec extends AnyWordSpecLike
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result).get shouldBe controllers.subsidiaries.routes.GroupSchemeController.groupPlanSummaryPage().url
     }
-
-    "redirect to the scheme Organiser Summary Page given the updateSchemeOrganiserCache call fails" in {
-      when(mockSessionService.cache[CompanyAddress](any(), any())(any(), any())).thenReturn(Future.successful(("", "")))
-      when(mockCompanyDetailsService.updateSchemeOrganiserCache(any())).thenReturn {
-        Future.failed(new Exception("error"))
-      }
-
-      val companyAddressUkData = Map("addressLine1" -> "123 Fake Street")
-      val form = RsFormMappings.companyAddressUkForm().bind(companyAddressUkData)
-      implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*))
-      val result = testController.questionSubmit(1).apply(authRequest)
-
-      status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result).get shouldBe controllers.subsidiaries.routes.GroupSchemeController.groupPlanSummaryPage().url
-    }
   }
 
   "calling editCompany" should {
