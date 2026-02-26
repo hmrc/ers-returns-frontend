@@ -19,7 +19,7 @@ package controllers.schemeOrganiser
 import controllers.auth.RequestWithOptionalAuthContext
 import models.{CompanyBasedInUk, CompanyDetails, RequestObject, RsFormMappings}
 import org.mockito.ArgumentMatchers.{any, refEq}
-import org.mockito.Mockito.{doNothing, when}
+import org.mockito.Mockito.when
 import org.scalatest.OptionValues
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.should.Matchers
@@ -57,7 +57,7 @@ class SchemeOrganiserBasedInUkControllerSpec extends AnyWordSpecLike
   implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
 
 
-  val testController = new SchemeOrganiserBasedInUkController (
+  val testController = new SchemeOrganiserBasedInUkController(
     mockMCC,
     mockErsConnector,
     app.injector.instanceOf[global_error],
@@ -125,7 +125,7 @@ class SchemeOrganiserBasedInUkControllerSpec extends AnyWordSpecLike
   "successfully bind the form and go to the scheme organiser address UK page if true" in {
     when(mockSessionService.cache[CompanyBasedInUk](any(), any())(any(), any())).thenReturn(Future.successful(sessionPair))
     when(mockSessionService.fetch[CompanyBasedInUk](refEq(mockErsUtil.SCHEME_ORGANISER_BASED))(any(), any())).thenReturn(Future.successful(CompanyBasedInUk(true)))
-    doNothing().when(mockCompanyDetailsService).updateSchemeOrganiserCache(any())
+    when(mockCompanyDetailsService.updateSchemeOrganiserCache(any())).thenReturn(Future(()))
 
     val companyBasedData = Map("basedInUk" -> "0")
     val form = RsFormMappings.companyBasedInUkForm().bind(companyBasedData)
@@ -139,7 +139,7 @@ class SchemeOrganiserBasedInUkControllerSpec extends AnyWordSpecLike
   "successfully bind the form and go to the scheme organiser address overseas page if false" in {
     when(mockSessionService.cache[CompanyBasedInUk](any(), any())(any(), any())).thenReturn(Future.successful(sessionPair))
     when(mockSessionService.fetch[CompanyBasedInUk](refEq(mockErsUtil.SCHEME_ORGANISER_BASED))(any(), any())).thenReturn(Future.successful(CompanyBasedInUk(false)))
-    doNothing().when(mockCompanyDetailsService).updateSchemeOrganiserCache(any())
+    when(mockCompanyDetailsService.updateSchemeOrganiserCache(any())).thenReturn(Future(()))
 
     val trusteeBasedData = Map("basedInUk" -> "1")
     val form = RsFormMappings.companyBasedInUkForm().bind(trusteeBasedData)
@@ -174,7 +174,7 @@ class SchemeOrganiserBasedInUkControllerSpec extends AnyWordSpecLike
       when(mockSessionService.cache[CompanyBasedInUk](any(), any())(any(), any())).thenReturn(Future.successful(sessionPair))
       when(mockSessionService.fetch[CompanyBasedInUk](refEq(mockErsUtil.SCHEME_ORGANISER_BASED))(any(), any())).thenReturn(Future.successful(CompanyBasedInUk(true)))
       when(mockSessionService.fetch[CompanyDetails](refEq(mockErsUtil.SCHEME_ORGANISER_CACHE))(any(), any())).thenReturn(Future.successful(Fixtures.exampleSchemeOrganiserUk))
-      doNothing().when(mockCompanyDetailsService).updateSchemeOrganiserCache(any())
+      when(mockCompanyDetailsService.updateSchemeOrganiserCache(any())).thenReturn(Future(()))
 
       val companyBasedData = Map("basedInUk" -> "0")
       val form = RsFormMappings.companyBasedInUkForm().bind(companyBasedData)
@@ -189,7 +189,7 @@ class SchemeOrganiserBasedInUkControllerSpec extends AnyWordSpecLike
       when(mockSessionService.cache[CompanyBasedInUk](any(), any())(any(), any())).thenReturn(Future.successful(sessionPair))
       when(mockSessionService.fetch[CompanyBasedInUk](refEq(mockErsUtil.SCHEME_ORGANISER_BASED))(any(), any())).thenReturn(Future.successful(CompanyBasedInUk(false)))
       when(mockSessionService.fetch[CompanyDetails](refEq(mockErsUtil.SCHEME_ORGANISER_CACHE))(any(), any())).thenReturn(Future.successful(Fixtures.exampleSchemeOrganiserOverseas))
-      doNothing().when(mockCompanyDetailsService).updateSchemeOrganiserCache(any())
+      when(mockCompanyDetailsService.updateSchemeOrganiserCache(any())).thenReturn(Future(()))
 
       val companyBasedData = Map("basedInUk" -> "0")
       val form = RsFormMappings.companyBasedInUkForm().bind(companyBasedData)

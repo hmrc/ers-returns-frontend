@@ -18,7 +18,7 @@ package controllers.schemeOrganiser
 
 import models.{Company, CompanyDetails, RequestObject, RsFormMappings}
 import org.mockito.ArgumentMatchers.{any, refEq}
-import org.mockito.Mockito.{doNothing, when}
+import org.mockito.Mockito.when
 import org.scalatest.OptionValues
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.should.Matchers
@@ -107,7 +107,7 @@ class SchemeOrganiserDetailsOverseasControllerSpec extends AnyWordSpecLike
   "calling handleQuestionSubmit" should {
     "show the company name form page with errors if the form is incorrectly filled" in {
       val companyData = Map("bool" -> "")
-      val form = RsFormMappings.companyNameForm().bind( companyData)
+      val form = RsFormMappings.companyNameForm().bind(companyData)
       implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*))
       val result = testController.questionSubmit(1).apply(authRequest)
 
@@ -118,8 +118,8 @@ class SchemeOrganiserDetailsOverseasControllerSpec extends AnyWordSpecLike
 
     "successfully bind the form and go to the company overseas address page if the form is filled correctly" in {
 
-      when(mockSessionService.cache[Company](any(), any())(any(), any())).thenReturn(Future.successful(("","")))
-      doNothing().when(mockCompanyDetailsService).updateSchemeOrganiserCache(any())
+      when(mockSessionService.cache[Company](any(), any())(any(), any())).thenReturn(Future.successful(("", "")))
+      when(mockCompanyDetailsService.updateSchemeOrganiserCache(any())).thenReturn(Future(()))
 
       val companyData = Map("companyName" -> "Test company")
       val form = RsFormMappings.companyNameForm().bind(companyData)
@@ -138,7 +138,7 @@ class SchemeOrganiserDetailsOverseasControllerSpec extends AnyWordSpecLike
     when(mockSessionService.fetch[RequestObject](any())(any(), any())).thenReturn(Future.successful(ersRequestObject))
 
     "be the same as showQuestion for a specific index" in {
-      when(mockSessionService.fetchPartFromCompanyDetails[Company]()(any(), any())).thenReturn(Future.successful(Some(Company("Test company",None,None))))
+      when(mockSessionService.fetchPartFromCompanyDetails[Company]()(any(), any())).thenReturn(Future.successful(Some(Company("Test company", None, None))))
 
       val result = testController.editCompany(1).apply(authRequest)
 
@@ -154,9 +154,9 @@ class SchemeOrganiserDetailsOverseasControllerSpec extends AnyWordSpecLike
     when(mockSessionService.fetch[RequestObject](any())(any(), any())).thenReturn(Future.successful(ersRequestObject))
 
     "successfully bind the form and go to the edit version of the scheme organiser address overseas page with the index preserved if the form is filled correctly" in {
-      when(mockSessionService.cache[CompanyDetails](any(), any())(any(), any())).thenReturn(Future.successful(("","")))
+      when(mockSessionService.cache[CompanyDetails](any(), any())(any(), any())).thenReturn(Future.successful(("", "")))
       when(mockSessionService.fetch[CompanyDetails](refEq(mockErsUtil.SCHEME_ORGANISER_CACHE))(any(), any())).thenReturn(Future.successful(Fixtures.exampleSchemeOrganiserOverseas))
-      doNothing().when(mockCompanyDetailsService).updateSchemeOrganiserCache(any())
+      when(mockCompanyDetailsService.updateSchemeOrganiserCache(any())).thenReturn(Future(()))
 
       val companyAddressData = Map("companyName" -> "Test person")
       val form = RsFormMappings.companyAddressOverseasForm().bind(companyAddressData)

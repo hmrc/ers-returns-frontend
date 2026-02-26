@@ -34,18 +34,18 @@ import utils.{CountryCodes, ERSUtil}
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class SubsidiaryAddressOverseasController  @Inject()(val mcc: MessagesControllerComponents,
-                                                     val authConnector: DefaultAuthConnector,
-                                                     val ersConnector: ErsConnector,
-                                                     val globalErrorView: views.html.global_error,
-                                                     val authAction: AuthAction,
-                                                     implicit val countryCodes: CountryCodes,
-                                                     implicit val ersUtil: ERSUtil,
-                                                     implicit val sessionService: FrontendSessionService,
-                                                     implicit val appConfig: ApplicationConfig,
-                                                     companyDetailsService: CompanyDetailsService,
-                                                     companyAddressOverseasView: views.html.manual_address_overseas
-                                                 )
+class SubsidiaryAddressOverseasController @Inject()(val mcc: MessagesControllerComponents,
+                                                    val authConnector: DefaultAuthConnector,
+                                                    val ersConnector: ErsConnector,
+                                                    val globalErrorView: views.html.global_error,
+                                                    val authAction: AuthAction,
+                                                    implicit val countryCodes: CountryCodes,
+                                                    implicit val ersUtil: ERSUtil,
+                                                    implicit val sessionService: FrontendSessionService,
+                                                    implicit val appConfig: ApplicationConfig,
+                                                    companyDetailsService: CompanyDetailsService,
+                                                    companyAddressOverseasView: views.html.manual_address_overseas
+                                                   )
   extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with SubsidiaryBaseController[CompanyAddress] {
 
   implicit val ec: ExecutionContext = mcc.executionContext
@@ -54,19 +54,26 @@ class SubsidiaryAddressOverseasController  @Inject()(val mcc: MessagesController
   implicit val format: Format[CompanyAddress] = CompanyAddress.format
 
   def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier, request: RequestHeader): Future[Result] = {
+
+    val redirect = Redirect(controllers.subsidiaries.routes.GroupSchemeController.groupPlanSummaryPage())
+
     if (edit) {
-      Future.successful(Redirect(controllers.subsidiaries.routes.GroupSchemeController.groupPlanSummaryPage()))
+      Future.successful(redirect)
     } else {
       companyDetailsService.updateSubsidiaryCompanyCache(index)
-      Future.successful(Redirect(controllers.subsidiaries.routes.GroupSchemeController.groupPlanSummaryPage()))
-      }
+        .map(_ => redirect)
+        .recover {
+          case _: Exception =>
+            redirect
+        }
     }
+  }
 
   def form(implicit request: Request[AnyContent]): Form[CompanyAddress] = RsFormMappings.companyAddressOverseasForm()
 
   def view(requestObject: RequestObject, index: Int, companyAddressOverseasForm: Form[CompanyAddress], edit: Boolean = false)
-            (implicit request: Request[AnyContent], hc: HeaderCarrier): Html = {
-      companyAddressOverseasView(requestObject, index, companyAddressOverseasForm, edit, schemeOrganiser = false)
+          (implicit request: Request[AnyContent], hc: HeaderCarrier): Html = {
+    companyAddressOverseasView(requestObject, index, companyAddressOverseasForm, edit, schemeOrganiser = false)
   }
 
 }

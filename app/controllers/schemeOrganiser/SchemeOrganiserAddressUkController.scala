@@ -53,13 +53,17 @@ class SchemeOrganiserAddressUkController @Inject()(val mcc: MessagesControllerCo
   implicit val format: Format[CompanyAddress] = CompanyAddress.format
 
   def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier, request: RequestHeader): Future[Result] = {
+    val redirect = Redirect(controllers.schemeOrganiser.routes.SchemeOrganiserController.schemeOrganiserSummaryPage())
     if (edit) {
-      Future.successful(Redirect(controllers.schemeOrganiser.routes.SchemeOrganiserController.schemeOrganiserSummaryPage()))
+      Future.successful(redirect)
     } else {
       companyDetailsService.updateSchemeOrganiserCache
-      Future.successful(Redirect(controllers.schemeOrganiser.routes.SchemeOrganiserController.schemeOrganiserSummaryPage()))
-      }
+        .map(_ => redirect)
+        .recover {
+          case _: Exception => redirect
+        }
     }
+  }
 
 
   def form(implicit request: Request[AnyContent]): Form[CompanyAddress] = RsFormMappings.companyAddressUkForm()
