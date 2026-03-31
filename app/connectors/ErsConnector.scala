@@ -126,7 +126,7 @@ class ErsConnector @Inject() (http: HttpClientV2, appConfig: ApplicationConfig)(
           case NO_CONTENT   => res
           case _            =>
             logger.error(s"[ErsConnector][validateFileData] Received status code ${res.status} from file validator")
-            throw new Exception(s"[ErsConnector][validateFileData] Received status code ${res.status} from file validator")
+            throw new Exception(s"[ErsConnector][validateFileData] Received status code ${res.status} from file validator") // throws on internal server error
         }
       }
       .recover { case e: Exception =>
@@ -134,7 +134,7 @@ class ErsConnector @Inject() (http: HttpClientV2, appConfig: ApplicationConfig)(
           s"[ErsConnector][validateFileData] Validate file data failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}."
         )
         ersConnector(System.currentTimeMillis() - startTime, TimeUnit.MILLISECONDS)
-        HttpResponse(BAD_REQUEST, "")
+        HttpResponse(BAD_REQUEST, "") // is caught here and turned in to bad request
       }
   }
 
@@ -158,14 +158,14 @@ class ErsConnector @Inject() (http: HttpClientV2, appConfig: ApplicationConfig)(
             case NO_CONTENT   => res
             case _            =>
               logger.error(s"[ErsConnector][validateCsvFileData] Received status code ${res.status} from file validator")
-              throw new Exception(s"[ErsConnector][validateCsvFileData] Received status code ${res.status} from file validator")
+              throw new Exception(s"[ErsConnector][validateCsvFileData] Received status code ${res.status} from file validator") // throws on internal server error
           }
       }
       .recover { case e: Exception =>
         logger.error(
           s"[ErsConnector][validateCsvFileData] Validate file data failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}."
         )
-        HttpResponse(BAD_REQUEST, "")
+        HttpResponse(BAD_REQUEST, "") // is caught here and turned in to bad request
       }
   }
 

@@ -147,7 +147,7 @@ class FileUploadController @Inject()(val mcc: MessagesControllerComponents,
 
         case BAD_REQUEST =>
           logger.warn(s"[FileUploadController][handleValidationResponse] Validation is not successful for schemeRef: $schemeRef, timestamp: ${System.currentTimeMillis()}.")
-          Redirect(routes.FileUploadController.validationFailure())
+          Redirect(routes.FileUploadController.validationFailure()) // comes in here if ers-submissions is down?
 
         case _ =>
           logger.error(s"[FileUploadController][handleValidationResponse] Validate file data failed with Status ${res.status}, timestamp: ${System.currentTimeMillis()}.")
