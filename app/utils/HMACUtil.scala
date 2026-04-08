@@ -55,11 +55,11 @@ trait HMACUtil {
 
   def timeIsValid(urlParams: RequestObject): Boolean = {
     try {
-      val longTime: Long    = urlParams.getTS.toLong * 1000
-      val instant: Instant = Instant.ofEpochMilli(longTime)
-      val urlTime = ZonedDateTime.ofInstant(instant, ZoneOffset.UTC)
-      val now: ZonedDateTime     = ZonedDateTime.now()
-      val diff: Int         = now.getSecond - urlTime.getSecond
+      val longTime: Long     = urlParams.getTS.toLong * 1000
+      val instant: Instant   = Instant.ofEpochMilli(longTime)
+      val urlTime            = ZonedDateTime.ofInstant(instant, ZoneOffset.UTC)
+      val now: ZonedDateTime = ZonedDateTime.now()
+      val diff: Int          = now.getSecond - urlTime.getSecond
 
       if (diff <= TIME_RANGE) {
         return true
@@ -77,4 +77,5 @@ trait HMACUtil {
     } else {
       true
     }
+
 }

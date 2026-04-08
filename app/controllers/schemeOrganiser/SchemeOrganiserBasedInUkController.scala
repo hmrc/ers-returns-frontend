@@ -33,48 +33,57 @@ import utils.{CountryCodes, ERSUtil}
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class SchemeOrganiserBasedInUkController @Inject()(val mcc: MessagesControllerComponents,
-                                                   val ersConnector: ErsConnector,
-                                                   val globalErrorView: views.html.global_error,
-                                                   val authAction: AuthAction,
-                                                   implicit val countryCodes: CountryCodes,
-                                                   implicit val ersUtil: ERSUtil,
-                                                   implicit val sessionService: FrontendSessionService,
-                                                   implicit val appConfig: ApplicationConfig,
-                                                   pageView: views.html.manual_is_the_company_in_uk
-                                                  )
-  extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with SchemeOrganiserBaseController[CompanyBasedInUk] {
+class SchemeOrganiserBasedInUkController @Inject() (
+  val mcc: MessagesControllerComponents,
+  val ersConnector: ErsConnector,
+  val globalErrorView: views.html.global_error,
+  val authAction: AuthAction,
+  implicit val countryCodes: CountryCodes,
+  implicit val ersUtil: ERSUtil,
+  implicit val sessionService: FrontendSessionService,
+  implicit val appConfig: ApplicationConfig,
+  pageView: views.html.manual_is_the_company_in_uk
+) extends FrontendController(mcc)
+    with WithUnsafeDefaultFormBinding
+    with SchemeOrganiserBaseController[CompanyBasedInUk] {
 
   implicit val ec: ExecutionContext = mcc.executionContext
 
-  val cacheKey: String = ersUtil.SCHEME_ORGANISER_BASED
+  val cacheKey: String                          = ersUtil.SCHEME_ORGANISER_BASED
   implicit val format: Format[CompanyBasedInUk] = CompanyBasedInUk.format
 
-  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier, request: RequestHeader): Future[Result] = {
+  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit
+    hc: HeaderCarrier,
+    request: RequestHeader
+  ): Future[Result] =
     for {
       subsidiaryBasedInUk <- if (edit) {
-        sessionService.fetch[CompanyDetails](ersUtil.SCHEME_ORGANISER_CACHE).map {
-          companyDetails => CompanyBasedInUk(companyDetails.basedInUk)
-        }
-      } else {
-        sessionService.fetch[CompanyBasedInUk](cacheKey)
-      }
-    } yield {
-      (subsidiaryBasedInUk.basedInUk, edit) match {
-        case (true, false) => Redirect(controllers.schemeOrganiser.routes.SchemeOrganiserDetailsUkController.questionPage())
-        case (false, false) => Redirect(controllers.schemeOrganiser.routes.SchemeOrganiserDetailsOverseasController.questionPage())
+                               sessionService.fetch[CompanyDetails](ersUtil.SCHEME_ORGANISER_CACHE).map {
+                                 companyDetails => CompanyBasedInUk(companyDetails.basedInUk)
+                               }
+                             } else {
+                               sessionService.fetch[CompanyBasedInUk](cacheKey)
+                             }
+    } yield (subsidiaryBasedInUk.basedInUk, edit) match {
+      case (true, false)  =>
+        Redirect(controllers.schemeOrganiser.routes.SchemeOrganiserDetailsUkController.questionPage())
+      case (false, false) =>
+        Redirect(controllers.schemeOrganiser.routes.SchemeOrganiserDetailsOverseasController.questionPage())
 
-        case (true, true) => Redirect(controllers.schemeOrganiser.routes.SchemeOrganiserDetailsUkController.editCompany(index))
-        case (false, true) => Redirect(controllers.schemeOrganiser.routes.SchemeOrganiserDetailsOverseasController.editCompany(index))
-      }
+      case (true, true)  =>
+        Redirect(controllers.schemeOrganiser.routes.SchemeOrganiserDetailsUkController.editCompany(index))
+      case (false, true) =>
+        Redirect(controllers.schemeOrganiser.routes.SchemeOrganiserDetailsOverseasController.editCompany(index))
     }
-  }
 
   def form(implicit request: Request[AnyContent]): Form[CompanyBasedInUk] = RsFormMappings.companyBasedInUkForm()
 
-  def view(requestObject: RequestObject, index: Int, companyBasedInUkForm: Form[CompanyBasedInUk], edit: Boolean = false)
-          (implicit request: Request[AnyContent], hc: HeaderCarrier): Html = {
+  def view(
+    requestObject: RequestObject,
+    index: Int,
+    companyBasedInUkForm: Form[CompanyBasedInUk],
+    edit: Boolean = false
+  )(implicit request: Request[AnyContent], hc: HeaderCarrier): Html =
     pageView(requestObject, index, companyBasedInUkForm, edit, schemeOrganiser = true)
-  }
 
 }

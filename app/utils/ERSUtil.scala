@@ -25,36 +25,38 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
 @Singleton
-class ERSUtil @Inject() (val appConfig: ApplicationConfig)
-                        (implicit val ec: ExecutionContext, countryCodes: CountryCodes) extends PageBuilder with Constants with Logging {
+class ERSUtil @Inject() (val appConfig: ApplicationConfig)(implicit
+  val ec: ExecutionContext,
+  countryCodes: CountryCodes
+) extends PageBuilder with Constants with Logging {
 
-	final def concatAddress(optionalAddressLines: List[Option[String]], existingAddressLines: String): String = {
-		val definedStrings = optionalAddressLines.filter(_.isDefined).map(_.get)
-		existingAddressLines ++ definedStrings.map(addressLine => ", " + addressLine).mkString("")
-	}
+  final def concatAddress(optionalAddressLines: List[Option[String]], existingAddressLines: String): String = {
+    val definedStrings = optionalAddressLines.filter(_.isDefined).map(_.get)
+    existingAddressLines ++ definedStrings.map(addressLine => ", " + addressLine).mkString("")
+  }
 
-	def buildAddressSummary[A](entity: A): String = {
-		entity match {
-			case companyDetails: CompanyDetails =>
-				val optionalAddressLines = List(
-					companyDetails.addressLine2,
-					companyDetails.addressLine3,
-					companyDetails.addressLine4,
-					companyDetails.addressLine5,
-					countryCodes.getCountry(companyDetails.country.getOrElse(""))
-				)
-				concatAddress(optionalAddressLines, companyDetails.addressLine1)
-			case trusteeDetails: TrusteeDetails =>
-				val optionalAddressLines = List(trusteeDetails.addressLine2,
-					trusteeDetails.addressLine3,
-					trusteeDetails.addressLine4,
-					trusteeDetails.addressLine5,
-					countryCodes.getCountry(trusteeDetails.country.getOrElse(""))
-				)
-				concatAddress(optionalAddressLines, trusteeDetails.addressLine1)
-			case _ => ""
-		}
-	}
+  def buildAddressSummary[A](entity: A): String =
+    entity match {
+      case companyDetails: CompanyDetails =>
+        val optionalAddressLines = List(
+          companyDetails.addressLine2,
+          companyDetails.addressLine3,
+          companyDetails.addressLine4,
+          companyDetails.addressLine5,
+          countryCodes.getCountry(companyDetails.country.getOrElse(""))
+        )
+        concatAddress(optionalAddressLines, companyDetails.addressLine1)
+      case trusteeDetails: TrusteeDetails =>
+        val optionalAddressLines = List(
+          trusteeDetails.addressLine2,
+          trusteeDetails.addressLine3,
+          trusteeDetails.addressLine4,
+          trusteeDetails.addressLine5,
+          countryCodes.getCountry(trusteeDetails.country.getOrElse(""))
+        )
+        concatAddress(optionalAddressLines, trusteeDetails.addressLine1)
+      case _                              => ""
+    }
 
   final def concatEntity(optionalLines: List[Option[String]], existingEntityLines: String): String = {
     val definedStrings = optionalLines.flatten
@@ -92,10 +94,11 @@ class ERSUtil @Inject() (val appConfig: ApplicationConfig)
     if (n == trusteeDetailsList.length) { trusteeNamesList }
     else { buildTrusteeNameList(trusteeDetailsList, n + 1, trusteeNamesList + trusteeDetailsList(n).name + "<br>") }
 
-	def companyLocation(company: CompanyDetails): String = if (company.basedInUk) "ers_trustee_based.uk" else "ers_trustee_based.overseas"
+  def companyLocation(company: CompanyDetails): String =
+    if (company.basedInUk) "ers_trustee_based.uk" else "ers_trustee_based.overseas"
 
-
-  def trusteeLocationMessage(trustee: TrusteeDetails): String = if (trustee.basedInUk) "ers_trustee_based.uk" else "ers_trustee_based.overseas"
+  def trusteeLocationMessage(trustee: TrusteeDetails): String =
+    if (trustee.basedInUk) "ers_trustee_based.uk" else "ers_trustee_based.overseas"
 
   def addCompanyMessage(messages: Messages, schemeOpt: Option[String]): String =
     messages.apply(s"ers_group_summary.${schemeOpt.getOrElse("").toLowerCase}.add_company")
@@ -103,4 +106,5 @@ class ERSUtil @Inject() (val appConfig: ApplicationConfig)
   def replaceAmpersand(input: String): String =
     appConfig.ampersandRegex
       .replaceAllIn(input, "&amp;")
+
 }

@@ -31,15 +31,13 @@ class UpscanCsvFilesListSpec extends AnyWordSpecLike with Matchers with OptionVa
 
     "throw an exception" when {
       "there is no corresponding upload ID" in {
-        an[Exception] should be thrownBy {
+        an[Exception] should be thrownBy
           inProgressUpscanCsvFilesList.updateToInProgress(testUploadId)
-        }
       }
 
       "the upload ID does not have a status of NotStarted" in {
-        an[Exception] should be thrownBy {
+        an[Exception] should be thrownBy
           notStartedUpscanCsvFilesList.updateToInProgress(UploadId("TEST-ID"))
-        }
       }
     }
   }

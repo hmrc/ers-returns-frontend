@@ -28,4 +28,5 @@ class YesNoDecorator(headingTitle: String, isNilReturn: String) extends Decorato
     }
     buildEntry(headingTitle, content)
   }
+
 }

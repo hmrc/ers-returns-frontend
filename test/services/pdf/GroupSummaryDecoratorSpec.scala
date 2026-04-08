@@ -47,4 +47,5 @@ class GroupSummaryDecoratorSpec extends AnyWordSpecLike with Matchers with Optio
       output.contains("<hr/>")       shouldBe true
     }
   }
+
 }

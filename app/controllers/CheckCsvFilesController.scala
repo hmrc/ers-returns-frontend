@@ -32,36 +32,38 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class CheckCsvFilesController @Inject() (val mcc: MessagesControllerComponents,
-                                         val sessionService: FrontendSessionService,
-                                         globalErrorView: views.html.global_error,
-                                         checkCsvFileView: views.html.check_csv_file,
-                                         authAction: AuthAction)
-                                        (implicit val ec: ExecutionContext,
-                                         val ersUtil: ERSUtil,
-                                         val appConfig: ApplicationConfig)
-  extends FrontendController(mcc) with I18nSupport with WithUnsafeDefaultFormBinding with Logging {
+class CheckCsvFilesController @Inject() (
+  val mcc: MessagesControllerComponents,
+  val sessionService: FrontendSessionService,
+  globalErrorView: views.html.global_error,
+  checkCsvFileView: views.html.check_csv_file,
+  authAction: AuthAction
+)(implicit val ec: ExecutionContext, val ersUtil: ERSUtil, val appConfig: ApplicationConfig)
+    extends FrontendController(mcc) with I18nSupport with WithUnsafeDefaultFormBinding with Logging {
 
   def checkCsvFilesPage(): Action[AnyContent] = authAction.async { implicit request =>
     sessionService.fetch[ErsMetaData](ersUtil.ERS_METADATA).map { ele =>
-      logger.info(s"[CheckCsvFilesController][checkCsvFilesPage()] Fetched request object with SAP Number: ${ele.sapNumber} " +
-        s"and schemeRef: ${ele.schemeInfo.schemeRef}")
-         }
+      logger.info(
+        s"[CheckCsvFilesController][checkCsvFilesPage()] Fetched request object with SAP Number: ${ele.sapNumber} " +
+          s"and schemeRef: ${ele.schemeInfo.schemeRef}"
+      )
+    }
     showCheckCsvFilesPage()(request)
   }
 
-  def showCheckCsvFilesPage()(implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] = {
+  def showCheckCsvFilesPage()(implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
     (for {
       requestObject <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
-      _ <- sessionService.remove(ersUtil.CSV_FILES_UPLOAD)
+      _             <- sessionService.remove(ersUtil.CSV_FILES_UPLOAD)
     } yield {
       val csvFilesList: List[CsvFiles] = ersUtil.getCsvFilesList(requestObject.getSchemeType)
       Ok(checkCsvFileView(requestObject, CsvFilesList(csvFilesList)))
     }) recover { case e: Throwable =>
-      logger.error(s"[CheckCsvFilesController][showCheckCsvFilesPage] Error while CSV file check: ${e.getMessage}, timestamp: ${System.currentTimeMillis()}")
+      logger.error(
+        s"[CheckCsvFilesController][showCheckCsvFilesPage] Error while CSV file check: ${e.getMessage}, timestamp: ${System.currentTimeMillis()}"
+      )
       getGlobalErrorPage
     }
-  }
 
   def checkCsvFilesPageSelected(): Action[AnyContent] = authAction.async { implicit request =>
     validateCsvFilesPageSelected()
@@ -76,8 +78,7 @@ class CheckCsvFilesController @Inject() (val mcc: MessagesControllerComponents,
         formData => performCsvFilesPageSelected(formData)
       )
 
-  def performCsvFilesPageSelected(formData: CsvFilesList)
-                                 (implicit request: RequestHeader): Future[Result] = {
+  def performCsvFilesPageSelected(formData: CsvFilesList)(implicit request: RequestHeader): Future[Result] = {
     val csvFilesCallbackList: UpscanCsvFilesList = createCacheData(formData.files)
     if (csvFilesCallbackList.ids.isEmpty) {
       reloadWithError()
@@ -113,4 +114,5 @@ class CheckCsvFilesController @Inject() (val mcc: MessagesControllerComponents,
         "ers.global_errors.message"
       )(request, messages, appConfig)
     )
+
 }

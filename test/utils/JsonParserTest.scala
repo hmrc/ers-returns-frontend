@@ -22,11 +22,7 @@ import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatestplus.mockito.MockitoSugar
 
 class JsonParserTest
-    extends AnyWordSpecLike
-    with Matchers
-    with OptionValues
-    with ERSFakeApplicationConfig
-    with MockitoSugar {
+    extends AnyWordSpecLike with Matchers with OptionValues with ERSFakeApplicationConfig with MockitoSugar {
   class TestJsonParser extends JsonParser
   val testJsonParser = new TestJsonParser
 

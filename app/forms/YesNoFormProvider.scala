@@ -30,9 +30,9 @@ class YesNoFormProvider @Inject() {
     )
 
   protected def boolean(
-                         requiredKey: String = "error.required",
-                         invalidKey: String = "error.boolean"
-                       ): FieldMapping[Boolean] =
+    requiredKey: String = "error.required",
+    invalidKey: String = "error.boolean"
+  ): FieldMapping[Boolean] =
     of(booleanFormatter(requiredKey, invalidKey))
 
   private[forms] def stringFormatter(errorKey: String): Formatter[String] = new Formatter[String] {
@@ -40,7 +40,7 @@ class YesNoFormProvider @Inject() {
     override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], String] =
       data.get(key) match {
         case None | Some("") => Left(Seq(FormError(key, errorKey)))
-        case Some(s) => Right(s.trim)
+        case Some(s)         => Right(s.trim)
       }
 
     override def unbind(key: String, value: String): Map[String, String] =
@@ -56,11 +56,12 @@ class YesNoFormProvider @Inject() {
         baseFormatter
           .bind(key, data)
           .flatMap {
-            case "true" => Right(true)
+            case "true"  => Right(true)
             case "false" => Right(false)
-            case _ => Left(Seq(FormError(key, invalidKey)))
+            case _       => Left(Seq(FormError(key, invalidKey)))
           }
 
       def unbind(key: String, value: Boolean): Map[String, String] = Map(key -> value.toString)
     }
+
 }

@@ -44,86 +44,93 @@ trait TrusteeBaseController[A] extends FrontendController with I18nSupport with 
   implicit val ec: ExecutionContext
   implicit val format: Format[A]
 
-  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier, request: RequestHeader): Future[Result]
+  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit
+    hc: HeaderCarrier,
+    request: RequestHeader
+  ): Future[Result]
 
   def form(implicit request: Request[AnyContent]): Form[A]
 
-  def view(requestObject: RequestObject, index: Int, form: Form[A], edit: Boolean = false)
-          (implicit request: Request[AnyContent], hc: HeaderCarrier): Html
+  def view(requestObject: RequestObject, index: Int, form: Form[A], edit: Boolean = false)(implicit
+    request: Request[AnyContent],
+    hc: HeaderCarrier
+  ): Html
 
-  def questionPage(index: Int): Action[AnyContent] = authAction.async {
-    implicit request =>
-      sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT).flatMap { requestObject =>
-        showQuestionPage(requestObject, index)
-      }
+  def questionPage(index: Int): Action[AnyContent] = authAction.async { implicit request =>
+    sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT).flatMap { requestObject =>
+      showQuestionPage(requestObject, index)
+    }
   }
 
-  def showQuestionPage(requestObject: RequestObject, index: Int, edit: Boolean = false)
-                      (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
+  def showQuestionPage(requestObject: RequestObject, index: Int, edit: Boolean = false)(implicit
+    request: RequestWithOptionalAuthContext[AnyContent],
+    hc: HeaderCarrier
+  ): Future[Result] =
     sessionService.fetchPartFromTrusteeDetailsList[A](index).map { previousAnswer: Option[A] =>
       val preparedForm = if (previousAnswer.isDefined) form.fill(previousAnswer.get) else form
       Ok(view(requestObject, index, preparedForm, edit))
-    } recover {
-      case e: Throwable =>
-        logger.error(s"[${this.getClass.getSimpleName}][showQuestionPage] Get data from cache failed with exception ${e.getMessage}")
-        getGlobalErrorPage
+    } recover { case e: Throwable =>
+      logger.error(
+        s"[${this.getClass.getSimpleName}][showQuestionPage] Get data from cache failed with exception ${e.getMessage}"
+      )
+      getGlobalErrorPage
+    }
+
+  def questionSubmit(index: Int): Action[AnyContent] = authAction.async { implicit request =>
+    sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT).flatMap { requestObject =>
+      handleQuestionSubmit(requestObject, index)(request, hc)
     }
   }
 
-  def questionSubmit(index: Int): Action[AnyContent] = authAction.async {
-    implicit request =>
-      sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT).flatMap { requestObject =>
-        handleQuestionSubmit(requestObject, index)(request, hc)
-      }
-  }
-
-  def handleQuestionSubmit(requestObject: RequestObject, index: Int, edit: Boolean = false)
-                          (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
-    form.bindFromRequest().fold(
-      errors => {
-        Future.successful(BadRequest(view(requestObject, index, errors, edit)))
-      },
-      result => {
-        if (edit) {
-          sessionService.fetchTrusteesOptionally().flatMap { trustees =>
-            val updatedTrustee = trustees.trustees(index).updatePart(result)
-            val updatedTrustees = TrusteeDetailsList(trustees.trustees.updated(index, updatedTrustee))
-            sessionService.cache[TrusteeDetailsList](ersUtil.TRUSTEES_CACHE, updatedTrustees).flatMap { _ =>
+  def handleQuestionSubmit(requestObject: RequestObject, index: Int, edit: Boolean = false)(implicit
+    request: RequestWithOptionalAuthContext[AnyContent],
+    hc: HeaderCarrier
+  ): Future[Result] =
+    form
+      .bindFromRequest()
+      .fold(
+        errors => Future.successful(BadRequest(view(requestObject, index, errors, edit))),
+        result =>
+          if (edit) {
+            sessionService.fetchTrusteesOptionally().flatMap { trustees =>
+              val updatedTrustee  = trustees.trustees(index).updatePart(result)
+              val updatedTrustees = TrusteeDetailsList(trustees.trustees.updated(index, updatedTrustee))
+              sessionService.cache[TrusteeDetailsList](ersUtil.TRUSTEES_CACHE, updatedTrustees).flatMap { _ =>
+                nextPageRedirect(index, edit)
+              }
+            }
+          } else {
+            sessionService.cache[A](cacheKey, result).flatMap { _ =>
               nextPageRedirect(index, edit)
             }
           }
-        } else {
-          sessionService.cache[A](cacheKey, result).flatMap { _ =>
-            nextPageRedirect(index, edit)
-          }
-        }
-      }
-    ).recover {
-      case e: Exception =>
-        logger.error(s"[${this.getClass.getSimpleName}][handleQuestionSubmit] Error occurred while updating trustee cache: ${e.getMessage}")
+      )
+      .recover { case e: Exception =>
+        logger.error(
+          s"[${this.getClass.getSimpleName}][handleQuestionSubmit] Error occurred while updating trustee cache: ${e.getMessage}"
+        )
         getGlobalErrorPage
+      }
+
+  def editQuestion(index: Int): Action[AnyContent] = authAction.async { implicit request =>
+    sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT).flatMap { requestObject =>
+      showQuestionPage(requestObject, index, edit = true)(request, hc)
     }
   }
 
-  def editQuestion(index: Int): Action[AnyContent] = authAction.async {
-    implicit request =>
-      sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT).flatMap { requestObject =>
-        showQuestionPage(requestObject, index, edit = true)(request, hc)
-      }
+  def editQuestionSubmit(index: Int): Action[AnyContent] = authAction.async { implicit request =>
+    sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT).flatMap { requestObject =>
+      handleQuestionSubmit(requestObject, index, edit = true)(request, hc)
+    }
   }
 
-  def editQuestionSubmit(index: Int): Action[AnyContent] = authAction.async {
-    implicit request =>
-      sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT).flatMap { requestObject =>
-        handleQuestionSubmit(requestObject, index, edit = true)(request, hc)
-      }
-  }
+  def getGlobalErrorPage(implicit request: RequestHeader, messages: Messages): Result =
+    Ok(
+      globalErrorView(
+        "ers.global_errors.title",
+        "ers.global_errors.heading",
+        "ers.global_errors.message"
+      )(request, messages, appConfig)
+    )
 
-  def getGlobalErrorPage(implicit request: RequestHeader, messages: Messages): Result = {
-    Ok(globalErrorView(
-      "ers.global_errors.title",
-      "ers.global_errors.heading",
-      "ers.global_errors.message"
-    )(request, messages, appConfig))
-  }
 }

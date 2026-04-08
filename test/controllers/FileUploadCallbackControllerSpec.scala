@@ -57,9 +57,10 @@ class FileUploadCallbackControllerSpec
 
   implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
 
-  implicit lazy val mat: Materializer    = app.materializer
+  implicit lazy val mat: Materializer = app.materializer
 
-  object TestFileUploadCallbackController extends FileUploadCallbackController(mockMCC, mockFileValidatorService, fileSizeUtils)
+  object TestFileUploadCallbackController
+      extends FileUploadCallbackController(mockMCC, mockFileValidatorService, fileSizeUtils)
 
   "callback" must {
     val sessionId = "sessionId"
@@ -68,15 +69,16 @@ class FileUploadCallbackControllerSpec
     "update callback" when {
       "Upload status is UpscanReadyCallback" in {
         val uploadStatusCaptor: ArgumentCaptor[UploadStatus] = ArgumentCaptor.forClass(classOf[UploadStatus])
-        val request = FakeRequest(controllers.internal.routes.FileUploadCallbackController.callback(schemeRef, sessionId))
-          .withBody(Json.toJson(readyCallback))
+        val request                                          =
+          FakeRequest(controllers.internal.routes.FileUploadCallbackController.callback(schemeRef, sessionId))
+            .withBody(Json.toJson(readyCallback))
 
         when(mockFileValidatorService.updateCallbackRecord(uploadStatusCaptor.capture(), any())(any()))
           .thenReturn(Future.successful(NO_CONTENT))
 
         val result = TestFileUploadCallbackController.callback(schemeRef, sessionId)(request)
 
-        status(result) mustBe OK
+        status(result)              mustBe OK
         uploadStatusCaptor.getValue mustBe UploadedSuccessfully(
           uploadDetails.fileName,
           readyCallback.downloadUrl.toExternalForm
@@ -86,14 +88,15 @@ class FileUploadCallbackControllerSpec
 
       "Upload status is failed" in {
         val uploadStatusCaptor: ArgumentCaptor[UploadStatus] = ArgumentCaptor.forClass(classOf[UploadStatus])
-        val request = FakeRequest(controllers.internal.routes.FileUploadCallbackController.callback(schemeRef, sessionId))
-          .withBody(Json.toJson(failedCallback))
+        val request                                          =
+          FakeRequest(controllers.internal.routes.FileUploadCallbackController.callback(schemeRef, sessionId))
+            .withBody(Json.toJson(failedCallback))
 
         when(mockFileValidatorService.updateCallbackRecord(uploadStatusCaptor.capture(), any())(any()))
           .thenReturn(Future.successful(NO_CONTENT))
 
         val result = TestFileUploadCallbackController.callback(schemeRef, sessionId)(request)
-        status(result) mustBe OK
+        status(result)              mustBe OK
         uploadStatusCaptor.getValue mustBe Failed
         verify(mockFileValidatorService).updateCallbackRecord(meq(Failed), any())(any())
       }
@@ -101,8 +104,9 @@ class FileUploadCallbackControllerSpec
 
     "return Internal Server Error" when {
       "an exception occurs updating callback record" in {
-        val request = FakeRequest(controllers.internal.routes.FileUploadCallbackController.callback(schemeRef, sessionId))
-          .withBody(Json.toJson(failedCallback))
+        val request =
+          FakeRequest(controllers.internal.routes.FileUploadCallbackController.callback(schemeRef, sessionId))
+            .withBody(Json.toJson(failedCallback))
 
         when(mockFileValidatorService.updateCallbackRecord(any[UploadStatus], any())(any()))
           .thenReturn(Future.failed(new Exception("Mock Session Service Exception")))
@@ -113,11 +117,13 @@ class FileUploadCallbackControllerSpec
 
     "throw an exception" when {
       "callback data cannot be parsed" in {
-        val request = FakeRequest(controllers.internal.routes.FileUploadCallbackController.callback(schemeRef, sessionId))
-          .withBody(Json.parse("""{"unexpectedKey": "unexpectedValue"}"""))
+        val request =
+          FakeRequest(controllers.internal.routes.FileUploadCallbackController.callback(schemeRef, sessionId))
+            .withBody(Json.parse("""{"unexpectedKey": "unexpectedValue"}"""))
 
         status(TestFileUploadCallbackController.callback(schemeRef, sessionId)(request)) mustBe BAD_REQUEST
       }
     }
   }
+
 }

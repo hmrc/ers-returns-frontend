@@ -28,7 +28,9 @@ import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.i18n
 import play.api.i18n.{Messages, MessagesApi, MessagesImpl}
-import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents}
+import play.api.mvc.{
+  AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents
+}
 import play.api.test.Helpers.stubBodyParser
 import play.i18n.Lang
 import services.pdf.{DecoratorController, ErsReceiptPdfBuilderService}
@@ -38,7 +40,7 @@ import java.io.ByteArrayOutputStream
 import scala.concurrent.ExecutionContext
 
 class ErsReceiptPdfBuilderServiceSpec
-  extends AnyWordSpecLike
+    extends AnyWordSpecLike
     with Matchers
     with OptionValues
     with MockitoSugar
@@ -56,9 +58,10 @@ class ErsReceiptPdfBuilderServiceSpec
     cc.fileMimeTypes,
     ExecutionContext.global
   )
-  implicit lazy val mat: Materializer = app.materializer
-  implicit val ersUtil: ERSUtil = mockErsUtil
-  val testErsReceiptPdfBuilderService = new ErsReceiptPdfBuilderService(mockCountryCodes)
+
+  implicit lazy val mat: Materializer       = app.materializer
+  implicit val ersUtil: ERSUtil             = mockErsUtil
+  val testErsReceiptPdfBuilderService       = new ErsReceiptPdfBuilderService(mockCountryCodes)
 
   val testCases: TableFor3[String, String, String] = Table(
     ("language", "inputDate", "expectedOutputDate"),
@@ -68,37 +71,36 @@ class ErsReceiptPdfBuilderServiceSpec
     ("cy", "15 January 2022, 9:20am", "9:20yb ar ddydd Sad 15 Ionawr 2022")
   )
 
-  "ErsReceiptPdfBuilderService" should {
+  "ErsReceiptPdfBuilderService" should
     forAll(testCases) { (language: String, inputDate: String, expectedOutputDate: String) =>
       s"generate the ERS summary metdata correctly when parsed the date: $inputDate and language: $language" in {
         val testMessages: MessagesImpl = MessagesImpl(i18n.Lang(language), mockMCC.messagesApi)
         when(mockErsUtil.replaceAmpersand(any[String])).thenAnswer(_.getArgument(0))
-        val output = testErsReceiptPdfBuilderService.addMetaData(Fixtures.ersSummary, inputDate)(testMessages)
+        val output                     = testErsReceiptPdfBuilderService.addMetaData(Fixtures.ersSummary, inputDate)(testMessages)
 
         val expectedConfirmationMessage =
           testMessages.messages(
             "ers.pdf.confirmation.submitted",
             testMessages.messages(ContentUtil.getSchemeAbbreviation("emi"))
           )
-        val expectedSchemeName = testMessages.messages("ers.pdf.scheme")
-        val expectedDateAndTime = testMessages.messages("ers.pdf.date_and_time")
+        val expectedSchemeName          = testMessages.messages("ers.pdf.scheme")
+        val expectedDateAndTime         = testMessages.messages("ers.pdf.date_and_time")
 
         // static pdf fields which depend on language
         output.contains(expectedConfirmationMessage) shouldBe true
-        output.contains(expectedSchemeName) shouldBe true
-        output.contains(expectedDateAndTime) shouldBe true
+        output.contains(expectedSchemeName)          shouldBe true
+        output.contains(expectedDateAndTime)         shouldBe true
 
         // pdf fields which depend on input
-        output.contains("My scheme") shouldBe true
-        output.contains("XA1100000000000") shouldBe true
+        output.contains("My scheme")        shouldBe true
+        output.contains("XA1100000000000")  shouldBe true
         output.contains(expectedOutputDate) shouldBe true
-        output.contains("testbundle") shouldBe true
+        output.contains("testbundle")       shouldBe true
       }
     }
-  }
 
   "correctly generate a non-empty PDF" in {
-    val testHtml =
+    val testHtml                         =
       """
         |<html>
         | <head><title>ERS PDF</title></head>
@@ -109,7 +111,7 @@ class ErsReceiptPdfBuilderServiceSpec
         |</html>
         |""".stripMargin
     val pdfStream: ByteArrayOutputStream = testErsReceiptPdfBuilderService.buildPdf(testHtml)
-    val pdfBytes = pdfStream.toByteArray
+    val pdfBytes                         = pdfStream.toByteArray
 
     pdfBytes.length should be > 0
   }
@@ -117,10 +119,10 @@ class ErsReceiptPdfBuilderServiceSpec
   "return HTML with correct header message" in {
 
     val testMessages: MessagesImpl = MessagesImpl(Lang.defaultLang(), mockMCC.messagesApi)
-    val output = testErsReceiptPdfBuilderService.pdfHeader(testMessages)
+    val output                     = testErsReceiptPdfBuilderService.pdfHeader(testMessages)
 
     output.contains("</div><hr/>") shouldBe true
-    output should include(testMessages("ers.pdf.header"))
+    output                           should include(testMessages("ers.pdf.header"))
 
   }
 
@@ -128,9 +130,10 @@ class ErsReceiptPdfBuilderServiceSpec
     implicit val fakeDecorator: DecoratorController = new DecoratorController(Array()) {
       override def decorate(implicit messages: Messages): String = "<p>Summary</p>"
     }
-    val output = testErsReceiptPdfBuilderService.addSummary()
+    val output                                      = testErsReceiptPdfBuilderService.addSummary()
 
     output.contains("Summary") shouldBe true
 
   }
+
 }

@@ -36,67 +36,91 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
 @Singleton
-class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
-                                      val authConnector: DefaultAuthConnector,
-                                      implicit val countryCodes: CountryCodes,
-                                      implicit val ersUtil: ERSUtil,
-                                      implicit val sessionService: FrontendSessionService,
-                                      implicit val companyService: CompanyDetailsService,
-                                      implicit val appConfig: ApplicationConfig,
-                                      globalErrorView: views.html.global_error,
-                                      groupView: views.html.group,
-                                      groupPlanSummaryView: views.html.group_plan_summary,
-                                      confirmDeleteCompanyView: views.html.confirm_delete_company,
-                                      yesNoFormProvider: YesNoFormProvider,
-                                      authAction: AuthAction
-                                     ) extends FrontendController(mcc) with I18nSupport with WithUnsafeDefaultFormBinding with Logging with Constants with CacheHelper {
+class GroupSchemeController @Inject() (
+  val mcc: MessagesControllerComponents,
+  val authConnector: DefaultAuthConnector,
+  implicit val countryCodes: CountryCodes,
+  implicit val ersUtil: ERSUtil,
+  implicit val sessionService: FrontendSessionService,
+  implicit val companyService: CompanyDetailsService,
+  implicit val appConfig: ApplicationConfig,
+  globalErrorView: views.html.global_error,
+  groupView: views.html.group,
+  groupPlanSummaryView: views.html.group_plan_summary,
+  confirmDeleteCompanyView: views.html.confirm_delete_company,
+  yesNoFormProvider: YesNoFormProvider,
+  authAction: AuthAction
+) extends FrontendController(mcc)
+    with I18nSupport
+    with WithUnsafeDefaultFormBinding
+    with Logging
+    with Constants
+    with CacheHelper {
 
   implicit val ec: ExecutionContext = mcc.executionContext
-  private val form: Form[Boolean] = yesNoFormProvider.withPrefix("delete-company")
+  private val form: Form[Boolean]   = yesNoFormProvider.withPrefix("delete-company")
 
-  private def getRequestObjAndCompanyDetails()(implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[(RequestObject, Int, CompanyDetailsList)] =
+  private def getRequestObjAndCompanyDetails()(implicit
+    request: RequestWithOptionalAuthContext[AnyContent]
+  ): Future[(RequestObject, Int, CompanyDetailsList)] =
     for {
-      requestObject <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
+      requestObject      <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
       companyDetailsList <- sessionService.fetchCompaniesOptionally()
-      companySize = companyDetailsList.companies.size
+      companySize         = companyDetailsList.companies.size
     } yield (requestObject, companySize, companyDetailsList)
-
 
   def confirmDeleteCompanyPage(id: Int): Action[AnyContent] = authAction.async { implicit request =>
     showConfirmDeleteCompanyPage(id)
   }
 
-  def showConfirmDeleteCompanyPage(id: Int)(implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] = {
+  def showConfirmDeleteCompanyPage(
+    id: Int
+  )(implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
     getRequestObjAndCompanyDetails() transformWith {
-      case _ @ Success((requestObject: RequestObject, companySize: Int, companyDetailsList: CompanyDetailsList)) =>
-        Future.successful(Ok(confirmDeleteCompanyView(requestObject, id, form, companySize == 1, companyDetailsList.companies(id).companyName)))
-      case Failure(cause) =>
+      case _ @Success((requestObject: RequestObject, companySize: Int, companyDetailsList: CompanyDetailsList)) =>
+        Future.successful(
+          Ok(
+            confirmDeleteCompanyView(
+              requestObject,
+              id,
+              form,
+              companySize == 1,
+              companyDetailsList.companies(id).companyName
+            )
+          )
+        )
+      case Failure(cause)                                                                                       =>
         logger.error(
           s"[GroupSchemeController][showConfirmDeleteCompanyPage] getRequestObjAndCompanyDetails failed, timestamp: ${System.currentTimeMillis()}, error: $cause"
         )
         Future.successful(getGlobalErrorPage)
     } recover { case e: Exception =>
-      logger.error(s"[GroupSchemeController][showConfirmDeleteCompanyPage] getRequestObjAndCompanyDetails failed, ${e.getMessage}")
+      logger.error(
+        s"[GroupSchemeController][showConfirmDeleteCompanyPage] getRequestObjAndCompanyDetails failed, ${e.getMessage}"
+      )
       getGlobalErrorPage
     }
-  }
 
   def confirmDeleteCompanySubmit(index: Int): Action[AnyContent] = authAction.async { implicit request =>
     val requestObjectWithCompanyList = getRequestObjAndCompanyDetails()
 
     requestObjectWithCompanyList.flatMap { case (requestObject, companySize, companyDetailsList) =>
-      form.bindFromRequest().fold(
-        formWithErrors => Future.successful(BadRequest(
-          confirmDeleteCompanyView(
-            requestObject,
-            index,
-            formWithErrors,
-            companySize == 1,
-            companyDetailsList.companies(index).companyName
-          )
-        )),
-        {
-          (formSubmissionRadio: Boolean) => {
+      form
+        .bindFromRequest()
+        .fold(
+          formWithErrors =>
+            Future.successful(
+              BadRequest(
+                confirmDeleteCompanyView(
+                  requestObject,
+                  index,
+                  formWithErrors,
+                  companySize == 1,
+                  companyDetailsList.companies(index).companyName
+                )
+              )
+            ),
+          (formSubmissionRadio: Boolean) =>
             if (formSubmissionRadio) {
               val pageToRedirectTo = if (companySize == 1) {
                 controllers.subsidiaries.routes.GroupSchemeController.groupSchemePage()
@@ -110,9 +134,7 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
             } else {
               Future.successful(Redirect(controllers.subsidiaries.routes.GroupSchemeController.groupPlanSummaryPage()))
             }
-          }
-        }
-      )
+        )
     } recover { case e: Exception =>
       logger.error(
         s"[GroupSchemeController][confirmDeleteCompanySubmit] Fetching companies failed, timestamp: ${System.currentTimeMillis()}, error: ${e.getMessage}"
@@ -121,28 +143,29 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
     }
   }
 
-  def groupSchemePage(): Action[AnyContent] = authAction.async {
-    implicit request =>
-      sessionService.fetch[ErsMetaData](ersUtil.ERS_METADATA).map { ele =>
-        logger.info(s"[GroupSchemeController][groupSchemePage] Fetched request object with SAP Number: ${ele.sapNumber} " +
-        s"and schemeRef: ${ele.schemeInfo.schemeRef}")
-      }
-      sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT).flatMap { requestObject =>
-        showGroupSchemePage(requestObject)(request)
-      }
+  def groupSchemePage(): Action[AnyContent] = authAction.async { implicit request =>
+    sessionService.fetch[ErsMetaData](ersUtil.ERS_METADATA).map { ele =>
+      logger.info(
+        s"[GroupSchemeController][groupSchemePage] Fetched request object with SAP Number: ${ele.sapNumber} " +
+          s"and schemeRef: ${ele.schemeInfo.schemeRef}"
+      )
+    }
+    sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT).flatMap { requestObject =>
+      showGroupSchemePage(requestObject)(request)
+    }
   }
 
-  def showGroupSchemePage(requestObject: RequestObject)
-                         (implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
-    sessionService.fetch[GroupSchemeInfo](ersUtil.GROUP_SCHEME_CACHE_CONTROLLER).map {
-      groupSchemeInfo =>
-        Ok(
-          groupView(
-            requestObject,
-            groupSchemeInfo.groupScheme,
-            RsFormMappings.groupForm().fill(RS_groupScheme(groupSchemeInfo.groupScheme))
-          )
+  def showGroupSchemePage(
+    requestObject: RequestObject
+  )(implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
+    sessionService.fetch[GroupSchemeInfo](ersUtil.GROUP_SCHEME_CACHE_CONTROLLER).map { groupSchemeInfo =>
+      Ok(
+        groupView(
+          requestObject,
+          groupSchemeInfo.groupScheme,
+          RsFormMappings.groupForm().fill(RS_groupScheme(groupSchemeInfo.groupScheme))
         )
+      )
     } recover { case _: Exception =>
       val form = RS_groupScheme(Some(ersUtil.DEFAULT))
       Ok(groupView(requestObject, Some(ersUtil.DEFAULT), RsFormMappings.groupForm().fill(form)))
@@ -154,16 +177,17 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
     }
   }
 
-  def showGroupSchemeSelected(requestObject: RequestObject, scheme: String)
-                             (implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
+  def showGroupSchemeSelected(requestObject: RequestObject, scheme: String)(implicit
+    request: RequestWithOptionalAuthContext[AnyContent]
+  ): Future[Result] =
     RsFormMappings
       .groupForm()
       .bindFromRequest()
       .fold(
         errors => {
-          val correctOrder = errors.errors.map(_.key).distinct
-          val incorrectOrderGrouped = errors.errors.groupBy(_.key).map(_._2.head).toSeq
-          val correctOrderGrouped = correctOrder.flatMap(x => incorrectOrderGrouped.find(_.key == x))
+          val correctOrder                             = errors.errors.map(_.key).distinct
+          val incorrectOrderGrouped                    = errors.errors.groupBy(_.key).map(_._2.head).toSeq
+          val correctOrderGrouped                      = correctOrder.flatMap(x => incorrectOrderGrouped.find(_.key == x))
           val firstErrors: Form[models.RS_groupScheme] =
             new Form[RS_groupScheme](errors.mapping, errors.data, correctOrderGrouped, errors.value)
           Future.successful(Ok(groupView(requestObject, Some(""), firstErrors)))
@@ -178,7 +202,8 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
           sessionService.cache(ersUtil.GROUP_SCHEME_CACHE_CONTROLLER, gsc).map { _ =>
             (requestObject.getSchemeId, formData.groupScheme) match {
 
-              case (_, Some(ersUtil.OPTION_YES)) => Redirect(controllers.subsidiaries.routes.GroupSchemeController.groupPlanSummaryPage())
+              case (_, Some(ersUtil.OPTION_YES)) =>
+                Redirect(controllers.subsidiaries.routes.GroupSchemeController.groupPlanSummaryPage())
 
               case (ersUtil.SCHEME_CSOP | ersUtil.SCHEME_SAYE, _) =>
                 sessionService.remove(ersUtil.SUBSIDIARY_COMPANIES_CACHE)
@@ -204,16 +229,14 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
 
   def showGroupPlanSummaryPage()(implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
     (for {
-      requestObject <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
+      requestObject      <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
       companyDetailsList <- sessionService.fetchCompaniesOptionally()
-    } yield {
+    } yield
       if (companyDetailsList.companies.isEmpty) {
         Redirect(controllers.subsidiaries.routes.SubsidiaryBasedInUkController.questionPage())
       } else {
         Ok(groupPlanSummaryView(requestObject, ersUtil.OPTION_MANUAL, companyDetailsList))
-      }
-
-    }) recover { case e: Exception =>
+      }) recover { case e: Exception =>
       logger.error(
         s"[GroupSchemeController][showGroupPlanSummaryPage] Fetch group scheme companies before call" +
           s" to group plan summary page failed with exception ${e.getMessage}, " +
@@ -226,34 +249,34 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
     continueFromGroupPlanSummaryPage(scheme)
   }
 
-  def continueFromGroupPlanSummaryPage(scheme: String)(implicit request: Request[_]): Future[Result] = {
-    RsFormMappings.addSubsidiaryForm().bindFromRequest().fold(
-      _ => {
-        for {
-          requestObject <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
-          companyDetailsList <- sessionService.fetchCompaniesOptionally()
-        } yield {
-          BadRequest(groupPlanSummaryView(requestObject, ersUtil.OPTION_MANUAL, companyDetailsList, formHasError = true))
-        }
-      },
-      addCompany => {
-        if (addCompany.addCompany) {
-          Future.successful(Redirect(controllers.subsidiaries.routes.SubsidiaryBasedInUkController.questionPage()))
-        } else {
-          scheme match {
-            case ersUtil.SCHEME_CSOP | ersUtil.SCHEME_SAYE =>
-              Future(Redirect(routes.AltAmendsController.altActivityPage()))
+  def continueFromGroupPlanSummaryPage(scheme: String)(implicit request: Request[_]): Future[Result] =
+    RsFormMappings
+      .addSubsidiaryForm()
+      .bindFromRequest()
+      .fold(
+        _ =>
+          for {
+            requestObject      <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
+            companyDetailsList <- sessionService.fetchCompaniesOptionally()
+          } yield BadRequest(
+            groupPlanSummaryView(requestObject, ersUtil.OPTION_MANUAL, companyDetailsList, formHasError = true)
+          ),
+        addCompany =>
+          if (addCompany.addCompany) {
+            Future.successful(Redirect(controllers.subsidiaries.routes.SubsidiaryBasedInUkController.questionPage()))
+          } else {
+            scheme match {
+              case ersUtil.SCHEME_CSOP | ersUtil.SCHEME_SAYE =>
+                Future(Redirect(routes.AltAmendsController.altActivityPage()))
 
-            case ersUtil.SCHEME_EMI | ersUtil.SCHEME_OTHER =>
-              Future(Redirect(routes.SummaryDeclarationController.summaryDeclarationPage()))
+              case ersUtil.SCHEME_EMI | ersUtil.SCHEME_OTHER =>
+                Future(Redirect(routes.SummaryDeclarationController.summaryDeclarationPage()))
 
-            case ersUtil.SCHEME_SIP =>
-              Future(Redirect(trustees.routes.TrusteeSummaryController.trusteeSummaryPage()))
+              case ersUtil.SCHEME_SIP =>
+                Future(Redirect(trustees.routes.TrusteeSummaryController.trusteeSummaryPage()))
+            }
           }
-        }
-      }
-    )
-  }
+      )
 
   def getGlobalErrorPage(implicit request: RequestHeader, messages: Messages): Result =
     InternalServerError(
@@ -263,4 +286,5 @@ class GroupSchemeController @Inject()(val mcc: MessagesControllerComponents,
         "ers.global_errors.message"
       )(request, messages, appConfig)
     )
+
 }

@@ -63,4 +63,5 @@ class UpscanCsvFilesCallbackSpec extends AnyWordSpecLike with Matchers with Opti
 
   def callbackWithStatus(uploadStatus: UploadStatus) =
     UpscanCsvFilesCallback(testUploadId, "FileId", uploadStatus)
+
 }

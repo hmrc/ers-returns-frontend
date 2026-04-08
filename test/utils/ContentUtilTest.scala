@@ -23,7 +23,9 @@ import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.i18n.{Messages, MessagesApi}
-import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents}
+import play.api.mvc.{
+  AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents
+}
 import play.api.test.Helpers.stubBodyParser
 
 import scala.concurrent.ExecutionContext
@@ -64,6 +66,7 @@ class ContentUtilTest
       result shouldBe Messages("ers_pdf_error_report.emi")
     }
   }
+
   "getSchemeName" should {
     "return SAYE scheme name for SAYE scheme type \"4\"" in {
       val schemeType = "4"
@@ -71,6 +74,7 @@ class ContentUtilTest
       result shouldBe Messages("ers_pdf_error_report.saye")
     }
   }
+
   "getSchemeName" should {
     "return SIP scheme name for SIP scheme type \"5\"" in {
       val schemeType = "5"
@@ -78,6 +82,7 @@ class ContentUtilTest
       result shouldBe Messages("ers_pdf_error_report.sip")
     }
   }
+
   "getSchemeName" should {
     "return OTHER scheme name for OTHER scheme type \"3\"" in {
       val schemeType = "3"
@@ -85,6 +90,7 @@ class ContentUtilTest
       result shouldBe Messages("ers_pdf_error_report.other")
     }
   }
+
   "getSchemeName" should {
     "return \"\" scheme name for any other scheme type e.g. \"9\"" in {
       val schemeType = "9"
@@ -108,6 +114,7 @@ class ContentUtilTest
       result shouldBe Messages("ers.emi")
     }
   }
+
   "getSchemeAbbreviation" should {
     "return SAYE scheme abbreviation for SAYE scheme type \"4\"" in {
       val schemeType = "4"
@@ -115,6 +122,7 @@ class ContentUtilTest
       result shouldBe Messages("ers.saye")
     }
   }
+
   "getSchemeAbbreviation" should {
     "return SIP scheme abbreviation for SIP scheme type \"5\"" in {
       val schemeType = "5"
@@ -122,6 +130,7 @@ class ContentUtilTest
       result shouldBe Messages("ers.sip")
     }
   }
+
   "getSchemeAbbreviation" should {
     "return OTHER scheme abbreviation for OTHER scheme type \"3\"" in {
       val schemeType = "3"
@@ -129,6 +138,7 @@ class ContentUtilTest
       result shouldBe Messages("ers.other")
     }
   }
+
   "getSchemeAbbreviation" should {
     "return \"\" scheme abbreviation for any other scheme type e.g. \"9\"" in {
       val schemeType = "9"

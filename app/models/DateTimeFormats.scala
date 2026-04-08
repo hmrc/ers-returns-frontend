@@ -27,7 +27,8 @@ trait DateTimeFormats {
 
   private val dateTimeRead: Reads[Instant] = Reads { json =>
     // Try MongoDB date format first
-    MongoJavatimeFormats.instantReads.reads(json)
+    MongoJavatimeFormats.instantReads
+      .reads(json)
       .orElse {
         // Try NumberLong format (epoch milliseconds)
         json.validate[Long].map(Instant.ofEpochMilli)

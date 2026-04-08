@@ -37,7 +37,7 @@ class LanguageSwitchControllerSpec
     with GuiceOneAppPerSuite
     with PrivateMethodTester {
 
-  override implicit val ec: ExecutionContext = app.injector.instanceOf[ExecutionContext]
+  implicit override val ec: ExecutionContext = app.injector.instanceOf[ExecutionContext]
 
   val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
     messagesActionBuilder,
@@ -90,4 +90,5 @@ class LanguageSwitchControllerSpec
     }
 
   }
+
 }

@@ -28,4 +28,5 @@ class SchemeOrganiserDetailsDecorator(
 
   def decorate(implicit messages: Messages): String =
     buildEntryMultiple(title, schemeOrganiser.toArray(countryCodes))
+
 }

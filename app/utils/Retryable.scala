@@ -31,11 +31,12 @@ trait Retryable extends Logging {
       extends Exception(s"Failed to meet predicate after retrying $retryNumber times.")
 
   implicit class RetryCache[A](f: => Future[A]) {
+
     def withRetry(
       maxTimes: Int
     )(pToBreakLoop: A => Boolean)(implicit actorSystem: ActorSystem, ec: ExecutionContext): Future[A] = {
-      val delay: FiniteDuration = appConfig.retryDelay
-      val scheduler: Scheduler  = actorSystem.getScheduler
+      val delay: FiniteDuration                                       = appConfig.retryDelay
+      val scheduler: Scheduler                                        = actorSystem.getScheduler
       def loop(count: Int = 0, previous: Option[A] = None): Future[A] = {
         logger.info(s"Retrying call x$count")
         if (count < maxTimes) {
@@ -52,5 +53,7 @@ trait Retryable extends Logging {
       }
       loop()
     }
+
   }
+
 }

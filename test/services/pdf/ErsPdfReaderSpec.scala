@@ -30,7 +30,7 @@ import utils.ERSFakeApplicationConfig
 import java.io.FileInputStream
 
 class ErsPdfReaderSpec
-  extends AnyWordSpecLike
+    extends AnyWordSpecLike
     with Matchers
     with OptionValues
     with MockitoSugar
@@ -38,17 +38,17 @@ class ErsPdfReaderSpec
     with GuiceOneAppPerSuite {
 
   def readPDF(path: String): String = {
-    val file = new FileInputStream(path)
+    val file       = new FileInputStream(path)
     val readBuffer = new RandomAccessReadBuffer(file)
-    val parser = new PDFParser(readBuffer)
-    val cosDoc = parser.parse().getDocument
-    val pdDoc = new PDDocument(cosDoc)
+    val parser     = new PDFParser(readBuffer)
+    val cosDoc     = parser.parse().getDocument
+    val pdDoc      = new PDDocument(cosDoc)
     try {
       val strip = new PDFTextStripper
       strip.getText(pdDoc)
     } catch {
       case e: Exception => throw new Exception
-    }finally {
+    } finally {
       pdDoc.close()
       file.close()
     }
@@ -82,4 +82,5 @@ class ErsPdfReaderSpec
       parsedText should include("12:08PM on Tue 25 January 2022")
     }
   }
+
 }

@@ -29,20 +29,21 @@ class FileUploadErrorsOdsViewSpec extends ViewSpecBase with FileUploadFixtures w
 
   private val view = app.injector.instanceOf[file_upload_errors_ods]
 
-  implicit val ersUtil: ERSUtil = app.injector.instanceOf[ERSUtil]
-  implicit val appConfig: ApplicationConfig = app.injector.instanceOf[ApplicationConfig]
+  implicit val ersUtil: ERSUtil                             = app.injector.instanceOf[ERSUtil]
+  implicit val appConfig: ApplicationConfig                 = app.injector.instanceOf[ApplicationConfig]
   implicit val request: FakeRequest[AnyContentAsEmpty.type] = fakeRequest
-  implicit val messages: Messages = testMessages
+  implicit val messages: Messages                           = testMessages
 
   "file_upload_errors_ods view" should {
 
     "show expected elements when expectedScheme = 'CSOP' and requestScheme = 'EMI'" in {
       val odsRequestObject = testRequestObject.copy(schemeType = Some("CSOP"))
-      val doc = asDocument(view(odsRequestObject, "schemeLink", "CSOP", "EMI"))
+      val doc              = asDocument(view(odsRequestObject, "schemeLink", "CSOP", "EMI"))
 
       hasExpectedContent(
         doc,
-        firstParagraph = "You chose to submit an end of year return for a CSOP scheme but the file you uploaded is for an EMI scheme.",
+        firstParagraph =
+          "You chose to submit an end of year return for a CSOP scheme but the file you uploaded is for an EMI scheme.",
         secondParagraph = "To submit an end of year return for a CSOP scheme you must either:",
         firstBullet = "upload a file created from a CSOP template",
         secondBullet = "upload a file created by using the CSOP guidance notes",
@@ -53,11 +54,12 @@ class FileUploadErrorsOdsViewSpec extends ViewSpecBase with FileUploadFixtures w
 
     "show expected elements when expectedScheme = 'SIP' and requestScheme = 'EMI'" in {
       val odsRequestObject = testRequestObject.copy(schemeType = Some("SIP"))
-      val doc = asDocument(view(odsRequestObject, "schemeLink", "SIP", "EMI"))
+      val doc              = asDocument(view(odsRequestObject, "schemeLink", "SIP", "EMI"))
 
       hasExpectedContent(
         doc,
-        firstParagraph = "You chose to submit an end of year return for a SIP scheme but the file you uploaded is for an EMI scheme.",
+        firstParagraph =
+          "You chose to submit an end of year return for a SIP scheme but the file you uploaded is for an EMI scheme.",
         secondParagraph = "To submit an end of year return for a SIP scheme you must either:",
         firstBullet = "upload a file created from a SIP template",
         secondBullet = "upload a file created by using the SIP guidance notes",
@@ -68,11 +70,12 @@ class FileUploadErrorsOdsViewSpec extends ViewSpecBase with FileUploadFixtures w
 
     "show expected elements when expectedScheme = 'SAYE' and requestScheme = 'EMI'" in {
       val odsRequestObject = testRequestObject.copy(schemeType = Some("SAYE"))
-      val doc = asDocument(view(odsRequestObject, "schemeLink", "SAYE", "EMI"))
+      val doc              = asDocument(view(odsRequestObject, "schemeLink", "SAYE", "EMI"))
 
       hasExpectedContent(
         doc,
-        firstParagraph = "You chose to submit an end of year return for a SAYE scheme but the file you uploaded is for an EMI scheme.",
+        firstParagraph =
+          "You chose to submit an end of year return for a SAYE scheme but the file you uploaded is for an EMI scheme.",
         secondParagraph = "To submit an end of year return for a SAYE scheme you must either:",
         firstBullet = "upload a file created from a SAYE template",
         secondBullet = "upload a file created by using the SAYE guidance notes",
@@ -83,11 +86,12 @@ class FileUploadErrorsOdsViewSpec extends ViewSpecBase with FileUploadFixtures w
 
     "show expected elements when expectedScheme = 'OTHER' and requestScheme = 'EMI'" in {
       val odsRequestObject = testRequestObject.copy(schemeType = Some("OTHER"))
-      val doc = asDocument(view(odsRequestObject, "schemeLink", "OTHER", "EMI"))
+      val doc              = asDocument(view(odsRequestObject, "schemeLink", "OTHER", "EMI"))
 
       hasExpectedContent(
         doc,
-        firstParagraph = "You chose to submit an end of year return for an OTHER scheme but the file you uploaded is for an EMI scheme.",
+        firstParagraph =
+          "You chose to submit an end of year return for an OTHER scheme but the file you uploaded is for an EMI scheme.",
         secondParagraph = "To submit an end of year return for an OTHER scheme you must either:",
         firstBullet = "upload a file created from an OTHER template",
         secondBullet = "upload a file created by using the OTHER guidance notes",
@@ -98,11 +102,12 @@ class FileUploadErrorsOdsViewSpec extends ViewSpecBase with FileUploadFixtures w
 
     "show expected elements when expectedScheme = 'EMI' and requestScheme = 'OTHER'" in {
       val odsRequestObject = testRequestObject.copy(schemeType = Some("EMI"))
-      val doc = asDocument(view(odsRequestObject, "schemeLink", "EMI", "OTHER"))
+      val doc              = asDocument(view(odsRequestObject, "schemeLink", "EMI", "OTHER"))
 
       hasExpectedContent(
         doc,
-        firstParagraph = "You chose to submit an end of year return for an EMI scheme but the file you uploaded is for an OTHER scheme.",
+        firstParagraph =
+          "You chose to submit an end of year return for an EMI scheme but the file you uploaded is for an OTHER scheme.",
         secondParagraph = "To submit an end of year return for an EMI scheme you must either:",
         firstBullet = "upload a file created from an EMI template",
         secondBullet = "upload a file created by using the EMI guidance notes",
@@ -113,27 +118,48 @@ class FileUploadErrorsOdsViewSpec extends ViewSpecBase with FileUploadFixtures w
 
   }
 
-  private def hasExpectedContent(doc: Document,
-                                 firstParagraph: String,
-                                 secondParagraph: String,
-                                 firstBullet: String,
-                                 secondBullet: String,
-                                 thirdBullet: String,
-                                 schemeRef: String): Unit = {
+  private def hasExpectedContent(
+    doc: Document,
+    firstParagraph: String,
+    secondParagraph: String,
+    firstBullet: String,
+    secondBullet: String,
+    thirdBullet: String,
+    schemeRef: String
+  ): Unit = {
     doc.getElementsByClass("govuk-body").get(1).text() mustBe firstParagraph
     doc.getElementsByClass("govuk-body").get(2).text() mustBe secondParagraph
-    doc.getElementsByClass("govuk-list govuk-list--bullet").get(0).getElementsByTag("li").get(0).text() mustBe firstBullet
-    doc.getElementsByClass("govuk-list govuk-list--bullet").get(0).getElementsByTag("li").get(1).text() mustBe secondBullet
-    doc.getElementsByClass("govuk-list govuk-list--bullet").get(1).getElementsByTag("li").get(0).text() mustBe thirdBullet
-    doc.getElementById("scheme-reference").text() mustBe schemeRef
+    doc
+      .getElementsByClass("govuk-list govuk-list--bullet")
+      .get(0)
+      .getElementsByTag("li")
+      .get(0)
+      .text()                                          mustBe firstBullet
+    doc
+      .getElementsByClass("govuk-list govuk-list--bullet")
+      .get(0)
+      .getElementsByTag("li")
+      .get(1)
+      .text()                                          mustBe secondBullet
+    doc
+      .getElementsByClass("govuk-list govuk-list--bullet")
+      .get(1)
+      .getElementsByTag("li")
+      .get(0)
+      .text()                                          mustBe thirdBullet
+    doc.getElementById("scheme-reference").text()      mustBe schemeRef
     hasExpectedHeaderConstantElements(doc)
   }
 
   private def hasExpectedHeaderConstantElements(doc: Document): Unit = {
     firstElementByClassText(doc, "govuk-heading-xl") mustBe "There is a problem with the file upload"
     doc.getElementsByClass("govuk-body").get(3).text mustBe "You can:"
-    doc.getElementsByClass("govuk-list govuk-list--bullet").get(1).getElementsByTag("li").get(1).text() mustBe "view your schemes and arrangements to choose a different scheme"
+    doc
+      .getElementsByClass("govuk-list govuk-list--bullet")
+      .get(1)
+      .getElementsByTag("li")
+      .get(1)
+      .text()                                        mustBe "view your schemes and arrangements to choose a different scheme"
   }
 
 }
-

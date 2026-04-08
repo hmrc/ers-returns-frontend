@@ -26,20 +26,19 @@ class PageNotFoundViewSpec extends ViewSpecBase with Matchers {
 
   private val view = app.injector.instanceOf[views.html.page_not_found_template]
 
-  implicit val appConfig: ApplicationConfig = app.injector.instanceOf[ApplicationConfig]
+  implicit val appConfig: ApplicationConfig                 = app.injector.instanceOf[ApplicationConfig]
   implicit val request: FakeRequest[AnyContentAsEmpty.type] = fakeRequest
-  implicit val messages: Messages = testMessages
+  implicit val messages: Messages                           = testMessages
 
   "page not found view" should {
 
     "show expected page elements" in {
       val doc = asDocument(view())
 
-      doc.title() mustBe messages("ers.app_title")
+      doc.title()                                         mustBe messages("ers.app_title")
       firstElementByClassOwnText(doc, "govuk-heading-xl") mustBe messages("ers.global.page.not.found.error.heading")
 
     }
   }
-
 
 }

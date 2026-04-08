@@ -24,7 +24,9 @@ import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.i18n.{Messages, MessagesApi}
-import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents}
+import play.api.mvc.{
+  AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents
+}
 import play.api.test.Helpers.stubBodyParser
 import utils._
 
@@ -55,8 +57,10 @@ class PdfDecoratorControllerFactorySpec
   class TestPdfDecoratorControllerFactory extends PdfDecoratorControllerFactory {
     val mockCountryCodes: CountryCodes      = mock[CountryCodes]
     override val countryCodes: CountryCodes = mockCountryCodes
+
     override val ERSUtil: ERSUtil           =
       new ERSUtil(mockAppConfig)(ec, mockCountryCodes)
+
   }
 
   lazy val altAmends: AlterationAmends = AlterationAmends(
@@ -120,11 +124,11 @@ class PdfDecoratorControllerFactorySpec
       val decorators: Array[Decorator]             = decoratorController.decorators
 
       decoratorController.decorators.size shouldEqual 5
-      decorators(0).getClass                   should be(classOf[YesNoDecorator])
-      decorators(1).getClass                   should be(classOf[FileNamesDecorator])
-      decorators(2).getClass                   should be(classOf[SchemeOrganiserDetailsDecorator])
-      decorators(3).getClass                   should be(classOf[YesNoDecorator])
-      decorators(4).getClass                   should be(classOf[GroupSummaryDecorator])
+      decorators(0).getClass should be(classOf[YesNoDecorator])
+      decorators(1).getClass should be(classOf[FileNamesDecorator])
+      decorators(2).getClass should be(classOf[SchemeOrganiserDetailsDecorator])
+      decorators(3).getClass should be(classOf[YesNoDecorator])
+      decorators(4).getClass should be(classOf[GroupSummaryDecorator])
     }
   }
 
@@ -136,13 +140,13 @@ class PdfDecoratorControllerFactorySpec
       val decorators: Array[Decorator]             = decoratorController.decorators
 
       decoratorController.decorators.length shouldEqual 7
-      decorators(0).getClass                     should be(classOf[YesNoDecorator])
-      decorators(1).getClass                     should be(classOf[FileNamesDecorator])
-      decorators(2).getClass                     should be(classOf[SchemeOrganiserDetailsDecorator])
-      decorators(3).getClass                     should be(classOf[YesNoDecorator])
-      decorators(4).getClass                     should be(classOf[GroupSummaryDecorator])
-      decorators(5).getClass                     should be(classOf[YesNoDecorator])
-      decorators(6).getClass                     should be(classOf[AlterationsAmendsDecorator])
+      decorators(0).getClass should be(classOf[YesNoDecorator])
+      decorators(1).getClass should be(classOf[FileNamesDecorator])
+      decorators(2).getClass should be(classOf[SchemeOrganiserDetailsDecorator])
+      decorators(3).getClass should be(classOf[YesNoDecorator])
+      decorators(4).getClass should be(classOf[GroupSummaryDecorator])
+      decorators(5).getClass should be(classOf[YesNoDecorator])
+      decorators(6).getClass should be(classOf[AlterationsAmendsDecorator])
     }
   }
 
@@ -154,14 +158,14 @@ class PdfDecoratorControllerFactorySpec
       val decorators: Array[Decorator]             = decoratorController.decorators
 
       decoratorController.decorators.length shouldEqual 8
-      decorators(0).getClass                     should be(classOf[YesNoDecorator])
-      decorators(1).getClass                     should be(classOf[FileNamesDecorator])
-      decorators(2).getClass                     should be(classOf[SchemeOrganiserDetailsDecorator])
-      decorators(3).getClass                     should be(classOf[YesNoDecorator])
-      decorators(4).getClass                     should be(classOf[GroupSummaryDecorator])
-      decorators(5).getClass                     should be(classOf[TrusteesDecorator])
-      decorators(6).getClass                     should be(classOf[YesNoDecorator])
-      decorators(7).getClass                     should be(classOf[AlterationsAmendsDecorator])
+      decorators(0).getClass should be(classOf[YesNoDecorator])
+      decorators(1).getClass should be(classOf[FileNamesDecorator])
+      decorators(2).getClass should be(classOf[SchemeOrganiserDetailsDecorator])
+      decorators(3).getClass should be(classOf[YesNoDecorator])
+      decorators(4).getClass should be(classOf[GroupSummaryDecorator])
+      decorators(5).getClass should be(classOf[TrusteesDecorator])
+      decorators(6).getClass should be(classOf[YesNoDecorator])
+      decorators(7).getClass should be(classOf[AlterationsAmendsDecorator])
     }
   }
 
@@ -173,12 +177,12 @@ class PdfDecoratorControllerFactorySpec
       val decorators: Array[Decorator]             = decoratorController.decorators
 
       decoratorController.decorators.length shouldEqual 6
-      decorators(0).getClass                     should be(classOf[YesNoDecorator])
-      decorators(1).getClass                     should be(classOf[FileNamesDecorator])
-      decorators(2).getClass                     should be(classOf[SchemeOrganiserDetailsDecorator])
-      decorators(3).getClass                     should be(classOf[YesNoDecorator])
-      decorators(4).getClass                     should be(classOf[YesNoDecorator])
-      decorators(5).getClass                     should be(classOf[AlterationsAmendsDecorator])
+      decorators(0).getClass should be(classOf[YesNoDecorator])
+      decorators(1).getClass should be(classOf[FileNamesDecorator])
+      decorators(2).getClass should be(classOf[SchemeOrganiserDetailsDecorator])
+      decorators(3).getClass should be(classOf[YesNoDecorator])
+      decorators(4).getClass should be(classOf[YesNoDecorator])
+      decorators(5).getClass should be(classOf[AlterationsAmendsDecorator])
     }
   }
 
@@ -190,11 +194,11 @@ class PdfDecoratorControllerFactorySpec
       val decorators: Array[Decorator]             = decoratorController.decorators
 
       decoratorController.decorators.length shouldEqual 5
-      decorators(0).getClass                     should be(classOf[YesNoDecorator])
-      decorators(1).getClass                     should be(classOf[FileNamesDecorator])
-      decorators(2).getClass                     should be(classOf[SchemeOrganiserDetailsDecorator])
-      decorators(3).getClass                     should be(classOf[YesNoDecorator])
-      decorators(4).getClass                     should be(classOf[GroupSummaryDecorator])
+      decorators(0).getClass should be(classOf[YesNoDecorator])
+      decorators(1).getClass should be(classOf[FileNamesDecorator])
+      decorators(2).getClass should be(classOf[SchemeOrganiserDetailsDecorator])
+      decorators(3).getClass should be(classOf[YesNoDecorator])
+      decorators(4).getClass should be(classOf[GroupSummaryDecorator])
     }
   }
 
@@ -204,7 +208,7 @@ class PdfDecoratorControllerFactorySpec
       Array("csop", "sip", "saye").map { scheme =>
         val mappedAltAmends = createAltAmendOptionsFor(ersSummary, scheme)
 
-        mappedAltAmends("title")   shouldEqual Messages("ers_trustee_summary.altamends.section")
+        mappedAltAmends("title") shouldEqual Messages("ers_trustee_summary.altamends.section")
         mappedAltAmends("option1") shouldEqual Messages(s"ers_alt_amends.$scheme.option_1")
         mappedAltAmends("option2") shouldEqual Messages(s"ers_alt_amends.$scheme.option_2")
         mappedAltAmends("option3") shouldEqual Messages(s"ers_alt_amends.$scheme.option_3")

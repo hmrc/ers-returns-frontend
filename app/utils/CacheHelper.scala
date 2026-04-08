@@ -21,13 +21,14 @@ import play.api.libs.json.{JsError, JsSuccess, Reads}
 import uk.gov.hmrc.mongo.cache.{CacheItem, DataKey}
 
 trait CacheHelper extends Logging {
-  def getEntry[A](cacheItem: CacheItem, key: DataKey[A])(implicit reads: Reads[A]): Option[A] = {
+
+  def getEntry[A](cacheItem: CacheItem, key: DataKey[A])(implicit reads: Reads[A]): Option[A] =
     (cacheItem.data \ key.unwrap).validate[A] match {
       case JsSuccess(value, _) =>
         Some(value)
-      case JsError(_) =>
+      case JsError(_)          =>
         logger.debug(s"Error parsing JSON for key ${key.unwrap}")
         None
     }
-  }
+
 }

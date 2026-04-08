@@ -29,43 +29,43 @@ class ApplicationConfig @Inject() (config: ServicesConfig) {
 
   lazy val appName: String = config.getString("appName")
 
-  lazy val ersUrl: String = config.baseUrl("ers-returns")
+  lazy val ersUrl: String       = config.baseUrl("ers-returns")
   lazy val validatorUrl: String = config.baseUrl("ers-file-validator")
 
-  lazy val upscanProtocol: String = config.getConfString("upscan.protocol", "http").toLowerCase()
+  lazy val upscanProtocol: String     = config.getConfString("upscan.protocol", "http").toLowerCase()
   lazy val upscanInitiateHost: String = config.baseUrl("upscan")
   lazy val upscanRedirectBase: String = config.getString("microservice.services.upscan.redirect-base")
 
   lazy val urBannerLink: String = config.getString("urBanner.link")
-  lazy val ggSignInUrl: String = config.getString("government-gateway-sign-in.host")
+  lazy val ggSignInUrl: String  = config.getString("government-gateway-sign-in.host")
 
   lazy val enableRetrieveSubmissionData: Boolean = config.getBoolean("settings.enable-retrieve-submission-data")
-  lazy val languageTranslationEnabled: Boolean = config.getConfBool("features.welsh-translation", defBool = true)
-  lazy val csopV5Enabled: Boolean = config.getConfBool("features.csop-v5.enabled", defBool = false)
+  lazy val languageTranslationEnabled: Boolean   = config.getConfBool("features.welsh-translation", defBool = true)
+  lazy val csopV5Enabled: Boolean                = config.getConfBool("features.csop-v5.enabled", defBool = false)
 
-  lazy val odsSuccessRetryAmount: Int = config.getInt("retry.ods-success-cache.complete-upload.amount")
-  lazy val odsValidationRetryAmount: Int = config.getInt("retry.ods-success-cache.validation.amount")
+  lazy val odsSuccessRetryAmount: Int       = config.getInt("retry.ods-success-cache.complete-upload.amount")
+  lazy val odsValidationRetryAmount: Int    = config.getInt("retry.ods-success-cache.validation.amount")
   lazy val allCsvFilesCacheRetryAmount: Int = config.getInt("retry.csv-success-cache.all-files-complete.amount")
-  lazy val retryDelay: FiniteDuration = FiniteDuration(config.getString("retry.delay").toInt, "ms")
-  lazy val accessThreshold: Int = config.getInt("accessThreshold")
-  lazy val timeOutSeconds: Int = config.getInt("sessionTimeout.timeoutSeconds")
-  lazy val timeOutCountDownSeconds: Int = config.getInt("sessionTimeout.time-out-countdown-seconds")
-  lazy val timeOut = s"$loginCallback/signed-out"
+  lazy val retryDelay: FiniteDuration       = FiniteDuration(config.getString("retry.delay").toInt, "ms")
+  lazy val accessThreshold: Int             = config.getInt("accessThreshold")
+  lazy val timeOutSeconds: Int              = config.getInt("sessionTimeout.timeoutSeconds")
+  lazy val timeOutCountDownSeconds: Int     = config.getInt("sessionTimeout.time-out-countdown-seconds")
+  lazy val timeOut                          = s"$loginCallback/signed-out"
 
   lazy val sentViaSchedulerNoOfRowsLimit: Int = 10000
 
-  //Previous ExternalUrls Object
-  lazy val companyAuthHost: String = config.getString(s"microservice.services.auth.company-auth.host")
-  lazy val signOutCallback: String = config.getString(s"microservice.services.feedback-survey-frontend.url")
-  lazy val signOut = s"$companyAuthHost/gg/sign-out?continue=$signOutCallback"
-  lazy val loginCallback: String = config.getString(s"microservice.services.auth.login-callback.url")
-  lazy val portalDomain: String = config.getString("portal.domain")
-  lazy val hmacToken: String = config.getString("hmac.hmac_token")
-  lazy val hmacOnSwitch: Boolean = config.getBoolean("hmac.hmac_switch")
-  lazy val dassGatewayHost: String = config.getString("govuk-tax.dass-gateway.host")
+  // Previous ExternalUrls Object
+  lazy val companyAuthHost: String      = config.getString(s"microservice.services.auth.company-auth.host")
+  lazy val signOutCallback: String      = config.getString(s"microservice.services.feedback-survey-frontend.url")
+  lazy val signOut                      = s"$companyAuthHost/gg/sign-out?continue=$signOutCallback"
+  lazy val loginCallback: String        = config.getString(s"microservice.services.auth.login-callback.url")
+  lazy val portalDomain: String         = config.getString("portal.domain")
+  lazy val hmacToken: String            = config.getString("hmac.hmac_token")
+  lazy val hmacOnSwitch: Boolean        = config.getBoolean("hmac.hmac_switch")
+  lazy val dassGatewayHost: String      = config.getString("govuk-tax.dass-gateway.host")
   lazy val dassGatewayAgentPath: String = config.getString("govuk-tax.dass-gateway.agent-path")
-  lazy val dassGatewayOrgLink: String = s"${dassGatewayHost}/ers/org"
-  lazy val dassGatewayOrgPath: String = config.getString("govuk-tax.dass-gateway.org-path")
+  lazy val dassGatewayOrgLink: String   = s"$dassGatewayHost/ers/org"
+  lazy val dassGatewayOrgPath: String   = config.getString("govuk-tax.dass-gateway.org-path")
 
   lazy val ampersandRegex: Regex = "(?!&amp;)(?:&)".r
 
@@ -75,7 +75,8 @@ class ApplicationConfig @Inject() (config: ServicesConfig) {
     "english" -> Lang("en"),
     "cymraeg" -> Lang("cy")
   )
-  lazy val uploadFileSizeLimit: Int = config.getInt("file-size.uploadSizeLimit")
-  lazy val uploadFileSizeInMB: Double = uploadFileSizeLimit/1000/1000.toDouble
+
+  lazy val uploadFileSizeLimit: Int       = config.getInt("file-size.uploadSizeLimit")
+  lazy val uploadFileSizeInMB: Double     = uploadFileSizeLimit / 1000 / 1000.toDouble
 
 }

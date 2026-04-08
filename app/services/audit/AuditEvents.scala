@@ -34,7 +34,7 @@ class AuditEvents @Inject() (val auditConnector: DefaultAuditConnector)(implicit
       "UploadFileSizeFromUpscanCallback",
       Map(
         "schemeRef" -> schemeRef,
-        "fileSize" -> fileSize
+        "fileSize"  -> fileSize
       )
     )
 
@@ -67,4 +67,5 @@ class AuditEvents @Inject() (val auditConnector: DefaultAuditConnector)(implicit
       "sapNumber"  -> rsc.sapNumber.getOrElse(""),
       "bundleRed"  -> bundle
     )
+
 }

@@ -28,4 +28,5 @@ class AlterationsAmendsDecorator(map: Map[String, String]) extends Decorator {
     } else {
       ""
     }
+
 }

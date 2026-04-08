@@ -28,54 +28,62 @@ class UpscanOdsFileUploadViewSpec extends ViewSpecBase with FileUploadFixtures {
 
   private val view = app.injector.instanceOf[upscan_ods_file_upload]
 
-  implicit val ersUtil: ERSUtil = app.injector.instanceOf[ERSUtil]
-  implicit val appConfig: ApplicationConfig = app.injector.instanceOf[ApplicationConfig]
+  implicit val ersUtil: ERSUtil                             = app.injector.instanceOf[ERSUtil]
+  implicit val appConfig: ApplicationConfig                 = app.injector.instanceOf[ApplicationConfig]
   implicit val request: FakeRequest[AnyContentAsEmpty.type] = fakeRequest
-  implicit val messages: Messages = testMessages
+  implicit val messages: Messages                           = testMessages
 
   "upscan_ods_file_upload view" should {
 
     "show expected elements for CSOP page" in {
       val odsRequestObject = testRequestObject.copy(schemeType = Some("CSOP"))
-      val doc = asDocument(view(odsRequestObject, upscanInitiateResponse))
+      val doc              = asDocument(view(odsRequestObject, upscanInitiateResponse))
 
-      doc.getElementById("scheme-reference").text() mustBe "CSOP - Company Share Option Plan scheme - XA1100000000000 - 2014 to 2015"
+      doc
+        .getElementById("scheme-reference")
+        .text()                                                        mustBe "CSOP - Company Share Option Plan scheme - XA1100000000000 - 2014 to 2015"
       firstElementByClassOwnText(doc, "hmrc-caption govuk-caption-xl") mustBe "Company Share Option Plan scheme"
       hasExpectedHeaderAndUploadElements(doc)
     }
 
     "show expected elements for EMI page" in {
       val odsRequestObject = testRequestObject.copy(schemeType = Some("EMI"))
-      val doc = asDocument(view(odsRequestObject, upscanInitiateResponse))
+      val doc              = asDocument(view(odsRequestObject, upscanInitiateResponse))
 
-      doc.getElementById("scheme-reference").text() mustBe "EMI - Enterprise Management Incentives scheme - XA1100000000000 - 2014 to 2015"
+      doc
+        .getElementById("scheme-reference")
+        .text()                                                        mustBe "EMI - Enterprise Management Incentives scheme - XA1100000000000 - 2014 to 2015"
       firstElementByClassOwnText(doc, "hmrc-caption govuk-caption-xl") mustBe "Enterprise Management Incentives scheme"
       hasExpectedHeaderAndUploadElements(doc)
     }
 
     "show expected elements for SAYE page" in {
       val odsRequestObject = testRequestObject.copy(schemeType = Some("SAYE"))
-      val doc = asDocument(view(odsRequestObject, upscanInitiateResponse))
+      val doc              = asDocument(view(odsRequestObject, upscanInitiateResponse))
 
-      doc.getElementById("scheme-reference").text() mustBe "SAYE - Save As You Earn scheme - XA1100000000000 - 2014 to 2015"
+      doc
+        .getElementById("scheme-reference")
+        .text()                                                        mustBe "SAYE - Save As You Earn scheme - XA1100000000000 - 2014 to 2015"
       firstElementByClassOwnText(doc, "hmrc-caption govuk-caption-xl") mustBe "Save As You Earn scheme"
       hasExpectedHeaderAndUploadElements(doc)
     }
 
     "show expected elements for SIP page" in {
       val odsRequestObject = testRequestObject.copy(schemeType = Some("SIP"))
-      val doc = asDocument(view(odsRequestObject, upscanInitiateResponse))
+      val doc              = asDocument(view(odsRequestObject, upscanInitiateResponse))
 
-      doc.getElementById("scheme-reference").text() mustBe "SIP - Share Incentive Plan scheme - XA1100000000000 - 2014 to 2015"
+      doc
+        .getElementById("scheme-reference")
+        .text()                                                        mustBe "SIP - Share Incentive Plan scheme - XA1100000000000 - 2014 to 2015"
       firstElementByClassOwnText(doc, "hmrc-caption govuk-caption-xl") mustBe "Share Incentive Plan scheme"
       hasExpectedHeaderAndUploadElements(doc)
     }
 
     "show expected elements for OTHER page" in {
       val odsRequestObject = testRequestObject.copy(schemeType = Some("OTHER"))
-      val doc = asDocument(view(odsRequestObject, upscanInitiateResponse))
+      val doc              = asDocument(view(odsRequestObject, upscanInitiateResponse))
 
-      doc.getElementById("scheme-reference").text() mustBe "OTHER - Other scheme - XA1100000000000 - 2014 to 2015"
+      doc.getElementById("scheme-reference").text()                    mustBe "OTHER - Other scheme - XA1100000000000 - 2014 to 2015"
       firstElementByClassOwnText(doc, "hmrc-caption govuk-caption-xl") mustBe "Other scheme"
       hasExpectedHeaderAndUploadElements(doc)
     }
@@ -83,12 +91,15 @@ class UpscanOdsFileUploadViewSpec extends ViewSpecBase with FileUploadFixtures {
   }
 
   private def hasExpectedHeaderAndUploadElements(doc: Document): Unit = {
-    firstElementByClassText(doc, "govuk-heading-xl") mustBe "Upload your ODS file"
-    firstElementByClassText(doc, "govuk-warning-text") mustBe "! Warning You must save a copy of your ODS file for your records."
-    firstElementByClassText(doc, "govuk-form-group") mustBe "Upload the file"
+    firstElementByClassText(doc, "govuk-heading-xl")   mustBe "Upload your ODS file"
+    firstElementByClassText(
+      doc,
+      "govuk-warning-text"
+    )                                                  mustBe "! Warning You must save a copy of your ODS file for your records."
+    firstElementByClassText(doc, "govuk-form-group")   mustBe "Upload the file"
     doc.getElementsByClass("govuk-file-upload").size() mustBe 1
-    doc.title() mustBe "Upload your ODS file – Employment Related Securities – GOV.UK"
-    firstElementByClassText(doc, "govuk-button") mustBe "Upload file"
+    doc.title()                                        mustBe "Upload your ODS file – Employment Related Securities – GOV.UK"
+    firstElementByClassText(doc, "govuk-button")       mustBe "Upload file"
   }
 
 }

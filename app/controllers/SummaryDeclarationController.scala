@@ -32,42 +32,50 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class SummaryDeclarationController @Inject() (val mcc: MessagesControllerComponents,
-                                              val ersConnector: ErsConnector,
-                                              val sessionService: FrontendSessionService,
-                                              globalErrorView: views.html.global_error,
-                                              summaryView: views.html.summary,
-                                              authAction: AuthAction)
-                                             (implicit val ec: ExecutionContext,
-                                              val ersUtil: ERSUtil,
-                                              val appConfig: ApplicationConfig,
-                                              val countryCodes: CountryCodes)
-  extends FrontendController(mcc) with I18nSupport with CacheHelper {
+class SummaryDeclarationController @Inject() (
+  val mcc: MessagesControllerComponents,
+  val ersConnector: ErsConnector,
+  val sessionService: FrontendSessionService,
+  globalErrorView: views.html.global_error,
+  summaryView: views.html.summary,
+  authAction: AuthAction
+)(implicit
+  val ec: ExecutionContext,
+  val ersUtil: ERSUtil,
+  val appConfig: ApplicationConfig,
+  val countryCodes: CountryCodes
+) extends FrontendController(mcc) with I18nSupport with CacheHelper {
 
   def summaryDeclarationPage(): Action[AnyContent] = authAction.async { implicit request =>
     sessionService.fetch[ErsMetaData](ersUtil.ERS_METADATA).map { ele =>
-      logger.info(s"[SummaryDeclarationController][summaryDeclarationPage] Fetched request object with SAP Number: ${ele.sapNumber} " +
-        s"and schemeRef: ${ele.schemeInfo.schemeRef}")
+      logger.info(
+        s"[SummaryDeclarationController][summaryDeclarationPage] Fetched request object with SAP Number: ${ele.sapNumber} " +
+          s"and schemeRef: ${ele.schemeInfo.schemeRef}"
+      )
     }
     sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT).flatMap { requestObject =>
       showSummaryDeclarationPage(requestObject)(request)
     }
   }
 
-  def showSummaryDeclarationPage(requestObject: RequestObject)(implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
+  def showSummaryDeclarationPage(
+    requestObject: RequestObject
+  )(implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
     sessionService.fetchAll().flatMap { all =>
       val schemeOrganiser: SchemeOrganiserDetails =
         getEntry[SchemeOrganiserDetails](all, DataKey(ersUtil.SCHEME_ORGANISER_CACHE)).get
-      val groupSchemeInfo: GroupSchemeInfo =
-        getEntry[GroupSchemeInfo](all, DataKey(ersUtil.GROUP_SCHEME_CACHE_CONTROLLER)).getOrElse(new GroupSchemeInfo(None, None))
-      val groupScheme: String = groupSchemeInfo.groupScheme.getOrElse("")
-      val reportableEvents: String = getEntry[ReportableEvents](all, DataKey(ersUtil.REPORTABLE_EVENTS)).get.isNilReturn.get
-      var fileType: String = ""
+      val groupSchemeInfo: GroupSchemeInfo        =
+        getEntry[GroupSchemeInfo](all, DataKey(ersUtil.GROUP_SCHEME_CACHE_CONTROLLER))
+          .getOrElse(new GroupSchemeInfo(None, None))
+      val groupScheme: String                     = groupSchemeInfo.groupScheme.getOrElse("")
+      val reportableEvents: String                =
+        getEntry[ReportableEvents](all, DataKey(ersUtil.REPORTABLE_EVENTS)).get.isNilReturn.get
+      var fileType: String                        = ""
 
       val (fileNames: String, fileCount: Int) = if (reportableEvents == ersUtil.OPTION_YES) {
         fileType = getEntry[CheckFileType](all, DataKey(ersUtil.FILE_TYPE_CACHE)).get.checkFileType.get
         if (fileType == ersUtil.OPTION_CSV) {
-          val csvCallback = getEntry[UpscanCsvFilesCallbackList](all, DataKey(ersUtil.CHECK_CSV_FILES))
+          val csvCallback                                    = getEntry[UpscanCsvFilesCallbackList](all, DataKey(ersUtil.CHECK_CSV_FILES))
             .getOrElse(
               throw new Exception(s"Cache data missing for key: ${ersUtil.CHECK_CSV_FILES} in CacheMap")
             )
@@ -89,12 +97,12 @@ class SummaryDeclarationController @Inject() (val mcc: MessagesControllerCompone
         }
       } else ("", 0)
 
-      val schemeID = requestObject.getSchemeId
+      val schemeID          = requestObject.getSchemeId
       val altAmendsActivity =
         getEntry[AltAmendsActivity](all, DataKey(ersUtil.ALT_AMENDS_ACTIVITY)).getOrElse(AltAmendsActivity(""))
       val altActivity       = schemeID match {
         case ersUtil.SCHEME_CSOP | ersUtil.SCHEME_SIP | ersUtil.SCHEME_SAYE => altAmendsActivity.altActivity
-        case _ => ""
+        case _                                                              => ""
       }
 
       if (validateCompanies(all, groupScheme) && validateAltAmends(all, altActivity, schemeID)) {
@@ -119,27 +127,34 @@ class SummaryDeclarationController @Inject() (val mcc: MessagesControllerCompone
         throw new Exception("Validation of companies or alt activities failed")
       }
     } recover { case e: Throwable =>
-      logger.error(s"[SummaryDeclarationController][showSummaryDeclarationPage] failed to load page with exception ${e.getMessage}.", e)
+      logger.error(
+        s"[SummaryDeclarationController][showSummaryDeclarationPage] failed to load page with exception ${e.getMessage}.",
+        e
+      )
       getGlobalErrorPage
     }
 
   private def validateCompanies(all: CacheItem, groupScheme: String): Boolean = {
     val companiesExist = getCompDetails(all).companies.nonEmpty
-    if ((companiesExist && groupScheme == ersUtil.OPTION_YES) || (!companiesExist && groupScheme == ersUtil.OPTION_NO)) {
+    if (
+      (companiesExist && groupScheme == ersUtil.OPTION_YES) || (!companiesExist && groupScheme == ersUtil.OPTION_NO)
+    ) {
       true
     } else {
-      logger.error(s"[SummaryDeclarationController][showSummaryDeclarationPage] attempted to route to summary page with incompatible state: Companies Filled = $companiesExist. Group Scheme = $groupScheme")
+      logger.error(
+        s"[SummaryDeclarationController][showSummaryDeclarationPage] attempted to route to summary page with incompatible state: Companies Filled = $companiesExist. Group Scheme = $groupScheme"
+      )
       false
     }
   }
 
   def isValidAltActivity(altActivity: String, altAmendsEmpty: Boolean): Boolean =
-    (altAmendsEmpty  && (altActivity == ersUtil.OPTION_NO || altActivity.isEmpty)) ||
-    (!altAmendsEmpty && altActivity == ersUtil.OPTION_YES)
+    (altAmendsEmpty && (altActivity == ersUtil.OPTION_NO || altActivity.isEmpty)) ||
+      (!altAmendsEmpty && altActivity == ersUtil.OPTION_YES)
 
   private def validateAltAmends(all: CacheItem, altActivity: String, schemeID: String): Boolean = {
     val altActivityCheck = Seq(ersUtil.SCHEME_CSOP, ersUtil.SCHEME_SIP, ersUtil.SCHEME_SAYE) contains schemeID
-    val altAmendsEmpty = getAltAmends(all).checkIfEmpty
+    val altAmendsEmpty   = getAltAmends(all).checkIfEmpty
 
     if (altActivityCheck) {
       isValidAltActivity(altActivity, altAmendsEmpty)
@@ -168,4 +183,5 @@ class SummaryDeclarationController @Inject() (val mcc: MessagesControllerCompone
         "ers.global_errors.message"
       )(request, messages, appConfig)
     )
+
 }
