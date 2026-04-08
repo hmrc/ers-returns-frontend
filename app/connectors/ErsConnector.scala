@@ -34,18 +34,22 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class ErsConnector @Inject() (http: HttpClientV2, appConfig: ApplicationConfig)(implicit ec: ExecutionContext) extends Logging with Metrics {
+class ErsConnector @Inject() (http: HttpClientV2, appConfig: ApplicationConfig)(implicit ec: ExecutionContext)
+    extends Logging with Metrics {
 
-  lazy val ersUrl: String = appConfig.ersUrl
+  lazy val ersUrl: String       = appConfig.ersUrl
   lazy val validatorUrl: String = appConfig.validatorUrl
 
-  def   connectToEtmpSapRequest(
-                                 schemeRef: String
-                               )(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Either[Throwable, String]] = {
+  def connectToEtmpSapRequest(
+    schemeRef: String
+  )(implicit
+    request: RequestWithOptionalAuthContext[AnyContent],
+    hc: HeaderCarrier
+  ): Future[Either[Throwable, String]] = {
 
     val empRef: String = request.authData.empRef.encodedValue
-    val url: String = s"$ersUrl/ers/$empRef/sapRequest/" + schemeRef
-    val startTime = System.currentTimeMillis()
+    val url: String    = s"$ersUrl/ers/$empRef/sapRequest/" + schemeRef
+    val startTime      = System.currentTimeMillis()
 
     http
       .get(url"$url")
@@ -71,48 +75,53 @@ class ErsConnector @Inject() (http: HttpClientV2, appConfig: ApplicationConfig)(
       }
   }
 
-  def connectToEtmpSummarySubmit(sap: String, payload: JsValue)(implicit request: RequestWithOptionalAuthContext[AnyContent],
-                                                                 hc: HeaderCarrier
+  def connectToEtmpSummarySubmit(sap: String, payload: JsValue)(implicit
+    request: RequestWithOptionalAuthContext[AnyContent],
+    hc: HeaderCarrier
   ): Future[String] = {
     val empRef: String = request.authData.empRef.encodedValue
-    val url: String = s"$ersUrl/ers/$empRef/summarySubmit/" + sap
+    val url: String    = s"$ersUrl/ers/$empRef/summarySubmit/" + sap
 
     http
       .post(url"$url")
       .withBody(payload)
       .execute[HttpResponse]
-      .map {
-        res =>
-          res.status match {
-            case OK =>
-              val bundleRef: String = (res.json \ "Form Bundle Number").as[String]
-              bundleRef
-            case _  =>
-              logger.error(
-                s"[ErsConnector][connectToEtmpSummarySubmit] Summary submit request failed with status ${res.status}, timestamp: ${System.currentTimeMillis()}."
-              )
-              throw new Exception
-          }
+      .map { res =>
+        res.status match {
+          case OK =>
+            val bundleRef: String = (res.json \ "Form Bundle Number").as[String]
+            bundleRef
+          case _  =>
+            logger.error(
+              s"[ErsConnector][connectToEtmpSummarySubmit] Summary submit request failed with status ${res.status}, timestamp: ${System.currentTimeMillis()}."
+            )
+            throw new Exception
+        }
       }
   }
 
   def submitReturnToBackend(
-                             allData: ErsSummary
-                           )(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[HttpResponse] = {
+    allData: ErsSummary
+  )(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[HttpResponse] = {
     val empRef: String = request.authData.empRef.encodedValue
-    val url: String = s"$ersUrl/ers/$empRef/saveReturnData"
+    val url: String    = s"$ersUrl/ers/$empRef/saveReturnData"
     http
       .post(url"$url")
       .withBody(Json.toJson(allData))
       .execute[HttpResponse]
   }
 
-  def validateFileData(callbackData: UploadedSuccessfully, schemeInfo: SchemeInfo)(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier
+  def validateFileData(callbackData: UploadedSuccessfully, schemeInfo: SchemeInfo)(implicit
+    request: RequestWithOptionalAuthContext[AnyContent],
+    hc: HeaderCarrier
   ): Future[HttpResponse] = {
     val empRef: String = request.authData.empRef.encodedValue
-    val url: String = s"$validatorUrl/ers/$empRef/process-file"
-    val startTime = System.currentTimeMillis()
-    logger.debug("[ErsConnector][connectToEtmpSapRequest] validateFileData: Call to Validator: " + (System.currentTimeMillis() / 1000))
+    val url: String    = s"$validatorUrl/ers/$empRef/process-file"
+    val startTime      = System.currentTimeMillis()
+    logger.debug(
+      "[ErsConnector][connectToEtmpSapRequest] validateFileData: Call to Validator: " + (System
+        .currentTimeMillis() / 1000)
+    )
     http
       .post(url"$url")
       .withBody(Json.toJson(ValidatorData(callbackData, schemeInfo)))
@@ -120,13 +129,15 @@ class ErsConnector @Inject() (http: HttpClientV2, appConfig: ApplicationConfig)(
       .map { res =>
         ersConnector(System.currentTimeMillis() - startTime, TimeUnit.MILLISECONDS)
         res.status match {
-          case OK           => res
-          case ACCEPTED     => res
-          case BAD_REQUEST  => res
-          case NO_CONTENT   => res
-          case _            =>
+          case OK          => res
+          case ACCEPTED    => res
+          case BAD_REQUEST => res
+          case NO_CONTENT  => res
+          case _           =>
             logger.error(s"[ErsConnector][validateFileData] Received status code ${res.status} from file validator")
-            throw new Exception(s"[ErsConnector][validateFileData] Received status code ${res.status} from file validator")
+            throw new Exception(
+              s"[ErsConnector][validateFileData] Received status code ${res.status} from file validator"
+            )
         }
       }
       .recover { case e: Exception =>
@@ -139,27 +150,28 @@ class ErsConnector @Inject() (http: HttpClientV2, appConfig: ApplicationConfig)(
   }
 
   def validateCsvFileData(callbackData: List[UploadedSuccessfully], schemeInfo: SchemeInfo)(implicit
-                                                                                            request: RequestWithOptionalAuthContext[AnyContent],
-                                                                                            hc: HeaderCarrier
+    request: RequestWithOptionalAuthContext[AnyContent],
+    hc: HeaderCarrier
   ): Future[HttpResponse] = {
     val empRef: String = request.authData.empRef.encodedValue
-    val url: String = s"$validatorUrl/ers/v2/$empRef/process-csv-file"
+    val url: String    = s"$validatorUrl/ers/v2/$empRef/process-csv-file"
 
     http
       .post(url"$url")
       .withBody(Json.toJson(CsvValidatorData(callbackData, schemeInfo)))
       .execute[HttpResponse]
-      .map {
-        res =>
-          res.status match {
-            case OK           => res
-            case ACCEPTED     => res
-            case BAD_REQUEST  => res
-            case NO_CONTENT   => res
-            case _            =>
-              logger.error(s"[ErsConnector][validateCsvFileData] Received status code ${res.status} from file validator")
-              throw new Exception(s"[ErsConnector][validateCsvFileData] Received status code ${res.status} from file validator")
-          }
+      .map { res =>
+        res.status match {
+          case OK          => res
+          case ACCEPTED    => res
+          case BAD_REQUEST => res
+          case NO_CONTENT  => res
+          case _           =>
+            logger.error(s"[ErsConnector][validateCsvFileData] Received status code ${res.status} from file validator")
+            throw new Exception(
+              s"[ErsConnector][validateCsvFileData] Received status code ${res.status} from file validator"
+            )
+        }
       }
       .recover { case e: Exception =>
         logger.error(
@@ -170,10 +182,10 @@ class ErsConnector @Inject() (http: HttpClientV2, appConfig: ApplicationConfig)(
   }
 
   def saveMetadata(
-                    allData: ErsSummary
-                  )(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[HttpResponse] = {
+    allData: ErsSummary
+  )(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[HttpResponse] = {
     val empRef: String = request.authData.empRef.encodedValue
-    val url: String = s"$ersUrl/ers/$empRef/saveMetadata"
+    val url: String    = s"$ersUrl/ers/$empRef/saveMetadata"
     http
       .post(url"$url")
       .withBody(Json.toJson(allData))
@@ -181,11 +193,11 @@ class ErsConnector @Inject() (http: HttpClientV2, appConfig: ApplicationConfig)(
   }
 
   def checkForPresubmission(schemeInfo: SchemeInfo, validatedSheets: String)(implicit
-                                                                             request: RequestWithOptionalAuthContext[AnyContent],
-                                                                             hc: HeaderCarrier
+    request: RequestWithOptionalAuthContext[AnyContent],
+    hc: HeaderCarrier
   ): Future[HttpResponse] = {
     val empRef: String = request.authData.empRef.encodedValue
-    val url: String = s"$ersUrl/ers/$empRef/check-for-presubmission/$validatedSheets"
+    val url: String    = s"$ersUrl/ers/$empRef/check-for-presubmission/$validatedSheets"
     http
       .post(url"$url")
       .withBody(Json.toJson(schemeInfo))
@@ -193,10 +205,10 @@ class ErsConnector @Inject() (http: HttpClientV2, appConfig: ApplicationConfig)(
   }
 
   def removePresubmissionData(
-                               schemeInfo: SchemeInfo
-                             )(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[HttpResponse] = {
+    schemeInfo: SchemeInfo
+  )(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[HttpResponse] = {
     val empRef: String = request.authData.empRef.encodedValue
-    val url: String = s"$ersUrl/ers/$empRef/removePresubmissionData"
+    val url: String    = s"$ersUrl/ers/$empRef/removePresubmissionData"
     http
       .post(url"$url")
       .withBody(Json.toJson(schemeInfo))
@@ -204,17 +216,20 @@ class ErsConnector @Inject() (http: HttpClientV2, appConfig: ApplicationConfig)(
   }
 
   def retrieveSubmissionData(
-                              data: JsObject
-                            )(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[HttpResponse] = {
+    data: JsObject
+  )(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[HttpResponse] = {
     val empRef: String = request.authData.empRef.encodedValue
-    val url: String = s"$ersUrl/ers/$empRef/retrieve-submission-data"
+    val url: String    = s"$ersUrl/ers/$empRef/retrieve-submission-data"
     http
       .post(url"$url")
       .withBody(Json.toJson(data))
       .execute[HttpResponse]
   }
 
-  def createCallbackRecord(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Int] = {
+  def createCallbackRecord(implicit
+    request: RequestWithOptionalAuthContext[AnyContent],
+    hc: HeaderCarrier
+  ): Future[Int] =
     withOptionalSession(
       ifSome = { sessionId =>
         val url: String = s"$validatorUrl/ers/$sessionId/create-callback"
@@ -223,18 +238,23 @@ class ErsConnector @Inject() (http: HttpClientV2, appConfig: ApplicationConfig)(
           .execute[HttpResponse]
           .map {
             case response if response.status == CREATED => CREATED
-            case response =>
-              logger.error(s"[ErsConnector][createCallbackRecord] Received unexpected status code ${response.status} from file validator")
-              throw new Exception(s"[ErsConnector][createCallbackRecord] Unexpected response status code ${response.status}")
-          }.recover {
-            case ex: Exception =>
-              logger.error("[ErsConnector][createCallbackRecord] Error in POST request: " + ex.getMessage, ex)
-              throw ex
+            case response                               =>
+              logger.error(
+                s"[ErsConnector][createCallbackRecord] Received unexpected status code ${response.status} from file validator"
+              )
+              throw new Exception(
+                s"[ErsConnector][createCallbackRecord] Unexpected response status code ${response.status}"
+              )
+          }
+          .recover { case ex: Exception =>
+            logger.error("[ErsConnector][createCallbackRecord] Error in POST request: " + ex.getMessage, ex)
+            throw ex
           }
       },
-      ifNone = Future.failed(new NoSuchElementException("[ErsConnector][createCallbackRecord] Session ID not found in the request session"))
+      ifNone = Future.failed(
+        new NoSuchElementException("[ErsConnector][createCallbackRecord] Session ID not found in the request session")
+      )
     )
-  }
 
   def updateCallbackRecord(uploadStatus: UploadStatus, sessionId: String)(implicit hc: HeaderCarrier): Future[Int] = {
     val url: String = s"$validatorUrl/ers/$sessionId/update-callback"
@@ -244,13 +264,20 @@ class ErsConnector @Inject() (http: HttpClientV2, appConfig: ApplicationConfig)(
       .execute[HttpResponse]
       .map {
         case response if response.status == 204 => NO_CONTENT
-        case response =>
-          logger.error(s"[ErsConnector][updateCallbackRecord] Received unexpected status code ${response.status} from file validator")
-          throw new Exception(s"[ErsConnector][updateCallbackRecord] Unexpected response status code ${response.status}")
+        case response                           =>
+          logger.error(
+            s"[ErsConnector][updateCallbackRecord] Received unexpected status code ${response.status} from file validator"
+          )
+          throw new Exception(
+            s"[ErsConnector][updateCallbackRecord] Unexpected response status code ${response.status}"
+          )
       }
   }
 
-  def getCallbackRecord(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Option[UploadStatus]] = {
+  def getCallbackRecord(implicit
+    request: RequestWithOptionalAuthContext[AnyContent],
+    hc: HeaderCarrier
+  ): Future[Option[UploadStatus]] =
     withOptionalSession(
       ifSome = { sessionId =>
         val url: String = s"$validatorUrl/ers/$sessionId/get-callback"
@@ -261,28 +288,30 @@ class ErsConnector @Inject() (http: HttpClientV2, appConfig: ApplicationConfig)(
             case response if response.status == OK =>
               response.json.validate[UploadStatus] match {
                 case JsSuccess(uploadStatus, _) => Some(uploadStatus)
-                case JsError(errors) =>
+                case JsError(errors)            =>
                   logger.error("[ErsConnector][getCallbackRecord] Error parsing UploadStatus: " + errors.toString)
                   None
               }
-            case response =>
-              logger.error(s"[ErsConnector][getCallbackRecord] Unexpected response status code ${response.status} from file validator")
+            case response                          =>
+              logger.error(
+                s"[ErsConnector][getCallbackRecord] Unexpected response status code ${response.status} from file validator"
+              )
               None
-          }.recover {
-            case ex: Exception =>
-              logger.error("[ErsConnector][getCallbackRecord] Error in GET request: " + ex.getMessage, ex)
-              None
+          }
+          .recover { case ex: Exception =>
+            logger.error("[ErsConnector][getCallbackRecord] Error in GET request: " + ex.getMessage, ex)
+            None
           }
       },
       ifNone = Future.successful(None)
     )
-  }
 
-  def withOptionalSession[A](ifSome: String => Future[A], ifNone: => Future[A])
-                            (implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[A] = {
+  def withOptionalSession[A](ifSome: String => Future[A], ifNone: => Future[A])(implicit
+    request: RequestWithOptionalAuthContext[AnyContent]
+  ): Future[A] =
     request.session.get("sessionId") match {
       case Some(sessionId) => ifSome(sessionId)
-      case None => ifNone
+      case None            => ifNone
     }
-  }
+
 }

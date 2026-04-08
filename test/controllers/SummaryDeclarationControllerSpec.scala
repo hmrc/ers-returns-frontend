@@ -41,7 +41,7 @@ import java.time.Instant
 import scala.concurrent.{ExecutionContext, Future}
 
 class SummaryDeclarationControllerSpec
-  extends AnyWordSpecLike
+    extends AnyWordSpecLike
     with Matchers
     with OptionValues
     with ErsTestHelper
@@ -61,14 +61,15 @@ class SummaryDeclarationControllerSpec
   )
 
   implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
-  implicit val countryCodes: CountryCodes = mockCountryCodes
+  implicit val countryCodes: CountryCodes      = mockCountryCodes
 
   implicit lazy val materializer: Materializer = app.materializer
-  val globalErrorView: global_error = app.injector.instanceOf[global_error]
-  val summaryView: summary = app.injector.instanceOf[summary]
+  val globalErrorView: global_error            = app.injector.instanceOf[global_error]
+  val summaryView: summary                     = app.injector.instanceOf[summary]
 
-  val schemeInfo: SchemeInfo = SchemeInfo("XA1100000000000",Instant.now, "2", "2016", "EMI", "EMI")
-  val rsc: ErsMetaData =
+  val schemeInfo: SchemeInfo = SchemeInfo("XA1100000000000", Instant.now, "2", "2016", "EMI", "EMI")
+
+  val rsc: ErsMetaData       =
     new ErsMetaData(schemeInfo, "ipRef", Some("aoRef"), "empRef", Some("agentRef"), Some("sapNumber"))
 
   val schemeOrganiser: SchemeOrganiserDetails = new SchemeOrganiserDetails(
@@ -82,11 +83,14 @@ class SummaryDeclarationControllerSpec
     Option("AB123456"),
     Option("1234567890")
   )
-  val schemeOrganiserString: String = "Company Name, Add1, Add2, Add3, Add4, UK, AA111AA, AB123456, 1234567890"
-  val groupSchemeInfo: GroupSchemeInfo = new GroupSchemeInfo(Option("1"), None)
-  val gscomp: CompanyDetails =
+
+  val schemeOrganiserString: String           = "Company Name, Add1, Add2, Add3, Add4, UK, AA111AA, AB123456, 1234567890"
+  val groupSchemeInfo: GroupSchemeInfo        = new GroupSchemeInfo(Option("1"), None)
+
+  val gscomp: CompanyDetails                  =
     new CompanyDetails(Fixtures.companyName, "Address Line 1", None, None, None, None, Some("UK"), None, None, true)
-  val gscomps: CompanyDetailsList = new CompanyDetailsList(List(gscomp))
+
+  val gscomps: CompanyDetailsList             = new CompanyDetailsList(List(gscomp))
 
   val alterationAmends: AlterationAmends = new AlterationAmends(
     Option("1"),
@@ -96,31 +100,42 @@ class SummaryDeclarationControllerSpec
     Option("1")
   )
 
-  val reportableEvents: ReportableEvents = new ReportableEvents(Some("1"))
-  val fileTypeCSV: CheckFileType = new CheckFileType(Some("csv"))
-  val fileTypeODS: CheckFileType = new CheckFileType(Some("ods"))
-  val csvFileCallBackList: UpscanCsvFilesCallbackList = UpscanCsvFilesCallbackList(List(UpscanCsvFilesCallback(UploadId("abcd"), "id0", UploadedSuccessfully("CSOP_OptionsGranted_V4.csv", "http://test.gov.uk"))))
-  val csvFilesCallbackList: UpscanCsvFilesCallbackList = incompleteCsvList
-  val trustees: TrusteeDetails = new TrusteeDetails("T Name", "T Add 1", None, None, None, None, None, false)
-  val trusteesList: TrusteeDetailsList = new TrusteeDetailsList(List(trustees))
-  val fileNameODS: String = "test.osd"
+  val reportableEvents: ReportableEvents               = new ReportableEvents(Some("1"))
+  val fileTypeCSV: CheckFileType                       = new CheckFileType(Some("csv"))
+  val fileTypeODS: CheckFileType                       = new CheckFileType(Some("ods"))
 
-  val company: CompanyDetails =
+  val csvFileCallBackList: UpscanCsvFilesCallbackList  = UpscanCsvFilesCallbackList(
+    List(
+      UpscanCsvFilesCallback(
+        UploadId("abcd"),
+        "id0",
+        UploadedSuccessfully("CSOP_OptionsGranted_V4.csv", "http://test.gov.uk")
+      )
+    )
+  )
+
+  val csvFilesCallbackList: UpscanCsvFilesCallbackList = incompleteCsvList
+  val trustees: TrusteeDetails                         = new TrusteeDetails("T Name", "T Add 1", None, None, None, None, None, false)
+  val trusteesList: TrusteeDetailsList                 = new TrusteeDetailsList(List(trustees))
+  val fileNameODS: String                              = "test.osd"
+
+  val company: CompanyDetails                           =
     CompanyDetails(Fixtures.companyName, "Address Line 1", None, None, None, None, Some("UK"), None, None, true)
-  lazy val companyDetailsList: CompanyDetailsList = CompanyDetailsList(List(company, company))
+
+  lazy val companyDetailsList: CompanyDetailsList       = CompanyDetailsList(List(company, company))
   lazy val companyDetailsListSingle: CompanyDetailsList = CompanyDetailsList(List(company))
 
   val commonAllDataMap: Map[String, JsValue] = Map(
-    "scheme-type" -> Json.toJson("1"),
-    "portal-scheme-ref" -> Json.toJson("CSOP - MyScheme - XA1100000000000 - 2014/15"),
-    "alt-activity" -> Json.toJson(new AltAmendsActivity("1")),
-    "scheme-organiser" -> Json.toJson(schemeOrganiser),
-    "group-scheme-controller" -> Json.toJson(groupSchemeInfo),
-    "subsidiary-companies" -> Json.toJson(gscomps),
-    "trustees" -> Json.toJson(trusteesList),
-    "reportable-events" -> Json.toJson(reportableEvents),
+    "scheme-type"                 -> Json.toJson("1"),
+    "portal-scheme-ref"           -> Json.toJson("CSOP - MyScheme - XA1100000000000 - 2014/15"),
+    "alt-activity"                -> Json.toJson(new AltAmendsActivity("1")),
+    "scheme-organiser"            -> Json.toJson(schemeOrganiser),
+    "group-scheme-controller"     -> Json.toJson(groupSchemeInfo),
+    "subsidiary-companies"        -> Json.toJson(gscomps),
+    "trustees"                    -> Json.toJson(trusteesList),
+    "reportable-events"           -> Json.toJson(reportableEvents),
     "alt-amends-cache-controller" -> Json.toJson(alterationAmends),
-    "ErsMetaData" -> Json.toJson(rsc)
+    "ErsMetaData"                 -> Json.toJson(rsc)
   )
 
   val csopRequestObject: RequestObject = ersRequestObject.copy(schemeName = Some("CSOP"), schemeType = Some("CSOP"))
@@ -186,7 +201,7 @@ class SummaryDeclarationControllerSpec
     "give a redirect status (to company authentication frontend)" in {
       setUnauthorisedMocks()
       summaryDeclarationControllerHandler(Fixtures.buildFakeRequestWithSessionId("GET")) { result =>
-        status(result) shouldBe SEE_OTHER
+        status(result)                                                  shouldBe SEE_OTHER
         headers(result)(implicitly)("Location").contains("/gg/sign-in") shouldBe true
       }
     }
@@ -208,9 +223,9 @@ class SummaryDeclarationControllerSpec
   "Calling SummaryDeclarationController.showSummaryDeclarationPage (GET) with authentication and required elements (Nil Return) in the cache" should {
     "show the summary declaration page" in {
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
-      val findList =
+      val findList    =
         Seq("scheme-organiser", "group-scheme-controller", "subsidiary-companies", "trustees", "ErsMetaData")
-      val addList = Map(
+      val addList     = Map(
         "reportable-events" -> Json.toJson(new ReportableEvents(Some(OPTION_NIL_RETURN))),
         "alt-activity"      -> Json.toJson(new AltAmendsActivity("2"))
       )
@@ -232,7 +247,7 @@ class SummaryDeclarationControllerSpec
 
       val findList =
         Seq("scheme-organiser", "group-scheme-controller", "subsidiary-companies", "trustees", "ErsMetaData")
-      val addList = Map(
+      val addList  = Map(
         "reportable-events" -> Json.toJson(new ReportableEvents(Some(mockErsUtil.OPTION_UPLOAD_SPREEDSHEET))),
         "check-file-type"   -> Json.toJson(fileTypeCSV),
         "check-csv-files"   -> Json.toJson(csvFileCallBackList),
@@ -256,7 +271,7 @@ class SummaryDeclarationControllerSpec
 
       val findList =
         Seq("scheme-organiser", "group-scheme-controller", "subsidiary-companies", "trustees", "ErsMetaData")
-      val addList = Map(
+      val addList  = Map(
         "reportable-events" -> Json.toJson(new ReportableEvents(Some(mockErsUtil.OPTION_UPLOAD_SPREEDSHEET))),
         "check-file-type"   -> Json.toJson(fileTypeODS),
         "file-name"         -> Json.toJson(fileNameODS),
@@ -279,9 +294,16 @@ class SummaryDeclarationControllerSpec
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
 
       val findList = Seq(
-        "scheme-type", "portal-scheme-ref", "scheme-organiser", "group-scheme-controller", "subsidiary-companies", "trustees", "reportable-events", "ErsMetaData"
+        "scheme-type",
+        "portal-scheme-ref",
+        "scheme-organiser",
+        "group-scheme-controller",
+        "subsidiary-companies",
+        "trustees",
+        "reportable-events",
+        "ErsMetaData"
       )
-      val addList = Map(
+      val addList  = Map(
         "check-file-type" -> Json.toJson(fileTypeODS),
         "file-name"       -> Json.toJson(fileNameODS),
         "alt-activity"    -> Json.toJson(new AltAmendsActivity("2"))
@@ -304,7 +326,7 @@ class SummaryDeclarationControllerSpec
 
       val findList =
         Seq("scheme-organiser", "subsidiary-companies", "trustees", "ErsMetaData")
-      val addList =
+      val addList  =
         Map(
           "reportable-events" -> Json.toJson(new ReportableEvents(Some(OPTION_NIL_RETURN))),
           "alt-activity"      -> Json.toJson(new AltAmendsActivity("2"))
@@ -327,7 +349,7 @@ class SummaryDeclarationControllerSpec
 
       val findList =
         Seq("scheme-organiser", "group-scheme-controller", "trustees", "ErsMetaData")
-      val addList =
+      val addList  =
         Map(
           "reportable-events" -> Json.toJson(new ReportableEvents(Some(OPTION_NIL_RETURN))),
           "alt-activity"      -> Json.toJson(new AltAmendsActivity("2"))
@@ -348,7 +370,7 @@ class SummaryDeclarationControllerSpec
 
       val findList =
         Seq("scheme-organiser", "group-scheme-controller", "subsidiary-companies", "trustees", "ErsMetaData")
-      val addList =
+      val addList  =
         Map(
           "reportable-events" -> Json.toJson(new ReportableEvents(Some(OPTION_NIL_RETURN))),
           "alt-activity"      -> Json.toJson(new AltAmendsActivity("2"))
@@ -371,7 +393,7 @@ class SummaryDeclarationControllerSpec
 
       val findList =
         Seq("scheme-organiser", "subsidiary-companies", "trustees", "ErsMetaData")
-      val addList =
+      val addList  =
         Map(
           "reportable-events"       -> Json.toJson(new ReportableEvents(Some(OPTION_NIL_RETURN))),
           "group-scheme-controller" -> Json.toJson(new GroupSchemeInfo(Option("2"), None)),
@@ -393,7 +415,7 @@ class SummaryDeclarationControllerSpec
 
       val findList =
         Seq("scheme-organiser", "trustees", "ErsMetaData")
-      val addList =
+      val addList  =
         Map(
           "reportable-events"       -> Json.toJson(new ReportableEvents(Some(OPTION_NIL_RETURN))),
           "group-scheme-controller" -> Json.toJson(new GroupSchemeInfo(Option("2"), None)),
@@ -417,7 +439,7 @@ class SummaryDeclarationControllerSpec
 
       val findList =
         Seq("scheme-type", "portal-scheme-ref", "scheme-organiser", "alt-activity", "trustees", "ErsMetaData")
-      val addList =
+      val addList  =
         Map(
           "reportable-events"       -> Json.toJson(new ReportableEvents(Some(OPTION_NIL_RETURN))),
           "group-scheme-controller" -> Json.toJson(new GroupSchemeInfo(Option("2"), None))
@@ -437,8 +459,16 @@ class SummaryDeclarationControllerSpec
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
 
       val findList =
-        Seq("scheme-type", "portal-scheme-ref", "scheme-organiser", "alt-activity", "alt-amends-cache-controller", "trustees", "ErsMetaData")
-      val addList =
+        Seq(
+          "scheme-type",
+          "portal-scheme-ref",
+          "scheme-organiser",
+          "alt-activity",
+          "alt-amends-cache-controller",
+          "trustees",
+          "ErsMetaData"
+        )
+      val addList  =
         Map(
           "reportable-events"       -> Json.toJson(new ReportableEvents(Some(OPTION_NIL_RETURN))),
           "group-scheme-controller" -> Json.toJson(new GroupSchemeInfo(Option("2"), None))
@@ -460,8 +490,15 @@ class SummaryDeclarationControllerSpec
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
 
       val findList =
-        Seq("scheme-type", "portal-scheme-ref", "alt-amends-cache-controller", "scheme-organiser", "trustees", "ErsMetaData")
-      val addList =
+        Seq(
+          "scheme-type",
+          "portal-scheme-ref",
+          "alt-amends-cache-controller",
+          "scheme-organiser",
+          "trustees",
+          "ErsMetaData"
+        )
+      val addList  =
         Map(
           "reportable-events"       -> Json.toJson(new ReportableEvents(Some(OPTION_NIL_RETURN))),
           "group-scheme-controller" -> Json.toJson(new GroupSchemeInfo(Option("2"), None)),
@@ -483,7 +520,7 @@ class SummaryDeclarationControllerSpec
 
       val findList =
         Seq("scheme-type", "portal-scheme-ref", "scheme-organiser", "trustees", "ErsMetaData")
-      val addList =
+      val addList  =
         Map(
           "reportable-events"       -> Json.toJson(new ReportableEvents(Some(OPTION_NIL_RETURN))),
           "group-scheme-controller" -> Json.toJson(new GroupSchemeInfo(Option("2"), None)),
@@ -507,7 +544,7 @@ class SummaryDeclarationControllerSpec
 
       val findList =
         Seq("scheme-type", "portal-scheme-ref", "scheme-organiser", "trustees", "ErsMetaData")
-      val addList =
+      val addList  =
         Map(
           "reportable-events"       -> Json.toJson(new ReportableEvents(Some(OPTION_NIL_RETURN))),
           "group-scheme-controller" -> Json.toJson(new GroupSchemeInfo(Option("2"), None))
@@ -527,8 +564,15 @@ class SummaryDeclarationControllerSpec
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
 
       val findList =
-        Seq("scheme-type", "portal-scheme-ref", "scheme-organiser", "alt-amends-cache-controller", "trustees", "ErsMetaData")
-      val addList =
+        Seq(
+          "scheme-type",
+          "portal-scheme-ref",
+          "scheme-organiser",
+          "alt-amends-cache-controller",
+          "trustees",
+          "ErsMetaData"
+        )
+      val addList  =
         Map(
           "reportable-events"       -> Json.toJson(new ReportableEvents(Some(OPTION_NIL_RETURN))),
           "group-scheme-controller" -> Json.toJson(new GroupSchemeInfo(Option("2"), None))
@@ -551,7 +595,7 @@ class SummaryDeclarationControllerSpec
 
       val findList =
         Seq("scheme-type", "portal-scheme-ref", "scheme-organiser", "trustees", "ErsMetaData")
-      val addList =
+      val addList  =
         Map(
           "reportable-events"       -> Json.toJson(new ReportableEvents(Some(OPTION_NIL_RETURN))),
           "group-scheme-controller" -> Json.toJson(new GroupSchemeInfo(Option("2"), None)),
@@ -572,8 +616,15 @@ class SummaryDeclarationControllerSpec
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
 
       val findList =
-        Seq("scheme-type", "portal-scheme-ref", "scheme-organiser", "alt-amends-cache-controller", "trustees", "ErsMetaData")
-      val addList =
+        Seq(
+          "scheme-type",
+          "portal-scheme-ref",
+          "scheme-organiser",
+          "alt-amends-cache-controller",
+          "trustees",
+          "ErsMetaData"
+        )
+      val addList  =
         Map(
           "reportable-events"       -> Json.toJson(new ReportableEvents(Some(OPTION_NIL_RETURN))),
           "group-scheme-controller" -> Json.toJson(new GroupSchemeInfo(Option("2"), None))
@@ -589,4 +640,5 @@ class SummaryDeclarationControllerSpec
       document.getElementsByTag("title").get(0).text shouldBe Messages("ers.global_errors.title")
     }
   }
+
 }

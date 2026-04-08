@@ -22,6 +22,7 @@ import org.scalatest.wordspec.AnyWordSpecLike
 import utils.UpscanData
 
 class UpscanCsvFilesCallbackListSpec extends AnyWordSpecLike with Matchers with OptionValues with UpscanData {
+
   "areAllFilesComplete" should {
     "return true for failed or successful uploads" in {
       failedCsvList.areAllFilesComplete()     shouldBe true
@@ -56,4 +57,5 @@ class UpscanCsvFilesCallbackListSpec extends AnyWordSpecLike with Matchers with 
       }
     }
   }
+
 }

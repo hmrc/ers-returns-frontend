@@ -41,7 +41,7 @@ import java.time.Instant
 import scala.concurrent.{ExecutionContext, Future}
 
 class ReturnServiceControllerSpec
-  extends AnyWordSpecLike
+    extends AnyWordSpecLike
     with Matchers
     with OptionValues
     with ERSFakeApplicationConfig
@@ -62,16 +62,18 @@ class ReturnServiceControllerSpec
   implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
 
   implicit lazy val mat: Materializer = app.materializer
-  val globalErrorView: global_error = app.injector.instanceOf[global_error]
-  val unauthorisedView: unauthorised = app.injector.instanceOf[unauthorised]
-  val startView: start = app.injector.instanceOf[start]
-  val hundred = 100
+  val globalErrorView: global_error   = app.injector.instanceOf[global_error]
+  val unauthorisedView: unauthorised  = app.injector.instanceOf[unauthorised]
+  val startView: start                = app.injector.instanceOf[start]
+  val hundred                         = 100
 
   lazy val ExpectedRedirectionUrlIfNotSignedIn = "/gg/sign-in?continue=/submit-your-ers-return"
-  lazy val schemeInfo: SchemeInfo = SchemeInfo("XA1100000000000",Instant.now, "1", "2016", "EMI", "EMI")
-  lazy val rsc: ErsMetaData =
+  lazy val schemeInfo: SchemeInfo              = SchemeInfo("XA1100000000000", Instant.now, "1", "2016", "EMI", "EMI")
+
+  lazy val rsc: ErsMetaData                    =
     new ErsMetaData(schemeInfo, "ipRef", Some("aoRef"), "empRef", Some("agentRef"), Some("sapNumber"))
-  lazy val rscAsRequestObject: RequestObject = RequestObject(
+
+  lazy val rscAsRequestObject: RequestObject   = RequestObject(
     Some("aoRef"),
     Some("2014/15"),
     Some("AA0000000000000"),
@@ -104,14 +106,15 @@ class ReturnServiceControllerSpec
     ) {
 
       override lazy val accessThreshold: Int = accessThresholdValue
-      override val accessDeniedUrl: String = "/denied.html"
+      override val accessDeniedUrl: String   = "/denied.html"
 
       when(mockRequestBuilder.execute[HttpResponse])
         .thenReturn(Future.successful(HttpResponse(OK, "")))
       when(mockSessionService.cache(any(), any())(any(), any())).thenReturn(Future.successful(sessionPair))
       when(mockSessionService.cache(any(), any())(any(), any())).thenReturn(Future.successful(sessionPair))
       when(mockSessionService.remove(any())(any())).thenReturn(Future.successful(()))
-      when(mockSessionService.fetch[RequestObject](any())(any(), any())).thenReturn(Future.successful(rscAsRequestObject))
+      when(mockSessionService.fetch[RequestObject](any())(any(), any()))
+        .thenReturn(Future.successful(rscAsRequestObject))
     }
 
   "Calling ReturnServiceController.cacheParams with existing cache storage for the given schemeId and schemeRef" should {
@@ -131,29 +134,31 @@ class ReturnServiceControllerSpec
   "Calling ReturnServiceController.cacheParams with no matching cache storage for the given schemeId and schemeRef" should {
     "create a new cache object and redirect to the initial start page" in {
       val controllerUnderTest = buildFakeReturnServiceController()
-      val result =
+      val result              =
         controllerUnderTest.cacheParams(ersRequestObject)(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
       status(result) shouldBe Status.OK
     }
   }
-  "Calling ReturnServiceController.cacheParams when schemeRef is not present" should {
+
+  "Calling ReturnServiceController.cacheParams when schemeRef is not present"                                       should {
     " redirect to the global error page" in {
       val controllerUnderTest = buildFakeReturnServiceController()
       when(mockSessionService.remove(any())(any())).thenReturn(Future.failed(new Exception("failed")))
-      val req = Fixtures.buildFakeRequestWithSessionIdCSOP("GET")
-      val result =
+      val req                 = Fixtures.buildFakeRequestWithSessionIdCSOP("GET")
+      val result              =
         controllerUnderTest.cacheParams(ersRequestObject)(req)
       contentAsString(result) shouldBe contentAsString(
         Future(controllerUnderTest.getGlobalErrorPage(req, testMessages))
       )
     }
   }
-  //Start Page
-  "Calling ReturnServiceController.startPage (GET) without authentication" should {
+
+  // Start Page
+  "Calling ReturnServiceController.startPage (GET) without authentication"                                          should {
     "give a redirect status (to company authentication frontend)" in {
       setUnauthorisedMocks()
       val controllerUnderTest = buildFakeReturnServiceController()
-      val result = controllerUnderTest.startPage().apply(FakeRequest("GET", ""))
+      val result              = controllerUnderTest.startPage().apply(FakeRequest("GET", ""))
       status(result) shouldBe Status.SEE_OTHER
     }
   }
@@ -162,16 +167,16 @@ class ReturnServiceControllerSpec
     "without authentication should redirect to to company authentication frontend" in {
       setUnauthorisedMocks()
       implicit val fakeRequest: FakeRequest[AnyContentAsEmpty.type] = Fixtures.buildFakeRequestWithSessionId("?")
-      val controllerUnderTest = buildFakeReturnServiceController(accessThresholdValue = 0)
-      val result = controllerUnderTest.hmacCheck()(fakeRequest)
+      val controllerUnderTest                                       = buildFakeReturnServiceController(accessThresholdValue = 0)
+      val result                                                    = controllerUnderTest.hmacCheck()(fakeRequest)
       Helpers.redirectLocation(result).get.startsWith(mockAppConfig.ggSignInUrl) shouldBe true
     }
 
     "with authentication should returns Ok status" in {
       setAuthMocks()
       implicit val fakeRequest: FakeRequest[AnyContentAsEmpty.type] = Fixtures.buildFakeRequestWithSessionId("?")
-      val controllerUnderTest = buildFakeReturnServiceController(accessThresholdValue = 0)
-      val result = controllerUnderTest.hmacCheck()(fakeRequest)
+      val controllerUnderTest                                       = buildFakeReturnServiceController(accessThresholdValue = 0)
+      val result                                                    = controllerUnderTest.hmacCheck()(fakeRequest)
       status(result) shouldBe OK
     }
   }
@@ -180,16 +185,16 @@ class ReturnServiceControllerSpec
     "without authentication should redirect to to company authentication frontend" in {
       setUnauthorisedMocks()
       implicit val fakeRequest: FakeRequest[AnyContentAsEmpty.type] = Fixtures.buildFakeRequestWithSessionId("?")
-      val controllerUnderTest = buildFakeReturnServiceController(accessThresholdValue = 0)
-      val result = controllerUnderTest.startPage()(fakeRequest)
+      val controllerUnderTest                                       = buildFakeReturnServiceController(accessThresholdValue = 0)
+      val result                                                    = controllerUnderTest.startPage()(fakeRequest)
       Helpers.redirectLocation(result).get.startsWith(mockAppConfig.ggSignInUrl) shouldBe true
     }
 
     "with authentication should redirect to to company authentication frontend" in {
       setAuthMocks()
       implicit val fakeRequest: FakeRequest[AnyContentAsEmpty.type] = Fixtures.buildFakeRequestWithSessionId("?")
-      val controllerUnderTest = buildFakeReturnServiceController(accessThresholdValue = 0)
-      val result = controllerUnderTest.startPage()(fakeRequest)
+      val controllerUnderTest                                       = buildFakeReturnServiceController(accessThresholdValue = 0)
+      val result                                                    = controllerUnderTest.startPage()(fakeRequest)
       status(result) shouldBe OK
     }
   }
@@ -198,31 +203,32 @@ class ReturnServiceControllerSpec
     "returns unauthorised view" in {
       setUnauthorisedMocks()
       implicit val fakeRequest: FakeRequest[AnyContentAsEmpty.type] = Fixtures.buildFakeRequestWithSessionId("?")
-      val controllerUnderTest = buildFakeReturnServiceController(accessThresholdValue = 0)
-      val result = controllerUnderTest.showUnauthorisedPage(fakeRequest)
+      val controllerUnderTest                                       = buildFakeReturnServiceController(accessThresholdValue = 0)
+      val result                                                    = controllerUnderTest.showUnauthorisedPage(fakeRequest)
       status(result) shouldBe UNAUTHORIZED
     }
   }
-
 
   "getRequestParameters" should {
     "correctly extract and construct a RequestObject from request query parameters" in {
       val controllerUnderTest = buildFakeReturnServiceController()
 
-      val queryString = "?aoRef=aoRefValue&taxYear=2020&ersSchemeRef=ersSchemeRefValue&schemeType=schemeTypeValue&schemeName=schemeNameValue&agentRef=agentRefValue&empRef=empRefValue&ts=tsValue&hmac=hmacValue"
+      val queryString =
+        "?aoRef=aoRefValue&taxYear=2020&ersSchemeRef=ersSchemeRefValue&schemeType=schemeTypeValue&schemeName=schemeNameValue&agentRef=agentRefValue&empRef=empRefValue&ts=tsValue&hmac=hmacValue"
       val fakeRequest = FakeRequest("GET", s"/$queryString").withHeaders("Host" -> "localhost")
 
       val result = controllerUnderTest.getRequestParameters(fakeRequest)
 
-      result.aoRef shouldBe Some("aoRefValue")
-      result.taxYear shouldBe Some("2020")
+      result.aoRef        shouldBe Some("aoRefValue")
+      result.taxYear      shouldBe Some("2020")
       result.ersSchemeRef shouldBe Some("ersSchemeRefValue")
-      result.schemeType shouldBe Some("schemeTypeValue")
-      result.schemeName shouldBe Some("schemeNameValue")
-      result.agentRef shouldBe Some("agentRefValue")
-      result.empRef shouldBe Some("empRefValue")
-      result.ts shouldBe Some("tsValue")
-      result.hmac shouldBe Some("hmacValue")
+      result.schemeType   shouldBe Some("schemeTypeValue")
+      result.schemeName   shouldBe Some("schemeNameValue")
+      result.agentRef     shouldBe Some("agentRefValue")
+      result.empRef       shouldBe Some("empRefValue")
+      result.ts           shouldBe Some("tsValue")
+      result.hmac         shouldBe Some("hmacValue")
     }
   }
+
 }

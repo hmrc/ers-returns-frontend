@@ -70,16 +70,16 @@ class CsvFileUploadControllerSpec
     ExecutionContext.global
   )
 
-  implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
-  implicit lazy val mat: Materializer = app.materializer
-  implicit val mockActorSystem: ActorSystem = app.injector.instanceOf[ActorSystem]
-  val globalErrorView: global_error = app.injector.instanceOf[global_error]
-  val upscanCsvFileUploadView: upscan_csv_file_upload = app.injector.instanceOf[upscan_csv_file_upload]
-  val fileUploadErrorsView: file_upload_errors = app.injector.instanceOf[file_upload_errors]
-  val fileUploadProblemView: file_upload_problem = app.injector.instanceOf[file_upload_problem]
+  implicit lazy val testMessages: MessagesImpl                 = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
+  implicit lazy val mat: Materializer                          = app.materializer
+  implicit val mockActorSystem: ActorSystem                    = app.injector.instanceOf[ActorSystem]
+  val globalErrorView: global_error                            = app.injector.instanceOf[global_error]
+  val upscanCsvFileUploadView: upscan_csv_file_upload          = app.injector.instanceOf[upscan_csv_file_upload]
+  val fileUploadErrorsView: file_upload_errors                 = app.injector.instanceOf[file_upload_errors]
+  val fileUploadProblemView: file_upload_problem               = app.injector.instanceOf[file_upload_problem]
   val fileSizeLimitErrorView: views.html.file_size_limit_error = app.injector.instanceOf[file_size_limit_error]
 
-  val mockUpscanService: UpscanService   = mock[UpscanService]
+  val mockUpscanService: UpscanService = mock[UpscanService]
 
   lazy val csvFileUploadController: CsvFileUploadController =
     new CsvFileUploadController(
@@ -173,7 +173,10 @@ class CsvFileUploadControllerSpec
         ArgumentCaptor.forClass(classOf[UpscanCsvFilesList])
       when(mockSessionService.fetch[UpscanCsvFilesList](meq("csv-files-upload"))(any(), any()))
         .thenReturn(Future.successful(notStartedUpscanCsvFilesList))
-      when(mockSessionService.cache[UpscanCsvFilesList](meq("csv-files-upload"), updatedCallbackCaptor.capture())(any(), any()))
+      when(
+        mockSessionService
+          .cache[UpscanCsvFilesList](meq("csv-files-upload"), updatedCallbackCaptor.capture())(any(), any())
+      )
         .thenReturn(Future.successful(sessionPair))
 
       await(csvFileUploadController.success(testUploadId)(testFakeRequest))
@@ -242,8 +245,10 @@ class CsvFileUploadControllerSpec
     }
 
     "redirect to the file size limit error page" in {
-      val request = FakeRequest().withTarget(RequestTarget("123", "/file-upload/failure", Map("errorCode" -> Seq("EntityTooLarge"))))
-      val result = contentAsString(csvFileUploadController.failure().apply(request))
+      val request = FakeRequest().withTarget(
+        RequestTarget("123", "/file-upload/failure", Map("errorCode" -> Seq("EntityTooLarge")))
+      )
+      val result  = contentAsString(csvFileUploadController.failure().apply(request))
       assert(result.contains(testMessages("There is a problem – Employment Related Securities – GOV.UK")))
     }
   }
@@ -370,7 +375,7 @@ class CsvFileUploadControllerSpec
         override def processValidationResults()(implicit
           request: RequestWithOptionalAuthContext[AnyContent],
           hc: HeaderCarrier
-        ): Future[Result]                                  = Future(Ok)
+        ): Future[Result] = Future(Ok)
         override lazy val allCsvFilesCacheRetryAmount: Int = 1
       }
 
@@ -407,7 +412,7 @@ class CsvFileUploadControllerSpec
         override def removePresubmissionData(schemeInfo: SchemeInfo)(implicit
           request: RequestWithOptionalAuthContext[AnyContent],
           hc: HeaderCarrier
-        ): Future[Result]                                  = Future(Ok)
+        ): Future[Result] = Future(Ok)
         override lazy val allCsvFilesCacheRetryAmount: Int = 1
       }
 
@@ -420,7 +425,7 @@ class CsvFileUploadControllerSpec
       when(
         mockSessionService.fetch[ErsMetaData](refEq(mockErsUtil.ERS_METADATA))(any(), any())
       ).thenReturn(
-        Future.successful(ErsMetaData(SchemeInfo("",Instant.now, "", "", "", ""), "", None, "", None, None))
+        Future.successful(ErsMetaData(SchemeInfo("", Instant.now, "", "", "", ""), "", None, "", None, None))
       )
 
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
@@ -450,7 +455,7 @@ class CsvFileUploadControllerSpec
       when(
         mockSessionService.fetch[ErsMetaData](anyString())(any(), any())
       ).thenReturn(
-        Future.successful(ErsMetaData(SchemeInfo("",Instant.now, "", "", "", ""), "", None, "", None, None))
+        Future.successful(ErsMetaData(SchemeInfo("", Instant.now, "", "", "", ""), "", None, "", None, None))
       )
 
       when(
@@ -483,7 +488,7 @@ class CsvFileUploadControllerSpec
         override def extractCsvCallbackData(schemeInfo: SchemeInfo)(implicit
           request: RequestWithOptionalAuthContext[AnyContent],
           hc: HeaderCarrier
-        ): Future[Result]                                  = Future(Redirect(""))
+        ): Future[Result] = Future(Redirect(""))
         override lazy val allCsvFilesCacheRetryAmount: Int = 1
       }
 
@@ -573,10 +578,19 @@ class CsvFileUploadControllerSpec
         when(
           mockSessionService.fetchAll()(any())
         ) thenReturn Future.successful(
-          CacheItem("id", Json.toJson(Map(
-            s"${"check-csv-files"}-${testUploadId.value}" ->
-              Json.toJson(asUploadStatus(uploadedSuccessfully))
-          )).as[JsObject], Instant.now(), Instant.now())
+          CacheItem(
+            "id",
+            Json
+              .toJson(
+                Map(
+                  s"${"check-csv-files"}-${testUploadId.value}" ->
+                    Json.toJson(asUploadStatus(uploadedSuccessfully))
+                )
+              )
+              .as[JsObject],
+            Instant.now(),
+            Instant.now()
+          )
         )
         when(
           mockSessionService.cache(any(), any())(any(), any())
@@ -601,16 +615,34 @@ class CsvFileUploadControllerSpec
 
       when(mockSessionService.fetchAll()(any())).thenReturn(
         Future(
-          CacheItem("id", Json.toJson(Map(
-            s"${"check-csv-files"}-${testUploadId.value}" ->
-              Json.toJson(asUploadStatus(uploadedSuccessfully))
-          )).as[JsObject], Instant.now(), Instant.now())
+          CacheItem(
+            "id",
+            Json
+              .toJson(
+                Map(
+                  s"${"check-csv-files"}-${testUploadId.value}" ->
+                    Json.toJson(asUploadStatus(uploadedSuccessfully))
+                )
+              )
+              .as[JsObject],
+            Instant.now(),
+            Instant.now()
+          )
         ),
         Future(
-          CacheItem("id", Json.toJson(Map(
-            s"${"check-csv-files"}-${testUploadId.value}" -> Json.toJson(asUploadStatus(uploadedSuccessfully)),
-            s"${"check-csv-files"}-ID1" -> Json.toJson(asUploadStatus(uploadedSuccessfully))
-          )).as[JsObject], Instant.now(), Instant.now())
+          CacheItem(
+            "id",
+            Json
+              .toJson(
+                Map(
+                  s"${"check-csv-files"}-${testUploadId.value}" -> Json.toJson(asUploadStatus(uploadedSuccessfully)),
+                  s"${"check-csv-files"}-ID1"                   -> Json.toJson(asUploadStatus(uploadedSuccessfully))
+                )
+              )
+              .as[JsObject],
+            Instant.now(),
+            Instant.now()
+          )
         )
       )
       when(mockSessionService.cache(any(), any())(any(), any())).thenReturn(Future.successful(sessionPair))
@@ -631,19 +663,28 @@ class CsvFileUploadControllerSpec
       when(
         mockSessionService.fetchAll()(any())
       ) thenReturn Future.successful(
-        CacheItem("id", Json.toJson(Map(
-          s"${"check-csv-files"}-${testUploadId.value}" ->
-            Json.toJson(asUploadStatus(uploadedSuccessfully))
-        )).as[JsObject], Instant.now(), Instant.now())
+        CacheItem(
+          "id",
+          Json
+            .toJson(
+              Map(
+                s"${"check-csv-files"}-${testUploadId.value}" ->
+                  Json.toJson(asUploadStatus(uploadedSuccessfully))
+              )
+            )
+            .as[JsObject],
+          Instant.now(),
+          Instant.now()
+        )
       )
       when(
         mockSessionService.cache(any(), any())(any(), any())
       ) thenReturn Future.successful(sessionPair)
 
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
-      val result = csvFileUploadControllerWithRetry(3).extractCsvCallbackData(Fixtures.EMISchemeInfo)(authRequest, hc)
+      val result      = csvFileUploadControllerWithRetry(3).extractCsvCallbackData(Fixtures.EMISchemeInfo)(authRequest, hc)
 
-      status(result) shouldBe OK
+      status(result)          shouldBe OK
       contentAsString(result) shouldBe "Validated"
 
       verify(mockSessionService, times(1)).fetchAll()(any())
@@ -656,10 +697,19 @@ class CsvFileUploadControllerSpec
       when(
         mockSessionService.fetchAll()(any())
       ) thenReturn Future.successful(
-        CacheItem("id", Json.toJson(Map(
-          s"${"check-csv-files"}-${testUploadId.value}" -> Json.toJson(asUploadStatus(uploadedSuccessfully)),
-          s"${"check-csv-files"}-ID1" -> Json.toJson(asUploadStatus(uploadedSuccessfully))
-        )).as[JsObject], Instant.now(), Instant.now())
+        CacheItem(
+          "id",
+          Json
+            .toJson(
+              Map(
+                s"${"check-csv-files"}-${testUploadId.value}" -> Json.toJson(asUploadStatus(uploadedSuccessfully)),
+                s"${"check-csv-files"}-ID1"                   -> Json.toJson(asUploadStatus(uploadedSuccessfully))
+              )
+            )
+            .as[JsObject],
+          Instant.now(),
+          Instant.now()
+        )
       )
       when(
         mockSessionService.cache(any(), any())(any(), any())
@@ -728,7 +778,9 @@ class CsvFileUploadControllerSpec
         csvFileUploadController.validateCsv(mock[List[UploadedSuccessfully]], mock[SchemeInfo])(authRequest, hc)
       status(result)         shouldBe SEE_OTHER
       result.futureValue.header
-        .headers("Location") shouldBe controllers.schemeOrganiser.routes.SchemeOrganiserBasedInUkController.questionPage().toString
+        .headers("Location") shouldBe controllers.schemeOrganiser.routes.SchemeOrganiserBasedInUkController
+        .questionPage()
+        .toString
     }
 
     "redirect to validationFailure if validating fails" in {
@@ -742,8 +794,9 @@ class CsvFileUploadControllerSpec
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
       val result      =
         csvFileUploadController.validateCsv(mock[List[UploadedSuccessfully]], mock[SchemeInfo])(authRequest, hc)
-      status(result)                                shouldBe SEE_OTHER
-      result.futureValue.header.headers("Location") shouldBe controllers.routes.CsvFileUploadController.validationFailure().toString
+      status(result)         shouldBe SEE_OTHER
+      result.futureValue.header
+        .headers("Location") shouldBe controllers.routes.CsvFileUploadController.validationFailure().toString
     }
 
     "show error page if validating returns result other than OK and ACCEPTED" in {
@@ -824,7 +877,9 @@ class CsvFileUploadControllerSpec
         .checkFileNames(testCsvCallbackData, mockSchemeInfo)(authRequest, hc)
       status(result)         shouldBe SEE_OTHER
       result.futureValue.header
-        .headers("Location") shouldBe controllers.schemeOrganiser.routes.SchemeOrganiserBasedInUkController.questionPage().toString
+        .headers("Location") shouldBe controllers.schemeOrganiser.routes.SchemeOrganiserBasedInUkController
+        .questionPage()
+        .toString
     }
 
     "redirect to validateCsv even when uploaded file name differs only by case" in {
@@ -859,7 +914,9 @@ class CsvFileUploadControllerSpec
 
       status(result)         shouldBe SEE_OTHER
       result.futureValue.header
-        .headers("Location") shouldBe controllers.schemeOrganiser.routes.SchemeOrganiserBasedInUkController.questionPage().toString
+        .headers("Location") shouldBe controllers.schemeOrganiser.routes.SchemeOrganiserBasedInUkController
+        .questionPage()
+        .toString
     }
 
     "redirect to getFileUploadProblemPage() if file name check is unsuccessful" in {
@@ -917,4 +974,5 @@ class CsvFileUploadControllerSpec
       )
     }
   }
+
 }

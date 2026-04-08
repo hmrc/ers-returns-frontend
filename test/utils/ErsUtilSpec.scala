@@ -36,7 +36,7 @@ class ErsUtilSpec
     with ErsTestHelper
     with ScalaFutures {
 
-  override implicit val hc: HeaderCarrier = HeaderCarrier(sessionId = Some(SessionId("sessionId")))
+  implicit override val hc: HeaderCarrier = HeaderCarrier(sessionId = Some(SessionId("sessionId")))
   implicit val countryCodes: CountryCodes = mockCountryCodes
 
   override def beforeEach(): Unit = {
@@ -50,17 +50,17 @@ class ErsUtilSpec
     "build an address summary from CompanyDetails" in {
       val companyDetails = CompanyDetails(
         "name",
-         addressLine1 = "ADDRESS1",
-         addressLine2 = Some("ADDRESS2"),
-         addressLine3 = None,
-         addressLine4 = None,
-         addressLine5 = Some("AB123CD"),
-         country = Some("UK"),
-         companyReg = Some("ABC"),
-         corporationRef = Some("DEF"),
+        addressLine1 = "ADDRESS1",
+        addressLine2 = Some("ADDRESS2"),
+        addressLine3 = None,
+        addressLine4 = None,
+        addressLine5 = Some("AB123CD"),
+        country = Some("UK"),
+        companyReg = Some("ABC"),
+        corporationRef = Some("DEF"),
         basedInUk = true
       )
-      val expected = "ADDRESS1, ADDRESS2, AB123CD, United Kingdom"
+      val expected       = "ADDRESS1, ADDRESS2, AB123CD, United Kingdom"
       val addressSummary = ersUtil.buildAddressSummary(companyDetails)
       assert(addressSummary == expected)
     }
@@ -76,7 +76,7 @@ class ErsUtilSpec
         addressLine5 = Some("AB123CD"),
         basedInUk = true
       )
-      val expected = "ADDRESS1, ADDRESS2, AB123CD, United Kingdom"
+      val expected       = "ADDRESS1, ADDRESS2, AB123CD, United Kingdom"
       val addressSummary = ersUtil.buildAddressSummary(companyDetails)
       assert(addressSummary == expected)
     }
@@ -134,12 +134,23 @@ class ErsUtilSpec
     val ersUtil: ERSUtil = new ERSUtil(mockAppConfig)
 
     "build summary with all fields present" in {
-      val entity = SchemeOrganiserDetails("Company", "Line1", Some("Line2"), Some("Line3"), Some("Line4"), Some("Country"), Some("Postcode"), Some("Reg"), Some("Ref"))
+      val entity = SchemeOrganiserDetails(
+        "Company",
+        "Line1",
+        Some("Line2"),
+        Some("Line3"),
+        Some("Line4"),
+        Some("Country"),
+        Some("Postcode"),
+        Some("Reg"),
+        Some("Ref")
+      )
       ersUtil.buildEntitySummary(entity) shouldBe "Company, Line1, Line2, Line3, Line4, Country, Postcode, Reg, Ref"
     }
 
     "handle missing optional fields" in {
-      val entity = SchemeOrganiserDetails("Company", "Line1", None, Some("Line3"), None, Some("Country"), None, None, None)
+      val entity =
+        SchemeOrganiserDetails("Company", "Line1", None, Some("Line3"), None, Some("Country"), None, None, None)
       ersUtil.buildEntitySummary(entity) shouldBe "Company, Line1, Line3, Country"
     }
   }
@@ -153,8 +164,31 @@ class ErsUtilSpec
 
     "handle a non-empty list" in {
       val companies = List(
-        CompanyDetails(companyName = "Company1", addressLine1= "", None, None, None, None, country = Some("UK"), None, None,true),
-        CompanyDetails(companyName = "Company2", addressLine1= "", None, None, None, None, country = Some("UK"), None, None, true))
+        CompanyDetails(
+          companyName = "Company1",
+          addressLine1 = "",
+          None,
+          None,
+          None,
+          None,
+          country = Some("UK"),
+          None,
+          None,
+          true
+        ),
+        CompanyDetails(
+          companyName = "Company2",
+          addressLine1 = "",
+          None,
+          None,
+          None,
+          None,
+          country = Some("UK"),
+          None,
+          None,
+          true
+        )
+      )
       ersUtil.buildCompanyNameList(companies) shouldBe "Company1<br>Company2<br>"
     }
   }
@@ -169,7 +203,8 @@ class ErsUtilSpec
     "handle a non-empty list" in {
       val trustees = List(
         TrusteeDetails("Trustee1", "1 The Street", None, None, None, Some("UK"), None, true),
-        TrusteeDetails("Trustee2", "1 The Street", None, None, None, Some("UK"), None, true))
+        TrusteeDetails("Trustee2", "1 The Street", None, None, None, Some("UK"), None, true)
+      )
       ersUtil.buildTrusteeNameList(trustees) shouldBe "Trustee1<br>Trustee2<br>"
     }
   }
@@ -178,11 +213,37 @@ class ErsUtilSpec
     val ersUtil: ERSUtil = new ERSUtil(mockAppConfig)
 
     "return OVERSEAS for non-default country" in {
-      ersUtil.companyLocation(CompanyDetails(companyName = "", addressLine1= "", None, None, None, None, country = Some("FR"), None, None, false)) shouldBe "ers_trustee_based.overseas"
+      ersUtil.companyLocation(
+        CompanyDetails(
+          companyName = "",
+          addressLine1 = "",
+          None,
+          None,
+          None,
+          None,
+          country = Some("FR"),
+          None,
+          None,
+          false
+        )
+      ) shouldBe "ers_trustee_based.overseas"
     }
 
     "return default country name" in {
-      ersUtil.companyLocation(CompanyDetails(companyName = "", addressLine1= "", None, None, None, None, country = Some("UK"), None, None, true)) shouldBe "ers_trustee_based.uk"
+      ersUtil.companyLocation(
+        CompanyDetails(
+          companyName = "",
+          addressLine1 = "",
+          None,
+          None,
+          None,
+          None,
+          country = Some("UK"),
+          None,
+          None,
+          true
+        )
+      ) shouldBe "ers_trustee_based.uk"
     }
   }
 
@@ -190,11 +251,15 @@ class ErsUtilSpec
     val ersUtil: ERSUtil = new ERSUtil(mockAppConfig)
 
     "return ers_trustee_based.uk for UK-based trustee" in {
-      ersUtil.trusteeLocationMessage(TrusteeDetails("First Trustee", "1 The Street", None, None, None, Some("UK"), None, true)) shouldBe "ers_trustee_based.uk"
+      ersUtil.trusteeLocationMessage(
+        TrusteeDetails("First Trustee", "1 The Street", None, None, None, Some("UK"), None, true)
+      ) shouldBe "ers_trustee_based.uk"
     }
 
     "return ers_trustee_based.overseas for overseas-based trustee" in {
-      ersUtil.trusteeLocationMessage(TrusteeDetails("First Trustee", "1 The Street", None, None, None, Some("FR"), None, false)) shouldBe "ers_trustee_based.overseas"
+      ersUtil.trusteeLocationMessage(
+        TrusteeDetails("First Trustee", "1 The Street", None, None, None, Some("FR"), None, false)
+      ) shouldBe "ers_trustee_based.overseas"
     }
   }
 
@@ -215,4 +280,5 @@ class ErsUtilSpec
       ersUtil.addCompanyMessage(messages, None) shouldBe "Add company"
     }
   }
+
 }

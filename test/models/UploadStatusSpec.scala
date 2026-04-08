@@ -25,6 +25,7 @@ import play.api.libs.json.{JsError, Json}
 class UploadStatusSpec extends AnyWordSpecLike with Matchers with OptionValues {
 
   val statuses: List[UploadStatus] = List(NotStarted, Failed, InProgress)
+
   "UploadStats json Reads" should {
     statuses.foreach { status =>
       s"return $status" when {
@@ -37,9 +38,9 @@ class UploadStatusSpec extends AnyWordSpecLike with Matchers with OptionValues {
 
     "return UploadedSuccessfully" when {
       "_type is UploadedSuccessfully" in {
-        val expectedName = "fileName"
-        val expectedUrl = "downloadUrl"
-        val json = s"""{"_type": "UploadedSuccessfully", "name": "$expectedName", "downloadUrl": "$expectedUrl"}"""
+        val expectedName     = "fileName"
+        val expectedUrl      = "downloadUrl"
+        val json             = s"""{"_type": "UploadedSuccessfully", "name": "$expectedName", "downloadUrl": "$expectedUrl"}"""
         val expectedResponse = UploadedSuccessfully(expectedName, expectedUrl, None)
         Json.parse(json).as[UploadStatus] shouldBe expectedResponse
       }

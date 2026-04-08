@@ -31,16 +31,15 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent._
 
 @Singleton
-class AltAmendsController @Inject() (val mcc: MessagesControllerComponents,
-                                     val sessionService: FrontendSessionService,
-                                     alterationsActivityView: views.html.alterations_activity,
-                                     alterationsAmendsView: views.html.alterations_amends,
-                                     globalErrorView: views.html.global_error,
-                                     authAction: AuthAction)
-                                    (implicit val ec: ExecutionContext,
-                                     val ersUtil: ERSUtil,
-                                     val appConfig: ApplicationConfig)
-  extends FrontendController(mcc) with I18nSupport with WithUnsafeDefaultFormBinding with Logging {
+class AltAmendsController @Inject() (
+  val mcc: MessagesControllerComponents,
+  val sessionService: FrontendSessionService,
+  alterationsActivityView: views.html.alterations_activity,
+  alterationsAmendsView: views.html.alterations_amends,
+  globalErrorView: views.html.global_error,
+  authAction: AuthAction
+)(implicit val ec: ExecutionContext, val ersUtil: ERSUtil, val appConfig: ApplicationConfig)
+    extends FrontendController(mcc) with I18nSupport with WithUnsafeDefaultFormBinding with Logging {
 
   def altActivityPage(): Action[AnyContent] = authAction.async { implicit request =>
     showAltActivityPage()
@@ -48,12 +47,12 @@ class AltAmendsController @Inject() (val mcc: MessagesControllerComponents,
 
   def showAltActivityPage()(implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
     (for {
-      requestObject <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
-      groupSchemeInfo <-
+      requestObject     <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
+      groupSchemeInfo   <-
         sessionService.fetch[GroupSchemeInfo](ersUtil.GROUP_SCHEME_CACHE_CONTROLLER)
       altAmendsActivity <-
-        sessionService.fetch[AltAmendsActivity](ersUtil.ALT_AMENDS_ACTIVITY).recover {
-          case _: NoSuchElementException => AltAmendsActivity("")
+        sessionService.fetch[AltAmendsActivity](ersUtil.ALT_AMENDS_ACTIVITY).recover { case _: NoSuchElementException =>
+          AltAmendsActivity("")
         }
     } yield Ok(
       alterationsActivityView(
@@ -109,9 +108,11 @@ class AltAmendsController @Inject() (val mcc: MessagesControllerComponents,
     for {
       requestObject <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
       altAmends     <-
-        sessionService.fetchOption[AltAmends](ersUtil.ALT_AMENDS_CACHE_CONTROLLER, requestObject.getSchemeReference).recover {
-          case _: Throwable => None
-        }
+        sessionService
+          .fetchOption[AltAmends](ersUtil.ALT_AMENDS_CACHE_CONTROLLER, requestObject.getSchemeReference)
+          .recover { case _: Throwable =>
+            None
+          }
     } yield Ok(alterationsAmendsView(requestObject, altAmends.getOrElse(AltAmends(None, None, None, None, None))))
 
   def altAmendsSelected(): Action[AnyContent] = authAction.async { implicit request =>
@@ -133,25 +134,24 @@ class AltAmendsController @Inject() (val mcc: MessagesControllerComponents,
                 )
             ),
           formData =>
-            sessionService.cache(ersUtil.ALT_AMENDS_CACHE_CONTROLLER, formData).flatMap {
-              _ =>
-                if (
-                  formData.altAmendsTerms.isEmpty
-                  && formData.altAmendsEligibility.isEmpty
-                  && formData.altAmendsExchange.isEmpty
-                  && formData.altAmendsVariations.isEmpty
-                  && formData.altAmendsOther.isEmpty
-                ) {
-                  Future.successful(
-                    Redirect(routes.AltAmendsController.altAmendsPage())
-                      .flashing(
-                        "alt-amends-not-selected-error" -> ersUtil
-                          .getPageElement(requestObject.getSchemeId, ersUtil.PAGE_ALT_AMENDS, "err.message")
-                      )
-                  )
-                } else {
-                  Future.successful(Redirect(routes.SummaryDeclarationController.summaryDeclarationPage()))
-                }
+            sessionService.cache(ersUtil.ALT_AMENDS_CACHE_CONTROLLER, formData).flatMap { _ =>
+              if (
+                formData.altAmendsTerms.isEmpty
+                && formData.altAmendsEligibility.isEmpty
+                && formData.altAmendsExchange.isEmpty
+                && formData.altAmendsVariations.isEmpty
+                && formData.altAmendsOther.isEmpty
+              ) {
+                Future.successful(
+                  Redirect(routes.AltAmendsController.altAmendsPage())
+                    .flashing(
+                      "alt-amends-not-selected-error" -> ersUtil
+                        .getPageElement(requestObject.getSchemeId, ersUtil.PAGE_ALT_AMENDS, "err.message")
+                    )
+                )
+              } else {
+                Future.successful(Redirect(routes.SummaryDeclarationController.summaryDeclarationPage()))
+              }
             } recover { case e: Throwable =>
               logger.error(
                 s"[AltAmendsController][showAltAmendsSelected] Save data to cache failed with exception ${e.getMessage}, " +
@@ -170,4 +170,5 @@ class AltAmendsController @Inject() (val mcc: MessagesControllerComponents,
         "ers.global_errors.message"
       )(request, messages, appConfig)
     )
+
 }

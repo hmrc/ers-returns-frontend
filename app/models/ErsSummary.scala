@@ -22,41 +22,44 @@ import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 import java.time.Instant
 
 case class SchemeInfo(
-                       schemeRef: String,
-                       timestamp: Instant,
-                       schemeId: String,
-                       taxYear: String,
-                       schemeName: String,
-                       schemeType: String
-                     )
+  schemeRef: String,
+  timestamp: Instant,
+  schemeId: String,
+  taxYear: String,
+  schemeName: String,
+  schemeType: String
+)
 
 object SchemeInfo extends DateTimeFormats {
   implicit val format: OFormat[SchemeInfo] = Json.format[SchemeInfo]
 }
 
 case class ErsMetaData(
-                        schemeInfo: SchemeInfo,
-                        ipRef: String,
-                        aoRef: Option[String],
-                        empRef: String,
-                        agentRef: Option[String],
-                        sapNumber: Option[String]
-                      )
+  schemeInfo: SchemeInfo,
+  ipRef: String,
+  aoRef: Option[String],
+  empRef: String,
+  agentRef: Option[String],
+  sapNumber: Option[String]
+)
 
 object ErsMetaData {
   implicit val format: OFormat[ErsMetaData] = Json.format[ErsMetaData]
 }
 
 case class AlterationAmends(
-                             altAmendsTerms: Option[String],
-                             altAmendsEligibility: Option[String],
-                             altAmendsExchange: Option[String],
-                             altAmendsVariations: Option[String],
-                             altAmendsOther: Option[String]
-                           ) {
-  val checkIfEmpty: Boolean = List(altAmendsTerms, altAmendsEligibility, altAmendsExchange, altAmendsVariations, altAmendsOther).forall {
-    _.isEmpty
-  }
+  altAmendsTerms: Option[String],
+  altAmendsEligibility: Option[String],
+  altAmendsExchange: Option[String],
+  altAmendsVariations: Option[String],
+  altAmendsOther: Option[String]
+) {
+
+  val checkIfEmpty: Boolean =
+    List(altAmendsTerms, altAmendsEligibility, altAmendsExchange, altAmendsVariations, altAmendsOther).forall {
+      _.isEmpty
+    }
+
 }
 
 object AlterationAmends {
@@ -64,27 +67,29 @@ object AlterationAmends {
 }
 
 case class CompanyDetails(
-                           companyName: String,
-                           addressLine1: String,
-                           addressLine2: Option[String],
-                           addressLine3: Option[String],
-                           addressLine4: Option[String],
-                           addressLine5: Option[String],
-                           country: Option[String],
-                           companyReg: Option[String],
-                           corporationRef: Option[String],
-                           basedInUk: Boolean
-                         ) {
+  companyName: String,
+  addressLine1: String,
+  addressLine2: Option[String],
+  addressLine3: Option[String],
+  addressLine4: Option[String],
+  addressLine5: Option[String],
+  country: Option[String],
+  companyReg: Option[String],
+  corporationRef: Option[String],
+  basedInUk: Boolean
+) {
 
-  def replaceName(company: Company): CompanyDetails = {
-    this.copy(companyName = company.companyName, companyReg = company.companyReg, corporationRef = company.corporationRef)
-  }
+  def replaceName(company: Company): CompanyDetails =
+    this.copy(
+      companyName = company.companyName,
+      companyReg = company.companyReg,
+      corporationRef = company.corporationRef
+    )
 
-  def replaceBasedInUk(companyBasedInUk: CompanyBasedInUk): CompanyDetails = {
+  def replaceBasedInUk(companyBasedInUk: CompanyBasedInUk): CompanyDetails =
     this.copy(basedInUk = companyBasedInUk.basedInUk)
-  }
 
-  def replaceAddress(companyAddress: CompanyAddress): CompanyDetails = {
+  def replaceAddress(companyAddress: CompanyAddress): CompanyDetails =
     this.copy(
       addressLine1 = companyAddress.addressLine1,
       addressLine2 = companyAddress.addressLine2,
@@ -93,22 +98,20 @@ case class CompanyDetails(
       addressLine5 = companyAddress.addressLine5,
       country = companyAddress.country
     )
-  }
 
-  def updatePart[A](part: A): CompanyDetails = {
+  def updatePart[A](part: A): CompanyDetails =
     part match {
-      case name: Company => replaceName(name)
+      case name: Company                      => replaceName(name)
       case companyBasedInUk: CompanyBasedInUk => replaceBasedInUk(companyBasedInUk)
-      case address: CompanyAddress => replaceAddress(address)
-      case _ => this
+      case address: CompanyAddress            => replaceAddress(address)
+      case _                                  => this
     }
-  }
-}
 
+}
 
 object CompanyDetails {
 
-  def apply(name: Company, address: CompanyAddress): CompanyDetails = {
+  def apply(name: Company, address: CompanyAddress): CompanyDetails =
     CompanyDetails(
       name.companyName,
       address.addressLine1,
@@ -121,7 +124,6 @@ object CompanyDetails {
       name.corporationRef,
       address.country.fold(false)(_.equals("UK"))
     )
-  }
 
   implicit val format: OFormat[CompanyDetails] = Json.format[CompanyDetails]
 }
@@ -133,24 +135,23 @@ object CompanyBasedInUk {
 }
 
 case class Company(
-                    companyName: String,
-                    companyReg: Option[String],
-                    corporationRef: Option[String]
-                  )
+  companyName: String,
+  companyReg: Option[String],
+  corporationRef: Option[String]
+)
 
 object Company {
   implicit val format: OFormat[Company] = Json.format[Company]
 }
 
-
 case class CompanyAddress(
-                           addressLine1: String,
-                           addressLine2: Option[String],
-                           addressLine3: Option[String],
-                           addressLine4: Option[String],
-                           addressLine5: Option[String],
-                           country: Option[String]
-                         )
+  addressLine1: String,
+  addressLine2: Option[String],
+  addressLine3: Option[String],
+  addressLine4: Option[String],
+  addressLine5: Option[String],
+  country: Option[String]
+)
 
 object CompanyAddress {
   implicit val format: OFormat[CompanyAddress] = Json.format[CompanyAddress]
@@ -163,29 +164,29 @@ object CompanyDetailsList {
 }
 
 case class GroupSchemeInfo(
-                            groupScheme: Option[String],
-                            groupSchemeType: Option[String]
-                          )
+  groupScheme: Option[String],
+  groupSchemeType: Option[String]
+)
 
 object GroupSchemeInfo {
   implicit val format: OFormat[GroupSchemeInfo] = Json.format[GroupSchemeInfo]
 }
 
 case class ErsSummary(
-                       bundleRef: String,
-                       isNilReturn: String,
-                       fileType: Option[String],
-                       confirmationDateTime: Instant,
-                       metaData: ErsMetaData,
-                       altAmendsActivity: Option[AltAmendsActivity],
-                       alterationAmends: Option[AlterationAmends],
-                       groupService: Option[GroupSchemeInfo],
-                       schemeOrganiser: Option[SchemeOrganiserDetails],
-                       companies: Option[CompanyDetailsList],
-                       trustees: Option[TrusteeDetailsList],
-                       nofOfRows: Option[Int],
-                       transferStatus: Option[String]
-                     )
+  bundleRef: String,
+  isNilReturn: String,
+  fileType: Option[String],
+  confirmationDateTime: Instant,
+  metaData: ErsMetaData,
+  altAmendsActivity: Option[AltAmendsActivity],
+  alterationAmends: Option[AlterationAmends],
+  groupService: Option[GroupSchemeInfo],
+  schemeOrganiser: Option[SchemeOrganiserDetails],
+  companies: Option[CompanyDetailsList],
+  trustees: Option[TrusteeDetailsList],
+  nofOfRows: Option[Int],
+  transferStatus: Option[String]
+)
 
 object ErsSummary extends MongoJavatimeFormats {
   implicit val format: OFormat[ErsSummary] = Json.format[ErsSummary]

@@ -33,35 +33,37 @@ import utils.ERSUtil
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class TrusteeNameController @Inject()(val mcc: MessagesControllerComponents,
-                                      val ersConnector: ErsConnector,
-                                      val globalErrorView: views.html.global_error,
-                                      val authAction: AuthAction,
-                                      val trusteeService: TrusteeService,
-                                      val sessionService: FrontendSessionService,
-                                      trusteeNameView: views.html.trustee_name)
-                                     (implicit val ec: ExecutionContext,
-                                      val ersUtil: ERSUtil,
-                                      val appConfig: ApplicationConfig)
-  extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with TrusteeBaseController[TrusteeName] {
+class TrusteeNameController @Inject() (
+  val mcc: MessagesControllerComponents,
+  val ersConnector: ErsConnector,
+  val globalErrorView: views.html.global_error,
+  val authAction: AuthAction,
+  val trusteeService: TrusteeService,
+  val sessionService: FrontendSessionService,
+  trusteeNameView: views.html.trustee_name
+)(implicit val ec: ExecutionContext, val ersUtil: ERSUtil, val appConfig: ApplicationConfig)
+    extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with TrusteeBaseController[TrusteeName] {
 
   implicit val format: Format[TrusteeName] = TrusteeName.format
 
   val cacheKey: String = ersUtil.TRUSTEE_NAME_CACHE
 
-  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier, request: RequestHeader): Future[Result] = {
+  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit
+    hc: HeaderCarrier,
+    request: RequestHeader
+  ): Future[Result] =
     if (edit) {
       Future.successful(Redirect(controllers.trustees.routes.TrusteeBasedInUkController.editQuestion(index)))
     } else {
       Future.successful(Redirect(controllers.trustees.routes.TrusteeBasedInUkController.questionPage()))
     }
-  }
 
   def form(implicit request: Request[AnyContent]): Form[TrusteeName] = RsFormMappings.trusteeNameForm()
 
-  def view(requestObject: RequestObject, index: Int, trusteeNameForm: Form[TrusteeName], edit: Boolean = false)
-          (implicit request: Request[AnyContent], hc: HeaderCarrier): Html = {
+  def view(requestObject: RequestObject, index: Int, trusteeNameForm: Form[TrusteeName], edit: Boolean = false)(implicit
+    request: Request[AnyContent],
+    hc: HeaderCarrier
+  ): Html =
     trusteeNameView(requestObject, index, trusteeNameForm, edit)
-  }
 
 }

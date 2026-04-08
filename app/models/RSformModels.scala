@@ -26,11 +26,13 @@ import java.time.Instant
 case class RS_scheme(scheme: String)
 
 case class ReportableEvents(isNilReturn: Option[String])
+
 object ReportableEvents {
   implicit val format: OFormat[ReportableEvents] = Json.format[ReportableEvents]
 }
 
 case class CheckFileType(checkFileType: Option[String])
+
 object CheckFileType {
   implicit val format: OFormat[CheckFileType] = Json.format[CheckFileType]
 }
@@ -40,11 +42,13 @@ case class RS_schemeType(schemeType: String)
 case class RS_groupSchemeType(groupSchemeType: String)
 
 case class RS_groupScheme(groupScheme: Option[String])
+
 object RS_groupScheme {
   implicit val format: OFormat[RS_groupScheme] = Json.format[RS_groupScheme]
 }
 
 case class AltAmendsActivity(altActivity: String)
+
 object AltAmendsActivity {
   implicit val format: OFormat[AltAmendsActivity] = Json.format[AltAmendsActivity]
 }
@@ -56,6 +60,7 @@ case class AltAmends(
   altAmendsVariations: Option[String],
   altAmendsOther: Option[String]
 )
+
 object AltAmends {
   implicit val format: OFormat[AltAmends] = Json.format[AltAmends]
 }
@@ -71,6 +76,7 @@ case class SchemeOrganiserDetails(
   companyReg: Option[String],
   corporationRef: Option[String]
 ) {
+
   def toArray(countryCodes: CountryCodes): Array[String] =
     Array(
       companyName,
@@ -83,6 +89,7 @@ case class SchemeOrganiserDetails(
       companyReg.getOrElse(""),
       corporationRef.getOrElse("")
     ).filter(_.nonEmpty)
+
 }
 
 object SchemeOrganiserDetails {
@@ -99,51 +106,49 @@ object SchemeOrganiserDetails {
     Some(""),
     Some("")
   )
+
 }
 
 case class TrusteeDetails(
-                              name: String,
-                              addressLine1: String,
-                              addressLine2: Option[String],
-                              addressLine3: Option[String],
-                              addressLine4: Option[String],
-                              country: Option[String],
-                              addressLine5: Option[String], // Postcode for UK address
-                              basedInUk: Boolean
-                              ) {
+  name: String,
+  addressLine1: String,
+  addressLine2: Option[String],
+  addressLine3: Option[String],
+  addressLine4: Option[String],
+  country: Option[String],
+  addressLine5: Option[String], // Postcode for UK address
+  basedInUk: Boolean
+) {
 
-  def replaceName(trusteeName: TrusteeName): TrusteeDetails = {
+  def replaceName(trusteeName: TrusteeName): TrusteeDetails =
     this.copy(name = trusteeName.name)
-  }
 
-  def replaceBasedInUk(trusteeBasedInUk: TrusteeBasedInUk): TrusteeDetails = {
+  def replaceBasedInUk(trusteeBasedInUk: TrusteeBasedInUk): TrusteeDetails =
     this.copy(basedInUk = trusteeBasedInUk.basedInUk)
-  }
 
-  def replaceAddress(trusteeAddress: TrusteeAddress): TrusteeDetails = {
+  def replaceAddress(trusteeAddress: TrusteeAddress): TrusteeDetails =
     this.copy(
       addressLine1 = trusteeAddress.addressLine1,
       addressLine2 = trusteeAddress.addressLine2,
       addressLine3 = trusteeAddress.addressLine3,
       addressLine4 = trusteeAddress.addressLine4,
-      country      = trusteeAddress.country,
+      country = trusteeAddress.country,
       addressLine5 = trusteeAddress.addressLine5
     )
-  }
 
-  def updatePart[A](part: A): TrusteeDetails = {
+  def updatePart[A](part: A): TrusteeDetails =
     part match {
-      case trusteeName: TrusteeName => replaceName(trusteeName)
+      case trusteeName: TrusteeName           => replaceName(trusteeName)
       case trusteeBasedInUk: TrusteeBasedInUk => replaceBasedInUk(trusteeBasedInUk)
-      case trusteeAddress: TrusteeAddress => replaceAddress(trusteeAddress)
-      case _ => this
+      case trusteeAddress: TrusteeAddress     => replaceAddress(trusteeAddress)
+      case _                                  => this
     }
-  }
+
 }
 
 object TrusteeDetails {
 
-  def apply(name: TrusteeName, address: TrusteeAddress): TrusteeDetails = {
+  def apply(name: TrusteeName, address: TrusteeAddress): TrusteeDetails =
     TrusteeDetails(
       name.name,
       address.addressLine1,
@@ -154,7 +159,6 @@ object TrusteeDetails {
       address.addressLine5,
       address.country.fold(false)(_.equals("UK"))
     )
-  }
 
   implicit val format: OFormat[TrusteeDetails] = Json.format[TrusteeDetails]
 }
@@ -172,29 +176,32 @@ object TrusteeName {
 }
 
 case class TrusteeAddress(
-                                   addressLine1: String,
-                                   addressLine2: Option[String],
-                                   addressLine3: Option[String],
-                                   addressLine4: Option[String],
-                                   addressLine5: Option[String],
-                                   country: Option[String]
-                                 )
+  addressLine1: String,
+  addressLine2: Option[String],
+  addressLine3: Option[String],
+  addressLine4: Option[String],
+  addressLine5: Option[String],
+  country: Option[String]
+)
 
 object TrusteeAddress {
   implicit val format: OFormat[TrusteeAddress] = Json.format[TrusteeAddress]
 }
 
 case class TrusteeDetailsList(trustees: List[TrusteeDetails])
+
 object TrusteeDetailsList {
   implicit val format: OFormat[TrusteeDetailsList] = Json.format[TrusteeDetailsList]
 }
 
 case class CsvFiles(fileId: String)
+
 object CsvFiles {
   implicit val format: OFormat[CsvFiles] = Json.format[CsvFiles]
 }
 
 case class CsvFilesList(files: List[CsvFiles])
+
 object CsvFilesList {
   implicit val format: OFormat[CsvFilesList] = Json.format[CsvFilesList]
 }
@@ -281,12 +288,13 @@ case class RequestObject(
 
   private def getNVPair(paramName: String, value: Option[String]): String =
     value.map(paramName + "=" + _ + ";").getOrElse("")
+
 }
 
 object RequestObject {
   implicit val formatRequestObject: OFormat[RequestObject] = Json.format[RequestObject]
 
-  def getSchemeWithArticle(schemeType: String)(implicit messages: Messages): String = {
+  def getSchemeWithArticle(schemeType: String)(implicit messages: Messages): String =
     messages.lang.code match {
       case "en" =>
         val article = if (startsWithVowel(schemeType)) "an" else "a"
@@ -295,11 +303,9 @@ object RequestObject {
       case _ => // cy
         if (schemeType == "OTHER") messages(s"ers.scheme.$schemeType") else schemeType
     }
-  }
 
-  def getSchemeTypeForOdsSchemeMismatch(schemeType: String)(implicit messages: Messages): String = {
+  def getSchemeTypeForOdsSchemeMismatch(schemeType: String)(implicit messages: Messages): String =
     s"${messages(s"ers.scheme.${schemeType.toUpperCase}")}"
-  }
 
   def startsWithVowel(scheme: String): Boolean = {
     val trimmed = scheme.trim.toUpperCase

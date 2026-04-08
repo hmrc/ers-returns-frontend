@@ -33,65 +33,76 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class ReportableEventsController @Inject()(val mcc: MessagesControllerComponents,
-                                           val ersConnector: ErsConnector,
-                                           val sessionService: FrontendSessionService,
-                                           globalErrorView: views.html.global_error,
-                                           reportableEventsView: views.html.reportable_events,
-                                           authAction: AuthAction)
-                                          (implicit val ec: ExecutionContext,
-                                           val ersUtil: ERSUtil,
-                                           val appConfig: ApplicationConfig)
-  extends FrontendController(mcc) with I18nSupport with WithUnsafeDefaultFormBinding with Logging {
+class ReportableEventsController @Inject() (
+  val mcc: MessagesControllerComponents,
+  val ersConnector: ErsConnector,
+  val sessionService: FrontendSessionService,
+  globalErrorView: views.html.global_error,
+  reportableEventsView: views.html.reportable_events,
+  authAction: AuthAction
+)(implicit val ec: ExecutionContext, val ersUtil: ERSUtil, val appConfig: ApplicationConfig)
+    extends FrontendController(mcc) with I18nSupport with WithUnsafeDefaultFormBinding with Logging {
 
   def reportableEventsPage(): Action[AnyContent] = authAction.async { implicit request =>
     sessionService.fetch[ErsMetaData](ersUtil.ERS_METADATA).map { ele =>
-      logger.info(s"[ReportableEventsController][reportableEventsPage] Fetched request object with SAP Number: ${ele.sapNumber} " +
-        s"and schemeRef: ${ele.schemeInfo.schemeRef}")
+      logger.info(
+        s"[ReportableEventsController][reportableEventsPage] Fetched request object with SAP Number: ${ele.sapNumber} " +
+          s"and schemeRef: ${ele.schemeInfo.schemeRef}"
+      )
 
     }
     sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT).flatMap { requestObj =>
-      updateErsMetaData(requestObj)(request, hc).flatMap { _ =>
-        showReportableEventsPage(requestObj)(request)
-      }.recover{
-        case _ =>
-        getGlobalErrorPage
-      }
+      updateErsMetaData(requestObj)(request, hc)
+        .flatMap { _ =>
+          showReportableEventsPage(requestObj)(request)
+        }
+        .recover { case _ =>
+          getGlobalErrorPage
+        }
     }
   }
 
-
-  def updateErsMetaData(requestObject: RequestObject)
-                       (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Object] =
-    ersConnector.connectToEtmpSapRequest(requestObject.getSchemeReference).flatMap {
-      case Right(sapNumber) =>
-      sessionService.fetch[ErsMetaData](ersUtil.ERS_METADATA).map { metaData =>
-        val ersMetaData = ErsMetaData(
-          metaData.schemeInfo,
-          metaData.ipRef,
-          metaData.aoRef,
-          metaData.empRef,
-          metaData.agentRef,
-          Some(sapNumber)
-        )
-        sessionService.cache(ersUtil.ERS_METADATA, ersMetaData).recover { case e: Exception =>
-          logger.error(s"[ReportableEventsController][updateErsMetaData] save failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
-          getGlobalErrorPage
-        }
-      } recover { case e: NoSuchElementException =>
-        logger.error(s"[ReportableEventsController][updateErsMetaData] fetch failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
-        getGlobalErrorPage
+  def updateErsMetaData(
+    requestObject: RequestObject
+  )(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Object] =
+    ersConnector
+      .connectToEtmpSapRequest(requestObject.getSchemeReference)
+      .flatMap {
+        case Right(sapNumber) =>
+          sessionService.fetch[ErsMetaData](ersUtil.ERS_METADATA).map { metaData =>
+            val ersMetaData = ErsMetaData(
+              metaData.schemeInfo,
+              metaData.ipRef,
+              metaData.aoRef,
+              metaData.empRef,
+              metaData.agentRef,
+              Some(sapNumber)
+            )
+            sessionService.cache(ersUtil.ERS_METADATA, ersMetaData).recover { case e: Exception =>
+              logger.error(
+                s"[ReportableEventsController][updateErsMetaData] save failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}."
+              )
+              getGlobalErrorPage
+            }
+          } recover { case e: NoSuchElementException =>
+            logger.error(
+              s"[ReportableEventsController][updateErsMetaData] fetch failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}."
+            )
+            getGlobalErrorPage
+          }
+        case Left(error)      =>
+          Future.successful(getGlobalErrorPage)
       }
-      case Left(error) =>
-        Future.successful(getGlobalErrorPage)
-    }.recover {
-      case e: Exception =>
-        logger.error(s"[ReportableEventsController][updateErsMetaData] in recover with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
+      .recover { case e: Exception =>
+        logger.error(
+          s"[ReportableEventsController][updateErsMetaData] in recover with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}."
+        )
         throw e
-    }
+      }
 
-  def showReportableEventsPage(requestObject: RequestObject)
-                              (implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
+  def showReportableEventsPage(
+    requestObject: RequestObject
+  )(implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
     sessionService.fetch[ReportableEvents](ersUtil.REPORTABLE_EVENTS).map { activity =>
       Ok(reportableEventsView(requestObject, activity.isNilReturn, RsFormMappings.chooseForm().fill(activity)))
     } recover { case _: NoSuchElementException =>
@@ -102,14 +113,17 @@ class ReportableEventsController @Inject()(val mcc: MessagesControllerComponents
   def reportableEventsSelected(): Action[AnyContent] = authAction.async { implicit request =>
     sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT).flatMap { requestObj =>
       showReportableEventsSelected(requestObj)(request) recover { case e: Exception =>
-        logger.error(s"[ReportableEventsController][reportableEventsSelected] failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
+        logger.error(
+          s"[ReportableEventsController][reportableEventsSelected] failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}."
+        )
         getGlobalErrorPage
       }
     }
   }
 
-  def showReportableEventsSelected(requestObject: RequestObject)
-                                  (implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
+  def showReportableEventsSelected(
+    requestObject: RequestObject
+  )(implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
     RsFormMappings
       .chooseForm()
       .bindFromRequest()
@@ -120,11 +134,15 @@ class ReportableEventsController @Inject()(val mcc: MessagesControllerComponents
             if (formData.isNilReturn.get == ersUtil.OPTION_NIL_RETURN) {
               Redirect(controllers.schemeOrganiser.routes.SchemeOrganiserBasedInUkController.questionPage())
             } else {
-              logger.info(s"[ReportableEventsController][showReportableEventsSelected] Redirecting to FileUpload controller to get Partial, timestamp: ${System.currentTimeMillis()}.")
+              logger.info(
+                s"[ReportableEventsController][showReportableEventsSelected] Redirecting to FileUpload controller to get Partial, timestamp: ${System.currentTimeMillis()}."
+              )
               Redirect(routes.CheckFileTypeController.checkFileTypePage())
             }
           } recover { case e: Exception =>
-            logger.error(s"[ReportableEventsController][showReportableEventsSelected] Save reportable event failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.")
+            logger.error(
+              s"[ReportableEventsController][showReportableEventsSelected] Save reportable event failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}."
+            )
             getGlobalErrorPage
           }
       )
@@ -137,4 +155,5 @@ class ReportableEventsController @Inject()(val mcc: MessagesControllerComponents
         "ers.global_errors.message"
       )(request, messages, appConfig)
     )
+
 }

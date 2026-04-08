@@ -20,8 +20,7 @@ import play.api.i18n.Messages
 import utils.PageBuilder
 
 class FileNamesDecorator(reportableEvents: String, filesUploaded: Option[List[String]])
-    extends Decorator
-    with PageBuilder {
+    extends Decorator with PageBuilder {
 
   def decorate(implicit messages: Messages): String =
     if (reportableEvents != OPTION_NIL_RETURN) {
@@ -34,4 +33,5 @@ class FileNamesDecorator(reportableEvents: String, filesUploaded: Option[List[St
     } else {
       ""
     }
+
 }

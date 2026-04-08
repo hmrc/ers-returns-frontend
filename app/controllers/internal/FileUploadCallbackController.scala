@@ -28,10 +28,12 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class FileUploadCallbackController @Inject() (val mcc: MessagesControllerComponents,
-                                              fileValidatorService: FileValidatorService,
-                                              fileSizeUtils: FileSizeUtils)
-                                             (implicit val ec: ExecutionContext) extends FrontendController(mcc) with Logging with Constants {
+class FileUploadCallbackController @Inject() (
+  val mcc: MessagesControllerComponents,
+  fileValidatorService: FileValidatorService,
+  fileSizeUtils: FileSizeUtils
+)(implicit val ec: ExecutionContext)
+    extends FrontendController(mcc) with Logging with Constants {
 
   def callback(schemeRef: String, sessionId: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
     request.body
@@ -56,19 +58,21 @@ class FileUploadCallbackController @Inject() (val mcc: MessagesControllerCompone
               Failed
           }
 
-          logger.info(s"[FileUploadCallbackController][callback] Updating callback for session: $sessionId to ${uploadStatus.getClass.getSimpleName}")
+          logger.info(
+            s"[FileUploadCallbackController][callback] Updating callback for session: $sessionId to ${uploadStatus.getClass.getSimpleName}"
+          )
           (for {
             _ <- fileValidatorService.updateCallbackRecord(uploadStatus, sessionId)
-          } yield Ok) recover {
-            case e: Throwable =>
-              logger.error(
-                s"[FileUploadCallbackController][callback] Failed to update callback record for session: $sessionId, timestamp: ${System
+          } yield Ok) recover { case e: Throwable =>
+            logger.error(
+              s"[FileUploadCallbackController][callback] Failed to update callback record for session: $sessionId, timestamp: ${System
                   .currentTimeMillis()}.",
-                e
-              )
-              InternalServerError("Exception occurred when attempting to update callback data")
+              e
+            )
+            InternalServerError("Exception occurred when attempting to update callback data")
           }
         }
       )
   }
+
 }

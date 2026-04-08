@@ -23,7 +23,9 @@ import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.i18n.{Messages, MessagesApi}
-import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents}
+import play.api.mvc.{
+  AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents
+}
 import play.api.test.Helpers.stubBodyParser
 import utils.{ERSFakeApplicationConfig, ErsTestHelper}
 
@@ -65,8 +67,8 @@ class FileNamesDecoratorSpec
       val output = decorator.decorate
 
       output.contains(Messages("ers_summary_declaration.file_name")) shouldBe true
-      output.contains("odsFile") shouldBe true
-      output.contains("<hr/>") shouldBe true
+      output.contains("odsFile")                                     shouldBe true
+      output.contains("<hr/>")                                       shouldBe true
     }
 
     "show csv files names when nil return is true" in {
@@ -75,10 +77,11 @@ class FileNamesDecoratorSpec
       val output = decorator.decorate
 
       output.contains(Messages("ers_summary_declaration.file_name")) shouldBe true
-      output.contains("csvFile0") shouldBe true
-      output.contains("csvFile1") shouldBe true
-      output.contains("<hr/>") shouldBe true
+      output.contains("csvFile0")                                    shouldBe true
+      output.contains("csvFile1")                                    shouldBe true
+      output.contains("<hr/>")                                       shouldBe true
 
     }
   }
+
 }

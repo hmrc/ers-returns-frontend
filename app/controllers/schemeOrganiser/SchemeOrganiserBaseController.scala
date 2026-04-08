@@ -43,90 +43,98 @@ trait SchemeOrganiserBaseController[A] extends FrontendController with I18nSuppo
   implicit val ec: ExecutionContext
   implicit val format: Format[A]
 
-  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier, request: RequestHeader): Future[Result]
+  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit
+    hc: HeaderCarrier,
+    request: RequestHeader
+  ): Future[Result]
 
   def form(implicit request: Request[AnyContent]): Form[A]
 
-  def view(requestObject: RequestObject, index: Int, form: Form[A], edit: Boolean = false)
-          (implicit request: Request[AnyContent], hc: HeaderCarrier): Html
+  def view(requestObject: RequestObject, index: Int, form: Form[A], edit: Boolean = false)(implicit
+    request: Request[AnyContent],
+    hc: HeaderCarrier
+  ): Html
 
-  def questionPage(index: Int): Action[AnyContent] = authAction.async {
-    implicit request =>
-      sessionService.fetch[ErsMetaData](ersUtil.ERS_METADATA).map { ele =>
-        logger.info(s"[SchemeOrganiserBaseController][questionPage] Fetched request object with SAP Number: ${ele.sapNumber} " +
-          s"and schemeRef: ${ele.schemeInfo.schemeRef}")
-      }
-      sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT).flatMap { requestObject =>
-        showQuestionPage(requestObject, index)
-      }
+  def questionPage(index: Int): Action[AnyContent] = authAction.async { implicit request =>
+    sessionService.fetch[ErsMetaData](ersUtil.ERS_METADATA).map { ele =>
+      logger.info(
+        s"[SchemeOrganiserBaseController][questionPage] Fetched request object with SAP Number: ${ele.sapNumber} " +
+          s"and schemeRef: ${ele.schemeInfo.schemeRef}"
+      )
+    }
+    sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT).flatMap { requestObject =>
+      showQuestionPage(requestObject, index)
+    }
   }
 
-  def showQuestionPage(requestObject: RequestObject, index: Int, edit: Boolean = false)
-                      (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
+  def showQuestionPage(requestObject: RequestObject, index: Int, edit: Boolean = false)(implicit
+    request: RequestWithOptionalAuthContext[AnyContent],
+    hc: HeaderCarrier
+  ): Future[Result] =
     sessionService.fetchPartFromCompanyDetails[A]().map { previousAnswer: Option[A] =>
       val preparedForm = previousAnswer.fold(form)(form.fill(_))
       Ok(view(requestObject, index, preparedForm, edit))
-    } recover {
-      case e: Exception =>
-        logger.error(s"[${this.getClass.getSimpleName}][showQuestionPage] Get data from cache failed with exception ${e.getMessage}")
-        getGlobalErrorPage
+    } recover { case e: Exception =>
+      logger.error(
+        s"[${this.getClass.getSimpleName}][showQuestionPage] Get data from cache failed with exception ${e.getMessage}"
+      )
+      getGlobalErrorPage
+    }
+
+  def questionSubmit(index: Int): Action[AnyContent] = authAction.async { implicit request =>
+    sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT).flatMap { requestObject =>
+      submissionHandler(requestObject, index)(request, hc)
     }
   }
 
-
-  def questionSubmit(index: Int): Action[AnyContent] = authAction.async {
-    implicit request =>
-      sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT).flatMap { requestObject =>
-        submissionHandler(requestObject, index)(request, hc)
-      }
-  }
-
-  def submissionHandler(requestObject: RequestObject, index: Int, edit: Boolean = false)
-                       (implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
-    form.bindFromRequest().fold(
-      errors => {
-        Future.successful(BadRequest(view(requestObject, index, errors, edit)))
-      },
-      result => {
-        if (edit) {
-          sessionService.fetch[CompanyDetails](ersUtil.SCHEME_ORGANISER_CACHE).flatMap { schemeOrganiser =>
-            val updatedSchemeOrganiser = schemeOrganiser.updatePart(result)
-            sessionService.cache[CompanyDetails](ersUtil.SCHEME_ORGANISER_CACHE, updatedSchemeOrganiser).flatMap { _ =>
+  def submissionHandler(requestObject: RequestObject, index: Int, edit: Boolean = false)(implicit
+    request: RequestWithOptionalAuthContext[AnyContent],
+    hc: HeaderCarrier
+  ): Future[Result] =
+    form
+      .bindFromRequest()
+      .fold(
+        errors => Future.successful(BadRequest(view(requestObject, index, errors, edit))),
+        result =>
+          if (edit) {
+            sessionService.fetch[CompanyDetails](ersUtil.SCHEME_ORGANISER_CACHE).flatMap { schemeOrganiser =>
+              val updatedSchemeOrganiser = schemeOrganiser.updatePart(result)
+              sessionService.cache[CompanyDetails](ersUtil.SCHEME_ORGANISER_CACHE, updatedSchemeOrganiser).flatMap { _ =>
+                nextPageRedirect(index, edit)
+              }
+            }
+          } else {
+            sessionService.cache[A](cacheKey, result).flatMap { _ =>
               nextPageRedirect(index, edit)
             }
           }
-        } else {
-          sessionService.cache[A](cacheKey, result).flatMap { _ =>
-            nextPageRedirect(index, edit)
-          }
-        }
-      }
-    ).recover {
-      case ex: Exception =>
-        logger.error(s"[${this.getClass.getSimpleName}][submissionHandler] Error occurred while updating company cache, ${ex.getMessage}")
+      )
+      .recover { case ex: Exception =>
+        logger.error(
+          s"[${this.getClass.getSimpleName}][submissionHandler] Error occurred while updating company cache, ${ex.getMessage}"
+        )
         getGlobalErrorPage
+      }
+
+  def editCompany(index: Int): Action[AnyContent] = authAction.async { implicit request =>
+    sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT).flatMap { requestObject =>
+      showQuestionPage(requestObject, index, edit = true)(request, hc)
     }
   }
 
-  def editCompany(index: Int): Action[AnyContent] = authAction.async {
-    implicit request =>
-      sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT).flatMap { requestObject =>
-        showQuestionPage(requestObject, index, edit = true)(request, hc)
-      }
+  def editQuestionSubmit(index: Int): Action[AnyContent] = authAction.async { implicit request =>
+    sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT).flatMap { requestObject =>
+      submissionHandler(requestObject, index, edit = true)(request, hc)
+    }
   }
 
-  def editQuestionSubmit(index: Int): Action[AnyContent] = authAction.async {
-    implicit request =>
-      sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT).flatMap { requestObject =>
-        submissionHandler(requestObject, index, edit = true)(request, hc)
-      }
-  }
+  def getGlobalErrorPage(implicit request: RequestHeader, messages: Messages): Result =
+    Ok(
+      globalErrorView(
+        "ers.global_errors.title",
+        "ers.global_errors.heading",
+        "ers.global_errors.message"
+      )(request, messages, appConfig)
+    )
 
-  def getGlobalErrorPage(implicit request: RequestHeader, messages: Messages): Result = {
-    Ok(globalErrorView(
-      "ers.global_errors.title",
-      "ers.global_errors.heading",
-      "ers.global_errors.message"
-    )(request, messages, appConfig))
-  }
 }

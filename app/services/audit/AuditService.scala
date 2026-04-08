@@ -44,8 +44,9 @@ trait AuditService {
     )
 
   private[audit] def generateTags(hc: HeaderCarrier): Map[String, String] = {
-    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+    val formatter                      = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
     val formattedZonedDateTime: String = ZonedDateTime.now().format(formatter)
     hc.otherHeaders.toMap ++ Map("dateTime" -> formattedZonedDateTime)
   }
+
 }

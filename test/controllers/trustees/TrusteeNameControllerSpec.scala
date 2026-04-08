@@ -27,7 +27,9 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status
 import play.api.i18n
 import play.api.i18n.{MessagesApi, MessagesImpl}
-import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents}
+import play.api.mvc.{
+  AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents
+}
 import play.api.test.Helpers.{contentAsString, defaultAwaitTimeout, redirectLocation, status, stubBodyParser}
 import utils.Fixtures.ersRequestObject
 import utils.{ERSFakeApplicationConfig, ErsTestHelper, Fixtures}
@@ -35,13 +37,14 @@ import views.html.{global_error, trustee_name}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class TrusteeNameControllerSpec extends AnyWordSpecLike
-  with Matchers
-  with OptionValues
-  with ERSFakeApplicationConfig
-  with ErsTestHelper
-  with GuiceOneAppPerSuite
-  with ScalaFutures {
+class TrusteeNameControllerSpec
+    extends AnyWordSpecLike
+    with Matchers
+    with OptionValues
+    with ERSFakeApplicationConfig
+    with ErsTestHelper
+    with GuiceOneAppPerSuite
+    with ScalaFutures {
 
   implicit val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
     messagesActionBuilder,
@@ -71,31 +74,34 @@ class TrusteeNameControllerSpec extends AnyWordSpecLike
     when(mockSessionService.fetch[RequestObject](any())(any(), any())).thenReturn(Future.successful(ersRequestObject))
 
     "show the empty trustee name question page when there is nothing to prefill" in {
-      when(mockSessionService.fetchPartFromTrusteeDetailsList[TrusteeName](any())(any(), any())).thenReturn(Future.successful(None))
+      when(mockSessionService.fetchPartFromTrusteeDetailsList[TrusteeName](any())(any(), any()))
+        .thenReturn(Future.successful(None))
 
       val result = testController.questionPage(1).apply(authRequest)
 
-      status(result) shouldBe Status.OK
+      status(result)        shouldBe Status.OK
       contentAsString(result) should include(testMessages("ers_trustee_name.title"))
     }
 
     "show the prefilled trustee name question page when there is data to prefill" in {
-      when(mockSessionService.fetchPartFromTrusteeDetailsList[TrusteeName](any())(any(), any())).thenReturn(Future.successful(Some(TrusteeName("Test person"))))
+      when(mockSessionService.fetchPartFromTrusteeDetailsList[TrusteeName](any())(any(), any()))
+        .thenReturn(Future.successful(Some(TrusteeName("Test person"))))
 
       val result = testController.questionPage(1).apply(authRequest)
 
-      status(result) shouldBe Status.OK
+      status(result)        shouldBe Status.OK
       contentAsString(result) should include(testMessages("ers_trustee_name.title"))
       contentAsString(result) should include("Test person")
 
     }
 
     "show the global error page if an exception occurs while retrieving cached data" in {
-      when(mockSessionService.fetchPartFromTrusteeDetailsList[TrusteeName](any())(any(), any())).thenReturn(Future.failed(new RuntimeException("Failure scenario")))
+      when(mockSessionService.fetchPartFromTrusteeDetailsList[TrusteeName](any())(any(), any()))
+        .thenReturn(Future.failed(new RuntimeException("Failure scenario")))
 
       val result = testController.questionPage(1).apply(authRequest)
 
-      status(result) shouldBe Status.OK
+      status(result)        shouldBe Status.OK
       contentAsString(result) should include(testMessages("ers.global_errors.title"))
       contentAsString(result) should include(testMessages("ers.global_errors.heading"))
       contentAsString(result) should include(testMessages("ers.global_errors.message"))
@@ -104,12 +110,14 @@ class TrusteeNameControllerSpec extends AnyWordSpecLike
 
   "calling handleQuestionSubmit" should {
     "show the trustee name form page with errors if the form is incorrectly filled" in {
-      val trusteeBasedData = Map("bool" -> "")
-      val form = RsFormMappings.trusteeBasedInUkForm().bind(trusteeBasedData)
-      implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*))
-      val result = testController.questionSubmit(1).apply(authRequest)
+      val trusteeBasedData     = Map("bool" -> "")
+      val form                 = RsFormMappings.trusteeBasedInUkForm().bind(trusteeBasedData)
+      implicit val authRequest = buildRequestWithAuth(
+        Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
+      )
+      val result               = testController.questionSubmit(1).apply(authRequest)
 
-      status(result) shouldBe Status.BAD_REQUEST
+      status(result)        shouldBe Status.BAD_REQUEST
       contentAsString(result) should include(testMessages("ers_trustee_name.title"))
       contentAsString(result) should include(testMessages("error.required"))
     }
@@ -118,12 +126,14 @@ class TrusteeNameControllerSpec extends AnyWordSpecLike
       when(mockSessionService.cache[TrusteeName](any(), any())(any(), any())).thenReturn(Future.successful(sessionPair))
       when(mockTrusteeService.updateTrusteeCache(any())(any())).thenReturn(Future.successful(()), Future.successful(()))
 
-      val trusteeBasedData = Map("name" -> "Test person")
-      val form = RsFormMappings.trusteeBasedInUkForm().bind(trusteeBasedData)
-      implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*))
-      val result = testController.questionSubmit(1).apply(authRequest)
+      val trusteeBasedData     = Map("name" -> "Test person")
+      val form                 = RsFormMappings.trusteeBasedInUkForm().bind(trusteeBasedData)
+      implicit val authRequest = buildRequestWithAuth(
+        Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
+      )
+      val result               = testController.questionSubmit(1).apply(authRequest)
 
-      status(result) shouldBe Status.SEE_OTHER
+      status(result)               shouldBe Status.SEE_OTHER
       redirectLocation(result).get shouldBe routes.TrusteeBasedInUkController.questionPage().url
 
     }
@@ -135,11 +145,12 @@ class TrusteeNameControllerSpec extends AnyWordSpecLike
     when(mockSessionService.fetch[RequestObject](any())(any(), any())).thenReturn(Future.successful(ersRequestObject))
 
     "be the same as showQuestion for a specific index" in {
-      when(mockSessionService.fetchPartFromTrusteeDetailsList[TrusteeName](any())(any(), any())).thenReturn(Future.successful(Some(TrusteeName("Test person"))))
+      when(mockSessionService.fetchPartFromTrusteeDetailsList[TrusteeName](any())(any(), any()))
+        .thenReturn(Future.successful(Some(TrusteeName("Test person"))))
 
       val result = testController.editQuestion(1).apply(authRequest)
 
-      status(result) shouldBe Status.OK
+      status(result)        shouldBe Status.OK
       contentAsString(result) should include(testMessages("ers_trustee_name.title"))
       contentAsString(result) should include("Test person")
     }
@@ -151,16 +162,20 @@ class TrusteeNameControllerSpec extends AnyWordSpecLike
 
     "successfully bind the form and go to the edit version of the trustee based in UK page with the index preserved if the form is filled correctly" in {
       when(mockSessionService.cache[TrusteeName](any(), any())(any(), any())).thenReturn(Future.successful(sessionPair))
-      when(mockSessionService.fetchTrusteesOptionally()(any(), any())).thenReturn(Future.successful(Fixtures.exampleTrustees))
+      when(mockSessionService.fetchTrusteesOptionally()(any(), any()))
+        .thenReturn(Future.successful(Fixtures.exampleTrustees))
       when(mockTrusteeService.updateTrusteeCache(any())(any())).thenReturn(Future.successful(()), Future.successful(()))
 
-      val trusteeBasedData = Map("name" -> "Test person")
-      val form = RsFormMappings.trusteeBasedInUkForm().bind(trusteeBasedData)
-      implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*))
-      val result = testController.editQuestionSubmit(1).apply(authRequest)
+      val trusteeBasedData     = Map("name" -> "Test person")
+      val form                 = RsFormMappings.trusteeBasedInUkForm().bind(trusteeBasedData)
+      implicit val authRequest = buildRequestWithAuth(
+        Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
+      )
+      val result               = testController.editQuestionSubmit(1).apply(authRequest)
 
-      status(result) shouldBe Status.SEE_OTHER
+      status(result)               shouldBe Status.SEE_OTHER
       redirectLocation(result).get shouldBe routes.TrusteeBasedInUkController.editQuestion(1).url
     }
   }
+
 }

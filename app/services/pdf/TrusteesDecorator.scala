@@ -27,4 +27,5 @@ class TrusteesDecorator(trusteesList: Option[TrusteeDetailsList]) extends Decora
     } else {
       ""
     }
+
 }

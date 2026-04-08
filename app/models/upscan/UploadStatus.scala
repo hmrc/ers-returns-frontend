@@ -30,6 +30,7 @@ object UploadedSuccessfully {
 }
 
 object UploadStatus {
+
   implicit val readsUploadStatus: Reads[UploadStatus] = new Reads[UploadStatus] {
     override def reads(json: JsValue): JsResult[UploadStatus] = {
       val jsObject = json.asInstanceOf[JsObject]
@@ -57,4 +58,5 @@ object UploadStatus {
           ))
       }
   }
+
 }

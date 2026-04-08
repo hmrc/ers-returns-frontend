@@ -37,7 +37,7 @@ import views.html.global_error
 import scala.concurrent.{ExecutionContext, Future}
 
 class TestOnlySubmissionDataControllerSpec
-  extends AnyWordSpecLike
+    extends AnyWordSpecLike
     with Matchers
     with OptionValues
     with ERSFakeApplicationConfig
@@ -103,7 +103,8 @@ class TestOnlySubmissionDataControllerSpec
 
     "redirect to login page if user is not authenticated" in {
       setUnauthorisedMocks()
-      val result = testOnlySubmissionDataController.retrieveSubmissionData()(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+      val result =
+        testOnlySubmissionDataController.retrieveSubmissionData()(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
       status(result) shouldBe SEE_OTHER
     }
   }
@@ -113,12 +114,12 @@ class TestOnlySubmissionDataControllerSpec
     val mockErsConnector: ErsConnector = mock[ErsConnector]
 
     class Setup(obj: Option[JsObject] = None)
-      extends TestOnlySubmissionDataController(
-        mockMCC,
-        mockErsConnector,
-        globalErrorView,
-        testAuthAction
-      ) {
+        extends TestOnlySubmissionDataController(
+          mockMCC,
+          mockErsConnector,
+          globalErrorView,
+          testAuthAction
+        ) {
       when(mockAppConfig.enableRetrieveSubmissionData).thenReturn(true)
 
       override def createSchemeInfoFromURL(request: Request[Any]): Option[JsObject] = obj
@@ -126,7 +127,7 @@ class TestOnlySubmissionDataControllerSpec
 
     "returns NOT_FOUND if not all parameters are given" in {
       lazy val testOnlySubmissionDataController: TestOnlySubmissionDataController = new Setup()
-      val authRequest = buildRequestWithAuth(testFakeRequest)
+      val authRequest                                                             = buildRequestWithAuth(testFakeRequest)
 
       val result = testOnlySubmissionDataController.getRetrieveSubmissionData()(authRequest, hc)
       status(result) shouldBe NOT_FOUND
@@ -141,7 +142,7 @@ class TestOnlySubmissionDataControllerSpec
 
       val authRequest = buildRequestWithAuth(testFakeRequest)
       val result      = testOnlySubmissionDataController.getRetrieveSubmissionData()(authRequest, hc)
-      status(result) shouldBe OK
+      status(result)                                       shouldBe OK
       contentAsString(result).contains("Retrieve Failure") shouldBe false
     }
 
@@ -153,8 +154,8 @@ class TestOnlySubmissionDataControllerSpec
         .thenReturn(Future.successful(HttpResponse(INTERNAL_SERVER_ERROR, "")))
 
       val authRequest = buildRequestWithAuth(testFakeRequest)
-      val result = testOnlySubmissionDataController.getRetrieveSubmissionData()(authRequest, hc)
-      status(result) shouldBe OK
+      val result      = testOnlySubmissionDataController.getRetrieveSubmissionData()(authRequest, hc)
+      status(result)                                                              shouldBe OK
       contentAsString(result).contains(testMessages("ers.global_errors.message")) shouldBe true
     }
 
@@ -167,7 +168,7 @@ class TestOnlySubmissionDataControllerSpec
 
       val authRequest = buildRequestWithAuth(testFakeRequest)
       val result      = testOnlySubmissionDataController.getRetrieveSubmissionData()(authRequest, hc)
-      status(result) shouldBe OK
+      status(result)                                                              shouldBe OK
       contentAsString(result).contains(testMessages("ers.global_errors.message")) shouldBe true
     }
 
@@ -187,4 +188,5 @@ class TestOnlySubmissionDataControllerSpec
       status(result) shouldBe NOT_FOUND
     }
   }
+
 }

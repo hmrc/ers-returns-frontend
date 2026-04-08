@@ -31,10 +31,10 @@ class StartPageViewSpec extends ViewSpecBase with FileUploadFixtures {
 
   private val view = app.injector.instanceOf[start]
 
-  implicit val ersUtil: ERSUtil = app.injector.instanceOf[ERSUtil]
-  implicit val appConfig: ApplicationConfig = app.injector.instanceOf[ApplicationConfig]
+  implicit val ersUtil: ERSUtil                             = app.injector.instanceOf[ERSUtil]
+  implicit val appConfig: ApplicationConfig                 = app.injector.instanceOf[ApplicationConfig]
   implicit val request: FakeRequest[AnyContentAsEmpty.type] = fakeRequest
-  implicit val messages: Messages = testMessages
+  implicit val messages: Messages                           = testMessages
 
   // for all pages except SIP scheme
   val expectedBullets: List[String] = List(
@@ -67,7 +67,7 @@ class StartPageViewSpec extends ViewSpecBase with FileUploadFixtures {
       )
 
       val requestObject = testRequestObject.copy(schemeType = Some("CSOP"))
-      val doc = asDocument(view(requestObject))
+      val doc           = asDocument(view(requestObject))
 
       hasExpectedContent(
         doc,
@@ -93,7 +93,7 @@ class StartPageViewSpec extends ViewSpecBase with FileUploadFixtures {
       )
 
       val requestObject = testRequestObject.copy(schemeType = Some("EMI"))
-      val doc = asDocument(view(requestObject))
+      val doc           = asDocument(view(requestObject))
 
       hasExpectedContent(
         doc,
@@ -135,7 +135,7 @@ class StartPageViewSpec extends ViewSpecBase with FileUploadFixtures {
       )
 
       val requestObject = testRequestObject.copy(schemeType = Some("SIP"))
-      val doc = asDocument(view(requestObject))
+      val doc           = asDocument(view(requestObject))
 
       hasExpectedContent(
         doc,
@@ -161,7 +161,7 @@ class StartPageViewSpec extends ViewSpecBase with FileUploadFixtures {
       )
 
       val requestObject = testRequestObject.copy(schemeType = Some("SAYE"))
-      val doc = asDocument(view(requestObject))
+      val doc           = asDocument(view(requestObject))
 
       hasExpectedContent(
         doc,
@@ -187,7 +187,7 @@ class StartPageViewSpec extends ViewSpecBase with FileUploadFixtures {
       )
 
       val requestObject = testRequestObject.copy(schemeType = Some("OTHER"))
-      val doc = asDocument(view(requestObject))
+      val doc           = asDocument(view(requestObject))
 
       hasExpectedContent(
         doc,
@@ -199,52 +199,53 @@ class StartPageViewSpec extends ViewSpecBase with FileUploadFixtures {
     }
   }
 
-  private def hasExpectedContent(doc: Document,
-                                 expectedBreadcrumb: String,
-                                 expectedCaption: String,
-                                 expectedParagraphs: List[String],
-                                 expectedBullets: List[String]
-                                ): Unit = {
+  private def hasExpectedContent(
+    doc: Document,
+    expectedBreadcrumb: String,
+    expectedCaption: String,
+    expectedParagraphs: List[String],
+    expectedBullets: List[String]
+  ): Unit = {
 
     def expectedElements(actualElements: mutable.Buffer[Element], expectedText: List[String]): Unit = {
       actualElements.size mustBe expectedText.size
-      actualElements.zip(expectedText).foreach {
-        case (element, expected) =>
-          element.text mustBe expected
+      actualElements.zip(expectedText).foreach { case (element, expected) =>
+        element.text mustBe expected
       }
     }
 
-    doc.title() mustBe "Submit your annual return – Employment Related Securities – GOV.UK"
+    doc.title()                                       mustBe "Submit your annual return – Employment Related Securities – GOV.UK"
     doc.getElementsByClass("govuk-heading-xl").text() mustBe "Submit your annual return"
-    doc.getElementById("scheme-reference").text() mustBe expectedBreadcrumb
-    doc.getElementsByClass("govuk-caption-l").text() mustBe expectedCaption
+    doc.getElementById("scheme-reference").text()     mustBe expectedBreadcrumb
+    doc.getElementsByClass("govuk-caption-l").text()  mustBe expectedCaption
 
     val paragraphs = doc.getElementsByClass("govuk-body").asScala
     expectedElements(paragraphs, expectedParagraphs)
 
-    val mediumHeadings = doc.getElementsByClass("govuk-heading-m").asScala
+    val mediumHeadings         = doc.getElementsByClass("govuk-heading-m").asScala
     val expectedMediumHeadings = List("Before you start", "What you will need", "After you submit your annual return")
     expectedElements(mediumHeadings, expectedMediumHeadings)
 
     val bullets = doc.getElementsByClass("govuk-list").asScala.flatMap(list => list.select("li").asScala)
     expectedElements(bullets, expectedBullets)
 
-    val insetText = doc.getElementsByClass("govuk-inset-text").asScala
+    val insetText         = doc.getElementsByClass("govuk-inset-text").asScala
     val expectedInsetText = List(
       "A company director or company secretary must have approved the return and must agree to any declaration you make in this service.",
       "You can print or save a copy of your submission receipt after you submit your annual return."
     )
     expectedElements(insetText, expectedInsetText)
 
-    val links = doc.getElementById("content").select("a")
-    val firstLink = links.get(0).attr("href")
+    val links      = doc.getElementById("content").select("a")
+    val firstLink  = links.get(0).attr("href")
     val secondLink = links.get(1).attr("href")
 
-    firstLink mustBe "https://www.gov.uk/government/collections/employment-related-securities-detailed-information"
+    firstLink  mustBe "https://www.gov.uk/government/collections/employment-related-securities-detailed-information"
     secondLink mustBe "https://www.gov.uk/guidance/spreadsheet-checking-service-employment-related-securities-ers"
 
     val buttons = doc.getElementsByClass("govuk-button")
-    buttons.size() mustBe 1
+    buttons.size()      mustBe 1
     buttons.get(0).text mustBe "Start now"
   }
+
 }

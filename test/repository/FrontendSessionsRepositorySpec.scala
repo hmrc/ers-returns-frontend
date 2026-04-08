@@ -32,24 +32,17 @@ import views.ViewSpecBase
 
 import java.util.UUID
 
-
-class FrontendSessionsRepositorySpec extends PlaySpec
-  with BeforeAndAfterEach
-  with MockitoSugar
-  with MongoSupport
-  with ViewSpecBase
-  {
+class FrontendSessionsRepositorySpec
+    extends PlaySpec with BeforeAndAfterEach with MockitoSugar with MongoSupport with ViewSpecBase {
   val mockConfiguration: ApplicationConfig = app.injector.instanceOf[ApplicationConfig]
-  val sessionCacheRepo = new
-      FrontendSessionsRepository(mongoComponent, mockConfiguration)
-
+  val sessionCacheRepo                     = new FrontendSessionsRepository(mongoComponent, mockConfiguration)
 
   "ERSSessionCacheRepository" when {
 
     "getAllFromSession" should {
       "return CacheItem with all the data from session" in {
 
-        val sessionId: SessionId = SessionId(UUID.randomUUID().toString)
+        val sessionId: SessionId                                      = SessionId(UUID.randomUUID().toString)
         implicit val fakeRequest: FakeRequest[AnyContentAsEmpty.type] =
           FakeRequest().withSession(("sessionId", sessionId.toString))
 
@@ -59,20 +52,21 @@ class FrontendSessionsRepositorySpec extends PlaySpec
         val result = sessionCacheRepo.getAllFromSession()
 
         await(result).map { cacheItem: CacheItem =>
-          cacheItem.id mustBe sessionId.toString
+          cacheItem.id   mustBe sessionId.toString
           cacheItem.data mustBe JsObject(Seq("file-type" -> JsString("csv"), "file-size" -> JsString("5MB")))
         }
       }
 
       "return None when there is no data in session" in {
-        val sessionId: SessionId = SessionId(UUID.randomUUID().toString)
+        val sessionId: SessionId                                      = SessionId(UUID.randomUUID().toString)
         implicit val fakeRequest: FakeRequest[AnyContentAsEmpty.type] =
           FakeRequest().withSession(("sessionId", sessionId.toString))
-        val result = sessionCacheRepo.getAllFromSession()
+        val result                                                    = sessionCacheRepo.getAllFromSession()
 
         await(result) mustBe None
       }
     }
 
   }
+
 }
