@@ -34,15 +34,15 @@ trait AuthHelper extends MockitoSugar {
   type RetrievalType = Enrolments ~ Option[AffinityGroup]
   lazy val mockAuthConnector: DefaultAuthConnector = mock[DefaultAuthConnector]
 
-  val agentOnlyEnrolmentSet: Set[Enrolment]        = Set(
+  val agentOnlyEnrolmentSet: Set[Enrolment] = Set(
     Enrolment("HMRC-AGENT-AGENT", Seq(EnrolmentIdentifier("AgentRefNumber", "JARN1234567")), "activated")
   )
 
-  val invalidEnrolmentSet: Set[Enrolment]          = Set(
+  val invalidEnrolmentSet: Set[Enrolment] = Set(
     Enrolment("HMRC-TEST-ORG", Seq(EnrolmentIdentifier("TestRefNumber", "XN1200000100001")), "activated")
   )
 
-  val ersEnrolmentSet: Set[Enrolment]              = Set(
+  val ersEnrolmentSet: Set[Enrolment] = Set(
     Enrolment(
       "IR-PAYE",
       Seq(EnrolmentIdentifier("TaxOfficeNumber", "123"), EnrolmentIdentifier("TaxOfficeReference", "4567890")),

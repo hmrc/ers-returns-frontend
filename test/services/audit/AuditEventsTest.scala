@@ -41,7 +41,7 @@ class AuditEventsTest
   val mockAuditConnector: DefaultAuditConnector             = mock[DefaultAuditConnector]
   implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
 
-  val rsc                                                   = new ErsMetaData(
+  val rsc = new ErsMetaData(
     new SchemeInfo(
       schemeRef = "testSchemeRef",
       timestamp = Instant.now,

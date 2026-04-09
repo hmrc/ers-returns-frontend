@@ -37,14 +37,14 @@ trait UpscanData {
     */
   def asUploadStatus(status: UploadStatus): UploadStatus = status
 
-  val incompleteCsvList  = UpscanCsvFilesCallbackList(
+  val incompleteCsvList = UpscanCsvFilesCallbackList(
     List(
       UpscanCsvFilesCallback(UploadId("ID1"), "file1", InProgress),
       notStartedCallback
     )
   )
 
-  val notStartedCsvList  = UpscanCsvFilesCallbackList(
+  val notStartedCsvList = UpscanCsvFilesCallbackList(
     List(
       UpscanCsvFilesCallback(testUploadId, "file1", NotStarted),
       UpscanCsvFilesCallback(UploadId("ID2"), "file4", NotStarted)
@@ -65,7 +65,7 @@ trait UpscanData {
     )
   )
 
-  val failedCsvList      = UpscanCsvFilesCallbackList(
+  val failedCsvList = UpscanCsvFilesCallbackList(
     List(
       UpscanCsvFilesCallback(testUploadId, "file1", Failed),
       UpscanCsvFilesCallback(UploadId("ID2"), "file4", Failed)
@@ -88,7 +88,7 @@ trait UpscanData {
     .writes[UpscanFailedCallback]
     .transform((js: JsValue) => js.as[JsObject] + ("fileStatus" -> JsString("FAILED")))
 
-  implicit val readWrites: OWrites[UpscanReadyCallback]    =
+  implicit val readWrites: OWrites[UpscanReadyCallback] =
     Json.writes[UpscanReadyCallback].transform((js: JsValue) => js.as[JsObject] + ("fileStatus" -> JsString("READY")))
 
   val upscanInitiateResponse: UpscanInitiateResponse =

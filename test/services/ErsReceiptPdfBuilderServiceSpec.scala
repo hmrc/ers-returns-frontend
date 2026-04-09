@@ -59,9 +59,9 @@ class ErsReceiptPdfBuilderServiceSpec
     ExecutionContext.global
   )
 
-  implicit lazy val mat: Materializer       = app.materializer
-  implicit val ersUtil: ERSUtil             = mockErsUtil
-  val testErsReceiptPdfBuilderService       = new ErsReceiptPdfBuilderService(mockCountryCodes)
+  implicit lazy val mat: Materializer = app.materializer
+  implicit val ersUtil: ERSUtil       = mockErsUtil
+  val testErsReceiptPdfBuilderService = new ErsReceiptPdfBuilderService(mockCountryCodes)
 
   val testCases: TableFor3[String, String, String] = Table(
     ("language", "inputDate", "expectedOutputDate"),

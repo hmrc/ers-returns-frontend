@@ -59,7 +59,7 @@ class ERSConnectorSpec
 
   implicit override val ec: ExecutionContext = app.injector.instanceOf[ExecutionContext]
 
-  lazy val newConfig: Map[String, Any]      = config + ("microservice.services.ers-file-validator.port" -> server.port())
+  lazy val newConfig: Map[String, Any] = config + ("microservice.services.ers-file-validator.port" -> server.port())
 
   val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
     messagesActionBuilder,
@@ -71,15 +71,15 @@ class ERSConnectorSpec
     ExecutionContext.global
   )
 
-  implicit lazy val testMessages: MessagesImpl                             = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
-  implicit lazy val mat: Materializer                                      = app.materializer
-  implicit lazy val authContext: ERSAuthData                               = defaultErsAuthData
-  lazy val testHttp: HttpClientV2                                          = app.injector.instanceOf[HttpClientV2]
+  implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
+  implicit lazy val mat: Materializer          = app.materializer
+  implicit lazy val authContext: ERSAuthData   = defaultErsAuthData
+  lazy val testHttp: HttpClientV2              = app.injector.instanceOf[HttpClientV2]
 
   override val requestWithAuth: RequestWithOptionalAuthContext[AnyContent] =
     RequestWithOptionalAuthContext(testFakeRequest.withSession("sessionId" -> "someSessionId"), defaultErsAuthData)
 
-  lazy val schemeInfo: SchemeInfo                                          = SchemeInfo("XA1100000000000", Instant.now, "1", "2016", "EMI", "EMI")
+  lazy val schemeInfo: SchemeInfo = SchemeInfo("XA1100000000000", Instant.now, "1", "2016", "EMI", "EMI")
 
   lazy val ersConnector: ErsConnector = new ErsConnector(testHttp, mockAppConfig) {
     override lazy val ersUrl       = "ers-returns"

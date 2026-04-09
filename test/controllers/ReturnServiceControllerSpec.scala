@@ -70,10 +70,10 @@ class ReturnServiceControllerSpec
   lazy val ExpectedRedirectionUrlIfNotSignedIn = "/gg/sign-in?continue=/submit-your-ers-return"
   lazy val schemeInfo: SchemeInfo              = SchemeInfo("XA1100000000000", Instant.now, "1", "2016", "EMI", "EMI")
 
-  lazy val rsc: ErsMetaData                    =
+  lazy val rsc: ErsMetaData =
     new ErsMetaData(schemeInfo, "ipRef", Some("aoRef"), "empRef", Some("agentRef"), Some("sapNumber"))
 
-  lazy val rscAsRequestObject: RequestObject   = RequestObject(
+  lazy val rscAsRequestObject: RequestObject = RequestObject(
     Some("aoRef"),
     Some("2014/15"),
     Some("AA0000000000000"),
@@ -140,7 +140,7 @@ class ReturnServiceControllerSpec
     }
   }
 
-  "Calling ReturnServiceController.cacheParams when schemeRef is not present"                                       should {
+  "Calling ReturnServiceController.cacheParams when schemeRef is not present" should {
     " redirect to the global error page" in {
       val controllerUnderTest = buildFakeReturnServiceController()
       when(mockSessionService.remove(any())(any())).thenReturn(Future.failed(new Exception("failed")))
@@ -154,7 +154,7 @@ class ReturnServiceControllerSpec
   }
 
   // Start Page
-  "Calling ReturnServiceController.startPage (GET) without authentication"                                          should {
+  "Calling ReturnServiceController.startPage (GET) without authentication" should {
     "give a redirect status (to company authentication frontend)" in {
       setUnauthorisedMocks()
       val controllerUnderTest = buildFakeReturnServiceController()
