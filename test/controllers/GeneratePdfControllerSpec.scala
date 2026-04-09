@@ -62,10 +62,10 @@ class GeneratePdfControllerSpec
   lazy val pdfBuilderMock: ErsReceiptPdfBuilderService = mock[ErsReceiptPdfBuilderService]
   lazy val schemeInfo: SchemeInfo                      = SchemeInfo("XA1100000000000", Instant.now, "1", "2016", "EMI", "EMI")
 
-  lazy val rsc: ErsMetaData                            =
+  lazy val rsc: ErsMetaData =
     ErsMetaData(schemeInfo, "ipRef", Some("aoRef"), "empRef", Some("agentRef"), Some("sapNumber"))
 
-  lazy val ersSummary: ErsSummary                      =
+  lazy val ersSummary: ErsSummary =
     ErsSummary("testbundle", "2", None, Instant.now, rsc, None, None, None, None, None, None, None, None)
 
   "pdf generation controller" should {

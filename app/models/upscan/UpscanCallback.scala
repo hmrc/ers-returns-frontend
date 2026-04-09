@@ -42,7 +42,7 @@ object UpscanCallback {
   implicit val uploadDetailsFormat: Format[UploadDetails] = Json.format[UploadDetails]
   implicit val errorDetailsFormat: Format[ErrorDetails]   = Json.format[ErrorDetails]
 
-  implicit val formatURL: Format[URL]                     = new Format[URL] {
+  implicit val formatURL: Format[URL] = new Format[URL] {
     override def reads(json: JsValue): JsResult[URL] = json match {
       case JsString(s) =>
         parseUrl(s)

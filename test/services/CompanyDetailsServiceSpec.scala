@@ -30,19 +30,19 @@ import scala.concurrent.Future
 
 class CompanyDetailsServiceSpec extends AnyWordSpecLike with ErsTestHelper {
 
-  val companyOne: CompanyDetails   =
+  val companyOne: CompanyDetails =
     CompanyDetails("First company", "20 Garden View", None, None, None, None, None, None, None, true)
 
-  val companyTwo: CompanyDetails   =
+  val companyTwo: CompanyDetails =
     CompanyDetails("Second company", "72 Big Avenue", None, None, None, None, None, None, None, true)
 
   val companyThree: CompanyDetails =
     CompanyDetails("Third company", "21 Brick Lane", None, None, None, None, None, None, None, true)
 
-  val companyFour: CompanyDetails  =
+  val companyFour: CompanyDetails =
     CompanyDetails("Fourth company", "21 Brick Lane", None, None, None, None, None, None, None, true)
 
-  val replacement: CompanyDetails  =
+  val replacement: CompanyDetails =
     CompanyDetails("Replacement company", "1 Some Place", None, None, None, None, None, None, None, true)
 
   val listOfCompanies: List[CompanyDetails] = List(

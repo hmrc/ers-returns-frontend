@@ -49,7 +49,7 @@ class RetryableSpec
       def f: Future[Boolean]
     }
 
-    val retryMock: RetryTestUtil               = mock[RetryTestUtil]
+    val retryMock: RetryTestUtil = mock[RetryTestUtil]
   }
 
   "withRetry" should {

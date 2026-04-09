@@ -45,7 +45,7 @@ trait ViewSpecBase extends PlaySpec with GuiceOneAppPerSuite {
 
   def asDocument(html: Html): Document = Jsoup.parse(html.toString())
 
-  def firstElementByClassText(document: Document, cssClass: String): String    =
+  def firstElementByClassText(document: Document, cssClass: String): String =
     document.getElementsByClass(cssClass).first().text()
 
   def firstElementByClassOwnText(document: Document, cssClass: String): String =
