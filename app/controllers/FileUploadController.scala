@@ -83,7 +83,7 @@ class FileUploadController @Inject() (
       file <- futureCallbackData
     } yield file match {
       case Some(file: UploadedSuccessfully) =>
-        if(!MimeTypeValidator.isValidMimeType(file.mimeType)){
+        if (!MimeTypeValidator.isValidMimeType(file.mimeType)) {
           logger.error(
             s"[FileUploadController][success] Validation failed due to wrong mime type"
           )
@@ -92,9 +92,11 @@ class FileUploadController @Inject() (
             sessionFileType <- sessionService.fetch[CheckFileType](ersUtil.FILE_TYPE_CACHE)
           } yield {
             val fileType = sessionFileType.checkFileType.getOrElse("Not Found")
-            InternalServerError(invalidMimeErrorView(requestObject, file.name, fileType.toUpperCase, "ers.invalid_mime.ods.paragraph"))
+            InternalServerError(
+              invalidMimeErrorView(requestObject, file.name, fileType.toUpperCase, "ers.invalid_mime.ods.paragraph")
+            )
           }
-        }else if (file.name.toLowerCase.contains(".csv")) {
+        } else if (file.name.toLowerCase.contains(".csv")) {
           logger.info("[FileUploadController][success] User uploaded a csv file instead of an ods file")
           Future(getFileUploadProblemPage())
         } else if (!file.name.toLowerCase.contains(".ods")) {

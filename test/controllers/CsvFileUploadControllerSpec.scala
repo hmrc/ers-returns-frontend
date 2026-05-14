@@ -78,6 +78,7 @@ class CsvFileUploadControllerSpec
   val fileUploadErrorsView: file_upload_errors                 = app.injector.instanceOf[file_upload_errors]
   val fileUploadProblemView: file_upload_problem               = app.injector.instanceOf[file_upload_problem]
   val fileSizeLimitErrorView: views.html.file_size_limit_error = app.injector.instanceOf[file_size_limit_error]
+  val invalidMimeError: views.html.invalid_mime_error          = app.injector.instanceOf[invalid_mime_error]
 
   val mockUpscanService: UpscanService = mock[UpscanService]
 
@@ -92,6 +93,7 @@ class CsvFileUploadControllerSpec
       fileSizeLimitErrorView,
       fileUploadErrorsView,
       fileUploadProblemView,
+      invalidMimeError,
       testAuthAction
     ) {
       override lazy val allCsvFilesCacheRetryAmount: Int = 1
@@ -292,6 +294,7 @@ class CsvFileUploadControllerSpec
         fileSizeLimitErrorView,
         fileUploadErrorsView,
         fileUploadProblemView,
+        invalidMimeError,
         testAuthAction
       ) {
         override lazy val allCsvFilesCacheRetryAmount: Int = 1
@@ -370,6 +373,7 @@ class CsvFileUploadControllerSpec
         fileSizeLimitErrorView,
         fileUploadErrorsView,
         fileUploadProblemView,
+        invalidMimeError,
         testAuthAction
       ) {
         override def processValidationResults()(implicit
@@ -407,6 +411,7 @@ class CsvFileUploadControllerSpec
         fileSizeLimitErrorView,
         fileUploadErrorsView,
         fileUploadProblemView,
+        invalidMimeError,
         testAuthAction
       ) {
         override def removePresubmissionData(schemeInfo: SchemeInfo)(implicit
@@ -483,6 +488,7 @@ class CsvFileUploadControllerSpec
         fileSizeLimitErrorView,
         fileUploadErrorsView,
         fileUploadProblemView,
+        invalidMimeError,
         testAuthAction
       ) {
         override def extractCsvCallbackData(schemeInfo: SchemeInfo)(implicit
@@ -548,6 +554,7 @@ class CsvFileUploadControllerSpec
         fileSizeLimitErrorView,
         fileUploadErrorsView,
         fileUploadProblemView,
+        invalidMimeError,
         testAuthAction
       ) {
         override lazy val allCsvFilesCacheRetryAmount: Int = retryTimes
@@ -760,6 +767,7 @@ class CsvFileUploadControllerSpec
         fileSizeLimitErrorView,
         fileUploadErrorsView,
         fileUploadProblemView,
+        invalidMimeError,
         testAuthAction
       ) {
         override lazy val allCsvFilesCacheRetryAmount: Int = 1
@@ -841,6 +849,7 @@ class CsvFileUploadControllerSpec
         fileSizeLimitErrorView,
         fileUploadErrorsView,
         fileUploadProblemView,
+        invalidMimeError,
         testAuthAction
       ) {
         override lazy val allCsvFilesCacheRetryAmount: Int = 1
@@ -851,7 +860,8 @@ class CsvFileUploadControllerSpec
 
       val testUploadedSuccessfully   = new UploadedSuccessfully(
         "CSOP_OptionsGranted_V4.csv",
-        "http://somedownloadlink.com/034099340"
+        "http://somedownloadlink.com/034099340",
+        mimeType = "csv"
       )
       val testCsvCallbackData        = List[UploadedSuccessfully](testUploadedSuccessfully)
       val testCacheFileIds           = List[UpscanIds](
@@ -887,7 +897,8 @@ class CsvFileUploadControllerSpec
 
       val testUploadedSuccessfully   = new UploadedSuccessfully(
         "csop_optionsgranted_v4.CSV",
-        "http://somedownloadlink.com/034099340"
+        "http://somedownloadlink.com/034099340",
+        mimeType = "csv"
       )
       val testCsvCallbackData        = List[UploadedSuccessfully](testUploadedSuccessfully)
       val testCacheFileIds           = List[UpscanIds](
@@ -924,7 +935,8 @@ class CsvFileUploadControllerSpec
 
       val testUploadedSuccessfully   = new UploadedSuccessfully(
         "CSOP_OptionsExercised_V4",
-        "http://somedownloadlink.com/034099340"
+        "http://somedownloadlink.com/034099340",
+        mimeType = ""
       )
       val testCsvCallbackData        = List[UploadedSuccessfully](testUploadedSuccessfully)
       val testCacheFileIds           = List[UpscanIds](
@@ -954,7 +966,8 @@ class CsvFileUploadControllerSpec
     "redirect to getGlobalErrorPage if checkFileNames throws an exception" in {
       val testUploadedSuccessfully   = new UploadedSuccessfully(
         "CSOP_OptionsExercised_V4",
-        "http://somedownloadlink.com/034099340"
+        "http://somedownloadlink.com/034099340",
+        mimeType = ""
       )
       val testCsvCallbackData        = List[UploadedSuccessfully](testUploadedSuccessfully)
       val mockSchemeInfo: SchemeInfo = mock[SchemeInfo]

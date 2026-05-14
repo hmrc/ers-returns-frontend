@@ -322,7 +322,7 @@ class ERSConnectorSpec
           .thenReturn(Future.successful(successfulResponse))
 
         val result = await(ersConnectorMockHttp.getCallbackRecord(requestWithAuth, hc))
-        result shouldBe Some(UploadedSuccessfully("fileName", "downloadUrl"))
+        result shouldBe Some(UploadedSuccessfully("fileName", "downloadUrl", mimeType = ""))
       }
     }
 
@@ -354,7 +354,10 @@ class ERSConnectorSpec
           .thenReturn(Future.successful(HttpResponse(NO_CONTENT, "")))
 
         val result = await(
-          ersConnectorMockHttp.updateCallbackRecord(UploadedSuccessfully("fileId", "downloadUrl"), "sessionId")(hc)
+          ersConnectorMockHttp.updateCallbackRecord(
+            UploadedSuccessfully("fileId", "downloadUrl", mimeType = ""),
+            "sessionId"
+          )(hc)
         )
         result shouldBe NO_CONTENT
       }
@@ -366,7 +369,10 @@ class ERSConnectorSpec
           .thenReturn(Future.successful(HttpResponse(BAD_REQUEST, "")))
 
         an[Exception] should be thrownBy await(
-          ersConnectorMockHttp.updateCallbackRecord(UploadedSuccessfully("fileId", "downloadUrl"), "sessionId")(hc)
+          ersConnectorMockHttp.updateCallbackRecord(
+            UploadedSuccessfully("fileId", "downloadUrl", mimeType = ""),
+            "sessionId"
+          )(hc)
         )
       }
     }
@@ -377,7 +383,10 @@ class ERSConnectorSpec
           .thenReturn(Future.failed(new Exception("Test exception")))
 
         an[Exception] should be thrownBy await(
-          ersConnectorMockHttp.updateCallbackRecord(UploadedSuccessfully("fileId", "downloadUrl"), "sessionId")(hc)
+          ersConnectorMockHttp.updateCallbackRecord(
+            UploadedSuccessfully("fileId", "downloadUrl", mimeType = ""),
+            "sessionId"
+          )(hc)
         )
       }
     }

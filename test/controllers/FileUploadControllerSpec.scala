@@ -98,6 +98,7 @@ class FileUploadControllerSpec
   val fileSizeLimitErrorView: file_size_limit_error   = app.injector.instanceOf[file_size_limit_error]
   val upscanOdsFileUploadView: upscan_ods_file_upload = app.injector.instanceOf[upscan_ods_file_upload]
   val fileUploadProblemView: file_upload_problem      = app.injector.instanceOf[file_upload_problem]
+  val invalidMimeError: views.html.invalid_mime_error = app.injector.instanceOf[invalid_mime_error]
 
   implicit lazy val materializer: Materializer = app.materializer
 
@@ -114,6 +115,7 @@ class FileUploadControllerSpec
         templateFailureView,
         upscanOdsFileUploadView,
         fileUploadProblemView,
+        invalidMimeError,
         testAuthAction
       )
 

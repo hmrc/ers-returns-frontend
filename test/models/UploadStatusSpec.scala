@@ -41,7 +41,7 @@ class UploadStatusSpec extends AnyWordSpecLike with Matchers with OptionValues {
         val expectedName     = "fileName"
         val expectedUrl      = "downloadUrl"
         val json             = s"""{"_type": "UploadedSuccessfully", "name": "$expectedName", "downloadUrl": "$expectedUrl"}"""
-        val expectedResponse = UploadedSuccessfully(expectedName, expectedUrl, None)
+        val expectedResponse = UploadedSuccessfully(expectedName, expectedUrl, None, "")
         Json.parse(json).as[UploadStatus] shouldBe expectedResponse
       }
     }
@@ -78,7 +78,7 @@ class UploadStatusSpec extends AnyWordSpecLike with Matchers with OptionValues {
         val expectedJson               = Json.parse(
           s"""{"name":"$expectedName","downloadUrl":"$expectedUrl","_type":"UploadedSuccessfully","noOfRows":$noOfRows}"""
         )
-        val uploadStatus: UploadStatus = UploadedSuccessfully(expectedName, expectedUrl, Some(noOfRows))
+        val uploadStatus: UploadStatus = UploadedSuccessfully(expectedName, expectedUrl, Some(noOfRows), mimeType = "")
         assert(Json.toJson(uploadStatus) == expectedJson, "The upload status does not match its expected Json form")
       }
     }

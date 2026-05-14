@@ -95,7 +95,7 @@ class FileValidatorServiceSpec extends PlaySpec with GuiceOneAppPerSuite with Sc
   "getCallbackRecord" must {
     "return a callback record" when {
       "record is successfully retrieved" in {
-        val mockUploadStatus: Option[UploadStatus] = Some(UploadedSuccessfully("fileId", "downloadUrl"))
+        val mockUploadStatus: Option[UploadStatus] = Some(UploadedSuccessfully("fileId", "downloadUrl", mimeType = ""))
         when(mockConnector.getCallbackRecord(any(), any()))
           .thenReturn(Future.successful(mockUploadStatus))
 
@@ -129,13 +129,13 @@ class FileValidatorServiceSpec extends PlaySpec with GuiceOneAppPerSuite with Sc
   "getSuccessfulCallbackRecord" must {
     "return a UploadedSuccessfully record" when {
       "record is successfully retrieved and is UploadedSuccessfully" in {
-        val mockUploadStatus: Option[UploadStatus] = Some(UploadedSuccessfully("fileId", "downloadUrl"))
+        val mockUploadStatus: Option[UploadStatus] = Some(UploadedSuccessfully("fileId", "downloadUrl", mimeType = ""))
         when(mockConnector.getCallbackRecord(any(), any()))
           .thenReturn(Future.successful(mockUploadStatus))
 
         val result = testService.getSuccessfulCallbackRecord.futureValue
 
-        result shouldBe Some(UploadedSuccessfully("fileId", "downloadUrl"))
+        result shouldBe Some(UploadedSuccessfully("fileId", "downloadUrl", mimeType = ""))
       }
     }
 
