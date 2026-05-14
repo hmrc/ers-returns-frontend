@@ -23,7 +23,7 @@
         hmrcPageHeading: HmrcPageHeading
 )
 
-@(requestObject: RequestObject, fileName: String, fileType: String)(implicit request: RequestHeader, messages: Messages, appConfig: ApplicationConfig)
+@(requestObject: RequestObject, fileName: String, fileType: String, msgKey: String)(implicit request: RequestHeader, messages: Messages, appConfig: ApplicationConfig)
 
 
 @govuk_wrapper(title = messages("ers.app_title")) {
@@ -40,7 +40,7 @@
     ))
 
     <p class="govuk-body">
-        @Html(messages("ers.invalid_mime.paragraph", fileName, fileType))
+        @Html(messages(msgKey, fileName, fileType))
     </p>
 
     <a class="govuk-link" href="@routes.CheckFileTypeController.checkFileTypePage().url">
