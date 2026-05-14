@@ -46,6 +46,7 @@ class CsvFileUploadController @Inject() (
   fileSizeLimitErrorView: views.html.file_size_limit_error,
   fileUploadErrorsView: views.html.file_upload_errors,
   fileUploadProblemView: views.html.file_upload_problem,
+  invaildMimeErrorView : views.html.invaild_mime_error,
   authAction: AuthAction
 )(implicit
   val ec: ExecutionContext,
@@ -181,7 +182,22 @@ class CsvFileUploadController @Inject() (
               if (csvFilesCallbackList.areAllFilesSuccessful()) {
                 val callbackDataList: List[UploadedSuccessfully] =
                   csvFilesCallbackList.files.map(_.uploadStatus.asInstanceOf[UploadedSuccessfully])
-                checkFileNames(callbackDataList, schemeInfo)
+
+                val isValidMimeType = callbackDataList.exists(_.mimeType.toLowerCase.equalsIgnoreCase("text/csv"))
+                if(!isValidMimeType){
+                  //redirect to invalid mime page
+                  logger.error(s"[CsvFileUploadController][extractCsvCallbackData] Validation failed due to wrong mime type")
+                  for {
+                    requestObject <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
+                    sessionFileType      <- sessionService.fetch[CheckFileType](ersUtil.FILE_TYPE_CACHE)
+                    fileName = callbackDataList.headOption.map(file => file.name).getOrElse("Not Found")
+                  } yield {
+                    val fileType = sessionFileType.checkFileType.getOrElse("Not Found")
+                    InternalServerError(invaildMimeErrorView(requestObject, fileName, fileType.toUpperCase))
+                  }
+                }else{
+                  checkFileNames(callbackDataList, schemeInfo)
+                }
               } else {
                 val failedFiles: String =
                   csvFilesCallbackList.files.filter(_.uploadStatus == Failed).map(_.uploadId.value).mkString(", ")

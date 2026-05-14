@@ -953,3 +953,12 @@ ers.global.page.not.found.error.check.web.address.full=If you pasted the web add
 ers.global.page.not.found.error.contact=If the web address is correct or you selected a link or button, {0} if you need to speak to someone about your annual return.
 ers.global.page.not.found.error.contact.link.text=contact the Employment related securities helpline
 ers.global.page.not.found.error.contact.link=https://www.gov.uk/government/organisations/hm-revenue-customs/contact/share-schemes-for-employees
+
+#********************************************************************
+# Invalid Mime Page
+#********************************************************************
+
+ers.invalid_mime.title=There is a problem with the file upload
+ers.invalid_mime.heading=There is a problem with the file upload
+ers.invalid_mime.paragraph = You chose to upload {0} but the file you uploaded is not a {1} file.
+ers.invalid_mime.tryAgain = Try again with the correct file.

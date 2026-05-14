@@ -816,3 +816,13 @@ file_size_limit_error.para_2 = Ni allwch uwchlwytho ffeil sy’n fwy na {0}
 file_size_limit_error.para_3_1 = Gallwch anfon e-bost at
 file_size_limit_error.link = shareschemes@hmrc.gov.uk
 file_size_limit_error.para_3_2 = i gael help gyda’ch cyflwyniad.
+
+
+#********************************************************************
+# Invalid Mime Page
+#********************************************************************
+
+ers.invalid_mime.title=Mae problem wrth uwchlwytho’r ffeil
+ers.invalid_mime.heading=Mae problem wrth uwchlwytho’r ffeil
+ers.invalid_mime.paragraph = Gwnaethoch ddewis uwchlwytho {0}, ond nid ffeil {1} yw’r ffeil a uwchlwythoch.
+ers.invalid_mime.tryAgain = Rhowch gynnig arall arni gyda’r ffeil gywir.
