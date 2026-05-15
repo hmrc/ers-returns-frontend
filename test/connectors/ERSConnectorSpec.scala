@@ -315,7 +315,8 @@ class ERSConnectorSpec
       "the response is successful and the status is OK" in {
         val expectedName       = "fileName"
         val expectedUrl        = "downloadUrl"
-        val json               = s"""{"_type": "UploadedSuccessfully", "name": "$expectedName", "downloadUrl": "$expectedUrl"}"""
+        val json               =
+          s"""{"_type": "UploadedSuccessfully", "name": "$expectedName", "downloadUrl": "$expectedUrl", "mimeType": ""}"""
         val successfulResponse = HttpResponse(OK, json, Map.empty)
 
         when(mockRequestBuilder.execute(any[HttpReads[HttpResponse]], any()))

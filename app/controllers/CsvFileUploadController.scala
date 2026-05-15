@@ -182,8 +182,8 @@ class CsvFileUploadController @Inject() (
               if (csvFilesCallbackList.areAllFilesSuccessful()) {
                 val callbackDataList: List[UploadedSuccessfully] =
                   csvFilesCallbackList.files.map(_.uploadStatus.asInstanceOf[UploadedSuccessfully])
-                val invalidMimeFiles                             = callbackDataList.forall(file => MimeTypeValidator.isValidMimeType(file.mimeType))
-                if (!invalidMimeFiles) { // redirect to invalid mime page
+                val isInvalidFiles                               = callbackDataList.forall(file => MimeTypeValidator.isInvalidMimeType(file.mimeType))
+                if (isInvalidFiles) { // redirect to invalid mime page
                   logger.error(
                     s"[CsvFileUploadController][extractCsvCallbackData] Validation failed due to wrong mime type"
                   )

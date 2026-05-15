@@ -83,7 +83,7 @@ class FileUploadController @Inject() (
       file <- futureCallbackData
     } yield file match {
       case Some(file: UploadedSuccessfully) =>
-        if (!MimeTypeValidator.isValidMimeType(file.mimeType)) {
+        if (MimeTypeValidator.isInvalidMimeType(file.mimeType)) {
           logger.error(
             s"[FileUploadController][success] Validation failed due to wrong mime type"
           )
