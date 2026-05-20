@@ -280,7 +280,6 @@ class CsvFileUploadController @Inject() (
     hc: HeaderCarrier
   ): Future[Result] =
     ersConnector.validateCsvFileData(csvCallbackData, schemeInfo).flatMap { res =>
-
       res.status match {
         case OK =>
           logger.info(

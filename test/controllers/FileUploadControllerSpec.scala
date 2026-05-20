@@ -140,6 +140,11 @@ class FileUploadControllerSpec
     contentAsString(result) must include(testMessages("ers.global_errors.title"))
   }
 
+  def checkMimeErrorPage(result: Future[Result]): Assertion = {
+    status(result)        mustBe UNSUPPORTED_MEDIA_TYPE
+    contentAsString(result) must include(testMessages("ers.invalid_mime.heading"))
+  }
+
   def checkFileUploadProblemPage(result: Future[Result]): Assertion = {
     status(result)        mustBe BAD_REQUEST
     contentAsString(result) must include(testMessages("ers.file_problem.heading"))
@@ -257,7 +262,7 @@ class FileUploadControllerSpec
 
         setAuthMocks()
         val result = TestFileUploadController.success()(testFakeRequest)
-        checkFileUploadProblemPage(result)
+        checkMimeErrorPage(result)
       }
 
       "file name includes .CSV in upper case" in {
@@ -268,7 +273,7 @@ class FileUploadControllerSpec
 
         setAuthMocks()
         val result = TestFileUploadController.success()(testFakeRequest)
-        checkFileUploadProblemPage(result)
+        checkMimeErrorPage(result)
       }
 
       "file name does not contain an ods extension at all (e.g. txt)" in {

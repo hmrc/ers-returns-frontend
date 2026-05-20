@@ -726,7 +726,7 @@ class CsvFileUploadControllerSpec
             .toJson(
               Map(
                 s"${"check-csv-files"}-${testUploadId.value}" ->
-                  Json.toJson(asUploadStatus(uploadedSuccessfully))
+                  Json.toJson(asUploadStatus(uploadedSuccessfullyCsv))
               )
             )
             .as[JsObject],
@@ -759,8 +759,8 @@ class CsvFileUploadControllerSpec
           Json
             .toJson(
               Map(
-                s"${"check-csv-files"}-${testUploadId.value}" -> Json.toJson(asUploadStatus(uploadedSuccessfully)),
-                s"${"check-csv-files"}-ID1"                   -> Json.toJson(asUploadStatus(uploadedSuccessfully))
+                s"${"check-csv-files"}-${testUploadId.value}" -> Json.toJson(asUploadStatus(uploadedSuccessfullyCsv)),
+                s"${"check-csv-files"}-ID1"                   -> Json.toJson(asUploadStatus(uploadedSuccessfullyCsv))
               )
             )
             .as[JsObject],
