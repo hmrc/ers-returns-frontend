@@ -281,7 +281,6 @@ class CsvFileUploadController @Inject() (
   ): Future[Result] =
     ersConnector.validateCsvFileData(csvCallbackData, schemeInfo).flatMap { res =>
 
-      println("res "+res.body)
       res.status match {
         case OK =>
           logger.info(
