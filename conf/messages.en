@@ -962,4 +962,4 @@ ers.invalid_mime.title=There is a problem with the file upload
 ers.invalid_mime.heading=There is a problem with the file upload
 ers.invalid_mime.paragraph =You chose to upload {0} but the file you uploaded is not a {1} file.
 ers.invalid_mime.tryAgain =Try again with the correct file.
-ers.invalid_mime.ods.paragraph =You chose to upload an ODS file but the the file that you uploaded is not an ODS file.
+ers.invalid_mime.ods.paragraph =You chose to upload an ODS file but the file that you uploaded is not an ODS file.

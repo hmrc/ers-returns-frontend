@@ -17,9 +17,15 @@
 package utils
 
 object MimeTypeValidator {
-  private val allowedMimeTyes: Set[String] = Set("text/csv", "application/vnd.oasis.opendocument.spreadsheet")
 
-  def isInvalidMimeType(mimeType: String): Boolean =
-    Option(mimeType).map(_.trim.toLowerCase).exists(allowedMimeTyes.contains)
+  def checkIsCSVMimeType(mimeType: String): Boolean =
+    Option(mimeType)
+      .map(_.trim.toLowerCase)
+      .contains("text/csv")
+
+  def checkIsODSMimeType(mimeType: String): Boolean =
+    Option(mimeType)
+      .map(_.trim.toLowerCase)
+      .contains("application/vnd.oasis.opendocument.spreadsheet")
 
 }

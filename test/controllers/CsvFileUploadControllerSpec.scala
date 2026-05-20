@@ -610,6 +610,56 @@ class CsvFileUploadControllerSpec
           Future(csvFileUploadController.getGlobalErrorPage(testFakeRequest, testMessages))
         )
       }
+
+      "return InternalServerError when uploaded file has invalid mime type" in {
+        when(
+          mockSessionService.fetch[UpscanCsvFilesList](meq("csv-files-upload"))(any(), any())
+        ).thenReturn(Future.successful(inProgressUpscanCsvFilesList))
+        when(
+          mockSessionService.fetchAll()(any())
+        ) thenReturn Future.successful(
+          CacheItem(
+            "id",
+            Json
+              .toJson(
+                Map(
+                  s"${"check-csv-files"}-${testUploadId.value}" ->
+                    Json.toJson(asUploadStatus(uploadedSuccessfullyInvalid))
+                )
+              )
+              .as[JsObject],
+            Instant.now(),
+            Instant.now()
+          )
+        )
+        when(
+          mockSessionService.cache(any(), any())(any(), any())
+        ) thenReturn Future.successful(sessionPair)
+
+        when(
+          mockSessionService.fetch[RequestObject](refEq(mockErsUtil.ERS_REQUEST_OBJECT))(any(), any())
+        ).thenReturn(
+          Future.successful(ersRequestObject)
+        )
+        when(
+          mockSessionService.fetch[CheckFileType](refEq(mockErsUtil.FILE_TYPE_CACHE))(any(), any())
+        ).thenReturn(
+          Future.successful(CheckFileType(Some("csv")))
+        )
+
+        val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+        val result      = csvFileUploadController.extractCsvCallbackData(Fixtures.EMISchemeInfo)(authRequest, hc)
+        status(result)          shouldBe UNSUPPORTED_MEDIA_TYPE
+        contentAsString(result) shouldBe contentAsString(
+          invalidMimeError(
+            ersRequestObject,
+            "test.txt",
+            "CSV",
+            "ers.invalid_mime.paragraph"
+          )
+        )
+      }
+
     }
 
     "call the cache multiple times when the data does not exist the first time" in {

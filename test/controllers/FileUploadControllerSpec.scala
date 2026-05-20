@@ -205,6 +205,38 @@ class FileUploadControllerSpec
       }
     }
 
+    "return invalid Mime Error page" when {
+      "invalidMimeErrorView" in {
+        when(mockErsConnector.getCallbackRecord(any(), any))
+          .thenReturn(Future.successful(Some(uploadedSuccessfullyInvalid)))
+
+        when(mockSessionService.cache(meq("file-name"), meq(uploadedSuccessfully.name))(any(), any()))
+          .thenReturn(Future.successful(sessionPair))
+
+        when(mockSessionService.fetch[RequestObject](meq(ERS_REQUEST_OBJECT))(any(), any()))
+          .thenReturn(Future.successful(ersRequestObject))
+
+        when(
+          mockSessionService.fetch[CheckFileType](refEq(mockErsUtil.FILE_TYPE_CACHE))(any(), any())
+        ).thenReturn(
+          Future.successful(CheckFileType(Some("ods")))
+        )
+
+        setAuthMocks()
+        val result = TestFileUploadController.success()(testFakeRequest)
+
+        status(result)          mustBe UNSUPPORTED_MEDIA_TYPE
+        contentAsString(result) mustBe contentAsString(
+          invalidMimeError(
+            ersRequestObject,
+            "test.txt",
+            "ODS",
+            "ers.invalid_mime.ods.paragraph"
+          )
+        )
+      }
+    }
+
     "return global error page" when {
       "caching file name fails" in {
         when(mockErsConnector.getCallbackRecord(any(), any))

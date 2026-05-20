@@ -182,19 +182,26 @@ class CsvFileUploadController @Inject() (
               if (csvFilesCallbackList.areAllFilesSuccessful()) {
                 val callbackDataList: List[UploadedSuccessfully] =
                   csvFilesCallbackList.files.map(_.uploadStatus.asInstanceOf[UploadedSuccessfully])
-                val isInvalidFiles                               = callbackDataList.forall(file => MimeTypeValidator.isInvalidMimeType(file.mimeType))
-                if (isInvalidFiles) { // redirect to invalid mime page
+                val invalidFiles                                 =
+                  callbackDataList.filter(file => !MimeTypeValidator.checkIsCSVMimeType(file.mimeType))
+
+                if (invalidFiles.nonEmpty) {
                   logger.error(
                     s"[CsvFileUploadController][extractCsvCallbackData] Validation failed due to wrong mime type"
                   )
                   for {
                     requestObject   <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
                     sessionFileType <- sessionService.fetch[CheckFileType](ersUtil.FILE_TYPE_CACHE)
-                    fileName         = callbackDataList.headOption.map(file => file.name).getOrElse("Not Found")
                   } yield {
-                    val fileType = sessionFileType.checkFileType.getOrElse("Not Found")
-                    InternalServerError(
-                      invalidMimeErrorView(requestObject, fileName, fileType.toUpperCase, "ers.invalid_mime.paragraph")
+                    val fileType         = sessionFileType.checkFileType.getOrElse("Not Found")
+                    val invalidFileNames = invalidFiles.map(_.name).mkString(", ")
+                    UnsupportedMediaType(
+                      invalidMimeErrorView(
+                        requestObject,
+                        invalidFileNames,
+                        fileType.toUpperCase,
+                        "ers.invalid_mime.paragraph"
+                      )
                     )
                   }
                 } else {
@@ -273,6 +280,8 @@ class CsvFileUploadController @Inject() (
     hc: HeaderCarrier
   ): Future[Result] =
     ersConnector.validateCsvFileData(csvCallbackData, schemeInfo).flatMap { res =>
+
+      println("res "+res.body)
       res.status match {
         case OK =>
           logger.info(
