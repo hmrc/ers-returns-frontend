@@ -646,10 +646,14 @@ class CsvFileUploadControllerSpec
         ).thenReturn(
           Future.successful(CheckFileType(Some("csv")))
         )
+        when(
+          mockErsUtil.getPageElement(any(), any(), any(), any())(any())
+        ) thenReturn "test.txt"
 
         val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
         val result      = csvFileUploadController.extractCsvCallbackData(Fixtures.EMISchemeInfo)(authRequest, hc)
-        status(result)          shouldBe UNSUPPORTED_MEDIA_TYPE
+        status(result) shouldBe UNSUPPORTED_MEDIA_TYPE
+
         contentAsString(result) shouldBe contentAsString(
           invalidMimeError(
             ersRequestObject,
