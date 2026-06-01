@@ -239,8 +239,8 @@ class CsvFileUploadController @Inject() (
     }
 
   def checkFileNames(csvCallbackData: List[UploadedSuccessfully], schemeInfo: SchemeInfo)(implicit
-                                                                                          request: RequestWithOptionalAuthContext[AnyContent],
-                                                                                          hc: HeaderCarrier
+    request: RequestWithOptionalAuthContext[AnyContent],
+    hc: HeaderCarrier
   ): Future[Result] =
     sessionService.fetch[UpscanCsvFilesList](ersUtil.CSV_FILES_UPLOAD).flatMap { list =>
       val expectedAndUploadedFileNames = list.ids
@@ -364,7 +364,10 @@ class CsvFileUploadController @Inject() (
       )(request, messages, appConfig)
     )
 
-  def getWrongCsvFileTypePage(csvFileType: String, fileName: String)(implicit request: RequestHeader, messages: Messages): Result =
+  def getWrongCsvFileTypePage(csvFileType: String, fileName: String)(implicit
+    request: RequestHeader,
+    messages: Messages
+  ): Result =
     BadRequest(
       wrongCsvFileTypeView(
         csvFileType,

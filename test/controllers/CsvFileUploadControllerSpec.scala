@@ -80,6 +80,9 @@ class CsvFileUploadControllerSpec
   val fileSizeLimitErrorView: views.html.file_size_limit_error = app.injector.instanceOf[file_size_limit_error]
   val invalidMimeError: views.html.invalid_mime_error          = app.injector.instanceOf[invalid_mime_error]
 
+  lazy val wrongCsvFileTypeView: views.html.wrong_csv_file_type =
+    app.injector.instanceOf[views.html.wrong_csv_file_type]
+
   val mockUpscanService: UpscanService = mock[UpscanService]
 
   lazy val csvFileUploadController: CsvFileUploadController =
@@ -94,6 +97,7 @@ class CsvFileUploadControllerSpec
       fileUploadErrorsView,
       fileUploadProblemView,
       invalidMimeError,
+      wrongCsvFileTypeView,
       testAuthAction
     ) {
       override lazy val allCsvFilesCacheRetryAmount: Int = 1
@@ -295,6 +299,7 @@ class CsvFileUploadControllerSpec
         fileUploadErrorsView,
         fileUploadProblemView,
         invalidMimeError,
+        wrongCsvFileTypeView,
         testAuthAction
       ) {
         override lazy val allCsvFilesCacheRetryAmount: Int = 1
@@ -374,6 +379,7 @@ class CsvFileUploadControllerSpec
         fileUploadErrorsView,
         fileUploadProblemView,
         invalidMimeError,
+        wrongCsvFileTypeView,
         testAuthAction
       ) {
         override def processValidationResults()(implicit
@@ -412,6 +418,7 @@ class CsvFileUploadControllerSpec
         fileUploadErrorsView,
         fileUploadProblemView,
         invalidMimeError,
+        wrongCsvFileTypeView,
         testAuthAction
       ) {
         override def removePresubmissionData(schemeInfo: SchemeInfo)(implicit
@@ -489,6 +496,7 @@ class CsvFileUploadControllerSpec
         fileUploadErrorsView,
         fileUploadProblemView,
         invalidMimeError,
+        wrongCsvFileTypeView,
         testAuthAction
       ) {
         override def extractCsvCallbackData(schemeInfo: SchemeInfo)(implicit
@@ -555,6 +563,7 @@ class CsvFileUploadControllerSpec
         fileUploadErrorsView,
         fileUploadProblemView,
         invalidMimeError,
+        wrongCsvFileTypeView,
         testAuthAction
       ) {
         override lazy val allCsvFilesCacheRetryAmount: Int = retryTimes
@@ -610,116 +619,6 @@ class CsvFileUploadControllerSpec
           Future(csvFileUploadController.getGlobalErrorPage(testFakeRequest, testMessages))
         )
       }
-
-      "return InternalServerError when uploaded file has invalid mime type" in {
-        when(
-          mockSessionService.fetch[UpscanCsvFilesList](meq("csv-files-upload"))(any(), any())
-        ).thenReturn(Future.successful(inProgressUpscanCsvFilesList))
-        when(
-          mockSessionService.fetchAll()(any())
-        ) thenReturn Future.successful(
-          CacheItem(
-            "id",
-            Json
-              .toJson(
-                Map(
-                  s"${"check-csv-files"}-${testUploadId.value}" ->
-                    Json.toJson(asUploadStatus(uploadedSuccessfullyInvalid))
-                )
-              )
-              .as[JsObject],
-            Instant.now(),
-            Instant.now()
-          )
-        )
-        when(
-          mockSessionService.cache(any(), any())(any(), any())
-        ) thenReturn Future.successful(sessionPair)
-
-        when(
-          mockSessionService.fetch[RequestObject](refEq(mockErsUtil.ERS_REQUEST_OBJECT))(any(), any())
-        ).thenReturn(
-          Future.successful(ersRequestObject)
-        )
-        when(
-          mockSessionService.fetch[CheckFileType](refEq(mockErsUtil.FILE_TYPE_CACHE))(any(), any())
-        ).thenReturn(
-          Future.successful(CheckFileType(Some("csv")))
-        )
-        when(
-          mockErsUtil.getPageElement(any(), any(), any(), any())(any())
-        ) thenReturn "test.ods"
-
-        val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
-        val result      = csvFileUploadController.extractCsvCallbackData(Fixtures.EMISchemeInfo)(authRequest, hc)
-        status(result) shouldBe UNSUPPORTED_MEDIA_TYPE
-
-        contentAsString(result) shouldBe contentAsString(
-          invalidMimeError(
-            ersRequestObject,
-            List("test.ods"),
-            "CSV"
-          )
-        )
-      }
-
-      "return UnsupportedMediaType when multiple uploaded files have invalid mime type" in {
-        when(
-          mockSessionService.fetch[UpscanCsvFilesList](meq("csv-files-upload"))(any(), any())
-        ).thenReturn(Future.successful(multipleInPrgoressUpscanCsvFilesList))
-
-        when(
-          mockSessionService.fetchAll()(any())
-        ) thenReturn Future.successful(
-          CacheItem(
-            "id",
-            Json
-              .toJson(
-                Map(
-                  s"${"check-csv-files"}-${testUploadId.value}" -> Json.toJson(asUploadStatus(uploadedSuccessfully)),
-                  s"${"check-csv-files"}-ID1"                   -> Json.toJson(asUploadStatus(uploadedSuccessfully))
-                )
-              )
-              .as[JsObject],
-            Instant.now(),
-            Instant.now()
-          )
-        )
-
-        when(
-          mockSessionService.cache(any(), any())(any(), any())
-        ) thenReturn Future.successful(sessionPair)
-
-        when(
-          mockSessionService.fetch[RequestObject](refEq(mockErsUtil.ERS_REQUEST_OBJECT))(any(), any())
-        ).thenReturn(
-          Future.successful(ersRequestObject)
-        )
-
-        when(
-          mockSessionService.fetch[CheckFileType](refEq(mockErsUtil.FILE_TYPE_CACHE))(any(), any())
-        ).thenReturn(
-          Future.successful(CheckFileType(Some("csv")))
-        )
-
-        val authRequest =
-          buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
-
-        val result =
-          csvFileUploadController.extractCsvCallbackData(Fixtures.EMISchemeInfo)(authRequest, hc)
-
-        status(result) shouldBe UNSUPPORTED_MEDIA_TYPE
-
-        contentAsString(result) shouldBe contentAsString(
-          invalidMimeError(
-            ersRequestObject,
-            List("fileName.ods", "fileName.ods"),
-            "CSV",
-            true
-          )
-        )
-      }
-
     }
 
     "call the cache multiple times when the data does not exist the first time" in {
@@ -786,7 +685,7 @@ class CsvFileUploadControllerSpec
             .toJson(
               Map(
                 s"${"check-csv-files"}-${testUploadId.value}" ->
-                  Json.toJson(asUploadStatus(uploadedSuccessfullyCsv))
+                  Json.toJson(asUploadStatus(uploadedSuccessfully))
               )
             )
             .as[JsObject],
@@ -819,8 +718,8 @@ class CsvFileUploadControllerSpec
           Json
             .toJson(
               Map(
-                s"${"check-csv-files"}-${testUploadId.value}" -> Json.toJson(asUploadStatus(uploadedSuccessfullyCsv)),
-                s"${"check-csv-files"}-ID1"                   -> Json.toJson(asUploadStatus(uploadedSuccessfullyCsv))
+                s"${"check-csv-files"}-${testUploadId.value}" -> Json.toJson(asUploadStatus(uploadedSuccessfully)),
+                s"${"check-csv-files"}-ID1"                   -> Json.toJson(asUploadStatus(uploadedSuccessfully))
               )
             )
             .as[JsObject],
@@ -878,6 +777,7 @@ class CsvFileUploadControllerSpec
         fileUploadErrorsView,
         fileUploadProblemView,
         invalidMimeError,
+        wrongCsvFileTypeView,
         testAuthAction
       ) {
         override lazy val allCsvFilesCacheRetryAmount: Int = 1
@@ -960,6 +860,7 @@ class CsvFileUploadControllerSpec
         fileUploadErrorsView,
         fileUploadProblemView,
         invalidMimeError,
+        wrongCsvFileTypeView,
         testAuthAction
       ) {
         override lazy val allCsvFilesCacheRetryAmount: Int = 1
