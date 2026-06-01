@@ -195,37 +195,12 @@ class CsvFileUploadController @Inject() (
                   } yield {
                     val fileType = sessionFileType.checkFileType.getOrElse("Not Found")
 
-                    val expectedFileNames: String =
-                      data.ids
-                        .map(_.fileId)
-                        .zip(callbackDataList.reverse.map(_.name))
-                        .map { case (fileId, uploadedName) =>
-                          val expectedName =
-                            ersUtil.getPageElement(
-                              schemeInfo.schemeId,
-                              ersUtil.PAGE_CHECK_CSV_FILE,
-                              fileId + ".file_name"
-                            )
-
-                          val expectedNameCsopV5 =
-                            ersUtil.getPageElement(
-                              schemeInfo.schemeId,
-                              ersUtil.PAGE_CHECK_CSV_FILE,
-                              fileId + ".file_name.v5"
-                            )
-
-                          if (schemeInfo.schemeType == "CSOP" && uploadedName.contains("V5")) {
-                            expectedNameCsopV5
-                          } else {
-                            expectedName
-                          }
-                        }
-                        .mkString(", ")
-
                     UnsupportedMediaType(
                       invalidMimeErrorView(
                         requestObject,
-                        expectedFileNames,
+                        FileNameHelper.getFinalFileNames(data, callbackDataList, invalidFiles, schemeInfo, ersUtil)(
+                          messagesApi.preferred(request)
+                        ),
                         fileType.toUpperCase,
                         "ers.invalid_mime.paragraph"
                       )
