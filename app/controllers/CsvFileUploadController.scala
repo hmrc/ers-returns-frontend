@@ -250,32 +250,56 @@ class CsvFileUploadController @Inject() (
             .map(uploadedFile => uploadedFile.name)
         )
         .map { names =>
-          val expectedName       =
-            ersUtil.getPageElement(schemeInfo.schemeId, ersUtil.PAGE_CHECK_CSV_FILE, names._1 + ".file_name")
-          val expectedNameCsopV5 =
-            ersUtil.getPageElement(schemeInfo.schemeId, ersUtil.PAGE_CHECK_CSV_FILE, names._1 + ".file_name.v5")
-          val uploadedName       = names._2
 
-          if (schemeInfo.schemeType == "CSOP" && uploadedName.contains("V5")) {
-            (expectedNameCsopV5, uploadedName)
-          } else {
-            (expectedName, uploadedName)
-          }
+          val expectedDescription =
+            ersUtil.getPageElement(
+              schemeInfo.schemeId,
+              ersUtil.PAGE_CHECK_CSV_FILE,
+              names._1 + ".description"
+            )
+
+          val expectedName =
+            ersUtil.getPageElement(
+              schemeInfo.schemeId,
+              ersUtil.PAGE_CHECK_CSV_FILE,
+              names._1 + ".file_name"
+            )
+
+          val expectedNameCsopV5 =
+            ersUtil.getPageElement(
+              schemeInfo.schemeId,
+              ersUtil.PAGE_CHECK_CSV_FILE,
+              names._1 + ".file_name.v5"
+            )
+
+          val uploadedName = names._2
+
+          val isCsopOptionsExercised =
+            schemeInfo.schemeType == "CSOP" && names._1 == "file2"
+
+          val expectedFileName =
+            if (isCsopOptionsExercised) {
+              expectedNameCsopV5
+            } else {
+              expectedName
+            }
+
+          (expectedDescription, expectedFileName, uploadedName)
         }
 
       val uploadedWithCorrectName: Boolean =
-        expectedAndUploadedFileNames.forall(names => names._1.toLowerCase == names._2.toLowerCase)
+        expectedAndUploadedFileNames.forall(names => names._2.toLowerCase == names._3.toLowerCase)
 
       if (uploadedWithCorrectName) {
         validateCsv(csvCallbackData, schemeInfo)
       } else {
         logger.info(s"[CsvFileUploadController][checkFileNames] User uploaded the wrong file: $uploadedWithCorrectName")
 
-        val expectedFileName = expectedAndUploadedFileNames
-          .map(_._1)
-          .mkString(", ")
+        val expectedFiles = expectedAndUploadedFileNames.map { names =>
+          (names._1, names._2)
+        }
 
-        Future(getWrongCsvFileTypePage(schemeInfo.schemeType, expectedFileName))
+        Future(getWrongCsvFileTypePage(expectedFiles))
       }
     } recover { case e: Exception =>
       logger.error(
@@ -364,14 +388,10 @@ class CsvFileUploadController @Inject() (
       )(request, messages, appConfig)
     )
 
-  def getWrongCsvFileTypePage(csvFileType: String, fileName: String)(implicit
-    request: RequestHeader,
-    messages: Messages
-  ): Result =
+  def getWrongCsvFileTypePage(expectedFiles: Seq[(String, String)])(implicit request: RequestHeader, messages: Messages): Result =
     BadRequest(
       wrongCsvFileTypeView(
-        csvFileType,
-        fileName
+        expectedFiles
       )(request, messages, appConfig)
     )
 

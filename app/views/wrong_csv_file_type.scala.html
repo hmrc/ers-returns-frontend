@@ -21,7 +21,7 @@ govuk_wrapper: govuk_wrapper,
 hmrcPageHeading: HmrcPageHeading
 )
 
-@(csvFileType: String, fileName: String)(implicit request: RequestHeader, messages: Messages, appConfig: ApplicationConfig)
+@(expectedFiles: Seq[(String, String)])(implicit request: RequestHeader, messages: Messages, appConfig: ApplicationConfig)
 
 @govuk_wrapper(title = messages("ers.wrong_csv_file_type.title")) {
 
@@ -33,9 +33,11 @@ text = messages("ers.wrong_csv_file_type.heading")
     @messages("ers.wrong_csv_file_type.paragraph1")
 </p>
 
+@expectedFiles.map { case (csvFileType, fileName) =>
 <p class="govuk-body">
     @messages("ers.wrong_csv_file_type.paragraph2", csvFileType, fileName)
 </p>
+}
 
 <p class="govuk-body">
     <a class="govuk-link" href="@routes.CheckFileTypeController.checkFileTypePage().url">
