@@ -941,7 +941,7 @@ class CsvFileUploadControllerSpec
         .toString
     }
 
-    "redirect to getFileUploadProblemPage() if file name check is unsuccessful" in {
+    "return BAD_REQUEST with wrong CSV file type page when uploaded file name is incorrect" in {
       reset(mockErsConnector)
 
       val testUploadedSuccessfully   = new UploadedSuccessfully(
@@ -957,6 +957,7 @@ class CsvFileUploadControllerSpec
       )
       val testUpscanCsvFileList      = new UpscanCsvFilesList(testCacheFileIds)
       val mockSchemeInfo: SchemeInfo = mock[SchemeInfo]
+      when(mockSchemeInfo.schemeType).thenReturn("CSOP")
 
       when(
         mockSessionService.fetch[UpscanCsvFilesList](any())(any(), any())
@@ -968,10 +969,14 @@ class CsvFileUploadControllerSpec
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
       val result      = csvFileUploadController
         .checkFileNames(testCsvCallbackData, mockSchemeInfo)(authRequest, hc)
-      status(result)          shouldBe BAD_REQUEST
-      contentAsString(result) shouldBe contentAsString(
-        Future(csvFileUploadController.getFileUploadProblemPage()(testFakeRequest, testMessages))
-      )
+      status(result) shouldBe BAD_REQUEST
+      val pageContent = contentAsString(result)
+
+      pageContent should include(testMessages("ers.wrong_csv_file_type.heading"))
+      pageContent should include(testMessages("ers.wrong_csv_file_type.paragraph1"))
+      pageContent should include("CSOP")
+      pageContent should include("CSOP_OptionsGranted_V4.csv")
+      pageContent should include(testMessages("ers.wrong_csv_file_type.tryAgain"))
     }
 
     "redirect to getGlobalErrorPage if checkFileNames throws an exception" in {

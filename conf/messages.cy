@@ -834,3 +834,13 @@ ers.invalid_mime.csv.multiple.paragraph2 =Gwiriwch eich ffeiliau er mwyn sicrhau
 ers.invalid_mime.csv.multiple.label =Ffeiliau sydd ddim yn ffeiliau CSV
 ers.invalid_mime.csv.multiple.h2 =Yr hyn i’w wneud nesaf
 ers.invalid_mime.csv.multiple.label2 =Mae angen i chi uwchlwytho eich holl ffeiliau eto.
+
+#********************************************************************
+# wrong file type
+#********************************************************************
+
+ers.wrong_csv_file_type.title = Mae problem wrth uwchlwytho’r ffeil - Gwarantau ar Sail Cyflogaeth – GOV.UK
+ers.wrong_csv_file_type.heading = Mae problem wrth uwchlwytho’r ffeil
+ers.wrong_csv_file_type.paragraph1 = Nid yw’r ffeil yr oeddech wedi’i uwchlwytho’n y ffeil gywir.
+ers.wrong_csv_file_type.paragraph2 = Ar gyfer {0} mae’n rhaid i chi uwchlwytho’r ffeil {1}.
+ers.wrong_csv_file_type.tryAgain = Rhowch gynnig arall arni gyda’r ffeil gywir.

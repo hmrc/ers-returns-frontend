@@ -975,7 +975,7 @@ ers.invalid_mime.csv.multiple.label2 =You need to upload all of your files again
 #********************************************************************
 # wrong file type
 #********************************************************************
-ers.wrong_csv_file_type.title = There is a problem with the file upload - Submit your ERS annual return - GOV.UK
+ers.wrong_csv_file_type.title = There is a problem with the file upload - Submit your ERS annual return – GOV.UK
 ers.wrong_csv_file_type.heading = There is a problem with the file upload
 ers.wrong_csv_file_type.paragraph1 = The file that you uploaded is not the right file.
 ers.wrong_csv_file_type.paragraph2 = For {0} you need to upload the file {1}.
