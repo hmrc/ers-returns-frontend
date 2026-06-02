@@ -250,7 +250,6 @@ class CsvFileUploadController @Inject() (
             .map(uploadedFile => uploadedFile.name)
         )
         .map { names =>
-
           val expectedDescription =
             ersUtil.getPageElement(
               schemeInfo.schemeId,
@@ -274,15 +273,7 @@ class CsvFileUploadController @Inject() (
 
           val uploadedName = names._2
 
-          val isCsopOptionsExercised =
-            schemeInfo.schemeType == "CSOP" && names._1 == "file2"
-
-          val expectedFileName =
-            if (isCsopOptionsExercised) {
-              expectedNameCsopV5
-            } else {
-              expectedName
-            }
+          val expectedFileName = expectedName
 
           (expectedDescription, expectedFileName, uploadedName)
         }
@@ -388,7 +379,9 @@ class CsvFileUploadController @Inject() (
       )(request, messages, appConfig)
     )
 
-  def getWrongCsvFileTypePage(expectedFiles: Seq[(String, String)])(implicit request: RequestHeader, messages: Messages): Result =
+  def getWrongCsvFileTypePage(
+    expectedFiles: Seq[(String, String)]
+  )(implicit request: RequestHeader, messages: Messages): Result =
     BadRequest(
       wrongCsvFileTypeView(
         expectedFiles
