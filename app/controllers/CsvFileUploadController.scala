@@ -286,11 +286,18 @@ class CsvFileUploadController @Inject() (
       } else {
         logger.info(s"[CsvFileUploadController][checkFileNames] User uploaded the wrong file: $uploadedWithCorrectName")
 
-        val expectedFiles = expectedAndUploadedFileNames.map { names =>
-          (names._1, names._2)
-        }
+        val expectedFiles = expectedAndUploadedFileNames
+          .filter { names =>
+            names._2.toLowerCase != names._3.toLowerCase
+          }
+          .map { names =>
+            (names._1, names._2)
+          }
+        for{requestObject <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)}yield{
 
-        Future(getWrongCsvFileTypePage(expectedFiles))
+        getWrongCsvFileTypePage(requestObject,expectedFiles)
+
+        }
       }
     } recover { case e: Exception =>
       logger.error(
@@ -379,11 +386,11 @@ class CsvFileUploadController @Inject() (
       )(request, messages, appConfig)
     )
 
-  def getWrongCsvFileTypePage(
+  def getWrongCsvFileTypePage(requestObject:RequestObject,
     expectedFiles: Seq[(String, String)]
   )(implicit request: RequestHeader, messages: Messages): Result =
     BadRequest(
-      wrongCsvFileTypeView(
+      wrongCsvFileTypeView(requestObject,
         expectedFiles
       )(request, messages, appConfig)
     )

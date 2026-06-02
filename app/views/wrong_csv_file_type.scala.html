@@ -15,22 +15,57 @@
  *@
 
 @import config.ApplicationConfig
+@import views.html.templates.reference
 
 @this(
 govuk_wrapper: govuk_wrapper,
 hmrcPageHeading: HmrcPageHeading
 )
 
-@(expectedFiles: Seq[(String, String)])(implicit request: RequestHeader, messages: Messages, appConfig: ApplicationConfig)
+@(requestObject: RequestObject,expectedFiles: Seq[(String, String)])(implicit request: RequestHeader, messages: Messages, appConfig: ApplicationConfig)
 
-@govuk_wrapper(title = messages("ers.wrong_csv_file_type.title")) {
+@isMultipleFiles = @{expectedFiles.size > 1}
 
+@pageTitle = @{
+if (isMultipleFiles) {
+messages("ers.wrong_csv_file_type.plural.title")
+} else {
+messages("ers.wrong_csv_file_type.title")
+}
+}
+
+@heading = @{
+if (isMultipleFiles) {
+messages("ers.wrong_csv_file_type.plural.heading")
+} else {
+messages("ers.wrong_csv_file_type.heading")
+}
+}
+
+@paragraph1 = @{
+if (isMultipleFiles) {
+messages("ers.wrong_csv_file_type.plural.paragraph1")
+} else {
+messages("ers.wrong_csv_file_type.paragraph1")
+}
+}
+
+@tryAgainText = @{
+if (isMultipleFiles) {
+messages("ers.wrong_csv_file_type.plural.tryAgain")
+} else {
+messages("ers.wrong_csv_file_type.tryAgain")
+}
+}
+
+@govuk_wrapper(title = pageTitle) {
+@reference(requestObject.getPageTitle)
 @hmrcPageHeading(PageHeading(
-text = messages("ers.wrong_csv_file_type.heading")
+text = heading
 ))
 
 <p class="govuk-body">
-    @messages("ers.wrong_csv_file_type.paragraph1")
+    @paragraph1
 </p>
 
 @expectedFiles.map { case (csvFileType, fileName) =>
@@ -41,7 +76,7 @@ text = messages("ers.wrong_csv_file_type.heading")
 
 <p class="govuk-body">
     <a class="govuk-link" href="@routes.CheckFileTypeController.checkFileTypePage().url">
-        @messages("ers.wrong_csv_file_type.tryAgain")
-    </a>
+        @tryAgainText
+    </a>.
 </p>
 }
