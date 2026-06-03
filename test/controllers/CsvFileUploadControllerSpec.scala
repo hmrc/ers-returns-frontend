@@ -47,6 +47,7 @@ import views.html._
 import java.time.Instant
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Random
+import org.mockito.ArgumentMatchers.{eq => eqTo}
 
 class CsvFileUploadControllerSpec
     extends AnyWordSpecLike
@@ -958,10 +959,18 @@ class CsvFileUploadControllerSpec
       val testUpscanCsvFileList      = new UpscanCsvFilesList(testCacheFileIds)
       val mockSchemeInfo: SchemeInfo = mock[SchemeInfo]
       when(mockSchemeInfo.schemeType).thenReturn("CSOP")
+      when(mockSchemeInfo.schemeId).thenReturn("csop")
+
+      val testRequestObject: RequestObject = mock[RequestObject]
+      when(testRequestObject.getPageTitle)
+        .thenReturn("CSOP - Company Share Option Plan scheme - XA1100000000000 - 2014 to 2015")
+      when(
+        mockSessionService.fetch[UpscanCsvFilesList](eqTo(mockErsUtil.CSV_FILES_UPLOAD))(any(), any())
+      ) thenReturn Future.successful(testUpscanCsvFileList)
 
       when(
-        mockSessionService.fetch[UpscanCsvFilesList](any())(any(), any())
-      ) thenReturn Future.successful(testUpscanCsvFileList)
+        mockSessionService.fetch[RequestObject](eqTo(mockErsUtil.ERS_REQUEST_OBJECT))(any(), any())
+      ) thenReturn Future.successful(testRequestObject)
       when(
         mockErsUtil.getPageElement(any(), any(), any(), any())(any())
       ) thenReturn "CSOP_OptionsGranted_V4.csv"

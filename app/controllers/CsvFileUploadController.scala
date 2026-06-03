@@ -293,11 +293,10 @@ class CsvFileUploadController @Inject() (
           .map { names =>
             (names._1, names._2)
           }
-        for{requestObject <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)}yield{
+        for {
+          requestObject <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
+        } yield getWrongCsvFileTypePage(requestObject, expectedFiles)
 
-        getWrongCsvFileTypePage(requestObject,expectedFiles)
-
-        }
       }
     } recover { case e: Exception =>
       logger.error(
@@ -386,13 +385,12 @@ class CsvFileUploadController @Inject() (
       )(request, messages, appConfig)
     )
 
-  def getWrongCsvFileTypePage(requestObject:RequestObject,
-    expectedFiles: Seq[(String, String)]
-  )(implicit request: RequestHeader, messages: Messages): Result =
+  def getWrongCsvFileTypePage(requestObject: RequestObject, expectedFiles: Seq[(String, String)])(implicit
+    request: RequestHeader,
+    messages: Messages
+  ): Result =
     BadRequest(
-      wrongCsvFileTypeView(requestObject,
-        expectedFiles
-      )(request, messages, appConfig)
+      wrongCsvFileTypeView(requestObject, expectedFiles)(request, messages, appConfig)
     )
 
   def getGlobalErrorPage(implicit request: RequestHeader, messages: Messages): Result =
