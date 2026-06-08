@@ -68,7 +68,7 @@ text = heading
     @paragraph1
 </p>
 
-@expectedFiles.map { case (csvFileType, fileName) =>
+@for((csvFileType, fileName) <- expectedFiles) {
 <p class="govuk-body">
     @messages("ers.wrong_csv_file_type.paragraph2", csvFileType, fileName)
 </p>
