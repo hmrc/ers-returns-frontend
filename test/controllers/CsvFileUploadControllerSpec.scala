@@ -870,23 +870,29 @@ class CsvFileUploadControllerSpec
     "redirect to validateCsv if file name check is successful" in {
       reset(mockErsConnector)
 
-      val testUploadedSuccessfully   = new UploadedSuccessfully(
+      val testUploadedSuccessfully         = new UploadedSuccessfully(
         "CSOP_OptionsGranted_V4.csv",
         "http://somedownloadlink.com/034099340",
         mimeType = "csv"
       )
-      val testCsvCallbackData        = List[UploadedSuccessfully](testUploadedSuccessfully)
-      val testCacheFileIds           = List[UpscanIds](
+      val testCsvCallbackData              = List[UploadedSuccessfully](testUploadedSuccessfully)
+      val testCacheFileIds                 = List[UpscanIds](
         new UpscanIds(new UploadId(Random.nextString(10)), "file0", InProgress),
         new UpscanIds(new UploadId(Random.nextString(10)), "file1", InProgress),
         new UpscanIds(new UploadId(Random.nextString(10)), "file2", InProgress)
       )
-      val testUpscanCsvFileList      = new UpscanCsvFilesList(testCacheFileIds)
-      val mockSchemeInfo: SchemeInfo = mock[SchemeInfo]
+      val testUpscanCsvFileList            = new UpscanCsvFilesList(testCacheFileIds)
+      val mockSchemeInfo: SchemeInfo       = mock[SchemeInfo]
+      val testRequestObject: RequestObject = mock[RequestObject]
+      when(testRequestObject.taxYear).thenReturn(Some("2024/25"))
 
       when(
-        mockSessionService.fetch[UpscanCsvFilesList](any())(any(), any())
+        mockSessionService.fetch[UpscanCsvFilesList](eqTo(mockErsUtil.CSV_FILES_UPLOAD))(any(), any())
       ) thenReturn Future.successful(testUpscanCsvFileList)
+
+      when(
+        mockSessionService.fetch[RequestObject](eqTo(mockErsUtil.ERS_REQUEST_OBJECT))(any(), any())
+      ) thenReturn Future.successful(testRequestObject)
       when(
         mockErsUtil.getPageElement(any(), any(), any(), any())(any())
       ) thenReturn "CSOP_OptionsGranted_V4.csv"
@@ -919,9 +925,16 @@ class CsvFileUploadControllerSpec
       val testUpscanCsvFileList      = new UpscanCsvFilesList(testCacheFileIds)
       val mockSchemeInfo: SchemeInfo = mock[SchemeInfo]
 
+      val testRequestObject: RequestObject = mock[RequestObject]
+      when(testRequestObject.taxYear).thenReturn(Some("2023/24"))
+
       when(
-        mockSessionService.fetch[UpscanCsvFilesList](any())(any(), any())
+        mockSessionService.fetch[UpscanCsvFilesList](eqTo(mockErsUtil.CSV_FILES_UPLOAD))(any(), any())
       ) thenReturn Future.successful(testUpscanCsvFileList)
+
+      when(
+        mockSessionService.fetch[RequestObject](eqTo(mockErsUtil.ERS_REQUEST_OBJECT))(any(), any())
+      ) thenReturn Future.successful(testRequestObject)
 
       when(
         mockErsUtil.getPageElement(any(), any(), any(), any())(any())

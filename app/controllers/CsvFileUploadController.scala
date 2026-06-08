@@ -242,7 +242,10 @@ class CsvFileUploadController @Inject() (
     request: RequestWithOptionalAuthContext[AnyContent],
     hc: HeaderCarrier
   ): Future[Result] =
-    sessionService.fetch[UpscanCsvFilesList](ersUtil.CSV_FILES_UPLOAD).flatMap { list =>
+    (for {
+      list          <- sessionService.fetch[UpscanCsvFilesList](ersUtil.CSV_FILES_UPLOAD)
+      requestObject <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
+    } yield (list, requestObject)).flatMap { case (list, requestObject) =>
       val expectedAndUploadedFileNames = list.ids
         .map(expectedFile => expectedFile.fileId)
         .zip(
@@ -273,7 +276,16 @@ class CsvFileUploadController @Inject() (
 
           val uploadedName = names._2
 
-          val expectedFileName = expectedName
+          val useV5Templates =
+            schemeInfo.schemeType == "CSOP" &&
+              useCsopV5Templates(requestObject.taxYear)
+
+          val expectedFileName =
+            if (useV5Templates) {
+              expectedNameCsopV5
+            } else {
+              expectedName
+            }
 
           (expectedDescription, expectedFileName, uploadedName)
         }
@@ -293,9 +305,9 @@ class CsvFileUploadController @Inject() (
           .map { names =>
             (names._1, names._2)
           }
-        for {
-          requestObject <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
-        } yield getWrongCsvFileTypePage(requestObject, expectedFiles)
+        Future.successful(
+          getWrongCsvFileTypePage(requestObject, expectedFiles)
+        )
 
       }
     } recover { case e: Exception =>
