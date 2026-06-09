@@ -26,7 +26,7 @@ import play.api.mvc._
 import play.twirl.api.Html
 import services.FrontendSessionService
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
+import uk.gov.hmrc.play.bootstrap.controller.WithUrlEncodedOnlyFormBinding
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.{CountryCodes, ERSUtil}
 
@@ -44,7 +44,7 @@ class SchemeOrganiserBasedInUkController @Inject() (
   implicit val appConfig: ApplicationConfig,
   pageView: views.html.manual_is_the_company_in_uk
 ) extends FrontendController(mcc)
-    with WithUnsafeDefaultFormBinding
+    with WithUrlEncodedOnlyFormBinding
     with SchemeOrganiserBaseController[CompanyBasedInUk] {
 
   implicit val ec: ExecutionContext = mcc.executionContext

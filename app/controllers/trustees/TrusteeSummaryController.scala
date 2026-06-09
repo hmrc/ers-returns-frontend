@@ -24,7 +24,7 @@ import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.mvc._
 import services.{FrontendSessionService, TrusteeService}
-import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
+import uk.gov.hmrc.play.bootstrap.controller.WithUrlEncodedOnlyFormBinding
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.{Constants, CountryCodes, ERSUtil}
 
@@ -44,7 +44,7 @@ class TrusteeSummaryController @Inject() (
   val ersUtil: ERSUtil,
   val appConfig: ApplicationConfig,
   val countryCodes: CountryCodes
-) extends FrontendController(mcc) with I18nSupport with WithUnsafeDefaultFormBinding with Logging with Constants {
+) extends FrontendController(mcc) with I18nSupport with WithUrlEncodedOnlyFormBinding with Logging with Constants {
 
   def deleteTrustee(id: Int): Action[AnyContent] = authAction.async { implicit request =>
     for {

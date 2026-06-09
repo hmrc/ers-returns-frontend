@@ -26,7 +26,7 @@ import play.api.mvc._
 import play.twirl.api.Html
 import services.{FrontendSessionService, TrusteeService}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
+import uk.gov.hmrc.play.bootstrap.controller.WithUrlEncodedOnlyFormBinding
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.{CountryCodes, ERSUtil}
 
@@ -46,7 +46,7 @@ class TrusteeAddressOverseasController @Inject() (
   val ersUtil: ERSUtil,
   val appConfig: ApplicationConfig,
   val countryCodes: CountryCodes
-) extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with TrusteeBaseController[TrusteeAddress] {
+) extends FrontendController(mcc) with WithUrlEncodedOnlyFormBinding with TrusteeBaseController[TrusteeAddress] {
 
   implicit val format: Format[TrusteeAddress] = TrusteeAddress.format
 

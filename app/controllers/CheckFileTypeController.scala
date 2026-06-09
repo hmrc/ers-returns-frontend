@@ -23,7 +23,7 @@ import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.mvc._
 import services.FrontendSessionService
-import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
+import uk.gov.hmrc.play.bootstrap.controller.WithUrlEncodedOnlyFormBinding
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils._
 
@@ -38,7 +38,7 @@ class CheckFileTypeController @Inject() (
   checkFileTypeView: views.html.check_file_type,
   authActionGovGateway: AuthActionGovGateway
 )(implicit val ec: ExecutionContext, val ersUtil: ERSUtil, val appConfig: ApplicationConfig)
-    extends FrontendController(mcc) with I18nSupport with WithUnsafeDefaultFormBinding with Logging {
+    extends FrontendController(mcc) with I18nSupport with WithUrlEncodedOnlyFormBinding with Logging {
 
   def checkFileTypePage(): Action[AnyContent] = authActionGovGateway.async { implicit request =>
     sessionService.fetch[ErsMetaData](ersUtil.ERS_METADATA).map { ele =>

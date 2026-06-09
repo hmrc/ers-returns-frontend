@@ -25,7 +25,7 @@ import play.api.test.FakeRequest
 import utils.DateUtils
 import utils.Fixtures.ersRequestObject
 
-import java.time.{Instant, ZonedDateTime}
+import java.time.Instant
 
 class RequestObjectSpec extends AnyWordSpecLike with Matchers with GuiceOneAppPerSuite with PrivateMethodTester {
 
