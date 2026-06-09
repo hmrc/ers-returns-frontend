@@ -1024,6 +1024,64 @@ class CsvFileUploadControllerSpec
         Future(csvFileUploadController.getGlobalErrorPage(testFakeRequest, testMessages))
       )
     }
+
+    "show only incorrect files when one uploaded file is correct and one is incorrect" in {
+      reset(mockErsConnector)
+
+      val testCsvCallbackData = List(
+        new UploadedSuccessfully("Wrong.csv", "http://test.com/1"),
+        new UploadedSuccessfully("CSOP_OptionsGranted_V4.csv", "http://test.com/2")
+      )
+
+      val testCacheFileIds = List(
+        new UpscanIds(new UploadId(Random.nextString(10)), "file0", InProgress),
+        new UpscanIds(new UploadId(Random.nextString(10)), "file1", InProgress)
+      )
+
+      val testUpscanCsvFileList = new UpscanCsvFilesList(testCacheFileIds)
+
+      val mockSchemeInfo: SchemeInfo = mock[SchemeInfo]
+      when(mockSchemeInfo.schemeId).thenReturn("csop")
+      when(mockSchemeInfo.schemeType).thenReturn("CSOP")
+
+      val testRequestObject: RequestObject = mock[RequestObject]
+      when(testRequestObject.taxYear).thenReturn(Some("2024/25"))
+      when(testRequestObject.getPageTitle)
+        .thenReturn("CSOP - Company Share Option Plan scheme - XA1100000000000 - 2024 to 2025")
+
+      when(
+        mockSessionService.fetch[UpscanCsvFilesList](eqTo(mockErsUtil.CSV_FILES_UPLOAD))(any(), any())
+      ) thenReturn Future.successful(testUpscanCsvFileList)
+
+      when(
+        mockSessionService.fetch[RequestObject](eqTo(mockErsUtil.ERS_REQUEST_OBJECT))(any(), any())
+      ) thenReturn Future.successful(testRequestObject)
+
+      when(
+        mockErsUtil.getPageElement(any(), any(), any(), any())(any())
+      ) thenReturn "CSOP_OptionsGranted_V4.csv"
+
+      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+
+      val result =
+        csvFileUploadController.checkFileNames(testCsvCallbackData, mockSchemeInfo)(authRequest, hc)
+
+      status(result) shouldBe BAD_REQUEST
+
+      val pageContent = contentAsString(result)
+
+      pageContent should include("CSOP_OptionsGranted_V4.csv")
+
+      // Singular page content should be shown
+      pageContent should include(testMessages("ers.wrong_csv_file_type.heading"))
+      pageContent should include(testMessages("ers.wrong_csv_file_type.paragraph1"))
+      pageContent should include(testMessages("ers.wrong_csv_file_type.tryAgain"))
+
+      // Plural page content should NOT be shown
+      pageContent shouldNot include(testMessages("ers.wrong_csv_file_type.plural.heading"))
+      pageContent shouldNot include(testMessages("ers.wrong_csv_file_type.plural.paragraph1"))
+      pageContent shouldNot include(testMessages("ers.wrong_csv_file_type.plural.tryAgain"))
+    }
   }
 
 }
