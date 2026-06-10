@@ -845,7 +845,7 @@ class GroupSchemeControllerSpec
 
     "redirect to alterations page for CSOP" in {
       val authRequest = buildRequestWithAuth(
-        Fixtures.buildFakeRequestWithSessionIdCSOP("GET").withFormUrlEncodedBody("addCompany" -> "1")
+        Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody("addCompany" -> "1")
       )
       val result      = testGroupSchemeController.continueFromGroupPlanSummaryPage(mockErsUtil.SCHEME_CSOP)(authRequest)
       status(result)               shouldBe SEE_OTHER
@@ -854,7 +854,7 @@ class GroupSchemeControllerSpec
 
     "redirect to alterations page for SAYE" in {
       val authRequest = buildRequestWithAuth(
-        Fixtures.buildFakeRequestWithSessionIdSAYE("GET").withFormUrlEncodedBody("addCompany" -> "1")
+        Fixtures.buildFakeRequestWithSessionIdSAYE("POST").withFormUrlEncodedBody("addCompany" -> "1")
       )
       val result      = testGroupSchemeController.continueFromGroupPlanSummaryPage(mockErsUtil.SCHEME_SAYE)(authRequest)
       status(result)               shouldBe SEE_OTHER
@@ -863,7 +863,7 @@ class GroupSchemeControllerSpec
 
     "redirect to summary page for EMI" in {
       val authRequest = buildRequestWithAuth(
-        Fixtures.buildFakeRequestWithSessionIdEMI("GET").withFormUrlEncodedBody("addCompany" -> "1")
+        Fixtures.buildFakeRequestWithSessionIdEMI("POST").withFormUrlEncodedBody("addCompany" -> "1")
       )
       val result      = testGroupSchemeController.continueFromGroupPlanSummaryPage(mockErsUtil.SCHEME_EMI)(authRequest)
       status(result)               shouldBe SEE_OTHER
@@ -872,7 +872,7 @@ class GroupSchemeControllerSpec
 
     "redirect to trustee page for SIP" in {
       val authRequest = buildRequestWithAuth(
-        Fixtures.buildFakeRequestWithSessionIdSIP("GET").withFormUrlEncodedBody("addCompany" -> "1")
+        Fixtures.buildFakeRequestWithSessionIdSIP("POST").withFormUrlEncodedBody("addCompany" -> "1")
       )
       val result      = testGroupSchemeController.continueFromGroupPlanSummaryPage(mockErsUtil.SCHEME_SIP)(authRequest)
       status(result)                          shouldBe SEE_OTHER
@@ -884,7 +884,7 @@ class GroupSchemeControllerSpec
 
     "redirect to summary page for OTHER" in {
       val authRequest = buildRequestWithAuth(
-        Fixtures.buildFakeRequestWithSessionIdOTHER("GET").withFormUrlEncodedBody("addCompany" -> "1")
+        Fixtures.buildFakeRequestWithSessionIdOTHER("POST").withFormUrlEncodedBody("addCompany" -> "1")
       )
       val result      = testGroupSchemeController.continueFromGroupPlanSummaryPage(mockErsUtil.SCHEME_OTHER)(authRequest)
       status(result)               shouldBe SEE_OTHER

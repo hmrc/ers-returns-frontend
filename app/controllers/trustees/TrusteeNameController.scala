@@ -26,7 +26,7 @@ import play.api.mvc._
 import play.twirl.api.Html
 import services.{FrontendSessionService, TrusteeService}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
+import uk.gov.hmrc.play.bootstrap.controller.WithUrlEncodedOnlyFormBinding
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.ERSUtil
 
@@ -42,7 +42,7 @@ class TrusteeNameController @Inject() (
   val sessionService: FrontendSessionService,
   trusteeNameView: views.html.trustee_name
 )(implicit val ec: ExecutionContext, val ersUtil: ERSUtil, val appConfig: ApplicationConfig)
-    extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with TrusteeBaseController[TrusteeName] {
+    extends FrontendController(mcc) with WithUrlEncodedOnlyFormBinding with TrusteeBaseController[TrusteeName] {
 
   implicit val format: Format[TrusteeName] = TrusteeName.format
 

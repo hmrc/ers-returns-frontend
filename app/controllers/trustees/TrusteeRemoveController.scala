@@ -25,7 +25,7 @@ import play.api.data.Form
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.mvc._
 import services.{FrontendSessionService, TrusteeService}
-import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
+import uk.gov.hmrc.play.bootstrap.controller.WithUrlEncodedOnlyFormBinding
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.ERSUtil
 
@@ -41,7 +41,7 @@ class TrusteeRemoveController @Inject() (
   trusteeService: TrusteeService,
   val sessionService: FrontendSessionService
 )(implicit executionContext: ExecutionContext, appConfig: ApplicationConfig, ersUtil: ERSUtil)
-    extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with I18nSupport with Logging {
+    extends FrontendController(mcc) with WithUrlEncodedOnlyFormBinding with I18nSupport with Logging {
 
   private val form: Form[Boolean] = yesNoFormProvider.withPrefix("ers_trustee_remove")
 

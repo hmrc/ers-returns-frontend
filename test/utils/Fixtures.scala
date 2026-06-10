@@ -38,36 +38,36 @@ object Fixtures extends AuthHelper {
   val buildFakeUser: ERSAuthData = defaultErsAuthData
 
   def buildFakeRequestWithSessionId(method: String): FakeRequest[AnyContentAsEmpty.type] =
-    FakeRequest()
+    FakeRequest(method, "/")
       .withSession("sessionId" -> "FAKE_SESSION_ID", "screenSchemeInfo" -> "2 - EMI - MYScheme - XX12345678 - 2016")
 
   def buildFakeRequestWithSessionIdCSOP(method: String): FakeRequest[AnyContentAsEmpty.type] =
-    FakeRequest().withSession(
+    FakeRequest(method, "/").withSession(
       "sessionId"        -> "FAKE_SESSION_ID",
       "screenSchemeInfo" -> "1 - CSOP - MYScheme - XX12345678 - 2016"
     )
 
   def buildFakeRequestWithSessionIdSAYE(method: String): FakeRequest[AnyContentAsEmpty.type] =
-    FakeRequest().withSession(
+    FakeRequest(method, "/").withSession(
       "sessionId"        -> "FAKE_SESSION_ID",
       "screenSchemeInfo" -> "4 - SAYE - MYScheme - XX12345678 - 2016"
     )
 
   def buildFakeRequestWithSessionIdSIP(method: String): FakeRequest[AnyContentAsEmpty.type] =
-    FakeRequest()
+    FakeRequest(method, "/")
       .withSession("sessionId" -> "FAKE_SESSION_ID", "screenSchemeInfo" -> "5 - SIP - MYScheme - XX12345678 - 2016")
 
   def buildFakeRequestWithSessionIdEMI(method: String): FakeRequest[AnyContentAsEmpty.type] =
-    FakeRequest()
+    FakeRequest(method, "/")
       .withSession("sessionId" -> "FAKE_SESSION_ID", "screenSchemeInfo" -> "2 - EMI - MYScheme - XX12345678 - 2016")
 
   def buildFakeRequestWithSessionIdOTHER(method: String): FakeRequest[AnyContentAsEmpty.type] =
-    FakeRequest().withSession(
+    FakeRequest(method, "/").withSession(
       "sessionId"        -> "FAKE_SESSION_ID",
       "screenSchemeInfo" -> "3 - OTHER - MYScheme - XX12345678 - 2016"
     )
 
-  def buildFakeRequest(method: String) = FakeRequest()
+  def buildFakeRequest(method: String) = FakeRequest(method, "/")
 
   def schemeRef: String = "XYZ12345"
 

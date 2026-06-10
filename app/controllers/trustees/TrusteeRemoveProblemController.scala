@@ -23,7 +23,7 @@ import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services.FrontendSessionService
-import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
+import uk.gov.hmrc.play.bootstrap.controller.WithUrlEncodedOnlyFormBinding
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.ERSUtil
 
@@ -38,7 +38,7 @@ class TrusteeRemoveProblemController @Inject() (
   trusteeRemoveProblemView: views.html.trustee_remove_problem,
   globalErrorView: views.html.global_error
 )(implicit executionContext: ExecutionContext, appConfig: ApplicationConfig)
-    extends FrontendController(mcc) with WithUnsafeDefaultFormBinding with I18nSupport with Logging {
+    extends FrontendController(mcc) with WithUrlEncodedOnlyFormBinding with I18nSupport with Logging {
 
   def onPageLoad(): Action[AnyContent] = authAction.async { implicit request =>
     (for {

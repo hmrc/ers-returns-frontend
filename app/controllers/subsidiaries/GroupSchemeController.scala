@@ -27,7 +27,7 @@ import play.api.i18n.{I18nSupport, Messages}
 import play.api.mvc._
 import services.{CompanyDetailsService, FrontendSessionService}
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
-import uk.gov.hmrc.play.bootstrap.controller.WithUnsafeDefaultFormBinding
+import uk.gov.hmrc.play.bootstrap.controller.WithUrlEncodedOnlyFormBinding
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils._
 
@@ -52,7 +52,7 @@ class GroupSchemeController @Inject() (
   authAction: AuthAction
 ) extends FrontendController(mcc)
     with I18nSupport
-    with WithUnsafeDefaultFormBinding
+    with WithUrlEncodedOnlyFormBinding
     with Logging
     with Constants
     with CacheHelper {
