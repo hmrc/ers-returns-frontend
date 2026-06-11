@@ -28,7 +28,7 @@ object FileNameHelper {
     invalidFiles: List[UploadedSuccessfully],
     schemeInfo: SchemeInfo,
     ersUtil: ERSUtil
-  )(implicit messages: Messages): String = {
+  )(implicit messages: Messages): List[String] = {
 
     val expectedFileNames: List[String] =
       data.ids
@@ -73,7 +73,7 @@ object FileNameHelper {
         remainingExpectedNames
       }
 
-    finalNames.mkString(",")
+    finalNames
   }
 
 }

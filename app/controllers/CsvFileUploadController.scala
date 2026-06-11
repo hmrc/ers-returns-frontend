@@ -193,8 +193,8 @@ class CsvFileUploadController @Inject() (
                     requestObject   <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
                     sessionFileType <- sessionService.fetch[CheckFileType](ersUtil.FILE_TYPE_CACHE)
                   } yield {
-                    val fileType = sessionFileType.checkFileType.getOrElse("Not Found")
-
+                    val fileType                = sessionFileType.checkFileType.getOrElse("Not Found")
+                    val isMultipleFile: Boolean = csvFilesCallbackList.files.size > 1;
                     UnsupportedMediaType(
                       invalidMimeErrorView(
                         requestObject,
@@ -202,7 +202,7 @@ class CsvFileUploadController @Inject() (
                           messagesApi.preferred(request)
                         ),
                         fileType.toUpperCase,
-                        "ers.invalid_mime.paragraph"
+                        isMultipleFile
                       )
                     )
                   }

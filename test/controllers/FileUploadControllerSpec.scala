@@ -234,9 +234,8 @@ class FileUploadControllerSpec
         contentAsString(result) mustBe contentAsString(
           invalidMimeError(
             ersRequestObject,
-            "test.txt",
-            "ODS",
-            "ers.invalid_mime.ods.paragraph"
+            List("test.txt"),
+            "ODS"
           )
         )
       }

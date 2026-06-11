@@ -657,9 +657,71 @@ class CsvFileUploadControllerSpec
         contentAsString(result) shouldBe contentAsString(
           invalidMimeError(
             ersRequestObject,
-            "test.txt",
+            List("test.txt"),
+            "CSV"
+          )
+        )
+      }
+
+
+      "return UnsupportedMediaType when multiple uploaded files have invalid mime type" in {
+        when(
+          mockSessionService.fetch[UpscanCsvFilesList](meq("csv-files-upload"))(any(), any())
+        ).thenReturn(Future.successful(multipleInPrgoressUpscanCsvFilesList))
+
+
+        when(
+          mockSessionService.fetchAll()(any())
+        ) thenReturn Future.successful(
+          CacheItem(
+            "id",
+            Json
+              .toJson(
+                Map(
+                  s"${"check-csv-files"}-${testUploadId.value}" -> Json.toJson(asUploadStatus(uploadedSuccessfully)),
+                  s"${"check-csv-files"}-ID1"                   -> Json.toJson(asUploadStatus(uploadedSuccessfully))
+                )
+              )
+              .as[JsObject],
+            Instant.now(),
+            Instant.now()
+          )
+        )
+
+        when(
+          mockSessionService.cache(any(), any())(any(), any())
+        ) thenReturn Future.successful(sessionPair)
+
+        when(
+          mockSessionService.fetch[RequestObject](refEq(mockErsUtil.ERS_REQUEST_OBJECT))(any(), any())
+        ).thenReturn(
+          Future.successful(ersRequestObject)
+        )
+
+        when(
+          mockSessionService.fetch[CheckFileType](refEq(mockErsUtil.FILE_TYPE_CACHE))(any(), any())
+        ).thenReturn(
+          Future.successful(CheckFileType(Some("csv")))
+        )
+
+        when(
+          mockErsUtil.getPageElement(any(), any(), any(), any())(any())
+        ) thenReturn "test-file-1.txt" thenReturn "test-file-2.pdf"
+
+        val authRequest =
+          buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+
+        val result =
+          csvFileUploadController.extractCsvCallbackData(Fixtures.EMISchemeInfo)(authRequest, hc)
+
+        status(result) shouldBe UNSUPPORTED_MEDIA_TYPE
+
+        contentAsString(result) shouldBe contentAsString(
+          invalidMimeError(
+            ersRequestObject,
+            List("test-file-1.txt", "test-file-2.pdf"),
             "CSV",
-            "ers.invalid_mime.paragraph"
+            true
           )
         )
       }

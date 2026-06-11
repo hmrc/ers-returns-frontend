@@ -23,10 +23,10 @@
         hmrcPageHeading: HmrcPageHeading
 )
 
-@(requestObject: RequestObject, fileName: String, fileType: String, msgKey: String)(implicit request: RequestHeader, messages: Messages, appConfig: ApplicationConfig)
+@(requestObject: RequestObject, fileNames: List[String], fileType: String, isMultipleFile:Boolean = false)(implicit request: RequestHeader, messages: Messages, appConfig: ApplicationConfig)
 
 
-@govuk_wrapper(title = messages("ers.app_title")) {
+@govuk_wrapper(title = messages("ers.app_title")+ " " + messages("ers.title.postfix")) {
 
 @reference(requestObject.getPageTitle)
 
@@ -36,12 +36,43 @@
     ))
 
     @hmrcPageHeading(PageHeading(
-        text = messages("ers.invalid_mime.title")
-    ))
+        text = messages(if (isMultipleFile) "ers.invalid_mime.csv.multiple.h1" else "ers.invalid_mime.title")))
 
-    <p class="govuk-body">
-        @Html(messages(msgKey, fileName, fileType))
-    </p>
+        @if(isMultipleFile) {
+
+        <p class="govuk-body">
+            @Html(messages("ers.invalid_mime.csv.multiple.paragraph1"))
+        </p>
+
+        <p class="govuk-body">
+            @Html(messages("ers.invalid_mime.csv.multiple.paragraph2"))
+        </p>
+
+        <dl class="govuk-summary-list">
+            <div class="govuk-summary-list__row ">
+                <dt class="govuk-summary-list__key govuk-!-font-size-16">
+                    @messages("ers.invalid_mime.csv.multiple.label")
+                </dt>
+                <dd class="govuk-summary-list__value">
+                    @fileNames.map { file =>
+                    @file<br>
+                    }
+                </dd>
+            </div>
+        </dl>
+
+        <h2 class="govuk-heading-m">
+            @messages("ers.invalid_mime.csv.multiple.h2")
+        </h2>
+
+        <p class="govuk-body">
+            @Html(messages("ers.invalid_mime.csv.multiple.label2"))
+        </p>
+        } else {
+            <p class="govuk-body">
+                @Html(messages("ers.invalid_mime.paragraph", fileNames, fileType))
+            </p>
+        }
 
     <a class="govuk-link" href="@routes.CheckFileTypeController.checkFileTypePage().url">
         @Html(messages("ers.invalid_mime.tryAgain"))

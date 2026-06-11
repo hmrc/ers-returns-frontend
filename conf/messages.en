@@ -963,3 +963,10 @@ ers.invalid_mime.heading=There is a problem with the file upload
 ers.invalid_mime.paragraph =You chose to upload {0} but the file you uploaded is not a {1} file.
 ers.invalid_mime.tryAgain =Try again with the correct file.
 ers.invalid_mime.ods.paragraph =You chose to upload an ODS file but the file that you uploaded is not an ODS file.
+
+ers.invalid_mime.csv.multiple.h1 =There is a problem with the uploaded files
+ers.invalid_mime.csv.multiple.paragraph1 =You chose to upload CSV files but it seems that some of the uploaded files are not CSV files.
+ers.invalid_mime.csv.multiple.paragraph2 =Check your files to make sure that they are saved as CSV files.
+ers.invalid_mime.csv.multiple.label =Files that are not CSV files
+ers.invalid_mime.csv.multiple.h2 =What to do next
+ers.invalid_mime.csv.multiple.label2 =You need to upload all of your files again.

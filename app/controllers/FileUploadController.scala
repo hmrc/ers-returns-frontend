@@ -94,7 +94,11 @@ class FileUploadController @Inject() (
           } yield {
             val fileType = sessionFileType.checkFileType.getOrElse("Not Found")
             UnsupportedMediaType(
-              invalidMimeErrorView(requestObject, fileName, fileType.toUpperCase, "ers.invalid_mime.ods.paragraph")
+              invalidMimeErrorView(
+                requestObject,
+                List(fileName),
+                fileType.toUpperCase
+              )
             )
           }
         } else if (fileName.endsWith(".csv")) {
