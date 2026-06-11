@@ -238,7 +238,7 @@ class CsvFileUploadController @Inject() (
       getGlobalErrorPage
     }
 
-  def getPageCheck(schemeInfo: SchemeInfo, pageId: String)(para: String)(implicit messages: Messages) =
+  def getAllPageElementsFromPageId(schemeInfo: SchemeInfo, pageId: String)(para: String)(implicit messages: Messages) =
     ersUtil.getPageElement(
       schemeInfo.schemeId,
       ersUtil.PAGE_CHECK_CSV_FILE,
