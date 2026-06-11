@@ -255,7 +255,7 @@ class CsvFileUploadController @Inject() (
       if (schemeInfo.schemeType == "CSOP" && useCsopV5Templates(requestObject.taxYear)) ".file_name.v5"
       else ".file_name"
     val upscanCsvFileNamesMap: Map[String, (String, String)] = list.ids.map { upscanCsvFile =>
-      val partialPageCheck: String => String = getPageCheck(schemeInfo, upscanCsvFile.fileId)
+      val pageElements: String => String = getPageCheck(schemeInfo, upscanCsvFile.fileId)
       val expectedFileName                   = partialPageCheck(fileName)
 
       expectedFileName.toLowerCase -> (partialPageCheck(".description"), expectedFileName)
