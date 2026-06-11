@@ -255,20 +255,18 @@ class CsvFileUploadController @Inject() (
       if (schemeInfo.schemeType == "CSOP" && useCsopV5Templates(requestObject.taxYear)) ".file_name.v5"
       else ".file_name"
     val upscanCsvFileNamesMap: Map[String, (String, String)] = list.ids.map { upscanCsvFile =>
-      val pageElements: String => String = getPageCheck(schemeInfo, upscanCsvFile.fileId)
-      val expectedFileName                   = partialPageCheck(fileName)
+      val pageElements: String => String = getAllPageElementsFromPageId(schemeInfo, upscanCsvFile.fileId)
+      val expectedFileName               = pageElements(fileName)
 
-      expectedFileName.toLowerCase -> (partialPageCheck(".description"), expectedFileName)
+      expectedFileName.toLowerCase -> (pageElements(".description"), expectedFileName)
     }.toMap
     val callBackFileNames: Set[String]                       = csvCallbackData.map(_.name.toLowerCase).toSet
-    val missingFileNames: Set[String]                         = upscanCsvFileNamesMap.keys.toSet.diff(callBackFileNames)
-    if (fileNamesLineUp.isEmpty) {
+    val missingFileNames: Set[String]                        = upscanCsvFileNamesMap.keys.toSet.diff(callBackFileNames)
+    if (missingFileNames.isEmpty) {
       validateCsv(csvCallbackData, schemeInfo)
     } else {
       logger.info(s"[CsvFileUploadController][checkFileNames] User uploaded the wrong file: ")
-      Future.successful(
-        getWrongCsvFileTypePage(requestObject, fileNamesLineUp.map(upscanCsvFileNamesMap).toSeq))
-      )
+      Future.successful(getWrongCsvFileTypePage(requestObject, missingFileNames.map(upscanCsvFileNamesMap).toSeq))
     }
   }
 
