@@ -663,12 +663,10 @@ class CsvFileUploadControllerSpec
         )
       }
 
-
       "return UnsupportedMediaType when multiple uploaded files have invalid mime type" in {
         when(
           mockSessionService.fetch[UpscanCsvFilesList](meq("csv-files-upload"))(any(), any())
         ).thenReturn(Future.successful(multipleInPrgoressUpscanCsvFilesList))
-
 
         when(
           mockSessionService.fetchAll()(any())
