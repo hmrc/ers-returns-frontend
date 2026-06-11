@@ -1045,9 +1045,9 @@ class CsvFileUploadControllerSpec
       when(mockSchemeInfo.schemeType).thenReturn("CSOP")
 
       val testRequestObject: RequestObject = mock[RequestObject]
-      when(testRequestObject.taxYear).thenReturn(Some("2024/25"))
+      when(testRequestObject.taxYear).thenReturn(Some("2014/15"))
       when(testRequestObject.getPageTitle)
-        .thenReturn("CSOP - Company Share Option Plan scheme - XA1100000000000 - 2024 to 2025")
+        .thenReturn("CSOP - Company Share Option Plan scheme - XA1100000000000 - 2014 to 2015")
 
       when(
         mockSessionService.fetch[UpscanCsvFilesList](eqTo(mockErsUtil.CSV_FILES_UPLOAD))(any(), any())
@@ -1058,8 +1058,20 @@ class CsvFileUploadControllerSpec
       ) thenReturn Future.successful(testRequestObject)
 
       when(
-        mockErsUtil.getPageElement(any(), any(), any(), any())(any())
+        mockErsUtil.getPageElement(any(), any(), eqTo("file0.file_name"), any())(any())
       ) thenReturn "CSOP_OptionsGranted_V4.csv"
+
+      when(
+        mockErsUtil.getPageElement(any(), any(), eqTo("file0.description"), any())(any())
+      ) thenReturn "Options granted"
+
+      when(
+        mockErsUtil.getPageElement(any(), any(), eqTo("file1.file_name"), any())(any())
+      ) thenReturn "CSOP_OptionsRCL_V4.csv"
+
+      when(
+        mockErsUtil.getPageElement(any(), any(), eqTo("file1.description"), any())(any())
+      ) thenReturn "Options released"
 
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
 
@@ -1070,14 +1082,13 @@ class CsvFileUploadControllerSpec
 
       val pageContent = contentAsString(result)
 
-      pageContent should include("CSOP_OptionsGranted_V4.csv")
+      pageContent should include("CSOP_OptionsRCL_V4.csv")
+      pageContent should include("Options released")
 
-      // Singular page content should be shown
       pageContent should include(testMessages("ers.wrong_csv_file_type.heading"))
       pageContent should include(testMessages("ers.wrong_csv_file_type.paragraph1"))
       pageContent should include(testMessages("ers.wrong_csv_file_type.tryAgain"))
 
-      // Plural page content should NOT be shown
       pageContent shouldNot include(testMessages("ers.wrong_csv_file_type.plural.heading"))
       pageContent shouldNot include(testMessages("ers.wrong_csv_file_type.plural.paragraph1"))
       pageContent shouldNot include(testMessages("ers.wrong_csv_file_type.plural.tryAgain"))

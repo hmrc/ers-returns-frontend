@@ -238,85 +238,56 @@ class CsvFileUploadController @Inject() (
       getGlobalErrorPage
     }
 
+  def getPageCheck(schemeInfo: SchemeInfo, pageId: String)(para: String)(implicit messages: Messages) =
+    ersUtil.getPageElement(
+      schemeInfo.schemeId,
+      ersUtil.PAGE_CHECK_CSV_FILE,
+      s"$pageId$para"
+    )
+
+  def checkFileNamesLineUp(
+    csvCallbackData: List[UploadedSuccessfully],
+    schemeInfo: SchemeInfo,
+    list: UpscanCsvFilesList,
+    requestObject: RequestObject
+  )(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
+    val fileName: String                                     =
+      if (schemeInfo.schemeType == "CSOP" && useCsopV5Templates(requestObject.taxYear)) ".file_name.v5"
+      else ".file_name"
+    val upscanCsvFileNamesMap: Map[String, (String, String)] = list.ids.map { upscanCsvFile =>
+      val partialPageCheck: String => String = getPageCheck(schemeInfo, upscanCsvFile.fileId)
+      val expectedFileName                   = partialPageCheck(fileName)
+
+      expectedFileName.toLowerCase -> (partialPageCheck(".description"), expectedFileName)
+    }.toMap
+    val callBackFileNames: Set[String]                       = csvCallbackData.map(_.name.toLowerCase).toSet
+    val fileNamesLineUp: Set[String]                         = upscanCsvFileNamesMap.keys.toSet.diff(callBackFileNames)
+    if (fileNamesLineUp.isEmpty) {
+      validateCsv(csvCallbackData, schemeInfo)
+    } else {
+      logger.info(s"[CsvFileUploadController][checkFileNames] User uploaded the wrong file: ")
+      Future.successful(
+        getWrongCsvFileTypePage(requestObject, fileNamesLineUp.map(key => upscanCsvFileNamesMap(key)).toSeq)
+      )
+    }
+  }
+
   def checkFileNames(csvCallbackData: List[UploadedSuccessfully], schemeInfo: SchemeInfo)(implicit
     request: RequestWithOptionalAuthContext[AnyContent],
     hc: HeaderCarrier
-  ): Future[Result] =
-    (for {
-      list          <- sessionService.fetch[UpscanCsvFilesList](ersUtil.CSV_FILES_UPLOAD)
-      requestObject <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
-    } yield (list, requestObject)).flatMap { case (list, requestObject) =>
-      val expectedAndUploadedFileNames = list.ids
-        .map(expectedFile => expectedFile.fileId)
-        .zip(
-          csvCallbackData.reverse
-            .map(uploadedFile => uploadedFile.name)
-        )
-        .map { names =>
-          val expectedDescription =
-            ersUtil.getPageElement(
-              schemeInfo.schemeId,
-              ersUtil.PAGE_CHECK_CSV_FILE,
-              names._1 + ".description"
-            )
-
-          val expectedName =
-            ersUtil.getPageElement(
-              schemeInfo.schemeId,
-              ersUtil.PAGE_CHECK_CSV_FILE,
-              names._1 + ".file_name"
-            )
-
-          val expectedNameCsopV5 =
-            ersUtil.getPageElement(
-              schemeInfo.schemeId,
-              ersUtil.PAGE_CHECK_CSV_FILE,
-              names._1 + ".file_name.v5"
-            )
-
-          val uploadedName = names._2
-
-          val useV5Templates =
-            schemeInfo.schemeType == "CSOP" &&
-              useCsopV5Templates(requestObject.taxYear)
-
-          val expectedFileName =
-            if (useV5Templates) {
-              expectedNameCsopV5
-            } else {
-              expectedName
-            }
-
-          (expectedDescription, expectedFileName, uploadedName)
-        }
-
-      val uploadedWithCorrectName: Boolean =
-        expectedAndUploadedFileNames.forall(names => names._2.toLowerCase == names._3.toLowerCase)
-
-      if (uploadedWithCorrectName) {
-        validateCsv(csvCallbackData, schemeInfo)
-      } else {
-        logger.info(s"[CsvFileUploadController][checkFileNames] User uploaded the wrong file: $uploadedWithCorrectName")
-
-        val expectedFiles = expectedAndUploadedFileNames
-          .filter { names =>
-            names._2.toLowerCase != names._3.toLowerCase
-          }
-          .map { names =>
-            (names._1, names._2)
-          }
-        Future.successful(
-          getWrongCsvFileTypePage(requestObject, expectedFiles)
-        )
-
-      }
-    } recover { case e: Exception =>
-      logger.error(
-        s"[CsvFileUploadController][checkFileNames] Failed to fetch CsvFilesCallbackList with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.",
-        e
-      )
-      getGlobalErrorPage
-    }
+  ): Future[Result] = {
+    for {
+      list: UpscanCsvFilesList     <- sessionService.fetch[UpscanCsvFilesList](ersUtil.CSV_FILES_UPLOAD)
+      requestObject: RequestObject <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
+      fileNamesLineUp              <- checkFileNamesLineUp(csvCallbackData, schemeInfo, list, requestObject)
+    } yield fileNamesLineUp
+  } recover { case e: Exception =>
+    logger.error(
+      s"[CsvFileUploadController][checkFileNames] Failed to fetch CsvFilesCallbackList with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}.",
+      e
+    )
+    getGlobalErrorPage
+  }
 
   def validateCsv(csvCallbackData: List[UploadedSuccessfully], schemeInfo: SchemeInfo)(implicit
     request: RequestWithOptionalAuthContext[AnyContent],
