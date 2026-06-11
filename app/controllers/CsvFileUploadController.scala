@@ -261,7 +261,7 @@ class CsvFileUploadController @Inject() (
       expectedFileName.toLowerCase -> (partialPageCheck(".description"), expectedFileName)
     }.toMap
     val callBackFileNames: Set[String]                       = csvCallbackData.map(_.name.toLowerCase).toSet
-    val fileNamesLineUp: Set[String]                         = upscanCsvFileNamesMap.keys.toSet.diff(callBackFileNames)
+    val missingFileNames: Set[String]                         = upscanCsvFileNamesMap.keys.toSet.diff(callBackFileNames)
     if (fileNamesLineUp.isEmpty) {
       validateCsv(csvCallbackData, schemeInfo)
     } else {
