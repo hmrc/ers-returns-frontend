@@ -267,7 +267,7 @@ class CsvFileUploadController @Inject() (
     } else {
       logger.info(s"[CsvFileUploadController][checkFileNames] User uploaded the wrong file: ")
       Future.successful(
-        getWrongCsvFileTypePage(requestObject, fileNamesLineUp.map(key => upscanCsvFileNamesMap(key)).toSeq)
+        getWrongCsvFileTypePage(requestObject, fileNamesLineUp.map(upscanCsvFileNamesMap).toSeq))
       )
     }
   }
