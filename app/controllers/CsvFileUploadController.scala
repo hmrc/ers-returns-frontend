@@ -198,9 +198,7 @@ class CsvFileUploadController @Inject() (
                     UnsupportedMediaType(
                       invalidMimeErrorView(
                         requestObject,
-                        FileNameHelper.getFinalFileNames(data, callbackDataList, invalidFiles, schemeInfo, ersUtil)(
-                          messagesApi.preferred(request)
-                        ),
+                        FileNameHelper.getFinalFileNames(data, callbackDataList, invalidFiles, schemeInfo, ersUtil),
                         fileType.toUpperCase,
                         isMultipleFile
                       )

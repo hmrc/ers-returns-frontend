@@ -70,7 +70,9 @@
         </p>
         } else {
             <p class="govuk-body">
-                @Html(messages("ers.invalid_mime.paragraph", fileNames, fileType))
+                @fileNames.map { file =>
+                @Html(messages("ers.invalid_mime.paragraph", file, fileType))
+                }
             </p>
         }
 
