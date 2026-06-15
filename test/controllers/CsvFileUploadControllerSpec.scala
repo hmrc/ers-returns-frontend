@@ -648,7 +648,7 @@ class CsvFileUploadControllerSpec
         )
         when(
           mockErsUtil.getPageElement(any(), any(), any(), any())(any())
-        ) thenReturn "test.txt"
+        ) thenReturn "test.ods"
 
         val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
         val result      = csvFileUploadController.extractCsvCallbackData(Fixtures.EMISchemeInfo)(authRequest, hc)
@@ -657,7 +657,7 @@ class CsvFileUploadControllerSpec
         contentAsString(result) shouldBe contentAsString(
           invalidMimeError(
             ersRequestObject,
-            List("test.txt"),
+            List("test.ods"),
             "CSV"
           )
         )
@@ -702,10 +702,6 @@ class CsvFileUploadControllerSpec
           Future.successful(CheckFileType(Some("csv")))
         )
 
-        when(
-          mockErsUtil.getPageElement(any(), any(), any(), any())(any())
-        ) thenReturn "test-file-1.txt" thenReturn "test-file-2.pdf"
-
         val authRequest =
           buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
 
@@ -717,7 +713,7 @@ class CsvFileUploadControllerSpec
         contentAsString(result) shouldBe contentAsString(
           invalidMimeError(
             ersRequestObject,
-            List("test-file-1.txt", "test-file-2.pdf"),
+            List("fileName.ods", "fileName.ods"),
             "CSV",
             true
           )

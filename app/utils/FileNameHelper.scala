@@ -23,12 +23,12 @@ import play.api.i18n.Messages
 object FileNameHelper {
 
   def getFinalFileNames(
-                         data: UpscanCsvFilesList,
-                         callbackDataList: List[UploadedSuccessfully],
-                         invalidFiles: List[UploadedSuccessfully],
-                         schemeInfo: SchemeInfo,
-                         ersUtil: ERSUtil
-                       )(implicit messages: Messages): List[String] = {
+    data: UpscanCsvFilesList,
+    callbackDataList: List[UploadedSuccessfully],
+    invalidFiles: List[UploadedSuccessfully],
+    schemeInfo: SchemeInfo,
+    ersUtil: ERSUtil
+  )(implicit messages: Messages): List[String] = {
 
     val expectedFileNames: List[String] =
       data.ids
@@ -60,10 +60,11 @@ object FileNameHelper {
     val uploadedFileNames: List[String] =
       callbackDataList.map(_.name)
 
-
     val isMulitpleFiles = callbackDataList.size > 1
 
-    val remainingExpectedNames = if (isMulitpleFiles) uploadedFileNames.filterNot(expectedFileNames.contains) else expectedFileNames.filterNot(uploadedFileNames.contains)
+    val remainingExpectedNames =
+      if (isMulitpleFiles) uploadedFileNames.filterNot(expectedFileNames.contains)
+      else expectedFileNames.filterNot(uploadedFileNames.contains)
 
     remainingExpectedNames
   }
