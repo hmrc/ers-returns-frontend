@@ -126,7 +126,7 @@ class FrontendSessionServiceSpec
     "return Some with the number of rows when nilReturn is not OPTION_NIL_RETURN and rows are available" in {
       val numberOfRows = Some(5)
       when(mockFileValidatorService.getSuccessfulCallbackRecord(any(), any()))
-        .thenReturn(Future.successful(Some(UploadedSuccessfully("", "", numberOfRows))))
+        .thenReturn(Future.successful(Some(UploadedSuccessfully("", "", numberOfRows, mimeType = ""))))
       val result       = testService.getNoOfRows("1").futureValue
       result shouldBe numberOfRows
     }

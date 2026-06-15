@@ -163,7 +163,11 @@ class GeneratePdfControllerSpec
     "use bundle ref to generate the confirmation pdf filename (CSV File submission)" in {
       val byteArrayOutputStream: ByteArrayOutputStream     = mock[ByteArrayOutputStream]
       val csvFilesCallBack: UpscanCsvFilesCallback         =
-        UpscanCsvFilesCallback(UploadId("uploadId"), "file0", UploadedSuccessfully("name", "downloadUrl"))
+        UpscanCsvFilesCallback(
+          UploadId("uploadId"),
+          "file0",
+          UploadedSuccessfully("name", "downloadUrl", mimeType = "")
+        )
       val csvFilesCallbackList: UpscanCsvFilesCallbackList = UpscanCsvFilesCallbackList(List(csvFilesCallBack))
 
       val testItem  = testCacheItem[ReportableEvents](REPORTABLE_EVENTS, ReportableEvents(Some("1")))

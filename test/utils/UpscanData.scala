@@ -24,10 +24,25 @@ import java.time.Instant
 
 trait UpscanData {
 
-  val testUploadId: UploadId                        = UploadId("TestUploadId")
-  val notStartedCallback: UpscanCsvFilesCallback    = UpscanCsvFilesCallback(testUploadId, "file4", NotStarted)
-  val uploadedSuccessfully: UploadedSuccessfully    = UploadedSuccessfully("fileName.ods", "https://downloadUrl.com")
-  val uploadedSuccessfullyCsv: UploadedSuccessfully = UploadedSuccessfully("fileName.csv", "https://downloadUrl.com")
+  val testUploadId: UploadId                     = UploadId("TestUploadId")
+  val notStartedCallback: UpscanCsvFilesCallback = UpscanCsvFilesCallback(testUploadId, "file4", NotStarted)
+
+  val uploadedSuccessfully: UploadedSuccessfully =
+    UploadedSuccessfully(
+      "fileName.ods",
+      "https://downloadUrl.com",
+      mimeType = "application/vnd.oasis.opendocument.spreadsheet"
+    )
+
+  val uploadedSuccessfullyInvalid: UploadedSuccessfully =
+    UploadedSuccessfully(
+      "test.txt",
+      "https://downloadUrl.com",
+      mimeType = "text/plain"
+    )
+
+  val uploadedSuccessfullyCsv: UploadedSuccessfully =
+    UploadedSuccessfully("fileName.csv", "https://downloadUrl.com", mimeType = "text/csv")
 
   /**
     * Provides an upcast of UploadStatus ADT members.<p/>

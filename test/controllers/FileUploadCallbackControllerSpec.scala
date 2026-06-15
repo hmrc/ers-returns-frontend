@@ -81,7 +81,8 @@ class FileUploadCallbackControllerSpec
         status(result)              mustBe OK
         uploadStatusCaptor.getValue mustBe UploadedSuccessfully(
           uploadDetails.fileName,
-          readyCallback.downloadUrl.toExternalForm
+          readyCallback.downloadUrl.toExternalForm,
+          mimeType = "fileMimeType"
         )
         verify(mockFileValidatorService).updateCallbackRecord(any[UploadedSuccessfully], any())(any())
       }

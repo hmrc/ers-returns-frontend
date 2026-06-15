@@ -98,6 +98,7 @@ class FileUploadControllerSpec
   val fileSizeLimitErrorView: file_size_limit_error   = app.injector.instanceOf[file_size_limit_error]
   val upscanOdsFileUploadView: upscan_ods_file_upload = app.injector.instanceOf[upscan_ods_file_upload]
   val fileUploadProblemView: file_upload_problem      = app.injector.instanceOf[file_upload_problem]
+  val invalidMimeError: views.html.invalid_mime_error = app.injector.instanceOf[invalid_mime_error]
 
   implicit lazy val materializer: Materializer = app.materializer
 
@@ -114,6 +115,7 @@ class FileUploadControllerSpec
         templateFailureView,
         upscanOdsFileUploadView,
         fileUploadProblemView,
+        invalidMimeError,
         testAuthAction
       )
 
@@ -136,6 +138,11 @@ class FileUploadControllerSpec
   def checkGlobalErrorPage(result: Future[Result]): Assertion = {
     status(result)        mustBe INTERNAL_SERVER_ERROR
     contentAsString(result) must include(testMessages("ers.global_errors.title"))
+  }
+
+  def checkMimeErrorPage(result: Future[Result]): Assertion = {
+    status(result)        mustBe UNSUPPORTED_MEDIA_TYPE
+    contentAsString(result) must include(testMessages("ers.invalid_mime.heading"))
   }
 
   def checkFileUploadProblemPage(result: Future[Result]): Assertion = {
@@ -203,6 +210,37 @@ class FileUploadControllerSpec
       }
     }
 
+    "return invalid Mime Error page" when {
+      "invalidMimeErrorView" in {
+        when(mockErsConnector.getCallbackRecord(any(), any))
+          .thenReturn(Future.successful(Some(uploadedSuccessfullyInvalid)))
+
+        when(mockSessionService.cache(meq("file-name"), meq(uploadedSuccessfully.name))(any(), any()))
+          .thenReturn(Future.successful(sessionPair))
+
+        when(mockSessionService.fetch[RequestObject](meq(ERS_REQUEST_OBJECT))(any(), any()))
+          .thenReturn(Future.successful(ersRequestObject))
+
+        when(
+          mockSessionService.fetch[CheckFileType](refEq(mockErsUtil.FILE_TYPE_CACHE))(any(), any())
+        ).thenReturn(
+          Future.successful(CheckFileType(Some("ods")))
+        )
+
+        setAuthMocks()
+        val result = TestFileUploadController.success()(testFakeRequest)
+
+        status(result)          mustBe UNSUPPORTED_MEDIA_TYPE
+        contentAsString(result) mustBe contentAsString(
+          invalidMimeError(
+            ersRequestObject,
+            List("test.txt"),
+            "ODS"
+          )
+        )
+      }
+    }
+
     "return global error page" when {
       "caching file name fails" in {
         when(mockErsConnector.getCallbackRecord(any(), any))
@@ -223,7 +261,7 @@ class FileUploadControllerSpec
 
         setAuthMocks()
         val result = TestFileUploadController.success()(testFakeRequest)
-        checkFileUploadProblemPage(result)
+        checkMimeErrorPage(result)
       }
 
       "file name includes .CSV in upper case" in {
@@ -234,7 +272,7 @@ class FileUploadControllerSpec
 
         setAuthMocks()
         val result = TestFileUploadController.success()(testFakeRequest)
-        checkFileUploadProblemPage(result)
+        checkMimeErrorPage(result)
       }
 
       "file name does not contain an ods extension at all (e.g. txt)" in {

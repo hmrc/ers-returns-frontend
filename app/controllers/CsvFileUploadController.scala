@@ -46,6 +46,7 @@ class CsvFileUploadController @Inject() (
   fileSizeLimitErrorView: views.html.file_size_limit_error,
   fileUploadErrorsView: views.html.file_upload_errors,
   fileUploadProblemView: views.html.file_upload_problem,
+  invalidMimeErrorView: views.html.invalid_mime_error,
   authAction: AuthAction
 )(implicit
   val ec: ExecutionContext,
@@ -181,7 +182,31 @@ class CsvFileUploadController @Inject() (
               if (csvFilesCallbackList.areAllFilesSuccessful()) {
                 val callbackDataList: List[UploadedSuccessfully] =
                   csvFilesCallbackList.files.map(_.uploadStatus.asInstanceOf[UploadedSuccessfully])
-                checkFileNames(callbackDataList, schemeInfo)
+                val invalidFiles                                 =
+                  callbackDataList.filter(file => !MimeTypeValidator.checkIsCSVMimeType(file.mimeType))
+
+                if (invalidFiles.nonEmpty) {
+                  logger.error(
+                    s"[CsvFileUploadController][extractCsvCallbackData] Validation failed due to wrong mime type"
+                  )
+                  for {
+                    requestObject   <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
+                    sessionFileType <- sessionService.fetch[CheckFileType](ersUtil.FILE_TYPE_CACHE)
+                  } yield {
+                    val fileType                = sessionFileType.checkFileType.getOrElse("Not Found")
+                    val isMultipleFile: Boolean = csvFilesCallbackList.files.size > 1;
+                    UnsupportedMediaType(
+                      invalidMimeErrorView(
+                        requestObject,
+                        FileNameHelper.getFinalFileNames(data, callbackDataList, invalidFiles, schemeInfo, ersUtil),
+                        fileType.toUpperCase,
+                        isMultipleFile
+                      )
+                    )
+                  }
+                } else {
+                  checkFileNames(callbackDataList, schemeInfo)
+                }
               } else {
                 val failedFiles: String =
                   csvFilesCallbackList.files.filter(_.uploadStatus == Failed).map(_.uploadId.value).mkString(", ")

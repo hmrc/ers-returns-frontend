@@ -816,3 +816,21 @@ file_size_limit_error.para_2 = Ni allwch uwchlwytho ffeil sy’n fwy na {0}
 file_size_limit_error.para_3_1 = Gallwch anfon e-bost at
 file_size_limit_error.link = shareschemes@hmrc.gov.uk
 file_size_limit_error.para_3_2 = i gael help gyda’ch cyflwyniad.
+
+
+#********************************************************************
+# Invalid Mime Page
+#********************************************************************
+
+ers.invalid_mime.title=Mae problem wrth uwchlwytho’r ffeil
+ers.invalid_mime.heading=Mae problem wrth uwchlwytho’r ffeil
+ers.invalid_mime.paragraph =Gwnaethoch ddewis uwchlwytho {0}, ond nid ffeil {1} yw’r ffeil a uwchlwythoch.
+ers.invalid_mime.tryAgain =Rhowch gynnig arall arni gyda’r ffeil gywir.
+ers.invalid_mime.ods.paragraph =Gwnaethoch ddewis uwchlwytho ffeil ODS, ond nid ffeil ODS yw’r ffeil a uwchlwythoch.
+
+ers.invalid_mime.csv.multiple.h1 =Mae problem gyda’r ffeiliau sydd wedi’u huwchlwytho
+ers.invalid_mime.csv.multiple.paragraph1 =Gwnaethoch ddewis uwchlwytho ffeiliau CSV, ond mae’n ymddangos nad yw rhai o’r ffeiliau sydd wedi’u huwchlwytho yn ffeiliau CSV.
+ers.invalid_mime.csv.multiple.paragraph2 =Gwiriwch eich ffeiliau er mwyn sicrhau eu bod wedi’u cadw fel ffeiliau CSV.
+ers.invalid_mime.csv.multiple.label =Ffeiliau sydd ddim yn ffeiliau CSV
+ers.invalid_mime.csv.multiple.h2 =Yr hyn i’w wneud nesaf
+ers.invalid_mime.csv.multiple.label2 =Mae angen i chi uwchlwytho eich holl ffeiliau eto.

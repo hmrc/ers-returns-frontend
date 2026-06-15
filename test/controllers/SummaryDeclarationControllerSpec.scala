@@ -109,7 +109,7 @@ class SummaryDeclarationControllerSpec
       UpscanCsvFilesCallback(
         UploadId("abcd"),
         "id0",
-        UploadedSuccessfully("CSOP_OptionsGranted_V4.csv", "http://test.gov.uk")
+        UploadedSuccessfully("CSOP_OptionsGranted_V4.csv", "http://test.gov.uk", mimeType = "csv")
       )
     )
   )
