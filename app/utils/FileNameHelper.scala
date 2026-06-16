@@ -66,7 +66,14 @@ object FileNameHelper {
       if (isMulitpleFiles) uploadedFileNames.filterNot(expectedFileNames.contains)
       else expectedFileNames.filterNot(uploadedFileNames.contains)
 
-    remainingExpectedNames
+    val finalNames =
+      if (remainingExpectedNames.isEmpty) {
+        invalidFiles.map(_.name)
+      } else {
+        remainingExpectedNames
+      }
+
+    finalNames
   }
 
 }
