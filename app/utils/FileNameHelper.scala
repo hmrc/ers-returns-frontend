@@ -60,13 +60,20 @@ object FileNameHelper {
     val uploadedFileNames: List[String] =
       callbackDataList.map(_.name)
 
-    val isMulitpleFiles = callbackDataList.size > 1
+    val isMultipleFile: Boolean = callbackDataList.size > 1
 
     val remainingExpectedNames =
-      if (isMulitpleFiles) uploadedFileNames.filterNot(expectedFileNames.contains)
+      if (isMultipleFile) uploadedFileNames.filterNot(expectedFileNames.contains)
       else expectedFileNames.filterNot(uploadedFileNames.contains)
 
-    remainingExpectedNames
+    val finalNames =
+      if (remainingExpectedNames.isEmpty) {
+        invalidFiles.map(_.name)
+      } else {
+        remainingExpectedNames
+      }
+
+    finalNames
   }
 
 }
