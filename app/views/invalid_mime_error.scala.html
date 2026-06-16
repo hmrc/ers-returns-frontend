@@ -71,7 +71,7 @@
         } else {
             <p class="govuk-body">
                 @fileNames.map { file =>
-                @Html(messages("ers.invalid_mime.paragraph", file, fileType))
+                @Html(messages(if (fileType.equalsIgnoreCase("ods")) "ers.invalid_mime.ods.paragraph" else "ers.invalid_mime.paragraph", file, fileType))
                 }
             </p>
         }
