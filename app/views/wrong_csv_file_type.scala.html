@@ -17,68 +17,63 @@
 @import config.ApplicationConfig
 @import views.html.templates.reference
 
-@this(
-govuk_wrapper: govuk_wrapper,
-hmrcPageHeading: HmrcPageHeading
-)
+@this(govuk_wrapper: govuk_wrapper,hmrcPageHeading: HmrcPageHeading)
 
 @(requestObject: RequestObject,expectedFiles: Seq[(String, String)])(implicit request: RequestHeader, messages: Messages, appConfig: ApplicationConfig)
 
-@isMultipleFiles = @{
-expectedFiles.size > 1
-}
+@isMultipleFiles = @{expectedFiles.size > 1}
 
 @pageTitle = @{
-if (isMultipleFiles) {
-messages("ers.wrong_csv_file_type.plural.title")
-} else {
-messages("ers.wrong_csv_file_type.title")
-}
-}
+        if (isMultipleFiles){
+                messages("ers.wrong_csv_file_type.plural.title")
+            } else {
+                messages("ers.wrong_csv_file_type.title")
+            }
+        }
 
 @heading = @{
-if (isMultipleFiles) {
-messages("ers.wrong_csv_file_type.plural.heading")
-} else {
-messages("ers.wrong_csv_file_type.heading")
-}
-}
+        if (isMultipleFiles) {
+                messages("ers.wrong_csv_file_type.plural.heading")
+            } else {
+                messages("ers.wrong_csv_file_type.heading")
+            }
+        }
 
 @paragraph1 = @{
-if (isMultipleFiles) {
-messages("ers.wrong_csv_file_type.plural.paragraph1")
-} else {
-messages("ers.wrong_csv_file_type.paragraph1")
-}
-}
+        if (isMultipleFiles) {
+                messages("ers.wrong_csv_file_type.plural.paragraph1")
+            } else {
+                messages("ers.wrong_csv_file_type.paragraph1")
+            }
+        }
 
 @tryAgainText = @{
-if (isMultipleFiles) {
-messages("ers.wrong_csv_file_type.plural.tryAgain")
-} else {
-messages("ers.wrong_csv_file_type.tryAgain")
-}
-}
+        if (isMultipleFiles) {
+            messages("ers.wrong_csv_file_type.plural.tryAgain")
+        } else {
+            messages("ers.wrong_csv_file_type.tryAgain")
+        }
+    }
 
 @govuk_wrapper(title = pageTitle) {
-@reference(requestObject.getPageTitle)
-@hmrcPageHeading(PageHeading(
-text = heading
-))
 
-<p class="govuk-body">
-    @paragraph1
-</p>
+    @reference(requestObject.getPageTitle)
 
-@for((csvFileType, fileName) <- expectedFiles) {
-<p class="govuk-body">
-    @messages("ers.wrong_csv_file_type.paragraph2", csvFileType, fileName)
-</p>
-}
+    @hmrcPageHeading(PageHeading(text = heading))
 
-<p class="govuk-body">
-    <a class="govuk-link" href="@routes.CheckFileTypeController.checkFileTypePage().url">
-        @tryAgainText
-    </a>.
-</p>
+    <p class="govuk-body">
+        @paragraph1
+    </p>
+
+    @for((csvFileType, fileName) <- expectedFiles) {
+    <p class="govuk-body">
+        @messages("ers.wrong_csv_file_type.paragraph2", csvFileType, fileName)
+    </p>
+    }
+
+    <p class="govuk-body">
+        <a class="govuk-link" href="@routes.CheckFileTypeController.checkFileTypePage().url">
+            @tryAgainText
+        </a>.
+    </p>
 }
