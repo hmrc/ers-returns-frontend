@@ -686,7 +686,7 @@ class CsvFileUploadControllerSpec
             .toJson(
               Map(
                 s"${"check-csv-files"}-${testUploadId.value}" ->
-                  Json.toJson(asUploadStatus(uploadedSuccessfully))
+                  Json.toJson(asUploadStatus(uploadedSuccessfullyCsv))
               )
             )
             .as[JsObject],
@@ -719,8 +719,8 @@ class CsvFileUploadControllerSpec
           Json
             .toJson(
               Map(
-                s"${"check-csv-files"}-${testUploadId.value}" -> Json.toJson(asUploadStatus(uploadedSuccessfully)),
-                s"${"check-csv-files"}-ID1"                   -> Json.toJson(asUploadStatus(uploadedSuccessfully))
+                s"${"check-csv-files"}-${testUploadId.value}" -> Json.toJson(asUploadStatus(uploadedSuccessfullyCsv)),
+                s"${"check-csv-files"}-ID1"                   -> Json.toJson(asUploadStatus(uploadedSuccessfullyCsv))
               )
             )
             .as[JsObject],
@@ -1029,8 +1029,8 @@ class CsvFileUploadControllerSpec
       reset(mockErsConnector)
 
       val testCsvCallbackData = List(
-        new UploadedSuccessfully("Wrong.csv", "http://test.com/1"),
-        new UploadedSuccessfully("CSOP_OptionsGranted_V4.csv", "http://test.com/2")
+        new UploadedSuccessfully("Wrong.csv", "http://test.com/1", mimeType = "text/csv"),
+        new UploadedSuccessfully("CSOP_OptionsGranted_V4.csv", "http://test.com/2", mimeType = "text/csv")
       )
 
       val testCacheFileIds = List(
