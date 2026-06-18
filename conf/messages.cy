@@ -537,10 +537,13 @@ ers_check_csv_file.err.message = Dewiswch y ffeil CSV rydych am ei huwchlwytho f
 ers_check_csv_options.hint = Dewiswch bob un sy’n berthnasol
 ers_check_csv_file.csop.file0.description = Opsiynau wedi eu caniatáu
 ers_check_csv_file.csop.file0.file_name = CSOP_OptionsGranted_V4.csv
+ers_check_csv_file.csop.file0.file_name.v5 = CSOP_OptionsGranted_V5.csv
 ers_check_csv_file.csop.file1.description = Opsiynau sydd, yn ystod y flwyddyn, wedi eu rhyddhau (gan gynnwys cyfnewidiadau), wedi eu dileu neu wedi dod i ben
 ers_check_csv_file.csop.file1.file_name = CSOP_OptionsRCL_V4.csv
+ers_check_csv_file.csop.file1.file_name.v5 = CSOP_OptionsRCL_V5.csv
 ers_check_csv_file.csop.file2.description = Opsiynau ac opsiynau newydd wedi eu harfer
 ers_check_csv_file.csop.file2.file_name = CSOP_OptionsExercised_V4.csv
+ers_check_csv_file.csop.file2.file_name.v5 = CSOP_OptionsExercised_V5.csv
 ers_check_csv_file.emi.file0.description = Addasu opsiynau
 ers_check_csv_file.emi.file0.file_name = EMI40_Adjustments_V4.csv
 ers_check_csv_file.emi.file1.description = Disodli opsiynau
@@ -834,3 +837,17 @@ ers.invalid_mime.csv.multiple.paragraph2 =Gwiriwch eich ffeiliau er mwyn sicrhau
 ers.invalid_mime.csv.multiple.label =Ffeiliau sydd ddim yn ffeiliau CSV
 ers.invalid_mime.csv.multiple.h2 =Yr hyn i’w wneud nesaf
 ers.invalid_mime.csv.multiple.label2 =Mae angen i chi uwchlwytho eich holl ffeiliau eto.
+
+#********************************************************************
+# wrong file type
+#********************************************************************
+
+ers.wrong_csv_file_type.title = Mae problem wrth uwchlwytho’r ffeil - Gwarantau ar Sail Cyflogaeth – GOV.UK
+ers.wrong_csv_file_type.heading = Mae problem wrth uwchlwytho’r ffeil
+ers.wrong_csv_file_type.paragraph1 = Nid yw’r ffeil yr oeddech wedi’i uwchlwytho’n y ffeil gywir.
+ers.wrong_csv_file_type.paragraph2 = Ar gyfer {0} mae’n rhaid i chi uwchlwytho’r ffeil {1}.
+ers.wrong_csv_file_type.tryAgain = Rhowch gynnig arall arni gyda’r ffeil gywir
+ers.wrong_csv_file_type.plural.title = Mae problem gyda’r ffeiliau y gwnaethoch eu huwchlwytho - Cyflwyno eich Datganiad Blynyddol ar gyfer ERS - GOV.UK
+ers.wrong_csv_file_type.plural.heading = Mae problem gyda’r ffeiliau y gwnaethoch eu huwchlwytho
+ers.wrong_csv_file_type.plural.paragraph1 = Nid ydych wedi uwchlwytho’r ffeiliau cywir.
+ers.wrong_csv_file_type.plural.tryAgain = Rhowch gynnig arall arni gyda’r ffeiliau cywir
