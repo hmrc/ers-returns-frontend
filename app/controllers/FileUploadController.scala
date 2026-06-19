@@ -186,6 +186,9 @@ class FileUploadController @Inject() (
         case BAD_REQUEST if res.body.contains("Incorrect ERS Template") =>
           handleIncorrectErsTemplate(res, schemeInfo)
 
+        case BAD_REQUEST if res.body.contains("The file that you chose doesn’t have any data after row 9") =>
+          getFileUploadProblemPage
+
         case BAD_REQUEST =>
           logger.warn(
             s"[FileUploadController][handleValidationResponse] Validation is not successful for schemeRef: $schemeRef, timestamp: ${System.currentTimeMillis()}."
