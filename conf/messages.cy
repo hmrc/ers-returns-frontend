@@ -828,7 +828,7 @@ file_size_limit_error.para_3_2 = i gael help gyda’ch cyflwyniad.
 ers.invalid_mime.title=Mae problem wrth uwchlwytho’r ffeil
 ers.invalid_mime.heading=Mae problem wrth uwchlwytho’r ffeil
 ers.invalid_mime.paragraph =Gwnaethoch ddewis uwchlwytho {0}, ond nid ffeil {1} yw’r ffeil a uwchlwythoch.
-ers.invalid_mime.tryAgain =Rhowch gynnig arall arni gyda’r ffeil gywir.
+ers.invalid_mime.tryAgain =Rhowch gynnig arall arni gyda’r ffeil gywir
 ers.invalid_mime.ods.paragraph =Gwnaethoch ddewis uwchlwytho ffeil ODS, ond nid ffeil ODS yw’r ffeil a uwchlwythoch.
 
 ers.invalid_mime.csv.multiple.h1 =Mae problem gyda’r ffeiliau sydd wedi’u huwchlwytho
