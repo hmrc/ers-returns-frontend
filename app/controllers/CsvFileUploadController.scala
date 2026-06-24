@@ -251,22 +251,36 @@ class CsvFileUploadController @Inject() (
     list: UpscanCsvFilesList,
     requestObject: RequestObject
   )(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
-    val fileName: String                                     =
+    val fileName: String =
       if (schemeInfo.schemeType == "CSOP" && useCsopV5Templates(requestObject.taxYear)) ".file_name.v5"
       else ".file_name"
-    val upscanCsvFileNamesMap: Map[String, (String, String)] = list.ids.map { upscanCsvFile =>
-      val pageElements: String => String = getAllPageElementsFromPageId(schemeInfo, upscanCsvFile.fileId)
-      val expectedFileName               = pageElements(fileName)
 
-      expectedFileName.toLowerCase -> (pageElements(".description"), expectedFileName)
-    }.toMap
-    val callBackFileNames: Set[String]                       = csvCallbackData.map(_.name.toLowerCase).toSet
-    val missingFileNames: Set[String]                        = upscanCsvFileNamesMap.keys.toSet.diff(callBackFileNames)
-    if (missingFileNames.isEmpty) {
+    val expectedAndUploadedFiles: List[(String, String, String)] =
+      list.ids
+        .zip(csvCallbackData.reverse)
+        .map { case (upscanCsvFile, uploadedFile) =>
+          val pageElements: String => String = getAllPageElementsFromPageId(schemeInfo, upscanCsvFile.fileId)
+          val expectedFileName               = pageElements(fileName)
+          val description                    = pageElements(".description")
+          val uploadedFileName               = uploadedFile.name
+
+          (description, expectedFileName, uploadedFileName)
+        }
+
+    val incorrectFiles: List[(String, String)] =
+      expectedAndUploadedFiles
+        .filter { case (_, expectedFileName, uploadedFileName) =>
+          expectedFileName.toLowerCase != uploadedFileName.toLowerCase
+        }
+        .map { case (description, expectedFileName, _) =>
+          (description, expectedFileName)
+        }
+
+    if (incorrectFiles.isEmpty) {
       validateCsv(csvCallbackData, schemeInfo)
     } else {
-      logger.info(s"[CsvFileUploadController][checkFileNames] User uploaded the wrong file: ")
-      Future.successful(getWrongCsvFileTypePage(requestObject, missingFileNames.map(upscanCsvFileNamesMap).toSeq))
+      logger.info("[CsvFileUploadController][checkFileNames] User uploaded the wrong file")
+      Future.successful(getWrongCsvFileTypePage(requestObject, incorrectFiles))
     }
   }
 
