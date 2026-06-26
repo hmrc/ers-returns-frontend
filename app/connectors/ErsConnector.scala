@@ -258,6 +258,14 @@ class ErsConnector @Inject() (http: HttpClientV2, appConfig: ApplicationConfig)(
 
   def updateCallbackRecord(uploadStatus: UploadStatus, sessionId: String)(implicit hc: HeaderCarrier): Future[Int] = {
     val url: String = s"$validatorUrl/ers/$sessionId/update-callback"
+    val mimeType    = uploadStatus match {
+      case s: UploadedSuccessfully => s.mimeTypeOrMissing
+      case _                       => "n/a"
+    }
+    logger.info(
+      s"[ErsConnector][updateCallbackRecord] Sending callback update for session: $sessionId with status: " +
+        s"${uploadStatus.getClass.getSimpleName}, mimeType: $mimeType"
+    )
     http
       .put(url"$url")
       .withBody(Json.toJson(uploadStatus))

@@ -166,7 +166,7 @@ class GeneratePdfControllerSpec
         UpscanCsvFilesCallback(
           UploadId("uploadId"),
           "file0",
-          UploadedSuccessfully("name", "downloadUrl", mimeType = "")
+          UploadedSuccessfully("name", "downloadUrl", mimeType = None)
         )
       val csvFilesCallbackList: UpscanCsvFilesCallbackList = UpscanCsvFilesCallbackList(List(csvFilesCallBack))
 

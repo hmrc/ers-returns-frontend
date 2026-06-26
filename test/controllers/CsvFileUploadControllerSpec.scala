@@ -873,7 +873,7 @@ class CsvFileUploadControllerSpec
       val testUploadedSuccessfully         = new UploadedSuccessfully(
         "CSOP_OptionsGranted_V4.csv",
         "http://somedownloadlink.com/034099340",
-        mimeType = "csv"
+        mimeType = Some("csv")
       )
       val testCsvCallbackData              = List[UploadedSuccessfully](testUploadedSuccessfully)
       val testCacheFileIds                 = List[UpscanIds](
@@ -916,7 +916,7 @@ class CsvFileUploadControllerSpec
       val testUploadedSuccessfully   = new UploadedSuccessfully(
         "csop_optionsgranted_v4.CSV",
         "http://somedownloadlink.com/034099340",
-        mimeType = "csv"
+        mimeType = Some("csv")
       )
       val testCsvCallbackData        = List[UploadedSuccessfully](testUploadedSuccessfully)
       val testCacheFileIds           = List[UpscanIds](
@@ -961,7 +961,7 @@ class CsvFileUploadControllerSpec
       val testUploadedSuccessfully   = new UploadedSuccessfully(
         "CSOP_OptionsExercised_V4",
         "http://somedownloadlink.com/034099340",
-        mimeType = ""
+        mimeType = None
       )
       val testCsvCallbackData        = List[UploadedSuccessfully](testUploadedSuccessfully)
       val testCacheFileIds           = List[UpscanIds](
@@ -1005,7 +1005,7 @@ class CsvFileUploadControllerSpec
       val testUploadedSuccessfully   = new UploadedSuccessfully(
         "CSOP_OptionsExercised_V4",
         "http://somedownloadlink.com/034099340",
-        mimeType = ""
+        mimeType = None
       )
       val testCsvCallbackData        = List[UploadedSuccessfully](testUploadedSuccessfully)
       val mockSchemeInfo: SchemeInfo = mock[SchemeInfo]
@@ -1029,8 +1029,8 @@ class CsvFileUploadControllerSpec
       reset(mockErsConnector)
 
       val testCsvCallbackData = List(
-        new UploadedSuccessfully("Wrong.csv", "http://test.com/1", mimeType = "text/csv"),
-        new UploadedSuccessfully("CSOP_OptionsGranted_V4.csv", "http://test.com/2", mimeType = "text/csv")
+        new UploadedSuccessfully("Wrong.csv", "http://test.com/1", mimeType = Some("text/csv")),
+        new UploadedSuccessfully("CSOP_OptionsGranted_V4.csv", "http://test.com/2", mimeType = Some("text/csv"))
       )
 
       val testCacheFileIds = List(
