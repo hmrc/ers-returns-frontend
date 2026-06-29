@@ -93,7 +93,7 @@ class CsvFileUploadCallbackControllerSpec
         val body           = UpscanReadyCallback(
           Reference("Reference"),
           url,
-          UploadDetails(Instant.now(), "checkSum", "fileMimeType", "fileName", 100)
+          UploadDetails(Instant.now(), "checkSum", Some("fileMimeType"), "fileName", 100)
         )
         val jsonBody       = Json.toJson(body)
         when(mockSessionService.cache(meq(s"check-csv-files-${uploadId.value}"), callbackCaptor.capture)(any(), any()))

@@ -18,14 +18,14 @@ package utils
 
 object MimeTypeValidator {
 
-  def checkIsCSVMimeType(mimeType: String): Boolean =
-    Option(mimeType)
+  def checkIsCSVMimeType(mimeType: Option[String]): Boolean =
+    mimeType
       .map(_.trim.toLowerCase)
-      .contains("text/csv")
+      .forall(_ == "text/csv")
 
-  def checkIsODSMimeType(mimeType: String): Boolean =
-    Option(mimeType)
+  def checkIsODSMimeType(mimeType: Option[String]): Boolean =
+    mimeType
       .map(_.trim.toLowerCase)
-      .contains("application/vnd.oasis.opendocument.spreadsheet")
+      .forall(_ == "application/vnd.oasis.opendocument.spreadsheet")
 
 }

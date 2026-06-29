@@ -316,14 +316,14 @@ class ERSConnectorSpec
         val expectedName       = "fileName"
         val expectedUrl        = "downloadUrl"
         val json               =
-          s"""{"_type": "UploadedSuccessfully", "name": "$expectedName", "downloadUrl": "$expectedUrl", "mimeType": ""}"""
+          s"""{"_type": "UploadedSuccessfully", "name": "$expectedName", "downloadUrl": "$expectedUrl"}"""
         val successfulResponse = HttpResponse(OK, json, Map.empty)
 
         when(mockRequestBuilder.execute(any[HttpReads[HttpResponse]], any()))
           .thenReturn(Future.successful(successfulResponse))
 
         val result = await(ersConnectorMockHttp.getCallbackRecord(requestWithAuth, hc))
-        result shouldBe Some(UploadedSuccessfully("fileName", "downloadUrl", mimeType = ""))
+        result shouldBe Some(UploadedSuccessfully("fileName", "downloadUrl", mimeType = None))
       }
     }
 
@@ -356,7 +356,7 @@ class ERSConnectorSpec
 
         val result = await(
           ersConnectorMockHttp.updateCallbackRecord(
-            UploadedSuccessfully("fileId", "downloadUrl", mimeType = ""),
+            UploadedSuccessfully("fileId", "downloadUrl", mimeType = None),
             "sessionId"
           )(hc)
         )
@@ -371,7 +371,7 @@ class ERSConnectorSpec
 
         an[Exception] should be thrownBy await(
           ersConnectorMockHttp.updateCallbackRecord(
-            UploadedSuccessfully("fileId", "downloadUrl", mimeType = ""),
+            UploadedSuccessfully("fileId", "downloadUrl", mimeType = None),
             "sessionId"
           )(hc)
         )
@@ -385,7 +385,7 @@ class ERSConnectorSpec
 
         an[Exception] should be thrownBy await(
           ersConnectorMockHttp.updateCallbackRecord(
-            UploadedSuccessfully("fileId", "downloadUrl", mimeType = ""),
+            UploadedSuccessfully("fileId", "downloadUrl", mimeType = None),
             "sessionId"
           )(hc)
         )
