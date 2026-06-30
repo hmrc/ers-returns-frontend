@@ -53,9 +53,14 @@
 
 	@reference(requestObject.getPageTitle)
 
-	@govukBackLink(BackLink(
-		attributes = Map("id" -> "back-link"), classes="js-enabled", content = HtmlContent(messages("ers.back"))
-	))
+	@govukBackLink(
+		BackLink(
+			attributes = Map("id" -> "back-link", "data-module" -> "hmrc-back-link"),
+			classes = "js-enabled",
+			href = "#",
+			content = HtmlContent(messages("ers.back"))
+		)
+	)
 
 	@if(companyDetails.hasErrors) {
 		@govukErrorSummary(ErrorSummary(
