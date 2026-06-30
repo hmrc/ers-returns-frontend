@@ -47,7 +47,6 @@
 
 @content = {
     <div id="content">
-
         <article class="content__body">
             @contentBlock
         </article>
@@ -58,7 +57,6 @@
 }
 
 @scripts = {
-    <script type="text/javascript" src='@controllers.routes.Assets.versioned("javascripts/iebacklink.js")' @{CSPNonce.attr}></script>
     @scriptElement.getOrElse(Html(""))
 }
 
