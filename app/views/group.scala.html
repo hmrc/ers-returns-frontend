@@ -35,9 +35,15 @@
 @govuk_wrapper(title = ersUtil.getPageElement(schemeId, "ers", "is_group_scheme.page_title") + " " + Messages("ers.title.postfix")) {
 	@reference(requestObject.getPageTitle)
 
-	@govukBackLink(BackLink(
-		attributes = Map("id" -> "back-link"), classes="js-enabled", content = HtmlContent(messages("ers.back"))
-	))
+	@govukBackLink(
+		BackLink(
+			attributes = Map("id" -> "back-link", "data-module" -> "hmrc-back-link"),
+			classes = "js-enabled",
+			href = "#",
+			content = HtmlContent(messages("ers.back"))
+		)
+	)
+
 
 	@if(groupSchemeForm.hasErrors) {
 		@govukErrorSummary(ErrorSummary(
