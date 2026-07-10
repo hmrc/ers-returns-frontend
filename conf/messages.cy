@@ -615,6 +615,7 @@ ers_service_unavailable.para1 = Nid yw’r Gwasanaeth Gwirio ar gael ar hyn o br
 ers_not_authorised.page_title = Gwiriwch eich ffeiliau ERS
 ers_not_authorised.para1 = Nid ydych wedi’ch awdurdodi i gyrchu’r gwasanaeth gwirio ERS
 
+error.prefix = Gwall
 error.required = Mae angen llenwi’r maes hwn
 ers_html_error_report.styles = <div></div>
 ers_html_error_report.styles2 = <style>article table td, article table th ‘{’background:none; padding:10px 20px 10px 0’}’ article table td, article table th ‘{’border:none;’}’ article table td, article table th ‘{’border-bottom: 1px solid #BFC1C3;’}’ .column, .row ‘{’width:10%’}’ .report-title ‘{’text-align:right; margin-top:0; margin-bottom:0;’}’</style>
