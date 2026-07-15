@@ -66,11 +66,19 @@ class CsvFileUploadController @Inject() (
       )
     }
     (for {
-      requestObject  <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
-      csvFilesList   <- sessionService.fetch[UpscanCsvFilesList](ersUtil.CSV_FILES_UPLOAD)
-      currentCsvFile  = csvFilesList.ids.find(ids => ids.uploadStatus == NotStarted)
+      requestObject                   <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
+      csvFilesList                    <- sessionService.fetch[UpscanCsvFilesList](ersUtil.CSV_FILES_UPLOAD)
+      allSelectedCsvFiles: Seq[String] =
+        csvFilesList.ids.map((upscanIds: UpscanIds) =>
+          ersUtil.getFileName(upscanIds.fileId, requestObject.getSchemeId, useCsopV5Templates(requestObject.taxYear))
+        )
+      _                                = logger.info(
+                                           s"[CsvFileUploadController][uploadFilePage] The following " +
+                                             s"files were selected to be uploaded: ${allSelectedCsvFiles.mkString(", ")}"
+                                         )
+      currentCsvFile                   = csvFilesList.ids.find(ids => ids.uploadStatus == NotStarted)
       if currentCsvFile.isDefined
-      upscanFormData <-
+      upscanFormData                  <-
         upscanService.getUpscanFormDataCsv(currentCsvFile.get.uploadId, requestObject.getSchemeReference)
     } yield Ok(
       upscanCsvFileUploadView(
