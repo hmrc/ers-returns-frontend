@@ -25,6 +25,7 @@ import org.apache.pekko.actor.ActorSystem
 import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.mvc._
+import services.audit.AuditEvents
 import services.{FrontendSessionService, UpscanService}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.mongo.cache.DataKey
@@ -41,6 +42,7 @@ class CsvFileUploadController @Inject() (
   val ersConnector: ErsConnector,
   val upscanService: UpscanService,
   val sessionService: FrontendSessionService,
+  val auditEvents: AuditEvents,
   globalErrorView: views.html.global_error,
   upscanCsvFileUploadView: views.html.upscan_csv_file_upload,
   fileSizeLimitErrorView: views.html.file_size_limit_error,
@@ -61,7 +63,7 @@ class CsvFileUploadController @Inject() (
   def uploadFilePage(): Action[AnyContent] = authAction.async { implicit request =>
     sessionService.fetch[ErsMetaData](ersUtil.ERS_METADATA).map { ele =>
       logger.info(
-        s"[CsvFileUploadController][uploadFilePage()] Fetched request object with SAP Number: ${ele.sapNumber} " +
+        s"[CsvFileUploadController][uploadFilePage] Fetched request object with SAP Number: ${ele.sapNumber} " +
           s"and schemeRef: ${ele.schemeInfo.schemeRef}"
       )
     }
@@ -72,10 +74,11 @@ class CsvFileUploadController @Inject() (
         csvFilesList.ids.map((upscanIds: UpscanIds) =>
           ersUtil.getFileName(upscanIds.fileId, requestObject.getSchemeId, useCsopV5Templates(requestObject.taxYear))
         )
-      _                                = logger.info(
-                                           s"[CsvFileUploadController][uploadFilePage] The following " +
-                                             s"files were selected to be uploaded: ${allSelectedCsvFiles.mkString(", ")}"
-                                         )
+      _                               <- auditEvents.auditSelectedCsvRadioButtons(allSelectedCsvFiles)
+      _                                =
+        logger.info(
+          s"[CsvFileUploadController][uploadFilePage] The following files were selected to be uploaded: ${allSelectedCsvFiles.mkString(", ")}"
+        )
       currentCsvFile                   = csvFilesList.ids.find(ids => ids.uploadStatus == NotStarted)
       if currentCsvFile.isDefined
       upscanFormData                  <-
