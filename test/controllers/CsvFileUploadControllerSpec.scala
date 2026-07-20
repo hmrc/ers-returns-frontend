@@ -89,7 +89,7 @@ class CsvFileUploadControllerSpec
 
   val mockUpscanService: UpscanService      = mock[UpscanService]
   val ersUtil: ERSUtil                      = new ERSUtil(mockAppConfig)
-  val CsvFileUploadControllerLogger: Logger = Logger(classOf[CsvFileUploadController])
+  val csvFileUploadControllerLogger: Logger = Logger(classOf[CsvFileUploadController])
 
   lazy val csvFileUploadController: CsvFileUploadController =
     new CsvFileUploadController(
@@ -108,7 +108,7 @@ class CsvFileUploadControllerSpec
       testAuthAction
     )(ec, ersUtil = ersUtil, mockAppConfig, mockActorSystem) {
       override lazy val allCsvFilesCacheRetryAmount: Int = 1
-      override val logger: Logger                        = CsvFileUploadControllerLogger
+      override val logger: Logger                        = csvFileUploadControllerLogger
     }
 
   override def beforeEach(): Unit =
@@ -202,7 +202,7 @@ class CsvFileUploadControllerSpec
       when(mockSessionService.fetch[UpscanCsvFilesList](meq("csv-files-upload"))(any(), any()))
         .thenReturn(Future.successful(UpscanCsvFilesList(upscanIds)))
 
-      withCaptureOfLoggingFrom(CsvFileUploadControllerLogger) { captureEvents =>
+      withCaptureOfLoggingFrom(csvFileUploadControllerLogger) { captureEvents =>
         await(csvFileUploadController.uploadFilePage()(testFakeRequest))
         assert(captureEvents.exists(_.getMessage.contains(expectedLogMessage)))
       }
@@ -231,7 +231,7 @@ class CsvFileUploadControllerSpec
       when(mockSessionService.fetch[UpscanCsvFilesList](meq("csv-files-upload"))(any(), any()))
         .thenReturn(Future.successful(UpscanCsvFilesList(upscanIds)))
 
-      withCaptureOfLoggingFrom(CsvFileUploadControllerLogger) { captureEvents =>
+      withCaptureOfLoggingFrom(csvFileUploadControllerLogger) { captureEvents =>
         await(csvFileUploadController.uploadFilePage()(testFakeRequest))
         assert(captureEvents.exists(_.getMessage.contains(expectedLogMessage)))
       }
