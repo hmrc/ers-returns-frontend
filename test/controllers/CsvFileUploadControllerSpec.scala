@@ -30,7 +30,7 @@ import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatest.{BeforeAndAfterEach, OptionValues}
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.i18n
+import play.api.{Logger, i18n}
 import play.api.i18n.{MessagesApi, MessagesImpl}
 import play.api.libs.json.{JsObject, Json}
 import play.api.mvc._
@@ -48,6 +48,8 @@ import java.time.Instant
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Random
 import org.mockito.ArgumentMatchers.{eq => eqTo}
+import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
+import uk.gov.hmrc.play.bootstrap.tools.LogCapturing
 
 class CsvFileUploadControllerSpec
     extends AnyWordSpecLike
@@ -59,7 +61,8 @@ class CsvFileUploadControllerSpec
     with UpscanData
     with ScalaFutures
     with ErsTestHelper
-    with GuiceOneAppPerSuite {
+    with GuiceOneAppPerSuite
+    with LogCapturing {
 
   val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
     messagesActionBuilder,
@@ -84,7 +87,9 @@ class CsvFileUploadControllerSpec
   lazy val wrongCsvFileTypeView: views.html.wrong_csv_file_type =
     app.injector.instanceOf[views.html.wrong_csv_file_type]
 
-  val mockUpscanService: UpscanService = mock[UpscanService]
+  val mockUpscanService: UpscanService      = mock[UpscanService]
+  val ersUtil: ERSUtil                      = new ERSUtil(mockAppConfig)
+  val csvFileUploadControllerLogger: Logger = Logger(classOf[CsvFileUploadController])
 
   lazy val csvFileUploadController: CsvFileUploadController =
     new CsvFileUploadController(
@@ -92,6 +97,7 @@ class CsvFileUploadControllerSpec
       mockErsConnector,
       mockUpscanService,
       mockSessionService,
+      mockAuditEvents,
       globalErrorView,
       upscanCsvFileUploadView,
       fileSizeLimitErrorView,
@@ -100,17 +106,24 @@ class CsvFileUploadControllerSpec
       invalidMimeError,
       wrongCsvFileTypeView,
       testAuthAction
-    ) {
+    )(ec, ersUtil = ersUtil, mockAppConfig, mockActorSystem) {
       override lazy val allCsvFilesCacheRetryAmount: Int = 1
+      override val logger: Logger                        = csvFileUploadControllerLogger
     }
 
-  override def beforeEach(): Unit = {
-    when(mockErsUtil.CSV_FILES_UPLOAD).thenReturn("csv-files-upload")
-    when(mockErsUtil.CHECK_CSV_FILES).thenReturn("check-csv-files")
-    when(mockSessionService.fetch[RequestObject](any())(any(), any()))
-      .thenReturn(Future.successful(ersRequestObject))
+  override def beforeEach(): Unit =
     setAuthMocks()
-  }
+
+  when(mockSessionService.fetch[RequestObject](refEq(mockErsUtil.ERS_REQUEST_OBJECT))(any(), any()))
+    .thenReturn(Future.successful(ersRequestObject))
+
+  when(
+    mockSessionService.fetch[ErsMetaData](refEq(mockErsUtil.ERS_METADATA))(any(), any())
+  ).thenReturn(
+    Future.successful(ErsMetaData(SchemeInfo("", Instant.now, "", "", "", ""), "", None, "", None, None))
+  )
+
+  when(mockAuditEvents.auditSelectedCsvRadioButtons(any())(any())).thenReturn(Future.successful(Success))
 
   "uploadFilePage" should {
     "display file upload page" when {
@@ -171,6 +184,62 @@ class CsvFileUploadControllerSpec
         status(result)        shouldBe INTERNAL_SERVER_ERROR
         contentAsString(result) should include(testMessages("ers.global_errors.title"))
       }
+    }
+
+    val upscanIds: List[UpscanIds] = List(
+      UpscanIds(UploadId("123"), "file0", NotStarted),
+      UpscanIds(UploadId("456"), "file1", NotStarted),
+      UpscanIds(UploadId("789"), "file2", NotStarted)
+    )
+
+    "log the selected csv files" in {
+
+      when(mockAppConfig.csopV5Enabled).thenReturn(false)
+
+      val expectedLogMessage = "[CsvFileUploadController][uploadFilePage] The following files were selected to be " +
+        "uploaded: Other_Grants_V4.csv, Other_Options_V4.csv, Other_Acquisition_V4.csv"
+
+      when(mockSessionService.fetch[UpscanCsvFilesList](meq("csv-files-upload"))(any(), any()))
+        .thenReturn(Future.successful(UpscanCsvFilesList(upscanIds)))
+
+      withCaptureOfLoggingFrom(csvFileUploadControllerLogger) { captureEvents =>
+        await(csvFileUploadController.uploadFilePage()(testFakeRequest))
+        assert(captureEvents.exists(_.getMessage.contains(expectedLogMessage)))
+      }
+
+      verify(mockAuditEvents, times(1)).auditSelectedCsvRadioButtons(
+        meq(List("Other_Grants_V4.csv", "Other_Options_V4.csv", "Other_Acquisition_V4.csv"))
+      )(any())
+    }
+
+    "log the selected csv files for v5 tax years" in {
+
+      when(mockAppConfig.csopV5Enabled).thenReturn(true)
+
+      val csopV5RequestObject = ersRequestObject.copy(
+        taxYear = Some("2024/25"),
+        schemeName = Some("Csop"),
+        schemeType = Some("CSOP")
+      )
+
+      when(mockSessionService.fetch[RequestObject](refEq(mockErsUtil.ERS_REQUEST_OBJECT))(any(), any()))
+        .thenReturn(Future.successful(csopV5RequestObject))
+
+      val expectedLogMessage = "[CsvFileUploadController][uploadFilePage] The following files were selected to be " +
+        "uploaded: CSOP_OptionsGranted_V5.csv, CSOP_OptionsRCL_V5.csv, CSOP_OptionsExercised_V5.csv"
+
+      when(mockSessionService.fetch[UpscanCsvFilesList](meq("csv-files-upload"))(any(), any()))
+        .thenReturn(Future.successful(UpscanCsvFilesList(upscanIds)))
+
+      withCaptureOfLoggingFrom(csvFileUploadControllerLogger) { captureEvents =>
+        await(csvFileUploadController.uploadFilePage()(testFakeRequest))
+        assert(captureEvents.exists(_.getMessage.contains(expectedLogMessage)))
+      }
+
+      verify(mockAuditEvents, times(1)).auditSelectedCsvRadioButtons(
+        meq(List("CSOP_OptionsGranted_V5.csv", "CSOP_OptionsRCL_V5.csv", "CSOP_OptionsExercised_V5.csv"))
+      )(any())
+
     }
   }
 
@@ -294,6 +363,7 @@ class CsvFileUploadControllerSpec
         mockErsConnector,
         mockUpscanService,
         mockSessionService,
+        mockAuditEvents,
         globalErrorView,
         upscanCsvFileUploadView,
         fileSizeLimitErrorView,
@@ -374,6 +444,7 @@ class CsvFileUploadControllerSpec
         mockErsConnector,
         mockUpscanService,
         mockSessionService,
+        mockAuditEvents,
         globalErrorView,
         upscanCsvFileUploadView,
         fileSizeLimitErrorView,
@@ -413,6 +484,7 @@ class CsvFileUploadControllerSpec
         mockErsConnector,
         mockUpscanService,
         mockSessionService,
+        mockAuditEvents,
         globalErrorView,
         upscanCsvFileUploadView,
         fileSizeLimitErrorView,
@@ -491,6 +563,7 @@ class CsvFileUploadControllerSpec
         mockErsConnector,
         mockUpscanService,
         mockSessionService,
+        mockAuditEvents,
         globalErrorView,
         upscanCsvFileUploadView,
         fileSizeLimitErrorView,
@@ -558,6 +631,7 @@ class CsvFileUploadControllerSpec
         mockErsConnector,
         mockUpscanService,
         mockSessionService,
+        mockAuditEvents,
         globalErrorView,
         upscanCsvFileUploadView,
         fileSizeLimitErrorView,
@@ -772,6 +846,7 @@ class CsvFileUploadControllerSpec
         mockErsConnector,
         mockUpscanService,
         mockSessionService,
+        mockAuditEvents,
         globalErrorView,
         upscanCsvFileUploadView,
         fileSizeLimitErrorView,
@@ -855,6 +930,7 @@ class CsvFileUploadControllerSpec
         mockErsConnector,
         mockUpscanService,
         mockSessionService,
+        mockAuditEvents,
         globalErrorView,
         upscanCsvFileUploadView,
         fileSizeLimitErrorView,

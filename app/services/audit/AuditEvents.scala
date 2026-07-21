@@ -29,6 +29,14 @@ import scala.concurrent.{ExecutionContext, Future}
 class AuditEvents @Inject() (val auditConnector: DefaultAuditConnector)(implicit val ec: ExecutionContext)
     extends AuditService {
 
+  def auditSelectedCsvRadioButtons(selectedCsvFiles: Seq[String])(implicit hc: HeaderCarrier): Future[AuditResult] =
+    sendEvent(
+      "SelectedCsvRadioButtons",
+      Map(
+        "selectedCsvFiles" -> selectedCsvFiles.mkString(", ")
+      )
+    )
+
   def auditFileSize(schemeRef: String, fileSize: String)(implicit hc: HeaderCarrier): Future[AuditResult] =
     sendEvent(
       "UploadFileSizeFromUpscanCallback",
