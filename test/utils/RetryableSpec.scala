@@ -121,7 +121,6 @@ class RetryableSpec
         withCaptureOfLoggingFrom(retryTestLogger) { captureEvents =>
           val error: LoopException[Boolean] = intercept[LoopException[Boolean]] {
             await(retryMock.f.withRetry(3, maybeSchemeInfo = Some(schemeInfo), callingFunc = "RetryableSpec")(b => b), 1, SECONDS)
-//            retryMock.f.withRetry(3, maybeSchemeInfo = Some(schemeInfo), callingFunc = "RetryableSpec")(b => b).futureValue
           }
           assert(error == LoopException(3, Some(false)))
           assert(error.getMessage == "Failed to meet predicate after retrying 3 times.")
