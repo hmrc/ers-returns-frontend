@@ -187,7 +187,7 @@ class CsvFileUploadController @Inject() (
             case (_, _)                                                     => None
           }
         }
-        .withRetry(allCsvFilesCacheRetryAmount)(_.isDefined)
+        .withRetry(allCsvFilesCacheRetryAmount, Some(schemeInfo), "extractCsvCallbackData")(_.isDefined)
         .flatMap { files =>
           val csvFilesCallbackList: UpscanCsvFilesCallbackList = UpscanCsvFilesCallbackList(files.get)
           sessionService.cache(ersUtil.CHECK_CSV_FILES, csvFilesCallbackList).flatMap { _ =>
