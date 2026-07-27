@@ -40,7 +40,7 @@ trait Retryable extends Logging {
     )(pToBreakLoop: A => Boolean)(implicit actorSystem: ActorSystem, ec: ExecutionContext): Future[A] = {
       val delay: FiniteDuration                                       = appConfig.retryDelay
       val scheduler: Scheduler                                        = actorSystem.getScheduler
-      val schemeRef                                            = maybeSchemeInfo.map(_.schemeRef).getOrElse("NOT DEFINED")
+      val schemeRef                                                   = maybeSchemeInfo.map(_.schemeRef).getOrElse("NOT DEFINED")
       def loop(count: Int = 0, previous: Option[A] = None): Future[A] = {
         logger.info(s"[$callingFunc][withRetry] Retrying call x$count, schemeRef: $schemeRef")
         if (count < maxTimes) {
@@ -53,7 +53,9 @@ trait Retryable extends Logging {
           }
         } else {
           // Logging "EXHAUSTED MAX NUMBER OF RETRIES" will cause alert to be triggered
-          logger.info(s"[$callingFunc][withRetry] EXHAUSTED MAX NUMBER OF RETRIES ($maxTimes times), schemeRef: $schemeRef")
+          logger.info(
+            s"[$callingFunc][withRetry] EXHAUSTED MAX NUMBER OF RETRIES ($maxTimes times), schemeRef: $schemeRef"
+          )
           throw LoopException(count, previous)
         }
       }
