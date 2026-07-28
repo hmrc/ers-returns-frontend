@@ -274,6 +274,8 @@ ers_scheme_organiser.continue = Continue
 # Error messages
 #********************************************************************
 
+error.prefix = Error
+
 ers_scheme_organiser.err.summary.company_name_required = Enter the scheme organiser’s company name
 ers_scheme_organiser.err.summary.company_name_size = Reduce the number of characters entered for the company name
 ers_scheme_organiser.err.summary.address_line1_required = Enter the first line of scheme organiser’s company address

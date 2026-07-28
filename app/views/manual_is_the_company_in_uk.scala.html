@@ -29,8 +29,7 @@
         govukErrorSummary: GovukErrorSummary,
         govukInput: GovukInput,
         govukButton: GovukButton,
-        govukRadios: GovukRadios,
-        hmrcPageHeading: HmrcPageHeading
+        govukRadios: GovukRadios
 )
 
 @(requestObject: RequestObject, index: Int, companyBasedInUkForm: Form[models.CompanyBasedInUk], edit: Boolean, schemeOrganiser: Boolean)(implicit request: RequestHeader, messages: Messages, appConfig: ApplicationConfig)
@@ -46,7 +45,6 @@
 @scripts = {
     <script type="text/javascript" src='@controllers.routes.Assets.versioned("javascripts/uk-or-overseas-form-reveal.js")' @{CSPNonce.attr}></script>
 }
-
 
 @govuk_wrapper(title = messages("ers_manual_is_the_company_in_uk.title"), Some(scripts)) {
 
@@ -64,18 +62,32 @@
     @if(companyBasedInUkForm.hasErrors) {
         @govukErrorSummary(ErrorSummary(
             title = Text(messages("validation.summary.heading")),
-            errorList = companyBasedInUkForm.errors.asTextErrorLinks
+            errorList = companyBasedInUkForm.errors.map { error =>
+                ErrorLink(
+                    href = Some("#uk-radio-button"),
+                    content = Text(messages(error.message, error.args: _*))
+                )
+            }
         ))
     }
-
-    @hmrcPageHeading(PageHeading(
-        text = messages("ers_manual_is_the_company_in_uk.title")
-    ))
 
     @formWithCSRF(action = formAction) {
 
         @govukRadios(Radios(
-            name = "basedInUk",
+            name = companyBasedInUkFields.basedInUk,
+            fieldset = Some(Fieldset(
+                legend = Some(Legend(
+                    content = Text(messages("ers_manual_is_the_company_in_uk.title")),
+                    classes = "govuk-fieldset__legend--xl",
+                    isPageHeading = true
+                ))
+            )),
+            errorMessage = companyBasedInUkForm.error(companyBasedInUkFields.basedInUk).map { error =>
+                ErrorMessage(
+                    content = Text(messages(error.message, error.args: _*)),
+                    visuallyHiddenText = Some(messages("error.prefix"))
+                )
+            },
             items = Seq(
                 RadioItem(
                     checked = companyBasedInUkForm(companyBasedInUkFields.basedInUk).value.contains("0"),
