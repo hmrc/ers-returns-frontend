@@ -20,35 +20,39 @@ import controllers.auth.RequestWithOptionalAuthContext
 import models._
 import org.apache.pekko.stream.Materializer
 import org.jsoup.Jsoup
-import org.mockito.ArgumentMatchers._
+import org.mockito.ArgumentMatchers.{eq => eqTo, _}
 import org.mockito.Mockito._
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatest.{BeforeAndAfterEach, OptionValues}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status
-import play.api.i18n
+import play.api.{Logger, i18n}
 import play.api.i18n.{MessagesApi, MessagesImpl}
 import play.api.libs.json.JsValue
 import play.api.mvc._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.play.bootstrap.tools.LogCapturing
 import utils.Fixtures.ersRequestObject
 import utils._
 import views.html.{confirmation, global_error}
 
 import java.time.Instant
+import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.{ExecutionContext, Future}
 
 class ConfirmationPageControllerSpec
     extends AnyWordSpecLike
     with Matchers
     with OptionValues
-    with ERSFakeApplicationConfig
     with ErsTestHelper
     with BeforeAndAfterEach
-    with GuiceOneAppPerSuite {
+    with GuiceOneAppPerSuite
+    with LogCapturing {
+
+  val confirmationPageControllerLogger: Logger = Logger(classOf[ConfirmationPageController])
 
   val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
     messagesActionBuilder,
@@ -84,13 +88,15 @@ class ConfirmationPageControllerSpec
     val ersSummaryNilReturn2 =
       ErsSummary("testbundle", "2", None, Instant.now, rsc, None, None, None, None, None, None, None, None)
 
+    when(mockAppConfig.confirmationPageRateLimitTTLDuration).thenReturn(FiniteDuration(1, "s"))
+
     def buildFakeConfirmationPageController(
       isNilReturn: Boolean = false,
       bundleRes: Future[String] = Future.successful("Bundle12345"),
-      allDataRes: Future[ErsSummary] = Future.successful(ersSummary),
       ersMetaRes: Future[ErsMetaData] = Future.successful(rsc),
       presubmission: Future[HttpResponse] = Future.successful(HttpResponse(OK, "")),
-      requestObjectRes: Future[RequestObject] = Future.successful(ersRequestObject)
+      requestObjectRes: Future[RequestObject] = Future.successful(ersRequestObject),
+      saveAndSubmitWait: Boolean = false
     ): ConfirmationPageController =
       new ConfirmationPageController(
         mockMCC,
@@ -101,6 +107,8 @@ class ConfirmationPageControllerSpec
         confirmationView,
         testAuthAction
       ) {
+
+        override val logger: Logger = confirmationPageControllerLogger
 
         when(
           mockErsConnector.connectToEtmpSummarySubmit(anyString(), any[JsValue]())(any(), any())
@@ -123,10 +131,18 @@ class ConfirmationPageControllerSpec
           mockSessionService.fetch[RequestObject](refEq("ErsRequestObject"))(any(), any())
         ) thenReturn requestObjectRes
 
+        when(mockErsConnector.saveMetadata(any())(any(), any())) thenReturn Future.successful(HttpResponse(OK))
+        when(mockErsConnector.submitReturnToBackend(any())(any(), any())) thenReturn Future.successful(HttpResponse(OK))
+
         override def saveAndSubmit(alldata: ErsSummary, all: ErsMetaData, bundle: String)(implicit
           request: RequestWithOptionalAuthContext[AnyContent],
           hc: HeaderCarrier
-        ): Future[Result] = Future(Ok)
+        ): Future[Result] = {
+          if (saveAndSubmitWait) {
+            Thread.sleep(2000L) // wait 2s
+          }
+          super.saveAndSubmit(alldata, all, bundle)
+        }
       }
 
     "give a redirect status (to company authentication frontend) if user is not authenticated" in {
@@ -270,6 +286,31 @@ class ConfirmationPageControllerSpec
       status(result)        shouldBe Status.OK
       contentAsString(result) should include(testMessages("ers_confirmation.submitted"))
     }
+
+    "log a RateLimitedException when multiple requests are made to confirmationPage within rate limit, return global " +
+      "error page for requests outside limit" in {
+        setAuthMocks()
+
+        val controllerUnderTest: ConfirmationPageController =
+          buildFakeConfirmationPageController(saveAndSubmitWait = true)
+
+        withCaptureOfLoggingFrom(confirmationPageControllerLogger) { captureEvents =>
+          val callOne: Future[Result] =
+            controllerUnderTest.confirmationPage().apply(Fixtures.buildFakeRequestWithSessionId("GET"))
+          val callTwo: Future[Result] =
+            controllerUnderTest.confirmationPage().apply(Fixtures.buildFakeRequestWithSessionId("GET"))
+
+          contentAsString(callOne) should include(testMessages("ers_confirmation.submitted"))
+          contentAsString(callTwo) should include(testMessages("ers.global_errors.message"))
+
+          val expectedRateLimitLogs: Seq[String] = Seq(
+            "[Throttle][withThrottle] Request failed to acquire a permit at a tps of 1 second",
+            "[ConfirmationPageController][confirmationPage] Encountered RateLimitedException"
+          )
+          captureEvents.map(_.getMessage) should contain allElementsOf expectedRateLimitLogs
+        }
+
+      }
 
   }
 

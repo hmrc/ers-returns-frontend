@@ -24,6 +24,7 @@ import metrics.Metrics
 import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.mvc._
+import repositories.RateLimiterCache
 import services.FrontendSessionService
 import services.audit.AuditEvents
 import uk.gov.hmrc.http.HeaderCarrier
@@ -31,7 +32,7 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.SessionKeys.{BUNDLE_REF, DATE_TIME_SUBMITTED}
 import utils._
 
-import java.time.ZoneId
+import java.time.{Instant, ZoneId}
 import java.time.format.DateTimeFormatter
 import java.util.concurrent.TimeUnit
 import javax.inject.{Inject, Singleton}
@@ -47,16 +48,26 @@ class ConfirmationPageController @Inject() (
   confirmationView: views.html.confirmation,
   authAction: AuthAction
 )(implicit val ec: ExecutionContext, val ersUtil: ERSUtil, val appConfig: ApplicationConfig)
-    extends FrontendController(mcc) with I18nSupport with Metrics with JsonParser with Logging {
+    extends FrontendController(mcc) with I18nSupport with Metrics with JsonParser with Logging with Throttle {
 
-  def confirmationPage(): Action[AnyContent] = authAction.async { implicit request =>
-    sessionService.fetch[ErsMetaData](ersUtil.ERS_METADATA).map { ele =>
-      logger.info(
-        s"[ConfirmationPageController][confirmationPage] Fetched request object with SAP Number: ${ele.sapNumber} " +
-          s"and schemeRef: ${ele.schemeInfo.schemeRef}"
-      )
+  val rateLimiterCache: RateLimiterCache = new RateLimiterCache(appConfig.confirmationPageRateLimitTTLDuration)
+
+  def confirmationPage() = authAction.async { implicit request =>
+    {
+      for {
+        metadata: ErsMetaData <- sessionService.fetch[ErsMetaData](ersUtil.ERS_METADATA)
+        _                      =
+          logger.info(
+            s"[ConfirmationPageController][confirmationPage] Fetched request object with SAP Number: ${metadata.sapNumber} " +
+              s"and schemeRef: ${metadata.schemeInfo.schemeRef}"
+          )
+        rateLimitId: String    = s"${metadata.schemeInfo.schemeRef}-${metadata.schemeInfo.taxYear}-${metadata.empRef}"
+        output                <- withThrottle(rateLimitId, showConfirmationPage()(request, hc))
+      } yield output
+    }.recoverWith { case RateLimitedException =>
+      logger.info("[ConfirmationPageController][confirmationPage] Encountered RateLimitedException")
+      Future.successful(getGlobalErrorPage)
     }
-    showConfirmationPage()(request, hc)
   }
 
   def showConfirmationPage()(implicit

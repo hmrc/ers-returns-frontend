@@ -4,7 +4,7 @@ object AppDependencies {
 
   private val openHtmlVersion  = "1.1.34"
   private val bootstrapVersion = "10.7.0"
-  private val mongoVersion     = "2.12.0"
+  private val mongoVersion     = "2.13.0"
 
   private val compile: Seq[ModuleID] = Seq(
     "uk.gov.hmrc"            %% "bootstrap-frontend-play-30" % bootstrapVersion,
@@ -14,7 +14,8 @@ object AppDependencies {
     "io.github.openhtmltopdf" % "openhtmltopdf-pdfbox"       % openHtmlVersion,
     "commons-codec"           % "commons-codec"              % "1.21.0",
     "commons-io"              % "commons-io"                 % "2.21.0",
-    "io.github.openhtmltopdf" % "openhtmltopdf-svg-support"  % openHtmlVersion
+    "io.github.openhtmltopdf" % "openhtmltopdf-svg-support"  % openHtmlVersion,
+    "com.github.blemale"     %% "scaffeine"                  % "5.3.0"
   )
 
   private val test: Seq[ModuleID] = Seq(
