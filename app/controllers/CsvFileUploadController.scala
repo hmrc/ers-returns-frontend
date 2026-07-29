@@ -29,7 +29,6 @@ import services.audit.AuditEvents
 import services.{FrontendSessionService, UpscanService}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.mongo.cache.DataKey
-import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils._
 

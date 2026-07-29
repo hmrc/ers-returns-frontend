@@ -17,7 +17,6 @@
 package utils
 
 import config.ApplicationConfig
-import controllers.CsvFileUploadController
 import models.SchemeInfo
 import org.apache.pekko.actor.ActorSystem
 import org.mockito.Mockito.{times, verify, when}
@@ -67,14 +66,14 @@ class RetryableSpec
   def generateExpectedRetryLogMessages(
     numberRetryLogs: Int,
     appendMaxNumberRetiresMessage: Boolean = false,
-    schemeRef: String = "NOT DEFINED"
+    schemeRef: String = "<<NOT DEFINED>>"
   ): Seq[String] = {
     val retryLogMessages: Seq[String] = (0 until numberRetryLogs).map((retry: Int) =>
-      s"[RetryableSpec][withRetry] Retrying call x$retry, schemeRef: $schemeRef"
+      s"[Retryable][withRetry] - [RetryableSpec] call x$retry, schemeRef: $schemeRef"
     )
     if (appendMaxNumberRetiresMessage) {
-      retryLogMessages :+ s"[RetryableSpec][withRetry] EXHAUSTED MAX NUMBER OF RETRIES (${numberRetryLogs - 1} times)," +
-        s" schemeRef: $schemeRef"
+      retryLogMessages :+ s"[Retryable][withRetry] - [RetryableSpec] EXHAUSTED_MAX_NUMBER_OF_RETRIES " +
+        s"(${numberRetryLogs - 1} times), schemeRef: $schemeRef"
     } else {
       retryLogMessages
     }
@@ -84,7 +83,7 @@ class RetryableSpec
 
     "return the future data once the predicate has been fulfilled" in new RetryTest {
       when(retryMock.f).thenReturn(Future.successful(true))
-      val expectedLogMessage = "[RetryableSpec][withRetry] Retrying call x0, schemeRef: NOT DEFINED"
+      val expectedLogMessage = "[Retryable][withRetry] - [RetryableSpec] call x0, schemeRef: <<NOT DEFINED>>"
       withCaptureOfLoggingFrom(retryTestLogger) { captureEvents =>
         val result: Boolean = retryMock.f.withRetry(5, callingFunc = "RetryableSpec")(b => b).futureValue
         assert(result)
@@ -104,7 +103,7 @@ class RetryableSpec
       withCaptureOfLoggingFrom(retryTestLogger) { captureEvents =>
         val result: Boolean = retryMock.f.withRetry(5, callingFunc = "RetryableSpec")(b => b).futureValue
         assert(result)
-        assert(captureEvents.map(_.getMessage) == generateExpectedRetryLogMessages(3))
+        captureEvents.map(_.getMessage) should contain theSameElementsAs generateExpectedRetryLogMessages(3)
       }
 
       verify(retryMock, times(3)).f
@@ -128,15 +127,11 @@ class RetryableSpec
             SECONDS
           )
         }
-        assert(error == LoopException(3, Some(false)))
-        assert(error.getMessage == "Failed to meet predicate after retrying 3 times.")
-        assert(
-          captureEvents.map(_.getMessage) == generateExpectedRetryLogMessages(
-            4,
-            schemeRef = "XA1100000000000",
-            appendMaxNumberRetiresMessage = true
-          )
-        )
+        error            shouldBe LoopException(3, Some(false))
+        error.getMessage shouldBe "Failed to meet predicate after retrying 3 times."
+        val expectedRetryLogMessages =
+          generateExpectedRetryLogMessages(4, schemeRef = "XA1100000000000", appendMaxNumberRetiresMessage = true)
+        captureEvents.map(_.getMessage) should contain theSameElementsAs expectedRetryLogMessages
       }
 
       verify(retryMock, times(3)).f
