@@ -72,7 +72,7 @@ class FileUploadController @Inject() (
 
   def success(): Action[AnyContent] = authAction.async { implicit request =>
     val futureCallbackData: Future[Option[UploadStatus]] =
-      ersConnector.getCallbackRecord.withRetry(appConfig.odsSuccessRetryAmount) { opt =>
+      ersConnector.getCallbackRecord.withRetry(appConfig.odsSuccessRetryAmount, callingFunc = "success") { opt =>
         opt.fold(true) {
           case _: UploadedSuccessfully | Failed => true
           case _                                => false
@@ -132,9 +132,10 @@ class FileUploadController @Inject() (
   }
 
   def validationResults(): Action[AnyContent] = authAction.async { implicit request =>
-    val futureCallbackData = ersConnector.getCallbackRecord.withRetry(appConfig.odsValidationRetryAmount)(
-      _.exists(_.isInstanceOf[UploadedSuccessfully])
-    )
+    val futureCallbackData =
+      ersConnector.getCallbackRecord.withRetry(appConfig.odsValidationRetryAmount, callingFunc = "validationResults")(
+        _.exists(_.isInstanceOf[UploadedSuccessfully])
+      )
 
     (for {
       all                <- sessionService.fetch[ErsMetaData](ersUtil.ERS_METADATA)

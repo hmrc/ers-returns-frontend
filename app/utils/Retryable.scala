@@ -17,6 +17,7 @@
 package utils
 
 import config.ApplicationConfig
+import models.SchemeInfo
 import org.apache.pekko.actor.{ActorSystem, Scheduler}
 import org.apache.pekko.pattern.after
 import play.api.Logging
@@ -33,12 +34,15 @@ trait Retryable extends Logging {
   implicit class RetryCache[A](f: => Future[A]) {
 
     def withRetry(
-      maxTimes: Int
+      maxTimes: Int,
+      maybeSchemeInfo: Option[SchemeInfo] = None,
+      callingFunc: String
     )(pToBreakLoop: A => Boolean)(implicit actorSystem: ActorSystem, ec: ExecutionContext): Future[A] = {
       val delay: FiniteDuration                                       = appConfig.retryDelay
       val scheduler: Scheduler                                        = actorSystem.getScheduler
+      val schemeRef                                                   = maybeSchemeInfo.map(_.schemeRef).getOrElse("<<NOT DEFINED>>")
       def loop(count: Int = 0, previous: Option[A] = None): Future[A] = {
-        logger.info(s"Retrying call x$count")
+        logger.info(s"[Retryable][withRetry] - [$callingFunc] call x$count, schemeRef: $schemeRef")
         if (count < maxTimes) {
           f.flatMap { data =>
             if (pToBreakLoop(data)) {
@@ -48,6 +52,10 @@ trait Retryable extends Logging {
             }
           }
         } else {
+          // Logging "EXHAUSTED MAX NUMBER OF RETRIES" will cause alert to be triggered
+          logger.info(
+            s"[Retryable][withRetry] - [$callingFunc] EXHAUSTED_MAX_NUMBER_OF_RETRIES ($maxTimes times), schemeRef: $schemeRef"
+          )
           throw LoopException(count, previous)
         }
       }
