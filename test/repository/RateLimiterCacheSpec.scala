@@ -39,12 +39,13 @@ class RateLimiterCacheSpec extends AnyWordSpecLike {
     "insert and retrieve a key value pair from cache" in new RateLimitCacheTest(
       new FiniteDuration(10, TimeUnit.SECONDS)
     ) {
-      rateLimiterCache.insertRateLimiter("123", Instant.now())
-      rateLimiterCache.insertRateLimiter("456", Instant.now())
-      rateLimiterCache.insertRateLimiter("789", Instant.now())
-      assert(rateLimiterCache.getRateLimiter("123").isDefined)
-      assert(rateLimiterCache.getRateLimiter("456").isDefined)
-      assert(rateLimiterCache.getRateLimiter("789").isDefined)
+      val createdAt: Instant = Instant.parse("2026-08-04T12:30:00Z")
+      rateLimiterCache.insertRateLimiter("123", createdAt)
+      rateLimiterCache.insertRateLimiter("456", createdAt)
+      rateLimiterCache.insertRateLimiter("789", createdAt)
+      rateLimiterCache.getRateLimiter("123") mustBe Some(createdAt)
+      rateLimiterCache.getRateLimiter("456") mustBe Some(createdAt)
+      rateLimiterCache.getRateLimiter("789") mustBe Some(createdAt)
     }
 
     "overwrite records which the same key" in new RateLimitCacheTest(new FiniteDuration(10, TimeUnit.SECONDS)) {
