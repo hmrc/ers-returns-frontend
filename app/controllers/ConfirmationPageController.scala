@@ -37,6 +37,7 @@ import java.time.format.DateTimeFormatter
 import java.util.concurrent.TimeUnit
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.Try
 
 @Singleton
 class ConfirmationPageController @Inject() (
@@ -44,13 +45,20 @@ class ConfirmationPageController @Inject() (
   val ersConnector: ErsConnector,
   val auditEvents: AuditEvents,
   val sessionService: FrontendSessionService,
+  val rateLimiterCache: RateLimiterCache,
   globalErrorView: views.html.global_error,
   confirmationView: views.html.confirmation,
   authAction: AuthAction
 )(implicit val ec: ExecutionContext, val ersUtil: ERSUtil, val appConfig: ApplicationConfig)
     extends FrontendController(mcc) with I18nSupport with Metrics with JsonParser with Logging with Throttle {
 
-  val rateLimiterCache: RateLimiterCache = new RateLimiterCache(appConfig.confirmationPageRateLimitTTLDuration)
+  def generateRateLimitId(metadata: ErsMetaData): String = {
+    val MISSING_ID: String = "<<<MISSING>>>"
+    val schemeRef          = Try(metadata.schemeInfo.schemeRef).toOption.getOrElse(MISSING_ID)
+    val taxYear            = Try(metadata.schemeInfo.taxYear).toOption.getOrElse(MISSING_ID)
+    val empRef             = Try(metadata.empRef).toOption.getOrElse(MISSING_ID)
+    s"$schemeRef-$taxYear-$empRef"
+  }
 
   def confirmationPage() = authAction.async { implicit request =>
     {
@@ -61,8 +69,7 @@ class ConfirmationPageController @Inject() (
             s"[ConfirmationPageController][confirmationPage] Fetched request object with SAP Number: ${metadata.sapNumber} " +
               s"and schemeRef: ${metadata.schemeInfo.schemeRef}"
           )
-        rateLimitId: String    = s"${metadata.schemeInfo.schemeRef}-${metadata.schemeInfo.taxYear}-${metadata.empRef}"
-        output                <- withThrottle(rateLimitId, showConfirmationPage()(request, hc))
+        output                <- withThrottle(generateRateLimitId(metadata), showConfirmationPage()(request, hc))
       } yield output
     }.recoverWith { case RateLimitedException =>
       logger.info("[ConfirmationPageController][confirmationPage] Encountered RateLimitedException")

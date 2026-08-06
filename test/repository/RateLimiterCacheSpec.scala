@@ -17,12 +17,15 @@
 package repository
 
 import scala.concurrent.duration._
-
 import com.github.benmanes.caffeine.cache.Ticker
+import com.github.benmanes.caffeine.cache.Ticker.systemTicker
 import com.github.blemale.scaffeine.{Cache, Scaffeine}
+import config.ApplicationConfig
+import org.mockito.Mockito.when
 import org.scalatest.matchers.must.Matchers.convertToAnyMustWrapper
 import org.scalatest.wordspec.AnyWordSpecLike
 import repositories.RateLimiterCache
+import utils.Fixtures.mock
 
 import java.time.Instant
 import java.util.concurrent.TimeUnit
@@ -31,67 +34,67 @@ import scala.concurrent.duration.FiniteDuration
 
 class RateLimiterCacheSpec extends AnyWordSpecLike {
 
-  class RateLimitCacheTest(expiry: FiniteDuration) {
-    val rateLimiterCache: RateLimiterCache = new RateLimiterCache(expiry)
+  val staticCreatedAt: Instant = Instant.parse("2026-08-04T12:30:00Z")
+
+  class RateLimitCacheTestSetup(
+    expiry: FiniteDuration,
+    ticker: Ticker = systemTicker,
+    initData: Map[String, Instant] = Map.empty[String, Instant]
+  ) {
+    val mockAppConfigWithExpiry: ApplicationConfig = mock[ApplicationConfig]
+    when(mockAppConfigWithExpiry.confirmationPageRateLimitTTLDuration).thenReturn(expiry)
+
+    val rateLimiterCache: RateLimiterCache = new RateLimiterCache(mockAppConfigWithExpiry) {
+      override protected val cache: Cache[String, Instant] = Scaffeine()
+        .expireAfterWrite(expiry)
+        .ticker(ticker)
+        .build[String, Instant]()
+
+      cache.putAll(initData)
+    }
+
   }
 
-  "RateLimiterCache" should {
-    "insert and retrieve a key value pair from cache" in new RateLimitCacheTest(
-      new FiniteDuration(10, TimeUnit.SECONDS)
-    ) {
-      val createdAt: Instant = Instant.parse("2026-08-04T12:30:00Z")
-      rateLimiterCache.insertRateLimiter("123", createdAt)
-      rateLimiterCache.insertRateLimiter("456", createdAt)
-      rateLimiterCache.insertRateLimiter("789", createdAt)
-      rateLimiterCache.getRateLimiter("123") mustBe Some(createdAt)
-      rateLimiterCache.getRateLimiter("456") mustBe Some(createdAt)
-      rateLimiterCache.getRateLimiter("789") mustBe Some(createdAt)
-    }
+  object customTicker extends Ticker {
+    private val time = new AtomicLong(0L)
 
-    "overwrite records which the same key" in new RateLimitCacheTest(new FiniteDuration(10, TimeUnit.SECONDS)) {
-      rateLimiterCache.insertRateLimiter("123", Instant.parse("2026-08-04T12:30:00Z"))
-      rateLimiterCache.insertRateLimiter("123", Instant.parse("2026-08-04T12:31:00Z"))
-      rateLimiterCache.getRateLimiter("123") mustBe Some(Instant.parse("2026-08-04T12:31:00Z"))
-    }
+    def advance(nanos: Long): Unit = time.addAndGet(nanos)
+    override def read(): Long      = time.get()
   }
 
-  "getRateLimiter" should {
-
-    "return None if there is no rate limit for a given id" in new RateLimitCacheTest(
+  "rateLimitPresentInCache" should {
+    "return false if a rate limit with a given id is not in the cache" in new RateLimitCacheTestSetup(
       new FiniteDuration(10, TimeUnit.SECONDS)
     ) {
-      rateLimiterCache.getRateLimiter("123") mustBe None
+      rateLimiterCache.rateLimitPresentInCache("123", staticCreatedAt) mustBe false
+      rateLimiterCache.rateLimitPresentInCache("456", staticCreatedAt) mustBe false
+      rateLimiterCache.rateLimitPresentInCache("789", staticCreatedAt) mustBe false
     }
 
-    "return None only when the rate limiter record has expired" in {
+    "return true if there is already a record with a given id" in new RateLimitCacheTestSetup(
+      new FiniteDuration(10, TimeUnit.SECONDS),
+      initData = Map(
+        ("123", staticCreatedAt)
+      )
+    ) {
+      rateLimiterCache.rateLimitPresentInCache("123", staticCreatedAt) mustBe true
+    }
 
-      class CustomTicker extends Ticker {
-        private val time = new AtomicLong(0L)
+    "return false only when the rate limiter record has expired" in new RateLimitCacheTestSetup(
+      new FiniteDuration(60L, TimeUnit.SECONDS),
+      customTicker,
+      initData = Map(
+        ("123", staticCreatedAt)
+      )
+    ) {
+      customTicker.advance(30.seconds.toNanos) // Advance 30s
+      rateLimiterCache.rateLimitPresentInCache("123", staticCreatedAt) mustBe true
 
-        def advance(nanos: Long): Unit = time.addAndGet(nanos)
-        override def read(): Long      = time.get()
-      }
+      customTicker.advance(29.seconds.toNanos) // Advance 29s
+      rateLimiterCache.rateLimitPresentInCache("123", staticCreatedAt) mustBe true
 
-      val ticker: CustomTicker = new CustomTicker()
-
-      val rateLimiterCache: RateLimiterCache = new RateLimiterCache(new FiniteDuration(60L, TimeUnit.SECONDS)) {
-        override protected val cache: Cache[String, Instant] = Scaffeine()
-          .expireAfterWrite(new FiniteDuration(60L, TimeUnit.SECONDS))
-          .ticker(ticker)
-          .build[String, Instant]()
-      }
-
-      val createdAtTime: Instant = Instant.now()
-      rateLimiterCache.insertRateLimiter("123", createdAtTime)
-
-      ticker.advance(30.seconds.toNanos) // Advance 30s
-      rateLimiterCache.getRateLimiter("123") mustBe Some(createdAtTime)
-
-      ticker.advance(29.seconds.toNanos) // Advance 29s
-      rateLimiterCache.getRateLimiter("123") mustBe Some(createdAtTime)
-
-      ticker.advance(1.seconds.toNanos) // Advance 1s
-      rateLimiterCache.getRateLimiter("123") mustBe None
+      customTicker.advance(1.seconds.toNanos) // Advance 1s
+      rateLimiterCache.rateLimitPresentInCache("123", staticCreatedAt) mustBe false
     }
   }
 

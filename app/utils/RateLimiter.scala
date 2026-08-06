@@ -31,14 +31,13 @@ trait Throttle extends Logging {
     rateLimitId: String,
     block: => Future[A]
   ): Future[A] =
-    if (rateLimiterCache.getRateLimiter(rateLimitId).isEmpty) {
-      rateLimiterCache.insertRateLimiter(rateLimitId, Instant.now())
-      block
-    } else {
+    if (rateLimiterCache.rateLimitPresentInCache(rateLimitId, Instant.now())) {
       logger.error(
         s"[Throttle][withThrottle] Request failed to acquire a permit at a tps of ${rateLimiterCache.maxTpsForConfirmationPageGet}"
       )
       Future.failed(RateLimitedException)
+    } else {
+      block
     }
 
 }

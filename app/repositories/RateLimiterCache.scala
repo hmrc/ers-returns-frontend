@@ -17,22 +17,22 @@
 package repositories
 
 import com.github.blemale.scaffeine.{Cache, Scaffeine}
+import config.ApplicationConfig
 
 import java.time.Instant
-import javax.inject.Singleton
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.duration.FiniteDuration
 
 @Singleton
-class RateLimiterCache(val maxTpsForConfirmationPageGet: FiniteDuration) {
+class RateLimiterCache @Inject() (appConfig: ApplicationConfig) {
+
+  val maxTpsForConfirmationPageGet: FiniteDuration = appConfig.confirmationPageRateLimitTTLDuration
 
   protected val cache: Cache[String, Instant] = Scaffeine()
     .expireAfterWrite(maxTpsForConfirmationPageGet)
     .build[String, Instant]()
 
-  def insertRateLimiter(rateLimitId: String, createAt: Instant): Unit =
-    cache.put(rateLimitId, createAt)
-
-  def getRateLimiter(rateLimitId: String): Option[Instant] =
-    cache.getIfPresent(rateLimitId)
+  def rateLimitPresentInCache(rateLimitId: String, createAt: Instant): Boolean =
+    cache.underlying.asMap().putIfAbsent(rateLimitId, createAt) != null
 
 }

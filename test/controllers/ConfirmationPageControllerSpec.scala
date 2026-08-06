@@ -33,6 +33,7 @@ import play.api.libs.json.JsValue
 import play.api.mvc._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import repositories.RateLimiterCache
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.tools.LogCapturing
 import utils.Fixtures.ersRequestObject
@@ -77,6 +78,7 @@ class ConfirmationPageControllerSpec
     when(mockErsUtil.ERS_METADATA).thenReturn("ErsMetaData")
     when(mockErsUtil.OPTION_NIL_RETURN).thenReturn("2")
     when(mockErsUtil.VALIDATED_SHEETS).thenReturn("validated-sheets")
+    when(mockAppConfig.confirmationPageRateLimitTTLDuration).thenReturn(FiniteDuration(10, "s"))
   }
 
   "calling showConfirmationPage" should {
@@ -88,21 +90,19 @@ class ConfirmationPageControllerSpec
     val ersSummaryNilReturn2 =
       ErsSummary("testbundle", "2", None, Instant.now, rsc, None, None, None, None, None, None, None, None)
 
-    when(mockAppConfig.confirmationPageRateLimitTTLDuration).thenReturn(FiniteDuration(1, "s"))
-
     def buildFakeConfirmationPageController(
       isNilReturn: Boolean = false,
       bundleRes: Future[String] = Future.successful("Bundle12345"),
       ersMetaRes: Future[ErsMetaData] = Future.successful(rsc),
       presubmission: Future[HttpResponse] = Future.successful(HttpResponse(OK, "")),
-      requestObjectRes: Future[RequestObject] = Future.successful(ersRequestObject),
-      saveAndSubmitWait: Boolean = false
+      requestObjectRes: Future[RequestObject] = Future.successful(ersRequestObject)
     ): ConfirmationPageController =
       new ConfirmationPageController(
         mockMCC,
         mockErsConnector,
         mockAuditEvents,
         mockSessionService,
+        new RateLimiterCache(mockAppConfig),
         globalErrorView,
         confirmationView,
         testAuthAction
@@ -133,16 +133,6 @@ class ConfirmationPageControllerSpec
 
         when(mockErsConnector.saveMetadata(any())(any(), any())) thenReturn Future.successful(HttpResponse(OK))
         when(mockErsConnector.submitReturnToBackend(any())(any(), any())) thenReturn Future.successful(HttpResponse(OK))
-
-        override def saveAndSubmit(alldata: ErsSummary, all: ErsMetaData, bundle: String)(implicit
-          request: RequestWithOptionalAuthContext[AnyContent],
-          hc: HeaderCarrier
-        ): Future[Result] = {
-          if (saveAndSubmitWait) {
-            Thread.sleep(2000L) // wait 2s
-          }
-          super.saveAndSubmit(alldata, all, bundle)
-        }
       }
 
     "give a redirect status (to company authentication frontend) if user is not authenticated" in {
@@ -292,11 +282,13 @@ class ConfirmationPageControllerSpec
         setAuthMocks()
 
         val controllerUnderTest: ConfirmationPageController =
-          buildFakeConfirmationPageController(saveAndSubmitWait = true)
+          buildFakeConfirmationPageController()
 
         withCaptureOfLoggingFrom(confirmationPageControllerLogger) { captureEvents =>
           val callOne: Future[Result] =
             controllerUnderTest.confirmationPage().apply(Fixtures.buildFakeRequestWithSessionId("GET"))
+
+          Thread.sleep(1000L) // Wait for first request to insert record into cache
           val callTwo: Future[Result] =
             controllerUnderTest.confirmationPage().apply(Fixtures.buildFakeRequestWithSessionId("GET"))
 
@@ -304,7 +296,7 @@ class ConfirmationPageControllerSpec
           contentAsString(callTwo) should include(testMessages("ers.global_errors.message"))
 
           val expectedRateLimitLogs: Seq[String] = Seq(
-            "[Throttle][withThrottle] Request failed to acquire a permit at a tps of 1 second",
+            "[Throttle][withThrottle] Request failed to acquire a permit at a tps of 10 seconds",
             "[ConfirmationPageController][confirmationPage] Encountered RateLimitedException"
           )
           captureEvents.map(_.getMessage) should contain allElementsOf expectedRateLimitLogs
@@ -330,6 +322,7 @@ class ConfirmationPageControllerSpec
         mockErsConnector,
         mockAuditEvents,
         mockSessionService,
+        new RateLimiterCache(mockAppConfig),
         globalErrorView,
         confirmationView,
         testAuthAction
