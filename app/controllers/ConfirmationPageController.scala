@@ -24,6 +24,7 @@ import metrics.Metrics
 import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.mvc._
+import repositories.RateLimiterCache
 import services.FrontendSessionService
 import services.audit.AuditEvents
 import uk.gov.hmrc.http.HeaderCarrier
@@ -31,11 +32,12 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.SessionKeys.{BUNDLE_REF, DATE_TIME_SUBMITTED}
 import utils._
 
-import java.time.ZoneId
+import java.time.{Instant, ZoneId}
 import java.time.format.DateTimeFormatter
 import java.util.concurrent.TimeUnit
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.Try
 
 @Singleton
 class ConfirmationPageController @Inject() (
@@ -43,20 +45,36 @@ class ConfirmationPageController @Inject() (
   val ersConnector: ErsConnector,
   val auditEvents: AuditEvents,
   val sessionService: FrontendSessionService,
+  val rateLimiterCache: RateLimiterCache,
   globalErrorView: views.html.global_error,
   confirmationView: views.html.confirmation,
   authAction: AuthAction
 )(implicit val ec: ExecutionContext, val ersUtil: ERSUtil, val appConfig: ApplicationConfig)
-    extends FrontendController(mcc) with I18nSupport with Metrics with JsonParser with Logging {
+    extends FrontendController(mcc) with I18nSupport with Metrics with JsonParser with Logging with Throttle {
 
-  def confirmationPage(): Action[AnyContent] = authAction.async { implicit request =>
-    sessionService.fetch[ErsMetaData](ersUtil.ERS_METADATA).map { ele =>
-      logger.info(
-        s"[ConfirmationPageController][confirmationPage] Fetched request object with SAP Number: ${ele.sapNumber} " +
-          s"and schemeRef: ${ele.schemeInfo.schemeRef}"
-      )
+  def generateRateLimitId(metadata: ErsMetaData): String = {
+    val MISSING_ID: String = "<<<MISSING>>>"
+    val schemeRef          = Try(metadata.schemeInfo.schemeRef).toOption.getOrElse(MISSING_ID)
+    val taxYear            = Try(metadata.schemeInfo.taxYear).toOption.getOrElse(MISSING_ID)
+    val empRef             = Try(metadata.empRef).toOption.getOrElse(MISSING_ID)
+    s"$schemeRef-$taxYear-$empRef"
+  }
+
+  def confirmationPage() = authAction.async { implicit request =>
+    {
+      for {
+        metadata: ErsMetaData <- sessionService.fetch[ErsMetaData](ersUtil.ERS_METADATA)
+        _                      =
+          logger.info(
+            s"[ConfirmationPageController][confirmationPage] Fetched request object with SAP Number: ${metadata.sapNumber} " +
+              s"and schemeRef: ${metadata.schemeInfo.schemeRef}"
+          )
+        output                <- withThrottle(generateRateLimitId(metadata), showConfirmationPage()(request, hc))
+      } yield output
+    }.recoverWith { case RateLimitedException =>
+      logger.info("[ConfirmationPageController][confirmationPage] Encountered RateLimitedException")
+      Future.successful(getGlobalErrorPage)
     }
-    showConfirmationPage()(request, hc)
   }
 
   def showConfirmationPage()(implicit

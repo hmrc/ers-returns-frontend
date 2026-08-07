@@ -79,4 +79,7 @@ class ApplicationConfig @Inject() (config: ServicesConfig) {
   lazy val uploadFileSizeLimit: Int   = config.getInt("file-size.uploadSizeLimit")
   lazy val uploadFileSizeInMB: Double = uploadFileSizeLimit / 1000 / 1000.toDouble
 
+  val confirmationPageRateLimitTTLDuration: FiniteDuration =
+    FiniteDuration(config.getInt("confirmation-page-get.maxTps"), "s")
+
 }
