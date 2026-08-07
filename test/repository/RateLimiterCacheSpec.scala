@@ -62,13 +62,13 @@ class RateLimiterCacheSpec extends AnyWordSpecLike {
     override def read(): Long      = time.get()
   }
 
-  "rateLimitPresentInCache" should {
+  "isRateLimitPresentInCache" should {
     "return false if a rate limit with a given id is not in the cache" in new RateLimitCacheTestSetup(
       new FiniteDuration(10, TimeUnit.SECONDS)
     ) {
-      rateLimiterCache.rateLimitPresentInCache("123", staticCreatedAt) mustBe false
-      rateLimiterCache.rateLimitPresentInCache("456", staticCreatedAt) mustBe false
-      rateLimiterCache.rateLimitPresentInCache("789", staticCreatedAt) mustBe false
+      rateLimiterCache.isRateLimitPresentInCache("123", staticCreatedAt) mustBe false
+      rateLimiterCache.isRateLimitPresentInCache("456", staticCreatedAt) mustBe false
+      rateLimiterCache.isRateLimitPresentInCache("789", staticCreatedAt) mustBe false
     }
 
     "return true if there is already a record with a given id" in new RateLimitCacheTestSetup(
@@ -77,7 +77,7 @@ class RateLimiterCacheSpec extends AnyWordSpecLike {
         ("123", staticCreatedAt)
       )
     ) {
-      rateLimiterCache.rateLimitPresentInCache("123", staticCreatedAt) mustBe true
+      rateLimiterCache.isRateLimitPresentInCache("123", staticCreatedAt) mustBe true
     }
 
     "return false only when the rate limiter record has expired" in new RateLimitCacheTestSetup(
@@ -88,13 +88,13 @@ class RateLimiterCacheSpec extends AnyWordSpecLike {
       )
     ) {
       customTicker.advance(30.seconds.toNanos) // Advance 30s
-      rateLimiterCache.rateLimitPresentInCache("123", staticCreatedAt) mustBe true
+      rateLimiterCache.isRateLimitPresentInCache("123", staticCreatedAt) mustBe true
 
       customTicker.advance(29.seconds.toNanos) // Advance 29s
-      rateLimiterCache.rateLimitPresentInCache("123", staticCreatedAt) mustBe true
+      rateLimiterCache.isRateLimitPresentInCache("123", staticCreatedAt) mustBe true
 
       customTicker.advance(1.seconds.toNanos) // Advance 1s
-      rateLimiterCache.rateLimitPresentInCache("123", staticCreatedAt) mustBe false
+      rateLimiterCache.isRateLimitPresentInCache("123", staticCreatedAt) mustBe false
     }
   }
 

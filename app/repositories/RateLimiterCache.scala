@@ -32,7 +32,7 @@ class RateLimiterCache @Inject() (appConfig: ApplicationConfig) {
     .expireAfterWrite(maxTpsForConfirmationPageGet)
     .build[String, Instant]()
 
-  def rateLimitPresentInCache(rateLimitId: String, createAt: Instant): Boolean =
+  def isRateLimitPresentInCache(rateLimitId: String, createAt: Instant): Boolean =
     cache.underlying.asMap().putIfAbsent(rateLimitId, createAt) != null
 
 }
