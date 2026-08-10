@@ -374,7 +374,7 @@ class FrontendSessionServiceSpec
   }
 
   "fetch" should {
-    val key       = "testKey"
+    val key = "testKey"
     "return data when it is successfully found in the session" in {
       val testData = "testData"
 
@@ -385,14 +385,13 @@ class FrontendSessionServiceSpec
       result shouldBe testData
     }
 
-
     "throw Exception when an unexpected exception occurs" in {
       val exception = new RuntimeException("Test exception")
 
       when(frontendSessionsRepository.getFromSession[String](DataKey(eqTo(key)))(any(), any()))
         .thenReturn(Future.failed(exception))
 
-      val thrown =  testService.fetch[String](key).failed.futureValue
+      val thrown = testService.fetch[String](key).failed.futureValue
 
       thrown.getMessage should include("Test exception")
     }

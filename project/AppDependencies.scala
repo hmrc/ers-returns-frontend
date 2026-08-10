@@ -4,7 +4,7 @@ object AppDependencies {
 
   private val openHtmlVersion  = "1.1.34"
   private val bootstrapVersion = "10.7.0"
-  private val mongoVersion     = "2.12.0"
+  private val mongoVersion     = "2.13.0"
 
   private val compile: Seq[ModuleID] = Seq(
     "uk.gov.hmrc"            %% "bootstrap-frontend-play-30" % bootstrapVersion,
