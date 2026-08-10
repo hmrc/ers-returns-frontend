@@ -30,7 +30,7 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json.{JsObject, JsValue, Json}
+import play.api.libs.json.{JsObject, JsResultException, JsValue, Json}
 import play.api.mvc.AnyContent
 import repositories.FrontendSessionsRepository
 import uk.gov.hmrc.mongo.MongoComponent
@@ -374,8 +374,8 @@ class FrontendSessionServiceSpec
   }
 
   "fetch" should {
+    val key       = "testKey"
     "return data when it is successfully found in the session" in {
-      val key      = "testKey"
       val testData = "testData"
 
       when(frontendSessionsRepository.getFromSession[JsValue](DataKey(eqTo(key)))(any(), any()))
@@ -385,29 +385,43 @@ class FrontendSessionServiceSpec
       result shouldBe testData
     }
 
-    "throw Exception when no data is found for the key" in {
-      val key = "testKey"
-
-      when(frontendSessionsRepository.getFromSession[JsValue](DataKey(eqTo(key)))(any(), any()))
-        .thenReturn(Future.successful(None))
-
-      val thrown = intercept[Exception] {
-        testService.fetch[String](key).futureValue
-      }
-      thrown.getMessage should include(s"[FrontendSessionService][fetch] No data found for key $key")
-    }
 
     "throw Exception when an unexpected exception occurs" in {
-      val key       = "testKey"
       val exception = new RuntimeException("Test exception")
 
       when(frontendSessionsRepository.getFromSession[String](DataKey(eqTo(key)))(any(), any()))
         .thenReturn(Future.failed(exception))
 
-      val thrown = intercept[Exception] {
-        testService.fetch[String](key).futureValue
-      }
+      val thrown =  testService.fetch[String](key).failed.futureValue
+
       thrown.getMessage should include("Test exception")
+    }
+
+    "throw JsResultException when session data cannot be parsed" in {
+
+      when(frontendSessionsRepository.getFromSession[JsValue](DataKey(eqTo(key)))(any(), any()))
+        .thenReturn(Future.successful(Some(Json.toJson(123))))
+
+      val thrown =
+        testService.fetch[String](key).failed.futureValue
+
+      thrown shouldBe a[JsResultException]
+
+      val jsResultException = thrown.asInstanceOf[JsResultException]
+
+      jsResultException.errors should not be empty
+    }
+
+    "throw NoSuchElementException when no data is found for the key" in {
+
+      when(frontendSessionsRepository.getFromSession[JsValue](DataKey(eqTo(key)))(any(), any()))
+        .thenReturn(Future.successful(None))
+
+      val thrown = testService.fetch[String](key).failed.futureValue
+
+      thrown shouldBe a[NoSuchElementException]
+
+      thrown.getMessage should include(s"[FrontendSessionService][fetch] No data found for key $key")
     }
   }
 
