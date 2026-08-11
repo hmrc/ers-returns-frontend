@@ -50,6 +50,7 @@ class CsvFileUploadController @Inject() (
   fileUploadProblemView: views.html.file_upload_problem,
   invalidMimeErrorView: views.html.invalid_mime_error,
   wrongCsvFileTypeView: views.html.wrong_csv_file_type,
+  incorrectCsvFileName: views.html.incorrect_file_name,
   authAction: AuthAction
 )(implicit
   val ec: ExecutionContext,
@@ -266,33 +267,47 @@ class CsvFileUploadController @Inject() (
       if (schemeInfo.schemeType == "CSOP" && useCsopV5Templates(requestObject.taxYear)) ".file_name.v5"
       else ".file_name"
 
-    val expectedAndUploadedFiles: List[(String, String, String)] =
-      list.ids
-        .zip(csvCallbackData.reverse)
-        .map { case (upscanCsvFile, uploadedFile) =>
-          val pageElements: String => String = getAllPageElementsFromPageId(schemeInfo, upscanCsvFile.fileId)
-          val expectedFileName               = pageElements(fileName)
-          val description                    = pageElements(".description")
-          val uploadedFileName               = uploadedFile.name
+      val expectedAndUploadedFiles: List[(String, String, String)] =
+        list.ids
+          .zip(csvCallbackData.reverse)
+          .map { case (upscanCsvFile, uploadedFile) =>
+            val pageElements: String => String = getAllPageElementsFromPageId(schemeInfo, upscanCsvFile.fileId)
+            val expectedFileName = pageElements(fileName)
+            val description = pageElements(".description")
+            val uploadedFileName = uploadedFile.name
 
-          (description, expectedFileName, uploadedFileName)
-        }
+            (description, expectedFileName, uploadedFileName)
+          }
 
-    val incorrectFiles: List[(String, String)] =
-      expectedAndUploadedFiles
-        .filter { case (_, expectedFileName, uploadedFileName) =>
-          expectedFileName.toLowerCase != uploadedFileName.toLowerCase
-        }
-        .map { case (description, expectedFileName, _) =>
-          (description, expectedFileName)
-        }
+      val incorrectFiles: List[(String, String)] =
+        expectedAndUploadedFiles
+          .filter { case (_, expectedFileName, uploadedFileName) =>
+            expectedFileName.toLowerCase != uploadedFileName.toLowerCase
+          }
+          .map { case (description, expectedFileName, _) =>
+            (description, expectedFileName)
+          }
 
-    if (incorrectFiles.isEmpty) {
-      validateCsv(csvCallbackData, schemeInfo)
-    } else {
-      logger.info("[CsvFileUploadController][checkFileNames] User uploaded the wrong file")
-      Future.successful(getWrongCsvFileTypePage(requestObject, incorrectFiles))
-    }
+      val incorrectFilesName: List[Boolean] =
+        expectedAndUploadedFiles
+          .filter { case (_, expectedFileName, uploadedFileName) =>
+            expectedFileName.toLowerCase != uploadedFileName.toLowerCase
+          }
+          .map { case (description, expectedFileName, name) =>
+            name.length > 240 || name.contains("@")
+          }
+
+      if (incorrectFiles.isEmpty) {
+        validateCsv(csvCallbackData, schemeInfo)
+      } else {
+        if (incorrectFilesName.contains(true)){
+          Future.successful(Redirect(controllers.routes.CsvFileUploadController.validationFailureIncorrect()))
+
+        } else {
+          logger.info("[CsvFileUploadController][checkFileNames] User uploaded the wrong file")
+          Future.successful(getWrongCsvFileTypePage(requestObject, incorrectFiles))
+        }
+      }
   }
 
   def checkFileNames(csvCallbackData: List[UploadedSuccessfully], schemeInfo: SchemeInfo)(implicit
@@ -407,5 +422,20 @@ class CsvFileUploadController @Inject() (
         "ers.global_errors.message"
       )(request, messages, appConfig)
     )
+
+  def getWrongFileNamePage(requestObject: RequestObject)(implicit
+                                                                                                  request: RequestHeader,
+                                                                                                  messages: Messages
+  ): Result =
+    BadRequest(
+      incorrectCsvFileName(requestObject)(request, messages, appConfig)
+    )
+
+  def validationFailureIncorrect(): Action[AnyContent] = authAction.async { implicit request =>
+    for {
+      requestObject: RequestObject <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
+    }yield
+    getWrongFileNamePage(requestObject)
+  }
 
 }
