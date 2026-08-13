@@ -66,7 +66,7 @@ class FrontendSessionService @Inject() (
             Future.failed(JsResultException(errors))
         }
       case None          =>
-        logger.info(s"[FrontendSessionService][fetch] No data found for key: $key")
+        logger.warn(s"[FrontendSessionService][fetch] No data found for key: $key")
         Future.failed(new NoSuchElementException(s"[FrontendSessionService][fetch] No data found for key $key"))
     } recoverWith {
       case e: NoSuchElementException =>
