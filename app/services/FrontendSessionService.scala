@@ -57,15 +57,24 @@ class FrontendSessionService @Inject() (
     }
 
   def fetch[T](key: String)(implicit request: RequestHeader, formats: json.Format[T]): Future[T] =
-    sessionCache.getFromSession[JsValue](DataKey(key)).map { result =>
-      result.get.as[T] // to be picked up in tech debt review
+    sessionCache.getFromSession[JsValue](DataKey(key)).flatMap {
+      case Some(jsonVal) =>
+        jsonVal.validate[T] match {
+          case JsSuccess(value, _) => Future.successful(value)
+          case JsError(errors)     =>
+            logger.error(s"[FrontendSessionService][fetch] JSON parsing failed for key $key: $errors")
+            Future.failed(JsResultException(errors))
+        }
+      case None          =>
+        logger.warn(s"[FrontendSessionService][fetch] No data found for key: $key")
+        Future.failed(new NoSuchElementException(s"[FrontendSessionService][fetch] No data found for key $key"))
     } recoverWith {
       case e: NoSuchElementException =>
-        logger.error(s"[FrontendSessionService][fetch] No data found for key: $key error: ${e.getMessage}")
-        throw new NoSuchElementException(s"[FrontendSessionService][fetch] No data found for key $key")
+        Future.failed(e)
       case ex: Exception             =>
         val errMsg =
-          s"[FrontendSessionService][fetch] Fetch failed for key $key in session ${request.session.get("sessionId").getOrElse("no session id")} with exception ${ex.getMessage}, timestamp: ${System.currentTimeMillis()}."
+          s"[FrontendSessionService][fetch] Fetch failed for key $key in session " +
+            s"${request.session.get("sessionId").getOrElse("no session id")} with exception ${ex.getMessage}"
         logger.error(errMsg, ex)
         Future.failed(ex)
     }
