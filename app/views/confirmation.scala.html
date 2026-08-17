@@ -28,8 +28,6 @@
 
 @(requestObject: RequestObject, dateSubmitted: String, bundle: String, taxYear: String, url: String)(implicit request: RequestHeader, messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 
-@schemeId = @{requestObject.getSchemeId}
-
 @govuk_wrapper(title = messages("ers_confirmation.page_title")) {
 
 	@reference(requestObject.getPageTitle)
@@ -87,7 +85,7 @@
 	</p>
 
 	<p class="govuk-body">
-		<a class="govuk-link" href='@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_CONFIRMATION, "finished"))' id="finished">
+		<a class="govuk-link" href="@appConfig.signOut" id="finished">
 		  @Html(messages("ers_confirmation.feedback"))
 		</a>
 		@Html(messages("ers_confirmation.feedback_time"))
