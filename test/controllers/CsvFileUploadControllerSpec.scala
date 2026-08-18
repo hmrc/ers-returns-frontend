@@ -203,7 +203,6 @@ class CsvFileUploadControllerSpec
         .thenReturn(Future.successful(UpscanCsvFilesList(upscanIds)))
 
       withCaptureOfLoggingFrom(csvFileUploadControllerLogger) { captureEvents =>
-        captureEvents.foreach(println)
         await(csvFileUploadController.uploadFilePage()(testFakeRequest))
         assert(captureEvents.exists(_.getMessage.contains(expectedLogMessage)))
       }
