@@ -41,7 +41,7 @@ class ApplicationConfig @Inject() (config: ServicesConfig) {
 
   lazy val enableRetrieveSubmissionData: Boolean = config.getBoolean("settings.enable-retrieve-submission-data")
   lazy val languageTranslationEnabled: Boolean   = config.getConfBool("features.welsh-translation", defBool = true)
-  lazy val csopV6V7Enabled: Boolean              = config.getConfBool("features.csop-v6-v7.enabled", defBool = false)
+  lazy val enableV6AndV7: Boolean              = config.getConfBool("features.v6-and-v7.enabled", defBool = false)
 
   lazy val odsSuccessRetryAmount: Int       = config.getInt("retry.ods-success-cache.complete-upload.amount")
   lazy val odsValidationRetryAmount: Int    = config.getInt("retry.ods-success-cache.validation.amount")

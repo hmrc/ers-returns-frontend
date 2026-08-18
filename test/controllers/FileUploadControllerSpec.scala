@@ -358,7 +358,7 @@ class FileUploadControllerSpec
       "Ers Meta Data is returned, callback record is uploaded successfully, remove presubmission data returns OK, " +
         "validate file data returns BAD_REQUEST, for CSOP with Incorrect ERS Template validation error, " +
         "csopV6V7Enabled = false" in {
-          when(mockAppConfig.csopV6V7Enabled).thenReturn(false)
+          when(mockAppConfig.enableV6AndV7).thenReturn(false)
           when(mockSessionService.fetch[RequestObject](anyString())(any(), any()))
             .thenReturn(Future.successful(ersRequestObject.copy(taxYear = Some("2010/11"))))
           when(mockErsConnector.getCallbackRecord(any(), any)).thenReturn(Future.successful(Some(uploadedSuccessfully)))
@@ -416,7 +416,7 @@ class FileUploadControllerSpec
 
     "redirect the user to FileUploadController.templateFailure()" when {
       "Ers Meta Data is returned, callback record is uploaded successfully, remove presubmission data returns OK, validate file data returns BAD_REQUEST, for CSOP with Incorrect ERS Template validation error, csopV7Enabled = true" in {
-        when(mockAppConfig.csopV6V7Enabled).thenReturn(true)
+        when(mockAppConfig.enableV6AndV7).thenReturn(true)
         when(mockSessionService.fetch[RequestObject](anyString())(any(), any()))
           .thenReturn(Future.successful(ersRequestObject))
         when(mockErsConnector.getCallbackRecord(any(), any)).thenReturn(Future.successful(Some(uploadedSuccessfully)))

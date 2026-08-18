@@ -23,7 +23,7 @@ sealed trait TemplateSet {
   def selectTemplatesSet(taxYear: Option[String])(implicit appConfig: ApplicationConfig): String = {
     val isAfter2023 = taxYear.exists(_.split("/")(0).toInt >= 2023)
 
-    (isAfter2023, appConfig.csopV6V7Enabled) match {
+    (isAfter2023, appConfig.enableV6AndV7) match {
       case (true, true)   => V7.toString
       case (true, false)  => V5.toString
       case (false, true)  => V6.toString

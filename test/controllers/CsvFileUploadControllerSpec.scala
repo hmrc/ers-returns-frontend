@@ -194,7 +194,7 @@ class CsvFileUploadControllerSpec
 
     "log the selected csv files" in {
 
-      when(mockAppConfig.csopV6V7Enabled).thenReturn(false)
+      when(mockAppConfig.enableV6AndV7).thenReturn(false)
 
       val expectedLogMessage = "[CsvFileUploadController][uploadFilePage] The following files were selected to be " +
         "uploaded: Other_Grants_V4.csv, Other_Options_V4.csv, Other_Acquisition_V4.csv"
@@ -214,7 +214,7 @@ class CsvFileUploadControllerSpec
 
     "log the selected csv files for v5 tax years" in {
 
-      when(mockAppConfig.csopV6V7Enabled).thenReturn(false)
+      when(mockAppConfig.enableV6AndV7).thenReturn(false)
 
       val csopV5RequestObject = ersRequestObject.copy(
         taxYear = Some("2024/25"),
