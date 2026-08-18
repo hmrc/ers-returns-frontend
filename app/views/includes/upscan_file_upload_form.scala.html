@@ -33,10 +33,10 @@
         schemeId: String,
         schemeName: String,
         fileId: String,
-        useCsopV5Templates: Boolean = false
+        templateSet: String = "v4"
 )(implicit messages: Messages, ersUtil: ERSUtil)
 
-@expectedFileName = @{ersUtil.getFileName(fileId, schemeId, useCsopV5Templates)}
+@expectedFileName = @{ersUtil.getFileName(fileId, schemeId, templateSet)}
 
 @* Derive message key for warning text from file type *@
 @csvOrOdsFileTypeKey = @{fileType.substring(1).toUpperCase}

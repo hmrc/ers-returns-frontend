@@ -42,7 +42,7 @@ class UpscanCsvFileUploadViewSpec extends ViewSpecBase with FileUploadFixtures {
 
       "show expected elements for CSOP page when fileId is `file0` and useCsopV5Templates is false" in {
         val doc =
-          asDocument(view(requestObjectWithCsopScheme, upscanInitiateResponse, "file0", useCsopV5Templates = false))
+          asDocument(view(requestObjectWithCsopScheme, upscanInitiateResponse, "file0", templateSet = "v4"))
 
         doc.getElementById("scheme-reference").text()                    mustBe expectedSchemeReference
         firstElementByClassOwnText(doc, "hmrc-caption govuk-caption-xl") mustBe "Options granted"
@@ -52,7 +52,7 @@ class UpscanCsvFileUploadViewSpec extends ViewSpecBase with FileUploadFixtures {
 
       "show expected elements for CSOP page when fileId is `file0` and useCsopV5Templates is true" in {
         val doc =
-          asDocument(view(requestObjectWithCsopScheme, upscanInitiateResponse, "file0", useCsopV5Templates = true))
+          asDocument(view(requestObjectWithCsopScheme, upscanInitiateResponse, "file0", templateSet = "v5"))
 
         doc.getElementById("scheme-reference").text()                    mustBe expectedSchemeReference
         firstElementByClassOwnText(doc, "hmrc-caption govuk-caption-xl") mustBe "Options granted"
@@ -62,7 +62,7 @@ class UpscanCsvFileUploadViewSpec extends ViewSpecBase with FileUploadFixtures {
 
       "show expected elements for CSOP page when fileId is `file1` and useCsopV5Templates is false" in {
         val doc =
-          asDocument(view(requestObjectWithCsopScheme, upscanInitiateResponse, "file1", useCsopV5Templates = false))
+          asDocument(view(requestObjectWithCsopScheme, upscanInitiateResponse, "file1", templateSet = "v4"))
 
         doc.getElementById("scheme-reference").text()    mustBe expectedSchemeReference
         firstElementByClassOwnText(
@@ -75,7 +75,7 @@ class UpscanCsvFileUploadViewSpec extends ViewSpecBase with FileUploadFixtures {
 
       "show expected elements for CSOP page when fileId is `file1` and useCsopV5Templates is true" in {
         val doc =
-          asDocument(view(requestObjectWithCsopScheme, upscanInitiateResponse, "file1", useCsopV5Templates = true))
+          asDocument(view(requestObjectWithCsopScheme, upscanInitiateResponse, "file1", templateSet = "v5"))
 
         doc.getElementById("scheme-reference").text()    mustBe expectedSchemeReference
         firstElementByClassOwnText(
@@ -88,7 +88,7 @@ class UpscanCsvFileUploadViewSpec extends ViewSpecBase with FileUploadFixtures {
 
       "show expected elements for CSOP page when fileId is `file2` and useCsopV5Templates is false" in {
         val doc =
-          asDocument(view(requestObjectWithCsopScheme, upscanInitiateResponse, "file2", useCsopV5Templates = false))
+          asDocument(view(requestObjectWithCsopScheme, upscanInitiateResponse, "file2", templateSet = "v4"))
 
         doc.getElementById("scheme-reference").text()    mustBe expectedSchemeReference
         firstElementByClassOwnText(
@@ -101,7 +101,7 @@ class UpscanCsvFileUploadViewSpec extends ViewSpecBase with FileUploadFixtures {
 
       "show expected elements for CSOP page when fileId is `file2` and useCsopV5Templates is true" in {
         val doc =
-          asDocument(view(requestObjectWithCsopScheme, upscanInitiateResponse, "file2", useCsopV5Templates = true))
+          asDocument(view(requestObjectWithCsopScheme, upscanInitiateResponse, "file2", templateSet = "v5"))
 
         doc.getElementById("scheme-reference").text()    mustBe expectedSchemeReference
         firstElementByClassOwnText(
@@ -120,7 +120,7 @@ class UpscanCsvFileUploadViewSpec extends ViewSpecBase with FileUploadFixtures {
       val expectedSchemeReference    = "EMI - Enterprise Management Incentives scheme - XA1100000000000 - 2014 to 2015"
 
       "show expected elements for EMI page when fileId is `file0`" in {
-        val doc = asDocument(view(requestObjectWithEmiScheme, upscanInitiateResponse, "file0", false))
+        val doc = asDocument(view(requestObjectWithEmiScheme, upscanInitiateResponse, "file0", templateSet = "v4"))
 
         doc.getElementById("scheme-reference").text()                    mustBe expectedSchemeReference
         firstElementByClassOwnText(doc, "hmrc-caption govuk-caption-xl") mustBe "Adjustment of options"
@@ -129,7 +129,7 @@ class UpscanCsvFileUploadViewSpec extends ViewSpecBase with FileUploadFixtures {
       }
 
       "show expected elements for EMI page when fileId is `file1`" in {
-        val doc = asDocument(view(requestObjectWithEmiScheme, upscanInitiateResponse, "file1", false))
+        val doc = asDocument(view(requestObjectWithEmiScheme, upscanInitiateResponse, "file1", templateSet = "v4"))
 
         doc.getElementById("scheme-reference").text()                    mustBe expectedSchemeReference
         firstElementByClassOwnText(doc, "hmrc-caption govuk-caption-xl") mustBe "Replacement of options"
@@ -138,7 +138,7 @@ class UpscanCsvFileUploadViewSpec extends ViewSpecBase with FileUploadFixtures {
       }
 
       "show expected elements for EMI page when fileId is `file2`" in {
-        val doc = asDocument(view(requestObjectWithEmiScheme, upscanInitiateResponse, "file2", false))
+        val doc = asDocument(view(requestObjectWithEmiScheme, upscanInitiateResponse, "file2", templateSet = "v4"))
 
         doc.getElementById("scheme-reference").text()                    mustBe expectedSchemeReference
         firstElementByClassOwnText(doc, "hmrc-caption govuk-caption-xl") mustBe "Options released, lapsed or cancelled"
@@ -147,7 +147,7 @@ class UpscanCsvFileUploadViewSpec extends ViewSpecBase with FileUploadFixtures {
       }
 
       "show expected elements for EMI page when fileId is `file3`" in {
-        val doc = asDocument(view(requestObjectWithEmiScheme, upscanInitiateResponse, "file3", false))
+        val doc = asDocument(view(requestObjectWithEmiScheme, upscanInitiateResponse, "file3", templateSet = "v4"))
 
         doc.getElementById("scheme-reference").text()                    mustBe expectedSchemeReference
         firstElementByClassOwnText(doc, "hmrc-caption govuk-caption-xl") mustBe "Non-taxable exercise of options"
@@ -156,7 +156,7 @@ class UpscanCsvFileUploadViewSpec extends ViewSpecBase with FileUploadFixtures {
       }
 
       "show expected elements for EMI page when fileId is `file4`" in {
-        val doc = asDocument(view(requestObjectWithEmiScheme, upscanInitiateResponse, "file4", false))
+        val doc = asDocument(view(requestObjectWithEmiScheme, upscanInitiateResponse, "file4", templateSet = "v4"))
 
         doc.getElementById("scheme-reference").text()                    mustBe expectedSchemeReference
         firstElementByClassOwnText(doc, "hmrc-caption govuk-caption-xl") mustBe "Taxable exercise of options"
@@ -171,7 +171,7 @@ class UpscanCsvFileUploadViewSpec extends ViewSpecBase with FileUploadFixtures {
       val expectedSchemeReference    = "SIP - Share Incentive Plan scheme - XA1100000000000 - 2014 to 2015"
 
       "show expected elements for SIP page when fileId is `file0`" in {
-        val doc = asDocument(view(requestObjectWithEmiScheme, upscanInitiateResponse, "file0", false))
+        val doc = asDocument(view(requestObjectWithEmiScheme, upscanInitiateResponse, "file0", templateSet = "v4"))
 
         doc.getElementById("scheme-reference").text()                    mustBe expectedSchemeReference
         firstElementByClassOwnText(doc, "hmrc-caption govuk-caption-xl") mustBe "Share awards"
@@ -180,7 +180,7 @@ class UpscanCsvFileUploadViewSpec extends ViewSpecBase with FileUploadFixtures {
       }
 
       "show expected elements for SIP page when fileId is `file1`" in {
-        val doc = asDocument(view(requestObjectWithEmiScheme, upscanInitiateResponse, "file1", false))
+        val doc = asDocument(view(requestObjectWithEmiScheme, upscanInitiateResponse, "file1", templateSet = "v4"))
 
         doc.getElementById("scheme-reference").text()                    mustBe expectedSchemeReference
         firstElementByClassOwnText(doc, "hmrc-caption govuk-caption-xl") mustBe "Shares withdrawn from the plan"
@@ -196,7 +196,7 @@ class UpscanCsvFileUploadViewSpec extends ViewSpecBase with FileUploadFixtures {
       val expectedSchemeReference    = "SAYE - Save As You Earn scheme - XA1100000000000 - 2014 to 2015"
 
       "show expected elements for SAYE page when fileId is `file0`" in {
-        val doc = asDocument(view(requestObjectWithEmiScheme, upscanInitiateResponse, "file0", false))
+        val doc = asDocument(view(requestObjectWithEmiScheme, upscanInitiateResponse, "file0", templateSet = "v4"))
 
         doc.getElementById("scheme-reference").text()                    mustBe expectedSchemeReference
         firstElementByClassOwnText(doc, "hmrc-caption govuk-caption-xl") mustBe "Options granted"
@@ -205,7 +205,7 @@ class UpscanCsvFileUploadViewSpec extends ViewSpecBase with FileUploadFixtures {
       }
 
       "show expected elements for SAYE page when fileId is `file1`" in {
-        val doc = asDocument(view(requestObjectWithEmiScheme, upscanInitiateResponse, "file1", false))
+        val doc = asDocument(view(requestObjectWithEmiScheme, upscanInitiateResponse, "file1", templateSet = "v4"))
 
         doc.getElementById("scheme-reference").text()    mustBe expectedSchemeReference
         firstElementByClassOwnText(
@@ -217,7 +217,7 @@ class UpscanCsvFileUploadViewSpec extends ViewSpecBase with FileUploadFixtures {
       }
 
       "show expected elements for SAYE page when fileId is `file2`" in {
-        val doc = asDocument(view(requestObjectWithEmiScheme, upscanInitiateResponse, "file2", false))
+        val doc = asDocument(view(requestObjectWithEmiScheme, upscanInitiateResponse, "file2", templateSet = "v4"))
 
         doc.getElementById("scheme-reference").text()                    mustBe expectedSchemeReference
         firstElementByClassOwnText(doc, "hmrc-caption govuk-caption-xl") mustBe "Options exercised"
@@ -233,7 +233,7 @@ class UpscanCsvFileUploadViewSpec extends ViewSpecBase with FileUploadFixtures {
       val expectedSchemeReference    = "OTHER - Other scheme - XA1100000000000 - 2014 to 2015"
 
       "show expected elements for Other page when fileId is `file0`" in {
-        val doc = asDocument(view(requestObjectWithEmiScheme, upscanInitiateResponse, "file0", false))
+        val doc = asDocument(view(requestObjectWithEmiScheme, upscanInitiateResponse, "file0", templateSet = "v4"))
 
         doc.getElementById("scheme-reference").text()                    mustBe expectedSchemeReference
         firstElementByClassOwnText(doc, "hmrc-caption govuk-caption-xl") mustBe "Grant of options"
@@ -242,7 +242,7 @@ class UpscanCsvFileUploadViewSpec extends ViewSpecBase with FileUploadFixtures {
       }
 
       "show expected elements for Other page when fileId is `file1`" in {
-        val doc = asDocument(view(requestObjectWithEmiScheme, upscanInitiateResponse, "file1", false))
+        val doc = asDocument(view(requestObjectWithEmiScheme, upscanInitiateResponse, "file1", templateSet = "v4"))
 
         doc.getElementById("scheme-reference").text()                    mustBe expectedSchemeReference
         firstElementByClassOwnText(doc, "hmrc-caption govuk-caption-xl") mustBe "Other option events"
@@ -251,7 +251,7 @@ class UpscanCsvFileUploadViewSpec extends ViewSpecBase with FileUploadFixtures {
       }
 
       "show expected elements for Other page when fileId is `file2`" in {
-        val doc = asDocument(view(requestObjectWithEmiScheme, upscanInitiateResponse, "file2", false))
+        val doc = asDocument(view(requestObjectWithEmiScheme, upscanInitiateResponse, "file2", templateSet = "v4"))
 
         doc.getElementById("scheme-reference").text()                    mustBe expectedSchemeReference
         firstElementByClassOwnText(doc, "hmrc-caption govuk-caption-xl") mustBe "Acquisition of securities"
@@ -260,7 +260,7 @@ class UpscanCsvFileUploadViewSpec extends ViewSpecBase with FileUploadFixtures {
       }
 
       "show expected elements for Other page when fileId is `file3`" in {
-        val doc = asDocument(view(requestObjectWithEmiScheme, upscanInitiateResponse, "file3", false))
+        val doc = asDocument(view(requestObjectWithEmiScheme, upscanInitiateResponse, "file3", templateSet = "v4"))
 
         doc.getElementById("scheme-reference").text()    mustBe expectedSchemeReference
         firstElementByClassOwnText(
@@ -272,7 +272,7 @@ class UpscanCsvFileUploadViewSpec extends ViewSpecBase with FileUploadFixtures {
       }
 
       "show expected elements for Other page when fileId is `file4`" in {
-        val doc = asDocument(view(requestObjectWithEmiScheme, upscanInitiateResponse, "file4", false))
+        val doc = asDocument(view(requestObjectWithEmiScheme, upscanInitiateResponse, "file4", templateSet = "v4"))
 
         doc.getElementById("scheme-reference").text()    mustBe expectedSchemeReference
         firstElementByClassOwnText(
@@ -284,7 +284,7 @@ class UpscanCsvFileUploadViewSpec extends ViewSpecBase with FileUploadFixtures {
       }
 
       "show expected elements for Other page when fileId is `file5`" in {
-        val doc = asDocument(view(requestObjectWithEmiScheme, upscanInitiateResponse, "file5", false))
+        val doc = asDocument(view(requestObjectWithEmiScheme, upscanInitiateResponse, "file5", templateSet = "v4"))
 
         doc.getElementById("scheme-reference").text()    mustBe expectedSchemeReference
         firstElementByClassOwnText(
@@ -296,7 +296,7 @@ class UpscanCsvFileUploadViewSpec extends ViewSpecBase with FileUploadFixtures {
       }
 
       "show expected elements for Other page when fileId is `file6`" in {
-        val doc = asDocument(view(requestObjectWithEmiScheme, upscanInitiateResponse, "file6", false))
+        val doc = asDocument(view(requestObjectWithEmiScheme, upscanInitiateResponse, "file6", templateSet = "v4"))
 
         doc.getElementById("scheme-reference").text()    mustBe expectedSchemeReference
         firstElementByClassOwnText(
@@ -308,7 +308,7 @@ class UpscanCsvFileUploadViewSpec extends ViewSpecBase with FileUploadFixtures {
       }
 
       "show expected elements for Other page when fileId is `file7`" in {
-        val doc = asDocument(view(requestObjectWithEmiScheme, upscanInitiateResponse, "file7", false))
+        val doc = asDocument(view(requestObjectWithEmiScheme, upscanInitiateResponse, "file7", templateSet = "v4"))
 
         doc.getElementById("scheme-reference").text()    mustBe expectedSchemeReference
         firstElementByClassOwnText(
@@ -320,7 +320,7 @@ class UpscanCsvFileUploadViewSpec extends ViewSpecBase with FileUploadFixtures {
       }
 
       "show expected elements for Other page when fileId is `file8`" in {
-        val doc = asDocument(view(requestObjectWithEmiScheme, upscanInitiateResponse, "file8", false))
+        val doc = asDocument(view(requestObjectWithEmiScheme, upscanInitiateResponse, "file8", templateSet = "v4"))
 
         doc.getElementById("scheme-reference").text()    mustBe expectedSchemeReference
         firstElementByClassOwnText(

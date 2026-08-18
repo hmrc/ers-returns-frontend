@@ -355,27 +355,30 @@ class FileUploadControllerSpec
         redirectLocation(result) mustBe Some(routes.FileUploadController.validationFailure().url)
       }
 
-      "Ers Meta Data is returned, callback record is uploaded successfully, remove presubmission data returns OK, validate file data returns BAD_REQUEST, for CSOP with Incorrect ERS Template validation error, csopV5Enabled = false" in {
-        when(mockAppConfig.csopV5Enabled).thenReturn(false)
-        when(mockSessionService.fetch[RequestObject](anyString())(any(), any()))
-          .thenReturn(Future.successful(ersRequestObject))
-        when(mockErsConnector.getCallbackRecord(any(), any)).thenReturn(Future.successful(Some(uploadedSuccessfully)))
-        when(mockErsConnector.removePresubmissionData(any())(any[RequestWithOptionalAuthContext[AnyContent]], any()))
-          .thenReturn(Future.successful(HttpResponse(OK, "")))
-        when(mockSessionService.fetch[ErsMetaData](any())(any(), any())).thenReturn(Future.successful(validErsMetaData))
-        when(
-          mockErsConnector.validateFileData(meq(uploadedSuccessfully), any[SchemeInfo])(
-            any[RequestWithOptionalAuthContext[AnyContent]],
-            any()
+      "Ers Meta Data is returned, callback record is uploaded successfully, remove presubmission data returns OK, " +
+        "validate file data returns BAD_REQUEST, for CSOP with Incorrect ERS Template validation error, " +
+        "csopV6V7Enabled = false" in {
+          when(mockAppConfig.csopV6V7Enabled).thenReturn(false)
+          when(mockSessionService.fetch[RequestObject](anyString())(any(), any()))
+            .thenReturn(Future.successful(ersRequestObject.copy(taxYear = Some("2010/11"))))
+          when(mockErsConnector.getCallbackRecord(any(), any)).thenReturn(Future.successful(Some(uploadedSuccessfully)))
+          when(mockErsConnector.removePresubmissionData(any())(any[RequestWithOptionalAuthContext[AnyContent]], any()))
+            .thenReturn(Future.successful(HttpResponse(OK, "")))
+          when(mockSessionService.fetch[ErsMetaData](any())(any(), any()))
+            .thenReturn(Future.successful(validErsMetaData))
+          when(
+            mockErsConnector.validateFileData(meq(uploadedSuccessfully), any[SchemeInfo])(
+              any[RequestWithOptionalAuthContext[AnyContent]],
+              any()
+            )
           )
-        )
-          .thenReturn(Future.successful(HttpResponse(BAD_REQUEST, "Incorrect ERS Template")))
+            .thenReturn(Future.successful(HttpResponse(BAD_REQUEST, "Incorrect ERS Template")))
 
-        setAuthMocks()
-        val result = TestFileUploadController.validationResults()(testFakeRequest)
-        status(result)           mustBe SEE_OTHER
-        redirectLocation(result) mustBe Some(routes.FileUploadController.validationFailure().url)
-      }
+          setAuthMocks()
+          val result = TestFileUploadController.validationResults()(testFakeRequest)
+          status(result)           mustBe SEE_OTHER
+          redirectLocation(result) mustBe Some(routes.FileUploadController.templateFailure().url)
+        }
     }
 
     "redirect the user to FileUploadController.odsSchemeMismatchFailure()" when {
@@ -412,8 +415,8 @@ class FileUploadControllerSpec
     }
 
     "redirect the user to FileUploadController.templateFailure()" when {
-      "Ers Meta Data is returned, callback record is uploaded successfully, remove presubmission data returns OK, validate file data returns BAD_REQUEST, for CSOP with Incorrect ERS Template validation error, csopV5Enabled = true" in {
-        when(mockAppConfig.csopV5Enabled).thenReturn(true)
+      "Ers Meta Data is returned, callback record is uploaded successfully, remove presubmission data returns OK, validate file data returns BAD_REQUEST, for CSOP with Incorrect ERS Template validation error, csopV7Enabled = true" in {
+        when(mockAppConfig.csopV6V7Enabled).thenReturn(true)
         when(mockSessionService.fetch[RequestObject](anyString())(any(), any()))
           .thenReturn(Future.successful(ersRequestObject))
         when(mockErsConnector.getCallbackRecord(any(), any)).thenReturn(Future.successful(Some(uploadedSuccessfully)))

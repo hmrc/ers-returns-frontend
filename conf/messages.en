@@ -658,60 +658,62 @@ ers_check_csv_file.err.message = Select the CSV files you need to upload as part
 ers_check_csv_options.hint = Select all that apply
 
 ers_check_csv_file.csop.file0.description = Options granted
-ers_check_csv_file.csop.file0.file_name = CSOP_OptionsGranted_V4.csv
+ers_check_csv_file.csop.file0.file_name.v4 = CSOP_OptionsGranted_V4.csv
 ers_check_csv_file.csop.file0.file_name.v5 = CSOP_OptionsGranted_V5.csv
 ers_check_csv_file.csop.file1.description = Options released (including exchanges) cancelled or lapsed in year
-ers_check_csv_file.csop.file1.file_name = CSOP_OptionsRCL_V4.csv
+ers_check_csv_file.csop.file1.file_name.v4 = CSOP_OptionsRCL_V4.csv
 ers_check_csv_file.csop.file1.file_name.v5 = CSOP_OptionsRCL_V5.csv
 ers_check_csv_file.csop.file2.description = Options and replacement options exercised
-ers_check_csv_file.csop.file2.file_name = CSOP_OptionsExercised_V4.csv
+ers_check_csv_file.csop.file2.file_name.v4 = CSOP_OptionsExercised_V4.csv
 ers_check_csv_file.csop.file2.file_name.v5 = CSOP_OptionsExercised_V5.csv
 
 ers_check_csv_file.emi.file0.description = Adjustment of options
-ers_check_csv_file.emi.file0.file_name = EMI40_Adjustments_V4.csv
+ers_check_csv_file.emi.file0.file_name.v4 = EMI40_Adjustments_V4.csv
 ers_check_csv_file.emi.file1.description = Replacement of options
-ers_check_csv_file.emi.file1.file_name = EMI40_Replaced_V4.csv
+ers_check_csv_file.emi.file1.file_name.v4 = EMI40_Replaced_V4.csv
 ers_check_csv_file.emi.file2.description = Options released, lapsed or cancelled
-ers_check_csv_file.emi.file2.file_name = EMI40_RLC_V4.csv
+ers_check_csv_file.emi.file2.file_name.v4 = EMI40_RLC_V4.csv
 ers_check_csv_file.emi.file3.description = Non-taxable exercise of options
-ers_check_csv_file.emi.file3.file_name = EMI40_NonTaxable_V4.csv
+ers_check_csv_file.emi.file3.file_name.v4 = EMI40_NonTaxable_V4.csv
 ers_check_csv_file.emi.file4.description = Taxable exercise of options
-ers_check_csv_file.emi.file4.file_name = EMI40_Taxable_V4.csv
+ers_check_csv_file.emi.file4.file_name.v4 = EMI40_Taxable_V4.csv
 
 ers_check_csv_file.saye.file0.description = Options granted
-ers_check_csv_file.saye.file0.file_name = SAYE_Granted_V4.csv
+ers_check_csv_file.saye.file0.file_name.v4 = SAYE_Granted_V4.csv
 ers_check_csv_file.saye.file1.description = Options released (including exchanges), cancelled or lapsed in year
-ers_check_csv_file.saye.file1.file_name = SAYE_RCL_V4.csv
+ers_check_csv_file.saye.file1.file_name.v4 = SAYE_RCL_V4.csv
 ers_check_csv_file.saye.file2.description = Options exercised
-ers_check_csv_file.saye.file2.file_name = SAYE_Exercised_V4.csv
+ers_check_csv_file.saye.file2.file_name.v4 = SAYE_Exercised_V4.csv
 
 ers_check_csv_file.sip.file0.description = Share awards
-ers_check_csv_file.sip.file0.file_name = SIP_Awards_V4.csv
+ers_check_csv_file.sip.file0.file_name.v4 = SIP_Awards_V4.csv
+ers_check_csv_file.sip.file0.file_name.v7 = SIP_Awards_V7.csv
 ers_check_csv_file.sip.file1.description = Shares withdrawn from the plan
-ers_check_csv_file.sip.file1.file_name = SIP_Out_V4.csv
+ers_check_csv_file.sip.file1.file_name.v4 = SIP_Out_V4.csv
+ers_check_csv_file.sip.file1.file_name.v7 = SIP_Out_V7.csv
 
 #********************************************************************
 # Other messages
 #********************************************************************
 
 ers_check_csv_file.other.file0.description = Grant of options
-ers_check_csv_file.other.file0.file_name = Other_Grants_V4.csv
+ers_check_csv_file.other.file0.file_name.v4 = Other_Grants_V4.csv
 ers_check_csv_file.other.file1.description = Other option events
-ers_check_csv_file.other.file1.file_name = Other_Options_V4.csv
+ers_check_csv_file.other.file1.file_name.v4 = Other_Options_V4.csv
 ers_check_csv_file.other.file2.description = Acquisition of securities
-ers_check_csv_file.other.file2.file_name = Other_Acquisition_V4.csv
+ers_check_csv_file.other.file2.file_name.v4 = Other_Acquisition_V4.csv
 ers_check_csv_file.other.file3.description = Restricted securities post-acquisition events
-ers_check_csv_file.other.file3.file_name = Other_RestrictedSecurities_V4.csv
+ers_check_csv_file.other.file3.file_name.v4 = Other_RestrictedSecurities_V4.csv
 ers_check_csv_file.other.file4.description = Receipt of other benefits from securities post-acquisition
-ers_check_csv_file.other.file4.file_name = Other_OtherBenefits_V4.csv
+ers_check_csv_file.other.file4.file_name.v4 = Other_OtherBenefits_V4.csv
 ers_check_csv_file.other.file5.description = Convertible securities post-acquisition
-ers_check_csv_file.other.file5.file_name = Other_Convertible_V4.csv
+ers_check_csv_file.other.file5.file_name.v4 = Other_Convertible_V4.csv
 ers_check_csv_file.other.file6.description = Discharge of notional loans post-acquisition
-ers_check_csv_file.other.file6.file_name = Other_Notional_V4.csv
+ers_check_csv_file.other.file6.file_name.v4 = Other_Notional_V4.csv
 ers_check_csv_file.other.file7.description = Artificial enhancement of market value. Value of securities post-acquisition
-ers_check_csv_file.other.file7.file_name = Other_Enhancement_V4.csv
+ers_check_csv_file.other.file7.file_name.v4 = Other_Enhancement_V4.csv
 ers_check_csv_file.other.file8.description = Securities sold for more than market value post-acquisition
-ers_check_csv_file.other.file8.file_name = Other_Sold_V4.csv
+ers_check_csv_file.other.file8.file_name.v4 = Other_Sold_V4.csv
 
 ers_check_file.title = Choose and check your spreadsheet
 ers_check_file.instruction = Choose the Open Document Spreadsheet (ODS, ODS file) that you want to check for formatting errors.

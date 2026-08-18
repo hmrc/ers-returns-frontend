@@ -32,7 +32,7 @@
     requestObject: RequestObject,
     upscanInitiateResponse: UpscanInitiateResponse,
     fileId: String,
-    useCsopV5Templates: Boolean
+    templateSet: String
 )(implicit request: RequestHeader, messages: Messages, ersUtil: ERSUtil, appConfig: ApplicationConfig)
 
 @schemeId = @{requestObject.getSchemeId}
@@ -73,7 +73,7 @@
         schemeId = schemeId,
         schemeName = schemeName,
         fileId = fileId,
-        useCsopV5Templates = useCsopV5Templates
+        templateSet = templateSet
     )
 
 }

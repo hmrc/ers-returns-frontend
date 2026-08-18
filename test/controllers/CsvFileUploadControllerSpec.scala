@@ -194,7 +194,7 @@ class CsvFileUploadControllerSpec
 
     "log the selected csv files" in {
 
-      when(mockAppConfig.csopV5Enabled).thenReturn(false)
+      when(mockAppConfig.csopV6V7Enabled).thenReturn(false)
 
       val expectedLogMessage = "[CsvFileUploadController][uploadFilePage] The following files were selected to be " +
         "uploaded: Other_Grants_V4.csv, Other_Options_V4.csv, Other_Acquisition_V4.csv"
@@ -203,6 +203,7 @@ class CsvFileUploadControllerSpec
         .thenReturn(Future.successful(UpscanCsvFilesList(upscanIds)))
 
       withCaptureOfLoggingFrom(csvFileUploadControllerLogger) { captureEvents =>
+        captureEvents.foreach(println)
         await(csvFileUploadController.uploadFilePage()(testFakeRequest))
         assert(captureEvents.exists(_.getMessage.contains(expectedLogMessage)))
       }
@@ -214,7 +215,7 @@ class CsvFileUploadControllerSpec
 
     "log the selected csv files for v5 tax years" in {
 
-      when(mockAppConfig.csopV5Enabled).thenReturn(true)
+      when(mockAppConfig.csopV6V7Enabled).thenReturn(false)
 
       val csopV5RequestObject = ersRequestObject.copy(
         taxYear = Some("2024/25"),
@@ -1051,6 +1052,7 @@ class CsvFileUploadControllerSpec
       when(mockSchemeInfo.schemeId).thenReturn("csop")
 
       val testRequestObject: RequestObject = mock[RequestObject]
+      when(testRequestObject.taxYear).thenReturn(Some("2014/15"))
       when(testRequestObject.getPageTitle)
         .thenReturn("CSOP - Company Share Option Plan scheme - XA1100000000000 - 2014 to 2015")
       when(
@@ -1134,7 +1136,7 @@ class CsvFileUploadControllerSpec
       ) thenReturn Future.successful(testRequestObject)
 
       when(
-        mockErsUtil.getPageElement(any(), any(), eqTo("file0.file_name"), any())(any())
+        mockErsUtil.getPageElement(any(), any(), eqTo("file0.file_name.v4"), any())(any())
       ) thenReturn "CSOP_OptionsGranted_V4.csv"
 
       when(
@@ -1142,7 +1144,7 @@ class CsvFileUploadControllerSpec
       ) thenReturn "Options granted"
 
       when(
-        mockErsUtil.getPageElement(any(), any(), eqTo("file1.file_name"), any())(any())
+        mockErsUtil.getPageElement(any(), any(), eqTo("file1.file_name.v4"), any())(any())
       ) thenReturn "CSOP_OptionsRCL_V4.csv"
 
       when(

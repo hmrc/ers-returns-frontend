@@ -107,11 +107,7 @@ class ERSUtil @Inject() (val appConfig: ApplicationConfig)(implicit
     appConfig.ampersandRegex
       .replaceAllIn(input, "&amp;")
 
-  def getFileName(fileId: String, schemeId: String, useCsopV5Templates: Boolean)(implicit messages: Messages): String =
-    if (schemeId == "1" && useCsopV5Templates) {
-      getPageElement(schemeId, PAGE_CHECK_CSV_FILE, s"$fileId.file_name.v5")
-    } else {
-      getPageElement(schemeId, PAGE_CHECK_CSV_FILE, s"$fileId.file_name")
-    }
+  def getFileName(fileId: String, schemeId: String, templateSet: String)(implicit messages: Messages): String =
+    getPageElement(schemeId, PAGE_CHECK_CSV_FILE, s"$fileId.file_name.$templateSet")
 
 }
