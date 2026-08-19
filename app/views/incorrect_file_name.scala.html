@@ -29,9 +29,9 @@
              messages("ers.incorrect_file_name.heading")
         }
 
-@paragraph1 = @{
+@paragraph = @{
 
-    messages("ers.incorrect_file_name.paragraph1")
+    messages("ers.incorrect_file_name.paragraph")
 }
 
 @tryAgainText = @{
@@ -44,9 +44,13 @@
 
     @hmrcPageHeading(PageHeading(text = heading))
 
-    <p class="govuk-body">
-        @paragraph1
-    </p>
+    <p class="govuk-body">@Html(messages("ers.incorrect_file_name.lead_in"))</p>
 
-    <p class="govuk-body"><a class="govuk-link" href="@routes.CheckFileTypeController.checkFileTypePage().url">@tryAgainText</a>.</p>
+    <ul class="govuk-list govuk-list--bullet">
+        <li>@Html(messages("ers.incorrect_file_name.bullet_1"))</li>
+        <li>@Html(messages("ers.incorrect_file_name.bullet_2"))</li>
+    </ul>
+
+    <p class="govuk-body">
+        @paragraph <a class="govuk-link" href="@routes.FileUploadController.uploadFilePage().url">@tryAgainText</a>.</p>
 }
