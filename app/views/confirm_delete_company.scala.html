@@ -96,10 +96,9 @@
         ))
 
         @govukButton(Button(
-            preventDoubleClick = Some(true),
             inputType = Some("submit"),
             content = Text(messages("ers.continue")),
-            attributes = Map("id" -> "continue"),
+            attributes = Map("id" -> "continue", "data-prevent-double-click" -> "true"),
         ))
     }
 }
