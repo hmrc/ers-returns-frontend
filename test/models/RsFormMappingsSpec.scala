@@ -108,11 +108,11 @@ class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPer
     }
 
     "return only one error if companyReg is of wrong length and contains invalid chars" in {
-      val postData      = Json.obj(
+      val postData         = Json.obj(
         companyNameFields.companyName -> " company name",
         companyNameFields.companyReg  -> "<script>rm *.*</script>"
       )
-      val validatedForm = companyNameForm().bind(postData, Form.FromJsonMaxChars)
+      val validatedForm    = companyNameForm().bind(postData, Form.FromJsonMaxChars)
       val companyRegErrors = validatedForm.errors.filter(_.key == companyNameFields.companyReg)
       assert(companyRegErrors.size == 1)
       assert(companyRegErrors.head.messages.head == Messages("ers_manual_company_details.err.company_reg"))
