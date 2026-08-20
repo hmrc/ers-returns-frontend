@@ -43,6 +43,17 @@ class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPer
   )
 
   "companyName" must {
+    "bind successfully with no errors when given valid company details" in {
+      val postData      = Json.obj(
+        companyNameFields.companyName    -> "Company Name",
+        companyNameFields.companyReg     -> "12345678",
+        companyNameFields.corporationRef -> "1234567890"
+      )
+      val validatedForm = companyNameForm().bind(postData, Form.FromJsonMaxChars)
+      assert(validatedForm.errors.isEmpty)
+      assert(validatedForm.value.contains(Company("Company Name", Some("12345678"), Some("1234567890"))))
+    }
+
     "return an error if companyName missing" in {
       val postData      = Json.obj(
         companyNameFields.companyName -> ""
@@ -94,6 +105,17 @@ class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPer
       val validatedForm = companyNameForm().bind(postData, Form.FromJsonMaxChars)
       assert(validatedForm.errors.head.key == companyNameFields.companyReg)
       assert(validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.company_reg"))
+    }
+
+    "return only one error if companyReg is of wrong length and contains invalid chars" in {
+      val postData         = Json.obj(
+        companyNameFields.companyName -> " company name",
+        companyNameFields.companyReg  -> "<script>rm *.*</script>"
+      )
+      val validatedForm    = companyNameForm().bind(postData, Form.FromJsonMaxChars)
+      val companyRegErrors = validatedForm.errors.filter(_.key == companyNameFields.companyReg)
+      assert(companyRegErrors.size == 1)
+      assert(companyRegErrors.head.messages.head == Messages("ers_manual_company_details.err.company_reg"))
     }
 
     "return an error if corporationRef contains invalid chars" in {

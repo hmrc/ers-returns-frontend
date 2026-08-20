@@ -427,19 +427,15 @@ object RsFormMappings {
           .verifying(Messages(s"${prefix._2}.err.company_name"), so => checkLength(so, s"${prefix._1}.companyName"))
           .verifying(
             Messages("ers_manual_company_details.err.invalidChars.company_name"),
-            so => validInputCharacters(so, addresssRegx)
+            so => !checkLength(so, s"${prefix._1}.companyName") || validInputCharacters(so, addresssRegx)
           ),
         companyNameFields.companyReg     -> optional(
           text
             .verifying(
               Messages("ers_manual_company_details.err.company_reg"),
-              so => checkLength(so, "companyDetailsFields.companyReg")
-            )
-            .verifying(
-              pattern(
-                fieldValidationPatterns.companyRegPattern.r,
-                error = Messages("ers_manual_company_details.err.company_reg")
-              )
+              so =>
+                checkLength(so, "companyDetailsFields.companyReg") &&
+                  validInputCharacters(so, fieldValidationPatterns.companyRegPattern)
             )
         ),
         companyNameFields.corporationRef -> optional(

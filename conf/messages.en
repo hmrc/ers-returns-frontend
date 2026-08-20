@@ -264,10 +264,10 @@ ers_scheme_organiser.addressLine4.label = County (optional)
 ers_scheme_organiser.postcode = Postcode (optional)
 ers_scheme_organiser.postcode.hint = For example, AA1 1AA
 ers_scheme_organiser.country = Country
-ers_scheme_organiser.company_reg_number = Company Registration Number (optional)
-ers_scheme_organiser.company_reg_number.hint = This should be the same as what is listed on the Companies House register. It’s either 8 numbers or 2 letters and 6 numbers.
-ers_scheme_organiser.corporation_tax_ref = Corporation Tax reference (optional)
-ers_scheme_organiser.corporation_tax_ref.hint = 10 digit number. Example, 1234567890
+ers_scheme_organiser.company_reg_number = Company registration number (optional)
+ers_scheme_organiser.company_reg_number.hint = It is 8 characters. For example, 01234567 or AC012345
+ers_scheme_organiser.corporation_tax_ref = Corporation Tax Unique Taxpayer Reference (UTR) (optional)
+ers_scheme_organiser.corporation_tax_ref.hint = It will be on tax returns and other letters about Corporation Tax. It might be called ‘reference’, ‘UTR’ or ‘official use’.Your UTR can be 10 or 13 digits long.
 ers_scheme_organiser.continue = Continue
 
 #********************************************************************
@@ -451,10 +451,10 @@ ers_manual_company_details.postcode = Postcode (optional)
 ers_manual_company_details.postcode.hint = For example, AA1 1AA
 ers_manual_company_details.postcode_zipcode = Postcode/ZIP code
 ers_manual_company_details.country = Country
-ers_manual_company_details.company_reg_number = Company Registration Number (optional)
-ers_manual_company_details.company_reg_number.hint = This should be the same as what is listed on the Companies House register. It’s either 8 numbers or 2 letters and 6 numbers.
-ers_manual_company_details.corporation_tax_ref = Corporation Tax reference (optional)
-ers_manual_company_details.corporation_tax_ref.hint = It’s a 10 digit number issued by HM Revenue and Customs, usually used in company tax returns. For example, 1234567890.
+ers_manual_company_details.company_reg_number = Company registration number (optional)
+ers_manual_company_details.company_reg_number.hint = It is 8 characters. For example, 01234567 or AC012345
+ers_manual_company_details.corporation_tax_ref = Corporation Tax Unique Taxpayer Reference (UTR) (optional)
+ers_manual_company_details.corporation_tax_ref.hint = It will be on tax returns and other letters about Corporation Tax. It might be called ‘reference’, ‘UTR’ or ‘official use’.Your UTR can be 10 or 13 digits long.
 
 ers_manual_company_details.err.summary.company_name_required = Enter the company name
 ers_manual_company_details.err.summary.company_name_size = Reduce the number of characters entered for the company name
@@ -480,8 +480,8 @@ ers_manual_company_details.err.invalidChars.address_line4 = Check the fourth lin
 ers_manual_company_details.err.address_line5 = Check the fifth line of the address (it must be less than 19 characters)
 ers_manual_company_details.err.invalidChars.address_line5 = Check the fifth line of the address (it contains invalid characters)
 ers_manual_company_details.err.postcode = Check the postcode (it must be valid and less than 9 characters)
-ers_manual_company_details.err.company_reg = Enter a valid Company Registration Number
-ers_manual_company_details.err.corporation_ref = Enter a valid Corporation Tax reference
+ers_manual_company_details.err.company_reg = Enter the Company registration number in the correct format
+ers_manual_company_details.err.corporation_ref = Enter the Corporation Tax UTR in the correct format
 
 ers_manual_company_details.continue = Continue
 ers_manual_address_uk.building = Building and street (optional)
