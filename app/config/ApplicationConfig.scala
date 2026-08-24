@@ -55,9 +55,9 @@ class ApplicationConfig @Inject() (config: ServicesConfig) {
   lazy val sentViaSchedulerNoOfRowsLimit: Int = 10000
 
   // Previous ExternalUrls Object
-  lazy val companyAuthHost: String      = config.getString(s"microservice.services.auth.company-auth.host")
+  lazy val basGatewayHost: String       = config.getString(s"microservice.services.auth.bas-gateway.host")
   lazy val signOutCallback: String      = config.getString(s"microservice.services.feedback-survey-frontend.url")
-  lazy val signOut                      = s"$companyAuthHost/gg/sign-out?continue=$signOutCallback"
+  lazy val signOut                      = s"$basGatewayHost/gg/sign-out?continue=$signOutCallback"
   lazy val loginCallback: String        = config.getString(s"microservice.services.auth.login-callback.url")
   lazy val portalDomain: String         = config.getString("portal.domain")
   lazy val hmacToken: String            = config.getString("hmac.hmac_token")

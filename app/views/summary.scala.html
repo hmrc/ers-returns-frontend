@@ -230,7 +230,7 @@
 
     @govukButton(Button(
         content = Text(messages("ers_summary_declaration.button")),
-        attributes = Map("id" -> "continue"),
+        attributes = Map("id" -> "continue", "data-prevent-double-click" -> "true"),
         href = Some(routes.ConfirmationPageController.confirmationPage().url)
     ))
 }

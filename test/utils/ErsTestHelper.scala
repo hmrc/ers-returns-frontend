@@ -136,7 +136,7 @@ trait ErsTestHelper extends MockitoSugar with AuthHelper with ERSFakeApplication
   when(mockAppConfig.loginCallback).thenReturn("http://localhost:9290/submit-your-ers-annual-return")
 
   when(mockAppConfig.signOut).thenReturn(
-    "http://localhost:9025/gg/sign-out?continue=http://localhost:9514/feedback/ERS"
+    "http://localhost:9553/gg/sign-out?continue=http://localhost:9514/feedback/ERS"
   )
 
   when(mockAppConfig.sentViaSchedulerNoOfRowsLimit).thenReturn(10000)
