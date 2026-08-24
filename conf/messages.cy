@@ -856,10 +856,10 @@ ers.wrong_csv_file_type.plural.tryAgain = Rhowch gynnig arall arni gyda’r ffei
 #********************************************************************
 # incorrect file name
 #********************************************************************
-ers.incorrect_file_name.title = NP-Mae problem wrth uwchlwytho’r ffeil - Gwarantau ar Sail Cyflogaeth – GOV.UK
-ers.incorrect_file_name.heading = NP-Mae problem wrth uwchlwytho’r ffeil
-ers.incorrect_file_name.lead_in = NP-Enw’r ffeil: mae’n rhaid i hyn
-ers.incorrect_file_name.bullet_1 = NP-gynnwys llythrennau o a i z a rhifau o 1 i 9 yn unig
-ers.incorrect_file_name.bullet_2 = NP-fod yn 240 cymeriad neu lai
-ers.incorrect_file_name.paragraph = NP-Gallwch newid enw’r ffeil a
-ers.incorrect_file_name.tryAgain = NP-rhowch gynnig arall arni
+ers.incorrect_file_name.title = Mae problem wrth uwchlwytho’r ffeil - Gwarantau ar Sail Cyflogaeth – GOV.UK
+ers.incorrect_file_name.heading = Mae problem wrth uwchlwytho’r ffeil
+ers.incorrect_file_name.lead_in = Enw’r ffeil: mae’n rhaid i hyn
+ers.incorrect_file_name.bullet_1 = gynnwys llythrennau o a i z a rhifau o 1 i 9 yn unig
+ers.incorrect_file_name.bullet_2 = fod yn 240 cymeriad neu lai
+ers.incorrect_file_name.paragraph = Gallwch newid enw’r ffeil a
+ers.incorrect_file_name.tryAgain = rhowch gynnig arall arni

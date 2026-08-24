@@ -990,10 +990,10 @@ ers.wrong_csv_file_type.plural.tryAgain = Try again with the correct files
 #********************************************************************
 # incorrect file name
 #********************************************************************
-ers.incorrect_file_name.title = NP-There is a problem with the file upload - Submit your ERS annual return – GOV.UK
-ers.incorrect_file_name.heading = Np-There is a problem with the file upload
-ers.incorrect_file_name.lead_in = Np-The file name must:
-ers.incorrect_file_name.bullet_1 = NP-only contain letters a to z and numbers 1 to 9
-ers.incorrect_file_name.bullet_2 = NP-be 240 characters or less
-ers.incorrect_file_name.paragraph = NP-You can change the filename and
-ers.incorrect_file_name.tryAgain = NP-try again
+ers.incorrect_file_name.title = There is a problem with the file upload - Submit your ERS annual return – GOV.UK
+ers.incorrect_file_name.heading = There is a problem with the file upload
+ers.incorrect_file_name.lead_in = The file name must:
+ers.incorrect_file_name.bullet_1 = only contain letters a to z and numbers 1 to 9
+ers.incorrect_file_name.bullet_2 = be 240 characters or less
+ers.incorrect_file_name.paragraph = You can change the filename and
+ers.incorrect_file_name.tryAgain = try again
