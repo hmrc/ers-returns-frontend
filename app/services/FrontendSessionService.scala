@@ -199,7 +199,7 @@ class FrontendSessionService @Inject() (
         companies = gc._2,
         trustees = td,
         nofOfRows = trows,
-        transferStatus = getStatus(trows)
+        transferStatus = transferStatus
       )
     }).recover { case e: NoSuchElementException =>
       logger.error(
