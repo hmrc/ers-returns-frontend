@@ -52,7 +52,7 @@ class ApplicationConfig @Inject() (config: ServicesConfig) {
   lazy val timeOutCountDownSeconds: Int     = config.getInt("sessionTimeout.time-out-countdown-seconds")
   lazy val timeOut                          = s"$loginCallback/signed-out"
 
-  lazy val sentViaSchedulerNoOfRowsLimit: Int = 10000
+  lazy val sentViaSchedulerNoOfRowsLimit: Int = config.getInt("sent-via-scheduler-no-of-rows-limit")
 
   // Previous ExternalUrls Object
   lazy val basGatewayHost: String       = config.getString(s"microservice.services.auth.bas-gateway.host")
