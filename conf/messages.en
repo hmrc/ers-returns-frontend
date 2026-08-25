@@ -186,8 +186,8 @@ ers_start.other.company_lead_in = For the establishing company and any participa
 
 ers_start.company_bullet_1 = name
 ers_start.company_bullet_2 = address
-ers_start.company_bullet_3 = Company Registration Number
-ers_start.company_bullet_4 = Corporation Tax reference
+ers_start.company_bullet_3 = Company registration number
+ers_start.company_bullet_4 = Corporation Tax Unique Taxpayer Reference (UTR)
 
 ers_start.sip.trustee_lead_in = You must provide details for at least one trustee. You will need:
 ers_start.sip.trustee_bullet_1 = the name of the trustee
@@ -390,8 +390,8 @@ ers_group_summary.other.title = Companies covered by this return
 ers_group_summary.company_name = Company name
 ers_group_summary.company_registration_location = Where the company is registered
 ers_group_summary.address = Address
-ers_group_summary.crn = Company Registration Number
-ers_group_summary.ctr = Corporation Tax reference
+ers_group_summary.crn = Company registration number
+ers_group_summary.ctr = Corporation Tax Unique Taxpayer Reference (UTR)
 ers_group_summary.action = Action
 ers_group_summary.notice = Notice a mistake?
 ers_group_summary.csop.notice_info = If there’s a mistake in any of the company details shown, you’ll need to correct them in the CSV file and
