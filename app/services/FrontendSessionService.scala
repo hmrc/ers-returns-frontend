@@ -178,7 +178,14 @@ class FrontendSessionService @Inject() (
       altData       <- getAltAmmendsData(schemeRef)
       trows         <- getNoOfRows(repEvents.get.isNilReturn.get)
     } yield {
-      val fileType = checkFileType.map(_.checkFileType.get)
+      val fileType       = checkFileType.map(_.checkFileType.get)
+      val transferStatus = getStatus(trows)
+      if (transferStatus.contains(LARGE_FILE_STATUS)) {
+        logger.info(
+          s"[FrontendSessionService][getAllData] Flagging submission as $LARGE_FILE_STATUS, schemeRef: $schemeRef, rows: ${trows.getOrElse(0)}"
+        )
+      }
+
       ErsSummary(
         bundleRef,
         repEvents.get.isNilReturn.get,
