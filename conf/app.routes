@@ -140,4 +140,4 @@ GET 		/confirmation/:bundle 		                    controllers.PdfGenerationContr
 GET         /language/:lang                                 controllers.LanguageSwitchController.switchToLanguage(lang: String)
 GET         /keep-alive                                     controllers.ApplicationController.keepAlive()
 
-GET         /incorrect-filename                             controllers.ValidFileNameController.fileNameValidationFailure()
+GET         /incorrect-filename                             controllers.IncorrectFileNameController.incorrectFileNamePage()

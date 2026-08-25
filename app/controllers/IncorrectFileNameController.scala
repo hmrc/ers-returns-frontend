@@ -19,9 +19,8 @@ package controllers
 import config.ApplicationConfig
 import controllers.auth.AuthAction
 import models._
-import org.apache.pekko.actor.ActorSystem
 import play.api.Logging
-import play.api.i18n.{I18nSupport, Messages}
+import play.api.i18n.I18nSupport
 import play.api.mvc._
 import services.FrontendSessionService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -31,29 +30,24 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
 @Singleton
-class ValidFileNameController @Inject() (
+class IncorrectFileNameController @Inject() (
   val mcc: MessagesControllerComponents,
   val sessionService: FrontendSessionService,
-  incorrectFileName: views.html.incorrect_file_name,
+  incorrectFileNameView: views.html.incorrect_file_name,
   authAction: AuthAction
 )(implicit
   val ec: ExecutionContext,
   val ersUtil: ERSUtil,
-  val appConfig: ApplicationConfig,
-  val actorSystem: ActorSystem
-) extends FrontendController(mcc) with Retryable with I18nSupport with Logging with CacheHelper {
+  val appConfig: ApplicationConfig
+) extends FrontendController(mcc) with I18nSupport with Logging {
 
-  def getIncorrectFileNamePage(
-    requestObject: RequestObject
-  )(implicit request: RequestHeader, messages: Messages): Result =
-    BadRequest(
-      incorrectFileName(requestObject)(request, messages, appConfig)
-    )
-
-  def fileNameValidationFailure(): Action[AnyContent] = authAction.async { implicit request =>
-    for {
-      requestObject: RequestObject <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
-    } yield getIncorrectFileNamePage(requestObject)
-  }
+  def incorrectFileNamePage(): Action[AnyContent] =
+    authAction.async { implicit request =>
+      for {
+        requestObject: RequestObject <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
+      } yield BadRequest(
+        incorrectFileNameView(requestObject)(request, request2Messages, appConfig)
+      )
+    }
 
 }

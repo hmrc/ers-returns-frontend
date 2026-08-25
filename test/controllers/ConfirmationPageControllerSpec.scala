@@ -16,7 +16,6 @@
 
 package controllers
 
-import controllers.auth.RequestWithOptionalAuthContext
 import models._
 import org.apache.pekko.stream.Materializer
 import org.jsoup.Jsoup
@@ -34,7 +33,7 @@ import play.api.mvc._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import repositories.RateLimiterCache
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.play.bootstrap.tools.LogCapturing
 import utils.Fixtures.ersRequestObject
 import utils._

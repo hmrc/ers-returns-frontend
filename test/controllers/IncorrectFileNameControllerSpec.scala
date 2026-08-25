@@ -38,7 +38,7 @@ import views.html.incorrect_file_name
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class ValidFileNameControllerSpec
+class IncorrectFileNameControllerSpec
     extends AnyWordSpecLike
     with Matchers
     with ErsTestHelper
@@ -76,14 +76,13 @@ class ValidFileNameControllerSpec
       ) thenReturn Future.successful(ersRequestObject)
 
       val controller =
-        new ValidFileNameController(mockMCC, mockSessionService, incorrectFileNameView, testAuthAction)(
+        new IncorrectFileNameController(mockMCC, mockSessionService, incorrectFileNameView, testAuthAction)(
           ec,
           mockErsUtil,
-          appConfig,
-          actorSystem
+          appConfig
         )
 
-      val result = controller.fileNameValidationFailure().apply(FakeRequest("GET", ""))
+      val result = controller.incorrectFileNamePage().apply(FakeRequest("GET", ""))
       status(result)        shouldBe BAD_REQUEST
       contentAsString(result) should include(
         testMessages("ers.incorrect_file_name.title")

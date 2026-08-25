@@ -21,30 +21,17 @@
 
 @(requestObject: RequestObject)(implicit request: RequestHeader, messages: Messages, appConfig: ApplicationConfig)
 
-@pageTitle = @{
-            messages("ers.incorrect_file_name.title")
-        }
-
-@heading = @{
-             messages("ers.incorrect_file_name.heading")
-        }
-
-@paragraph = @{
-
-    messages("ers.incorrect_file_name.paragraph")
-}
-
-@tryAgainText = @{
-            messages("ers.incorrect_file_name.tryAgain")
-    }
-
-@govuk_wrapper(title = pageTitle) {
+@govuk_wrapper(title = messages("ers.incorrect_file_name.title")) {
 
     @reference(requestObject.getPageTitle)
 
-    @hmrcPageHeading(PageHeading(text = heading))
+    @hmrcPageHeading(
+        PageHeading(text = messages("ers.incorrect_file_name.heading"))
+    )
 
-    <p class="govuk-body">@Html(messages("ers.incorrect_file_name.lead_in"))</p>
+    <p class="govuk-body">
+        @Html(messages("ers.incorrect_file_name.lead_in"))
+    </p>
 
     <ul class="govuk-list govuk-list--bullet">
         <li>@Html(messages("ers.incorrect_file_name.bullet_1"))</li>
@@ -52,5 +39,9 @@
     </ul>
 
     <p class="govuk-body">
-        @paragraph <a class="govuk-link" href="@routes.FileUploadController.uploadFilePage().url">@tryAgainText</a>.</p>
+        @messages("ers.incorrect_file_name.paragraph")
+        <a class="govuk-link" href="@routes.FileUploadController.uploadFilePage().url">
+            @messages("ers.incorrect_file_name.tryAgain")
+        </a>.
+    </p>
 }

@@ -42,12 +42,13 @@ class IncorrectFileNameViewSpec extends ViewSpecBase with FileUploadFixtures {
       doc.title()             mustBe messages("ers.incorrect_file_name.title")
       doc.select("h1").text() mustBe messages("ers.incorrect_file_name.heading")
 
+      val paragraphs = doc.select("p.govuk-body")
+      paragraphs.get(1).text() mustBe messages("ers.incorrect_file_name.lead_in")
+      paragraphs.get(2).text()   must include(messages("ers.incorrect_file_name.paragraph"))
+
       val bulletItems = doc.select("ul.govuk-list li")
       bulletItems.get(0).text() mustBe messages("ers.incorrect_file_name.bullet_1")
       bulletItems.get(1).text() mustBe messages("ers.incorrect_file_name.bullet_2")
-
-      val paragraphs = doc.select("p.govuk-body")
-      paragraphs.get(2).text() must include(messages("ers.incorrect_file_name.paragraph"))
 
       val tryAgainLink = doc.select("""a[href="/submit-your-ers-annual-return/upload-ods-file"]""")
       tryAgainLink.text() mustBe messages("ers.incorrect_file_name.tryAgain")
