@@ -852,3 +852,14 @@ ers.wrong_csv_file_type.plural.title = Mae problem gyda’r ffeiliau y gwnaethoc
 ers.wrong_csv_file_type.plural.heading = Mae problem gyda’r ffeiliau y gwnaethoch eu huwchlwytho
 ers.wrong_csv_file_type.plural.paragraph1 = Nid ydych wedi uwchlwytho’r ffeiliau cywir.
 ers.wrong_csv_file_type.plural.tryAgain = Rhowch gynnig arall arni gyda’r ffeiliau cywir
+
+#********************************************************************
+# incorrect file name
+#********************************************************************
+ers.incorrect_file_name.title = Mae problem wrth uwchlwytho’r ffeil - Gwarantau ar Sail Cyflogaeth – GOV.UK
+ers.incorrect_file_name.heading = Mae problem wrth uwchlwytho’r ffeil
+ers.incorrect_file_name.lead_in = Enw’r ffeil: mae’n rhaid i hyn
+ers.incorrect_file_name.bullet_1 = gynnwys llythrennau o a i z a rhifau o 1 i 9 yn unig
+ers.incorrect_file_name.bullet_2 = fod yn 240 cymeriad neu lai
+ers.incorrect_file_name.paragraph = Gallwch newid enw’r ffeil a
+ers.incorrect_file_name.tryAgain = rhowch gynnig arall arni

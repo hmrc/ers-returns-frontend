@@ -986,3 +986,14 @@ ers.wrong_csv_file_type.plural.title = There is a problem with the files you upl
 ers.wrong_csv_file_type.plural.heading = There is a problem with the files you uploaded
 ers.wrong_csv_file_type.plural.paragraph1 = The files you uploaded are not the right files.
 ers.wrong_csv_file_type.plural.tryAgain = Try again with the correct files
+
+#********************************************************************
+# incorrect file name
+#********************************************************************
+ers.incorrect_file_name.title = There is a problem with the file upload - Submit your ERS annual return – GOV.UK
+ers.incorrect_file_name.heading = There is a problem with the file upload
+ers.incorrect_file_name.lead_in = The file name must:
+ers.incorrect_file_name.bullet_1 = only contain letters a to z and numbers 1 to 9
+ers.incorrect_file_name.bullet_2 = be 240 characters or less
+ers.incorrect_file_name.paragraph = You can change the filename and
+ers.incorrect_file_name.tryAgain = try again
