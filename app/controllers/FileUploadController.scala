@@ -84,7 +84,7 @@ class FileUploadController @Inject() (
     } yield file match {
       case Some(file: UploadedSuccessfully) =>
         val fileName = file.name.toLowerCase
-        if (FileNameHelper.isValidFileName(fileName)) {
+        if (FileNameHelper.isIncorrectFileName(fileName)) {
           Future.successful(Redirect(controllers.routes.IncorrectFileNameController.incorrectFileNamePage()))
 
         } else if (!MimeTypeValidator.checkIsODSMimeType(file.mimeType)) {
