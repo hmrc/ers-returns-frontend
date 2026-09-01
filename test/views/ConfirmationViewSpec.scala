@@ -116,7 +116,7 @@ class ConfirmationViewSpec extends ViewSpecBase with FileUploadFixtures {
     doc.getElementsByClass("govuk-body").get(6).text   mustBe "What did you think of this service? (takes 30 seconds)"
     doc.getElementsByClass("govuk-body").get(6).text     must include("(takes 30 seconds)")
     doc.getElementById("finished").attr("href")        mustBe
-      "http://localhost:9553/gg/sign-out?continue=http://localhost:9514/feedback/ERS"
+      "http://localhost:9553/gg/sign-out?continue=http://localhost:9514/feedback/ERS?useServiceNavigation"
     doc.getElementById("scheme-reference").text()      mustBe schemeRef
   }
 
