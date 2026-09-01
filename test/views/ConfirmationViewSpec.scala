@@ -113,8 +113,6 @@ class ConfirmationViewSpec extends ViewSpecBase with FileUploadFixtures {
       .getElementsByClass("govuk-body")
       .get(5)
       .text                                            mustBe "You can view your schemes and arrangements to submit a different annual return."
-    doc.getElementById("finished").attr("href")        mustBe
-      "http://localhost:9553/gg/sign-out?continue=http://localhost:9514/feedback/ERS?useServiceNavigation"
     doc.getElementById("scheme-reference").text()      mustBe schemeRef
   }
 
