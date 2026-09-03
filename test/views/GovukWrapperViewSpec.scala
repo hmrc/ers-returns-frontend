@@ -33,7 +33,8 @@ class GovukWrapperViewSpec extends ViewSpecBase {
   implicit val request: FakeRequest[AnyContentAsEmpty.type] = fakeRequest
   implicit val messages: Messages                           = testMessages
 
-  private val exitSurveyUrl = "http://localhost:9553/gg/sign-out?continue=http://localhost:9514/feedback/ERS"
+  private val exitSurveyUrl =
+    "http://localhost:9553/gg/sign-out?continue=http://localhost:9514/feedback/ERS?useServiceNavigation"
 
   private def linkHrefs(html: Html): Seq[String] =
     asDocument(html).select("a").eachAttr("href").asScala.toSeq

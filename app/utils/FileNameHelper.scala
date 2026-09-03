@@ -76,4 +76,10 @@ object FileNameHelper {
     finalNames
   }
 
+  def isIncorrectFileName(fileName: String): Boolean = {
+    val exceedsMaxLength          = fileName.length > 240
+    val containsInvalidCharacters = !fileName.matches("^[A-Za-z0-9_.-]+$")
+    exceedsMaxLength || containsInvalidCharacters
+  }
+
 }

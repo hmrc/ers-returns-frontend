@@ -26,7 +26,9 @@
         hmrcHead: HmrcHead,
         hmrcScripts: HmrcScripts,
         hmrcReportTechnicalIssueHelper: HmrcReportTechnicalIssueHelper,
-        hmrcTimeoutDialogHelper: HmrcTimeoutDialogHelper
+        hmrcTimeoutDialogHelper: HmrcTimeoutDialogHelper,
+        autocompleteCss: HmrcAccessibleAutocompleteCss,
+        autocompleteJavascript: HmrcAccessibleAutocompleteJavascript
 )
 
 @(title: String, scriptElement: Option[Html] = None, isUserResearchBannerVisible: Boolean = false, disableSignOut: Boolean = false)(contentBlock: Html)(implicit request: RequestHeader, messages: Messages, applicationConfig: ApplicationConfig)
@@ -34,6 +36,7 @@
 @head = {
     <meta name="format-detection" content="telephone=no"/>
     <link rel="stylesheet" href="assets/css/ers.css" type="text/css" @{CSPNonce.attr}>
+    @autocompleteCss()
     @if(!disableSignOut) {
         @hmrcTimeoutDialogHelper(
             signOutUrl = applicationConfig.signOut,
@@ -58,6 +61,7 @@
 
 @scripts = {
     @scriptElement.getOrElse(Html(""))
+    @autocompleteJavascript()
 }
 
 @hmrcStandardPage(

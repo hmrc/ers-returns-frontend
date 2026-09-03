@@ -15,6 +15,7 @@
  *@
 
 @import _root_.utils.CountryCodes
+@import uk.gov.hmrc.govukfrontend.views.Implicits.RichSelect
 
 @this(govukSelect: GovukSelect)
 
@@ -35,4 +36,4 @@
     label = Label(
         content = Text(messages("ers_scheme_organiser.country"))
     )
-))
+).asAccessibleAutocomplete())

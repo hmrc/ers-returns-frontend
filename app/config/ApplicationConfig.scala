@@ -52,11 +52,14 @@ class ApplicationConfig @Inject() (config: ServicesConfig) {
   lazy val timeOutCountDownSeconds: Int     = config.getInt("sessionTimeout.time-out-countdown-seconds")
   lazy val timeOut                          = s"$loginCallback/signed-out"
 
-  lazy val sentViaSchedulerNoOfRowsLimit: Int = 10000
+  lazy val sentViaSchedulerNoOfRowsLimit: Int = config.getInt("sent-via-scheduler-no-of-rows-limit")
 
   // Previous ExternalUrls Object
-  lazy val basGatewayHost: String       = config.getString(s"microservice.services.auth.bas-gateway.host")
-  lazy val signOutCallback: String      = config.getString(s"microservice.services.feedback-survey-frontend.url")
+  lazy val basGatewayHost: String = config.getString(s"microservice.services.auth.bas-gateway.host")
+
+  lazy val signOutCallback: String =
+    s"${config.getString(s"microservice.services.feedback-survey-frontend.url")}?useServiceNavigation"
+
   lazy val signOut                      = s"$basGatewayHost/gg/sign-out?continue=$signOutCallback"
   lazy val loginCallback: String        = config.getString(s"microservice.services.auth.login-callback.url")
   lazy val portalDomain: String         = config.getString("portal.domain")
