@@ -480,7 +480,7 @@ ers_manual_company_details.err.invalidChars.address_line4 = Check the fourth lin
 ers_manual_company_details.err.address_line5 = Check the fifth line of the address (it must be less than 19 characters)
 ers_manual_company_details.err.invalidChars.address_line5 = Check the fifth line of the address (it contains invalid characters)
 ers_manual_company_details.err.postcode = Check the postcode (it must be valid and less than 9 characters)
-ers_manual_company_details.err.company_reg = Enter the Company registration number in the correct format
+ers_manual_company_details.err.company_reg = Enter the company registration number in the correct format
 ers_manual_company_details.err.corporation_ref = Enter the Corporation Tax UTR in the correct format
 
 ers_manual_company_details.continue = Continue
