@@ -84,8 +84,8 @@ class ApplicationConfig @Inject() (config: ServicesConfig) {
 
   lazy val notificationBannerEnabled: Boolean = config.getBoolean("notification-banner.enabled")
 
-  lazy val notificationBannerPostAprilEnabled: Boolean =
-    config.getBoolean("notification-banner.post-april-enabled")
+  lazy val notificationBannerPreAprilEnabled: Boolean =
+    config.getBoolean("notification-banner.pre-april-enabled")
 
   val confirmationPageRateLimitTTLDuration: FiniteDuration =
     FiniteDuration(config.getInt("confirmation-page-get.maxTps"), "s")

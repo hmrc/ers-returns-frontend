@@ -144,8 +144,6 @@ trait ErsTestHelper extends MockitoSugar with AuthHelper with ERSFakeApplication
   when(mockAppConfig.odsValidationRetryAmount).thenReturn(1)
   when(mockAppConfig.urBannerLink).thenReturn("http://")
   when(mockAppConfig.ampersandRegex).thenReturn("(?!&amp;)&".r)
-  when(mockAppConfig.notificationBannerEnabled).thenReturn(true)
-  when(mockAppConfig.notificationBannerPostAprilEnabled).thenReturn(true)
 
   import scala.concurrent.duration._
   when(mockAppConfig.retryDelay).thenReturn(3.milliseconds)

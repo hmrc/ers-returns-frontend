@@ -32,8 +32,8 @@ class StartPageViewSpec extends ViewSpecBase with FileUploadFixtures {
 
   implicit override lazy val app = new GuiceApplicationBuilder()
     .configure(
-      "notification-banner.enabled"            -> true,
-      "notification-banner.post-april-enabled" -> true
+      "notification-banner.enabled"           -> true,
+      "notification-banner.pre-april-enabled" -> true
     )
     .build()
 
