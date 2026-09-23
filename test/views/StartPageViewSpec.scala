@@ -37,7 +37,7 @@ class StartPageViewSpec extends ViewSpecBase with FileUploadFixtures {
     )
     .build()
 
-  private val view               = app.injector.instanceOf[start]
+  private val view = app.injector.instanceOf[start]
 
   implicit val ersUtil: ERSUtil                             = app.injector.instanceOf[ERSUtil]
   implicit val appConfig: ApplicationConfig                 = app.injector.instanceOf[ApplicationConfig]
