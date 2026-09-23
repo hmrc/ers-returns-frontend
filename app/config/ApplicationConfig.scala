@@ -82,6 +82,11 @@ class ApplicationConfig @Inject() (config: ServicesConfig) {
   lazy val uploadFileSizeLimit: Int   = config.getInt("file-size.uploadSizeLimit")
   lazy val uploadFileSizeInMB: Double = uploadFileSizeLimit / 1000 / 1000.toDouble
 
+  lazy val notificationBannerEnabled: Boolean = config.getBoolean("notification-banner.enabled")
+
+  lazy val notificationBannerPostAprilEnabled: Boolean =
+    config.getBoolean("notification-banner.post-april-enabled")
+
   val confirmationPageRateLimitTTLDuration: FiniteDuration =
     FiniteDuration(config.getInt("confirmation-page-get.maxTps"), "s")
 

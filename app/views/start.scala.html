@@ -33,6 +33,22 @@
 
     @reference(requestObject.getPageTitle)
 
+    @if(appConfig.notificationBannerEnabled){
+        <div class="govuk-notification-banner" role="region" aria-labelledby="govuk-notification-banner-title" data-module="govuk-notification-banner">
+            <div class="govuk-notification-banner__header">
+            <h2 class="govuk-notification-banner__title" id="govuk-notification-banner-title">
+                @messages("ers_start.notification.banner.title")
+            </h2>
+        </div>
+        <div class="govuk-notification-banner__content">
+            @messages("ers_start.notification.banner.para_1")
+                @if(appConfig.notificationBannerPostAprilEnabled){
+                    <br><br>
+                    @messages("ers_start.notification.banner.para_2")
+                }
+        </div>
+    </div>
+    }
     <h1 class="govuk-heading-l">
         <span class="govuk-caption-l">@Html(ersUtil.getPageElement(schemeId, ersUtil.PAGE_START, "caption"))</span>
         <span class="govuk-heading-xl">@Html(messages("ers_start.page_heading", requestObject.getSchemeNameForDisplay))</span>

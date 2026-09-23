@@ -19,6 +19,7 @@ package views
 import config.ApplicationConfig
 import org.jsoup.nodes.{Document, Element}
 import play.api.i18n.Messages
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import utils.ERSUtil
@@ -29,7 +30,14 @@ import scala.jdk.CollectionConverters._
 
 class StartPageViewSpec extends ViewSpecBase with FileUploadFixtures {
 
-  private val view = app.injector.instanceOf[start]
+  implicit override lazy val app = new GuiceApplicationBuilder()
+    .configure(
+      "notification-banner.enabled"            -> true,
+      "notification-banner.post-april-enabled" -> true
+    )
+    .build()
+
+  private val view               = app.injector.instanceOf[start]
 
   implicit val ersUtil: ERSUtil                             = app.injector.instanceOf[ERSUtil]
   implicit val appConfig: ApplicationConfig                 = app.injector.instanceOf[ApplicationConfig]
@@ -218,6 +226,14 @@ class StartPageViewSpec extends ViewSpecBase with FileUploadFixtures {
     doc.getElementsByClass("govuk-heading-xl").text() mustBe "Submit your annual return"
     doc.getElementById("scheme-reference").text()     mustBe expectedBreadcrumb
     doc.getElementsByClass("govuk-caption-l").text()  mustBe expectedCaption
+
+    doc.getElementsByClass("govuk-notification-banner__title").text() mustBe "Important"
+    doc
+      .getElementsByClass("govuk-notification-banner__content")
+      .text()
+      .contains(
+        "From 6 April 2027 you must use the updated version of the HMRC templates when you submit your ERS return"
+      )
 
     val paragraphs = doc.getElementsByClass("govuk-body").asScala
     expectedElements(paragraphs, expectedParagraphs)

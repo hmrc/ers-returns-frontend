@@ -152,6 +152,9 @@ ers_start.sip.intro_para = Use this service to submit your return at the end of 
 ers_start.other.intro_para = Use this service to submit your return at the end of the tax year.
 ers_start.sub_title = Before you start
 ers_start.sub_title_1 = What you will need
+ers_start.notification.banner.title = Important
+ers_start.notification.banner.para_1 = From 6 April 2027 you must use the updated version of the HMRC templates when you submit your ERS return. If you create your own files you will need to use the technical notes to update your file.
+ers_start.notification.banner.para_2 = You cannot submit a return using the updated templates before 6 April 2027.
 
 ers_start.large_files = If you have a ODS file that’s larger than 200MB or a CSV file that’s larger than 200MB
 ers_start.help = A company director or company secretary must have approved the return and must agree to any declaration you make in this service.
