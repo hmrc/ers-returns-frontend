@@ -181,6 +181,10 @@ ers_start.sip.relevant_bullet_3 = gellir nodi manylion aelodau’r plan grŵp â
 ers_start.other.relevant_bullet_3 = gellir nodi manylion unrhyw gwmnïau eraill a gwmpesir gan y Datganiad hwn â llaw neu drwy eu huwchlwytho mewn ffeil CSV
 ers_start.filesize = E-bostiwch <a class="govuk-link" href="mailto:shareschemes@hmrc.gsi.gov.uk">shareschemes@hmrc.gsi.gov.uk</a> a byddwn yn eich helpu gyda’ch cyflwyniad.
 ers_start.start_now_button = Dechrau nawr
+ers_start.notification.banner.title = Pwysig
+ers_start.notification.banner.para_1 = O 6 Ebrill 2027 ymlaen,bydd yn rhaid i chi ddefnyddio’r fersiwn wedi’i diweddaru o dempledi CThEF pan fyddwch yn cyflwyno’ch datganiad ERS. Os ydych yn creu eich ffeiliau eich hun, bydd angen i chi ddefnyddio’r nodiadau technegol i ddiweddaru’ch ffeil.
+ers_start.notification.banner.para_2 = Ni allwch gyflwyno datganiad gan ddefnyddio’r templedi sydd wedi’u diweddaru cyn 6 Ebrill 2027.
+
 ers_choose.title = Digwyddiadau i’w nodi
 ers_choose.csop.question = A oes opsiynau wedi eu haddasu, wedi eu harfer, wedi eu rhyddhau (gan gynnwys cyfnewidfeydd), wedi dod i ben neu wedi eu dileu, yn ystod y flwyddyn dreth?
 ers_choose.saye.question = A oes opsiynau wedi eu haddasu, wedi eu harfer, wedi eu rhyddhau (gan gynnwys cyfnewidfeydd), wedi dod i ben neu wedi eu dileu, yn ystod y flwyddyn dreth?
