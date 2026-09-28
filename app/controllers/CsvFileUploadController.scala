@@ -265,20 +265,18 @@ class CsvFileUploadController @Inject() (
     list: UpscanCsvFilesList,
     requestObject: RequestObject
   )(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
-    val fileName: String =
-      if (
-        schemeInfo.schemeType == "CSOP" && useCsopV5V7Templates(
-          requestObject.taxYear,
-          requestObject.schemeType
-        ) && appConfig.useV4andV5Scheme
-      ) ".file_name.v5"
-      else if (
-        schemeInfo.schemeType == "CSOP" && useCsopV5V7Templates(
-          requestObject.taxYear,
-          requestObject.schemeType
-        ) && appConfig.useV6andV7Scheme
-      ) ".file_name.v7"
-      else ".file_name"
+
+    val fileName = if (appConfig.useV6andV7Scheme) {
+      if (schemeInfo.schemeType == "CSOP" && !useCsopV5V7Templates(requestObject.taxYear, requestObject.schemeType))
+        ".file_name.v6"
+      else
+        ".file_name.v7"
+    } else if (
+      appConfig.useV4andV5Scheme &&
+      schemeInfo.schemeType == "CSOP" &&
+      useCsopV5V7Templates(requestObject.taxYear, requestObject.schemeType)
+    ) ".file_name.v5"
+    else ".file_name"
 
     val expectedAndUploadedFiles: List[(String, String, String)] =
       list.ids
@@ -304,7 +302,7 @@ class CsvFileUploadController @Inject() (
     if (incorrectFiles.isEmpty) {
       validateCsv(csvCallbackData, schemeInfo)
     } else {
-      logger.info("[CsvFileUploadController][checkFileNames] User uploaded the wrong file")
+      logger.info(s"[CsvFileUploadController][checkFileNames] User uploaded the wrong file $incorrectFiles")
       Future.successful(getWrongCsvFileTypePage(requestObject, incorrectFiles))
     }
   }

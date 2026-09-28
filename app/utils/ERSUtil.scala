@@ -117,25 +117,27 @@ class ERSUtil @Inject() (val appConfig: ApplicationConfig)(implicit
     useCsopV5Templates: Boolean
   )(implicit messages: Messages): String = {
 
-    val fileNameKey =
-      if (appConfig.useV6andV7Scheme) {
-        if (schemeId == "1" && !useCsopV5Templates)
-          s"$fileId.file_name.v6"
-        else
-          s"$fileId.file_name.v7"
-
-      } else if (
-        appConfig.useV4andV5Scheme &&
-        schemeId == "1" &&
-        useCsopV5Templates
-      ) {
-        s"$fileId.file_name.v5"
-
-      } else {
-        s"$fileId.file_name"
-      }
-
-    getPageElement(schemeId, PAGE_CHECK_CSV_FILE, fileNameKey)
+    val fileNameKey = getFileNameSuffix(schemeId == "1", useCsopV5Templates)
+    getPageElement(schemeId, PAGE_CHECK_CSV_FILE, s"$fileId$fileNameKey")
   }
+
+  def getFileNameSuffix(
+    isCsop: Boolean,
+    useCsopV5V7Templates: Boolean
+  ): String =
+    if (appConfig.useV6andV7Scheme) {
+      if (isCsop && !useCsopV5V7Templates)
+        ".file_name.v6"
+      else
+        ".file_name.v7"
+    } else if (
+      appConfig.useV4andV5Scheme &&
+      isCsop &&
+      useCsopV5V7Templates
+    ) {
+      ".file_name.v5"
+    } else {
+      ".file_name"
+    }
 
 }
