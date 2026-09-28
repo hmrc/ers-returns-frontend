@@ -266,18 +266,10 @@ class CsvFileUploadController @Inject() (
     requestObject: RequestObject
   )(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
 
-    val fileName = if (appConfig.useV6andV7Scheme) {
-      if (schemeInfo.schemeType == "CSOP" && !useCsopV5V7Templates(requestObject.taxYear, requestObject.schemeType))
-        ".file_name.v6"
-      else
-        ".file_name.v7"
-    } else if (
-      appConfig.useV4andV5Scheme &&
-      schemeInfo.schemeType == "CSOP" &&
+    val fileName                                                 = ersUtil.getFileNameSuffix(
+      schemeInfo.schemeType == "CSOP",
       useCsopV5V7Templates(requestObject.taxYear, requestObject.schemeType)
-    ) ".file_name.v5"
-    else ".file_name"
-
+    )
     val expectedAndUploadedFiles: List[(String, String, String)] =
       list.ids
         .zip(csvCallbackData.reverse)

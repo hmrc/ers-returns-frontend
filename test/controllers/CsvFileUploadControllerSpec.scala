@@ -210,6 +210,66 @@ class CsvFileUploadControllerSpec
       )(any())
     }
 
+    "log the selected csv files for CSOP when useV6andV7Scheme is enabled" in {
+
+      val csopV7RequestObject = ersRequestObject.copy(
+        taxYear = Some("2024/25"),
+        schemeName = Some("Csop"),
+        schemeType = Some("CSOP")
+      )
+
+      when(mockSessionService.fetch[RequestObject](refEq(mockErsUtil.ERS_REQUEST_OBJECT))(any(), any()))
+        .thenReturn(Future.successful(csopV7RequestObject))
+      when(mockAppConfig.useV4andV5Scheme).thenReturn(false)
+      when(mockAppConfig.useV6andV7Scheme).thenReturn(true)
+
+      val expectedLogMessage = "[CsvFileUploadController][uploadFilePage] The following files were selected to be " +
+        "uploaded: CSOP_OptionsGranted_V7.csv, CSOP_OptionsRCL_V7.csv, CSOP_OptionsExercised_V7.csv"
+
+      when(mockSessionService.fetch[UpscanCsvFilesList](meq("csv-files-upload"))(any(), any()))
+        .thenReturn(Future.successful(UpscanCsvFilesList(upscanIds)))
+
+      withCaptureOfLoggingFrom(csvFileUploadControllerLogger) { captureEvents =>
+        await(csvFileUploadController.uploadFilePage()(testFakeRequest))
+        assert(captureEvents.exists(_.getMessage.contains(expectedLogMessage)))
+      }
+
+      verify(mockAuditEvents, times(1)).auditSelectedCsvRadioButtons(
+        meq(List("CSOP_OptionsGranted_V7.csv", "CSOP_OptionsRCL_V7.csv", "CSOP_OptionsExercised_V7.csv"))
+      )(any())
+
+    }
+
+    "log the selected csv files for CSOP for tax year < 2023 when useV6andV7Scheme is enabled" in {
+
+      val csopV7RequestObject = ersRequestObject.copy(
+        taxYear = Some("2014/15"),
+        schemeName = Some("Csop"),
+        schemeType = Some("CSOP")
+      )
+
+      when(mockSessionService.fetch[RequestObject](refEq(mockErsUtil.ERS_REQUEST_OBJECT))(any(), any()))
+        .thenReturn(Future.successful(csopV7RequestObject))
+      when(mockAppConfig.useV4andV5Scheme).thenReturn(false)
+      when(mockAppConfig.useV6andV7Scheme).thenReturn(true)
+
+      val expectedLogMessage = "[CsvFileUploadController][uploadFilePage] The following files were selected to be " +
+        "uploaded: CSOP_OptionsGranted_V6.csv, CSOP_OptionsRCL_V6.csv, CSOP_OptionsExercised_V6.csv"
+
+      when(mockSessionService.fetch[UpscanCsvFilesList](meq("csv-files-upload"))(any(), any()))
+        .thenReturn(Future.successful(UpscanCsvFilesList(upscanIds)))
+
+      withCaptureOfLoggingFrom(csvFileUploadControllerLogger) { captureEvents =>
+        await(csvFileUploadController.uploadFilePage()(testFakeRequest))
+        assert(captureEvents.exists(_.getMessage.contains(expectedLogMessage)))
+      }
+
+      verify(mockAuditEvents, times(1)).auditSelectedCsvRadioButtons(
+        meq(List("CSOP_OptionsGranted_V6.csv", "CSOP_OptionsRCL_V6.csv", "CSOP_OptionsExercised_V6.csv"))
+      )(any())
+
+    }
+
     "log the selected csv files for v5 tax years" in {
 
       val csopV5RequestObject = ersRequestObject.copy(
@@ -959,6 +1019,7 @@ class CsvFileUploadControllerSpec
       val mockSchemeInfo: SchemeInfo       = mock[SchemeInfo]
       val testRequestObject: RequestObject = mock[RequestObject]
       when(testRequestObject.taxYear).thenReturn(Some("2024/25"))
+      when(testRequestObject.schemeType).thenReturn(Some("CSOP"))
 
       when(
         mockSessionService.fetch[UpscanCsvFilesList](eqTo(mockErsUtil.CSV_FILES_UPLOAD))(any(), any())
@@ -970,6 +1031,50 @@ class CsvFileUploadControllerSpec
       when(
         mockErsUtil.getPageElement(any(), any(), any(), any())(any())
       ) thenReturn "CSOP_OptionsGranted_V4.csv"
+      when(
+        mockErsConnector.validateCsvFileData(any[List[UploadedSuccessfully]](), any[SchemeInfo]())(any(), any())
+      ) thenReturn Future.successful(HttpResponse(OK, ""))
+
+      val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+      val result      = csvFileUploadController
+        .checkFileNames(testCsvCallbackData, mockSchemeInfo)(authRequest, hc)
+      status(result)         shouldBe SEE_OTHER
+      result.futureValue.header
+        .headers("Location") shouldBe controllers.schemeOrganiser.routes.SchemeOrganiserBasedInUkController
+        .questionPage()
+        .toString
+    }
+
+    "redirect to validateCsv if file name check is successful for V7 CSV file" in {
+      reset(mockErsConnector)
+
+      val testUploadedSuccessfully         = new UploadedSuccessfully(
+        "CSOP_OptionsGranted_V7.csv",
+        "http://somedownloadlink.com/034099340",
+        mimeType = Some("csv")
+      )
+      val testCsvCallbackData              = List[UploadedSuccessfully](testUploadedSuccessfully)
+      val testCacheFileIds                 = List[UpscanIds](
+        new UpscanIds(new UploadId(Random.nextString(10)), "file0", InProgress),
+        new UpscanIds(new UploadId(Random.nextString(10)), "file1", InProgress),
+        new UpscanIds(new UploadId(Random.nextString(10)), "file2", InProgress)
+      )
+      val testUpscanCsvFileList            = new UpscanCsvFilesList(testCacheFileIds)
+      val mockSchemeInfo: SchemeInfo       = mock[SchemeInfo]
+      val testRequestObject: RequestObject = mock[RequestObject]
+      when(testRequestObject.taxYear).thenReturn(Some("2024/25"))
+      when(testRequestObject.schemeType).thenReturn(Some("CSOP"))
+
+      when(
+        mockSessionService.fetch[UpscanCsvFilesList](eqTo(mockErsUtil.CSV_FILES_UPLOAD))(any(), any())
+      ) thenReturn Future.successful(testUpscanCsvFileList)
+
+      when(
+        mockSessionService.fetch[RequestObject](eqTo(mockErsUtil.ERS_REQUEST_OBJECT))(any(), any())
+      ) thenReturn Future.successful(testRequestObject)
+      when(
+        mockErsUtil.getPageElement(any(), any(), any(), any())(any())
+      ) thenReturn "CSOP_OptionsGranted_V7.csv"
       when(
         mockErsConnector.validateCsvFileData(any[List[UploadedSuccessfully]](), any[SchemeInfo]())(any(), any())
       ) thenReturn Future.successful(HttpResponse(OK, ""))
@@ -1001,6 +1106,7 @@ class CsvFileUploadControllerSpec
 
       val testRequestObject: RequestObject = mock[RequestObject]
       when(testRequestObject.taxYear).thenReturn(Some("2023/24"))
+      when(testRequestObject.schemeType).thenReturn(Some("csop"))
 
       when(
         mockSessionService.fetch[UpscanCsvFilesList](eqTo(mockErsUtil.CSV_FILES_UPLOAD))(any(), any())
@@ -1151,6 +1257,7 @@ class CsvFileUploadControllerSpec
         mockErsUtil.getPageElement(any(), any(), eqTo("file1.description"), any())(any())
       ) thenReturn "Options released"
 
+      when(mockErsUtil.getFileNameSuffix(any(), any())) thenReturn ".file_name"
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
 
       val result =
