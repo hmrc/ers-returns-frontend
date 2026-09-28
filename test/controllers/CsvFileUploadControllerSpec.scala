@@ -212,7 +212,6 @@ class CsvFileUploadControllerSpec
 
     "log the selected csv files for v5 tax years" in {
 
-
       val csopV5RequestObject = ersRequestObject.copy(
         taxYear = Some("2024/25"),
         schemeName = Some("Csop"),
