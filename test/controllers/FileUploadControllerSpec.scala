@@ -69,7 +69,7 @@ class FileUploadControllerSpec
     testOptString.get,
     Instant.now,
     testOptString.get,
-    testOptString.get,
+    "2024/25",
     testOptString.get,
     "CSOP"
   )
@@ -356,7 +356,18 @@ class FileUploadControllerSpec
       }
 
       "Ers Meta Data is returned, callback record is uploaded successfully, remove presubmission data returns OK, validate file data returns BAD_REQUEST, for CSOP with Incorrect ERS Template validation error, csopV5Enabled = false" in {
-        when(mockAppConfig.csopV5Enabled).thenReturn(false)
+        val schemeInfo: SchemeInfo = SchemeInfo(
+          testOptString.get,
+          Instant.now,
+          testOptString.get,
+          "2014/15",
+          testOptString.get,
+          "CSOP"
+        )
+
+        val validErsMetaData: ErsMetaData =
+          ErsMetaData(schemeInfo, "ipRef", Some("aoRef"), "empRef", Some("agentRef"), Some("sapNumber"))
+
         when(mockSessionService.fetch[RequestObject](anyString())(any(), any()))
           .thenReturn(Future.successful(ersRequestObject))
         when(mockErsConnector.getCallbackRecord(any(), any)).thenReturn(Future.successful(Some(uploadedSuccessfully)))
@@ -413,7 +424,6 @@ class FileUploadControllerSpec
 
     "redirect the user to FileUploadController.templateFailure()" when {
       "Ers Meta Data is returned, callback record is uploaded successfully, remove presubmission data returns OK, validate file data returns BAD_REQUEST, for CSOP with Incorrect ERS Template validation error, csopV5Enabled = true" in {
-        when(mockAppConfig.csopV5Enabled).thenReturn(true)
         when(mockSessionService.fetch[RequestObject](anyString())(any(), any()))
           .thenReturn(Future.successful(ersRequestObject))
         when(mockErsConnector.getCallbackRecord(any(), any)).thenReturn(Future.successful(Some(uploadedSuccessfully)))

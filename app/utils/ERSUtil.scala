@@ -81,8 +81,9 @@ class ERSUtil @Inject() (val appConfig: ApplicationConfig)(implicit
     n: Int = 0,
     companyNamesList: String = ""
   ): String =
-    if (n == companyDetailsList.length) { companyNamesList }
-    else {
+    if (n == companyDetailsList.length) {
+      companyNamesList
+    } else {
       buildCompanyNameList(companyDetailsList, n + 1, companyNamesList + companyDetailsList(n).companyName + "<br>")
     }
 
@@ -91,8 +92,11 @@ class ERSUtil @Inject() (val appConfig: ApplicationConfig)(implicit
     n: Int = 0,
     trusteeNamesList: String = ""
   ): String =
-    if (n == trusteeDetailsList.length) { trusteeNamesList }
-    else { buildTrusteeNameList(trusteeDetailsList, n + 1, trusteeNamesList + trusteeDetailsList(n).name + "<br>") }
+    if (n == trusteeDetailsList.length) {
+      trusteeNamesList
+    } else {
+      buildTrusteeNameList(trusteeDetailsList, n + 1, trusteeNamesList + trusteeDetailsList(n).name + "<br>")
+    }
 
   def companyLocation(company: CompanyDetails): String =
     if (company.basedInUk) "ers_trustee_based.uk" else "ers_trustee_based.overseas"
@@ -107,11 +111,21 @@ class ERSUtil @Inject() (val appConfig: ApplicationConfig)(implicit
     appConfig.ampersandRegex
       .replaceAllIn(input, "&amp;")
 
-  def getFileName(fileId: String, schemeId: String, useCsopV5Templates: Boolean)(implicit messages: Messages): String =
-    if (schemeId == "1" && useCsopV5Templates) {
-      getPageElement(schemeId, PAGE_CHECK_CSV_FILE, s"$fileId.file_name.v5")
-    } else {
-      getPageElement(schemeId, PAGE_CHECK_CSV_FILE, s"$fileId.file_name")
-    }
+  def getFileName(
+    fileId: String,
+    schemeId: String,
+    useCsopV5Templates: Boolean
+  )(implicit messages: Messages): String = {
+    val fileNameKey =
+      if (schemeId == "1" && useCsopV5Templates) {
+        if (appConfig.useV6andV7Scheme) s"$fileId.file_name.v7"
+        else
+          s"$fileId.file_name.v5"
+      } else {
+        s"$fileId.file_name"
+      }
+    getPageElement(schemeId, PAGE_CHECK_CSV_FILE, fileNameKey)
+
+  }
 
 }

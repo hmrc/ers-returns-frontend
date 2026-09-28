@@ -194,8 +194,6 @@ class CsvFileUploadControllerSpec
 
     "log the selected csv files" in {
 
-      when(mockAppConfig.csopV5Enabled).thenReturn(false)
-
       val expectedLogMessage = "[CsvFileUploadController][uploadFilePage] The following files were selected to be " +
         "uploaded: Other_Grants_V4.csv, Other_Options_V4.csv, Other_Acquisition_V4.csv"
 
@@ -214,7 +212,6 @@ class CsvFileUploadControllerSpec
 
     "log the selected csv files for v5 tax years" in {
 
-      when(mockAppConfig.csopV5Enabled).thenReturn(true)
 
       val csopV5RequestObject = ersRequestObject.copy(
         taxYear = Some("2024/25"),
@@ -1056,6 +1053,8 @@ class CsvFileUploadControllerSpec
       when(
         mockSessionService.fetch[UpscanCsvFilesList](eqTo(mockErsUtil.CSV_FILES_UPLOAD))(any(), any())
       ) thenReturn Future.successful(testUpscanCsvFileList)
+      when(testRequestObject.taxYear).thenReturn(Some("2014/15"))
+      when(testRequestObject.schemeType).thenReturn(Some("CSOP"))
 
       when(
         mockSessionService.fetch[RequestObject](eqTo(mockErsUtil.ERS_REQUEST_OBJECT))(any(), any())
@@ -1122,6 +1121,8 @@ class CsvFileUploadControllerSpec
 
       val testRequestObject: RequestObject = mock[RequestObject]
       when(testRequestObject.taxYear).thenReturn(Some("2014/15"))
+      when(testRequestObject.schemeType).thenReturn(Some("CSOP"))
+
       when(testRequestObject.getPageTitle)
         .thenReturn("CSOP - Company Share Option Plan scheme - XA1100000000000 - 2014 to 2015")
 

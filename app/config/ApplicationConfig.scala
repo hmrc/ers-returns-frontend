@@ -41,7 +41,6 @@ class ApplicationConfig @Inject() (config: ServicesConfig) {
 
   lazy val enableRetrieveSubmissionData: Boolean = config.getBoolean("settings.enable-retrieve-submission-data")
   lazy val languageTranslationEnabled: Boolean   = config.getConfBool("features.welsh-translation", defBool = true)
-  lazy val csopV5Enabled: Boolean                = config.getConfBool("features.csop-v5.enabled", defBool = false)
 
   lazy val odsSuccessRetryAmount: Int       = config.getInt("retry.ods-success-cache.complete-upload.amount")
   lazy val odsValidationRetryAmount: Int    = config.getInt("retry.ods-success-cache.validation.amount")
@@ -87,6 +86,10 @@ class ApplicationConfig @Inject() (config: ServicesConfig) {
 
   lazy val notificationBannerPreAprilEnabled: Boolean =
     config.getBoolean("microservice.services.features.notification-banner.pre-april-enabled")
+
+  lazy val useV4andV5Scheme: Boolean = config.getConfBool("features.scheme-version.use-V4-and-V5", defBool = true)
+
+  lazy val useV6andV7Scheme: Boolean = config.getConfBool("features.scheme-version.use-V6-and-V7", defBool = false)
 
   val confirmationPageRateLimitTTLDuration: FiniteDuration =
     FiniteDuration(config.getInt("confirmation-page-get.maxTps"), "s")
