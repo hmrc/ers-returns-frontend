@@ -220,6 +220,8 @@ class CsvFileUploadControllerSpec
 
       when(mockSessionService.fetch[RequestObject](refEq(mockErsUtil.ERS_REQUEST_OBJECT))(any(), any()))
         .thenReturn(Future.successful(csopV5RequestObject))
+      when(mockAppConfig.useV4andV5Scheme).thenReturn(true)
+      when(mockAppConfig.useV6andV7Scheme).thenReturn(false)
 
       val expectedLogMessage = "[CsvFileUploadController][uploadFilePage] The following files were selected to be " +
         "uploaded: CSOP_OptionsGranted_V5.csv, CSOP_OptionsRCL_V5.csv, CSOP_OptionsExercised_V5.csv"

@@ -116,16 +116,26 @@ class ERSUtil @Inject() (val appConfig: ApplicationConfig)(implicit
     schemeId: String,
     useCsopV5Templates: Boolean
   )(implicit messages: Messages): String = {
+
     val fileNameKey =
-      if (schemeId == "1" && useCsopV5Templates) {
-        if (appConfig.useV6andV7Scheme) s"$fileId.file_name.v7"
+      if (appConfig.useV6andV7Scheme) {
+        if (schemeId == "1" && !useCsopV5Templates)
+          s"$fileId.file_name.v6"
         else
-          s"$fileId.file_name.v5"
+          s"$fileId.file_name.v7"
+
+      } else if (
+        appConfig.useV4andV5Scheme &&
+        schemeId == "1" &&
+        useCsopV5Templates
+      ) {
+        s"$fileId.file_name.v5"
+
       } else {
         s"$fileId.file_name"
       }
-    getPageElement(schemeId, PAGE_CHECK_CSV_FILE, fileNameKey)
 
+    getPageElement(schemeId, PAGE_CHECK_CSV_FILE, fileNameKey)
   }
 
 }
