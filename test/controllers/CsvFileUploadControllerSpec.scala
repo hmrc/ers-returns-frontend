@@ -210,24 +210,28 @@ class CsvFileUploadControllerSpec
       )(any())
     }
 
-    "log the selected csv files for CSOP when useV6andV7Scheme is enabled" in {
+    "log the selected csv files for SIP V7 when useV6andV7Scheme is enabled" in {
 
-      val csopV7RequestObject = ersRequestObject.copy(
+      val sipV7RequestObject = ersRequestObject.copy(
         taxYear = Some("2024/25"),
-        schemeName = Some("Csop"),
-        schemeType = Some("CSOP")
+        schemeName = Some("Sip"),
+        schemeType = Some("SIP")
       )
 
       when(mockSessionService.fetch[RequestObject](refEq(mockErsUtil.ERS_REQUEST_OBJECT))(any(), any()))
-        .thenReturn(Future.successful(csopV7RequestObject))
+        .thenReturn(Future.successful(sipV7RequestObject))
       when(mockAppConfig.useV4andV5Scheme).thenReturn(false)
       when(mockAppConfig.useV6andV7Scheme).thenReturn(true)
 
-      val expectedLogMessage = "[CsvFileUploadController][uploadFilePage] The following files were selected to be " +
-        "uploaded: CSOP_OptionsGranted_V7.csv, CSOP_OptionsRCL_V7.csv, CSOP_OptionsExercised_V7.csv"
+      val upscanSipIds: List[UpscanIds] = List(
+        UpscanIds(UploadId("123"), "file0", NotStarted),
+        UpscanIds(UploadId("456"), "file1", NotStarted)
+      )
+      val expectedLogMessage            = "[CsvFileUploadController][uploadFilePage] The following files were selected to be " +
+        "uploaded: SIP_Awards_V7.csv, SIP_Out_V7.csv"
 
       when(mockSessionService.fetch[UpscanCsvFilesList](meq("csv-files-upload"))(any(), any()))
-        .thenReturn(Future.successful(UpscanCsvFilesList(upscanIds)))
+        .thenReturn(Future.successful(UpscanCsvFilesList(upscanSipIds)))
 
       withCaptureOfLoggingFrom(csvFileUploadControllerLogger) { captureEvents =>
         await(csvFileUploadController.uploadFilePage()(testFakeRequest))
@@ -235,38 +239,8 @@ class CsvFileUploadControllerSpec
       }
 
       verify(mockAuditEvents, times(1)).auditSelectedCsvRadioButtons(
-        meq(List("CSOP_OptionsGranted_V7.csv", "CSOP_OptionsRCL_V7.csv", "CSOP_OptionsExercised_V7.csv"))
-      )(any())
-
-    }
-
-    "log the selected csv files for CSOP for tax year < 2023 when useV6andV7Scheme is enabled" in {
-
-      val csopV7RequestObject = ersRequestObject.copy(
-        taxYear = Some("2014/15"),
-        schemeName = Some("Csop"),
-        schemeType = Some("CSOP")
-      )
-
-      when(mockSessionService.fetch[RequestObject](refEq(mockErsUtil.ERS_REQUEST_OBJECT))(any(), any()))
-        .thenReturn(Future.successful(csopV7RequestObject))
-      when(mockAppConfig.useV4andV5Scheme).thenReturn(false)
-      when(mockAppConfig.useV6andV7Scheme).thenReturn(true)
-
-      val expectedLogMessage = "[CsvFileUploadController][uploadFilePage] The following files were selected to be " +
-        "uploaded: CSOP_OptionsGranted_V6.csv, CSOP_OptionsRCL_V6.csv, CSOP_OptionsExercised_V6.csv"
-
-      when(mockSessionService.fetch[UpscanCsvFilesList](meq("csv-files-upload"))(any(), any()))
-        .thenReturn(Future.successful(UpscanCsvFilesList(upscanIds)))
-
-      withCaptureOfLoggingFrom(csvFileUploadControllerLogger) { captureEvents =>
-        await(csvFileUploadController.uploadFilePage()(testFakeRequest))
-        assert(captureEvents.exists(_.getMessage.contains(expectedLogMessage)))
-      }
-
-      verify(mockAuditEvents, times(1)).auditSelectedCsvRadioButtons(
-        meq(List("CSOP_OptionsGranted_V6.csv", "CSOP_OptionsRCL_V6.csv", "CSOP_OptionsExercised_V6.csv"))
-      )(any())
+        meq(List("SIP_Awards_V7.csv", "SIP_Out_V7.csv"))
+      )(any[HeaderCarrier])
 
     }
 
