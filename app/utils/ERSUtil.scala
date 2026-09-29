@@ -114,10 +114,10 @@ class ERSUtil @Inject() (val appConfig: ApplicationConfig)(implicit
   def getFileName(
     fileId: String,
     schemeId: String,
-    useCsopV5Templates: Boolean
+    useCsopV5V7Templates: Boolean
   )(implicit messages: Messages): String = {
 
-    val fileNameKey = getFileNameSuffix(schemeId == "1", useCsopV5Templates)
+    val fileNameKey = getFileNameSuffix(schemeId == "1", useCsopV5V7Templates)
     getPageElement(schemeId, PAGE_CHECK_CSV_FILE, s"$fileId$fileNameKey")
   }
 
