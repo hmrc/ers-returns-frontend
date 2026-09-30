@@ -19,6 +19,7 @@ package utils
 import models._
 import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.matchers.must.Matchers.convertToAnyMustWrapper
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatest.{BeforeAndAfterEach, OptionValues}
@@ -38,14 +39,14 @@ class ErsUtilSpec
 
   implicit override val hc: HeaderCarrier = HeaderCarrier(sessionId = Some(SessionId("sessionId")))
   implicit val countryCodes: CountryCodes = mockCountryCodes
+  val ersUtil: ERSUtil                    = new ERSUtil(mockAppConfig)
 
-  override def beforeEach(): Unit = {
+  override def beforeEach(): Unit         = {
     super.beforeEach()
     reset(mockSessionService)
   }
 
   "calling buildAddressSummary" should {
-    val ersUtil: ERSUtil = new ERSUtil(mockAppConfig)
 
     "build an address summary from CompanyDetails" in {
       val companyDetails = CompanyDetails(
@@ -109,7 +110,6 @@ class ErsUtilSpec
   }
 
   "concatEntity" should {
-    val ersUtil: ERSUtil = new ERSUtil(mockAppConfig)
 
     "concatenate all defined strings with existing entity lines" in {
       val optionalLines = List(Some("Line2"), Some("Line3"))
@@ -131,7 +131,6 @@ class ErsUtilSpec
   }
 
   "buildEntitySummary" should {
-    val ersUtil: ERSUtil = new ERSUtil(mockAppConfig)
 
     "build summary with all fields present" in {
       val entity = SchemeOrganiserDetails(
@@ -156,7 +155,6 @@ class ErsUtilSpec
   }
 
   "buildCompanyNameList" should {
-    val ersUtil: ERSUtil = new ERSUtil(mockAppConfig)
 
     "handle an empty list" in {
       ersUtil.buildCompanyNameList(List.empty) shouldBe ""
@@ -194,7 +192,6 @@ class ErsUtilSpec
   }
 
   "buildTrusteeNameList" should {
-    val ersUtil: ERSUtil = new ERSUtil(mockAppConfig)
 
     "handle an empty list" in {
       ersUtil.buildTrusteeNameList(List.empty) shouldBe ""
@@ -210,7 +207,6 @@ class ErsUtilSpec
   }
 
   "companyLocation" should {
-    val ersUtil: ERSUtil = new ERSUtil(mockAppConfig)
 
     "return OVERSEAS for non-default country" in {
       ersUtil.companyLocation(
@@ -248,7 +244,6 @@ class ErsUtilSpec
   }
 
   "trusteeLocationMessage" should {
-    val ersUtil: ERSUtil = new ERSUtil(mockAppConfig)
 
     "return ers_trustee_based.uk for UK-based trustee" in {
       ersUtil.trusteeLocationMessage(
@@ -264,7 +259,6 @@ class ErsUtilSpec
   }
 
   "addCompanyMessage" should {
-    val ersUtil: ERSUtil = new ERSUtil(mockAppConfig)
 
     "return appropriate message for Some scheme option" in {
       val messages = mock[Messages]
@@ -278,6 +272,81 @@ class ErsUtilSpec
       when(messages.apply("ers_group_summary..add_company")).thenReturn("Add company")
 
       ersUtil.addCompanyMessage(messages, None) shouldBe "Add company"
+    }
+  }
+
+  "getFileNameSuffix" should {
+
+    "return file_name.v6 when V6V7 is enabled, V4V5 is disabled & scheme is CSOP for tax year before 2023" in {
+      when(mockAppConfig.useV6andV7Scheme).thenReturn(true)
+      when(mockAppConfig.useV4andV5Scheme).thenReturn(false)
+
+      val result = ersUtil.getFileNameSuffix(
+        isCsop = true,
+        useCsopV5V7Templates = false
+      )
+
+      result mustBe ".file_name.v6"
+    }
+
+    "return file_name.v7 when V6V7 is enabled, V4V5 is disabled & scheme is CSOP for tax year >= 2023" in {
+      when(mockAppConfig.useV6andV7Scheme).thenReturn(true)
+      when(mockAppConfig.useV4andV5Scheme).thenReturn(false)
+
+      val result = ersUtil.getFileNameSuffix(
+        isCsop = true,
+        useCsopV5V7Templates = true
+      )
+
+      result mustBe ".file_name.v7"
+    }
+
+    "return file_name.v7 when V6V7 is enabled, V4V5 is disabled & for schemes other than CSOP" in {
+      when(mockAppConfig.useV6andV7Scheme).thenReturn(true)
+      when(mockAppConfig.useV4andV5Scheme).thenReturn(false)
+
+      val result = ersUtil.getFileNameSuffix(
+        isCsop = false,
+        useCsopV5V7Templates = false
+      )
+
+      result mustBe ".file_name.v7"
+    }
+
+    "return file_name.v5 when V6V7 is disabled, V4V5 is enabled & scheme is CSOP for tax year >= 2023" in {
+      when(mockAppConfig.useV6andV7Scheme).thenReturn(false)
+      when(mockAppConfig.useV4andV5Scheme).thenReturn(true)
+
+      val result = ersUtil.getFileNameSuffix(
+        isCsop = true,
+        useCsopV5V7Templates = true
+      )
+
+      result mustBe ".file_name.v5"
+    }
+
+    "return file_name when V4V5 is enabled, V6V7 is disabled & scheme is CSOP for tax year before 2023" in {
+      when(mockAppConfig.useV6andV7Scheme).thenReturn(false)
+      when(mockAppConfig.useV4andV5Scheme).thenReturn(true)
+
+      val result = ersUtil.getFileNameSuffix(
+        isCsop = true,
+        useCsopV5V7Templates = false
+      )
+
+      result mustBe ".file_name"
+    }
+
+    "return file_name when V4V5 is enabled, V6V7 is disabled and for schemes other than CSOP" in {
+      when(mockAppConfig.useV6andV7Scheme).thenReturn(false)
+      when(mockAppConfig.useV4andV5Scheme).thenReturn(true)
+
+      val result = ersUtil.getFileNameSuffix(
+        isCsop = false,
+        useCsopV5V7Templates = false
+      )
+
+      result mustBe ".file_name"
     }
   }
 
