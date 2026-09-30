@@ -123,21 +123,18 @@ class ERSUtil @Inject() (val appConfig: ApplicationConfig)(implicit
 
   def getFileNameSuffix(
     isCsop: Boolean,
-    useCsopV5V7Templates: Boolean
+    useCsopV5OrV7Templates: Boolean
   ): String =
-    if (appConfig.useV6andV7Scheme) {
-      if (isCsop && !useCsopV5V7Templates)
-        ".file_name.v6"
-      else
-        ".file_name.v7"
-    } else if (
-      appConfig.useV4andV5Scheme &&
-      isCsop &&
-      useCsopV5V7Templates
-    ) {
-      ".file_name.v5"
-    } else {
-      ".file_name"
+    (
+      appConfig.useV6andV7Scheme,
+      appConfig.useV4andV5Scheme,
+      isCsop,
+      useCsopV5OrV7Templates
+    ) match {
+      case (true, _, true, false) => ".file_name.v6"
+      case (true, _, _, _)        => ".file_name.v7"
+      case (_, true, true, true)  => ".file_name.v5"
+      case _                      => ".file_name"
     }
 
 }

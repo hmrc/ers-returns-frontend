@@ -283,7 +283,7 @@ class ErsUtilSpec
 
       val result = ersUtil.getFileNameSuffix(
         isCsop = true,
-        useCsopV5V7Templates = false
+        useCsopV5OrV7Templates = false
       )
 
       result mustBe ".file_name.v6"
@@ -295,7 +295,7 @@ class ErsUtilSpec
 
       val result = ersUtil.getFileNameSuffix(
         isCsop = true,
-        useCsopV5V7Templates = true
+        useCsopV5OrV7Templates = true
       )
 
       result mustBe ".file_name.v7"
@@ -307,7 +307,7 @@ class ErsUtilSpec
 
       val result = ersUtil.getFileNameSuffix(
         isCsop = false,
-        useCsopV5V7Templates = false
+        useCsopV5OrV7Templates = false
       )
 
       result mustBe ".file_name.v7"
@@ -319,7 +319,7 @@ class ErsUtilSpec
 
       val result = ersUtil.getFileNameSuffix(
         isCsop = true,
-        useCsopV5V7Templates = true
+        useCsopV5OrV7Templates = true
       )
 
       result mustBe ".file_name.v5"
@@ -331,7 +331,7 @@ class ErsUtilSpec
 
       val result = ersUtil.getFileNameSuffix(
         isCsop = true,
-        useCsopV5V7Templates = false
+        useCsopV5OrV7Templates = false
       )
 
       result mustBe ".file_name"
@@ -343,7 +343,7 @@ class ErsUtilSpec
 
       val result = ersUtil.getFileNameSuffix(
         isCsop = false,
-        useCsopV5V7Templates = false
+        useCsopV5OrV7Templates = false
       )
 
       result mustBe ".file_name"
