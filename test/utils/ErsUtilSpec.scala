@@ -41,7 +41,7 @@ class ErsUtilSpec
   implicit val countryCodes: CountryCodes = mockCountryCodes
   val ersUtil: ERSUtil                    = new ERSUtil(mockAppConfig)
 
-  override def beforeEach(): Unit         = {
+  override def beforeEach(): Unit = {
     super.beforeEach()
     reset(mockSessionService)
   }
