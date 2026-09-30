@@ -75,7 +75,7 @@ class CsvFileUploadController @Inject() (
           ersUtil.getFileName(
             upscanIds.fileId,
             requestObject.getSchemeId,
-            useCsopV5V7Templates(requestObject.taxYear, requestObject.schemeType)
+            useCsopV5OrV7Templates(requestObject.taxYear, requestObject.schemeType)
           )
         )
       _                                = auditEvents.auditSelectedCsvRadioButtons(allSelectedCsvFiles)
@@ -92,7 +92,7 @@ class CsvFileUploadController @Inject() (
         requestObject,
         upscanFormData,
         currentCsvFile.get.fileId,
-        useCsopV5V7Templates(requestObject.taxYear, requestObject.schemeType)
+        useCsopV5OrV7Templates(requestObject.taxYear, requestObject.schemeType)
       )
     )).recover {
       case ex: NoSuchElementException =>
@@ -109,7 +109,7 @@ class CsvFileUploadController @Inject() (
     }
   }
 
-  private def useCsopV5V7Templates(taxYear: Option[String], schemeType: Option[String]): Boolean =
+  private def useCsopV5OrV7Templates(taxYear: Option[String], schemeType: Option[String]): Boolean =
     taxYear.exists { year =>
       schemeType.exists(_.equalsIgnoreCase("CSOP")) && year.split("/")(0).toInt >= 2023
     }
@@ -268,7 +268,7 @@ class CsvFileUploadController @Inject() (
 
     val fileName                                                 = ersUtil.getFileNameSuffix(
       schemeInfo.schemeType == "CSOP",
-      useCsopV5V7Templates(requestObject.taxYear, requestObject.schemeType)
+      useCsopV5OrV7Templates(requestObject.taxYear, requestObject.schemeType)
     )
     val expectedAndUploadedFiles: List[(String, String, String)] =
       list.ids
