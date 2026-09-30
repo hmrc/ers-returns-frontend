@@ -294,7 +294,7 @@ class CsvFileUploadController @Inject() (
     if (incorrectFiles.isEmpty) {
       validateCsv(csvCallbackData, schemeInfo)
     } else {
-      logger.info(s"[CsvFileUploadController][checkFileNames] User uploaded the wrong file $incorrectFiles")
+      logger.info(s"[CsvFileUploadController][checkFileNames] User uploaded the wrong file")
       Future.successful(getWrongCsvFileTypePage(requestObject, incorrectFiles))
     }
   }
