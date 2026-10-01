@@ -81,8 +81,9 @@ class ERSUtil @Inject() (val appConfig: ApplicationConfig)(implicit
     n: Int = 0,
     companyNamesList: String = ""
   ): String =
-    if (n == companyDetailsList.length) { companyNamesList }
-    else {
+    if (n == companyDetailsList.length) {
+      companyNamesList
+    } else {
       buildCompanyNameList(companyDetailsList, n + 1, companyNamesList + companyDetailsList(n).companyName + "<br>")
     }
 
@@ -91,8 +92,11 @@ class ERSUtil @Inject() (val appConfig: ApplicationConfig)(implicit
     n: Int = 0,
     trusteeNamesList: String = ""
   ): String =
-    if (n == trusteeDetailsList.length) { trusteeNamesList }
-    else { buildTrusteeNameList(trusteeDetailsList, n + 1, trusteeNamesList + trusteeDetailsList(n).name + "<br>") }
+    if (n == trusteeDetailsList.length) {
+      trusteeNamesList
+    } else {
+      buildTrusteeNameList(trusteeDetailsList, n + 1, trusteeNamesList + trusteeDetailsList(n).name + "<br>")
+    }
 
   def companyLocation(company: CompanyDetails): String =
     if (company.basedInUk) "ers_trustee_based.uk" else "ers_trustee_based.overseas"
@@ -107,11 +111,30 @@ class ERSUtil @Inject() (val appConfig: ApplicationConfig)(implicit
     appConfig.ampersandRegex
       .replaceAllIn(input, "&amp;")
 
-  def getFileName(fileId: String, schemeId: String, useCsopV5Templates: Boolean)(implicit messages: Messages): String =
-    if (schemeId == "1" && useCsopV5Templates) {
-      getPageElement(schemeId, PAGE_CHECK_CSV_FILE, s"$fileId.file_name.v5")
-    } else {
-      getPageElement(schemeId, PAGE_CHECK_CSV_FILE, s"$fileId.file_name")
+  def getFileName(
+    fileId: String,
+    schemeId: String,
+    useCsopV5V7Templates: Boolean
+  )(implicit messages: Messages): String = {
+
+    val fileNameKey = getFileNameSuffix(schemeId == "1", useCsopV5V7Templates)
+    getPageElement(schemeId, PAGE_CHECK_CSV_FILE, s"$fileId$fileNameKey")
+  }
+
+  def getFileNameSuffix(
+    isCsop: Boolean,
+    useCsopV5OrV7Templates: Boolean
+  ): String =
+    (
+      appConfig.useV6andV7Scheme,
+      appConfig.useV4andV5Scheme,
+      isCsop,
+      useCsopV5OrV7Templates
+    ) match {
+      case (true, _, true, false) => ".file_name.v6"
+      case (true, _, _, _)        => ".file_name.v7"
+      case (_, true, true, true)  => ".file_name.v5"
+      case _                      => ".file_name"
     }
 
 }

@@ -72,7 +72,11 @@ class CsvFileUploadController @Inject() (
       csvFilesList                    <- sessionService.fetch[UpscanCsvFilesList](ersUtil.CSV_FILES_UPLOAD)
       allSelectedCsvFiles: Seq[String] =
         csvFilesList.ids.map((upscanIds: UpscanIds) =>
-          ersUtil.getFileName(upscanIds.fileId, requestObject.getSchemeId, useCsopV5Templates(requestObject.taxYear))
+          ersUtil.getFileName(
+            upscanIds.fileId,
+            requestObject.getSchemeId,
+            useCsopV5OrV7Templates(requestObject.taxYear, requestObject.schemeType)
+          )
         )
       _                                = auditEvents.auditSelectedCsvRadioButtons(allSelectedCsvFiles)
       _                                =
@@ -88,7 +92,7 @@ class CsvFileUploadController @Inject() (
         requestObject,
         upscanFormData,
         currentCsvFile.get.fileId,
-        useCsopV5Templates(requestObject.taxYear)
+        useCsopV5OrV7Templates(requestObject.taxYear, requestObject.schemeType)
       )
     )).recover {
       case ex: NoSuchElementException =>
@@ -105,11 +109,10 @@ class CsvFileUploadController @Inject() (
     }
   }
 
-  private def useCsopV5Templates(taxYear: Option[String]): Boolean = taxYear match {
-    case Some(year)                      => appConfig.csopV5Enabled && year.split("/")(0).toInt >= 2023
-    case None if appConfig.csopV5Enabled => true
-    case _                               => false
-  }
+  private def useCsopV5OrV7Templates(taxYear: Option[String], schemeType: Option[String]): Boolean =
+    taxYear.exists { year =>
+      schemeType.exists(_.equalsIgnoreCase("CSOP")) && year.split("/")(0).toInt >= 2023
+    }
 
   def success(uploadId: UploadId): Action[AnyContent] = authAction.async { implicit request =>
     logger.info(s"[CsvFileUploadController][success] Upload form submitted for ID: $uploadId")
@@ -262,10 +265,11 @@ class CsvFileUploadController @Inject() (
     list: UpscanCsvFilesList,
     requestObject: RequestObject
   )(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
-    val fileName: String =
-      if (schemeInfo.schemeType == "CSOP" && useCsopV5Templates(requestObject.taxYear)) ".file_name.v5"
-      else ".file_name"
 
+    val fileName                                                 = ersUtil.getFileNameSuffix(
+      schemeInfo.schemeType == "CSOP",
+      useCsopV5OrV7Templates(requestObject.taxYear, requestObject.schemeType)
+    )
     val expectedAndUploadedFiles: List[(String, String, String)] =
       list.ids
         .zip(csvCallbackData.reverse)

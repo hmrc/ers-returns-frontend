@@ -18,7 +18,7 @@ package controllers
 
 import controllers.auth.RequestWithOptionalAuthContext
 import models._
-import models.upscan.Failed
+import models.upscan.{Failed, UploadedSuccessfully}
 import org.apache.pekko.actor.ActorSystem
 import org.apache.pekko.stream.Materializer
 import org.mockito.ArgumentMatchers.{eq => meq, _}
@@ -69,7 +69,7 @@ class FileUploadControllerSpec
     testOptString.get,
     Instant.now,
     testOptString.get,
-    testOptString.get,
+    "2024/25",
     testOptString.get,
     "CSOP"
   )
@@ -355,8 +355,19 @@ class FileUploadControllerSpec
         redirectLocation(result) mustBe Some(routes.FileUploadController.validationFailure().url)
       }
 
-      "Ers Meta Data is returned, callback record is uploaded successfully, remove presubmission data returns OK, validate file data returns BAD_REQUEST, for CSOP with Incorrect ERS Template validation error, csopV5Enabled = false" in {
-        when(mockAppConfig.csopV5Enabled).thenReturn(false)
+      "Ers Meta Data is returned, callback record is uploaded successfully, remove presubmission data returns OK, validate file data returns BAD_REQUEST, for CSOP with Incorrect ERS Template validation error for tax year < 2023" in {
+        val schemeInfo: SchemeInfo = SchemeInfo(
+          testOptString.get,
+          Instant.now,
+          testOptString.get,
+          "2014/15",
+          testOptString.get,
+          "CSOP"
+        )
+
+        val validErsMetaData: ErsMetaData =
+          ErsMetaData(schemeInfo, "ipRef", Some("aoRef"), "empRef", Some("agentRef"), Some("sapNumber"))
+
         when(mockSessionService.fetch[RequestObject](anyString())(any(), any()))
           .thenReturn(Future.successful(ersRequestObject))
         when(mockErsConnector.getCallbackRecord(any(), any)).thenReturn(Future.successful(Some(uploadedSuccessfully)))
@@ -374,7 +385,7 @@ class FileUploadControllerSpec
         setAuthMocks()
         val result = TestFileUploadController.validationResults()(testFakeRequest)
         status(result)           mustBe SEE_OTHER
-        redirectLocation(result) mustBe Some(routes.FileUploadController.validationFailure().url)
+        redirectLocation(result) mustBe Some(routes.FileUploadController.templateFailure().url)
       }
     }
 
@@ -412,8 +423,32 @@ class FileUploadControllerSpec
     }
 
     "redirect the user to FileUploadController.templateFailure()" when {
-      "Ers Meta Data is returned, callback record is uploaded successfully, remove presubmission data returns OK, validate file data returns BAD_REQUEST, for CSOP with Incorrect ERS Template validation error, csopV5Enabled = true" in {
-        when(mockAppConfig.csopV5Enabled).thenReturn(true)
+      "Ers Meta Data is returned, callback record is uploaded successfully, remove presubmission data returns OK, validate file data returns BAD_REQUEST, for CSOP with Incorrect ERS Template validation error" in {
+        when(mockSessionService.fetch[RequestObject](anyString())(any(), any()))
+          .thenReturn(Future.successful(ersRequestObject))
+        when(mockErsConnector.getCallbackRecord(any(), any)).thenReturn(Future.successful(Some(uploadedSuccessfully)))
+        when(mockErsConnector.removePresubmissionData(any())(any(), any()))
+          .thenReturn(Future.successful(HttpResponse(OK, "")))
+        when(mockSessionService.fetch[ErsMetaData](any())(any(), any())).thenReturn(Future.successful(validErsMetaData))
+        when(
+          mockErsConnector.validateFileData(meq(uploadedSuccessfully), any[SchemeInfo])(
+            any[RequestWithOptionalAuthContext[AnyContent]],
+            any()
+          )
+        )
+          .thenReturn(
+            Future.successful(HttpResponse(BAD_REQUEST, "Incorrect ERS Template - Sheet Name isn't as expected"))
+          )
+
+        setAuthMocks()
+        val result = TestFileUploadController.validationResults()(testFakeRequest)
+        status(result)           mustBe SEE_OTHER
+        redirectLocation(result) mustBe Some(routes.FileUploadController.templateFailure().url)
+      }
+
+      "Ers Meta Data is returned, callback record is uploaded successfully, remove presubmission data returns OK, validate file data returns BAD_REQUEST, for CSOP with Incorrect ERS Template validation error when V6V7 enabled and V4'v5 disabled" in {
+        when(mockAppConfig.useV6andV7Scheme).thenReturn(true)
+        when(mockAppConfig.useV4andV5Scheme).thenReturn(false)
         when(mockSessionService.fetch[RequestObject](anyString())(any(), any()))
           .thenReturn(Future.successful(ersRequestObject))
         when(mockErsConnector.getCallbackRecord(any(), any)).thenReturn(Future.successful(Some(uploadedSuccessfully)))
