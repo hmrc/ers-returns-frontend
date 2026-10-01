@@ -222,7 +222,7 @@ class FileUploadController @Inject() (
             ("requestScheme"  -> schemeMismatchError.requestSchemeType.toUpperCase)
         )
 
-      case None if (schemeInfo.taxYear.split("/")(0).toInt >= 2023) && schemeInfo.schemeType == "CSOP" =>
+      case None if schemeInfo.schemeType == "CSOP" =>
         logger.warn(
           s"[FileUploadController][handleIncorrectErsTemplate] Validation is not successful for schemeRef:" +
             s" ${schemeInfo.schemeRef}, timestamp: ${System.currentTimeMillis()}. Wrong CSOP template used for tax year."

@@ -355,7 +355,7 @@ class FileUploadControllerSpec
         redirectLocation(result) mustBe Some(routes.FileUploadController.validationFailure().url)
       }
 
-      "Ers Meta Data is returned, callback record is uploaded successfully, remove presubmission data returns OK, validate file data returns BAD_REQUEST, for CSOP with Incorrect ERS Template validation error, csopV5Enabled = false" in {
+      "Ers Meta Data is returned, callback record is uploaded successfully, remove presubmission data returns OK, validate file data returns BAD_REQUEST, for CSOP with Incorrect ERS Template validation error for tax year < 2023" in {
         val schemeInfo: SchemeInfo = SchemeInfo(
           testOptString.get,
           Instant.now,
@@ -385,7 +385,7 @@ class FileUploadControllerSpec
         setAuthMocks()
         val result = TestFileUploadController.validationResults()(testFakeRequest)
         status(result)           mustBe SEE_OTHER
-        redirectLocation(result) mustBe Some(routes.FileUploadController.validationFailure().url)
+        redirectLocation(result) mustBe Some(routes.FileUploadController.templateFailure().url)
       }
     }
 
