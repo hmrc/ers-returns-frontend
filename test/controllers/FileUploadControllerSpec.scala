@@ -197,16 +197,20 @@ class FileUploadControllerSpec
   "success" must {
     "return OK" when {
       "Callback record is returned with a successful upload and file name is cached" in {
-        when(mockErsConnector.getCallbackRecord(any(), any()))
-          .thenReturn(Future.successful(Some(uploadedSuccessfully)))
-        when(mockSessionService.cache(meq("file-name"), meq(uploadedSuccessfully.name))(any(), any()))
+        // filename contains spaces and all ASCII punctuation not on the deny-list: (! ' ( ) - . ; = _ `),
+        // plus non-ASCII: é – (en dash)
+        val fileName = "ERS return !'()-;=_`é–.ods"
+        when(mockErsConnector.getCallbackRecord(any(), any))
+          .thenReturn(Future.successful(Some(uploadedSuccessfully.copy(name = fileName))))
+        when(mockSessionService.cache(meq("file-name"), meq(fileName))(any(), any()))
           .thenReturn(Future.successful(sessionPair))
 
         setAuthMocks()
+
         val result = TestFileUploadController.success()(testFakeRequest)
+
         status(result)           mustBe SEE_OTHER
         redirectLocation(result) mustBe Some(routes.FileUploadController.validationResults().url)
-
       }
     }
 
@@ -255,6 +259,19 @@ class FileUploadControllerSpec
     }
 
     "return file upload problem page" when {
+
+      "file name is invalid" in {
+        val filename = "Smith & Co.ods" // contains & which is invalid based on existing JS regex
+
+        when(mockErsConnector.getCallbackRecord(any(), any))
+          .thenReturn(Future.successful(Some(uploadedSuccessfully.copy(name = "Smith & Co.ods"))))
+        setAuthMocks()
+
+        val result = TestFileUploadController.success()(testFakeRequest)
+
+        checkFileUploadProblemPage(result)
+      }
+
       "file name includes .csv" in {
         when(mockErsConnector.getCallbackRecord(any(), any))
           .thenReturn(Future.successful(Some(uploadedSuccessfullyCsv)))
