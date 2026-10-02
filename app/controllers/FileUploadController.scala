@@ -84,13 +84,17 @@ class FileUploadController @Inject() (
     } yield file match {
       case Some(file: UploadedSuccessfully) =>
         val fileName = file.name.toLowerCase
-        if (FileNameHelper.isIncorrectFileName(fileName)) {
-          Future.successful(Redirect(controllers.routes.IncorrectFileNameController.incorrectFileNamePage()))
 
+        if (FileNameHelper.isIncorrectFileName(fileName)) {
+          logger.info(
+            "[FileUploadController][success] User uploaded a file with a name that failed the non-JS filename checks"
+          )
+          Future(getFileUploadProblemPage())
         } else if (!MimeTypeValidator.checkIsODSMimeType(file.mimeType)) {
           logger.error(
             s"[FileUploadController][success] Validation failed due to wrong mime type"
           )
+
           for {
             requestObject   <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
             sessionFileType <- sessionService.fetch[CheckFileType](ersUtil.FILE_TYPE_CACHE)

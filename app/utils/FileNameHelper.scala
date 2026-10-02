@@ -20,6 +20,8 @@ import models.SchemeInfo
 import models.upscan.{UploadedSuccessfully, UpscanCsvFilesList}
 import play.api.i18n.Messages
 
+import scala.util.matching.Regex
+
 object FileNameHelper {
 
   def getFinalFileNames(
@@ -77,9 +79,12 @@ object FileNameHelper {
   }
 
   def isIncorrectFileName(fileName: String): Boolean = {
+    val invalidFileNameCharacters: Regex = """[/^~"|#?,\]\[£$&:@*\\+%{}<>]""".r
+
+    val isEmpty                   = fileName.isEmpty
     val exceedsMaxLength          = fileName.length > 240
-    val containsInvalidCharacters = !fileName.matches("^[A-Za-z0-9_.-]+$")
-    exceedsMaxLength || containsInvalidCharacters
+    val containsInvalidCharacters = invalidFileNameCharacters.findFirstIn(fileName).isDefined
+    isEmpty || exceedsMaxLength || containsInvalidCharacters
   }
 
 }
