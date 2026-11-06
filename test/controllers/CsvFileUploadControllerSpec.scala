@@ -17,13 +17,13 @@
 package controllers
 
 import controllers.auth.RequestWithOptionalAuthContext
-import models._
-import models.upscan._
+import models.*
+import models.upscan.*
 import org.apache.pekko.actor.ActorSystem
 import org.apache.pekko.stream.Materializer
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{eq => meq, _}
-import org.mockito.Mockito._
+import org.mockito.Mockito.*
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
@@ -33,16 +33,16 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.{Logger, i18n}
 import play.api.i18n.{MessagesApi, MessagesImpl}
 import play.api.libs.json.{JsObject, Json}
-import play.api.mvc._
+import play.api.mvc.*
 import play.api.mvc.request.RequestTarget
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import services.UpscanService
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.mongo.cache.CacheItem
 import utils.Fixtures.ersRequestObject
-import utils._
-import views.html._
+import utils.*
+import views.html.*
 
 import java.time.Instant
 import scala.concurrent.{ExecutionContext, Future}

@@ -18,7 +18,7 @@ package controllers.internal
 
 import connectors.ErsConnector
 import models.RequestWithUpdatedSession
-import models.upscan._
+import models.upscan.*
 import play.api.Logging
 import play.api.libs.json.JsValue
 import play.api.mvc.{Action, MessagesControllerComponents}

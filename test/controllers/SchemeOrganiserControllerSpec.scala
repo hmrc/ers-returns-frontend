@@ -17,9 +17,9 @@
 package controllers
 
 import controllers.schemeOrganiser.SchemeOrganiserController
-import models._
-import org.mockito.ArgumentMatchers._
-import org.mockito.Mockito._
+import models.*
+import org.mockito.ArgumentMatchers.*
+import org.mockito.Mockito.*
 import org.scalatest.OptionValues
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.should.Matchers
@@ -32,7 +32,7 @@ import play.api.mvc.{
   AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents
 }
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import utils.Fixtures.ersRequestObject
 import utils.{ERSFakeApplicationConfig, ErsTestHelper, Fixtures}
 import views.html.{global_error, scheme_organiser_summary}
@@ -62,7 +62,7 @@ class SchemeOrganiserControllerSpec
   val globalErrorView: global_error                        = app.injector.instanceOf[global_error]
   val schemeOrganiserSummaryView: scheme_organiser_summary = app.injector.instanceOf[scheme_organiser_summary]
 
-  val companyDetails = CompanyDetails("First company", "20 Garden View", None, None, None, None, None, None, None, true)
+  val companyDetails: CompanyDetails = CompanyDetails("First company", "20 Garden View", None, None, None, None, None, None, None, true)
 
   "calling Scheme Organiser summary page" should {
 

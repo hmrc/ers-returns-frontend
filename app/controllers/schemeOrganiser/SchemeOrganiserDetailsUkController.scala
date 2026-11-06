@@ -32,6 +32,7 @@ import utils.{CountryCodes, ERSUtil}
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
+import play.api.mvc.Result
 
 class SchemeOrganiserDetailsUkController @Inject() (
   val mcc: MessagesControllerComponents,
@@ -51,7 +52,7 @@ class SchemeOrganiserDetailsUkController @Inject() (
 
   implicit val format: Format[Company] = Company.format
 
-  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier, request: RequestHeader) =
+  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit hc: HeaderCarrier, request: RequestHeader): Future[Result] =
     if (edit) {
       Future.successful(
         Redirect(controllers.schemeOrganiser.routes.SchemeOrganiserAddressUkController.editCompany(index))

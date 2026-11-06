@@ -16,15 +16,16 @@
 
 package models
 
-import play.api.data.Forms._
-import play.api.data._
+import play.api.data.Forms.*
+import play.api.data.*
 import play.api.data.validation.Constraints
-import play.api.data.validation.Constraints._
+import play.api.data.validation.Constraints.*
 import play.api.i18n.Messages
+import play.libs.F.Tuple
 
 object RsFormMappings {
 
-  import fieldValidationPatterns._
+  import fieldValidationPatterns.*
   val postcodeMinLength: Int      = 5
   val postcodeMaxLength: Int      = 8
   /*

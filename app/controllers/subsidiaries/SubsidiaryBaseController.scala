@@ -62,7 +62,7 @@ trait SubsidiaryBaseController[A] extends SchemeOrganiserBaseController[A] {
     request: RequestWithOptionalAuthContext[AnyContent],
     hc: HeaderCarrier
   ): Future[Result] =
-    sessionService.fetchPartFromCompanyDetailsList[A](index).map { previousAnswer: Option[A] =>
+    sessionService.fetchPartFromCompanyDetailsList[A](index).map { (previousAnswer: Option[A]) =>
       val preparedForm = previousAnswer.fold(form)(form.fill(_))
       Ok(view(requestObject, index, preparedForm, edit))
     } recover { case e: Exception =>

@@ -17,23 +17,23 @@
 package controllers
 
 import controllers.internal.{CsvFileUploadCallbackController, FileSizeUtils}
-import models.upscan._
+import models.upscan.*
 import org.apache.pekko.stream.Materializer
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{eq => meq, _}
-import org.mockito.Mockito._
+import org.mockito.Mockito.*
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatest.{BeforeAndAfterEach, OptionValues}
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.i18n.{MessagesApi, MessagesImpl}
-import play.api.libs.json._
+import play.api.libs.json.*
 import play.api.mvc.{
   AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents
 }
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import play.api.{Environment, i18n}
 import utils.{ERSFakeApplicationConfig, ErsTestHelper, UpscanData}
 
@@ -75,7 +75,7 @@ class CsvFileUploadCallbackControllerSpec
 
   lazy val csvFileUploadCallbackController: CsvFileUploadCallbackController =
     new CsvFileUploadCallbackController(mockMCC, mockErsConnector, mockSessionService, fileSizeUtils) {
-      import scala.concurrent.duration._
+      import scala.concurrent.duration.*
       when(mockAppConfig.retryDelay).thenReturn(1.millisecond)
     }
 

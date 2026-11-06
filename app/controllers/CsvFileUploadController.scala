@@ -19,18 +19,18 @@ package controllers
 import config.ApplicationConfig
 import connectors.ErsConnector
 import controllers.auth.{AuthAction, RequestWithOptionalAuthContext}
-import models._
-import models.upscan._
+import models.*
+import models.upscan.*
 import org.apache.pekko.actor.ActorSystem
 import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages}
-import play.api.mvc._
+import play.api.mvc.*
 import services.audit.AuditEvents
 import services.{FrontendSessionService, UpscanService}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.mongo.cache.DataKey
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
-import utils._
+import utils.*
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
@@ -252,7 +252,7 @@ class CsvFileUploadController @Inject() (
       getGlobalErrorPage
     }
 
-  def getAllPageElementsFromPageId(schemeInfo: SchemeInfo, pageId: String)(para: String)(implicit messages: Messages) =
+  def getAllPageElementsFromPageId(schemeInfo: SchemeInfo, pageId: String)(para: String)(implicit messages: Messages): String =
     ersUtil.getPageElement(
       schemeInfo.schemeId,
       ersUtil.PAGE_CHECK_CSV_FILE,

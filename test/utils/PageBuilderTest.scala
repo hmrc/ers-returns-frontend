@@ -16,7 +16,7 @@
 
 package utils
 
-import controllers._
+import controllers.*
 import org.apache.pekko.stream.Materializer
 import org.scalatest.OptionValues
 import org.scalatest.matchers.should.Matchers

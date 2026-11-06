@@ -19,17 +19,17 @@ package controllers.auth
 import config.ApplicationConfig
 import models.{ERSAuthData, ErsMetaData, RequestObject, SchemeInfo}
 import org.mockito.ArgumentMatchers
-import org.mockito.Mockito._
+import org.mockito.Mockito.*
 import org.scalatest.OptionValues
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatestplus.play.guice.GuiceFakeApplicationFactory
 import play.api.i18n.MessagesApi
-import play.api.mvc._
+import play.api.mvc.*
 import play.api.test.Helpers.{redirectLocation, status, stubBodyParser}
 import play.api.test.{DefaultAwaitTimeout, FakeRequest}
 import uk.gov.hmrc.auth.core.AffinityGroup.{Agent, Organisation}
-import uk.gov.hmrc.auth.core._
+import uk.gov.hmrc.auth.core.*
 import uk.gov.hmrc.domain.EmpRef
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.ErsTestHelper

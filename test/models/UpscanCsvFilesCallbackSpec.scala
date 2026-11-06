@@ -16,7 +16,7 @@
 
 package models
 
-import models.upscan._
+import models.upscan.*
 import org.scalatest.OptionValues
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
@@ -61,7 +61,7 @@ class UpscanCsvFilesCallbackSpec extends AnyWordSpecLike with Matchers with Opti
     }
   }
 
-  def callbackWithStatus(uploadStatus: UploadStatus) =
+  def callbackWithStatus(uploadStatus: UploadStatus): UpscanCsvFilesCallback =
     UpscanCsvFilesCallback(testUploadId, "FileId", uploadStatus)
 
 }

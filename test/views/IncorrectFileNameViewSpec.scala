@@ -22,12 +22,13 @@ import play.api.i18n.Messages
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import utils.ERSUtil
+import models.RequestObject
 
 class IncorrectFileNameViewSpec extends ViewSpecBase with FileUploadFixtures {
 
   private val view = app.injector.instanceOf[views.html.incorrect_file_name]
 
-  val odsRequestObject = testRequestObject.copy(schemeType = Some("CSOP"))
+  val odsRequestObject: RequestObject = testRequestObject.copy(schemeType = Some("CSOP"))
 
   implicit val ersUtil: ERSUtil                             = app.injector.instanceOf[ERSUtil]
   implicit val appConfig: ApplicationConfig                 = app.injector.instanceOf[ApplicationConfig]

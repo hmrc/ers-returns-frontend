@@ -18,15 +18,15 @@ package services
 
 import config.ApplicationConfig
 import controllers.auth.RequestWithOptionalAuthContext
-import models._
+import models.*
 import play.api.Logging
 import play.api.libs.json
-import play.api.libs.json._
+import play.api.libs.json.*
 import play.api.mvc.{AnyContent, RequestHeader}
 import repositories.FrontendSessionsRepository
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.mongo.cache.{CacheItem, DataKey}
-import utils.JsonUtils._
+import utils.JsonUtils.*
 import utils.{Constants, PageBuilder}
 
 import java.time.Instant

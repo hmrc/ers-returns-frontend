@@ -23,7 +23,7 @@ import play.api.Logging
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.libs.json.Format
-import play.api.mvc._
+import play.api.mvc.*
 import play.twirl.api.Html
 import services.FrontendSessionService
 import uk.gov.hmrc.http.HeaderCarrier
@@ -71,7 +71,7 @@ trait SchemeOrganiserBaseController[A] extends FrontendController with I18nSuppo
     request: RequestWithOptionalAuthContext[AnyContent],
     hc: HeaderCarrier
   ): Future[Result] =
-    sessionService.fetchPartFromCompanyDetails[A]().map { previousAnswer: Option[A] =>
+    sessionService.fetchPartFromCompanyDetails[A]().map { (previousAnswer: Option[A]) =>
       val preparedForm = previousAnswer.fold(form)(form.fill(_))
       Ok(view(requestObject, index, preparedForm, edit))
     } recover { case e: Exception =>

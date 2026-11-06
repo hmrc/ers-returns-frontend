@@ -16,7 +16,7 @@
 
 package controllers
 
-import models._
+import models.*
 import org.apache.pekko.stream.Materializer
 import org.jsoup.Jsoup
 import org.mockito.ArgumentMatchers.any
@@ -29,8 +29,8 @@ import play.api.http.Status
 import play.api.i18n
 import play.api.i18n.{Messages, MessagesApi, MessagesImpl}
 import play.api.libs.json.JsObject
-import play.api.mvc._
-import play.api.test.Helpers._
+import play.api.mvc.*
+import play.api.test.Helpers.*
 import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.http.HttpResponse
 import utils.Fixtures.ersRequestObject

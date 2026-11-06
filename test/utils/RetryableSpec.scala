@@ -47,7 +47,7 @@ class RetryableSpec
   val retryTestLogger: Logger = Logger(classOf[RetryTest])
 
   class RetryTest extends Retryable {
-    import scala.concurrent.duration._
+    import scala.concurrent.duration.*
 
     override val logger: Logger          = retryTestLogger
     val mockAppConfig: ApplicationConfig = mock[ApplicationConfig]

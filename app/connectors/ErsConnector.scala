@@ -19,13 +19,13 @@ package connectors
 import config.ApplicationConfig
 import controllers.auth.RequestWithOptionalAuthContext
 import metrics.Metrics
-import models._
+import models.*
 import models.upscan.{UploadStatus, UploadedSuccessfully}
 import play.api.Logging
-import play.api.http.Status._
-import play.api.libs.json._
+import play.api.http.Status.*
+import play.api.libs.json.*
 import play.api.mvc.AnyContent
-import uk.gov.hmrc.http.HttpReads.Implicits._
+import uk.gov.hmrc.http.HttpReads.Implicits.*
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps}
 

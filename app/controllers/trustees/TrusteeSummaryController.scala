@@ -22,7 +22,7 @@ import controllers.auth.{AuthAction, RequestWithOptionalAuthContext}
 import models.{RequestObject, RsFormMappings}
 import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages}
-import play.api.mvc._
+import play.api.mvc.*
 import services.{FrontendSessionService, TrusteeService}
 import uk.gov.hmrc.play.bootstrap.controller.WithUrlEncodedOnlyFormBinding
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController

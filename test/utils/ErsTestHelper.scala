@@ -24,13 +24,13 @@ import models.ERSAuthData
 import org.apache.pekko.stream.Materializer
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
-import org.mockito.Mockito._
+import org.mockito.Mockito.*
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.i18n
 import play.api.i18n.MessagesImpl
 import play.api.libs.json.{JsObject, JsValue, Json, Writes}
 import play.api.mvc.BodyParsers.Default
-import play.api.mvc._
+import play.api.mvc.*
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{
   contentAsString, defaultAwaitTimeout, stubBodyParser, stubControllerComponents, stubMessagesApi
@@ -145,7 +145,7 @@ trait ErsTestHelper extends MockitoSugar with AuthHelper with ERSFakeApplication
   when(mockAppConfig.urBannerLink).thenReturn("http://")
   when(mockAppConfig.ampersandRegex).thenReturn("(?!&amp;)&".r)
 
-  import scala.concurrent.duration._
+  import scala.concurrent.duration.*
   when(mockAppConfig.retryDelay).thenReturn(3.milliseconds)
 
   when(mockErsUtil.PAGE_ALT_ACTIVITY).thenReturn("ers_alt_activity")

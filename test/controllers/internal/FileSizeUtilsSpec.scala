@@ -65,7 +65,7 @@ class FileSizeUtilsSpec extends AnyWordSpecLike with Matchers with MockitoSugar 
       (1181116006, "1.10 GB (1181116006 bytes)")
     )
 
-    fileSizeInBytesAndExpectedString.foreach { fileSizeAndExpectedString: (Int, String) =>
+    fileSizeInBytesAndExpectedString.foreach { (fileSizeAndExpectedString: (Int, String)) =>
       s"return the expected string: ${fileSizeAndExpectedString._2} when parsed a file size of: ${fileSizeAndExpectedString._1}" in {
         fileSizeUtils.mapFileSizeToString(fileSizeAndExpectedString._1) shouldBe fileSizeAndExpectedString._2
       }

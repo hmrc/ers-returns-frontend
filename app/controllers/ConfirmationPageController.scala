@@ -16,21 +16,21 @@
 
 package controllers
 
-import _root_.models._
+import _root_.models.*
 import config.ApplicationConfig
 import connectors.ErsConnector
 import controllers.auth.{AuthAction, RequestWithOptionalAuthContext}
 import metrics.Metrics
 import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages}
-import play.api.mvc._
+import play.api.mvc.*
 import repositories.RateLimiterCache
 import services.FrontendSessionService
 import services.audit.AuditEvents
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.SessionKeys.{BUNDLE_REF, DATE_TIME_SUBMITTED}
-import utils._
+import utils.*
 
 import java.time.{Instant, ZoneId}
 import java.time.format.DateTimeFormatter
@@ -60,7 +60,7 @@ class ConfirmationPageController @Inject() (
     s"$schemeRef-$taxYear-$empRef"
   }
 
-  def confirmationPage() = authAction.async { implicit request =>
+  def confirmationPage(): Action[AnyContent] = authAction.async { implicit request =>
     {
       for {
         metadata: ErsMetaData <- sessionService.fetch[ErsMetaData](ersUtil.ERS_METADATA)

@@ -51,7 +51,7 @@ class FrontendSessionsRepositorySpec
 
         val result = sessionCacheRepo.getAllFromSession()
 
-        await(result).map { cacheItem: CacheItem =>
+        await(result).map { (cacheItem: CacheItem) =>
           cacheItem.id   mustBe sessionId.toString
           cacheItem.data mustBe JsObject(Seq("file-type" -> JsString("csv"), "file-size" -> JsString("5MB")))
         }

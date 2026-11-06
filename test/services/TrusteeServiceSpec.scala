@@ -16,7 +16,7 @@
 
 package services
 
-import models._
+import models.*
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.when
 import org.scalatest.concurrent.ScalaFutures.convertScalaFuture

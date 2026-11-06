@@ -26,11 +26,12 @@ import utils.ERSUtil
 import views.html.start
 
 import scala.collection.mutable
-import scala.jdk.CollectionConverters._
+import scala.jdk.CollectionConverters.*
+import play.api.Application
 
 class StartPageViewSpec extends ViewSpecBase with FileUploadFixtures {
 
-  implicit override lazy val app = new GuiceApplicationBuilder()
+  implicit override lazy val app: Application = new GuiceApplicationBuilder()
     .configure(
       "microservice.services.features.notification-banner.enabled"           -> true,
       "microservice.services.features.notification-banner.pre-april-enabled" -> true

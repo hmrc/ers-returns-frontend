@@ -100,7 +100,7 @@ trait PageBuilder {
   val MSG_SIP: String   = ".sip."
   val MSG_OTHER: String = ".other."
 
-  val CSVFilesList = Map(
+  val CSVFilesList: Map[String,List[CsvFiles]] = Map(
     (
       EMI,
       List(

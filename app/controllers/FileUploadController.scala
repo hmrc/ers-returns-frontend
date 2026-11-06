@@ -16,7 +16,7 @@
 
 package controllers
 
-import _root_.models._
+import _root_.models.*
 import config.ApplicationConfig
 import connectors.ErsConnector
 import controllers.auth.{AuthAction, RequestWithOptionalAuthContext}
@@ -24,11 +24,11 @@ import models.upscan.{Failed, UploadStatus, UploadedSuccessfully}
 import org.apache.pekko.actor.ActorSystem
 import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages}
-import play.api.mvc._
+import play.api.mvc.*
 import services.{FrontendSessionService, UpscanService}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
-import utils._
+import utils.*
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}

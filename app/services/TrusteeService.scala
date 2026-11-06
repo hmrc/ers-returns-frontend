@@ -16,7 +16,7 @@
 
 package services
 
-import models._
+import models.*
 import play.api.Logging
 import play.api.mvc.RequestHeader
 import utils.ERSUtil

@@ -18,10 +18,10 @@ package controllers
 
 import config.ApplicationConfig
 import controllers.auth.{AuthAction, RequestWithOptionalAuthContext}
-import models._
+import models.*
 import models.upscan.{UploadedSuccessfully, UpscanCsvFilesCallback, UpscanCsvFilesCallbackList}
 import play.api.i18n.{I18nSupport, Messages}
-import play.api.mvc._
+import play.api.mvc.*
 import services.FrontendSessionService
 import services.pdf.ErsReceiptPdfBuilderService
 import uk.gov.hmrc.mongo.cache.{CacheItem, DataKey}

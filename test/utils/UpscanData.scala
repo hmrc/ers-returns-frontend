@@ -16,8 +16,8 @@
 
 package utils
 
-import models.upscan._
-import play.api.libs.json._
+import models.upscan.*
+import play.api.libs.json.*
 
 import java.net.URL
 import java.time.Instant
@@ -52,52 +52,52 @@ trait UpscanData {
     */
   def asUploadStatus(status: UploadStatus): UploadStatus = status
 
-  val incompleteCsvList = UpscanCsvFilesCallbackList(
+  val incompleteCsvList: UpscanCsvFilesCallbackList = UpscanCsvFilesCallbackList(
     List(
       UpscanCsvFilesCallback(UploadId("ID1"), "file1", InProgress),
       notStartedCallback
     )
   )
 
-  val notStartedCsvList = UpscanCsvFilesCallbackList(
+  val notStartedCsvList: UpscanCsvFilesCallbackList = UpscanCsvFilesCallbackList(
     List(
       UpscanCsvFilesCallback(testUploadId, "file1", NotStarted),
       UpscanCsvFilesCallback(UploadId("ID2"), "file4", NotStarted)
     )
   )
 
-  val incompleteCsvList2 = UpscanCsvFilesCallbackList(
+  val incompleteCsvList2: UpscanCsvFilesCallbackList = UpscanCsvFilesCallbackList(
     List(
       UpscanCsvFilesCallback(testUploadId, "file1", InProgress),
       UpscanCsvFilesCallback(UploadId("ID2"), "file4", NotStarted)
     )
   )
 
-  val incompleteCsvList3 = UpscanCsvFilesCallbackList(
+  val incompleteCsvList3: UpscanCsvFilesCallbackList = UpscanCsvFilesCallbackList(
     List(
       UpscanCsvFilesCallback(testUploadId, "file1", uploadedSuccessfully),
       UpscanCsvFilesCallback(UploadId("ID2"), "file4", NotStarted)
     )
   )
 
-  val failedCsvList = UpscanCsvFilesCallbackList(
+  val failedCsvList: UpscanCsvFilesCallbackList = UpscanCsvFilesCallbackList(
     List(
       UpscanCsvFilesCallback(testUploadId, "file1", Failed),
       UpscanCsvFilesCallback(UploadId("ID2"), "file4", Failed)
     )
   )
 
-  val successfulCsvList = UpscanCsvFilesCallbackList(
+  val successfulCsvList: UpscanCsvFilesCallbackList = UpscanCsvFilesCallbackList(
     List(
       UpscanCsvFilesCallback(testUploadId, "file1", uploadedSuccessfully)
     )
   )
 
-  val uploadDetails  = UploadDetails(Instant.now(), "checksum", Some("fileMimeType"), "fileName", 100)
-  val readyCallback  = UpscanReadyCallback(Reference("Reference"), new URL("https://callbackUrl.com"), uploadDetails)
-  val failedCallback = UpscanFailedCallback(Reference("Reference"), ErrorDetails("failureReason", "message"))
+  val uploadDetails: UploadDetails  = UploadDetails(Instant.now(), "checksum", Some("fileMimeType"), "fileName", 100)
+  val readyCallback: UpscanReadyCallback  = UpscanReadyCallback(Reference("Reference"), new URL("https://callbackUrl.com"), uploadDetails)
+  val failedCallback: UpscanFailedCallback = UpscanFailedCallback(Reference("Reference"), ErrorDetails("failureReason", "message"))
 
-  import models.upscan.UpscanCallback._
+  import models.upscan.UpscanCallback.*
 
   implicit val failedWrites: OWrites[UpscanFailedCallback] = Json
     .writes[UpscanFailedCallback]
@@ -109,26 +109,26 @@ trait UpscanData {
   val upscanInitiateResponse: UpscanInitiateResponse =
     UpscanInitiateResponse(Reference("reference"), "postTarget", formFields = Map.empty[String, String])
 
-  val inProgressUpscanCsvFilesList = UpscanCsvFilesList(
+  val inProgressUpscanCsvFilesList: UpscanCsvFilesList = UpscanCsvFilesList(
     ids = List(
       UpscanIds(testUploadId, "file1", InProgress)
     )
   )
 
-  val notStartedUpscanCsvFilesList = UpscanCsvFilesList(
+  val notStartedUpscanCsvFilesList: UpscanCsvFilesList = UpscanCsvFilesList(
     ids = List(
       UpscanIds(testUploadId, "file1", NotStarted)
     )
   )
 
-  val multipleNotStartedUpscanCsvFilesList = UpscanCsvFilesList(
+  val multipleNotStartedUpscanCsvFilesList: UpscanCsvFilesList = UpscanCsvFilesList(
     ids = List(
       UpscanIds(testUploadId, "file1", NotStarted),
       UpscanIds(UploadId("ID1"), "file2", NotStarted)
     )
   )
 
-  val multipleInPrgoressUpscanCsvFilesList = UpscanCsvFilesList(
+  val multipleInPrgoressUpscanCsvFilesList: UpscanCsvFilesList = UpscanCsvFilesList(
     ids = List(
       UpscanIds(testUploadId, "file1", InProgress),
       UpscanIds(UploadId("ID1"), "file2", InProgress)

@@ -16,7 +16,7 @@
 
 package models
 
-import models.RsFormMappings._
+import models.RsFormMappings.*
 import org.scalatestplus.play.PlaySpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.data.Form

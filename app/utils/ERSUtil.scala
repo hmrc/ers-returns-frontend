@@ -17,7 +17,7 @@
 package utils
 
 import config.ApplicationConfig
-import models._
+import models.*
 import play.api.Logging
 import play.api.i18n.Messages
 

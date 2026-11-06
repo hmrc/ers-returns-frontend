@@ -20,7 +20,7 @@ import org.apache.pekko.stream.Materializer
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatest.matchers.should.Matchers
-import org.scalatest.prop.TableDrivenPropertyChecks._
+import org.scalatest.prop.TableDrivenPropertyChecks.*
 import org.scalatest.prop.TableFor3
 import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatest.{BeforeAndAfterEach, OptionValues}
@@ -34,7 +34,7 @@ import play.api.mvc.{
 import play.api.test.Helpers.stubBodyParser
 import play.i18n.Lang
 import services.pdf.{DecoratorController, ErsReceiptPdfBuilderService}
-import utils._
+import utils.*
 
 import java.io.ByteArrayOutputStream
 import scala.concurrent.ExecutionContext

@@ -16,7 +16,7 @@
 
 package services.pdf
 
-import models._
+import models.*
 import org.apache.pekko.stream.Materializer
 import org.scalatest.OptionValues
 import org.scalatest.matchers.should.Matchers

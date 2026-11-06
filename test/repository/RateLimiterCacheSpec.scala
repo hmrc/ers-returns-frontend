@@ -16,7 +16,7 @@
 
 package repository
 
-import scala.concurrent.duration._
+import scala.concurrent.duration.*
 import com.github.benmanes.caffeine.cache.Ticker
 import com.github.benmanes.caffeine.cache.Ticker.systemTicker
 import com.github.blemale.scaffeine.{Cache, Scaffeine}

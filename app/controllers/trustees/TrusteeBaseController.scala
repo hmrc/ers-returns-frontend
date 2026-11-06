@@ -23,7 +23,7 @@ import play.api.Logging
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.libs.json.Format
-import play.api.mvc._
+import play.api.mvc.*
 import play.twirl.api.Html
 import services.{FrontendSessionService, TrusteeService}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -66,7 +66,7 @@ trait TrusteeBaseController[A] extends FrontendController with I18nSupport with 
     request: RequestWithOptionalAuthContext[AnyContent],
     hc: HeaderCarrier
   ): Future[Result] =
-    sessionService.fetchPartFromTrusteeDetailsList[A](index).map { previousAnswer: Option[A] =>
+    sessionService.fetchPartFromTrusteeDetailsList[A](index).map { (previousAnswer: Option[A]) =>
       val preparedForm = if (previousAnswer.isDefined) form.fill(previousAnswer.get) else form
       Ok(view(requestObject, index, preparedForm, edit))
     } recover { case e: Throwable =>
