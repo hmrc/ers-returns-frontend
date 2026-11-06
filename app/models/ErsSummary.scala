@@ -31,7 +31,7 @@ case class SchemeInfo(
 )
 
 object SchemeInfo extends DateTimeFormats {
-  implicit val format: OFormat[SchemeInfo] = Json.format[SchemeInfo]
+  given format: OFormat[SchemeInfo] = Json.format[SchemeInfo]
 }
 
 case class ErsMetaData(
@@ -44,7 +44,7 @@ case class ErsMetaData(
 )
 
 object ErsMetaData {
-  implicit val format: OFormat[ErsMetaData] = Json.format[ErsMetaData]
+  given format: OFormat[ErsMetaData] = Json.format[ErsMetaData]
 }
 
 case class AlterationAmends(
@@ -63,7 +63,7 @@ case class AlterationAmends(
 }
 
 object AlterationAmends {
-  implicit val format: OFormat[AlterationAmends] = Json.format[AlterationAmends]
+  given format: OFormat[AlterationAmends] = Json.format[AlterationAmends]
 }
 
 case class CompanyDetails(
@@ -125,13 +125,13 @@ object CompanyDetails {
       address.country.fold(false)(_.equals("UK"))
     )
 
-  implicit val format: OFormat[CompanyDetails] = Json.format[CompanyDetails]
+  given format: OFormat[CompanyDetails] = Json.format[CompanyDetails]
 }
 
 case class CompanyBasedInUk(basedInUk: Boolean)
 
 object CompanyBasedInUk {
-  implicit val format: OFormat[CompanyBasedInUk] = Json.format[CompanyBasedInUk]
+  given format: OFormat[CompanyBasedInUk] = Json.format[CompanyBasedInUk]
 }
 
 case class Company(
@@ -141,7 +141,7 @@ case class Company(
 )
 
 object Company {
-  implicit val format: OFormat[Company] = Json.format[Company]
+  given format: OFormat[Company] = Json.format[Company]
 }
 
 case class CompanyAddress(
@@ -154,13 +154,13 @@ case class CompanyAddress(
 )
 
 object CompanyAddress {
-  implicit val format: OFormat[CompanyAddress] = Json.format[CompanyAddress]
+  given format: OFormat[CompanyAddress] = Json.format[CompanyAddress]
 }
 
 case class CompanyDetailsList(companies: List[CompanyDetails])
 
 object CompanyDetailsList {
-  implicit val format: OFormat[CompanyDetailsList] = Json.format[CompanyDetailsList]
+  given format: OFormat[CompanyDetailsList] = Json.format[CompanyDetailsList]
 }
 
 case class GroupSchemeInfo(
@@ -169,7 +169,7 @@ case class GroupSchemeInfo(
 )
 
 object GroupSchemeInfo {
-  implicit val format: OFormat[GroupSchemeInfo] = Json.format[GroupSchemeInfo]
+  given format: OFormat[GroupSchemeInfo] = Json.format[GroupSchemeInfo]
 }
 
 case class ErsSummary(
@@ -189,5 +189,5 @@ case class ErsSummary(
 )
 
 object ErsSummary extends MongoJavatimeFormats {
-  implicit val format: OFormat[ErsSummary] = Json.format[ErsSummary]
+  given format: OFormat[ErsSummary] = Json.format[ErsSummary]
 }

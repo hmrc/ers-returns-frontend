@@ -38,7 +38,7 @@ class CheckCsvFilesController @Inject() (
   globalErrorView: views.html.global_error,
   checkCsvFileView: views.html.check_csv_file,
   authAction: AuthAction
-)(implicit val ec: ExecutionContext, val ersUtil: ERSUtil, val appConfig: ApplicationConfig)
+)(using val ec: ExecutionContext, val ersUtil: ERSUtil, val appConfig: ApplicationConfig)
     extends FrontendController(mcc) with I18nSupport with WithUrlEncodedOnlyFormBinding with Logging {
 
   def checkCsvFilesPage(): Action[AnyContent] = authAction.async { implicit request =>
@@ -48,10 +48,10 @@ class CheckCsvFilesController @Inject() (
           s"and schemeRef: ${ele.schemeInfo.schemeRef}"
       )
     }
-    showCheckCsvFilesPage()(request)
+    showCheckCsvFilesPage()(using request)
   }
 
-  def showCheckCsvFilesPage()(implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
+  def showCheckCsvFilesPage()(using request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
     (for {
       requestObject <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
       _             <- sessionService.remove(ersUtil.CSV_FILES_UPLOAD)
@@ -69,7 +69,7 @@ class CheckCsvFilesController @Inject() (
     validateCsvFilesPageSelected()
   }
 
-  def validateCsvFilesPageSelected()(implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
+  def validateCsvFilesPageSelected()(using request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
     RsFormMappings
       .csvFileCheckForm()
       .bindFromRequest()
@@ -78,7 +78,7 @@ class CheckCsvFilesController @Inject() (
         formData => performCsvFilesPageSelected(formData)
       )
 
-  def performCsvFilesPageSelected(formData: CsvFilesList)(implicit request: RequestHeader): Future[Result] = {
+  def performCsvFilesPageSelected(formData: CsvFilesList)(using request: RequestHeader): Future[Result] = {
     val csvFilesCallbackList: UpscanCsvFilesList = createCacheData(formData.files)
     if (csvFilesCallbackList.ids.isEmpty) {
       reloadWithError()
@@ -100,13 +100,13 @@ class CheckCsvFilesController @Inject() (
     UpscanCsvFilesList(ids)
   }
 
-  def reloadWithError()(implicit messages: Messages): Future[Result] =
+  def reloadWithError()(using messages: Messages): Future[Result] =
     Future.successful(
       Redirect(routes.CheckCsvFilesController.checkCsvFilesPage())
         .flashing("csv-file-not-selected-error" -> messages(ersUtil.PAGE_CHECK_CSV_FILE + ".err.message"))
     )
 
-  def getGlobalErrorPage(implicit request: RequestHeader, messages: Messages): Result =
+  def getGlobalErrorPage(using request: RequestHeader, messages: Messages): Result =
     Ok(
       globalErrorView(
         "ers.global_errors.title",

@@ -42,7 +42,7 @@ class SchemeOrganiserController @Inject() (
   authAction: AuthAction
 ) extends FrontendController(mcc) with I18nSupport with WithUrlEncodedOnlyFormBinding with Logging {
 
-  implicit val ec: ExecutionContext = mcc.executionContext
+  given ec: ExecutionContext = mcc.executionContext
 
   def schemeOrganiserSummaryPage: Action[AnyContent] = authAction.async { implicit request =>
     sessionService.fetch[ErsMetaData](ersUtil.ERS_METADATA).map { ele =>
@@ -51,10 +51,10 @@ class SchemeOrganiserController @Inject() (
           s"and schemeRef: ${ele.schemeInfo.schemeRef}"
       )
     }
-    showSchemeOrganiserSummaryPage(request)
+    showSchemeOrganiserSummaryPage(using request)
   }
 
-  def showSchemeOrganiserSummaryPage(implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
+  def showSchemeOrganiserSummaryPage(using request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
     (for {
       requestObject  <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
       companyDetails <- sessionService.fetchSchemeOrganiserOptionally()

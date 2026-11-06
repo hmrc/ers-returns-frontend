@@ -26,7 +26,7 @@ import scala.io.Source
 case class Country(country: String, countryCode: String)
 
 object Country {
-  implicit val formats: OFormat[Country] = Json.format[Country]
+  given formats: OFormat[Country] = Json.format[Country]
 }
 
 class CountryCodesImpl @Inject() (val environment: Environment) extends CountryCodes

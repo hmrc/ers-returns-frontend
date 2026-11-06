@@ -33,7 +33,7 @@ trait ViewSpecBase extends PlaySpec with GuiceOneAppPerSuite {
 
   def injector: Injector = app.injector
 
-  implicit val ec: ExecutionContext = injector.instanceOf[ExecutionContext]
+  given ec: ExecutionContext = injector.instanceOf[ExecutionContext]
 
   def frontendAppConfig: ApplicationConfig = injector.instanceOf[ApplicationConfig]
 

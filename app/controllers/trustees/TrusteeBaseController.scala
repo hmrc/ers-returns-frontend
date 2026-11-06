@@ -41,17 +41,17 @@ trait TrusteeBaseController[A] extends FrontendController with I18nSupport with 
   val globalErrorView: views.html.global_error
   val appConfig: ApplicationConfig
   val cacheKey: String
-  implicit val ec: ExecutionContext
-  implicit val format: Format[A]
+  given ec: ExecutionContext
+  given format: Format[A]
 
-  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit
+  def nextPageRedirect(index: Int, edit: Boolean = false)(using
     hc: HeaderCarrier,
     request: RequestHeader
   ): Future[Result]
 
-  def form(implicit request: Request[AnyContent]): Form[A]
+  def form(using request: Request[AnyContent]): Form[A]
 
-  def view(requestObject: RequestObject, index: Int, form: Form[A], edit: Boolean = false)(implicit
+  def view(requestObject: RequestObject, index: Int, form: Form[A], edit: Boolean = false)(using
     request: Request[AnyContent],
     hc: HeaderCarrier
   ): Html
@@ -62,7 +62,7 @@ trait TrusteeBaseController[A] extends FrontendController with I18nSupport with 
     }
   }
 
-  def showQuestionPage(requestObject: RequestObject, index: Int, edit: Boolean = false)(implicit
+  def showQuestionPage(requestObject: RequestObject, index: Int, edit: Boolean = false)(using
     request: RequestWithOptionalAuthContext[AnyContent],
     hc: HeaderCarrier
   ): Future[Result] =
@@ -78,11 +78,11 @@ trait TrusteeBaseController[A] extends FrontendController with I18nSupport with 
 
   def questionSubmit(index: Int): Action[AnyContent] = authAction.async { implicit request =>
     sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT).flatMap { requestObject =>
-      handleQuestionSubmit(requestObject, index)(request, hc)
+      handleQuestionSubmit(requestObject, index)(using request, hc)
     }
   }
 
-  def handleQuestionSubmit(requestObject: RequestObject, index: Int, edit: Boolean = false)(implicit
+  def handleQuestionSubmit(requestObject: RequestObject, index: Int, edit: Boolean = false)(using
     request: RequestWithOptionalAuthContext[AnyContent],
     hc: HeaderCarrier
   ): Future[Result] =
@@ -114,17 +114,17 @@ trait TrusteeBaseController[A] extends FrontendController with I18nSupport with 
 
   def editQuestion(index: Int): Action[AnyContent] = authAction.async { implicit request =>
     sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT).flatMap { requestObject =>
-      showQuestionPage(requestObject, index, edit = true)(request, hc)
+      showQuestionPage(requestObject, index, edit = true)(using request, hc)
     }
   }
 
   def editQuestionSubmit(index: Int): Action[AnyContent] = authAction.async { implicit request =>
     sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT).flatMap { requestObject =>
-      handleQuestionSubmit(requestObject, index, edit = true)(request, hc)
+      handleQuestionSubmit(requestObject, index, edit = true)(using request, hc)
     }
   }
 
-  def getGlobalErrorPage(implicit request: RequestHeader, messages: Messages): Result =
+  def getGlobalErrorPage(using request: RequestHeader, messages: Messages): Result =
     Ok(
       globalErrorView(
         "ers.global_errors.title",

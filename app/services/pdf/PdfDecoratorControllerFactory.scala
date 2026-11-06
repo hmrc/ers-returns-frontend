@@ -25,7 +25,7 @@ import scala.collection.mutable
 trait PdfDecoratorControllerFactory extends PageBuilder {
 
   val countryCodes: CountryCodes
-  implicit val ERSUtil: ERSUtil
+  given ERSUtil: ERSUtil
 
   def createPdfDecoratorControllerForScheme(
     scheme: String,

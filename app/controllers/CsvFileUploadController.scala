@@ -237,7 +237,7 @@ class CsvFileUploadController @Inject() (
               Future.successful(getGlobalErrorPage)
             }
           }
-        } recover { case e: LoopException[_] =>
+        } recover { case e: LoopException[?] =>
         logger.error(
           s"[CsvFileUploadController][extractCsvCallbackData] Could not fetch all files from cache map. UploadIds: ${data.ids.map(_.uploadId).mkString}",
           e
@@ -252,7 +252,9 @@ class CsvFileUploadController @Inject() (
       getGlobalErrorPage
     }
 
-  def getAllPageElementsFromPageId(schemeInfo: SchemeInfo, pageId: String)(para: String)(implicit messages: Messages): String =
+  def getAllPageElementsFromPageId(schemeInfo: SchemeInfo, pageId: String)(
+    para: String
+  )(implicit messages: Messages): String =
     ersUtil.getPageElement(
       schemeInfo.schemeId,
       ersUtil.PAGE_CHECK_CSV_FILE,

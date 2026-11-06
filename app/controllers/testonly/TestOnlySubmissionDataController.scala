@@ -37,7 +37,7 @@ class TestOnlySubmissionDataController @Inject() (
   val ersConnector: ErsConnector,
   globalErrorView: views.html.global_error,
   authAction: AuthAction
-)(implicit val ec: ExecutionContext, val ersUtil: ERSUtil, val appConfig: ApplicationConfig)
+)(using val ec: ExecutionContext, val ersUtil: ERSUtil, val appConfig: ApplicationConfig)
     extends FrontendController(mcc) with I18nSupport with Logging {
 
   def retrieveSubmissionData(): Action[AnyContent] = authAction.async { implicit request =>
@@ -91,7 +91,7 @@ class TestOnlySubmissionDataController @Inject() (
       case _                                 => None
     }
 
-  private def getGlobalErrorPage()(implicit request: RequestHeader, messages: Messages): Result =
+  private def getGlobalErrorPage()(using request: RequestHeader, messages: Messages): Result =
     Ok(
       globalErrorView(
         "ers.global_errors.title",
@@ -100,7 +100,7 @@ class TestOnlySubmissionDataController @Inject() (
       )(request, messages, appConfig)
     )
 
-  private def notFoundGlobalErrorView()(implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
+  private def notFoundGlobalErrorView()(using request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
     Future.successful(
       NotFound(
         globalErrorView(

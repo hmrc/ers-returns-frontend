@@ -93,9 +93,13 @@ trait UpscanData {
     )
   )
 
-  val uploadDetails: UploadDetails  = UploadDetails(Instant.now(), "checksum", Some("fileMimeType"), "fileName", 100)
-  val readyCallback: UpscanReadyCallback  = UpscanReadyCallback(Reference("Reference"), new URL("https://callbackUrl.com"), uploadDetails)
-  val failedCallback: UpscanFailedCallback = UpscanFailedCallback(Reference("Reference"), ErrorDetails("failureReason", "message"))
+  val uploadDetails: UploadDetails         = UploadDetails(Instant.now(), "checksum", Some("fileMimeType"), "fileName", 100)
+
+  val readyCallback: UpscanReadyCallback   =
+    UpscanReadyCallback(Reference("Reference"), new URL("https://callbackUrl.com"), uploadDetails)
+
+  val failedCallback: UpscanFailedCallback =
+    UpscanFailedCallback(Reference("Reference"), ErrorDetails("failureReason", "message"))
 
   import models.upscan.UpscanCallback.*
 

@@ -36,12 +36,12 @@ case class UploadedSuccessfully(
 object UploadedSuccessfully {
   val missingMimeType: String = "<<missing mime type>>"
 
-  implicit val uploadedSuccessfullyFormat: OFormat[UploadedSuccessfully] = Json.format[UploadedSuccessfully]
+  given uploadedSuccessfullyFormat: OFormat[UploadedSuccessfully] = Json.format[UploadedSuccessfully]
 }
 
 object UploadStatus {
 
-  implicit val readsUploadStatus: Reads[UploadStatus] = new Reads[UploadStatus] {
+  given readsUploadStatus: Reads[UploadStatus] = new Reads[UploadStatus] {
     override def reads(json: JsValue): JsResult[UploadStatus] = {
       val jsObject = json.asInstanceOf[JsObject]
       jsObject.value.get("_type") match {
@@ -56,7 +56,7 @@ object UploadStatus {
     }
   }
 
-  implicit val writesUploadStatus: Writes[UploadStatus] = new Writes[UploadStatus] {
+  given writesUploadStatus: Writes[UploadStatus] = new Writes[UploadStatus] {
     override def writes(status: UploadStatus): JsValue =
       status match {
         case NotStarted              => JsObject(Map("_type" -> JsString("NotStarted")))

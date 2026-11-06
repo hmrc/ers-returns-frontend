@@ -34,7 +34,7 @@ class CacheHelperSpec extends PlaySpec with MockitoSugar {
       val key                                     = DataKey[ReportableEvents]("ReportableEvents")
       val cacheItem                               =
         CacheItem("id", Json.obj("ReportableEvents" -> Json.toJson(expectedValue)), Instant.now(), Instant.now())
-      implicit val reads: Reads[ReportableEvents] = Json.reads[ReportableEvents]
+      given reads: Reads[ReportableEvents] = Json.reads[ReportableEvents]
 
       val result = CacheHelperTest.getEntry[ReportableEvents](cacheItem, key)
 
@@ -47,7 +47,7 @@ class CacheHelperSpec extends PlaySpec with MockitoSugar {
       val invalidJson                             = Json.obj("ReportableEvents" -> JsString("invalidData"))
       val key                                     = DataKey[ReportableEvents]("ReportableEvents")
       val cacheItem                               = CacheItem("id", invalidJson, Instant.now(), Instant.now())
-      implicit val reads: Reads[ReportableEvents] = Json.reads[ReportableEvents]
+      given reads: Reads[ReportableEvents] = Json.reads[ReportableEvents]
 
       val result = CacheHelperTest.getEntry[ReportableEvents](cacheItem, key)
 

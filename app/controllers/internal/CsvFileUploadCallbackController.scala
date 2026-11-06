@@ -36,7 +36,7 @@ class CsvFileUploadCallbackController @Inject() (
   val ersConnector: ErsConnector,
   val sessionService: FrontendSessionService,
   val fileSizeUtils: FileSizeUtils
-)(implicit val ec: ExecutionContext, ersUtil: ERSUtil)
+)(using val ec: ExecutionContext, ersUtil: ERSUtil)
     extends FrontendController(mcc) with Logging {
 
   def callback(uploadId: UploadId, scRef: String, sessionId: String): Action[JsValue] =

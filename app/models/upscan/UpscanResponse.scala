@@ -29,8 +29,8 @@ case class Reference(value: String) extends AnyVal
 case class UploadForm(href: String, fields: Map[String, String])
 
 object Reference {
-  implicit val referenceReader: Reads[Reference]  = Reads.StringReads.map(Reference(_))
-  implicit val referenceWrites: Writes[Reference] = Writes[Reference](x => JsString(x.value))
+  given referenceReader: Reads[Reference]  = Reads.StringReads.map(Reference(_))
+  given referenceWrites: Writes[Reference] = Writes[Reference](x => JsString(x.value))
 }
 
 case class PreparedUpload(reference: Reference, uploadRequest: UploadForm) {
@@ -45,6 +45,6 @@ case class PreparedUpload(reference: Reference, uploadRequest: UploadForm) {
 }
 
 object PreparedUpload {
-  implicit val uploadFormFormat: Format[UploadForm] = Json.format[UploadForm]
-  implicit val format: Format[PreparedUpload]       = Json.format[PreparedUpload]
+  given uploadFormFormat: Format[UploadForm] = Json.format[UploadForm]
+  given format: Format[PreparedUpload]       = Json.format[PreparedUpload]
 }

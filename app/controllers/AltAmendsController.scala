@@ -38,14 +38,14 @@ class AltAmendsController @Inject() (
   alterationsAmendsView: views.html.alterations_amends,
   globalErrorView: views.html.global_error,
   authAction: AuthAction
-)(implicit val ec: ExecutionContext, val ersUtil: ERSUtil, val appConfig: ApplicationConfig)
+)(using val ec: ExecutionContext, val ersUtil: ERSUtil, val appConfig: ApplicationConfig)
     extends FrontendController(mcc) with I18nSupport with WithUrlEncodedOnlyFormBinding with Logging {
 
   def altActivityPage(): Action[AnyContent] = authAction.async { implicit request =>
     showAltActivityPage()
   }
 
-  def showAltActivityPage()(implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
+  def showAltActivityPage()(using request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
     (for {
       requestObject     <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
       groupSchemeInfo   <-
@@ -69,11 +69,11 @@ class AltAmendsController @Inject() (
     }
 
   def altActivitySelected(): Action[AnyContent] = authAction.async { implicit request =>
-    showAltActivitySelected()(request)
+    showAltActivitySelected()(using request)
 
   }
 
-  def showAltActivitySelected()(implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
+  def showAltActivitySelected()(using request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
     sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT).flatMap { requestObject =>
       RsFormMappings
         .altActivityForm()
@@ -101,10 +101,10 @@ class AltAmendsController @Inject() (
     }
 
   def altAmendsPage(): Action[AnyContent] = authAction.async { implicit request =>
-    showAltAmendsPage()(request)
+    showAltAmendsPage()(using request)
   }
 
-  def showAltAmendsPage()(implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
+  def showAltAmendsPage()(using request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
     for {
       requestObject <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
       altAmends     <-
@@ -116,10 +116,10 @@ class AltAmendsController @Inject() (
     } yield Ok(alterationsAmendsView(requestObject, altAmends.getOrElse(AltAmends(None, None, None, None, None))))
 
   def altAmendsSelected(): Action[AnyContent] = authAction.async { implicit request =>
-    showAltAmendsSelected()(request)
+    showAltAmendsSelected()(using request)
   }
 
-  def showAltAmendsSelected()(implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
+  def showAltAmendsSelected()(using request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
     sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT).flatMap { requestObject =>
       RsFormMappings
         .altAmendsForm()
@@ -162,7 +162,7 @@ class AltAmendsController @Inject() (
         )
     }
 
-  def getGlobalErrorPage(implicit request: RequestHeader, messages: Messages): Result =
+  def getGlobalErrorPage(using request: RequestHeader, messages: Messages): Result =
     Ok(
       globalErrorView(
         "ers.global_errors.title",

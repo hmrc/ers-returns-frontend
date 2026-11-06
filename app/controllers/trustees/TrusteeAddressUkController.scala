@@ -41,18 +41,18 @@ class TrusteeAddressUkController @Inject() (
   val trusteeService: TrusteeService,
   val sessionService: FrontendSessionService,
   trusteeAddressUkView: views.html.trustee_address_uk
-)(implicit
+)(using
   val ec: ExecutionContext,
   val ersUtil: ERSUtil,
   val appConfig: ApplicationConfig,
   val countryCodes: CountryCodes
 ) extends FrontendController(mcc) with WithUrlEncodedOnlyFormBinding with TrusteeBaseController[TrusteeAddress] {
 
-  implicit val format: Format[TrusteeAddress] = TrusteeAddress.format
+  given format: Format[TrusteeAddress] = TrusteeAddress.format
 
   val cacheKey: String = ersUtil.TRUSTEE_ADDRESS_CACHE
 
-  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit
+  def nextPageRedirect(index: Int, edit: Boolean = false)(using
     hc: HeaderCarrier,
     request: RequestHeader
   ): Future[Result] =
@@ -64,10 +64,10 @@ class TrusteeAddressUkController @Inject() (
       }
     }
 
-  def form(implicit request: Request[AnyContent]): Form[TrusteeAddress] = RsFormMappings.trusteeAddressUkForm()
+  def form(using request: Request[AnyContent]): Form[TrusteeAddress] = RsFormMappings.trusteeAddressUkForm()
 
   def view(requestObject: RequestObject, index: Int, trusteeAddressForm: Form[TrusteeAddress], edit: Boolean = false)(
-    implicit
+    using
     request: Request[AnyContent],
     hc: HeaderCarrier
   ): Html =

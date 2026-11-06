@@ -28,5 +28,5 @@ case class UpscanInitiateRequest(
 )
 
 object UpscanInitiateRequest {
-  implicit val format: OFormat[UpscanInitiateRequest] = Json.format[UpscanInitiateRequest]
+  given format: OFormat[UpscanInitiateRequest] = Json.format[UpscanInitiateRequest]
 }

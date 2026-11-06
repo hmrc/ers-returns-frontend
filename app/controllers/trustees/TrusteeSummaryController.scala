@@ -39,7 +39,7 @@ class TrusteeSummaryController @Inject() (
   globalErrorView: views.html.global_error,
   trusteeSummaryView: views.html.trustee_summary,
   authAction: AuthAction
-)(implicit
+)(using
   val ec: ExecutionContext,
   val ersUtil: ERSUtil,
   val appConfig: ApplicationConfig,
@@ -58,10 +58,10 @@ class TrusteeSummaryController @Inject() (
   }
 
   def trusteeSummaryPage(): Action[AnyContent] = authAction.async { implicit request =>
-    showTrusteeSummaryPage()(request)
+    showTrusteeSummaryPage()(using request)
   }
 
-  def showTrusteeSummaryPage()(implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
+  def showTrusteeSummaryPage()(using request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
     (for {
       requestObject      <- sessionService.fetch[RequestObject](ERS_REQUEST_OBJECT)
       trusteeDetailsList <- sessionService.fetchTrusteesOptionally()
@@ -76,10 +76,10 @@ class TrusteeSummaryController @Inject() (
     }
 
   def trusteeSummaryContinue(): Action[AnyContent] = authAction.async { implicit request =>
-    continueFromTrusteeSummaryPage()(request)
+    continueFromTrusteeSummaryPage()(using request)
   }
 
-  def continueFromTrusteeSummaryPage()(implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
+  def continueFromTrusteeSummaryPage()(using request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
     RsFormMappings
       .addTrusteeForm()
       .bindFromRequest()
@@ -104,7 +104,7 @@ class TrusteeSummaryController @Inject() (
 
   def getGlobalErrorPage(
     status: Status = InternalServerError
-  )(implicit request: RequestHeader, messages: Messages): Result =
+  )(using request: RequestHeader, messages: Messages): Result =
     status(
       globalErrorView(
         "ers.global_errors.title",

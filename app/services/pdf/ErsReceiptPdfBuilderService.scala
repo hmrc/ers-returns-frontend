@@ -39,7 +39,7 @@ class ErsReceiptPdfBuilderService @Inject() (val countryCodes: CountryCodes)(imp
     messages: Messages
   ): ByteArrayOutputStream = {
 
-    implicit val decorator: DecoratorController =
+    given decorator: DecoratorController =
       createPdfDecoratorControllerForScheme(ersSummary.metaData.schemeInfo.schemeType, ersSummary, filesUploaded)
 
     val startBoilerplate =

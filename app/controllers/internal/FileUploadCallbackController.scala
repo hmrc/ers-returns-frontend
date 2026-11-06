@@ -32,7 +32,7 @@ class FileUploadCallbackController @Inject() (
   val mcc: MessagesControllerComponents,
   fileValidatorService: FileValidatorService,
   fileSizeUtils: FileSizeUtils
-)(implicit val ec: ExecutionContext)
+)(using val ec: ExecutionContext)
     extends FrontendController(mcc) with Logging with Constants {
 
   def callback(schemeRef: String, sessionId: String): Action[JsValue] = Action.async(parse.json) { implicit request =>

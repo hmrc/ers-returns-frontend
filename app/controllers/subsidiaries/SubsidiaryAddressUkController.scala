@@ -48,10 +48,10 @@ class SubsidiaryAddressUkController @Inject() (
   trusteeAddressUkView: views.html.manual_address_uk
 ) extends FrontendController(mcc) with WithUrlEncodedOnlyFormBinding with SubsidiaryBaseController[CompanyAddress] {
 
-  implicit val ec: ExecutionContext = mcc.executionContext
+  given ec: ExecutionContext = mcc.executionContext
 
   val cacheKey: String                        = ersUtil.SUBSIDIARY_COMPANY_ADDRESS_CACHE
-  implicit val format: Format[CompanyAddress] = CompanyAddress.format
+  given format: Format[CompanyAddress] = CompanyAddress.format
 
   def nextPageRedirect(index: Int, edit: Boolean = false)(implicit
     hc: HeaderCarrier,
@@ -72,10 +72,10 @@ class SubsidiaryAddressUkController @Inject() (
     }
   }
 
-  def form(implicit request: Request[AnyContent]): Form[CompanyAddress] = RsFormMappings.companyAddressUkForm()
+  def form(using request: Request[AnyContent]): Form[CompanyAddress] = RsFormMappings.companyAddressUkForm()
 
   def view(requestObject: RequestObject, index: Int, companyAddressUkForm: Form[CompanyAddress], edit: Boolean = false)(
-    implicit
+    using
     request: Request[AnyContent],
     hc: HeaderCarrier
   ): Html =

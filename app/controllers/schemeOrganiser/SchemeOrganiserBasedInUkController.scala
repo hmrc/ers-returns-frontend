@@ -47,12 +47,12 @@ class SchemeOrganiserBasedInUkController @Inject() (
     with WithUrlEncodedOnlyFormBinding
     with SchemeOrganiserBaseController[CompanyBasedInUk] {
 
-  implicit val ec: ExecutionContext = mcc.executionContext
+  given ec: ExecutionContext = mcc.executionContext
 
   val cacheKey: String                          = ersUtil.SCHEME_ORGANISER_BASED
-  implicit val format: Format[CompanyBasedInUk] = CompanyBasedInUk.format
+  given format: Format[CompanyBasedInUk] = CompanyBasedInUk.format
 
-  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit
+  def nextPageRedirect(index: Int, edit: Boolean = false)(using
     hc: HeaderCarrier,
     request: RequestHeader
   ): Future[Result] =
@@ -76,14 +76,14 @@ class SchemeOrganiserBasedInUkController @Inject() (
         Redirect(controllers.schemeOrganiser.routes.SchemeOrganiserDetailsOverseasController.editCompany(index))
     }
 
-  def form(implicit request: Request[AnyContent]): Form[CompanyBasedInUk] = RsFormMappings.companyBasedInUkForm()
+  def form(using request: Request[AnyContent]): Form[CompanyBasedInUk] = RsFormMappings.companyBasedInUkForm()
 
   def view(
     requestObject: RequestObject,
     index: Int,
     companyBasedInUkForm: Form[CompanyBasedInUk],
     edit: Boolean = false
-  )(implicit request: Request[AnyContent], hc: HeaderCarrier): Html =
+  )(using request: Request[AnyContent], hc: HeaderCarrier): Html =
     pageView(requestObject, index, companyBasedInUkForm, edit, schemeOrganiser = true)
 
 }

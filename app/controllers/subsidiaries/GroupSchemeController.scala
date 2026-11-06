@@ -57,7 +57,7 @@ class GroupSchemeController @Inject() (
     with Constants
     with CacheHelper {
 
-  implicit val ec: ExecutionContext = mcc.executionContext
+  given ec: ExecutionContext = mcc.executionContext
   private val form: Form[Boolean]   = yesNoFormProvider.withPrefix("delete-company")
 
   private def getRequestObjAndCompanyDetails()(implicit
@@ -75,7 +75,7 @@ class GroupSchemeController @Inject() (
 
   def showConfirmDeleteCompanyPage(
     id: Int
-  )(implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
+  )(using request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
     getRequestObjAndCompanyDetails() transformWith {
       case _ @Success((requestObject: RequestObject, companySize: Int, companyDetailsList: CompanyDetailsList)) =>
         Future.successful(
@@ -151,13 +151,13 @@ class GroupSchemeController @Inject() (
       )
     }
     sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT).flatMap { requestObject =>
-      showGroupSchemePage(requestObject)(request)
+      showGroupSchemePage(requestObject)(using request)
     }
   }
 
   def showGroupSchemePage(
     requestObject: RequestObject
-  )(implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
+  )(using request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
     sessionService.fetch[GroupSchemeInfo](ersUtil.GROUP_SCHEME_CACHE_CONTROLLER).map { groupSchemeInfo =>
       Ok(
         groupView(
@@ -173,11 +173,11 @@ class GroupSchemeController @Inject() (
 
   def groupSchemeSelected(scheme: String): Action[AnyContent] = authAction.async { implicit request =>
     sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT).flatMap { requestObject =>
-      showGroupSchemeSelected(requestObject, scheme)(request)
+      showGroupSchemeSelected(requestObject, scheme)(using request)
     }
   }
 
-  def showGroupSchemeSelected(requestObject: RequestObject, scheme: String)(implicit
+  def showGroupSchemeSelected(requestObject: RequestObject, scheme: String)(using
     request: RequestWithOptionalAuthContext[AnyContent]
   ): Future[Result] =
     RsFormMappings
@@ -224,10 +224,10 @@ class GroupSchemeController @Inject() (
       )
 
   def groupPlanSummaryPage(): Action[AnyContent] = authAction.async { implicit request =>
-    showGroupPlanSummaryPage()(request)
+    showGroupPlanSummaryPage()(using request)
   }
 
-  def showGroupPlanSummaryPage()(implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
+  def showGroupPlanSummaryPage()(using request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
     (for {
       requestObject      <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
       companyDetailsList <- sessionService.fetchCompaniesOptionally()
@@ -249,7 +249,7 @@ class GroupSchemeController @Inject() (
     continueFromGroupPlanSummaryPage(scheme)
   }
 
-  def continueFromGroupPlanSummaryPage(scheme: String)(implicit request: Request[_]): Future[Result] =
+  def continueFromGroupPlanSummaryPage(scheme: String)(using request: Request[?]): Future[Result] =
     RsFormMappings
       .addSubsidiaryForm()
       .bindFromRequest()
@@ -278,7 +278,7 @@ class GroupSchemeController @Inject() (
           }
       )
 
-  def getGlobalErrorPage(implicit request: RequestHeader, messages: Messages): Result =
+  def getGlobalErrorPage(using request: RequestHeader, messages: Messages): Result =
     InternalServerError(
       globalErrorView(
         "ers.global_errors.title",

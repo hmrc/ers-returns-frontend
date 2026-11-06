@@ -62,7 +62,8 @@ class SchemeOrganiserControllerSpec
   val globalErrorView: global_error                        = app.injector.instanceOf[global_error]
   val schemeOrganiserSummaryView: scheme_organiser_summary = app.injector.instanceOf[scheme_organiser_summary]
 
-  val companyDetails: CompanyDetails = CompanyDetails("First company", "20 Garden View", None, None, None, None, None, None, None, true)
+  val companyDetails: CompanyDetails =
+    CompanyDetails("First company", "20 Garden View", None, None, None, None, None, None, None, true)
 
   "calling Scheme Organiser summary page" should {
 
@@ -130,7 +131,7 @@ class SchemeOrganiserControllerSpec
     "give a redirect status (to company authentication frontend) on GET if user is not authenticated" in {
       setUnauthorisedMocks()
       val controllerUnderTest = buildFakeSchemeOrganiserSummaryController()
-      val result              = controllerUnderTest.schemeOrganiserSummaryPage().apply(FakeRequest("GET", ""))
+      val result              = controllerUnderTest.schemeOrganiserSummaryPage.apply(FakeRequest("GET", ""))
       status(result) shouldBe Status.SEE_OTHER
     }
 
@@ -138,7 +139,7 @@ class SchemeOrganiserControllerSpec
       setAuthMocks()
       val controllerUnderTest = buildFakeSchemeOrganiserSummaryController()
       val result              =
-        controllerUnderTest.schemeOrganiserSummaryPage().apply(Fixtures.buildFakeRequestWithSessionIdSIP("GET"))
+        controllerUnderTest.schemeOrganiserSummaryPage.apply(Fixtures.buildFakeRequestWithSessionIdSIP("GET"))
       status(result) shouldBe Status.OK
     }
 

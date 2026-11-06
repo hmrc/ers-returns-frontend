@@ -51,7 +51,7 @@ class AuthAction @Inject() (
   appConfig: ApplicationConfig,
   sessionService: FrontendSessionService,
   val parser: BodyParsers.Default
-)(implicit val executionContext: ExecutionContext)
+)(using val executionContext: ExecutionContext)
     extends AuthorisedFunctions with AuthIdentifierAction with Constants with Logging {
 
   lazy val signInUrl: String = appConfig.ggSignInUrl
@@ -71,8 +71,8 @@ class AuthAction @Inject() (
     request: Request[A],
     block: RequestWithOptionalAuthContext[A] => Future[Result]
   ): Future[Result] = {
-    implicit val hc: HeaderCarrier                    = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
-    implicit val formatRSParams: OFormat[ErsMetaData] = Json.format[ErsMetaData]
+    given hc: HeaderCarrier                    = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
+    given formatRSParams: OFormat[ErsMetaData] = Json.format[ErsMetaData]
 
     authorised((Enrolment("IR-PAYE") or Enrolment("HMRC-AGENT-AGENT") or Agent) and AuthProviders(GovernmentGateway))
       .retrieve(authorisedEnrolments and affinityGroup) { case authorisedEnrolments ~ affinityGroup =>
@@ -107,7 +107,7 @@ class AuthActionGovGateway @Inject() (
   override val authConnector: DefaultAuthConnector,
   appConfig: ApplicationConfig,
   val parser: BodyParsers.Default
-)(implicit val executionContext: ExecutionContext)
+)(using val executionContext: ExecutionContext)
     extends AuthorisedFunctions with AuthIdentifierAction with Logging {
 
   lazy val signInUrl: String = appConfig.ggSignInUrl
@@ -127,7 +127,7 @@ class AuthActionGovGateway @Inject() (
     request: Request[A],
     block: RequestWithOptionalAuthContext[A] => Future[Result]
   ): Future[Result] = {
-    implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
+    given hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
 
     authorised(AuthProviders(GovernmentGateway)).retrieve(allEnrolments and affinityGroup) {
       case authorisedEnrolments ~ affinityGroup =>

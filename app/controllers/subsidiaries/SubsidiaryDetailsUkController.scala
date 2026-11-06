@@ -47,13 +47,13 @@ class SubsidiaryDetailsUkController @Inject() (
   companyUKNameView: views.html.manual_company_details_uk
 ) extends FrontendController(mcc) with WithUrlEncodedOnlyFormBinding with SubsidiaryBaseController[Company] {
 
-  implicit val ec: ExecutionContext = mcc.executionContext
+  given ec: ExecutionContext = mcc.executionContext
 
   val cacheKey: String = ersUtil.SUBSIDIARY_COMPANY_NAME_CACHE
 
-  implicit val format: Format[Company] = Company.format
+  given format: Format[Company] = Company.format
 
-  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit
+  def nextPageRedirect(index: Int, edit: Boolean = false)(using
     hc: HeaderCarrier,
     request: RequestHeader
   ): Future[Result] =
@@ -63,9 +63,9 @@ class SubsidiaryDetailsUkController @Inject() (
       Future.successful(Redirect(controllers.subsidiaries.routes.SubsidiaryAddressUkController.questionPage()))
     }
 
-  def form(implicit request: Request[AnyContent]): Form[Company] = RsFormMappings.companyNameForm()
+  def form(using request: Request[AnyContent]): Form[Company] = RsFormMappings.companyNameForm()
 
-  def view(requestObject: RequestObject, index: Int, companyNameUKForm: Form[Company], edit: Boolean = false)(implicit
+  def view(requestObject: RequestObject, index: Int, companyNameUKForm: Form[Company], edit: Boolean = false)(using
     request: Request[AnyContent],
     hc: HeaderCarrier
   ): Html =

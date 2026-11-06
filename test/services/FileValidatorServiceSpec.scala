@@ -38,7 +38,7 @@ class FileValidatorServiceSpec extends PlaySpec with GuiceOneAppPerSuite with Sc
 
   val sessionId                    = "sessionId"
   val request: Request[AnyContent] = FakeRequest()
-  implicit val hc: HeaderCarrier   = HeaderCarrier().copy(sessionId = Some(SessionId(sessionId)))
+  given hc: HeaderCarrier   = HeaderCarrier().copy(sessionId = Some(SessionId(sessionId)))
 
   val mockConnector: ErsConnector = mock[ErsConnector]
 

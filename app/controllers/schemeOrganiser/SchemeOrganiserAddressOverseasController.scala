@@ -48,13 +48,13 @@ class SchemeOrganiserAddressOverseasController @Inject() (
     with WithUrlEncodedOnlyFormBinding
     with SchemeOrganiserBaseController[CompanyAddress] {
 
-  implicit val ec: ExecutionContext = mcc.executionContext
+  given ec: ExecutionContext = mcc.executionContext
 
   val cacheKey: String = ersUtil.SCHEME_ORGANISER_ADDRESS_CACHE
 
-  implicit val format: Format[CompanyAddress] = CompanyAddress.format
+  given format: Format[CompanyAddress] = CompanyAddress.format
 
-  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit
+  def nextPageRedirect(index: Int, edit: Boolean = false)(using
     hc: HeaderCarrier,
     request: RequestHeader
   ): Future[Result] = {
@@ -71,14 +71,14 @@ class SchemeOrganiserAddressOverseasController @Inject() (
     }
   }
 
-  def form(implicit request: Request[AnyContent]): Form[CompanyAddress] = RsFormMappings.companyAddressOverseasForm()
+  def form(using request: Request[AnyContent]): Form[CompanyAddress] = RsFormMappings.companyAddressOverseasForm()
 
   def view(
     requestObject: RequestObject,
     index: Int,
     companyAddressOverseasForm: Form[CompanyAddress],
     edit: Boolean = false
-  )(implicit request: Request[AnyContent], hc: HeaderCarrier): Html =
+  )(using request: Request[AnyContent], hc: HeaderCarrier): Html =
     companyAddressOverseasView(requestObject, index, companyAddressOverseasForm, edit, schemeOrganiser = true)
 
 }

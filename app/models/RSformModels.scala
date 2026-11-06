@@ -28,13 +28,13 @@ case class RS_scheme(scheme: String)
 case class ReportableEvents(isNilReturn: Option[String])
 
 object ReportableEvents {
-  implicit val format: OFormat[ReportableEvents] = Json.format[ReportableEvents]
+  given format: OFormat[ReportableEvents] = Json.format[ReportableEvents]
 }
 
 case class CheckFileType(checkFileType: Option[String])
 
 object CheckFileType {
-  implicit val format: OFormat[CheckFileType] = Json.format[CheckFileType]
+  given format: OFormat[CheckFileType] = Json.format[CheckFileType]
 }
 
 case class RS_schemeType(schemeType: String)
@@ -44,13 +44,13 @@ case class RS_groupSchemeType(groupSchemeType: String)
 case class RS_groupScheme(groupScheme: Option[String])
 
 object RS_groupScheme {
-  implicit val format: OFormat[RS_groupScheme] = Json.format[RS_groupScheme]
+  given format: OFormat[RS_groupScheme] = Json.format[RS_groupScheme]
 }
 
 case class AltAmendsActivity(altActivity: String)
 
 object AltAmendsActivity {
-  implicit val format: OFormat[AltAmendsActivity] = Json.format[AltAmendsActivity]
+  given format: OFormat[AltAmendsActivity] = Json.format[AltAmendsActivity]
 }
 
 case class AltAmends(
@@ -62,7 +62,7 @@ case class AltAmends(
 )
 
 object AltAmends {
-  implicit val format: OFormat[AltAmends] = Json.format[AltAmends]
+  given format: OFormat[AltAmends] = Json.format[AltAmends]
 }
 
 case class SchemeOrganiserDetails(
@@ -93,7 +93,7 @@ case class SchemeOrganiserDetails(
 }
 
 object SchemeOrganiserDetails {
-  implicit val format: OFormat[SchemeOrganiserDetails] = Json.format[SchemeOrganiserDetails]
+  given format: OFormat[SchemeOrganiserDetails] = Json.format[SchemeOrganiserDetails]
 
   val emptyForm: SchemeOrganiserDetails = SchemeOrganiserDetails(
     "",

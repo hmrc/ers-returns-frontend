@@ -31,7 +31,7 @@ object RsFormMappings {
   /*
    * scheme type Form definition.
    */
-  val schemeForm: Form[RS_scheme] = Form(mapping("scheme" -> text)(RS_scheme.apply)(RS_scheme.unapply))
+  val schemeForm: Form[RS_scheme] = Form(mapping("scheme" -> text)(RS_scheme.apply)(rs => Some(rs.scheme)))
 
   /*
    * activity type Form definition
@@ -44,7 +44,7 @@ object RsFormMappings {
           Messages("ers.invalidCharacters"),
           so => validInputCharacters(so.getOrElse("1"), fieldValidationPatterns.yesNoRegPattern)
         )
-    )(ReportableEvents.apply)(ReportableEvents.unapply)
+    )(ReportableEvents.apply)(reportableEvents => Some(reportableEvents.isNilReturn))
   )
 
   /*
@@ -59,7 +59,7 @@ object RsFormMappings {
             Messages("ers.invalidCharacters"),
             so => validInputCharacters(so.getOrElse("csv"), csvOdsRegPattern)
           )
-    )(CheckFileType.apply)(CheckFileType.unapply)
+    )(CheckFileType.apply)(checkFile => Some(checkFile.checkFileType))
   )
 
   /*
@@ -71,14 +71,14 @@ object RsFormMappings {
         optional(text)
           .verifying("required field", _.nonEmpty)
           .verifying(Messages("ers.invalidCharacters"), so => validInputCharacters(so.getOrElse("1"), yesNoRegPattern))
-    )(RS_groupScheme.apply)(RS_groupScheme.unapply)
+    )(RS_groupScheme.apply)(rs => Some(rs.groupScheme))
   )
 
   /*
    * Is a group scheme type Form definition
    */
   def groupTypeForm(): Form[RS_groupSchemeType] =
-    Form(mapping("groupSchemeType" -> text)(RS_groupSchemeType.apply)(RS_groupSchemeType.unapply))
+    Form(mapping("groupSchemeType" -> text)(RS_groupSchemeType.apply)(rs => Some(rs.groupSchemeType)))
 
   /*
    * Alterations Activity Form definition
@@ -89,7 +89,7 @@ object RsFormMappings {
         "altActivity" -> text
           .verifying("required field", _.nonEmpty)
           .verifying(Messages("ers.invalidCharacters"), so => validInputCharacters(so, yesNoRegPattern))
-      )(AltAmendsActivity.apply)(AltAmendsActivity.unapply)
+      )(AltAmendsActivity.apply)(altAmends => Some(altAmends.altActivity))
     )
 
   /*
@@ -122,7 +122,15 @@ object RsFormMappings {
           .verifying("required field", _.nonEmpty)
           .verifying(Messages("ers.invalidCharacters"), so => validInputCharacters(so, yesNoRegPattern))
       )
-    )(AltAmends.apply)(AltAmends.unapply)
+    )(AltAmends.apply)(altAmends =>
+      Some(
+        altAmends.altAmendsEligibility,
+        altAmends.altAmendsExchange,
+        altAmends.altAmendsOther,
+        altAmends.altAmendsTerms,
+        altAmends.altAmendsVariations
+      )
+    )
   )
 
   /*
@@ -136,23 +144,23 @@ object RsFormMappings {
           "fileId" -> text
             .verifying("required field", _.nonEmpty)
             .verifying(Messages("ers.invalidCharacters"), so => validInputCharacters(so, csvFileNameRegx))
-        )(CsvFiles.apply)(CsvFiles.unapply)
+        )(CsvFiles.apply)(csvFiles => Some(csvFiles.fileId))
       )
-    )(CsvFilesList.apply)(CsvFilesList.unapply)
+    )(CsvFilesList.apply)(csv => Some(csv.files))
   )
 
   def addTrusteeForm(): Form[AddTrustee] = Form(
     mapping(
       "addTrustee" -> nonEmptyText
         .transform(int => if (int == "0") true else false, (bool: Boolean) => if (bool) "0" else "1")
-    )(AddTrustee.apply)(AddTrustee.unapply)
+    )(AddTrustee.apply)(at => Some(at.addTrustee))
   )
 
   def trusteeBasedInUkForm(): Form[TrusteeBasedInUk] = Form(
     mapping(
       trusteeBasedInUkFields.basedInUk -> nonEmptyText
         .transform(int => if (int == "0") true else false, (bool: Boolean) => if (bool) "0" else "1")
-    )(TrusteeBasedInUk.apply)(TrusteeBasedInUk.unapply)
+    )(TrusteeBasedInUk.apply)(tb => Some(tb.basedInUk))
   )
 
   def trusteeNameForm()(implicit messages: Messages): Form[TrusteeName] = Form(
@@ -161,7 +169,7 @@ object RsFormMappings {
         .verifying(Messages("ers_trustee_details.err.summary.name_required"), _.nonEmpty)
         .verifying(Messages("ers_trustee_details.err.name"), so => checkLength(so, "trusteeNameFields.name"))
         .verifying(Messages("ers_trustee_details.err.invalidChars.name"), so => validInputCharacters(so, addresssRegx))
-    )(TrusteeName.apply)(TrusteeName.unapply)
+    )(TrusteeName.apply)(tn => Some(tn.name))
   )
 
   def trusteeAddressOverseasForm()(implicit messages: Messages): Form[TrusteeAddress] = Form(
@@ -224,7 +232,9 @@ object RsFormMappings {
         text
           verifying pattern(countryCodeRegx.r, error = Messages("ers_scheme_organiser.err.summary.invalid_country"))
       )
-    )(TrusteeAddress.apply)(TrusteeAddress.unapply)
+    )(TrusteeAddress.apply)(ta =>
+      Some(ta.addressLine1, ta.addressLine2, ta.addressLine3, ta.addressLine4, ta.addressLine5, ta.country)
+    )
   )
 
   def trusteeAddressUkForm()(implicit messages: Messages): Form[TrusteeAddress] = Form(
@@ -279,7 +289,9 @@ object RsFormMappings {
         text
           .verifying(pattern(countryCodeRegx.r, error = Messages("ers_scheme_organiser.err.summary.invalid_country")))
       )
-    )(TrusteeAddress.apply)(TrusteeAddress.unapply)
+    )(TrusteeAddress.apply)(ta =>
+      Some(ta.addressLine1, ta.addressLine2, ta.addressLine3, ta.addressLine4, ta.addressLine5, ta.country)
+    )
   )
 
   def companyAddressUkForm()(implicit messages: Messages): Form[CompanyAddress] = Form(
@@ -334,7 +346,16 @@ object RsFormMappings {
         text
           .verifying(pattern(countryCodeRegx.r, error = Messages("ers_scheme_organiser.err.summary.invalid_country")))
       )
-    )(CompanyAddress.apply)(CompanyAddress.unapply)
+    )(CompanyAddress.apply)(companyAddress =>
+      Some(
+        companyAddress.addressLine1,
+        companyAddress.addressLine2,
+        companyAddress.addressLine3,
+        companyAddress.addressLine4,
+        companyAddress.addressLine5,
+        companyAddress.country
+      )
+    )
   )
 
   def companyAddressOverseasForm()(implicit messages: Messages): Form[CompanyAddress] = Form(
@@ -397,7 +418,16 @@ object RsFormMappings {
         text
           .verifying(pattern(countryCodeRegx.r, error = Messages("ers_scheme_organiser.err.summary.invalid_country")))
       )
-    )(CompanyAddress.apply)(CompanyAddress.unapply)
+    )(CompanyAddress.apply)(companyAddress =>
+      Some(
+        companyAddress.addressLine1,
+        companyAddress.country,
+        companyAddress.addressLine4,
+        companyAddress.addressLine3,
+        companyAddress.addressLine2,
+        companyAddress.addressLine5
+      )
+    )
   )
 
   /*
@@ -410,7 +440,7 @@ object RsFormMappings {
         .verifying(Constraints.nonEmpty(errorMessage = "problem with companyBasedInUkForm"))
         .verifying(Messages("ers_trustee_details.err.summary.name_required"), _.nonEmpty)
         .transform(int => if (int == "0") true else false, (bool: Boolean) => if (bool) "0" else "1")
-    )(CompanyBasedInUk.apply)(CompanyBasedInUk.unapply)
+    )(CompanyBasedInUk.apply)(cb => Some(cb.basedInUk))
   )
 
   object companyBasedInUkFields {
@@ -445,7 +475,7 @@ object RsFormMappings {
               pattern(corporationRefPattern.r, error = Messages("ers_manual_company_details.err.corporation_ref"))
             )
         )
-      )(Company.apply)(Company.unapply)
+      )(Company.apply)(c => Some((c.companyName, c.companyReg, c.corporationRef)))
     )
   }
 
@@ -453,14 +483,14 @@ object RsFormMappings {
     mapping(
       "addCompany" -> nonEmptyText
         .transform(int => if (int == "0") true else false, (bool: Boolean) => if (bool) "0" else "1")
-    )(AddCompany.apply)(AddCompany.unapply)
+    )(AddCompany.apply)(ac => Some(ac.addCompany))
   )
 
   /*
    * scheme type Form definition.
    */
   def schemeTypeForm(): Form[RS_schemeType] = Form(
-    mapping("schemeType" -> text)(RS_schemeType.apply)(RS_schemeType.unapply)
+    mapping("schemeType" -> text)(RS_schemeType.apply)(rs => Some(rs.schemeType))
   )
 
   def checkAddressLength(so: String, field: String): Boolean =

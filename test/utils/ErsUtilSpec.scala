@@ -38,7 +38,7 @@ class ErsUtilSpec
     with ScalaFutures {
 
   implicit override val hc: HeaderCarrier = HeaderCarrier(sessionId = Some(SessionId("sessionId")))
-  implicit val countryCodes: CountryCodes = mockCountryCodes
+  given countryCodes: CountryCodes = mockCountryCodes
   val ersUtil: ERSUtil                    = new ERSUtil(mockAppConfig)
 
   override def beforeEach(): Unit = {

@@ -37,7 +37,7 @@ class CheckFileTypeController @Inject() (
   globalErrorView: views.html.global_error,
   checkFileTypeView: views.html.check_file_type,
   authActionGovGateway: AuthActionGovGateway
-)(implicit val ec: ExecutionContext, val ersUtil: ERSUtil, val appConfig: ApplicationConfig)
+)(using val ec: ExecutionContext, val ersUtil: ERSUtil, val appConfig: ApplicationConfig)
     extends FrontendController(mcc) with I18nSupport with WithUrlEncodedOnlyFormBinding with Logging {
 
   def checkFileTypePage(): Action[AnyContent] = authActionGovGateway.async { implicit request =>
@@ -66,10 +66,10 @@ class CheckFileTypeController @Inject() (
     }
 
   def checkFileTypeSelected(): Action[AnyContent] = authActionGovGateway.async { implicit request =>
-    showCheckFileTypeSelected()(request)
+    showCheckFileTypeSelected()(using request)
   }
 
-  def showCheckFileTypeSelected()(implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
+  def showCheckFileTypeSelected()(using request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
     sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT).flatMap { requestObject =>
       RsFormMappings
         .checkFileTypeForm()
@@ -95,7 +95,7 @@ class CheckFileTypeController @Inject() (
         )
     }
 
-  def getGlobalErrorPage(implicit request: RequestHeader, messages: Messages): Result =
+  def getGlobalErrorPage(using request: RequestHeader, messages: Messages): Result =
     Ok(
       globalErrorView(
         "ers.global_errors.title",

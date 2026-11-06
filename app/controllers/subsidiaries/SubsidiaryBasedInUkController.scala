@@ -47,12 +47,12 @@ class SubsidiaryBasedInUkController @Inject() (
   pageView: views.html.manual_is_the_company_in_uk
 ) extends FrontendController(mcc) with WithUrlEncodedOnlyFormBinding with SubsidiaryBaseController[CompanyBasedInUk] {
 
-  implicit val ec: ExecutionContext = mcc.executionContext
+  given ec: ExecutionContext = mcc.executionContext
 
   val cacheKey: String                          = ersUtil.SUBSIDIARY_COMPANY_BASED
-  implicit val format: Format[CompanyBasedInUk] = CompanyBasedInUk.format
+  given format: Format[CompanyBasedInUk] = CompanyBasedInUk.format
 
-  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit
+  def nextPageRedirect(index: Int, edit: Boolean = false)(using
     hc: HeaderCarrier,
     request: RequestHeader
   ): Future[Result] =
@@ -72,14 +72,14 @@ class SubsidiaryBasedInUkController @Inject() (
         Redirect(controllers.subsidiaries.routes.SubsidiaryDetailsOverseasController.editCompany(index))
     }
 
-  def form(implicit request: Request[AnyContent]): Form[CompanyBasedInUk] = RsFormMappings.companyBasedInUkForm()
+  def form(using request: Request[AnyContent]): Form[CompanyBasedInUk] = RsFormMappings.companyBasedInUkForm()
 
   def view(
     requestObject: RequestObject,
     index: Int,
     companyBasedInUkForm: Form[CompanyBasedInUk],
     edit: Boolean = false
-  )(implicit request: Request[AnyContent], hc: HeaderCarrier): Html =
+  )(using request: Request[AnyContent], hc: HeaderCarrier): Html =
     pageView(requestObject, index, companyBasedInUkForm, edit, schemeOrganiser = false)
 
 }

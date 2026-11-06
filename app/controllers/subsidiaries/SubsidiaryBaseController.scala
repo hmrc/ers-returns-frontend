@@ -26,7 +26,7 @@ import scala.concurrent.Future
 
 trait SubsidiaryBaseController[A] extends SchemeOrganiserBaseController[A] {
 
-  override def submissionHandler(requestObject: RequestObject, index: Int, edit: Boolean = false)(implicit
+  override def submissionHandler(requestObject: RequestObject, index: Int, edit: Boolean = false)(using
     request: RequestWithOptionalAuthContext[AnyContent],
     hc: HeaderCarrier
   ): Future[Result] =

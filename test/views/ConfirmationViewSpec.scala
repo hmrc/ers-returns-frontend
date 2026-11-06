@@ -28,10 +28,10 @@ class ConfirmationViewSpec extends ViewSpecBase with FileUploadFixtures {
 
   private val view = app.injector.instanceOf[confirmation]
 
-  implicit val ersUtil: ERSUtil                             = app.injector.instanceOf[ERSUtil]
-  implicit val appConfig: ApplicationConfig                 = app.injector.instanceOf[ApplicationConfig]
-  implicit val request: FakeRequest[AnyContentAsEmpty.type] = fakeRequest
-  implicit val messages: Messages                           = testMessages
+  given ersUtil: ERSUtil                             = app.injector.instanceOf[ERSUtil]
+  given appConfig: ApplicationConfig                 = app.injector.instanceOf[ApplicationConfig]
+  given request: FakeRequest[AnyContentAsEmpty.type] = fakeRequest
+  given messages: Messages                           = testMessages
 
   "confirmation view" should {
     "show expected elements for CSOP page" in {
