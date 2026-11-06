@@ -21,7 +21,7 @@ import play.api.i18n.Messages
 
 class GroupSummaryDecorator(headingTitle: String, companiesList: Option[CompanyDetailsList]) extends Decorator {
 
-  def decorate(implicit messages: Messages): String =
+  def decorate(using messages: Messages): String =
     if (companiesList.isDefined) {
       buildEntryMultiple(headingTitle, companiesList.get.companies.map(_.companyName).toArray)
     } else {

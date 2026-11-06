@@ -38,7 +38,7 @@ class PdfGenerationController @Inject() (
   val sessionService: FrontendSessionService,
   globalErrorView: views.html.global_error,
   authAction: AuthAction
-)(implicit val ec: ExecutionContext, val ersUtil: ERSUtil, val appConfig: ApplicationConfig)
+)(using val ec: ExecutionContext, val ersUtil: ERSUtil, val appConfig: ApplicationConfig)
     extends FrontendController(mcc) with I18nSupport with CacheHelper {
 
   def buildPdfForBundle(bundle: String, dateSubmitted: String): Action[AnyContent] = authAction.async {
@@ -48,7 +48,7 @@ class PdfGenerationController @Inject() (
       }
   }
 
-  def generatePdf(bundle: String, dateSubmitted: String)(implicit
+  def generatePdf(bundle: String, dateSubmitted: String)(using
     request: RequestWithOptionalAuthContext[AnyContent]
   ): Future[Result] = {
     for {
@@ -100,7 +100,7 @@ class PdfGenerationController @Inject() (
 
   def getGlobalErrorPage(
     status: Status = InternalServerError
-  )(implicit request: RequestHeader, messages: Messages): Result =
+  )(using request: RequestHeader, messages: Messages): Result =
     status(
       globalErrorView(
         "ers.global_errors.title",

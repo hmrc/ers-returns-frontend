@@ -27,24 +27,24 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class FileValidatorService @Inject() (ersConnector: ErsConnector)(implicit ec: ExecutionContext) extends Logging {
+class FileValidatorService @Inject() (ersConnector: ErsConnector)(using val ec: ExecutionContext) extends Logging {
 
-  def createCallbackRecord(implicit
+  def createCallbackRecord(using
     request: RequestWithOptionalAuthContext[AnyContent],
     hc: HeaderCarrier
   ): Future[Int] =
     ersConnector.createCallbackRecord
 
-  def updateCallbackRecord(uploadStatus: UploadStatus, sessionId: String)(implicit hc: HeaderCarrier): Future[Int] =
+  def updateCallbackRecord(uploadStatus: UploadStatus, sessionId: String)(using hc: HeaderCarrier): Future[Int] =
     ersConnector.updateCallbackRecord(uploadStatus, sessionId)
 
-  def getCallbackRecord(implicit
+  def getCallbackRecord(using
     request: RequestWithOptionalAuthContext[AnyContent],
     hc: HeaderCarrier
   ): Future[Option[UploadStatus]] =
     ersConnector.getCallbackRecord
 
-  def getSuccessfulCallbackRecord(implicit
+  def getSuccessfulCallbackRecord(using
     request: RequestWithOptionalAuthContext[AnyContent],
     hc: HeaderCarrier
   ): Future[Option[UploadedSuccessfully]] =

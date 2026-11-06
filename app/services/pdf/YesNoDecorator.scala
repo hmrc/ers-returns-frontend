@@ -21,7 +21,7 @@ import utils.PageBuilder
 
 class YesNoDecorator(headingTitle: String, isNilReturn: String) extends Decorator with PageBuilder {
 
-  def decorate(implicit messages: Messages): String = {
+  def decorate(using messages: Messages): String = {
     val content = isNilReturn match {
       case OPTION_YES => Messages("ers.yes")
       case OPTION_NO  => Messages("ers.no")

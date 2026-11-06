@@ -39,7 +39,7 @@ class SummaryDeclarationController @Inject() (
   globalErrorView: views.html.global_error,
   summaryView: views.html.summary,
   authAction: AuthAction
-)(implicit
+)(using
   val ec: ExecutionContext,
   val ersUtil: ERSUtil,
   val appConfig: ApplicationConfig,
@@ -54,13 +54,13 @@ class SummaryDeclarationController @Inject() (
       )
     }
     sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT).flatMap { requestObject =>
-      showSummaryDeclarationPage(requestObject)(request)
+      showSummaryDeclarationPage(requestObject)(using request)
     }
   }
 
   def showSummaryDeclarationPage(
     requestObject: RequestObject
-  )(implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
+  )(using request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
     sessionService.fetchAll().flatMap { all =>
       val schemeOrganiser: SchemeOrganiserDetails =
         getEntry[SchemeOrganiserDetails](all, DataKey(ersUtil.SCHEME_ORGANISER_CACHE)).get
@@ -175,7 +175,7 @@ class SummaryDeclarationController @Inject() (
     getEntry[CompanyDetailsList](cacheItem, DataKey(ersUtil.SUBSIDIARY_COMPANIES_CACHE))
       .getOrElse(CompanyDetailsList(List[CompanyDetails]()))
 
-  def getGlobalErrorPage(implicit request: RequestHeader, messages: Messages): Result =
+  def getGlobalErrorPage(using request: RequestHeader, messages: Messages): Result =
     InternalServerError(
       globalErrorView(
         "ers.global_errors.title",

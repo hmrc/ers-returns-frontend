@@ -21,7 +21,6 @@ import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.when
 import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
 import org.scalatest.matchers.should.Matchers.{contain, convertToAnyShouldWrapper}
-import org.scalatest.wordspec.AnyWordSpecLike
 import play.api.libs.json.Format
 import utils.Fixtures.ersRequestObject
 import utils.{ErsTestHelper, Fixtures}

@@ -16,17 +16,17 @@
 
 package repository
 
-import scala.concurrent.duration.*
+import scala.concurrent.duration
 import com.github.benmanes.caffeine.cache.Ticker
 import com.github.benmanes.caffeine.cache.Ticker.systemTicker
 import com.github.blemale.scaffeine.{Cache, Scaffeine}
 import config.ApplicationConfig
 import org.mockito.Mockito.when
-import org.scalatest.matchers.must.Matchers.convertToAnyMustWrapper
+import org.scalatest.matchers.must.Matchers.mustBe
 import org.scalatest.wordspec.AnyWordSpecLike
 import repositories.RateLimiterCache
 import utils.Fixtures.mock
-
+import org.mockito.Mockito.*
 import java.time.Instant
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicLong

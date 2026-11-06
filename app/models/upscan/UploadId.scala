@@ -26,9 +26,9 @@ case class UploadId(value: String) extends AnyVal
 object UploadId {
   def generate: UploadId = UploadId(UUID.randomUUID().toString)
 
-  implicit def queryBinder(implicit stringBinder: QueryStringBindable[String]): QueryStringBindable[UploadId] =
+  given queryBinder(using stringBinder: QueryStringBindable[String]): QueryStringBindable[UploadId] =
     stringBinder.transform(UploadId(_), _.value)
 
-  implicit def readsUploadId: Reads[UploadId]   = Reads.StringReads.map(UploadId(_))
-  implicit def writesUploadId: Writes[UploadId] = Writes[UploadId](id => JsString(id.value))
+  given readsUploadId: Reads[UploadId]   = Reads.StringReads.map(UploadId(_))
+  given writesUploadId: Writes[UploadId] = Writes[UploadId](id => JsString(id.value))
 }

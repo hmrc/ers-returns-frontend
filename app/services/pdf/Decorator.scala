@@ -20,7 +20,7 @@ import play.api.i18n.Messages
 
 trait Decorator {
 
-  def decorate(implicit messages: Messages): String
+  def decorate(using messages: Messages): String
 
   def buildEntry(title: String, content: String): String =
     s"""<div style="display: block;">

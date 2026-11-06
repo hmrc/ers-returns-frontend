@@ -153,7 +153,7 @@ trait PageBuilder {
   def getCsvFilesList(scheme: String): List[CsvFiles] =
     CSVFilesList.getOrElse(scheme, List[CsvFiles]())
 
-  def getPageElement(scheme: String, pageId: String, element: String, para: String = "")(implicit
+  def getPageElement(scheme: String, pageId: String, element: String, para: String = "")(using
     messages: Messages
   ): String =
     scheme match {

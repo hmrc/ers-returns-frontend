@@ -26,10 +26,10 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class AuditEvents @Inject() (val auditConnector: DefaultAuditConnector)(implicit val ec: ExecutionContext)
+class AuditEvents @Inject() (val auditConnector: DefaultAuditConnector)(using val ec: ExecutionContext)
     extends AuditService {
 
-  def auditSelectedCsvRadioButtons(selectedCsvFiles: Seq[String])(implicit hc: HeaderCarrier): Future[AuditResult] =
+  def auditSelectedCsvRadioButtons(selectedCsvFiles: Seq[String])(using hc: HeaderCarrier): Future[AuditResult] =
     sendEvent(
       "SelectedCsvRadioButtons",
       Map(
@@ -37,7 +37,7 @@ class AuditEvents @Inject() (val auditConnector: DefaultAuditConnector)(implicit
       )
     )
 
-  def auditFileSize(schemeRef: String, fileSize: String)(implicit hc: HeaderCarrier): Future[AuditResult] =
+  def auditFileSize(schemeRef: String, fileSize: String)(using hc: HeaderCarrier): Future[AuditResult] =
     sendEvent(
       "UploadFileSizeFromUpscanCallback",
       Map(
@@ -46,7 +46,7 @@ class AuditEvents @Inject() (val auditConnector: DefaultAuditConnector)(implicit
       )
     )
 
-  def auditRunTimeError(exception: Throwable, contextInfo: String, rsc: ErsMetaData, bundle: String)(implicit
+  def auditRunTimeError(exception: Throwable, contextInfo: String, rsc: ErsMetaData, bundle: String)(using
     hc: HeaderCarrier
   ): Unit =
     sendEvent(
@@ -59,7 +59,7 @@ class AuditEvents @Inject() (val auditConnector: DefaultAuditConnector)(implicit
       )
     )
 
-  def ersSubmissionAuditEvent(rsc: ErsMetaData, bundle: String)(implicit hc: HeaderCarrier): Future[AuditResult] =
+  def ersSubmissionAuditEvent(rsc: ErsMetaData, bundle: String)(using hc: HeaderCarrier): Future[AuditResult] =
     sendEvent("ErsReturnsFrontendSubmission", eventMap(rsc, bundle))
 
   def eventMap(rsc: ErsMetaData, bundle: String): Map[String, String] =

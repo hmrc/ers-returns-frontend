@@ -358,7 +358,7 @@ object RsFormMappings {
     )
   )
 
-  def companyAddressOverseasForm()(implicit messages: Messages): Form[CompanyAddress] = Form(
+  def companyAddressOverseasForm()(using messages: Messages): Form[CompanyAddress] = Form(
     mapping(
       companyAddressFields.addressLine1 -> text
         .verifying(Messages("ers_manual_company_details.err.summary.address_line1_required"), _.nonEmpty)

@@ -64,10 +64,10 @@ trait ErsTestHelper extends MockitoSugar with AuthHelper with ERSFakeApplication
   ): RequestWithOptionalAuthContext[AnyContent] =
     RequestWithOptionalAuthContext(req, authData)
 
-  implicit val hc: HeaderCarrier                        = HeaderCarrier()
-  implicit val ec: ExecutionContext                     = cc.executionContext
-  implicit val testFakeRequest: FakeRequest[AnyContent] = FakeRequest()
-  implicit lazy val messages: MessagesImpl              = MessagesImpl(i18n.Lang("en"), stubMessagesApi())
+  given hc: HeaderCarrier                        = HeaderCarrier()
+  given ec: ExecutionContext                     = cc.executionContext
+  given testFakeRequest: FakeRequest[AnyContent] = FakeRequest()
+  given messages: MessagesImpl              = MessagesImpl(i18n.Lang("en"), stubMessagesApi())
 
   val requestWithAuth: RequestWithOptionalAuthContext[AnyContent] =
     RequestWithOptionalAuthContext(testFakeRequest, defaultErsAuthData)
@@ -94,9 +94,9 @@ trait ErsTestHelper extends MockitoSugar with AuthHelper with ERSFakeApplication
 
   val mockHttp: HttpClientV2                            = mock[HttpClientV2]
   val mockRequestBuilder: RequestBuilder                = mock[RequestBuilder]
-  implicit val mockAppConfig: ApplicationConfig         = mock[ApplicationConfig]
+  given mockAppConfig: ApplicationConfig         = mock[ApplicationConfig]
   val mockErsConnector: ErsConnector                    = mock[ErsConnector]
-  implicit val mockErsUtil: ERSUtil                     = mock[ERSUtil]
+  given mockErsUtil: ERSUtil                     = mock[ERSUtil]
   val mockMetrics: Metrics                              = mock[Metrics]
   val mockAuditEvents: AuditEvents                      = mock[AuditEvents]
   val mockSessionRepository: FrontendSessionsRepository = mock[FrontendSessionsRepository]
@@ -104,7 +104,7 @@ trait ErsTestHelper extends MockitoSugar with AuthHelper with ERSFakeApplication
   val mockFileValidatorService: FileValidatorService    = mock[FileValidatorService]
   val mockTrusteeService: TrusteeService                = mock[TrusteeService]
   val mockCompanyDetailsService: CompanyDetailsService  = mock[CompanyDetailsService]
-  implicit val mockCountryCodes: CountryCodes           = mock[CountryCodes]
+  given mockCountryCodes: CountryCodes           = mock[CountryCodes]
   val sessionPair: (String, String)                     = SessionKeys.sessionId -> sessionId
 
   val testCacheItem: CacheItem = CacheItem(
@@ -114,7 +114,7 @@ trait ErsTestHelper extends MockitoSugar with AuthHelper with ERSFakeApplication
     Instant.now()
   )
 
-  def testCacheItem[A](key: String, data: A)(implicit writes: Writes[A]): CacheItem =
+  def testCacheItem[A](key: String, data: A)(using writes: Writes[A]): CacheItem =
     CacheItem("id", Json.toJson(Map(key -> Json.toJson(data))).as[JsObject], Instant.now(), Instant.now())
 
   def testCacheItems(data: Map[String, JsValue]): CacheItem =

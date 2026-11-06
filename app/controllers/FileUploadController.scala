@@ -49,7 +49,7 @@ class FileUploadController @Inject() (
   fileUploadProblemView: views.html.file_upload_problem,
   invalidMimeErrorView: views.html.invalid_mime_error,
   authAction: AuthAction
-)(implicit
+)(using
   val ec: ExecutionContext,
   val ersUtil: ERSUtil,
   val appConfig: ApplicationConfig,
@@ -174,7 +174,7 @@ class FileUploadController @Inject() (
     }
   }
 
-  def handleValidationResponse(callbackData: UploadedSuccessfully, schemeInfo: SchemeInfo)(implicit
+  def handleValidationResponse(callbackData: UploadedSuccessfully, schemeInfo: SchemeInfo)(using
     request: RequestWithOptionalAuthContext[AnyContent],
     hc: HeaderCarrier
   ): Future[Result] = {
@@ -209,7 +209,7 @@ class FileUploadController @Inject() (
     }
   }
 
-  private def handleIncorrectErsTemplate(response: HttpResponse, schemeInfo: SchemeInfo)(implicit
+  private def handleIncorrectErsTemplate(response: HttpResponse, schemeInfo: SchemeInfo)(using
     request: RequestWithOptionalAuthContext[AnyContent]
   ): Result =
 
@@ -309,14 +309,14 @@ class FileUploadController @Inject() (
     }
   }
 
-  def getFileUploadProblemPage()(implicit request: RequestHeader, messages: Messages): Result =
+  def getFileUploadProblemPage()(using request: RequestHeader, messages: Messages): Result =
     BadRequest(
       fileUploadProblemView(
         "ers.file_problem.title"
       )(request, messages, appConfig)
     )
 
-  def getGlobalErrorPage(implicit request: RequestHeader, messages: Messages): Result =
+  def getGlobalErrorPage(using request: RequestHeader, messages: Messages): Result =
     InternalServerError(
       globalErrorView(
         "ers.global_errors.title",

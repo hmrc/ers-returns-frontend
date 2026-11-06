@@ -35,7 +35,7 @@ class IncorrectFileNameController @Inject() (
   val sessionService: FrontendSessionService,
   incorrectFileNameView: views.html.incorrect_file_name,
   authAction: AuthAction
-)(implicit
+)(using
   val ec: ExecutionContext,
   val ersUtil: ERSUtil,
   val appConfig: ApplicationConfig

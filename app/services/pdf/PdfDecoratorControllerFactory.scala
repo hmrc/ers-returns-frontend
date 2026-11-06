@@ -31,7 +31,7 @@ trait PdfDecoratorControllerFactory extends PageBuilder {
     scheme: String,
     ersSummary: ErsSummary,
     filesUploaded: Option[List[String]]
-  )(implicit messages: Messages): DecoratorController =
+  )(using messages: Messages): DecoratorController =
     scheme.trim.toLowerCase match {
       case "emi" =>
         new DecoratorController(Array[Decorator]())
@@ -91,7 +91,7 @@ trait PdfDecoratorControllerFactory extends PageBuilder {
       "5" -> altAmends.altAmendsOther.getOrElse(OPTION_NO)
     )
 
-  def createAltAmendOptionsFor(ersSummary: ErsSummary, variant: String)(implicit
+  def createAltAmendOptionsFor(ersSummary: ErsSummary, variant: String)(using
     messages: Messages
   ): Map[String, String] = {
     val map: mutable.HashMap[String, String] = mutable.HashMap()

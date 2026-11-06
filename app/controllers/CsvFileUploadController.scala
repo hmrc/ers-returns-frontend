@@ -51,7 +51,7 @@ class CsvFileUploadController @Inject() (
   invalidMimeErrorView: views.html.invalid_mime_error,
   wrongCsvFileTypeView: views.html.wrong_csv_file_type,
   authAction: AuthAction
-)(implicit
+)(using
   val ec: ExecutionContext,
   val ersUtil: ERSUtil,
   val appConfig: ApplicationConfig,
@@ -141,7 +141,7 @@ class CsvFileUploadController @Inject() (
     processValidationResults()
   }
 
-  def processValidationResults()(implicit
+  def processValidationResults()(using
     request: RequestWithOptionalAuthContext[AnyContent],
     hc: HeaderCarrier
   ): Future[Result] =
@@ -157,7 +157,7 @@ class CsvFileUploadController @Inject() (
 
   def removePresubmissionData(
     schemeInfo: SchemeInfo
-  )(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] =
+  )(using request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] =
     ersConnector.removePresubmissionData(schemeInfo).flatMap { result =>
       result.status match {
         case OK => extractCsvCallbackData(schemeInfo)
@@ -176,7 +176,7 @@ class CsvFileUploadController @Inject() (
 
   def extractCsvCallbackData(
     schemeInfo: SchemeInfo
-  )(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] =
+  )(using request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] =
     sessionService.fetch[UpscanCsvFilesList](ersUtil.CSV_FILES_UPLOAD).flatMap { data =>
       sessionService
         .fetchAll()
@@ -254,7 +254,7 @@ class CsvFileUploadController @Inject() (
 
   def getAllPageElementsFromPageId(schemeInfo: SchemeInfo, pageId: String)(
     para: String
-  )(implicit messages: Messages): String =
+  )(using messages: Messages): String =
     ersUtil.getPageElement(
       schemeInfo.schemeId,
       ersUtil.PAGE_CHECK_CSV_FILE,
@@ -266,7 +266,7 @@ class CsvFileUploadController @Inject() (
     schemeInfo: SchemeInfo,
     list: UpscanCsvFilesList,
     requestObject: RequestObject
-  )(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
+  )(using request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
 
     val fileName                                                 = ersUtil.getFileNameSuffix(
       schemeInfo.schemeType == "CSOP",
@@ -301,7 +301,7 @@ class CsvFileUploadController @Inject() (
     }
   }
 
-  def checkFileNames(csvCallbackData: List[UploadedSuccessfully], schemeInfo: SchemeInfo)(implicit
+  def checkFileNames(csvCallbackData: List[UploadedSuccessfully], schemeInfo: SchemeInfo)(using
     request: RequestWithOptionalAuthContext[AnyContent],
     hc: HeaderCarrier
   ): Future[Result] = {
@@ -318,7 +318,7 @@ class CsvFileUploadController @Inject() (
     getGlobalErrorPage
   }
 
-  def validateCsv(csvCallbackData: List[UploadedSuccessfully], schemeInfo: SchemeInfo)(implicit
+  def validateCsv(csvCallbackData: List[UploadedSuccessfully], schemeInfo: SchemeInfo)(using
     request: RequestWithOptionalAuthContext[AnyContent],
     hc: HeaderCarrier
   ): Future[Result] =
@@ -355,10 +355,10 @@ class CsvFileUploadController @Inject() (
     }
 
   def validationFailure(): Action[AnyContent] = authAction.async { implicit request =>
-    processValidationFailure()(request)
+    processValidationFailure()(using request)
   }
 
-  def processValidationFailure()(implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] = {
+  def processValidationFailure()(using request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] = {
     logger.info(
       "[CsvFileUploadController][processValidationFailure] Validation Failure: " + (System.currentTimeMillis() / 1000)
     )
@@ -390,14 +390,14 @@ class CsvFileUploadController @Inject() (
     }
   }
 
-  def getFileUploadProblemPage()(implicit request: RequestHeader, messages: Messages): Result =
+  def getFileUploadProblemPage()(using request: RequestHeader, messages: Messages): Result =
     BadRequest(
       fileUploadProblemView(
         "ers.file_problem.title"
       )(request, messages, appConfig)
     )
 
-  def getWrongCsvFileTypePage(requestObject: RequestObject, expectedFiles: Seq[(String, String)])(implicit
+  def getWrongCsvFileTypePage(requestObject: RequestObject, expectedFiles: Seq[(String, String)])(using
     request: RequestHeader,
     messages: Messages
   ): Result =
@@ -405,7 +405,7 @@ class CsvFileUploadController @Inject() (
       wrongCsvFileTypeView(requestObject, expectedFiles)(request, messages, appConfig)
     )
 
-  def getGlobalErrorPage(implicit request: RequestHeader, messages: Messages): Result =
+  def getGlobalErrorPage(using request: RequestHeader, messages: Messages): Result =
     InternalServerError(
       globalErrorView(
         "ers.global_errors.title",

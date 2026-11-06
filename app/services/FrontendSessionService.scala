@@ -38,10 +38,10 @@ class FrontendSessionService @Inject() (
   val sessionCache: FrontendSessionsRepository,
   fileValidatorService: FileValidatorService,
   applicationConfig: ApplicationConfig
-)(implicit ec: ExecutionContext)
+)(using val ec: ExecutionContext)
     extends PageBuilder with Logging with Constants {
 
-  def cache[T](key: String, body: T)(implicit
+  def cache[T](key: String, body: T)(using
     request: RequestHeader,
     formats: json.Format[T]
   ): Future[(String, String)] =
@@ -50,13 +50,13 @@ class FrontendSessionService @Inject() (
       Future.failed(ex)
     }
 
-  def remove(key: String)(implicit request: RequestHeader): Future[Unit] =
+  def remove(key: String)(using request: RequestHeader): Future[Unit] =
     sessionCache.deleteFromSession(DataKey(key)).recoverWith { case ex: Exception =>
       logger.error(s"Failed to remove data for key $key from cache, Exception: ${ex.getMessage}", ex)
       Future.failed(ex)
     }
 
-  def fetch[T](key: String)(implicit request: RequestHeader, formats: json.Format[T]): Future[T] =
+  def fetch[T](key: String)(using request: RequestHeader, formats: json.Format[T]): Future[T] =
     sessionCache.getFromSession[JsValue](DataKey(key)).flatMap {
       case Some(jsonVal) =>
         jsonVal.validate[T] match {
@@ -79,7 +79,7 @@ class FrontendSessionService @Inject() (
         Future.failed(ex)
     }
 
-  def fetchTrusteesOptionally()(implicit
+  def fetchTrusteesOptionally()(using
     request: RequestHeader,
     formats: json.Format[TrusteeDetailsList]
   ): Future[TrusteeDetailsList] =
@@ -90,7 +90,7 @@ class FrontendSessionService @Inject() (
 
   def fetchPartFromTrusteeDetailsList[A](
     index: Int
-  )(implicit request: RequestHeader, formats: json.Format[A]): Future[Option[A]] =
+  )(using request: RequestHeader, formats: json.Format[A]): Future[Option[A]] =
     sessionCache.getFromSession[JsValue](DataKey(TRUSTEES_CACHE)).map { optionalJson =>
       optionalJson.flatMap { json =>
         (json \ TRUSTEES_CACHE).as[JsArray].applyOption(index).map(_.as[A])
@@ -102,7 +102,7 @@ class FrontendSessionService @Inject() (
       None
     }
 
-  def fetchOption[T](key: String, cacheId: String)(implicit
+  def fetchOption[T](key: String, cacheId: String)(using
     request: RequestHeader,
     formats: json.Format[T]
   ): Future[Option[T]] =
@@ -120,7 +120,7 @@ class FrontendSessionService @Inject() (
         Future.successful(None)
     }
 
-  def fetchAll()(implicit request: RequestHeader): Future[CacheItem] =
+  def fetchAll()(using request: RequestHeader): Future[CacheItem] =
     sessionCache.getAllFromSession().flatMap {
       case Some(cacheItem) => Future.successful(cacheItem)
       case None            =>
@@ -135,7 +135,7 @@ class FrontendSessionService @Inject() (
       Future.failed(new Exception(errMsg))
     }
 
-  def getAltAmmendsData(schemeRef: String)(implicit
+  def getAltAmmendsData(schemeRef: String)(using
     ec: ExecutionContext,
     request: RequestHeader
   ): Future[(Option[AltAmendsActivity], Option[AlterationAmends])] =
@@ -149,7 +149,7 @@ class FrontendSessionService @Inject() (
                                 }
     } yield (altAmendsOption, alterationAmendsOption)
 
-  def getGroupSchemeData(schemeRef: String)(implicit
+  def getGroupSchemeData(schemeRef: String)(using
     request: RequestHeader,
     ec: ExecutionContext
   ): Future[(Option[GroupSchemeInfo], Option[CompanyDetailsList])] =
@@ -163,7 +163,7 @@ class FrontendSessionService @Inject() (
                               }
     } yield (gscOption, companyDetailsOption)
 
-  def getAllData(bundleRef: String, ersMetaData: ErsMetaData)(implicit
+  def getAllData(bundleRef: String, ersMetaData: ErsMetaData)(using
     ec: ExecutionContext,
     request: RequestWithOptionalAuthContext[AnyContent],
     hc: HeaderCarrier
@@ -210,7 +210,7 @@ class FrontendSessionService @Inject() (
     }
   }
 
-  def getNoOfRows(nilReturn: String)(implicit
+  def getNoOfRows(nilReturn: String)(using
     ec: ExecutionContext,
     request: RequestWithOptionalAuthContext[AnyContent],
     hc: HeaderCarrier
@@ -232,7 +232,7 @@ class FrontendSessionService @Inject() (
 
   def fetchPartFromCompanyDetailsList[A](
     index: Int
-  )(implicit request: RequestHeader, formats: json.Format[A]): Future[Option[A]] =
+  )(using request: RequestHeader, formats: json.Format[A]): Future[Option[A]] =
     sessionCache.getFromSession[JsValue](DataKey(SUBSIDIARY_COMPANIES_CACHE)).map { subsidiaryCompanies =>
       subsidiaryCompanies.map(_.\(COMPANIES).as[JsArray].\(index).getOrElse(Json.obj()).as[A])
     } recover { case x: Throwable =>
@@ -242,7 +242,7 @@ class FrontendSessionService @Inject() (
       None
     }
 
-  def fetchPartFromCompanyDetails[A]()(implicit request: RequestHeader, formats: json.Format[A]): Future[Option[A]] =
+  def fetchPartFromCompanyDetails[A]()(using request: RequestHeader, formats: json.Format[A]): Future[Option[A]] =
     sessionCache.getFromSession[JsValue](DataKey(SCHEME_ORGANISER_CACHE)).map { companyDetailsOpt =>
       companyDetailsOpt.map(_.as[A])
     } recover { case x: Throwable =>
@@ -252,7 +252,7 @@ class FrontendSessionService @Inject() (
       None
     }
 
-  def fetchCompaniesOptionally()(implicit
+  def fetchCompaniesOptionally()(using
     request: RequestHeader,
     formats: json.Format[CompanyDetailsList]
   ): Future[CompanyDetailsList] =
@@ -260,7 +260,7 @@ class FrontendSessionService @Inject() (
       CompanyDetailsList(List.empty[CompanyDetails])
     }
 
-  def fetchSchemeOrganiserOptionally()(implicit
+  def fetchSchemeOrganiserOptionally()(using
     request: RequestHeader,
     formats: json.Format[CompanyDetails]
   ): Future[Option[CompanyDetails]] =

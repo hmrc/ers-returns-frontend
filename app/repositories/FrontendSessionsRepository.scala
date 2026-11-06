@@ -27,7 +27,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class FrontendSessionsRepository @Inject() (mongoComponent: MongoComponent, applicationConfig: ApplicationConfig)(
-  implicit ec: ExecutionContext
+  using ec: ExecutionContext
 ) extends SessionCacheRepository(
       mongoComponent = mongoComponent,
       collectionName = "sessions",

@@ -160,19 +160,19 @@ object TrusteeDetails {
       address.country.fold(false)(_.equals("UK"))
     )
 
-  implicit val format: OFormat[TrusteeDetails] = Json.format[TrusteeDetails]
+  given format: OFormat[TrusteeDetails] = Json.format[TrusteeDetails]
 }
 
 case class TrusteeBasedInUk(basedInUk: Boolean)
 
 object TrusteeBasedInUk {
-  implicit val format: OFormat[TrusteeBasedInUk] = Json.format[TrusteeBasedInUk]
+  given format: OFormat[TrusteeBasedInUk] = Json.format[TrusteeBasedInUk]
 }
 
 case class TrusteeName(name: String)
 
 object TrusteeName {
-  implicit val format: OFormat[TrusteeName] = Json.format[TrusteeName]
+  given format: OFormat[TrusteeName] = Json.format[TrusteeName]
 }
 
 case class TrusteeAddress(
@@ -185,25 +185,25 @@ case class TrusteeAddress(
 )
 
 object TrusteeAddress {
-  implicit val format: OFormat[TrusteeAddress] = Json.format[TrusteeAddress]
+  given format: OFormat[TrusteeAddress] = Json.format[TrusteeAddress]
 }
 
 case class TrusteeDetailsList(trustees: List[TrusteeDetails])
 
 object TrusteeDetailsList {
-  implicit val format: OFormat[TrusteeDetailsList] = Json.format[TrusteeDetailsList]
+  given format: OFormat[TrusteeDetailsList] = Json.format[TrusteeDetailsList]
 }
 
 case class CsvFiles(fileId: String)
 
 object CsvFiles {
-  implicit val format: OFormat[CsvFiles] = Json.format[CsvFiles]
+  given format: OFormat[CsvFiles] = Json.format[CsvFiles]
 }
 
 case class CsvFilesList(files: List[CsvFiles])
 
 object CsvFilesList {
-  implicit val format: OFormat[CsvFilesList] = Json.format[CsvFilesList]
+  given format: OFormat[CsvFilesList] = Json.format[CsvFilesList]
 }
 
 case class RequestObject(
@@ -292,7 +292,7 @@ case class RequestObject(
 }
 
 object RequestObject {
-  implicit val formatRequestObject: OFormat[RequestObject] = Json.format[RequestObject]
+  given formatRequestObject: OFormat[RequestObject] = Json.format[RequestObject]
 
   def getSchemeWithArticle(schemeType: String)(implicit messages: Messages): String =
     messages.lang.code match {

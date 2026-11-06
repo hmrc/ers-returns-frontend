@@ -41,9 +41,9 @@ class FileSizeUtilsSpec extends AnyWordSpecLike with Matchers with MockitoSugar 
       fileSizeUtils.logFileSize("1234", 100)
       val eventCaptor = ArgumentCaptor.forClass(classOf[DataEvent])
       verify(mockAuditConnector, times(1)).sendEvent(eventCaptor.capture())(any(), any())
-      eventCaptor.getValue.asInstanceOf[DataEvent].auditSource shouldBe "ers-returns-frontend"
-      eventCaptor.getValue.asInstanceOf[DataEvent].auditType   shouldBe "UploadFileSizeFromUpscanCallback"
-      eventCaptor.getValue.asInstanceOf[DataEvent].detail      shouldBe Map("schemeRef" -> "1234", "fileSize" -> "100")
+      eventCaptor.getValue.auditSource shouldBe "ers-returns-frontend"
+      eventCaptor.getValue.auditType   shouldBe "UploadFileSizeFromUpscanCallback"
+      eventCaptor.getValue.detail      shouldBe Map("schemeRef" -> "1234", "fileSize" -> "100")
     }
   }
 

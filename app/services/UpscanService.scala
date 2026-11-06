@@ -36,7 +36,7 @@ class UpscanService @Inject() (applicationConfig: ApplicationConfig, upscanConne
   private def urlToString(c: Call): String = redirectUrlBase + c.url
   val uploadFileSizeLimit                  = applicationConfig.uploadFileSizeLimit
 
-  def getUpscanFormDataCsv(uploadId: UploadId, schemeRef: String)(implicit
+  def getUpscanFormDataCsv(uploadId: UploadId, schemeRef: String)(using
     hc: HeaderCarrier,
     request: RequestHeader
   ): Future[UpscanInitiateResponse] = {
@@ -59,7 +59,7 @@ class UpscanService @Inject() (applicationConfig: ApplicationConfig, upscanConne
 
   def getUpscanFormDataOds(
     schemeRef: String
-  )(implicit hc: HeaderCarrier, request: RequestHeader): Future[UpscanInitiateResponse] = {
+  )(using hc: HeaderCarrier, request: RequestHeader): Future[UpscanInitiateResponse] = {
     val callbackUrl = generateCallbackUrl(
       hc.sessionId,
       sessionId => controllers.internal.routes.FileUploadCallbackController.callback(schemeRef, sessionId),
@@ -74,7 +74,7 @@ class UpscanService @Inject() (applicationConfig: ApplicationConfig, upscanConne
   }
 
   private def generateCallbackUrl(sessionIdOption: Option[SessionId], routeFunction: String => Call, isSecure: Boolean)(
-    implicit request: RequestHeader
+    using request: RequestHeader
   ): String =
 
     sessionIdOption match {

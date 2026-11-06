@@ -37,7 +37,7 @@ trait Retryable extends Logging {
       maxTimes: Int,
       maybeSchemeInfo: Option[SchemeInfo] = None,
       callingFunc: String
-    )(pToBreakLoop: A => Boolean)(implicit actorSystem: ActorSystem, ec: ExecutionContext): Future[A] = {
+    )(pToBreakLoop: A => Boolean)(using actorSystem: ActorSystem, ec: ExecutionContext): Future[A] = {
       val delay: FiniteDuration                                       = appConfig.retryDelay
       val scheduler: Scheduler                                        = actorSystem.getScheduler
       val schemeRef                                                   = maybeSchemeInfo.map(_.schemeRef).getOrElse("<<NOT DEFINED>>")

@@ -40,7 +40,7 @@ class ReportableEventsController @Inject() (
   globalErrorView: views.html.global_error,
   reportableEventsView: views.html.reportable_events,
   authAction: AuthAction
-)(implicit val ec: ExecutionContext, val ersUtil: ERSUtil, val appConfig: ApplicationConfig)
+)(using val ec: ExecutionContext, val ersUtil: ERSUtil, val appConfig: ApplicationConfig)
     extends FrontendController(mcc) with I18nSupport with WithUrlEncodedOnlyFormBinding with Logging {
 
   def reportableEventsPage(): Action[AnyContent] = authAction.async { implicit request =>
@@ -52,9 +52,9 @@ class ReportableEventsController @Inject() (
 
     }
     sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT).flatMap { requestObj =>
-      updateErsMetaData(requestObj)(request, hc)
+      updateErsMetaData(requestObj)(using request, hc)
         .flatMap { _ =>
-          showReportableEventsPage(requestObj)(request)
+          showReportableEventsPage(requestObj)(using request)
         }
         .recover { case _ =>
           getGlobalErrorPage
@@ -64,7 +64,7 @@ class ReportableEventsController @Inject() (
 
   def updateErsMetaData(
     requestObject: RequestObject
-  )(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Object] =
+  )(using request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Object] =
     ersConnector
       .connectToEtmpSapRequest(requestObject.getSchemeReference)
       .flatMap {
@@ -102,7 +102,7 @@ class ReportableEventsController @Inject() (
 
   def showReportableEventsPage(
     requestObject: RequestObject
-  )(implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
+  )(using request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
     sessionService.fetch[ReportableEvents](ersUtil.REPORTABLE_EVENTS).map { activity =>
       Ok(reportableEventsView(requestObject, activity.isNilReturn, RsFormMappings.chooseForm().fill(activity)))
     } recover { case _: NoSuchElementException =>
@@ -112,7 +112,7 @@ class ReportableEventsController @Inject() (
 
   def reportableEventsSelected(): Action[AnyContent] = authAction.async { implicit request =>
     sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT).flatMap { requestObj =>
-      showReportableEventsSelected(requestObj)(request) recover { case e: Exception =>
+      showReportableEventsSelected(requestObj)(using request) recover { case e: Exception =>
         logger.error(
           s"[ReportableEventsController][reportableEventsSelected] failed with exception ${e.getMessage}, timestamp: ${System.currentTimeMillis()}."
         )
@@ -123,7 +123,7 @@ class ReportableEventsController @Inject() (
 
   def showReportableEventsSelected(
     requestObject: RequestObject
-  )(implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
+  )(using request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
     RsFormMappings
       .chooseForm()
       .bindFromRequest()
@@ -147,7 +147,7 @@ class ReportableEventsController @Inject() (
           }
       )
 
-  def getGlobalErrorPage(implicit request: RequestHeader, messages: Messages): Result =
+  def getGlobalErrorPage(using request: RequestHeader, messages: Messages): Result =
     InternalServerError(
       globalErrorView(
         "ers.global_errors.title",
