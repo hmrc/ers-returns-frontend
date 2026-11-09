@@ -60,7 +60,7 @@ class GroupSchemeControllerSpec
 
   given testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
 
-  given materializer: Materializer         = app.materializer
+  given materializer: Materializer                     = app.materializer
   val globalErrorView: global_error                    = app.injector.instanceOf[global_error]
   val groupView: group                                 = app.injector.instanceOf[group]
   val groupPlanSummaryView: group_plan_summary         = app.injector.instanceOf[group_plan_summary]
@@ -103,7 +103,7 @@ class GroupSchemeControllerSpec
     when(mockErsUtil.SCHEME_SIP).thenReturn("5")
     when(mockErsUtil.OPTION_YES).thenReturn("1")
     when(mockErsUtil.OPTION_NO).thenReturn("2")
-    when(mockErsUtil.getPageElement(any(), any(), any(), any())(any())).thenCallRealMethod()
+    when(mockErsUtil.getPageElement(any(), any(), any(), any())(using any())).thenCallRealMethod()
     when(mockErsUtil.companyLocation(any())).thenReturn("UK")
     when(mockErsUtil.buildAddressSummary(any())).thenReturn("addressSummary")
     when(mockErsUtil.MSG_CSOP).thenReturn(".csop.")
@@ -469,7 +469,9 @@ class GroupSchemeControllerSpec
   "groupSchemePage" should {
     "display group scheme page if there is no data in cache" in {
       setAuthMocks()
-      when(mockSessionService.fetch[GroupSchemeInfo](refEq(mockErsUtil.GROUP_SCHEME_CACHE_CONTROLLER))(using any(), any()))
+      when(
+        mockSessionService.fetch[GroupSchemeInfo](refEq(mockErsUtil.GROUP_SCHEME_CACHE_CONTROLLER))(using any(), any())
+      )
         .thenReturn(Future.failed(new NoSuchElementException("Nothing in cache")))
       when(mockSessionService.fetch[RequestObject](any())(using any(), any()))
         .thenReturn(Future.successful(ersRequestObject))
@@ -483,7 +485,9 @@ class GroupSchemeControllerSpec
       document.select("input[id=no]").hasAttr("checked") shouldEqual false
     }
     "display group scheme page if there is cached data" in {
-      when(mockSessionService.fetch[GroupSchemeInfo](refEq(mockErsUtil.GROUP_SCHEME_CACHE_CONTROLLER))(using any(), any()))
+      when(
+        mockSessionService.fetch[GroupSchemeInfo](refEq(mockErsUtil.GROUP_SCHEME_CACHE_CONTROLLER))(using any(), any())
+      )
         .thenReturn(Future.successful(GroupSchemeInfo(Option(OPTION_YES), None)))
 
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
@@ -556,7 +560,10 @@ class GroupSchemeControllerSpec
 
     "redirect to group plan summary page if user select yes for CSOP" in {
       when(
-        mockSessionService.cache(refEq(mockErsUtil.GROUP_SCHEME_CACHE_CONTROLLER), any[GroupSchemeInfo]())(using any(), any())
+        mockSessionService.cache(refEq(mockErsUtil.GROUP_SCHEME_CACHE_CONTROLLER), any[GroupSchemeInfo]())(using
+          any(),
+          any()
+        )
       ).thenReturn(
         Future.successful(sessionPair)
       )
@@ -573,7 +580,10 @@ class GroupSchemeControllerSpec
 
     "redirect to alterations page if user select no for CSOP" in {
       when(
-        mockSessionService.cache(refEq(mockErsUtil.GROUP_SCHEME_CACHE_CONTROLLER), any[GroupSchemeInfo]())(using any(), any())
+        mockSessionService.cache(refEq(mockErsUtil.GROUP_SCHEME_CACHE_CONTROLLER), any[GroupSchemeInfo]())(using
+          any(),
+          any()
+        )
       ).thenReturn(
         Future.successful(sessionPair)
       )
@@ -592,7 +602,10 @@ class GroupSchemeControllerSpec
 
     "redirect to group plan summary page if user select yes for SAYE" in {
       when(
-        mockSessionService.cache(refEq(mockErsUtil.GROUP_SCHEME_CACHE_CONTROLLER), any[GroupSchemeInfo]())(using any(), any())
+        mockSessionService.cache(refEq(mockErsUtil.GROUP_SCHEME_CACHE_CONTROLLER), any[GroupSchemeInfo]())(using
+          any(),
+          any()
+        )
       ).thenReturn(
         Future.successful(sessionPair)
       )
@@ -610,7 +623,10 @@ class GroupSchemeControllerSpec
 
     "redirect to alterations page if user select no for SAYE" in {
       when(
-        mockSessionService.cache(refEq(mockErsUtil.GROUP_SCHEME_CACHE_CONTROLLER), any[GroupSchemeInfo]())(using any(), any())
+        mockSessionService.cache(refEq(mockErsUtil.GROUP_SCHEME_CACHE_CONTROLLER), any[GroupSchemeInfo]())(using
+          any(),
+          any()
+        )
       ).thenReturn(
         Future.successful(sessionPair)
       )
@@ -628,7 +644,10 @@ class GroupSchemeControllerSpec
 
     "redirect to group plan summary page if user select yes for EMI" in {
       when(
-        mockSessionService.cache(refEq(mockErsUtil.GROUP_SCHEME_CACHE_CONTROLLER), any[GroupSchemeInfo]())(using any(), any())
+        mockSessionService.cache(refEq(mockErsUtil.GROUP_SCHEME_CACHE_CONTROLLER), any[GroupSchemeInfo]())(using
+          any(),
+          any()
+        )
       ).thenReturn(
         Future.successful(sessionPair)
       )
@@ -646,7 +665,10 @@ class GroupSchemeControllerSpec
 
     "redirect to summary page if user select no for EMI" in {
       when(
-        mockSessionService.cache(refEq(mockErsUtil.GROUP_SCHEME_CACHE_CONTROLLER), any[GroupSchemeInfo]())(using any(), any())
+        mockSessionService.cache(refEq(mockErsUtil.GROUP_SCHEME_CACHE_CONTROLLER), any[GroupSchemeInfo]())(using
+          any(),
+          any()
+        )
       ).thenReturn(
         Future.successful(sessionPair)
       )
@@ -664,7 +686,10 @@ class GroupSchemeControllerSpec
 
     "redirect to group plan summary page if user select yes for SIP" in {
       when(
-        mockSessionService.cache(refEq(mockErsUtil.GROUP_SCHEME_CACHE_CONTROLLER), any[GroupSchemeInfo]())(using any(), any())
+        mockSessionService.cache(refEq(mockErsUtil.GROUP_SCHEME_CACHE_CONTROLLER), any[GroupSchemeInfo]())(using
+          any(),
+          any()
+        )
       ).thenReturn(
         Future.successful(sessionPair)
       )
@@ -681,7 +706,10 @@ class GroupSchemeControllerSpec
 
     "redirect to trustee summary page if user select no for SIP" in {
       when(
-        mockSessionService.cache(refEq(mockErsUtil.GROUP_SCHEME_CACHE_CONTROLLER), any[GroupSchemeInfo]())(using any(), any())
+        mockSessionService.cache(refEq(mockErsUtil.GROUP_SCHEME_CACHE_CONTROLLER), any[GroupSchemeInfo]())(using
+          any(),
+          any()
+        )
       ).thenReturn(
         Future.successful(sessionPair)
       )
@@ -698,7 +726,10 @@ class GroupSchemeControllerSpec
 
     "redirect to group plan summary page if user select yes for OTHER" in {
       when(
-        mockSessionService.cache(refEq(mockErsUtil.GROUP_SCHEME_CACHE_CONTROLLER), any[GroupSchemeInfo]())(using any(), any())
+        mockSessionService.cache(refEq(mockErsUtil.GROUP_SCHEME_CACHE_CONTROLLER), any[GroupSchemeInfo]())(using
+          any(),
+          any()
+        )
       ).thenReturn(
         Future.successful(sessionPair)
       )
@@ -715,7 +746,10 @@ class GroupSchemeControllerSpec
 
     "redirect to summary page if user select no for OTHER" in {
       when(
-        mockSessionService.cache(refEq(mockErsUtil.GROUP_SCHEME_CACHE_CONTROLLER), any[GroupSchemeInfo]())(using any(), any())
+        mockSessionService.cache(refEq(mockErsUtil.GROUP_SCHEME_CACHE_CONTROLLER), any[GroupSchemeInfo]())(using
+          any(),
+          any()
+        )
       ).thenReturn(
         Future.successful(sessionPair)
       )
@@ -750,7 +784,9 @@ class GroupSchemeControllerSpec
 
     "display error page if fetch company details list fails" in {
       setAuthMocks()
-      when(mockSessionService.fetch[CompanyDetailsList](refEq(mockErsUtil.SUBSIDIARY_COMPANIES_CACHE))(using any(), any()))
+      when(
+        mockSessionService.fetch[CompanyDetailsList](refEq(mockErsUtil.SUBSIDIARY_COMPANIES_CACHE))(using any(), any())
+      )
         .thenReturn(Future.failed(new NoSuchElementException("Nothing in cache")))
       when(mockSessionService.fetch[RequestObject](refEq(mockErsUtil.ERS_REQUEST_OBJECT))(using any(), any()))
         .thenReturn(Future.successful(ersRequestObject))
@@ -764,7 +800,9 @@ class GroupSchemeControllerSpec
     }
 
     "display error page if fetch request object fails" in {
-      when(mockSessionService.fetch[CompanyDetailsList](refEq(mockErsUtil.SUBSIDIARY_COMPANIES_CACHE))(using any(), any()))
+      when(
+        mockSessionService.fetch[CompanyDetailsList](refEq(mockErsUtil.SUBSIDIARY_COMPANIES_CACHE))(using any(), any())
+      )
         .thenReturn(Future.successful(mock[CompanyDetailsList]))
       when(mockSessionService.fetch[RequestObject](refEq(mockErsUtil.ERS_REQUEST_OBJECT))(using any(), any()))
         .thenReturn(Future.failed(new Exception))
@@ -847,7 +885,8 @@ class GroupSchemeControllerSpec
       val authRequest = buildRequestWithAuth(
         Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody("addCompany" -> "1")
       )
-      val result      = testGroupSchemeController.continueFromGroupPlanSummaryPage(mockErsUtil.SCHEME_CSOP)(using authRequest)
+      val result      =
+        testGroupSchemeController.continueFromGroupPlanSummaryPage(mockErsUtil.SCHEME_CSOP)(using authRequest)
       status(result)               shouldBe SEE_OTHER
       redirectLocation(result).get shouldBe controllers.routes.AltAmendsController.altActivityPage().url
     }
@@ -856,7 +895,8 @@ class GroupSchemeControllerSpec
       val authRequest = buildRequestWithAuth(
         Fixtures.buildFakeRequestWithSessionIdSAYE("POST").withFormUrlEncodedBody("addCompany" -> "1")
       )
-      val result      = testGroupSchemeController.continueFromGroupPlanSummaryPage(mockErsUtil.SCHEME_SAYE)(using authRequest)
+      val result      =
+        testGroupSchemeController.continueFromGroupPlanSummaryPage(mockErsUtil.SCHEME_SAYE)(using authRequest)
       status(result)               shouldBe SEE_OTHER
       redirectLocation(result).get shouldBe controllers.routes.AltAmendsController.altActivityPage().url
     }
@@ -886,7 +926,8 @@ class GroupSchemeControllerSpec
       val authRequest = buildRequestWithAuth(
         Fixtures.buildFakeRequestWithSessionIdOTHER("POST").withFormUrlEncodedBody("addCompany" -> "1")
       )
-      val result      = testGroupSchemeController.continueFromGroupPlanSummaryPage(mockErsUtil.SCHEME_OTHER)(using authRequest)
+      val result      =
+        testGroupSchemeController.continueFromGroupPlanSummaryPage(mockErsUtil.SCHEME_OTHER)(using authRequest)
       status(result)               shouldBe SEE_OTHER
       redirectLocation(result).get shouldBe controllers.routes.SummaryDeclarationController.summaryDeclarationPage().url
     }

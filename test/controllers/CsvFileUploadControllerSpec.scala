@@ -74,9 +74,9 @@ class CsvFileUploadControllerSpec
     ExecutionContext.global
   )
 
-  given testMessages: MessagesImpl                 = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
-  given mat: Materializer                          = app.materializer
-  given mockActorSystem: ActorSystem                    = app.injector.instanceOf[ActorSystem]
+  given testMessages: MessagesImpl                             = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
+  given mat: Materializer                                      = app.materializer
+  given mockActorSystem: ActorSystem                           = app.injector.instanceOf[ActorSystem]
   val globalErrorView: global_error                            = app.injector.instanceOf[global_error]
   val upscanCsvFileUploadView: upscan_csv_file_upload          = app.injector.instanceOf[upscan_csv_file_upload]
   val fileUploadErrorsView: file_upload_errors                 = app.injector.instanceOf[file_upload_errors]
@@ -691,7 +691,9 @@ class CsvFileUploadControllerSpec
         val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
         contentAsString(
           csvFileUploadController.extractCsvCallbackData(Fixtures.EMISchemeInfo)(using authRequest, hc)
-        ) shouldBe contentAsString(Future(csvFileUploadController.getGlobalErrorPage(using testFakeRequest, testMessages)))
+        ) shouldBe contentAsString(
+          Future(csvFileUploadController.getGlobalErrorPage(using testFakeRequest, testMessages))
+        )
       }
 
       "data is missing from the cache map" in {
@@ -805,7 +807,8 @@ class CsvFileUploadControllerSpec
       ) thenReturn Future.successful(sessionPair)
 
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
-      val result      = csvFileUploadControllerWithRetry(3).extractCsvCallbackData(Fixtures.EMISchemeInfo)(using authRequest, hc)
+      val result      =
+        csvFileUploadControllerWithRetry(3).extractCsvCallbackData(Fixtures.EMISchemeInfo)(using authRequest, hc)
 
       status(result)          shouldBe OK
       contentAsString(result) shouldBe "Validated"
@@ -853,7 +856,9 @@ class CsvFileUploadControllerSpec
         val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
         contentAsString(
           csvFileUploadController.extractCsvCallbackData(Fixtures.EMISchemeInfo)(using authRequest, hc)
-        ) shouldBe contentAsString(Future(csvFileUploadController.getGlobalErrorPage(using testFakeRequest, testMessages)))
+        ) shouldBe contentAsString(
+          Future(csvFileUploadController.getGlobalErrorPage(using testFakeRequest, testMessages))
+        )
       }
 
       "one of the files are not complete" in {
@@ -864,7 +869,9 @@ class CsvFileUploadControllerSpec
         val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
         contentAsString(
           csvFileUploadController.extractCsvCallbackData(Fixtures.EMISchemeInfo)(using authRequest, hc)
-        ) shouldBe contentAsString(Future(csvFileUploadController.getGlobalErrorPage(using testFakeRequest, testMessages)))
+        ) shouldBe contentAsString(
+          Future(csvFileUploadController.getGlobalErrorPage(using testFakeRequest, testMessages))
+        )
       }
     }
 
@@ -950,7 +957,9 @@ class CsvFileUploadControllerSpec
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
       contentAsString(
         csvFileUploadController.validateCsv(mock[List[UploadedSuccessfully]], mock[SchemeInfo])(using authRequest, hc)
-      ) shouldBe contentAsString(Future(csvFileUploadController.getGlobalErrorPage(using testFakeRequest, testMessages)))
+      ) shouldBe contentAsString(
+        Future(csvFileUploadController.getGlobalErrorPage(using testFakeRequest, testMessages))
+      )
     }
   }
 
@@ -1003,7 +1012,7 @@ class CsvFileUploadControllerSpec
         mockSessionService.fetch[RequestObject](eqTo(mockErsUtil.ERS_REQUEST_OBJECT))(using any(), any())
       ) thenReturn Future.successful(testRequestObject)
       when(
-        mockErsUtil.getPageElement(any(), any(), any(), any())(any())
+        mockErsUtil.getPageElement(any(), any(), any(), any())(using any())
       ) thenReturn "CSOP_OptionsGranted_V4.csv"
       when(
         mockErsConnector.validateCsvFileData(any[List[UploadedSuccessfully]](), any[SchemeInfo]())(any(), any())
@@ -1047,7 +1056,7 @@ class CsvFileUploadControllerSpec
         mockSessionService.fetch[RequestObject](eqTo(mockErsUtil.ERS_REQUEST_OBJECT))(using any(), any())
       ) thenReturn Future.successful(testRequestObject)
       when(
-        mockErsUtil.getPageElement(any(), any(), any(), any())(any())
+        mockErsUtil.getPageElement(any(), any(), any(), any())(using any())
       ) thenReturn "CSOP_OptionsGranted_V7.csv"
       when(
         mockErsConnector.validateCsvFileData(any[List[UploadedSuccessfully]](), any[SchemeInfo]())(any(), any())
@@ -1091,7 +1100,7 @@ class CsvFileUploadControllerSpec
       ) thenReturn Future.successful(testRequestObject)
 
       when(
-        mockErsUtil.getPageElement(any(), any(), any(), any())(any())
+        mockErsUtil.getPageElement(any(), any(), any(), any())(using any())
       ) thenReturn "CSOP_OptionsGranted_V4.csv"
 
       when(
@@ -1141,7 +1150,7 @@ class CsvFileUploadControllerSpec
         mockSessionService.fetch[RequestObject](eqTo(mockErsUtil.ERS_REQUEST_OBJECT))(using any(), any())
       ) thenReturn Future.successful(testRequestObject)
       when(
-        mockErsUtil.getPageElement(any(), any(), any(), any())(any())
+        mockErsUtil.getPageElement(any(), any(), any(), any())(using any())
       ) thenReturn "CSOP_OptionsGranted_V4.csv"
 
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
@@ -1216,19 +1225,19 @@ class CsvFileUploadControllerSpec
       ) thenReturn Future.successful(testRequestObject)
 
       when(
-        mockErsUtil.getPageElement(any(), any(), eqTo("file0.file_name"), any())(any())
+        mockErsUtil.getPageElement(any(), any(), eqTo("file0.file_name"), any())(using any())
       ) thenReturn "CSOP_OptionsGranted_V4.csv"
 
       when(
-        mockErsUtil.getPageElement(any(), any(), eqTo("file0.description"), any())(any())
+        mockErsUtil.getPageElement(any(), any(), eqTo("file0.description"), any())(using any())
       ) thenReturn "Options granted"
 
       when(
-        mockErsUtil.getPageElement(any(), any(), eqTo("file1.file_name"), any())(any())
+        mockErsUtil.getPageElement(any(), any(), eqTo("file1.file_name"), any())(using any())
       ) thenReturn "CSOP_OptionsRCL_V4.csv"
 
       when(
-        mockErsUtil.getPageElement(any(), any(), eqTo("file1.description"), any())(any())
+        mockErsUtil.getPageElement(any(), any(), eqTo("file1.description"), any())(using any())
       ) thenReturn "Options released"
 
       when(mockErsUtil.getFileNameSuffix(any(), any())) thenReturn ".file_name"

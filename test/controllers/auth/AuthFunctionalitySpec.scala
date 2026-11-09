@@ -136,7 +136,7 @@ class AuthFunctionalitySpec
       "it receives a NoActiveSessionException and preserves query parameters" in new Setup(invalidEnrolmentSet) {
         setUnauthorisedMocks()
 
-        given testFakeRequest: FakeRequest[AnyContent]           = FakeRequest("GET", "/my-resources?a=1&b=2&c=3")
+        given testFakeRequest: FakeRequest[AnyContent]                  = FakeRequest("GET", "/my-resources?a=1&b=2&c=3")
         val requestWithAuth: RequestWithOptionalAuthContext[AnyContent] =
           RequestWithOptionalAuthContext(testFakeRequest, defaultErsAuthData)
 
@@ -196,7 +196,7 @@ class AuthFunctionalitySpec
       "it receives a NoActiveSessionException and preserves query parameters" in new Setup(invalidEnrolmentSet) {
         setUnauthorisedMocks()
 
-        given testFakeRequest: FakeRequest[AnyContent]           = FakeRequest("GET", "/my-resources?a=1&b=2&c=3")
+        given testFakeRequest: FakeRequest[AnyContent]                  = FakeRequest("GET", "/my-resources?a=1&b=2&c=3")
         val requestWithAuth: RequestWithOptionalAuthContext[AnyContent] =
           RequestWithOptionalAuthContext(testFakeRequest, defaultErsAuthData)
 

@@ -126,7 +126,8 @@ class TrusteeServiceSpec extends AnyWordSpecLike with ErsTestHelper {
   "deleteTrustee" must {
     val trusteeService: TrusteeService = new TrusteeService(mockErsUtil, mockSessionService)
 
-    when(mockSessionService.fetch[RequestObject](any())(using any(), any())).thenReturn(Future.successful(ersRequestObject))
+    when(mockSessionService.fetch[RequestObject](any())(using any(), any()))
+      .thenReturn(Future.successful(ersRequestObject))
     when(mockSessionService.fetch[TrusteeDetailsList](any())(using any(), any()))
       .thenReturn(Future.successful(exampleTrustees))
 
@@ -164,14 +165,17 @@ class TrusteeServiceSpec extends AnyWordSpecLike with ErsTestHelper {
         val cachedTrustees                 = TrusteeDetailsList(List(trusteeOne))
 
         when(
-          mockSessionService.fetch[TrusteeName](eqTo(mockErsUtil.TRUSTEE_NAME_CACHE))(using any(), any[Format[TrusteeName]])
+          mockSessionService.fetch[TrusteeName](eqTo(mockErsUtil.TRUSTEE_NAME_CACHE))(using
+            any(),
+            any[Format[TrusteeName]]
+          )
         )
           .thenReturn(Future.successful(trusteeName))
         when(mockSessionService.fetchTrusteesOptionally()(using any(), any()))
           .thenReturn(Future.successful(cachedTrustees))
         when(
-          mockSessionService.fetch[TrusteeAddress](eqTo(mockErsUtil.TRUSTEE_ADDRESS_CACHE))(
-            using any(),
+          mockSessionService.fetch[TrusteeAddress](eqTo(mockErsUtil.TRUSTEE_ADDRESS_CACHE))(using
+            any(),
             eqTo(implicitly[Format[TrusteeAddress]])
           )
         )
@@ -188,7 +192,12 @@ class TrusteeServiceSpec extends AnyWordSpecLike with ErsTestHelper {
     "handle exceptions during fetching or caching" in {
       val index = 1
 
-      when(mockSessionService.fetch[TrusteeName](eqTo(mockErsUtil.TRUSTEE_NAME_CACHE))(using any(), any[Format[TrusteeName]]))
+      when(
+        mockSessionService.fetch[TrusteeName](eqTo(mockErsUtil.TRUSTEE_NAME_CACHE))(using
+          any(),
+          any[Format[TrusteeName]]
+        )
+      )
         .thenReturn(Future.failed(new Exception("Fetch failed")))
 
       val result: Unit = trusteeService.updateTrusteeCache(index).futureValue

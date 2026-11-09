@@ -57,8 +57,8 @@ class GroupSchemeController @Inject() (
     with Constants
     with CacheHelper {
 
-  given ec: ExecutionContext = mcc.executionContext
-  private val form: Form[Boolean]   = yesNoFormProvider.withPrefix("delete-company")
+  given ec: ExecutionContext      = mcc.executionContext
+  private val form: Form[Boolean] = yesNoFormProvider.withPrefix("delete-company")
 
   private def getRequestObjAndCompanyDetails()(implicit
     request: RequestWithOptionalAuthContext[AnyContent]
@@ -73,7 +73,7 @@ class GroupSchemeController @Inject() (
     showConfirmDeleteCompanyPage(id)
   }
 
-  def  showConfirmDeleteCompanyPage(
+  def showConfirmDeleteCompanyPage(
     id: Int
   )(using request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
     getRequestObjAndCompanyDetails() transformWith {

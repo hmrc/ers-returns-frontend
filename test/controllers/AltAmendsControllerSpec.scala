@@ -84,18 +84,21 @@ class AltAmendsControllerSpec
         globalErrorView,
         testAuthAction
       ) {
-        when(mockSessionService.fetch[GroupSchemeInfo](ArgumentMatchers.eq("group-scheme-controller"))(using any(), any()))
+        when(
+          mockSessionService.fetch[GroupSchemeInfo](ArgumentMatchers.eq("group-scheme-controller"))(using any(), any())
+        )
           .thenReturn(groupSchemeActivity)
 
         when(mockSessionService.fetch[AltAmendsActivity](ArgumentMatchers.eq("alt-activity"))(using any(), any()))
           .thenReturn(altAmendsActivity)
 
-        when(mockSessionService.fetch[RequestObject](refEq(ERS_REQUEST_OBJECT))(using any(), any())).thenReturn(requestObject)
+        when(mockSessionService.fetch[RequestObject](refEq(ERS_REQUEST_OBJECT))(using any(), any()))
+          .thenReturn(requestObject)
 
         when(mockSessionService.cache(ArgumentMatchers.eq("alt-activity"), any())(using any(), any()))
           .thenReturn(if (successfulCache) Future.successful(sessionPair) else Future.failed(new Exception("error")))
 
-        when(mockErsUtil.getPageElement(any(), any(), any(), any())(any())).thenCallRealMethod()
+        when(mockErsUtil.getPageElement(any(), any(), any(), any())(using any())).thenCallRealMethod()
       }
 
     "give a redirect status (to company authentication frontend) on GET if user is not authenticated" in {
@@ -273,7 +276,7 @@ class AltAmendsControllerSpec
         .thenReturn(altAmends)
       when(mockSessionService.cache(refEq("alt-amends-cache-controller"), any())(using any(), any()))
         .thenReturn(if (successfulCache) Future.successful(sessionPair) else Future.failed(new Exception("error")))
-      when(mockErsUtil.getPageElement(any(), any(), any(), any())(any())).thenReturn("")
+      when(mockErsUtil.getPageElement(any(), any(), any(), any())(using any())).thenReturn("")
     }
 
     "give a redirect status (to company authentication frontend) on GET if user is not authenticated" in {

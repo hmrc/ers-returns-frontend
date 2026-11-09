@@ -61,7 +61,7 @@ class CheckFileTypeControllerSpec
 
   given testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
 
-  given mat: Materializer    = app.materializer
+  given mat: Materializer                = app.materializer
   val globalErrorView: global_error      = app.injector.instanceOf[global_error]
   val checkFileTypeView: check_file_type = app.injector.instanceOf[check_file_type]
 
@@ -79,7 +79,8 @@ class CheckFileTypeControllerSpec
       testAuthActionGov
     ) {
       when(mockSessionService.fetch[CheckFileType](refEq("check-file-type"))(using any(), any())).thenReturn(fileType)
-      when(mockSessionService.fetch[RequestObject](refEq(ERS_REQUEST_OBJECT))(using any(), any())).thenReturn(requestObject)
+      when(mockSessionService.fetch[RequestObject](refEq(ERS_REQUEST_OBJECT))(using any(), any()))
+        .thenReturn(requestObject)
       when(mockSessionService.fetch[ErsMetaData](refEq(ERS_META_DATA))(using any(), any())).thenReturn(requestMeta)
     }
 
@@ -142,7 +143,8 @@ class CheckFileTypeControllerSpec
       new CheckFileTypeController(mockMCC, mockSessionService, globalErrorView, checkFileTypeView, testAuthActionGov) {
         when(mockSessionService.cache(matches("check-file-type"), any())(using any(), any()))
           .thenReturn(if (successfulCache) Future.successful(sessionPair) else Future.failed(new Exception("error")))
-        when(mockSessionService.fetch[RequestObject](refEq(ERS_REQUEST_OBJECT))(using any(), any())).thenReturn(requestObject)
+        when(mockSessionService.fetch[RequestObject](refEq(ERS_REQUEST_OBJECT))(using any(), any()))
+          .thenReturn(requestObject)
       }
 
     "give a redirect status (to company authentication frontend) on GET if user is not authenticated" in {

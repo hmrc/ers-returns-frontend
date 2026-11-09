@@ -16,6 +16,7 @@
 
 package controllers.subsidiaries
 
+import controllers.auth.RequestWithOptionalAuthContext
 import models.{CompanyAddress, CompanyDetailsList, RequestObject, RsFormMappings}
 import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers.any
@@ -59,7 +60,7 @@ class SubsidiaryAddressOverseasControllerSpec
     ExecutionContext.global
   )
 
-  implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
+  given testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
 
   val testController = new SubsidiaryAddressOverseasController(
     mockMCC,
@@ -76,12 +77,14 @@ class SubsidiaryAddressOverseasControllerSpec
   )
 
   "calling showQuestionPage" should {
-    given authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+    given authRequest: RequestWithOptionalAuthContext[AnyContent] =
+      buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
     setAuthMocks()
-    when(mockSessionService.fetch[RequestObject](any())(any(), any())).thenReturn(Future.successful(ersRequestObject))
+    when(mockSessionService.fetch[RequestObject](any())(using any(), any()))
+      .thenReturn(Future.successful(ersRequestObject))
 
     "show the empty company address overseas question page when there is nothing to prefill" in {
-      when(mockSessionService.fetchPartFromCompanyDetailsList[CompanyDetailsList](any())(any(), any()))
+      when(mockSessionService.fetchPartFromCompanyDetailsList[CompanyDetailsList](any())(using any(), any()))
         .thenReturn(Future.successful(None))
       val result = testController.questionPage(1).apply(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
 
@@ -91,7 +94,7 @@ class SubsidiaryAddressOverseasControllerSpec
     }
 
     "show the prefilled company address overseas question page when there is data to prefill" in {
-      when(mockSessionService.fetchPartFromCompanyDetailsList[CompanyAddress](any())(any(), any()))
+      when(mockSessionService.fetchPartFromCompanyDetailsList[CompanyAddress](any())(using any(), any()))
         .thenReturn(Future.successful(Some(companyAddressOverseas)))
 
       val result = testController.questionPage(1).apply(authRequest)
@@ -102,7 +105,7 @@ class SubsidiaryAddressOverseasControllerSpec
       contentAsString(result) should include("Overseas 1")
     }
     "show the global error page if an exception occurs while retrieving cached data" in {
-      when(mockSessionService.fetchPartFromCompanyDetailsList[CompanyAddress](any())(any(), any()))
+      when(mockSessionService.fetchPartFromCompanyDetailsList[CompanyAddress](any())(using any(), any()))
         .thenReturn(Future.failed(new RuntimeException("Failure scenario")))
 
       val result = testController.questionPage(1).apply(authRequest)
@@ -116,12 +119,12 @@ class SubsidiaryAddressOverseasControllerSpec
 
   "calling questionSubmit" should {
     "show company address overseas form page with errors if the form is incorrectly filled" in {
-      val companyAddressOverseasData = Map("addressLine1" -> "")
-      val form                       = RsFormMappings.companyAddressOverseasForm().bind(companyAddressOverseasData)
-      given authRequest       = buildRequestWithAuth(
+      val companyAddressOverseasData                                = Map("addressLine1" -> "")
+      val form                                                      = RsFormMappings.companyAddressOverseasForm().bind(companyAddressOverseasData)
+      given authRequest: RequestWithOptionalAuthContext[AnyContent] = buildRequestWithAuth(
         Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       )
-      val result                     = testController.questionSubmit(1).apply(authRequest)
+      val result                                                    = testController.questionSubmit(1).apply(authRequest)
 
       status(result)        shouldBe Status.BAD_REQUEST
       contentAsString(result) should include(testMessages("ers_manual_address_overseas.title"))
@@ -129,15 +132,16 @@ class SubsidiaryAddressOverseasControllerSpec
     }
 
     "successfully bind the form and redirect to the scheme Organiser Summary Page" in {
-      when(mockSessionService.cache[CompanyAddress](any(), any())(any(), any())).thenReturn(Future.successful(("", "")))
-      when(mockCompanyDetailsService.updateSubsidiaryCompanyCache(any())(any())).thenReturn(Future(()))
+      when(mockSessionService.cache[CompanyAddress](any(), any())(using any(), any()))
+        .thenReturn(Future.successful(("", "")))
+      when(mockCompanyDetailsService.updateSubsidiaryCompanyCache(any())(using any())).thenReturn(Future(()))
 
-      val companyAddressOverseasData = Map("addressLine1" -> "123 Fake Street")
-      val form                       = RsFormMappings.companyAddressOverseasForm().bind(companyAddressOverseasData)
-      given authRequest       = buildRequestWithAuth(
+      val companyAddressOverseasData                                = Map("addressLine1" -> "123 Fake Street")
+      val form                                                      = RsFormMappings.companyAddressOverseasForm().bind(companyAddressOverseasData)
+      given authRequest: RequestWithOptionalAuthContext[AnyContent] = buildRequestWithAuth(
         Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       )
-      val result                     = testController.questionSubmit(1).apply(authRequest)
+      val result                                                    = testController.questionSubmit(1).apply(authRequest)
 
       status(result)               shouldBe Status.SEE_OTHER
       redirectLocation(result).get shouldBe controllers.subsidiaries.routes.GroupSchemeController
@@ -147,12 +151,14 @@ class SubsidiaryAddressOverseasControllerSpec
   }
 
   "calling editCompany" should {
-    given authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+    given authRequest: RequestWithOptionalAuthContext[AnyContent] =
+      buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
     setAuthMocks()
-    when(mockSessionService.fetch[RequestObject](any())(any(), any())).thenReturn(Future.successful(ersRequestObject))
+    when(mockSessionService.fetch[RequestObject](any())(using any(), any()))
+      .thenReturn(Future.successful(ersRequestObject))
 
     "be the same as showQuestion for a specific index" in {
-      when(mockSessionService.fetchPartFromCompanyDetailsList[CompanyAddress](any())(any(), any()))
+      when(mockSessionService.fetchPartFromCompanyDetailsList[CompanyAddress](any())(using any(), any()))
         .thenReturn(Future.successful(Some(companyAddressOverseas)))
 
       val result = testController.editCompany(1).apply(authRequest)
@@ -173,9 +179,9 @@ class SubsidiaryAddressOverseasControllerSpec
 
     "redirect to groupPlanSummaryPage given edit parameter is true " in {
       reset(mockCompanyDetailsService)
-      verify(mockCompanyDetailsService, never()).updateSubsidiaryCompanyCache(any())(any())
+      verify(mockCompanyDetailsService, never()).updateSubsidiaryCompanyCache(any())(using any())
 
-      val result = testController.nextPageRedirect(0, edit = true)(hc, request)
+      val result = testController.nextPageRedirect(0, edit = true)(using hc, request)
 
       status(result)                          shouldBe Status.SEE_OTHER
       headers(result)(implicitly)("Location") shouldBe expectedRedirectUrl
@@ -186,11 +192,11 @@ class SubsidiaryAddressOverseasControllerSpec
 
       val index = 0
 
-      when(mockCompanyDetailsService.updateSubsidiaryCompanyCache(ArgumentMatchers.eq(index))(any())).thenReturn {
+      when(mockCompanyDetailsService.updateSubsidiaryCompanyCache(ArgumentMatchers.eq(index))(using any())).thenReturn {
         Future.failed(new Exception("error"))
       }
 
-      val result = testController.nextPageRedirect(index, edit = false)(hc, request)
+      val result = testController.nextPageRedirect(index, edit = false)(using hc, request)
 
       status(result)                          shouldBe Status.SEE_OTHER
       headers(result)(implicitly)("Location") shouldBe expectedRedirectUrl

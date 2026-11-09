@@ -57,8 +57,6 @@ class ERSConnectorSpec
     with BeforeAndAfter
     with GuiceOneAppPerSuite {
 
-  implicit override val ec: ExecutionContext = app.injector.instanceOf[ExecutionContext]
-
   lazy val newConfig: Map[String, Any] = config + ("microservice.services.ers-file-validator.port" -> server.port())
 
   val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(

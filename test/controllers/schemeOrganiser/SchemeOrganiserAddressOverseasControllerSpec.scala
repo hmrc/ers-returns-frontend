@@ -16,6 +16,7 @@
 
 package controllers.schemeOrganiser
 
+import controllers.auth.RequestWithOptionalAuthContext
 import models.{CompanyAddress, CompanyDetailsList, RequestObject, RsFormMappings}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{never, reset, verify, when}
@@ -74,9 +75,11 @@ class SchemeOrganiserAddressOverseasControllerSpec
   )
 
   "calling showQuestionPage" should {
-    implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+    given authRequest: RequestWithOptionalAuthContext[AnyContent] =
+      buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
     setAuthMocks()
-    when(mockSessionService.fetch[RequestObject](any())(using any(), any())).thenReturn(Future.successful(ersRequestObject))
+    when(mockSessionService.fetch[RequestObject](any())(using any(), any()))
+      .thenReturn(Future.successful(ersRequestObject))
 
     "show the empty Scheme Organiser address overseas question page when there is nothing to prefill" in {
       when(mockSessionService.fetchPartFromCompanyDetails[CompanyDetailsList]()(using any(), any()))
@@ -114,12 +117,13 @@ class SchemeOrganiserAddressOverseasControllerSpec
 
   "calling questionSubmit" should {
     "show Scheme Organiser address overseas form page with errors if the form is incorrectly filled" in {
-      val companyAddressOverseasData = Map("addressLine1" -> "")
-      val form                       = RsFormMappings.companyAddressOverseasForm().bind(companyAddressOverseasData)
-      implicit val authRequest       = buildRequestWithAuth(
-        Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*), authData = Fixtures.buildFakeUser
+      val companyAddressOverseasData                                = Map("addressLine1" -> "")
+      val form                                                      = RsFormMappings.companyAddressOverseasForm().bind(companyAddressOverseasData)
+      given authRequest: RequestWithOptionalAuthContext[AnyContent] = buildRequestWithAuth(
+        Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*),
+        authData = Fixtures.buildFakeUser
       )
-      val result                     = testController.questionSubmit(1).apply(authRequest)
+      val result                                                    = testController.questionSubmit(1).apply(authRequest)
 
       status(result)        shouldBe Status.BAD_REQUEST
       contentAsString(result) should include(testMessages("ers_manual_address_overseas.title"))
@@ -127,15 +131,17 @@ class SchemeOrganiserAddressOverseasControllerSpec
     }
 
     "successfully bind the form and redirect to the scheme Organiser Summary Page" in {
-      when(mockSessionService.cache[CompanyAddress](any(), any())(using any(), any())).thenReturn(Future.successful(("", "")))
+      when(mockSessionService.cache[CompanyAddress](any(), any())(using any(), any()))
+        .thenReturn(Future.successful(("", "")))
       when(mockCompanyDetailsService.updateSchemeOrganiserCache(using any())).thenReturn(Future(()))
 
-      val companyAddressOverseasData = Map("addressLine1" -> "123 Fake Street")
-      val form                       = RsFormMappings.companyAddressOverseasForm().bind(companyAddressOverseasData)
-      implicit val authRequest       = buildRequestWithAuth(
-        Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*), authData = Fixtures.buildFakeUser
+      val companyAddressOverseasData                                = Map("addressLine1" -> "123 Fake Street")
+      val form                                                      = RsFormMappings.companyAddressOverseasForm().bind(companyAddressOverseasData)
+      given authRequest: RequestWithOptionalAuthContext[AnyContent] = buildRequestWithAuth(
+        Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*),
+        authData = Fixtures.buildFakeUser
       )
-      val result                     = testController.questionSubmit(1).apply(authRequest)
+      val result                                                    = testController.questionSubmit(1).apply(authRequest)
 
       status(result)               shouldBe Status.SEE_OTHER
       redirectLocation(result).get shouldBe controllers.schemeOrganiser.routes.SchemeOrganiserController
@@ -145,9 +151,11 @@ class SchemeOrganiserAddressOverseasControllerSpec
   }
 
   "calling editCompany" should {
-    implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+    given authRequest: RequestWithOptionalAuthContext[AnyContent] =
+      buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
     setAuthMocks()
-    when(mockSessionService.fetch[RequestObject](any())(using any(), any())).thenReturn(Future.successful(ersRequestObject))
+    when(mockSessionService.fetch[RequestObject](any())(using any(), any()))
+      .thenReturn(Future.successful(ersRequestObject))
 
     "be the same as showQuestion for a specific index" in {
       when(mockSessionService.fetchPartFromCompanyDetails[CompanyAddress]()(using any(), any()))

@@ -58,7 +58,7 @@ class SchemeOrganiserControllerSpec
     ExecutionContext.global
   )
 
-  given testMessages: MessagesImpl             = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
+  given testMessages: MessagesImpl                         = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
   val globalErrorView: global_error                        = app.injector.instanceOf[global_error]
   val schemeOrganiserSummaryView: scheme_organiser_summary = app.injector.instanceOf[scheme_organiser_summary]
 

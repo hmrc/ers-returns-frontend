@@ -60,7 +60,7 @@ class ErsReceiptPdfBuilderServiceSpec
   )
 
   implicit lazy val mat: Materializer = app.materializer
-  given ersUtil: ERSUtil       = mockErsUtil
+  given ersUtil: ERSUtil              = mockErsUtil
   val testErsReceiptPdfBuilderService = new ErsReceiptPdfBuilderService(mockCountryCodes)
 
   val testCases: TableFor3[String, String, String] = Table(
@@ -130,7 +130,7 @@ class ErsReceiptPdfBuilderServiceSpec
     given fakeDecorator: DecoratorController = new DecoratorController(Array()) {
       override def decorate(implicit messages: Messages): String = "<p>Summary</p>"
     }
-    val output                                      = testErsReceiptPdfBuilderService.addSummary()
+    val output                               = testErsReceiptPdfBuilderService.addSummary()
 
     output.contains("Summary") shouldBe true
 

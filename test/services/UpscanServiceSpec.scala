@@ -56,14 +56,14 @@ class UpscanServiceSpec
   "getUpscanFormDataOds" must {
     "get form data from Upscan Connector with an initiate request" in {
       given request: RequestHeader = FakeRequest("GET", "http://localhost:9290/")
-      val hc                              = HeaderCarrier(sessionId = Some(SessionId("sessionid")))
-      val callback                        =
+      val hc                       = HeaderCarrier(sessionId = Some(SessionId("sessionid")))
+      val callback                 =
         controllers.internal.routes.FileUploadCallbackController
           .callback(schemeRef, hc.sessionId.get.value)
           .absoluteURL()
-      val success                         = controllers.routes.FileUploadController.success().absoluteURL()
-      val failure                         = controllers.routes.FileUploadController.failure().absoluteURL()
-      val expectedInitiateRequest         = UpscanInitiateRequest(callback, success, failure, 1, 209715200)
+      val success                  = controllers.routes.FileUploadController.success().absoluteURL()
+      val failure                  = controllers.routes.FileUploadController.failure().absoluteURL()
+      val expectedInitiateRequest  = UpscanInitiateRequest(callback, success, failure, 1, 209715200)
 
       val upscanInitiateResponse =
         UpscanInitiateResponse(Reference("reference"), "postTarget", formFields = Map.empty[String, String])
@@ -81,14 +81,14 @@ class UpscanServiceSpec
   "getUpscanFormDataCsv" must {
     "get form data from Upscan Connector with an initiate and uploadId" in {
       given request: RequestHeader = FakeRequest("GET", "http://localhost:9290/")
-      val uploadId                        = UploadId("TestUploadId")
-      val scRef                           = "ScRef"
-      val hc                              = HeaderCarrier(sessionId = Some(SessionId("sessionid")))
-      val callback                        =
+      val uploadId                 = UploadId("TestUploadId")
+      val scRef                    = "ScRef"
+      val hc                       = HeaderCarrier(sessionId = Some(SessionId("sessionid")))
+      val callback                 =
         controllers.internal.routes.CsvFileUploadCallbackController.callback(uploadId, scRef, "sessionid").absoluteURL()
-      val success                         = controllers.routes.CsvFileUploadController.success(uploadId).absoluteURL()
-      val failure                         = controllers.routes.CsvFileUploadController.failure().absoluteURL()
-      val expectedInitiateRequest         = UpscanInitiateRequest(callback, success, failure, 1, 209715200)
+      val success                  = controllers.routes.CsvFileUploadController.success(uploadId).absoluteURL()
+      val failure                  = controllers.routes.CsvFileUploadController.failure().absoluteURL()
+      val expectedInitiateRequest  = UpscanInitiateRequest(callback, success, failure, 1, 209715200)
 
       val upscanInitiateResponse =
         UpscanInitiateResponse(Reference("reference"), "postTarget", formFields = Map.empty[String, String])

@@ -57,7 +57,7 @@ class TrusteeAddressOverseasSpec
     ExecutionContext.global
   )
 
-  implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
+  given testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
 
   val testController = new TrusteeAddressOverseasController(
     mockMCC,
@@ -73,12 +73,13 @@ class TrusteeAddressOverseasSpec
     given authRequest: RequestWithOptionalAuthContext[AnyContent] =
       buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
     setAuthMocks()
-    when(mockSessionService.fetch[RequestObject](any())(any(), any())).thenReturn(Future.successful(ersRequestObject))
+    when(mockSessionService.fetch[RequestObject](any())(using any(), any()))
+      .thenReturn(Future.successful(ersRequestObject))
 
     "show the empty trustee address overseas question page when there is nothing to prefill" in {
-      when(mockSessionService.fetchPartFromTrusteeDetailsList[TrusteeAddress](any())(any(), any()))
+      when(mockSessionService.fetchPartFromTrusteeDetailsList[TrusteeAddress](any())(using any(), any()))
         .thenReturn(Future.successful(None))
-      when(mockSessionService.fetchPartFromTrusteeDetailsList[TrusteeAddress](any())(any(), any()))
+      when(mockSessionService.fetchPartFromTrusteeDetailsList[TrusteeAddress](any())(using any(), any()))
         .thenReturn(Future.successful(None))
       val result = testController.questionPage(1).apply(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
 
@@ -88,7 +89,7 @@ class TrusteeAddressOverseasSpec
     }
 
     "show the prefilled trustee address overseas question page when there is data to prefill" in {
-      when(mockSessionService.fetchPartFromTrusteeDetailsList[TrusteeAddress](any())(any(), any()))
+      when(mockSessionService.fetchPartFromTrusteeDetailsList[TrusteeAddress](any())(using any(), any()))
         .thenReturn(Future.successful(Some(trusteeAddressOverseas)))
 
       val result = testController.questionPage(1).apply(authRequest)
@@ -100,7 +101,7 @@ class TrusteeAddressOverseasSpec
     }
 
     "show the global error page if an exception occurs while retrieving cached data" in {
-      when(mockSessionService.fetchPartFromTrusteeDetailsList[TrusteeAddress](any())(any(), any()))
+      when(mockSessionService.fetchPartFromTrusteeDetailsList[TrusteeAddress](any())(using any(), any()))
         .thenReturn(Future.failed(new RuntimeException("Failure scenario")))
 
       val result = testController.questionPage(1).apply(authRequest)
@@ -114,7 +115,8 @@ class TrusteeAddressOverseasSpec
 
   "nextPageRedirect" should {
     setAuthMocks()
-    when(mockSessionService.fetch[RequestObject](any())(any(), any())).thenReturn(Future.successful(ersRequestObject))
+    when(mockSessionService.fetch[RequestObject](any())(using any(), any()))
+      .thenReturn(Future.successful(ersRequestObject))
 
     "redirect to TrusteeSummaryController.trusteeSummaryPage if edit true" in {
 
@@ -124,7 +126,7 @@ class TrusteeAddressOverseasSpec
     }
 
     "update trustee cache and redirect to TrusteeSummaryController.trusteeSummaryPage if edit false" in {
-      when(mockTrusteeService.updateTrusteeCache(any())(any())).thenReturn(Future.successful(()))
+      when(mockTrusteeService.updateTrusteeCache(any())(using any())).thenReturn(Future.successful(()))
 
       val result = testController.nextPageRedirect(0, edit = false)
 
@@ -134,12 +136,12 @@ class TrusteeAddressOverseasSpec
 
   "calling questionSubmit" should {
     "show the trustee address overseas form page with errors if the form is incorrectly filled" in {
-      val trusteeAddressOverseasData                                       = Map("addressLine1" -> "")
-      val form                                                             = RsFormMappings.trusteeAddressOverseasForm().bind(trusteeAddressOverseasData)
+      val trusteeAddressOverseasData                                = Map("addressLine1" -> "")
+      val form                                                      = RsFormMappings.trusteeAddressOverseasForm().bind(trusteeAddressOverseasData)
       given authRequest: RequestWithOptionalAuthContext[AnyContent] = buildRequestWithAuth(
         Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       )
-      val result                                                           = testController.questionSubmit(1).apply(authRequest)
+      val result                                                    = testController.questionSubmit(1).apply(authRequest)
 
       status(result)        shouldBe Status.BAD_REQUEST
       contentAsString(result) should include(testMessages("ers_trustee_address.title"))
@@ -147,16 +149,17 @@ class TrusteeAddressOverseasSpec
     }
 
     "successfully bind the form and redirect to the trustee summary page" in {
-      when(mockSessionService.cache[TrusteeAddress](any(), any())(any(), any()))
+      when(mockSessionService.cache[TrusteeAddress](any(), any())(using any(), any()))
         .thenReturn(Future.successful(("sessionId", "someId")))
-      when(mockTrusteeService.updateTrusteeCache(any())(any())).thenReturn(Future.successful(()), Future.successful(()))
+      when(mockTrusteeService.updateTrusteeCache(any())(using any()))
+        .thenReturn(Future.successful(()), Future.successful(()))
 
-      val trusteeAddressOverseasData                                       = Map("addressLine1" -> "123 Fake Street")
-      val form                                                             = RsFormMappings.trusteeAddressOverseasForm().bind(trusteeAddressOverseasData)
+      val trusteeAddressOverseasData                                = Map("addressLine1" -> "123 Fake Street")
+      val form                                                      = RsFormMappings.trusteeAddressOverseasForm().bind(trusteeAddressOverseasData)
       given authRequest: RequestWithOptionalAuthContext[AnyContent] = buildRequestWithAuth(
         Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       )
-      val result                                                           = testController.questionSubmit(1).apply(authRequest)
+      val result                                                    = testController.questionSubmit(1).apply(authRequest)
 
       status(result)               shouldBe Status.SEE_OTHER
       redirectLocation(result).get shouldBe routes.TrusteeSummaryController.trusteeSummaryPage().url
@@ -167,10 +170,11 @@ class TrusteeAddressOverseasSpec
     given authRequest: RequestWithOptionalAuthContext[AnyContent] =
       buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
     setAuthMocks()
-    when(mockSessionService.fetch[RequestObject](any())(any(), any())).thenReturn(Future.successful(ersRequestObject))
+    when(mockSessionService.fetch[RequestObject](any())(using any(), any()))
+      .thenReturn(Future.successful(ersRequestObject))
 
     "be the same as showQuestion for a specific index" in {
-      when(mockSessionService.fetchPartFromTrusteeDetailsList[TrusteeAddress](any())(any(), any()))
+      when(mockSessionService.fetchPartFromTrusteeDetailsList[TrusteeAddress](any())(using any(), any()))
         .thenReturn(Future.successful(Some(trusteeAddressOverseas)))
 
       val result = testController.editQuestion(1).apply(authRequest)

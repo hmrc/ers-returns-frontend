@@ -16,6 +16,7 @@
 
 package controllers.subsidiaries
 
+import controllers.auth.RequestWithOptionalAuthContext
 import models.{CompanyBasedInUk, RequestObject, RsFormMappings}
 import org.mockito.ArgumentMatchers.{any, refEq}
 import org.mockito.Mockito.when
@@ -56,7 +57,7 @@ class SubsidiaryBasedInUkControllerSpec
     ExecutionContext.global
   )
 
-  implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
+  given testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
 
   val testController = new SubsidiaryBasedInUkController(
     mockMCC,
@@ -72,12 +73,14 @@ class SubsidiaryBasedInUkControllerSpec
   )
 
   "calling showQuestionPage" should {
-    given authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+    given authRequest: RequestWithOptionalAuthContext[AnyContent] =
+      buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
     setAuthMocks()
-    when(mockSessionService.fetch[RequestObject](any())(any(), any())).thenReturn(Future.successful(ersRequestObject))
+    when(mockSessionService.fetch[RequestObject](any())(using any(), any()))
+      .thenReturn(Future.successful(ersRequestObject))
 
     "show the empty subsidiary based in UK question page when there is nothing to prefill" in {
-      when(mockSessionService.fetchPartFromCompanyDetailsList[CompanyBasedInUk](any())(any(), any()))
+      when(mockSessionService.fetchPartFromCompanyDetailsList[CompanyBasedInUk](any())(using any(), any()))
         .thenReturn(Future.successful(None))
 
       val result = testController.questionPage(1).apply(authRequest)
@@ -89,7 +92,7 @@ class SubsidiaryBasedInUkControllerSpec
     }
 
     "show the prefilled subsidiary based in UK question page when there is data to prefill" in {
-      when(mockSessionService.fetchPartFromCompanyDetailsList[CompanyBasedInUk](any())(any(), any()))
+      when(mockSessionService.fetchPartFromCompanyDetailsList[CompanyBasedInUk](any())(using any(), any()))
         .thenReturn(Future.successful(Some(CompanyBasedInUk(true))))
 
       val result = testController.questionPage(1).apply(authRequest)
@@ -102,7 +105,7 @@ class SubsidiaryBasedInUkControllerSpec
     }
 
     "show the global error page if an exception occurs while retrieving cached data" in {
-      when(mockSessionService.fetchPartFromCompanyDetailsList[CompanyBasedInUk](any())(any(), any()))
+      when(mockSessionService.fetchPartFromCompanyDetailsList[CompanyBasedInUk](any())(using any(), any()))
         .thenReturn(Future.failed(new RuntimeException("Failure scenario")))
 
       val result = testController.questionPage(1).apply(authRequest)
@@ -116,12 +119,12 @@ class SubsidiaryBasedInUkControllerSpec
 
   "calling handleQuestionSubmit" should {
     "show the subsidiary based in UK form page with errors if the form is incorrectly filled" in {
-      val companyBasedData     = Map("bool" -> "")
-      val form                 = RsFormMappings.companyBasedInUkForm().bind(companyBasedData)
-      given authRequest = buildRequestWithAuth(
+      val companyBasedData                                          = Map("bool" -> "")
+      val form                                                      = RsFormMappings.companyBasedInUkForm().bind(companyBasedData)
+      given authRequest: RequestWithOptionalAuthContext[AnyContent] = buildRequestWithAuth(
         Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       )
-      val result               = testController.questionSubmit(1).apply(authRequest)
+      val result                                                    = testController.questionSubmit(1).apply(authRequest)
 
       status(result)        shouldBe Status.BAD_REQUEST
       contentAsString(result) should include(testMessages("ers_manual_is_the_company_in_uk.title"))
@@ -130,18 +133,18 @@ class SubsidiaryBasedInUkControllerSpec
   }
 
   "successfully bind the form and go to the subsidiary address UK page if true" in {
-    when(mockSessionService.cache[CompanyBasedInUk](any(), any())(any(), any()))
+    when(mockSessionService.cache[CompanyBasedInUk](any(), any())(using any(), any()))
       .thenReturn(Future.successful(sessionPair))
-    when(mockSessionService.fetch[CompanyBasedInUk](refEq(mockErsUtil.SUBSIDIARY_COMPANY_BASED))(any(), any()))
+    when(mockSessionService.fetch[CompanyBasedInUk](refEq(mockErsUtil.SUBSIDIARY_COMPANY_BASED))(using any(), any()))
       .thenReturn(Future.successful(CompanyBasedInUk(true)))
-    when(mockCompanyDetailsService.updateSubsidiaryCompanyCache(any())(any())).thenReturn(Future(()))
+    when(mockCompanyDetailsService.updateSubsidiaryCompanyCache(any())(using any())).thenReturn(Future(()))
 
-    val companyBasedData     = Map("basedInUk" -> "0")
-    val form                 = RsFormMappings.companyBasedInUkForm().bind(companyBasedData)
-    given authRequest = buildRequestWithAuth(
+    val companyBasedData                                          = Map("basedInUk" -> "0")
+    val form                                                      = RsFormMappings.companyBasedInUkForm().bind(companyBasedData)
+    given authRequest: RequestWithOptionalAuthContext[AnyContent] = buildRequestWithAuth(
       Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
     )
-    val result               = testController.questionSubmit(1).apply(authRequest)
+    val result                                                    = testController.questionSubmit(1).apply(authRequest)
 
     status(result)               shouldBe Status.SEE_OTHER
     redirectLocation(result).get shouldBe controllers.subsidiaries.routes.SubsidiaryDetailsUkController
@@ -150,18 +153,18 @@ class SubsidiaryBasedInUkControllerSpec
   }
 
   "successfully bind the form and go to the scheme organiser address overseas page if false" in {
-    when(mockSessionService.cache[CompanyBasedInUk](any(), any())(any(), any()))
+    when(mockSessionService.cache[CompanyBasedInUk](any(), any())(using any(), any()))
       .thenReturn(Future.successful(sessionPair))
-    when(mockSessionService.fetch[CompanyBasedInUk](refEq(mockErsUtil.SUBSIDIARY_COMPANY_BASED))(any(), any()))
+    when(mockSessionService.fetch[CompanyBasedInUk](refEq(mockErsUtil.SUBSIDIARY_COMPANY_BASED))(using any(), any()))
       .thenReturn(Future.successful(CompanyBasedInUk(false)))
-    when(mockCompanyDetailsService.updateSubsidiaryCompanyCache(any())(any())).thenReturn(Future(()))
+    when(mockCompanyDetailsService.updateSubsidiaryCompanyCache(any())(using any())).thenReturn(Future(()))
 
-    val trusteeBasedData     = Map("basedInUk" -> "1")
-    val form                 = RsFormMappings.companyBasedInUkForm().bind(trusteeBasedData)
-    given authRequest = buildRequestWithAuth(
+    val trusteeBasedData                                          = Map("basedInUk" -> "1")
+    val form                                                      = RsFormMappings.companyBasedInUkForm().bind(trusteeBasedData)
+    given authRequest: RequestWithOptionalAuthContext[AnyContent] = buildRequestWithAuth(
       Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
     )
-    val result               = testController.questionSubmit(1).apply(authRequest)
+    val result                                                    = testController.questionSubmit(1).apply(authRequest)
 
     status(result)               shouldBe Status.SEE_OTHER
     redirectLocation(result).get shouldBe controllers.subsidiaries.routes.SubsidiaryDetailsOverseasController
@@ -170,12 +173,14 @@ class SubsidiaryBasedInUkControllerSpec
   }
 
   "calling editQuestion" should {
-    given authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+    given authRequest: RequestWithOptionalAuthContext[AnyContent] =
+      buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
     setAuthMocks()
-    when(mockSessionService.fetch[RequestObject](any())(any(), any())).thenReturn(Future.successful(ersRequestObject))
+    when(mockSessionService.fetch[RequestObject](any())(using any(), any()))
+      .thenReturn(Future.successful(ersRequestObject))
 
     "be the same as showQuestion for a specific index" in {
-      when(mockSessionService.fetchPartFromCompanyDetailsList[CompanyBasedInUk](any())(any(), any()))
+      when(mockSessionService.fetchPartFromCompanyDetailsList[CompanyBasedInUk](any())(using any(), any()))
         .thenReturn(Future.successful(Some(CompanyBasedInUk(false))))
 
       val result = testController.editCompany(1).apply(authRequest)
@@ -187,24 +192,25 @@ class SubsidiaryBasedInUkControllerSpec
 
   "calling editQuestionSubmit" should {
     setAuthMocks()
-    when(mockSessionService.fetch[RequestObject](any())(any(), any())).thenReturn(Future.successful(ersRequestObject))
+    when(mockSessionService.fetch[RequestObject](any())(using any(), any()))
+      .thenReturn(Future.successful(ersRequestObject))
 
     "successfully bind the form and go to the edit version of the scheme organiser address UK page with the index preserved if the answer is true" in {
 
-      when(mockSessionService.cache[CompanyBasedInUk](any(), any())(any(), any()))
+      when(mockSessionService.cache[CompanyBasedInUk](any(), any())(using any(), any()))
         .thenReturn(Future.successful(sessionPair))
-      when(mockSessionService.fetch[CompanyBasedInUk](refEq(mockErsUtil.SUBSIDIARY_COMPANY_BASED))(any(), any()))
+      when(mockSessionService.fetch[CompanyBasedInUk](refEq(mockErsUtil.SUBSIDIARY_COMPANY_BASED))(using any(), any()))
         .thenReturn(Future.successful(CompanyBasedInUk(true)))
-      when(mockSessionService.fetchCompaniesOptionally()(any(), any()))
+      when(mockSessionService.fetchCompaniesOptionally()(using any(), any()))
         .thenReturn(Future.successful(Fixtures.exampleCompanies))
-      when(mockCompanyDetailsService.updateSubsidiaryCompanyCache(any())(any())).thenReturn(Future(()))
+      when(mockCompanyDetailsService.updateSubsidiaryCompanyCache(any())(using any())).thenReturn(Future(()))
 
-      val companyBasedData     = Map("basedInUk" -> "0")
-      val form                 = RsFormMappings.companyBasedInUkForm().bind(companyBasedData)
-      given authRequest = buildRequestWithAuth(
+      val companyBasedData                                          = Map("basedInUk" -> "0")
+      val form                                                      = RsFormMappings.companyBasedInUkForm().bind(companyBasedData)
+      given authRequest: RequestWithOptionalAuthContext[AnyContent] = buildRequestWithAuth(
         Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       )
-      val result               = testController.editQuestionSubmit(0).apply(authRequest)
+      val result                                                    = testController.editQuestionSubmit(0).apply(authRequest)
 
       status(result)               shouldBe Status.SEE_OTHER
       redirectLocation(result).get shouldBe controllers.subsidiaries.routes.SubsidiaryDetailsUkController
@@ -214,20 +220,20 @@ class SubsidiaryBasedInUkControllerSpec
 
     "successfully bind the form and go to the edit version of the scheme organiser address overseas page with the index preserved if the answer is false" in {
 
-      when(mockSessionService.cache[CompanyBasedInUk](any(), any())(any(), any()))
+      when(mockSessionService.cache[CompanyBasedInUk](any(), any())(using any(), any()))
         .thenReturn(Future.successful(sessionPair))
-      when(mockSessionService.fetch[CompanyBasedInUk](refEq(mockErsUtil.SUBSIDIARY_COMPANY_BASED))(any(), any()))
+      when(mockSessionService.fetch[CompanyBasedInUk](refEq(mockErsUtil.SUBSIDIARY_COMPANY_BASED))(using any(), any()))
         .thenReturn(Future.successful(CompanyBasedInUk(false)))
-      when(mockSessionService.fetchCompaniesOptionally()(any(), any()))
+      when(mockSessionService.fetchCompaniesOptionally()(using any(), any()))
         .thenReturn(Future.successful(Fixtures.exampleCompanies))
-      when(mockCompanyDetailsService.updateSubsidiaryCompanyCache(any())(any())).thenReturn(Future(()))
+      when(mockCompanyDetailsService.updateSubsidiaryCompanyCache(any())(using any())).thenReturn(Future(()))
 
-      val companyBasedData     = Map("basedInUk" -> "0")
-      val form                 = RsFormMappings.companyBasedInUkForm().bind(companyBasedData)
-      given authRequest = buildRequestWithAuth(
+      val companyBasedData                                          = Map("basedInUk" -> "0")
+      val form                                                      = RsFormMappings.companyBasedInUkForm().bind(companyBasedData)
+      given authRequest: RequestWithOptionalAuthContext[AnyContent] = buildRequestWithAuth(
         Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       )
-      val result               = testController.editQuestionSubmit(1).apply(authRequest)
+      val result                                                    = testController.editQuestionSubmit(1).apply(authRequest)
 
       status(result)               shouldBe Status.SEE_OTHER
       redirectLocation(result).get shouldBe controllers.subsidiaries.routes.SubsidiaryDetailsOverseasController

@@ -84,7 +84,8 @@ class ReportableEventsControllerSpec
       val schemeInfo: SchemeInfo   = SchemeInfo("XA1100000000000", Instant.now, "1", "2016", "CSOP 2015/16", "CSOP")
       val ersMetaData: ErsMetaData = ErsMetaData(schemeInfo, "300.300.300.300", None, "", None, None)
 
-      when(mockSessionService.fetch[RequestObject](any())(using any(), any())).thenReturn(Future.successful(ersRequestObject))
+      when(mockSessionService.fetch[RequestObject](any())(using any(), any()))
+        .thenReturn(Future.successful(ersRequestObject))
 
       when(mockErsConnector.connectToEtmpSapRequest(anyString())(any(), any()))
         .thenReturn(
@@ -204,7 +205,8 @@ class ReportableEventsControllerSpec
       val schemeInfo: SchemeInfo   = SchemeInfo("XA1100000000000", Instant.now, "1", "2016", "CSOP 2015/16", "CSOP")
       val ersMetaData: ErsMetaData = ErsMetaData(schemeInfo, "300.300.300.300", None, "", None, None)
 
-      when(mockSessionService.fetch[RequestObject](any())(using any(), any())).thenReturn(Future.successful(ersRequestObject))
+      when(mockSessionService.fetch[RequestObject](any())(using any(), any()))
+        .thenReturn(Future.successful(ersRequestObject))
 
       when(mockErsConnector.connectToEtmpSapRequest(anyString())(any(), any()))
         .thenReturn(
@@ -226,7 +228,9 @@ class ReportableEventsControllerSpec
       when(mockSessionService.cache(refEq(mockErsUtil.REPORTABLE_EVENTS), any())(using any(), any()))
         .thenReturn(if (ersMetaDataCachedOk) Future.successful(null) else Future.failed(new Exception))
 
-      when(mockSessionService.fetch[SchemeOrganiserDetails](refEq(mockErsUtil.SCHEME_ORGANISER_CACHE))(using any(), any()))
+      when(
+        mockSessionService.fetch[SchemeOrganiserDetails](refEq(mockErsUtil.SCHEME_ORGANISER_CACHE))(using any(), any())
+      )
         .thenReturn(
           if (schemeOrganiserDetailsRes) {
             if (schemeOrganiserDataCached) {

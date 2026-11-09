@@ -17,16 +17,19 @@
 package utils
 
 import org.apache.pekko.stream.Materializer
-import org.scalatest.OptionValues
+import org.scalatest.{BeforeAndAfterEach, OptionValues}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.Environment
+import play.api.{Application, Environment}
 import play.api.i18n.MessagesApi
+import play.api.inject.Injector
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.{
   AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents
 }
 import play.api.test.Helpers.stubBodyParser
+import org.mockito.Mockito.{never, reset, verify, when}
 
 import java.io.InputStream
 import scala.concurrent.ExecutionContext

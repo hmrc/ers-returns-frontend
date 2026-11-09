@@ -42,7 +42,7 @@ class UpscanConnectorSpec
     with WireMockHelper {
 
   lazy val connector: UpscanConnector = app.injector.instanceOf[UpscanConnector]
-  given hc: HeaderCarrier      = HeaderCarrier()
+  given hc: HeaderCarrier             = HeaderCarrier()
 
   val request: UpscanInitiateRequest =
     UpscanInitiateRequest("callbackUrl", "successRedirectUrl", "errorRedirectUrl", 1, 209715200)

@@ -59,8 +59,8 @@ class IncorrectFileNameControllerSpec
   val incorrectFileNameView: incorrect_file_name = app.injector.instanceOf[incorrect_file_name]
   implicit lazy val testMessages: MessagesImpl   = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
   implicit lazy val mat: Materializer            = app.materializer
-  given appConfig: ApplicationConfig      = app.injector.instanceOf[ApplicationConfig]
-  given actorSystem: ActorSystem          = app.actorSystem
+  given appConfig: ApplicationConfig             = app.injector.instanceOf[ApplicationConfig]
+  given actorSystem: ActorSystem                 = app.actorSystem
 
   override def beforeEach(): Unit =
     reset(mockErsUtil)
@@ -76,7 +76,7 @@ class IncorrectFileNameControllerSpec
       ) thenReturn Future.successful(ersRequestObject)
 
       val controller =
-        new IncorrectFileNameController(mockMCC, mockSessionService, incorrectFileNameView, testAuthAction)(using 
+        new IncorrectFileNameController(mockMCC, mockSessionService, incorrectFileNameView, testAuthAction)(using
           ec,
           mockErsUtil,
           appConfig

@@ -28,7 +28,7 @@ import utils.CountryCodes
 class SchemeOrganiserDetailsDecoratorSpec
     extends AnyWordSpecLike with Matchers with OptionValues with MockitoSugar with GuiceOneAppPerSuite {
 
-  given messages: Messages    = mock[Messages]
+  given messages: Messages           = mock[Messages]
   val mockCountryCodes: CountryCodes = app.injector.instanceOf[CountryCodes]
 
   "Company details title decorator" should {

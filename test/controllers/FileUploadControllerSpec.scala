@@ -90,7 +90,7 @@ class FileUploadControllerSpec
   )
 
   lazy val mockUpscanService: UpscanService           = mock[UpscanService]
-  given mockActorSystem: ActorSystem           = app.injector.instanceOf[ActorSystem]
+  given mockActorSystem: ActorSystem                  = app.injector.instanceOf[ActorSystem]
   val globalErrorView: global_error                   = app.injector.instanceOf[global_error]
   val fileUploadErrorsView: file_upload_errors        = app.injector.instanceOf[file_upload_errors]
   val fileUploadErrorsOdsView: file_upload_errors_ods = app.injector.instanceOf[file_upload_errors_ods]
@@ -357,7 +357,8 @@ class FileUploadControllerSpec
         when(mockErsConnector.getCallbackRecord(any(), any)).thenReturn(Future.successful(Some(uploadedSuccessfully)))
         when(mockErsConnector.removePresubmissionData(any())(any[RequestWithOptionalAuthContext[AnyContent]], any()))
           .thenReturn(Future.successful(HttpResponse(OK, "")))
-        when(mockSessionService.fetch[ErsMetaData](any())(using any(), any())).thenReturn(Future.successful(validErsMetaData))
+        when(mockSessionService.fetch[ErsMetaData](any())(using any(), any()))
+          .thenReturn(Future.successful(validErsMetaData))
         when(
           mockErsConnector.validateFileData(meq(uploadedSuccessfully), any[SchemeInfo])(
             any[RequestWithOptionalAuthContext[AnyContent]],
@@ -390,7 +391,8 @@ class FileUploadControllerSpec
         when(mockErsConnector.getCallbackRecord(any(), any)).thenReturn(Future.successful(Some(uploadedSuccessfully)))
         when(mockErsConnector.removePresubmissionData(any())(any[RequestWithOptionalAuthContext[AnyContent]], any()))
           .thenReturn(Future.successful(HttpResponse(OK, "")))
-        when(mockSessionService.fetch[ErsMetaData](any())(using any(), any())).thenReturn(Future.successful(validErsMetaData))
+        when(mockSessionService.fetch[ErsMetaData](any())(using any(), any()))
+          .thenReturn(Future.successful(validErsMetaData))
         when(
           mockErsConnector.validateFileData(meq(uploadedSuccessfully), any[SchemeInfo])(
             any[RequestWithOptionalAuthContext[AnyContent]],
@@ -413,7 +415,8 @@ class FileUploadControllerSpec
         when(mockErsConnector.getCallbackRecord(any(), any)).thenReturn(Future.successful(Some(uploadedSuccessfully)))
         when(mockErsConnector.removePresubmissionData(any())(any(), any()))
           .thenReturn(Future.successful(HttpResponse(OK, "")))
-        when(mockSessionService.fetch[ErsMetaData](any())(using any(), any())).thenReturn(Future.successful(validErsMetaData))
+        when(mockSessionService.fetch[ErsMetaData](any())(using any(), any()))
+          .thenReturn(Future.successful(validErsMetaData))
         when(mockErsConnector.validateFileData(meq(uploadedSuccessfully), any[SchemeInfo])(any(), any()))
           .thenReturn(
             Future.successful(
@@ -446,7 +449,8 @@ class FileUploadControllerSpec
         when(mockErsConnector.getCallbackRecord(any(), any)).thenReturn(Future.successful(Some(uploadedSuccessfully)))
         when(mockErsConnector.removePresubmissionData(any())(any(), any()))
           .thenReturn(Future.successful(HttpResponse(OK, "")))
-        when(mockSessionService.fetch[ErsMetaData](any())(using any(), any())).thenReturn(Future.successful(validErsMetaData))
+        when(mockSessionService.fetch[ErsMetaData](any())(using any(), any()))
+          .thenReturn(Future.successful(validErsMetaData))
         when(
           mockErsConnector.validateFileData(meq(uploadedSuccessfully), any[SchemeInfo])(
             any[RequestWithOptionalAuthContext[AnyContent]],
@@ -471,7 +475,8 @@ class FileUploadControllerSpec
         when(mockErsConnector.getCallbackRecord(any(), any)).thenReturn(Future.successful(Some(uploadedSuccessfully)))
         when(mockErsConnector.removePresubmissionData(any())(any(), any()))
           .thenReturn(Future.successful(HttpResponse(OK, "")))
-        when(mockSessionService.fetch[ErsMetaData](any())(using any(), any())).thenReturn(Future.successful(validErsMetaData))
+        when(mockSessionService.fetch[ErsMetaData](any())(using any(), any()))
+          .thenReturn(Future.successful(validErsMetaData))
         when(
           mockErsConnector.validateFileData(meq(uploadedSuccessfully), any[SchemeInfo])(
             any[RequestWithOptionalAuthContext[AnyContent]],

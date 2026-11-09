@@ -66,8 +66,8 @@ class CsvFileUploadCallbackControllerSpec
 
   given testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
 
-  given materializer: Materializer = app.materializer
-  lazy val environment: Environment            = app.injector.instanceOf[Environment]
+  given materializer: Materializer  = app.materializer
+  lazy val environment: Environment = app.injector.instanceOf[Environment]
 
   def request(body: JsValue): FakeRequest[JsValue] = FakeRequest().withBody(body)
   val scRef                                        = "scRef"
@@ -96,7 +96,12 @@ class CsvFileUploadCallbackControllerSpec
           UploadDetails(Instant.now(), "checkSum", Some("fileMimeType"), "fileName", 100)
         )
         val jsonBody       = Json.toJson(body)
-        when(mockSessionService.cache(meq(s"check-csv-files-${uploadId.value}"), callbackCaptor.capture)(using any(), any()))
+        when(
+          mockSessionService.cache(meq(s"check-csv-files-${uploadId.value}"), callbackCaptor.capture)(using
+            any(),
+            any()
+          )
+        )
           .thenReturn(Future.successful(sessionPair))
         val result         = csvFileUploadCallbackController.callback(uploadId, scRef, sessionId)(request(jsonBody))
         status(result)                                             shouldBe OK
@@ -114,7 +119,12 @@ class CsvFileUploadCallbackControllerSpec
         val callbackCaptor = ArgumentCaptor.forClass(classOf[UploadStatus])
         val body           = UpscanFailedCallback(Reference("ref"), ErrorDetails("failed", "message"))
         val jsonBody       = Json.toJson(body)
-        when(mockSessionService.cache(meq(s"check-csv-files-${uploadId.value}"), callbackCaptor.capture)(using any(), any()))
+        when(
+          mockSessionService.cache(meq(s"check-csv-files-${uploadId.value}"), callbackCaptor.capture)(using
+            any(),
+            any()
+          )
+        )
           .thenReturn(Future.successful(sessionPair))
         val result         = csvFileUploadCallbackController.callback(uploadId, scRef, sessionId)(request(jsonBody))
         status(result) shouldBe OK

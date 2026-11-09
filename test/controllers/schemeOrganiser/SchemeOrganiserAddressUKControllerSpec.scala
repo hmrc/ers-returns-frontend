@@ -16,6 +16,7 @@
 
 package controllers.schemeOrganiser
 
+import controllers.auth.RequestWithOptionalAuthContext
 import models.{CompanyAddress, CompanyDetailsList, RequestObject, RsFormMappings}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{never, reset, verify, when}
@@ -27,7 +28,9 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status
 import play.api.i18n
 import play.api.i18n.{MessagesApi, MessagesImpl}
-import play.api.mvc.{AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents}
+import play.api.mvc.{
+  AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents
+}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentAsString, defaultAwaitTimeout, headers, redirectLocation, status, stubBodyParser}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -72,9 +75,11 @@ class SchemeOrganiserAddressUKControllerSpec
   )
 
   "calling showQuestionPage" should {
-    implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+    given authRequest: RequestWithOptionalAuthContext[AnyContent] =
+      buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
     setAuthMocks()
-    when(mockSessionService.fetch[RequestObject](any())(using any(), any())).thenReturn(Future.successful(ersRequestObject))
+    when(mockSessionService.fetch[RequestObject](any())(using any(), any()))
+      .thenReturn(Future.successful(ersRequestObject))
 
     "show the empty scheme organiser address UK question page when there is nothing to prefill" in {
       when(mockSessionService.fetchPartFromCompanyDetails[CompanyDetailsList]()(using any(), any()))
@@ -112,12 +117,13 @@ class SchemeOrganiserAddressUKControllerSpec
 
   "calling questionSubmit" should {
     "show scheme organiser address UK form page with errors if the form is incorrectly filled" in {
-      val companyAddressUkData = Map("addressLine1" -> "")
-      val form                 = RsFormMappings.companyAddressUkForm().bind(companyAddressUkData)
-      implicit val authRequest = buildRequestWithAuth(
-        Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*), authData = Fixtures.buildFakeUser
+      val companyAddressUkData                                      = Map("addressLine1" -> "")
+      val form                                                      = RsFormMappings.companyAddressUkForm().bind(companyAddressUkData)
+      given authRequest: RequestWithOptionalAuthContext[AnyContent] = buildRequestWithAuth(
+        Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*),
+        authData = Fixtures.buildFakeUser
       )
-      val result               = testController.questionSubmit(1).apply(authRequest)
+      val result                                                    = testController.questionSubmit(1).apply(authRequest)
 
       status(result)        shouldBe Status.BAD_REQUEST
       contentAsString(result) should include(testMessages("ers_manual_address_uk.title"))
@@ -127,15 +133,17 @@ class SchemeOrganiserAddressUKControllerSpec
     }
 
     "successfully bind the form and redirect to the scheme Organiser Summary Page" in {
-      when(mockSessionService.cache[CompanyAddress](any(), any())(using any(), any())).thenReturn(Future.successful(("", "")))
+      when(mockSessionService.cache[CompanyAddress](any(), any())(using any(), any()))
+        .thenReturn(Future.successful(("", "")))
       when(mockCompanyDetailsService.updateSchemeOrganiserCache(using any())).thenReturn(Future(()))
 
-      val companyAddressUkData = Map("addressLine1" -> "123 Fake Street")
-      val form                 = RsFormMappings.companyAddressUkForm().bind(companyAddressUkData)
-      implicit val authRequest = buildRequestWithAuth(
-        Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*), authData = Fixtures.buildFakeUser
+      val companyAddressUkData                                      = Map("addressLine1" -> "123 Fake Street")
+      val form                                                      = RsFormMappings.companyAddressUkForm().bind(companyAddressUkData)
+      given authRequest: RequestWithOptionalAuthContext[AnyContent] = buildRequestWithAuth(
+        Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*),
+        authData = Fixtures.buildFakeUser
       )
-      val result               = testController.questionSubmit(1).apply(authRequest)
+      val result                                                    = testController.questionSubmit(1).apply(authRequest)
 
       status(result)               shouldBe Status.SEE_OTHER
       redirectLocation(result).get shouldBe controllers.schemeOrganiser.routes.SchemeOrganiserController
@@ -145,9 +153,11 @@ class SchemeOrganiserAddressUKControllerSpec
   }
 
   "calling editCompany" should {
-    implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+    given authRequest: RequestWithOptionalAuthContext[AnyContent] =
+      buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
     setAuthMocks()
-    when(mockSessionService.fetch[RequestObject](any())(using any(), any())).thenReturn(Future.successful(ersRequestObject))
+    when(mockSessionService.fetch[RequestObject](any())(using any(), any()))
+      .thenReturn(Future.successful(ersRequestObject))
 
     "be the same as showQuestion for a specific index" in {
       when(mockSessionService.fetchPartFromCompanyDetails[CompanyAddress]()(using any(), any()))

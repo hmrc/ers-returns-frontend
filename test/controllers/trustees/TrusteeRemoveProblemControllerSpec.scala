@@ -57,7 +57,7 @@ class TrusteeRemoveProblemControllerSpec
     ExecutionContext.global
   )
 
-  implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
+  given testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
 
   val testController = new TrusteeRemoveProblemController(
     mockMCC,
@@ -66,7 +66,7 @@ class TrusteeRemoveProblemControllerSpec
     mockSessionService,
     app.injector.instanceOf[trustee_remove_problem],
     app.injector.instanceOf[global_error]
-  )(mockMCC.executionContext, mockAppConfig)
+  )(using mockMCC.executionContext, mockAppConfig)
 
   "onPageLoad" should {
     val authRequest: RequestWithOptionalAuthContext[AnyContent] =
@@ -74,7 +74,8 @@ class TrusteeRemoveProblemControllerSpec
     setAuthMocks()
 
     "show trusteeRemoveProblemView" in {
-      when(mockSessionService.fetch[RequestObject](any())(any(), any())).thenReturn(Future.successful(ersRequestObject))
+      when(mockSessionService.fetch[RequestObject](any())(using any(), any()))
+        .thenReturn(Future.successful(ersRequestObject))
 
       val result = testController.onPageLoad().apply(authRequest)
 
@@ -86,7 +87,7 @@ class TrusteeRemoveProblemControllerSpec
     }
 
     "show getGlobalErrorPage if fetch failed" in {
-      when(mockSessionService.fetch[RequestObject](any())(any(), any()))
+      when(mockSessionService.fetch[RequestObject](any())(using any(), any()))
         .thenReturn(Future.failed(new Exception("exception")))
 
       val result = testController.onPageLoad().apply(authRequest)

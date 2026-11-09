@@ -85,8 +85,10 @@ class GeneratePdfControllerSpec
       val byteArrayOutputStream: ByteArrayOutputStream = mock[ByteArrayOutputStream]
       val testItem                                     = testCacheItem[ReportableEvents](REPORTABLE_EVENTS, ReportableEvents(Some("2")))
 
-      when(mockSessionService.fetch[RequestObject](any())(using any(), any())).thenReturn(Future.successful(ersRequestObject))
-      when(mockSessionService.fetch[ErsMetaData](refEq(ERS_META_DATA))(using any(), any())).thenReturn(Future.successful(rsc))
+      when(mockSessionService.fetch[RequestObject](any())(using any(), any()))
+        .thenReturn(Future.successful(ersRequestObject))
+      when(mockSessionService.fetch[ErsMetaData](refEq(ERS_META_DATA))(using any(), any()))
+        .thenReturn(Future.successful(rsc))
       when(mockSessionService.getAllData(any(), any())(using any(), any(), any()))
         .thenReturn(Future.successful(Fixtures.ersSummary))
       when(mockSessionService.fetchAll()(using any())).thenReturn(Future.successful(testItem))
@@ -103,8 +105,10 @@ class GeneratePdfControllerSpec
     "direct to errors page if fetch all res pdf throws exception" in {
       val authRequest = buildRequestWithAuth(buildFakeRequestWithSessionIdEMI("GET"))
 
-      when(mockSessionService.fetch[RequestObject](any())(using any(), any())).thenReturn(Future.successful(ersRequestObject))
-      when(mockSessionService.fetch[ErsMetaData](refEq(ERS_META_DATA))(using any(), any())).thenReturn(Future.successful(rsc))
+      when(mockSessionService.fetch[RequestObject](any())(using any(), any()))
+        .thenReturn(Future.successful(ersRequestObject))
+      when(mockSessionService.fetch[ErsMetaData](refEq(ERS_META_DATA))(using any(), any()))
+        .thenReturn(Future.successful(rsc))
       when(mockSessionService.getAllData(any(), any())(using any(), any(), any()))
         .thenReturn(Future.successful(Fixtures.ersSummary))
       when(mockSessionService.fetchAll()(using any())).thenReturn(Future.failed(new Exception("error")))
@@ -123,8 +127,10 @@ class GeneratePdfControllerSpec
     "direct to errors page if get all data res pdf throws exception" in {
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
 
-      when(mockSessionService.fetch[RequestObject](any())(using any(), any())).thenReturn(Future.successful(ersRequestObject))
-      when(mockSessionService.fetch[ErsMetaData](refEq(ERS_META_DATA))(using any(), any())).thenReturn(Future.successful(rsc))
+      when(mockSessionService.fetch[RequestObject](any())(using any(), any()))
+        .thenReturn(Future.successful(ersRequestObject))
+      when(mockSessionService.fetch[ErsMetaData](refEq(ERS_META_DATA))(using any(), any()))
+        .thenReturn(Future.successful(rsc))
       when(mockSessionService.getAllData(any(), any())(using any(), any(), any()))
         .thenReturn(Future.failed(new Exception("error")))
 

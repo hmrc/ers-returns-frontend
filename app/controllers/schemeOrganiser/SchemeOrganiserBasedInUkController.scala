@@ -49,7 +49,7 @@ class SchemeOrganiserBasedInUkController @Inject() (
 
   given ec: ExecutionContext = mcc.executionContext
 
-  val cacheKey: String                          = ersUtil.SCHEME_ORGANISER_BASED
+  val cacheKey: String                   = ersUtil.SCHEME_ORGANISER_BASED
   given format: Format[CompanyBasedInUk] = CompanyBasedInUk.format
 
   def nextPageRedirect(index: Int, edit: Boolean = false)(using

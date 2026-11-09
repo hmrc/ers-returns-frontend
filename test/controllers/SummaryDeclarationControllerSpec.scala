@@ -61,7 +61,7 @@ class SummaryDeclarationControllerSpec
   )
 
   implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
-  given countryCodes: CountryCodes      = mockCountryCodes
+  given countryCodes: CountryCodes             = mockCountryCodes
 
   implicit lazy val materializer: Materializer = app.materializer
   val globalErrorView: global_error            = app.injector.instanceOf[global_error]
@@ -173,7 +173,7 @@ class SummaryDeclarationControllerSpec
     when(mockErsUtil.SCHEME_SIP).thenReturn("5")
     when(mockErsUtil.OPTION_YES).thenReturn("1")
     when(mockErsUtil.OPTION_NO).thenReturn("2")
-    when(mockErsUtil.getPageElement(any(), any(), any(), any())(any())).thenCallRealMethod()
+    when(mockErsUtil.getPageElement(any(), any(), any(), any())(using any())).thenCallRealMethod()
     when(mockErsUtil.MSG_CSOP).thenReturn(".csop.")
     when(mockErsUtil.PAGE_GROUP_SUMMARY).thenReturn("ers_group_summary")
     when(mockErsUtil.PAGE_SUMMARY_DECLARATION).thenReturn("ers_summary_declaration")
@@ -231,7 +231,8 @@ class SummaryDeclarationControllerSpec
       )
 
       when(mockErsUtil.buildEntitySummary(any())).thenReturn(schemeOrganiserString)
-      when(mockSessionService.fetchAll()(using any())).thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
+      when(mockSessionService.fetchAll()(using any()))
+        .thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
 
       val result = testSummaryDeclarationController.showSummaryDeclarationPage(ersRequestObject)(using authRequest)
 
@@ -255,7 +256,8 @@ class SummaryDeclarationControllerSpec
       )
 
       when(mockErsUtil.buildEntitySummary(any())).thenReturn(schemeOrganiserString)
-      when(mockSessionService.fetchAll()(using any())).thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
+      when(mockSessionService.fetchAll()(using any()))
+        .thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
 
       val result = testSummaryDeclarationController.showSummaryDeclarationPage(ersRequestObject)(using authRequest)
 
@@ -279,7 +281,8 @@ class SummaryDeclarationControllerSpec
       )
 
       when(mockErsUtil.buildEntitySummary(any())).thenReturn(schemeOrganiserString)
-      when(mockSessionService.fetchAll()(using any())).thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
+      when(mockSessionService.fetchAll()(using any()))
+        .thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
 
       val result = testSummaryDeclarationController.showSummaryDeclarationPage(ersRequestObject)(using authRequest)
 
@@ -310,7 +313,8 @@ class SummaryDeclarationControllerSpec
       )
 
       when(mockErsUtil.buildEntitySummary(any())).thenReturn(schemeOrganiserString)
-      when(mockSessionService.fetchAll()(using any())).thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
+      when(mockSessionService.fetchAll()(using any()))
+        .thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
 
       val result = testSummaryDeclarationController.showSummaryDeclarationPage(ersRequestObject)(using authRequest)
 
@@ -333,7 +337,8 @@ class SummaryDeclarationControllerSpec
         )
 
       when(mockErsUtil.buildEntitySummary(any())).thenReturn(schemeOrganiserString)
-      when(mockSessionService.fetchAll()(using any())).thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
+      when(mockSessionService.fetchAll()(using any()))
+        .thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
 
       val result = testSummaryDeclarationController.showSummaryDeclarationPage(ersRequestObject)(using authRequest)
 
@@ -356,7 +361,8 @@ class SummaryDeclarationControllerSpec
         )
 
       when(mockErsUtil.buildEntitySummary(any())).thenReturn(schemeOrganiserString)
-      when(mockSessionService.fetchAll()(using any())).thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
+      when(mockSessionService.fetchAll()(using any()))
+        .thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
 
       val result = testSummaryDeclarationController.showSummaryDeclarationPage(ersRequestObject)(using authRequest)
 
@@ -377,7 +383,8 @@ class SummaryDeclarationControllerSpec
         )
 
       when(mockErsUtil.buildEntitySummary(any())).thenReturn(schemeOrganiserString)
-      when(mockSessionService.fetchAll()(using any())).thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
+      when(mockSessionService.fetchAll()(using any()))
+        .thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
 
       val result = testSummaryDeclarationController.showSummaryDeclarationPage(ersRequestObject)(using authRequest)
 
@@ -401,7 +408,8 @@ class SummaryDeclarationControllerSpec
         )
 
       when(mockErsUtil.buildEntitySummary(any())).thenReturn(schemeOrganiserString)
-      when(mockSessionService.fetchAll()(using any())).thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
+      when(mockSessionService.fetchAll()(using any()))
+        .thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
 
       val result = testSummaryDeclarationController.showSummaryDeclarationPage(ersRequestObject)(using authRequest)
 
@@ -423,7 +431,8 @@ class SummaryDeclarationControllerSpec
         )
 
       when(mockErsUtil.buildEntitySummary(any())).thenReturn(schemeOrganiserString)
-      when(mockSessionService.fetchAll()(using any())).thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
+      when(mockSessionService.fetchAll()(using any()))
+        .thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
 
       val result = testSummaryDeclarationController.showSummaryDeclarationPage(ersRequestObject)(using authRequest)
 
@@ -446,7 +455,8 @@ class SummaryDeclarationControllerSpec
         )
 
       when(mockErsUtil.buildEntitySummary(any())).thenReturn(schemeOrganiserString)
-      when(mockSessionService.fetchAll()(using any())).thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
+      when(mockSessionService.fetchAll()(using any()))
+        .thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
 
       val result = testSummaryDeclarationController.showSummaryDeclarationPage(csopRequestObject)(using authRequest)
 
@@ -475,7 +485,8 @@ class SummaryDeclarationControllerSpec
         )
 
       when(mockErsUtil.buildEntitySummary(any())).thenReturn(schemeOrganiserString)
-      when(mockSessionService.fetchAll()(using any())).thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
+      when(mockSessionService.fetchAll()(using any()))
+        .thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
 
       val result = testSummaryDeclarationController.showSummaryDeclarationPage(csopRequestObject)(using authRequest)
 
@@ -506,7 +517,8 @@ class SummaryDeclarationControllerSpec
         )
 
       when(mockErsUtil.buildEntitySummary(any())).thenReturn(schemeOrganiserString)
-      when(mockSessionService.fetchAll()(using any())).thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
+      when(mockSessionService.fetchAll()(using any()))
+        .thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
 
       val result = testSummaryDeclarationController.showSummaryDeclarationPage(csopRequestObject)(using authRequest)
 
@@ -528,7 +540,8 @@ class SummaryDeclarationControllerSpec
         )
 
       when(mockErsUtil.buildEntitySummary(any())).thenReturn(schemeOrganiserString)
-      when(mockSessionService.fetchAll()(using any())).thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
+      when(mockSessionService.fetchAll()(using any()))
+        .thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
 
       val result = testSummaryDeclarationController.showSummaryDeclarationPage(csopRequestObject)(using authRequest)
 
@@ -551,7 +564,8 @@ class SummaryDeclarationControllerSpec
         )
 
       when(mockErsUtil.buildEntitySummary(any())).thenReturn(schemeOrganiserString)
-      when(mockSessionService.fetchAll()(using any())).thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
+      when(mockSessionService.fetchAll()(using any()))
+        .thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
 
       val result = testSummaryDeclarationController.showSummaryDeclarationPage(csopRequestObject)(using authRequest)
 
@@ -579,7 +593,8 @@ class SummaryDeclarationControllerSpec
         )
 
       when(mockErsUtil.buildEntitySummary(any())).thenReturn(schemeOrganiserString)
-      when(mockSessionService.fetchAll()(using any())).thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
+      when(mockSessionService.fetchAll()(using any()))
+        .thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
 
       val result = testSummaryDeclarationController.showSummaryDeclarationPage(csopRequestObject)(using authRequest)
 
@@ -603,7 +618,8 @@ class SummaryDeclarationControllerSpec
         )
 
       when(mockErsUtil.buildEntitySummary(any())).thenReturn(schemeOrganiserString)
-      when(mockSessionService.fetchAll()(using any())).thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
+      when(mockSessionService.fetchAll()(using any()))
+        .thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
 
       val result = testSummaryDeclarationController.showSummaryDeclarationPage(ersRequestObject)(using authRequest)
 
@@ -631,7 +647,8 @@ class SummaryDeclarationControllerSpec
         )
 
       when(mockErsUtil.buildEntitySummary(any())).thenReturn(schemeOrganiserString)
-      when(mockSessionService.fetchAll()(using any())).thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
+      when(mockSessionService.fetchAll()(using any()))
+        .thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
 
       val result = testSummaryDeclarationController.showSummaryDeclarationPage(ersRequestObject)(using authRequest)
 

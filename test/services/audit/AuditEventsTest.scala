@@ -38,7 +38,7 @@ import scala.concurrent.Future
 class AuditEventsTest
     extends AnyWordSpecLike with Matchers with OptionValues with MockitoSugar with ScalaFutures with ErsTestHelper {
 
-  val mockAuditConnector: DefaultAuditConnector             = mock[DefaultAuditConnector]
+  val mockAuditConnector: DefaultAuditConnector      = mock[DefaultAuditConnector]
   given request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
 
   val rsc = new ErsMetaData(

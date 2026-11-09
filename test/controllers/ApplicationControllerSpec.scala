@@ -49,7 +49,7 @@ class ApplicationControllerSpec extends PlaySpec with ErsTestHelper with GuiceOn
 
   given testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
 
-  given materializer: Materializer     = app.materializer
+  given materializer: Materializer                 = app.materializer
   val unauthorisedView: unauthorised               = app.injector.instanceOf[unauthorised]
   val signedOutView: signedOut                     = app.injector.instanceOf[signedOut]
   val notAuthorisedView: views.html.not_authorised = app.injector.instanceOf[not_authorised]

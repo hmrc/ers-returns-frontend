@@ -42,7 +42,7 @@ class FrontendSessionsRepositorySpec
     "getAllFromSession" should {
       "return CacheItem with all the data from session" in {
 
-        val sessionId: SessionId                                      = SessionId(UUID.randomUUID().toString)
+        val sessionId: SessionId                               = SessionId(UUID.randomUUID().toString)
         given fakeRequest: FakeRequest[AnyContentAsEmpty.type] =
           FakeRequest().withSession(("sessionId", sessionId.toString))
 
@@ -58,10 +58,10 @@ class FrontendSessionsRepositorySpec
       }
 
       "return None when there is no data in session" in {
-        val sessionId: SessionId                                      = SessionId(UUID.randomUUID().toString)
+        val sessionId: SessionId                               = SessionId(UUID.randomUUID().toString)
         given fakeRequest: FakeRequest[AnyContentAsEmpty.type] =
           FakeRequest().withSession(("sessionId", sessionId.toString))
-        val result                                                    = sessionCacheRepo.getAllFromSession()
+        val result                                             = sessionCacheRepo.getAllFromSession()
 
         await(result) mustBe None
       }

@@ -50,7 +50,7 @@ class SubsidiaryAddressOverseasController @Inject() (
 
   given ec: ExecutionContext = mcc.executionContext
 
-  val cacheKey: String                        = ersUtil.SUBSIDIARY_COMPANY_ADDRESS_CACHE
+  val cacheKey: String                 = ersUtil.SUBSIDIARY_COMPANY_ADDRESS_CACHE
   given format: Format[CompanyAddress] = CompanyAddress.format
 
   def nextPageRedirect(index: Int, edit: Boolean = false)(using

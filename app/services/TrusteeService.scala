@@ -25,8 +25,9 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class TrusteeService @Inject() (ersUtil: ERSUtil, sessionService: FrontendSessionService)(using val ec: ExecutionContext)
-    extends Logging {
+class TrusteeService @Inject() (ersUtil: ERSUtil, sessionService: FrontendSessionService)(using
+  val ec: ExecutionContext
+) extends Logging {
 
   def updateTrusteeCache(index: Int)(using request: RequestHeader): Future[Unit] =
     (for {

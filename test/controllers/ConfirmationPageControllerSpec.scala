@@ -118,7 +118,9 @@ class ConfirmationPageControllerSpec
 
         when(mockSessionService.fetch[ErsMetaData](refEq("ErsMetaData"))(using any(), any())) thenReturn ersMetaRes
 
-        when(mockSessionService.getAllData(anyString(), any[ErsMetaData]())(using any(), any(), any())) thenReturn Future
+        when(
+          mockSessionService.getAllData(anyString(), any[ErsMetaData]())(using any(), any(), any())
+        ) thenReturn Future
           .successful(
             if (isNilReturn) ersSummaryNilReturn2 else ersSummary
           )

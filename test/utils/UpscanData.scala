@@ -18,9 +18,11 @@ package utils
 
 import models.upscan.*
 import play.api.libs.json.*
+import play.api.libs.ws.JsonBodyWritables.writeableOf_JsValue
 
 import java.net.URL
 import java.time.Instant
+import models.upscan.UpscanCallback.*
 
 trait UpscanData {
 
@@ -93,9 +95,9 @@ trait UpscanData {
     )
   )
 
-  val uploadDetails: UploadDetails         = UploadDetails(Instant.now(), "checksum", Some("fileMimeType"), "fileName", 100)
+  val uploadDetails: UploadDetails = UploadDetails(Instant.now(), "checksum", Some("fileMimeType"), "fileName", 100)
 
-  val readyCallback: UpscanReadyCallback   =
+  val readyCallback: UpscanReadyCallback =
     UpscanReadyCallback(Reference("Reference"), new URL("https://callbackUrl.com"), uploadDetails)
 
   val failedCallback: UpscanFailedCallback =
@@ -103,12 +105,29 @@ trait UpscanData {
 
   import models.upscan.UpscanCallback.*
 
-  given failedWrites: OWrites[UpscanFailedCallback] = Json
-    .writes[UpscanFailedCallback]
-    .transform((js: JsValue) => js.as[JsObject] + ("fileStatus" -> JsString("FAILED")))
+  given failedWrites: OWrites[UpscanFailedCallback] =
+    OWrites[UpscanFailedCallback] { callback =>
+      Json.obj(
+        "reference"      -> JsString(callback.reference.value),
+        "failureDetails" -> Json.obj(
+          "failureReason" -> callback.failureDetails.failureReason,
+          "message"       -> callback.failureDetails.message
+        ),
+        "fileStatus"     -> "FAILED"
+      )
+    }
 
-  given readWrites: OWrites[UpscanReadyCallback] =
-    Json.writes[UpscanReadyCallback].transform((js: JsValue) => js.as[JsObject] + ("fileStatus" -> JsString("READY")))
+  given readyWrites: OWrites[UpscanReadyCallback] =
+    OWrites[UpscanReadyCallback] { callback =>
+      Json.obj(
+        "reference"     -> JsString(callback.reference.value),
+        "downloadUrl"   -> JsString(callback.downloadUrl.toString),
+        "uploadDetails" -> Json.toJson(callback.uploadDetails)(
+          UpscanCallback.uploadDetailsFormat
+        ),
+        "fileStatus"    -> "READY"
+      )
+    }
 
   val upscanInitiateResponse: UpscanInitiateResponse =
     UpscanInitiateResponse(Reference("reference"), "postTarget", formFields = Map.empty[String, String])

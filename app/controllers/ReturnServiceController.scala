@@ -48,7 +48,7 @@ class ReturnServiceController @Inject() (
   def cacheParams(ersRequestObject: RequestObject)(implicit request: RequestHeader): Future[Result] = {
     given formatRSParams: OFormat[RequestObject] = Json.format[RequestObject]
     logger.debug("Request Object created --> " + ersRequestObject)
-    val futureResult                                    = for {
+    val futureResult                             = for {
       _ <- sessionService.remove(ersRequestObject.getSchemeReference)
       _ <- sessionService.cache(ersUtil.ERS_METADATA, ersRequestObject.toErsMetaData)
       _ <- sessionService.cache(ersUtil.ERS_REQUEST_OBJECT, ersRequestObject)

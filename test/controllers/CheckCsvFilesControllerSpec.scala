@@ -66,7 +66,7 @@ class CheckCsvFilesControllerSpec
 
   given testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
 
-  given mat: Materializer  = app.materializer
+  given mat: Materializer              = app.materializer
   val checkCsvFileView: check_csv_file = app.injector.instanceOf[check_csv_file]
 
   override def beforeEach(): Unit = {

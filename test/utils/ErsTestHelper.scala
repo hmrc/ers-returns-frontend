@@ -65,9 +65,9 @@ trait ErsTestHelper extends MockitoSugar with AuthHelper with ERSFakeApplication
     RequestWithOptionalAuthContext(req, authData)
 
   given hc: HeaderCarrier                        = HeaderCarrier()
-  given ec: ExecutionContext                     = cc.executionContext
+  given ec: ExecutionContext                     = ExecutionContext.global
   given testFakeRequest: FakeRequest[AnyContent] = FakeRequest()
-  given messages: MessagesImpl              = MessagesImpl(i18n.Lang("en"), stubMessagesApi())
+  given messages: MessagesImpl                   = MessagesImpl(i18n.Lang("en"), stubMessagesApi())
 
   val requestWithAuth: RequestWithOptionalAuthContext[AnyContent] =
     RequestWithOptionalAuthContext(testFakeRequest, defaultErsAuthData)
@@ -94,9 +94,9 @@ trait ErsTestHelper extends MockitoSugar with AuthHelper with ERSFakeApplication
 
   val mockHttp: HttpClientV2                            = mock[HttpClientV2]
   val mockRequestBuilder: RequestBuilder                = mock[RequestBuilder]
-  given mockAppConfig: ApplicationConfig         = mock[ApplicationConfig]
+  given mockAppConfig: ApplicationConfig                = mock[ApplicationConfig]
   val mockErsConnector: ErsConnector                    = mock[ErsConnector]
-  given mockErsUtil: ERSUtil                     = mock[ERSUtil]
+  given mockErsUtil: ERSUtil                            = mock[ERSUtil]
   val mockMetrics: Metrics                              = mock[Metrics]
   val mockAuditEvents: AuditEvents                      = mock[AuditEvents]
   val mockSessionRepository: FrontendSessionsRepository = mock[FrontendSessionsRepository]
@@ -104,7 +104,7 @@ trait ErsTestHelper extends MockitoSugar with AuthHelper with ERSFakeApplication
   val mockFileValidatorService: FileValidatorService    = mock[FileValidatorService]
   val mockTrusteeService: TrusteeService                = mock[TrusteeService]
   val mockCompanyDetailsService: CompanyDetailsService  = mock[CompanyDetailsService]
-  given mockCountryCodes: CountryCodes           = mock[CountryCodes]
+  given mockCountryCodes: CountryCodes                  = mock[CountryCodes]
   val sessionPair: (String, String)                     = SessionKeys.sessionId -> sessionId
 
   val testCacheItem: CacheItem = CacheItem(

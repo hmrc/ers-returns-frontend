@@ -33,7 +33,7 @@ class FileSizeUtilsSpec extends AnyWordSpecLike with Matchers with MockitoSugar 
 
   val mockAuditConnector: DefaultAuditConnector = mock[DefaultAuditConnector]
   val mockAuditEvents: AuditEvents              = new AuditEvents(mockAuditConnector)
-  given hc: HeaderCarrier                = HeaderCarrier()
+  given hc: HeaderCarrier                       = HeaderCarrier()
   val fileSizeUtils: FileSizeUtils              = new FileSizeUtils(mockAuditEvents)
 
   "logFileSize" should {
