@@ -40,11 +40,12 @@ class SubsidiaryBasedInUkController @Inject() (
   val ersConnector: ErsConnector,
   val globalErrorView: views.html.global_error,
   val authAction: AuthAction,
-  implicit val countryCodes: CountryCodes,
-  implicit val ersUtil: ERSUtil,
-  implicit val sessionService: FrontendSessionService,
-  implicit val appConfig: ApplicationConfig,
   pageView: views.html.manual_is_the_company_in_uk
+)(using
+  val countryCodes: CountryCodes,
+  val ersUtil: ERSUtil,
+  val sessionService: FrontendSessionService,
+  val appConfig: ApplicationConfig
 ) extends FrontendController(mcc) with WithUrlEncodedOnlyFormBinding with SubsidiaryBaseController[CompanyBasedInUk] {
 
   given ec: ExecutionContext = mcc.executionContext

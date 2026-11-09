@@ -40,12 +40,13 @@ class SubsidiaryAddressOverseasController @Inject() (
   val ersConnector: ErsConnector,
   val globalErrorView: views.html.global_error,
   val authAction: AuthAction,
-  implicit val countryCodes: CountryCodes,
-  implicit val ersUtil: ERSUtil,
-  implicit val sessionService: FrontendSessionService,
-  implicit val appConfig: ApplicationConfig,
   companyDetailsService: CompanyDetailsService,
   companyAddressOverseasView: views.html.manual_address_overseas
+)(using
+  val countryCodes: CountryCodes,
+  val ersUtil: ERSUtil,
+  val sessionService: FrontendSessionService,
+  val appConfig: ApplicationConfig
 ) extends FrontendController(mcc) with WithUrlEncodedOnlyFormBinding with SubsidiaryBaseController[CompanyAddress] {
 
   given ec: ExecutionContext = mcc.executionContext

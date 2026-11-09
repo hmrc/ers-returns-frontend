@@ -68,13 +68,9 @@ class SubsidiaryAddressUKControllerSpec
     mockErsConnector,
     app.injector.instanceOf[global_error],
     testAuthAction,
-    mockCountryCodes,
-    mockErsUtil,
-    mockSessionService,
-    mockAppConfig,
     mockCompanyDetailsService,
     app.injector.instanceOf[manual_address_uk]
-  )
+  )(using mockCountryCodes, mockErsUtil, mockSessionService, mockAppConfig)
 
   "calling showQuestionPage" should {
     given authRequest: RequestWithOptionalAuthContext[AnyContent] =

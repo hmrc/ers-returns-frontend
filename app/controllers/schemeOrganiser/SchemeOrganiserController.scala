@@ -33,13 +33,14 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class SchemeOrganiserController @Inject() (
   val mcc: MessagesControllerComponents,
-  implicit val countryCodes: CountryCodes,
-  implicit val ersUtil: ERSUtil,
-  implicit val sessionService: FrontendSessionService,
-  implicit val appConfig: ApplicationConfig,
   globalErrorView: views.html.global_error,
   schemeOrganiserSummaryView: views.html.scheme_organiser_summary,
   authAction: AuthAction
+)(using
+  val countryCodes: CountryCodes,
+  val ersUtil: ERSUtil,
+  val sessionService: FrontendSessionService,
+  val appConfig: ApplicationConfig
 ) extends FrontendController(mcc) with I18nSupport with WithUrlEncodedOnlyFormBinding with Logging {
 
   given ec: ExecutionContext = mcc.executionContext

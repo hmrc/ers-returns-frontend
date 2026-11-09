@@ -64,12 +64,8 @@ class SchemeOrganiserBasedInUkControllerSpec
     mockErsConnector,
     app.injector.instanceOf[global_error],
     testAuthAction,
-    mockCountryCodes,
-    mockErsUtil,
-    mockSessionService,
-    mockAppConfig,
     app.injector.instanceOf[manual_is_the_company_in_uk]
-  )
+  )(using mockCountryCodes, mockErsUtil, mockSessionService, mockAppConfig)
 
   "calling showQuestionPage" should {
     given authRequest: RequestWithOptionalAuthContext[AnyContent] =
@@ -206,12 +202,12 @@ class SchemeOrganiserBasedInUkControllerSpec
         .thenReturn(Future.successful(Fixtures.exampleSchemeOrganiserUk))
       when(mockCompanyDetailsService.updateSchemeOrganiserCache(using any())).thenReturn(Future(()))
 
-      val companyBasedData                                                 = Map("basedInUk" -> "0")
-      val form                                                             = RsFormMappings.companyBasedInUkForm().bind(companyBasedData)
-      implicit val authRequest: RequestWithOptionalAuthContext[AnyContent] = buildRequestWithAuth(
+      val companyBasedData                                          = Map("basedInUk" -> "0")
+      val form                                                      = RsFormMappings.companyBasedInUkForm().bind(companyBasedData)
+      given authRequest: RequestWithOptionalAuthContext[AnyContent] = buildRequestWithAuth(
         Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq*)
       )
-      val result                                                           = testController.editQuestionSubmit(0).apply(authRequest)
+      val result                                                    = testController.editQuestionSubmit(0).apply(authRequest)
 
       status(result)               shouldBe Status.SEE_OTHER
       redirectLocation(result).get shouldBe controllers.schemeOrganiser.routes.SchemeOrganiserDetailsUkController
@@ -228,12 +224,12 @@ class SchemeOrganiserBasedInUkControllerSpec
         .thenReturn(Future.successful(Fixtures.exampleSchemeOrganiserOverseas))
       when(mockCompanyDetailsService.updateSchemeOrganiserCache(using any())).thenReturn(Future(()))
 
-      val companyBasedData                                                 = Map("basedInUk" -> "0")
-      val form                                                             = RsFormMappings.companyBasedInUkForm().bind(companyBasedData)
-      implicit val authRequest: RequestWithOptionalAuthContext[AnyContent] = buildRequestWithAuth(
+      val companyBasedData                                          = Map("basedInUk" -> "0")
+      val form                                                      = RsFormMappings.companyBasedInUkForm().bind(companyBasedData)
+      given authRequest: RequestWithOptionalAuthContext[AnyContent] = buildRequestWithAuth(
         Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq*)
       )
-      val result                                                           = testController.editQuestionSubmit(1).apply(authRequest)
+      val result                                                    = testController.editQuestionSubmit(1).apply(authRequest)
 
       status(result)               shouldBe Status.SEE_OTHER
       redirectLocation(result).get shouldBe controllers.schemeOrganiser.routes.SchemeOrganiserDetailsOverseasController

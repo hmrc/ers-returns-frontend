@@ -675,7 +675,7 @@ class CsvFileUploadControllerSpec
       ) {
         override lazy val allCsvFilesCacheRetryAmount: Int = retryTimes
 
-        override def checkFileNames(csvCallbackData: List[UploadedSuccessfully], schemeInfo: SchemeInfo)(implicit
+        override def checkFileNames(csvCallbackData: List[UploadedSuccessfully], schemeInfo: SchemeInfo)(using
           request: RequestWithOptionalAuthContext[AnyContent],
           hc: HeaderCarrier
         ): Future[Result] = Future.successful(Ok("Validated"))

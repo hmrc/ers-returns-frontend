@@ -34,7 +34,7 @@ import play.api.mvc.{
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentAsString, defaultAwaitTimeout, headers, redirectLocation, status, stubBodyParser}
 import uk.gov.hmrc.http.HeaderCarrier
-import utils.Fixtures.{buildFakeUser, companyAddressUK, ersRequestObject}
+import utils.Fixtures.{companyAddressUK, ersRequestObject}
 import utils.{ERSFakeApplicationConfig, ErsTestHelper, Fixtures}
 import views.html.{global_error, manual_address_uk}
 
@@ -66,13 +66,9 @@ class SchemeOrganiserAddressUKControllerSpec
     mockErsConnector,
     app.injector.instanceOf[global_error],
     testAuthAction,
-    mockCountryCodes,
-    mockErsUtil,
-    mockSessionService,
-    mockAppConfig,
     mockCompanyDetailsService,
     app.injector.instanceOf[manual_address_uk]
-  )
+  )(using mockCountryCodes, mockErsUtil, mockSessionService, mockAppConfig)
 
   "calling showQuestionPage" should {
     given authRequest: RequestWithOptionalAuthContext[AnyContent] =

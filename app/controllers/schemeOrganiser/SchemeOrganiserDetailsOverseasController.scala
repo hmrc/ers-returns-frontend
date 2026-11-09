@@ -38,11 +38,12 @@ class SchemeOrganiserDetailsOverseasController @Inject() (
   val ersConnector: ErsConnector,
   val globalErrorView: views.html.global_error,
   val authAction: AuthAction,
-  implicit val countryCodes: CountryCodes,
-  implicit val ersUtil: ERSUtil,
-  implicit val sessionService: FrontendSessionService,
-  implicit val appConfig: ApplicationConfig,
   companyOverseasDetailsView: views.html.manual_company_details_overseas
+)(using
+  val countryCodes: CountryCodes,
+  val ersUtil: ERSUtil,
+  val sessionService: FrontendSessionService,
+  val appConfig: ApplicationConfig
 ) extends FrontendController(mcc) with WithUrlEncodedOnlyFormBinding with SchemeOrganiserBaseController[Company] {
 
   given ec: ExecutionContext = mcc.executionContext

@@ -65,12 +65,8 @@ class SubsidiaryDetailsUKControllerSpec
     mockErsConnector,
     app.injector.instanceOf[global_error],
     testAuthAction,
-    mockCountryCodes,
-    mockErsUtil,
-    mockSessionService,
-    mockAppConfig,
     app.injector.instanceOf[manual_company_details_uk]
-  )
+  )(using mockCountryCodes, mockErsUtil, mockSessionService, mockAppConfig)
 
   "calling showQuestionPage" should {
     given authRequest: RequestWithOptionalAuthContext[AnyContent] =

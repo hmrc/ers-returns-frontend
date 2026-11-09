@@ -113,18 +113,13 @@ class GroupSchemeControllerSpec
   lazy val testGroupSchemeController: GroupSchemeController = new GroupSchemeController(
     mockMCC,
     mockAuthConnector,
-    mockCountryCodes,
-    mockErsUtil,
-    mockSessionService,
-    mockCompanyDetailsService,
-    mockAppConfig,
     globalErrorView,
     groupView,
     groupPlanSummaryView,
     confirmDeleteCompanyView,
     yesNoFormProvider,
     testAuthAction
-  )
+  )(using mockCountryCodes, mockErsUtil, mockSessionService, mockCompanyDetailsService, mockAppConfig)
 
   "manualCompanyDetailsPage" should {
 
@@ -145,18 +140,13 @@ class GroupSchemeControllerSpec
   lazy val controllerUnderTest: GroupSchemeController = new GroupSchemeController(
     mockMCC,
     mockAuthConnector,
-    mockCountryCodes,
-    mockErsUtil,
-    mockSessionService,
-    mockCompanyDetailsService,
-    mockAppConfig,
     globalErrorView,
     groupView,
     groupPlanSummaryView,
     confirmDeleteCompanyView,
     yesNoFormProvider,
     testAuthAction
-  )
+  )(using mockCountryCodes, mockErsUtil, mockSessionService, mockCompanyDetailsService, mockAppConfig)
 
   "confirmDeleteCompanyPage" should {
     def confirmDeleteCompanyHandler(index: Int, request: FakeRequest[AnyContentAsEmpty.type])(

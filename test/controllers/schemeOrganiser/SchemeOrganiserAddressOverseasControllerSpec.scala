@@ -66,13 +66,9 @@ class SchemeOrganiserAddressOverseasControllerSpec
     mockErsConnector,
     app.injector.instanceOf[global_error],
     testAuthAction,
-    mockCountryCodes,
-    mockErsUtil,
-    mockSessionService,
-    mockAppConfig,
     mockCompanyDetailsService,
     app.injector.instanceOf[manual_address_overseas]
-  )
+  )(using mockCountryCodes, mockErsUtil, mockSessionService, mockAppConfig)
 
   "calling showQuestionPage" should {
     given authRequest: RequestWithOptionalAuthContext[AnyContent] =

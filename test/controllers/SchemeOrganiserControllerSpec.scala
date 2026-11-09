@@ -78,14 +78,10 @@ class SchemeOrganiserControllerSpec
       requestObjectRes: Future[RequestObject] = Future.successful(ersRequestObject)
     ): SchemeOrganiserController = new SchemeOrganiserController(
       mockMCC,
-      mockCountryCodes,
-      mockErsUtil,
-      mockSessionService,
-      mockAppConfig,
       globalErrorView,
       schemeOrganiserSummaryView,
       testAuthAction
-    ) {
+    )(using mockCountryCodes, mockErsUtil, mockSessionService, mockAppConfig) {
 
       when(mockSessionService.fetch[CompanyDetails](refEq(mockErsUtil.SCHEME_ORGANISER_CACHE))(using any(), any()))
         .thenReturn(

@@ -39,17 +39,18 @@ import scala.util.{Failure, Success}
 class GroupSchemeController @Inject() (
   val mcc: MessagesControllerComponents,
   val authConnector: DefaultAuthConnector,
-  implicit val countryCodes: CountryCodes,
-  implicit val ersUtil: ERSUtil,
-  implicit val sessionService: FrontendSessionService,
-  implicit val companyService: CompanyDetailsService,
-  implicit val appConfig: ApplicationConfig,
   globalErrorView: views.html.global_error,
   groupView: views.html.group,
   groupPlanSummaryView: views.html.group_plan_summary,
   confirmDeleteCompanyView: views.html.confirm_delete_company,
   yesNoFormProvider: YesNoFormProvider,
   authAction: AuthAction
+)(using
+  val countryCodes: CountryCodes,
+  val ersUtil: ERSUtil,
+  val sessionService: FrontendSessionService,
+  val companyService: CompanyDetailsService,
+  val appConfig: ApplicationConfig
 ) extends FrontendController(mcc)
     with I18nSupport
     with WithUrlEncodedOnlyFormBinding
