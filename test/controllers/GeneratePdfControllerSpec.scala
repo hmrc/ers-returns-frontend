@@ -54,10 +54,10 @@ class GeneratePdfControllerSpec
     ExecutionContext.global
   )
 
-  implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
+  given testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
 
-  implicit lazy val mat: Materializer = app.materializer
-  val globalErrorView: global_error   = app.injector.instanceOf[global_error]
+  given mat: Materializer           = app.materializer
+  val globalErrorView: global_error = app.injector.instanceOf[global_error]
 
   lazy val pdfBuilderMock: ErsReceiptPdfBuilderService = mock[ErsReceiptPdfBuilderService]
   lazy val schemeInfo: SchemeInfo                      = SchemeInfo("XA1100000000000", Instant.now, "1", "2016", "EMI", "EMI")

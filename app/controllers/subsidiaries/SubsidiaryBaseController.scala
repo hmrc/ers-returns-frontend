@@ -58,7 +58,7 @@ trait SubsidiaryBaseController[A] extends SchemeOrganiserBaseController[A] {
         getGlobalErrorPage
       }
 
-  override def showQuestionPage(requestObject: RequestObject, index: Int, edit: Boolean = false)(implicit
+  override def showQuestionPage(requestObject: RequestObject, index: Int, edit: Boolean = false)(using
     request: RequestWithOptionalAuthContext[AnyContent],
     hc: HeaderCarrier
   ): Future[Result] =

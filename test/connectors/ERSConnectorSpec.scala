@@ -69,10 +69,10 @@ class ERSConnectorSpec
     ExecutionContext.global
   )
 
-  implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
-  implicit lazy val mat: Materializer          = app.materializer
-  implicit lazy val authContext: ERSAuthData   = defaultErsAuthData
-  lazy val testHttp: HttpClientV2              = app.injector.instanceOf[HttpClientV2]
+  given testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
+  given mat: Materializer          = app.materializer
+  given authContext: ERSAuthData   = defaultErsAuthData
+  lazy val testHttp: HttpClientV2  = app.injector.instanceOf[HttpClientV2]
 
   override val requestWithAuth: RequestWithOptionalAuthContext[AnyContent] =
     RequestWithOptionalAuthContext(testFakeRequest.withSession("sessionId" -> "someSessionId"), defaultErsAuthData)
@@ -122,7 +122,8 @@ class ERSConnectorSpec
       when(mockRequestBuilder.execute(any[HttpReads[HttpResponse]], any()))
         .thenReturn(Future(HttpResponse(status = OK, body = "")))
 
-      val result = await(ersConnectorMockHttp.validateFileData(uploadedSuccessfully, schemeInfo)(using requestWithAuth, hc))
+      val result =
+        await(ersConnectorMockHttp.validateFileData(uploadedSuccessfully, schemeInfo)(using requestWithAuth, hc))
       result.status                shouldBe OK
       stringCaptor.getValue.toString should include("123%2FABCDE")
     }
@@ -185,7 +186,8 @@ class ERSConnectorSpec
       "validator throw Exception" in {
         when(mockRequestBuilder.execute(any[HttpReads[HttpResponse]], any()))
           .thenReturn(Future.failed(new Exception("Test exception")))
-        val result = await(ersConnectorMockHttp.validateFileData(uploadedSuccessfully, schemeInfo)(using requestWithAuth, hc))
+        val result =
+          await(ersConnectorMockHttp.validateFileData(uploadedSuccessfully, schemeInfo)(using requestWithAuth, hc))
         result.status shouldBe BAD_REQUEST
       }
     }
@@ -200,7 +202,8 @@ class ERSConnectorSpec
       when(mockRequestBuilder.execute(any[HttpReads[HttpResponse]], any()))
         .thenReturn(Future(HttpResponse(status = OK, body = "")))
 
-      val result = await(ersConnectorMockHttp.validateFileData(uploadedSuccessfully, schemeInfo)(using requestWithAuth, hc))
+      val result =
+        await(ersConnectorMockHttp.validateFileData(uploadedSuccessfully, schemeInfo)(using requestWithAuth, hc))
       result.status                shouldBe OK
       stringCaptor.getValue.toString should include("123%2FABCDE")
     }
@@ -427,7 +430,9 @@ class ERSConnectorSpec
         when(mockRequestBuilder.execute(any[HttpReads[HttpResponse]], any()))
           .thenReturn(Future.failed(new Exception("Test exception")))
 
-        an[Exception] should be thrownBy await(ersConnectorMockHttp.createCallbackRecord(using requestWithAuthNoSession, hc))
+        an[Exception] should be thrownBy await(
+          ersConnectorMockHttp.createCallbackRecord(using requestWithAuthNoSession, hc)
+        )
       }
     }
   }
@@ -574,7 +579,9 @@ class ERSConnectorSpec
         when(mockRequestBuilder.execute(any[HttpReads[HttpResponse]], any()))
           .thenReturn(Future.failed(new Exception("Test exception")))
 
-        an[Exception] should be thrownBy await(ersConnectorMockHttp.saveMetadata(mockErsSummary)(using requestWithAuth, hc))
+        an[Exception] should be thrownBy await(
+          ersConnectorMockHttp.saveMetadata(mockErsSummary)(using requestWithAuth, hc)
+        )
       }
     }
   }

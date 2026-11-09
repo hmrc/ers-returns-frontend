@@ -53,7 +53,7 @@ class CountryCodesSpec
   )
 
   lazy val appEnvironment: Environment = app.injector.instanceOf[Environment]
-  implicit lazy val mat: Materializer  = app.materializer
+  given mat: Materializer              = app.materializer
 
   object TestCountryCodes extends CountryCodes {
     override def environment: Environment             = appEnvironment

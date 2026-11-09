@@ -53,7 +53,7 @@ class SubsidiaryAddressUkController @Inject() (
   val cacheKey: String                 = ersUtil.SUBSIDIARY_COMPANY_ADDRESS_CACHE
   given format: Format[CompanyAddress] = CompanyAddress.format
 
-  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit
+  def nextPageRedirect(index: Int, edit: Boolean = false)(using
     hc: HeaderCarrier,
     request: RequestHeader
   ): Future[Result] = {

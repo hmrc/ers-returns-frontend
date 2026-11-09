@@ -122,7 +122,7 @@ class ReturnServiceControllerSpec
       val controllerUnderTest = buildFakeReturnServiceController()
 
       val result =
-        controllerUnderTest.cacheParams(ersRequestObject)(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+        controllerUnderTest.cacheParams(ersRequestObject)(using Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
       status(result) shouldBe Status.OK
       val document = Jsoup.parse(contentAsString(result))
       document.getElementsByTag("h1").text() should include(
@@ -135,7 +135,7 @@ class ReturnServiceControllerSpec
     "create a new cache object and redirect to the initial start page" in {
       val controllerUnderTest = buildFakeReturnServiceController()
       val result              =
-        controllerUnderTest.cacheParams(ersRequestObject)(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+        controllerUnderTest.cacheParams(ersRequestObject)(using Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
       status(result) shouldBe Status.OK
     }
   }
@@ -146,7 +146,7 @@ class ReturnServiceControllerSpec
       when(mockSessionService.remove(any())(using any())).thenReturn(Future.failed(new Exception("failed")))
       val req                 = Fixtures.buildFakeRequestWithSessionIdCSOP("GET")
       val result              =
-        controllerUnderTest.cacheParams(ersRequestObject)(req)
+        controllerUnderTest.cacheParams(ersRequestObject)(using req)
       contentAsString(result) shouldBe contentAsString(
         Future(controllerUnderTest.getGlobalErrorPage(using req, testMessages))
       )

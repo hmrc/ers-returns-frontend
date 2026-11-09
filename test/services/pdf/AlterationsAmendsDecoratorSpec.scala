@@ -51,7 +51,7 @@ class AlterationsAmendsDecoratorSpec
     ExecutionContext.global
   )
 
-  implicit lazy val mat: Materializer = app.materializer
+  given mat: Materializer = app.materializer
 
   lazy val altAmends: AlterationAmends = AlterationAmends(
     altAmendsTerms = Some("1"),

@@ -58,11 +58,11 @@ class ReportableEventsControllerSpec
     ExecutionContext.global
   )
 
-  implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
-  implicit lazy val mat: Materializer          = app.materializer
-  val globalErrorView: global_error            = app.injector.instanceOf[global_error]
-  val reportableEventsView: reportable_events  = app.injector.instanceOf[reportable_events]
-  val TEST_OPTION_NIL_RETURN                   = "2"
+  given testMessages: MessagesImpl            = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
+  given mat: Materializer                     = app.materializer
+  val globalErrorView: global_error           = app.injector.instanceOf[global_error]
+  val reportableEventsView: reportable_events = app.injector.instanceOf[reportable_events]
+  val TEST_OPTION_NIL_RETURN                  = "2"
 
   "calling Reportable Events Page" should {
 

@@ -54,10 +54,10 @@ class TestOnlySubmissionDataControllerSpec
     ExecutionContext.global
   )
 
-  implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
+  given testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
 
-  implicit lazy val mat: Materializer = app.materializer
-  val globalErrorView: global_error   = app.injector.instanceOf[global_error]
+  given mat: Materializer           = app.materializer
+  val globalErrorView: global_error = app.injector.instanceOf[global_error]
 
   "calling createSchemeInfoFromURL" should {
 
@@ -129,7 +129,7 @@ class TestOnlySubmissionDataControllerSpec
       lazy val testOnlySubmissionDataController: TestOnlySubmissionDataController = new Setup()
       val authRequest                                                             = buildRequestWithAuth(testFakeRequest)
 
-      val result = testOnlySubmissionDataController.getRetrieveSubmissionData()(authRequest, hc)
+      val result = testOnlySubmissionDataController.getRetrieveSubmissionData()(using authRequest, hc)
       status(result) shouldBe NOT_FOUND
     }
 
@@ -141,7 +141,7 @@ class TestOnlySubmissionDataControllerSpec
         .thenReturn(Future.successful(HttpResponse(OK, "")))
 
       val authRequest = buildRequestWithAuth(testFakeRequest)
-      val result      = testOnlySubmissionDataController.getRetrieveSubmissionData()(authRequest, hc)
+      val result      = testOnlySubmissionDataController.getRetrieveSubmissionData()(using authRequest, hc)
       status(result)                                       shouldBe OK
       contentAsString(result).contains("Retrieve Failure") shouldBe false
     }
@@ -154,7 +154,7 @@ class TestOnlySubmissionDataControllerSpec
         .thenReturn(Future.successful(HttpResponse(INTERNAL_SERVER_ERROR, "")))
 
       val authRequest = buildRequestWithAuth(testFakeRequest)
-      val result      = testOnlySubmissionDataController.getRetrieveSubmissionData()(authRequest, hc)
+      val result      = testOnlySubmissionDataController.getRetrieveSubmissionData()(using authRequest, hc)
       status(result)                                                              shouldBe OK
       contentAsString(result).contains(testMessages("ers.global_errors.message")) shouldBe true
     }
@@ -167,7 +167,7 @@ class TestOnlySubmissionDataControllerSpec
         .thenReturn(Future.failed(new RuntimeException))
 
       val authRequest = buildRequestWithAuth(testFakeRequest)
-      val result      = testOnlySubmissionDataController.getRetrieveSubmissionData()(authRequest, hc)
+      val result      = testOnlySubmissionDataController.getRetrieveSubmissionData()(using authRequest, hc)
       status(result)                                                              shouldBe OK
       contentAsString(result).contains(testMessages("ers.global_errors.message")) shouldBe true
     }
@@ -184,7 +184,7 @@ class TestOnlySubmissionDataControllerSpec
 
       val authRequest = buildRequestWithAuth(testFakeRequest)
 
-      val result = testOnlySubmissionDataController.getRetrieveSubmissionData()(authRequest, hc)
+      val result = testOnlySubmissionDataController.getRetrieveSubmissionData()(using authRequest, hc)
       status(result) shouldBe NOT_FOUND
     }
   }

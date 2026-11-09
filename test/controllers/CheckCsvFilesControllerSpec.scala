@@ -84,7 +84,7 @@ class CheckCsvFilesControllerSpec
         checkCsvFileView,
         testAuthAction
       ) {
-        override def showCheckCsvFilesPage()(implicit
+        override def showCheckCsvFilesPage()(using
           request: RequestWithOptionalAuthContext[AnyContent]
         ): Future[Result] = Future.successful(Ok)
       }

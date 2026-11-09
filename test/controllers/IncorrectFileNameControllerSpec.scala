@@ -57,8 +57,8 @@ class IncorrectFileNameControllerSpec
   )
 
   val incorrectFileNameView: incorrect_file_name = app.injector.instanceOf[incorrect_file_name]
-  implicit lazy val testMessages: MessagesImpl   = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
-  implicit lazy val mat: Materializer            = app.materializer
+  given testMessages: MessagesImpl               = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
+  given mat: Materializer                        = app.materializer
   given appConfig: ApplicationConfig             = app.injector.instanceOf[ApplicationConfig]
   given actorSystem: ActorSystem                 = app.actorSystem
 

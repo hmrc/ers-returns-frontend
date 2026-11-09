@@ -128,7 +128,7 @@ trait SchemeOrganiserBaseController[A] extends FrontendController with I18nSuppo
     }
   }
 
-  def getGlobalErrorPage(implicit request: RequestHeader, messages: Messages): Result =
+  def getGlobalErrorPage(using request: RequestHeader, messages: Messages): Result =
     Ok(
       globalErrorView(
         "ers.global_errors.title",

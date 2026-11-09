@@ -36,7 +36,7 @@ class FrontendSessionsRepository @Inject() (mongoComponent: MongoComponent, appl
       sessionIdKey = SessionKeys.sessionId
     ) {
 
-  def getAllFromSession()(implicit request: RequestHeader): Future[Option[CacheItem]] =
+  def getAllFromSession()(using request: RequestHeader): Future[Option[CacheItem]] =
     cacheRepo.findById(request)
 
 }

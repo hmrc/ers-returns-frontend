@@ -184,7 +184,7 @@ class SubsidiaryAddressUKControllerSpec
       reset(mockCompanyDetailsService)
       verify(mockCompanyDetailsService, never()).updateSubsidiaryCompanyCache(any())(using any())
 
-      val result = testController.nextPageRedirect(0, edit = true)(hc, request)
+      val result = testController.nextPageRedirect(0, edit = true)(using hc, request)
 
       status(result)                          shouldBe Status.SEE_OTHER
       headers(result)(implicitly)("Location") shouldBe expectedRedirectUrl
@@ -196,7 +196,7 @@ class SubsidiaryAddressUKControllerSpec
       when(mockCompanyDetailsService.updateSubsidiaryCompanyCache(ArgumentMatchers.eq(index))(using any())).thenReturn {
         Future.failed(new Exception("error"))
       }
-      val result = testController.nextPageRedirect(index, edit = false)(hc, request)
+      val result = testController.nextPageRedirect(index, edit = false)(using hc, request)
 
       status(result)                          shouldBe Status.SEE_OTHER
       headers(result)(implicitly)("Location") shouldBe expectedRedirectUrl

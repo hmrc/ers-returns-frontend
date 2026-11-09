@@ -77,7 +77,7 @@ class SchemeOrganiserController @Inject() (
   def continueFromCompanySummaryPage()(): Future[Result] =
     Future(Redirect(controllers.subsidiaries.routes.GroupSchemeController.groupSchemePage()))
 
-  def getGlobalErrorPage(implicit request: RequestHeader, messages: Messages): Result =
+  def getGlobalErrorPage(using request: RequestHeader, messages: Messages): Result =
     Ok(
       globalErrorView(
         "ers.global_errors.title",

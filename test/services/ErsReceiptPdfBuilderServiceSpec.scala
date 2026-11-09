@@ -59,7 +59,7 @@ class ErsReceiptPdfBuilderServiceSpec
     ExecutionContext.global
   )
 
-  implicit lazy val mat: Materializer = app.materializer
+  given mat: Materializer             = app.materializer
   given ersUtil: ERSUtil              = mockErsUtil
   val testErsReceiptPdfBuilderService = new ErsReceiptPdfBuilderService(mockCountryCodes)
 
@@ -128,7 +128,7 @@ class ErsReceiptPdfBuilderServiceSpec
 
   "return the decorated string from a single decorator HTML with correct header message" in {
     given fakeDecorator: DecoratorController = new DecoratorController(Array()) {
-      override def decorate(implicit messages: Messages): String = "<p>Summary</p>"
+      override def decorate(using messages: Messages): String = "<p>Summary</p>"
     }
     val output                               = testErsReceiptPdfBuilderService.addSummary()
 

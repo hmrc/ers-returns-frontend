@@ -100,7 +100,7 @@ class CheckFileTypeControllerSpec
 
     "give a status OK if fetch successful and shows check file type page with file type selected" in {
       val controllerUnderTest = buildFakeCheckingServiceController()
-      val result              = controllerUnderTest.showCheckFileTypePage()(
+      val result              = controllerUnderTest.showCheckFileTypePage()(using
         buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
       )
       status(result) shouldBe Status.OK
@@ -112,7 +112,7 @@ class CheckFileTypeControllerSpec
     "give a status OK if fetch fails then show check file type page with nothing selected" in {
       val controllerUnderTest = buildFakeCheckingServiceController(fileType = Future.failed(new Exception))
 
-      val result = controllerUnderTest.showCheckFileTypePage()(
+      val result = controllerUnderTest.showCheckFileTypePage()(using
         buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
       )
 
@@ -125,7 +125,7 @@ class CheckFileTypeControllerSpec
     "render error page if fetch on Request Object fails" in {
       val controllerUnderTest = buildFakeCheckingServiceController(requestObject = Future.failed(new Exception))
       val req                 = Fixtures.buildFakeRequestWithSessionId("GET")
-      val result              = controllerUnderTest.showCheckFileTypePage()(buildRequestWithAuth(req))
+      val result              = controllerUnderTest.showCheckFileTypePage()(using buildRequestWithAuth(req))
 
       contentAsString(result)   should include(testMessages("ers.global_errors.message"))
       contentAsString(result) shouldBe contentAsString(

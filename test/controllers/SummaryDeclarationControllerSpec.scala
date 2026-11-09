@@ -60,12 +60,12 @@ class SummaryDeclarationControllerSpec
     ExecutionContext.global
   )
 
-  implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
-  given countryCodes: CountryCodes             = mockCountryCodes
+  given testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
+  given countryCodes: CountryCodes = mockCountryCodes
 
-  implicit lazy val materializer: Materializer = app.materializer
-  val globalErrorView: global_error            = app.injector.instanceOf[global_error]
-  val summaryView: summary                     = app.injector.instanceOf[summary]
+  given materializer: Materializer  = app.materializer
+  val globalErrorView: global_error = app.injector.instanceOf[global_error]
+  val summaryView: summary          = app.injector.instanceOf[summary]
 
   val schemeInfo: SchemeInfo = SchemeInfo("XA1100000000000", Instant.now, "2", "2016", "EMI", "EMI")
 

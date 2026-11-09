@@ -61,7 +61,7 @@ class FileUploadControllerSpec
     ExecutionContext.global
   )
 
-  implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
+  given testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
 
   val testOptString: Option[String] = Some("test")
 
@@ -100,7 +100,7 @@ class FileUploadControllerSpec
   val fileUploadProblemView: file_upload_problem      = app.injector.instanceOf[file_upload_problem]
   val invalidMimeError: views.html.invalid_mime_error = app.injector.instanceOf[invalid_mime_error]
 
-  implicit lazy val materializer: Materializer = app.materializer
+  given materializer: Materializer = app.materializer
 
   object TestFileUploadController
       extends FileUploadController(
@@ -334,8 +334,8 @@ class FileUploadControllerSpec
         when(mockSessionService.fetch[ErsMetaData](any())(using any(), any()))
           .thenReturn(Future.successful(validErsMetaData))
         when(
-          mockErsConnector.validateFileData(meq(uploadedSuccessfully), any[SchemeInfo])(
-            using any[RequestWithOptionalAuthContext[AnyContent]],
+          mockErsConnector.validateFileData(meq(uploadedSuccessfully), any[SchemeInfo])(using
+            any[RequestWithOptionalAuthContext[AnyContent]],
             any()
           )
         )
@@ -354,8 +354,11 @@ class FileUploadControllerSpec
       "Ers Meta Data is returned, callback record is uploaded successfully, remove presubmission data returns OK and validate file data returns BAD_REQUEST" in {
         when(mockSessionService.fetch[RequestObject](anyString())(using any(), any()))
           .thenReturn(Future.successful(ersRequestObject))
-        when(mockErsConnector.getCallbackRecord(using any(), any)).thenReturn(Future.successful(Some(uploadedSuccessfully)))
-        when(mockErsConnector.removePresubmissionData(any())(using any[RequestWithOptionalAuthContext[AnyContent]], any()))
+        when(mockErsConnector.getCallbackRecord(using any(), any))
+          .thenReturn(Future.successful(Some(uploadedSuccessfully)))
+        when(
+          mockErsConnector.removePresubmissionData(any())(using any[RequestWithOptionalAuthContext[AnyContent]], any())
+        )
           .thenReturn(Future.successful(HttpResponse(OK, "")))
         when(mockSessionService.fetch[ErsMetaData](any())(using any(), any()))
           .thenReturn(Future.successful(validErsMetaData))
@@ -388,8 +391,11 @@ class FileUploadControllerSpec
 
         when(mockSessionService.fetch[RequestObject](anyString())(using any(), any()))
           .thenReturn(Future.successful(ersRequestObject))
-        when(mockErsConnector.getCallbackRecord(using any(), any)).thenReturn(Future.successful(Some(uploadedSuccessfully)))
-        when(mockErsConnector.removePresubmissionData(any())(using any[RequestWithOptionalAuthContext[AnyContent]], any()))
+        when(mockErsConnector.getCallbackRecord(using any(), any))
+          .thenReturn(Future.successful(Some(uploadedSuccessfully)))
+        when(
+          mockErsConnector.removePresubmissionData(any())(using any[RequestWithOptionalAuthContext[AnyContent]], any())
+        )
           .thenReturn(Future.successful(HttpResponse(OK, "")))
         when(mockSessionService.fetch[ErsMetaData](any())(using any(), any()))
           .thenReturn(Future.successful(validErsMetaData))
@@ -412,7 +418,8 @@ class FileUploadControllerSpec
       "Ers Meta Data is returned, callback record is uploaded successfully, remove presubmission data returns OK, validate file data returns BAD_REQUEST, where a SchemeMismatchError occurs" in {
         when(mockSessionService.fetch[RequestObject](anyString())(using any(), any()))
           .thenReturn(Future.successful(ersRequestObject))
-        when(mockErsConnector.getCallbackRecord(using any(), any)).thenReturn(Future.successful(Some(uploadedSuccessfully)))
+        when(mockErsConnector.getCallbackRecord(using any(), any))
+          .thenReturn(Future.successful(Some(uploadedSuccessfully)))
         when(mockErsConnector.removePresubmissionData(any())(using any(), any()))
           .thenReturn(Future.successful(HttpResponse(OK, "")))
         when(mockSessionService.fetch[ErsMetaData](any())(using any(), any()))
@@ -446,7 +453,8 @@ class FileUploadControllerSpec
       "Ers Meta Data is returned, callback record is uploaded successfully, remove presubmission data returns OK, validate file data returns BAD_REQUEST, for CSOP with Incorrect ERS Template validation error" in {
         when(mockSessionService.fetch[RequestObject](anyString())(using any(), any()))
           .thenReturn(Future.successful(ersRequestObject))
-        when(mockErsConnector.getCallbackRecord(using any(), any)).thenReturn(Future.successful(Some(uploadedSuccessfully)))
+        when(mockErsConnector.getCallbackRecord(using any(), any))
+          .thenReturn(Future.successful(Some(uploadedSuccessfully)))
         when(mockErsConnector.removePresubmissionData(any())(using any(), any()))
           .thenReturn(Future.successful(HttpResponse(OK, "")))
         when(mockSessionService.fetch[ErsMetaData](any())(using any(), any()))
@@ -472,7 +480,8 @@ class FileUploadControllerSpec
         when(mockAppConfig.useV4andV5Scheme).thenReturn(false)
         when(mockSessionService.fetch[RequestObject](anyString())(using any(), any()))
           .thenReturn(Future.successful(ersRequestObject))
-        when(mockErsConnector.getCallbackRecord(using any(), any)).thenReturn(Future.successful(Some(uploadedSuccessfully)))
+        when(mockErsConnector.getCallbackRecord(using any(), any))
+          .thenReturn(Future.successful(Some(uploadedSuccessfully)))
         when(mockErsConnector.removePresubmissionData(any())(using any(), any()))
           .thenReturn(Future.successful(HttpResponse(OK, "")))
         when(mockSessionService.fetch[ErsMetaData](any())(using any(), any()))

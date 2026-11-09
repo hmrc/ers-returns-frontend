@@ -51,8 +51,8 @@ class YesNoDecoratorSpec
     ExecutionContext.global
   )
 
-  implicit lazy val mat: Materializer          = app.materializer
-  implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
+  given mat: Materializer          = app.materializer
+  given testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
 
   "nil returns decorator" should {
     "show Yes if there is nil return" in {

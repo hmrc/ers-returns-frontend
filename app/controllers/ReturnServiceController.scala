@@ -45,7 +45,7 @@ class ReturnServiceController @Inject() (
   lazy val accessThreshold: Int = appConfig.accessThreshold
   val accessDeniedUrl           = "/outage-ers-frontend/index.html"
 
-  def cacheParams(ersRequestObject: RequestObject)(implicit request: RequestHeader): Future[Result] = {
+  def cacheParams(ersRequestObject: RequestObject)(using request: RequestHeader): Future[Result] = {
     given formatRSParams: OFormat[RequestObject] = Json.format[RequestObject]
     logger.debug("Request Object created --> " + ersRequestObject)
     val futureResult                             = for {

@@ -53,8 +53,8 @@ class RetryableSpec
     val mockAppConfig: ApplicationConfig = mock[ApplicationConfig]
     when(mockAppConfig.retryDelay).thenReturn(1.millisecond)
 
-    implicit lazy val actorSystem: ActorSystem = app.actorSystem
-    override val appConfig: ApplicationConfig  = mockAppConfig
+    given actorSystem: ActorSystem            = app.actorSystem
+    override val appConfig: ApplicationConfig = mockAppConfig
 
     trait RetryTestUtil {
       def f: Future[Boolean]

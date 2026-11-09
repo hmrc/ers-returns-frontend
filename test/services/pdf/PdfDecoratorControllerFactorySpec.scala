@@ -52,7 +52,7 @@ class PdfDecoratorControllerFactorySpec
     ExecutionContext.global
   )
 
-  implicit lazy val mat: Materializer = app.materializer
+  given mat: Materializer = app.materializer
 
   class TestPdfDecoratorControllerFactory extends PdfDecoratorControllerFactory {
     val mockCountryCodes: CountryCodes      = mock[CountryCodes]

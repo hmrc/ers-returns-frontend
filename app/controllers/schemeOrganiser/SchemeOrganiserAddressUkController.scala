@@ -73,7 +73,7 @@ class SchemeOrganiserAddressUkController @Inject() (
   def form(using request: Request[AnyContent]): Form[CompanyAddress] = RsFormMappings.companyAddressUkForm()
 
   def view(requestObject: RequestObject, index: Int, companyAddressUkForm: Form[CompanyAddress], edit: Boolean = false)(
-    implicit
+    using
     request: Request[AnyContent],
     hc: HeaderCarrier
   ): Html =

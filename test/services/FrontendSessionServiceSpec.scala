@@ -251,14 +251,14 @@ class FrontendSessionServiceSpec
         Instant.now()
       )
 
-      when(frontendSessionsRepository.getAllFromSession()(any())).thenReturn(Future.successful(Some(cacheItem)))
+      when(frontendSessionsRepository.getAllFromSession()(using any())).thenReturn(Future.successful(Some(cacheItem)))
 
       val result = testService.fetchAll().futureValue
       result shouldBe cacheItem
     }
 
     "throw Exception with a specific message when no data is found in the session" in {
-      when(frontendSessionsRepository.getAllFromSession()(any())).thenReturn(Future.successful(None))
+      when(frontendSessionsRepository.getAllFromSession()(using any())).thenReturn(Future.successful(None))
 
       val thrown = intercept[Exception] {
         testService.fetchAll().futureValue
@@ -268,7 +268,7 @@ class FrontendSessionServiceSpec
 
     "throw Exception when there is an error fetching data" in {
       val exception = new RuntimeException("Test exception")
-      when(frontendSessionsRepository.getAllFromSession()(any())).thenReturn(Future.failed(exception))
+      when(frontendSessionsRepository.getAllFromSession()(using any())).thenReturn(Future.failed(exception))
 
       val thrown = intercept[Exception] {
         testService.fetchAll().futureValue

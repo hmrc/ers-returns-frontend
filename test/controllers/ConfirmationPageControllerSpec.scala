@@ -64,11 +64,11 @@ class ConfirmationPageControllerSpec
     ExecutionContext.global
   )
 
-  implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
+  given testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
 
-  implicit lazy val mat: Materializer = app.materializer
-  val globalErrorView: global_error   = app.injector.instanceOf[global_error]
-  val confirmationView: confirmation  = app.injector.instanceOf[confirmation]
+  given mat: Materializer            = app.materializer
+  val globalErrorView: global_error  = app.injector.instanceOf[global_error]
+  val confirmationView: confirmation = app.injector.instanceOf[confirmation]
 
   override def beforeEach(): Unit = {
     super.beforeEach()
@@ -133,7 +133,9 @@ class ConfirmationPageControllerSpec
         ) thenReturn requestObjectRes
 
         when(mockErsConnector.saveMetadata(any())(using any(), any())) thenReturn Future.successful(HttpResponse(OK))
-        when(mockErsConnector.submitReturnToBackend(any())(using any(), any())) thenReturn Future.successful(HttpResponse(OK))
+        when(mockErsConnector.submitReturnToBackend(any())(using any(), any())) thenReturn Future.successful(
+          HttpResponse(OK)
+        )
       }
 
     "give a redirect status (to company authentication frontend) if user is not authenticated" in {
@@ -338,9 +340,10 @@ class ConfirmationPageControllerSpec
             }
           )
 
-        when(mockErsConnector.submitReturnToBackend(any[ErsSummary]())(using any(), any())) thenReturn Future.successful(
-          HttpResponse(submitReturnToBackendResponse, "")
-        )
+        when(mockErsConnector.submitReturnToBackend(any[ErsSummary]())(using any(), any())) thenReturn Future
+          .successful(
+            HttpResponse(submitReturnToBackendResponse, "")
+          )
       }
 
     "returns OK for Submission if there are no exceptions thrown - submit to backend successful" in {

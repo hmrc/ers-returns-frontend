@@ -60,7 +60,7 @@ class GroupSchemeController @Inject() (
   given ec: ExecutionContext      = mcc.executionContext
   private val form: Form[Boolean] = yesNoFormProvider.withPrefix("delete-company")
 
-  private def getRequestObjAndCompanyDetails()(implicit
+  private def getRequestObjAndCompanyDetails()(using
     request: RequestWithOptionalAuthContext[AnyContent]
   ): Future[(RequestObject, Int, CompanyDetailsList)] =
     for {

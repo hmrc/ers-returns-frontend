@@ -44,7 +44,7 @@ class TestOnlySubmissionDataController @Inject() (
     getRetrieveSubmissionData()
   }
 
-  def getRetrieveSubmissionData()(implicit
+  def getRetrieveSubmissionData()(using
     request: RequestWithOptionalAuthContext[AnyContent],
     hc: HeaderCarrier
   ): Future[Result] = {

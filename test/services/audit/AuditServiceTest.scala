@@ -47,7 +47,7 @@ class AuditServiceTest extends AnyWordSpecLike with Matchers with MockitoSugar w
   "sendEvent" should {
     class TestAuditService(auditResult: AuditResult) extends AuditService {
       override val auditConnector: DefaultAuditConnector = mockAuditConnector
-      override def buildEvent(transactionName: String, details: Map[String, String])(implicit
+      override def buildEvent(transactionName: String, details: Map[String, String])(using
         hc: HeaderCarrier
       ): DataEvent = dataEvent
       when(auditConnector.sendEvent(any())(any(), any())).thenReturn(Future.successful(auditResult))

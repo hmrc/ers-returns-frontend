@@ -47,10 +47,10 @@ class CheckFileTypeController @Inject() (
           s"and schemeRef: ${ele.schemeInfo.schemeRef}"
       )
     }
-    showCheckFileTypePage()(request)
+    showCheckFileTypePage()(using request)
   }
 
-  def showCheckFileTypePage()(implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
+  def showCheckFileTypePage()(using request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
     (for {
       requestObject <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
       fileType      <- sessionService

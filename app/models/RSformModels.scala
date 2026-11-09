@@ -228,7 +228,7 @@ case class RequestObject(
       getSchemeType
     )
 
-  def toErsMetaData(implicit request: RequestHeader): ErsMetaData =
+  def toErsMetaData(using request: RequestHeader): ErsMetaData =
     ErsMetaData(
       toSchemeInfo,
       request.remoteAddress,
@@ -238,7 +238,7 @@ case class RequestObject(
       None
     )
 
-  def getPageTitle(implicit messages: Messages): String =
+  def getPageTitle(using messages: Messages): String =
     s"${messages(s"ers.scheme.${getSchemeType.toUpperCase}")} " +
       s"- ${messages("ers.scheme.title", getSchemeNameForDisplay)} " +
       s"- $getSchemeReference - ${DateUtils.getFullTaxYear(getTaxYear)}"
@@ -251,13 +251,13 @@ case class RequestObject(
 
   def getSchemeType: String = schemeType.getOrElse("")
 
-  def getSchemeNameForDisplay(implicit messages: Messages): String =
+  def getSchemeNameForDisplay(using messages: Messages): String =
     if (schemeName.isDefined) messages(s"ers.${getSchemeType.toLowerCase}") else ""
 
-  def getSchemeNameCaptionForDisplay(implicit messages: Messages): String =
+  def getSchemeNameCaptionForDisplay(using messages: Messages): String =
     if (schemeName.isDefined) messages(s"ers.${getSchemeType.toLowerCase}.caption") else ""
 
-  def getSchemeHeadingName(implicit messages: Messages): String =
+  def getSchemeHeadingName(using messages: Messages): String =
     schemeType.map(schemeName => messages(s"ers.schemeDisplay.${schemeName.toUpperCase}")).getOrElse("")
 
   def getEmpRef: String = empRef.getOrElse("")
@@ -294,7 +294,7 @@ case class RequestObject(
 object RequestObject {
   given formatRequestObject: OFormat[RequestObject] = Json.format[RequestObject]
 
-  def getSchemeWithArticle(schemeType: String)(implicit messages: Messages): String =
+  def getSchemeWithArticle(schemeType: String)(using messages: Messages): String =
     messages.lang.code match {
       case "en" =>
         val article = if (startsWithVowel(schemeType)) "an" else "a"
@@ -304,7 +304,7 @@ object RequestObject {
         if (schemeType == "OTHER") messages(s"ers.scheme.$schemeType") else schemeType
     }
 
-  def getSchemeTypeForOdsSchemeMismatch(schemeType: String)(implicit messages: Messages): String =
+  def getSchemeTypeForOdsSchemeMismatch(schemeType: String)(using messages: Messages): String =
     s"${messages(s"ers.scheme.${schemeType.toUpperCase}")}"
 
   def startsWithVowel(scheme: String): Boolean = {

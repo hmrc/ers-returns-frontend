@@ -50,7 +50,7 @@ class PageBuilderTest
     ExecutionContext.global
   )
 
-  implicit lazy val mat: Materializer = app.materializer
+  given mat: Materializer = app.materializer
 
   class TestPageBuilder extends PageBuilder
 

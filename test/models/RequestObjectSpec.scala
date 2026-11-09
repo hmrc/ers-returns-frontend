@@ -21,6 +21,7 @@ import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.i18n.{Lang, Messages, MessagesApi}
+import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import utils.DateUtils
 import utils.Fixtures.ersRequestObject
@@ -95,7 +96,7 @@ class RequestObjectSpec extends AnyWordSpecLike with Matchers with GuiceOneAppPe
 
     "return an instance of ErsMetaData with the correct field" in {
 
-      implicit val request = FakeRequest("GET", "/foo")
+      given request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("GET", "/foo")
 
       val requestObject =
         RequestObject(

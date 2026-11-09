@@ -148,7 +148,7 @@ class SchemeOrganiserControllerSpec
       val authRequest         = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdSIP("GET"))
 
       contentAsString(controllerUnderTest.showSchemeOrganiserSummaryPage(using authRequest)) shouldBe contentAsString(
-        Future(controllerUnderTest.getGlobalErrorPage(testFakeRequest, testMessages))
+        Future(controllerUnderTest.getGlobalErrorPage(using testFakeRequest, testMessages))
       )
     }
 
@@ -157,7 +157,7 @@ class SchemeOrganiserControllerSpec
       val authRequest         = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdSIP("GET"))
 
       contentAsString(controllerUnderTest.showSchemeOrganiserSummaryPage(using authRequest)) shouldBe contentAsString(
-        Future(controllerUnderTest.getGlobalErrorPage(testFakeRequest, testMessages))
+        Future(controllerUnderTest.getGlobalErrorPage(using testFakeRequest, testMessages))
       )
     }
 
@@ -169,7 +169,7 @@ class SchemeOrganiserControllerSpec
       val result = controllerUnderTest.showSchemeOrganiserSummaryPage(using authRequest)
 
       contentAsString(result) shouldBe contentAsString(
-        Future(controllerUnderTest.getGlobalErrorPage(testFakeRequest, testMessages))
+        Future(controllerUnderTest.getGlobalErrorPage(using testFakeRequest, testMessages))
       )
       status(result)          shouldBe Status.OK
 
