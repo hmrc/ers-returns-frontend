@@ -1,4 +1,4 @@
-ThisBuild / majorVersion := 1
+ThisBuild / majorVersion := 2
 ThisBuild / scalaVersion := "3.3.9"
 
 lazy val microservice = Project("ers-returns-frontend", file("."))
