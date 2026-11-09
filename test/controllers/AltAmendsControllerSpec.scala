@@ -60,7 +60,7 @@ class AltAmendsControllerSpec
     ExecutionContext.global
   )
 
-  implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
+  given testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
 
   val fakeGroupSchemeInfo: GroupSchemeInfo     = GroupSchemeInfo(Some(OPTION_NO), Some(""))
   val fakeAltAmendsActivity: AltAmendsActivity = AltAmendsActivity("1")
@@ -84,15 +84,15 @@ class AltAmendsControllerSpec
         globalErrorView,
         testAuthAction
       ) {
-        when(mockSessionService.fetch[GroupSchemeInfo](ArgumentMatchers.eq("group-scheme-controller"))(any(), any()))
+        when(mockSessionService.fetch[GroupSchemeInfo](ArgumentMatchers.eq("group-scheme-controller"))(using any(), any()))
           .thenReturn(groupSchemeActivity)
 
-        when(mockSessionService.fetch[AltAmendsActivity](ArgumentMatchers.eq("alt-activity"))(any(), any()))
+        when(mockSessionService.fetch[AltAmendsActivity](ArgumentMatchers.eq("alt-activity"))(using any(), any()))
           .thenReturn(altAmendsActivity)
 
-        when(mockSessionService.fetch[RequestObject](refEq(ERS_REQUEST_OBJECT))(any(), any())).thenReturn(requestObject)
+        when(mockSessionService.fetch[RequestObject](refEq(ERS_REQUEST_OBJECT))(using any(), any())).thenReturn(requestObject)
 
-        when(mockSessionService.cache(ArgumentMatchers.eq("alt-activity"), any())(any(), any()))
+        when(mockSessionService.cache(ArgumentMatchers.eq("alt-activity"), any())(using any(), any()))
           .thenReturn(if (successfulCache) Future.successful(sessionPair) else Future.failed(new Exception("error")))
 
         when(mockErsUtil.getPageElement(any(), any(), any(), any())(any())).thenCallRealMethod()
@@ -115,22 +115,22 @@ class AltAmendsControllerSpec
     "direct to ers errors page if fetching groupSchemeActivity throws exception" in {
       val controllerUnderTest = buildFakeAltAmendsPageController(groupSchemeActivity = Future.failed(new Exception))
       val authRequest         = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"), Fixtures.buildFakeUser)
-      val result              = controllerUnderTest.showAltActivityPage()(authRequest)
+      val result              = controllerUnderTest.showAltActivityPage()(using authRequest)
 
       contentAsString(result)   should include(testMessages("ers.global_errors.message"))
       contentAsString(result) shouldBe contentAsString(
-        Future(buildFakeAltAmendsPageController().getGlobalErrorPage(testFakeRequest, testMessages))
+        Future(buildFakeAltAmendsPageController().getGlobalErrorPage(using testFakeRequest, testMessages))
       )
     }
 
     "direct to ers errors page if fetching requestObject throws exception" in {
       val controllerUnderTest = buildFakeAltAmendsPageController(requestObject = Future.failed(new Exception))
       val authRequest         = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"), Fixtures.buildFakeUser)
-      val result              = controllerUnderTest.showAltActivityPage()(authRequest)
+      val result              = controllerUnderTest.showAltActivityPage()(using authRequest)
 
       contentAsString(result)   should include(testMessages("ers.global_errors.message"))
       contentAsString(result) shouldBe contentAsString(
-        Future(buildFakeAltAmendsPageController().getGlobalErrorPage(testFakeRequest, testMessages))
+        Future(buildFakeAltAmendsPageController().getGlobalErrorPage(using testFakeRequest, testMessages))
       )
     }
 
@@ -138,7 +138,7 @@ class AltAmendsControllerSpec
       val controllerUnderTest = buildFakeAltAmendsPageController()
       val authRequest         = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"), Fixtures.buildFakeUser)
 
-      val result = controllerUnderTest.showAltActivityPage()(authRequest)
+      val result = controllerUnderTest.showAltActivityPage()(using authRequest)
 
       status(result) shouldBe Status.OK
       val document = Jsoup.parse(contentAsString(result))
@@ -150,7 +150,7 @@ class AltAmendsControllerSpec
       val controllerUnderTest = buildFakeAltAmendsPageController(altAmendsActivity = Future.failed(new Exception))
       val authRequest         = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"), Fixtures.buildFakeUser)
 
-      val result = controllerUnderTest.showAltActivityPage()(authRequest)
+      val result = controllerUnderTest.showAltActivityPage()(using authRequest)
 
       status(result) shouldBe Status.OK
       val document = Jsoup.parse(contentAsString(result))
@@ -183,7 +183,7 @@ class AltAmendsControllerSpec
       val request             = Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val authRequest         = buildRequestWithAuth(request)
 
-      val result = controllerUnderTest.showAltActivitySelected()(authRequest)
+      val result = controllerUnderTest.showAltActivitySelected()(using authRequest)
 
       status(result) shouldBe Status.OK
     }
@@ -195,7 +195,7 @@ class AltAmendsControllerSpec
       val request                       = Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val authRequest                   = buildRequestWithAuth(request, Fixtures.buildFakeUser)
 
-      val result = controllerUnderTest.showAltActivitySelected()(authRequest)
+      val result = controllerUnderTest.showAltActivitySelected()(using authRequest)
 
       status(result)         shouldBe Status.SEE_OTHER
       result.futureValue.header
@@ -209,7 +209,7 @@ class AltAmendsControllerSpec
       val request             = Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val authRequest         = buildRequestWithAuth(request, Fixtures.buildFakeUser)
 
-      val result = controllerUnderTest.showAltActivitySelected()(authRequest)
+      val result = controllerUnderTest.showAltActivitySelected()(using authRequest)
 
       status(result)                                shouldBe Status.SEE_OTHER
       result.futureValue.header.headers("Location") shouldBe routes.AltAmendsController.altAmendsPage().toString
@@ -222,11 +222,11 @@ class AltAmendsControllerSpec
       val req                 = Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val authRequest         = buildRequestWithAuth(req, Fixtures.buildFakeUser)
 
-      val result = controllerUnderTest.showAltActivitySelected()(authRequest)
+      val result = controllerUnderTest.showAltActivitySelected()(using authRequest)
 
       status(result)          shouldBe Status.OK
       contentAsString(result) shouldBe contentAsString(
-        Future(buildFakeAltAmendsPageController().getGlobalErrorPage(req, testMessages))
+        Future(buildFakeAltAmendsPageController().getGlobalErrorPage(using req, testMessages))
       )
       contentAsString(result)   should include(testMessages("ers.global_errors.message"))
     }
@@ -238,10 +238,10 @@ class AltAmendsControllerSpec
       val req                 = Fixtures.buildFakeRequest("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val authRequest         = buildRequestWithAuth(req, Fixtures.buildFakeUser)
 
-      val result = controllerUnderTest.showAltActivitySelected()(authRequest)
+      val result = controllerUnderTest.showAltActivitySelected()(using authRequest)
 
       contentAsString(result) shouldBe contentAsString(
-        Future(buildFakeAltAmendsPageController().getGlobalErrorPage(req, testMessages))
+        Future(buildFakeAltAmendsPageController().getGlobalErrorPage(using req, testMessages))
       )
       contentAsString(result)   should include(testMessages("ers.global_errors.message"))
     }
@@ -267,11 +267,11 @@ class AltAmendsControllerSpec
       testAuthAction
     ) {
 
-      when(mockSessionService.fetch[RequestObject](refEq(ERS_REQUEST_OBJECT))(any(), any()))
+      when(mockSessionService.fetch[RequestObject](refEq(ERS_REQUEST_OBJECT))(using any(), any()))
         .thenReturn(requestObject)
-      when(mockSessionService.fetchOption[AltAmends](refEq("alt-amends-cache-controller"), any())(any(), any()))
+      when(mockSessionService.fetchOption[AltAmends](refEq("alt-amends-cache-controller"), any())(using any(), any()))
         .thenReturn(altAmends)
-      when(mockSessionService.cache(refEq("alt-amends-cache-controller"), any())(any(), any()))
+      when(mockSessionService.cache(refEq("alt-amends-cache-controller"), any())(using any(), any()))
         .thenReturn(if (successfulCache) Future.successful(sessionPair) else Future.failed(new Exception("error")))
       when(mockErsUtil.getPageElement(any(), any(), any(), any())(any())).thenReturn("")
     }
@@ -295,7 +295,7 @@ class AltAmendsControllerSpec
         buildFakeAltAmendsPageController(altAmends = Future.failed(new Exception))
       val authRequest                              = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"), Fixtures.buildFakeUser)
 
-      val result = controllerUnderTest.showAltAmendsPage()(authRequest)
+      val result = controllerUnderTest.showAltAmendsPage()(using authRequest)
 
       status(result) shouldBe Status.OK
       val document = Jsoup.parse(contentAsString(result))
@@ -311,7 +311,7 @@ class AltAmendsControllerSpec
         buildFakeAltAmendsPageController(altAmends = Future.successful(None))
       val authRequest                              = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"), Fixtures.buildFakeUser)
 
-      val result = controllerUnderTest.showAltAmendsPage()(authRequest)
+      val result = controllerUnderTest.showAltAmendsPage()(using authRequest)
 
       status(result) shouldBe Status.OK
       val document = Jsoup.parse(contentAsString(result))
@@ -326,7 +326,7 @@ class AltAmendsControllerSpec
       val controllerUnderTest: AltAmendsController = buildFakeAltAmendsPageController()
       val authRequest                              = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"), Fixtures.buildFakeUser)
 
-      val result = controllerUnderTest.showAltAmendsPage()(authRequest)
+      val result = controllerUnderTest.showAltAmendsPage()(using authRequest)
 
       status(result) shouldBe Status.OK
       val document = Jsoup.parse(contentAsString(result))
@@ -367,7 +367,7 @@ class AltAmendsControllerSpec
       val request                                  = Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val authRequest                              = buildRequestWithAuth(request, Fixtures.buildFakeUser)
 
-      val result = controllerUnderTest.showAltAmendsSelected()(authRequest)
+      val result = controllerUnderTest.showAltAmendsSelected()(using authRequest)
       status(result)                                shouldBe Status.SEE_OTHER
       result.futureValue.header.headers("Location") shouldBe routes.AltAmendsController.altAmendsPage().toString
     }
@@ -385,7 +385,7 @@ class AltAmendsControllerSpec
       val request                                  = Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val authRequest                              = buildRequestWithAuth(request, Fixtures.buildFakeUser)
 
-      val result = controllerUnderTest.showAltAmendsSelected()(authRequest)
+      val result = controllerUnderTest.showAltAmendsSelected()(using authRequest)
 
       status(result)                                shouldBe Status.SEE_OTHER
       result.futureValue.header.headers("Location") shouldBe routes.AltAmendsController.altAmendsPage().toString
@@ -405,11 +405,11 @@ class AltAmendsControllerSpec
       val req                                      = Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val authRequest                              = buildRequestWithAuth(req, Fixtures.buildFakeUser)
 
-      val result = controllerUnderTest.showAltAmendsSelected()(authRequest)
+      val result = controllerUnderTest.showAltAmendsSelected()(using authRequest)
 
       status(result)          shouldBe Status.OK
       contentAsString(result) shouldBe contentAsString(
-        Future(buildFakeAltAmendsPageController().getGlobalErrorPage(req, testMessages))
+        Future(buildFakeAltAmendsPageController().getGlobalErrorPage(using req, testMessages))
       )
       contentAsString(result)   should include(testMessages("ers.global_errors.message"))
     }
@@ -427,7 +427,7 @@ class AltAmendsControllerSpec
       val request                                  = Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       val authRequest                              = buildRequestWithAuth(request, Fixtures.buildFakeUser)
 
-      val result = controllerUnderTest.showAltAmendsSelected()(authRequest)
+      val result = controllerUnderTest.showAltAmendsSelected()(using authRequest)
 
       status(result)         shouldBe Status.SEE_OTHER
       result.futureValue.header

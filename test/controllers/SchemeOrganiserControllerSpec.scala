@@ -58,7 +58,7 @@ class SchemeOrganiserControllerSpec
     ExecutionContext.global
   )
 
-  implicit lazy val testMessages: MessagesImpl             = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
+  given testMessages: MessagesImpl             = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
   val globalErrorView: global_error                        = app.injector.instanceOf[global_error]
   val schemeOrganiserSummaryView: scheme_organiser_summary = app.injector.instanceOf[scheme_organiser_summary]
 
@@ -87,7 +87,7 @@ class SchemeOrganiserControllerSpec
       testAuthAction
     ) {
 
-      when(mockSessionService.fetch[CompanyDetails](refEq(mockErsUtil.SCHEME_ORGANISER_CACHE))(any(), any()))
+      when(mockSessionService.fetch[CompanyDetails](refEq(mockErsUtil.SCHEME_ORGANISER_CACHE))(using any(), any()))
         .thenReturn(
           if (schemeOrganiserSummaryRes) {
             if (schemeOrganiserSummaryCached) {
@@ -102,7 +102,7 @@ class SchemeOrganiserControllerSpec
           }
         )
 
-      when(mockSessionService.cache(refEq(SCHEME_ORGANISER_CACHE), any())(any(), any())).thenReturn(
+      when(mockSessionService.cache(refEq(SCHEME_ORGANISER_CACHE), any())(using any(), any())).thenReturn(
         if (schemeOrganiserSummaryCachedOk) {
           Future.successful(null)
         } else {
@@ -110,16 +110,16 @@ class SchemeOrganiserControllerSpec
         }
       )
 
-      when(mockSessionService.fetch[RequestObject](any())(any(), any())).thenReturn(requestObjectRes)
+      when(mockSessionService.fetch[RequestObject](any())(using any(), any())).thenReturn(requestObjectRes)
 
-      when(mockSessionService.fetch[ReportableEvents](refEq(REPORTABLE_EVENTS))(any(), any())).thenReturn(
+      when(mockSessionService.fetch[ReportableEvents](refEq(REPORTABLE_EVENTS))(using any(), any())).thenReturn(
         if (reportableEventsRes) {
           Future.successful(ReportableEvents(Some(OPTION_NO)))
         } else {
           Future.failed(new Exception)
         }
       )
-      when(mockSessionService.fetchOption[CheckFileType](refEq(FILE_TYPE_CACHE), any())(any(), any())).thenReturn(
+      when(mockSessionService.fetchOption[CheckFileType](refEq(FILE_TYPE_CACHE), any())(using any(), any())).thenReturn(
         if (fileTypeRes) {
           Future.successful(Some(CheckFileType(Some(OPTION_CSV))))
         } else {
@@ -147,7 +147,7 @@ class SchemeOrganiserControllerSpec
       val controllerUnderTest = buildFakeSchemeOrganiserSummaryController(schemeOrganiserSummaryRes = false)
       val authRequest         = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdSIP("GET"))
 
-      contentAsString(controllerUnderTest.showSchemeOrganiserSummaryPage(authRequest)) shouldBe contentAsString(
+      contentAsString(controllerUnderTest.showSchemeOrganiserSummaryPage(using authRequest)) shouldBe contentAsString(
         Future(controllerUnderTest.getGlobalErrorPage(testFakeRequest, testMessages))
       )
     }
@@ -156,7 +156,7 @@ class SchemeOrganiserControllerSpec
       val controllerUnderTest = buildFakeSchemeOrganiserSummaryController(requestObjectRes = failure)
       val authRequest         = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdSIP("GET"))
 
-      contentAsString(controllerUnderTest.showSchemeOrganiserSummaryPage(authRequest)) shouldBe contentAsString(
+      contentAsString(controllerUnderTest.showSchemeOrganiserSummaryPage(using authRequest)) shouldBe contentAsString(
         Future(controllerUnderTest.getGlobalErrorPage(testFakeRequest, testMessages))
       )
     }
@@ -166,7 +166,7 @@ class SchemeOrganiserControllerSpec
       val controllerUnderTest = buildFakeSchemeOrganiserSummaryController(schemeOrganiserSummaryCached = true)
       val authRequest         = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdSIP("GET"))
 
-      val result = controllerUnderTest.showSchemeOrganiserSummaryPage(authRequest)
+      val result = controllerUnderTest.showSchemeOrganiserSummaryPage(using authRequest)
 
       contentAsString(result) shouldBe contentAsString(
         Future(controllerUnderTest.getGlobalErrorPage(testFakeRequest, testMessages))
@@ -177,25 +177,25 @@ class SchemeOrganiserControllerSpec
 
     "return Ok with schemeOrganiserSummaryView" in {
 
-      when(mockSessionService.fetchSchemeOrganiserOptionally()(any(), any()))
+      when(mockSessionService.fetchSchemeOrganiserOptionally()(using any(), any()))
         .thenReturn(Future.successful(Some(companyDetails)))
       setAuthMocks()
       val controllerUnderTest = buildFakeSchemeOrganiserSummaryController(schemeOrganiserSummaryCached = true)
       val authRequest         = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdSIP("GET"))
 
-      val result = controllerUnderTest.showSchemeOrganiserSummaryPage(authRequest)
+      val result = controllerUnderTest.showSchemeOrganiserSummaryPage(using authRequest)
       status(result) shouldBe Status.OK
 
     }
 
     "redirect to SchemeOrganiserNameController.questionPage if no scheme organiser is present" in {
 
-      when(mockSessionService.fetchSchemeOrganiserOptionally()(any(), any())).thenReturn(Future.successful(None))
+      when(mockSessionService.fetchSchemeOrganiserOptionally()(using any(), any())).thenReturn(Future.successful(None))
       setAuthMocks()
       val controllerUnderTest = buildFakeSchemeOrganiserSummaryController(schemeOrganiserSummaryCached = false)
       val authRequest         = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdSIP("GET"))
 
-      val result = controllerUnderTest.showSchemeOrganiserSummaryPage(authRequest)
+      val result = controllerUnderTest.showSchemeOrganiserSummaryPage(using authRequest)
 
       status(result)           shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some("/submit-your-ers-annual-return/where-is-company-registered")

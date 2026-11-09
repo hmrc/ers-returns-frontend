@@ -60,7 +60,7 @@ class ErsReceiptPdfBuilderServiceSpec
   )
 
   implicit lazy val mat: Materializer = app.materializer
-  implicit val ersUtil: ERSUtil       = mockErsUtil
+  given ersUtil: ERSUtil       = mockErsUtil
   val testErsReceiptPdfBuilderService = new ErsReceiptPdfBuilderService(mockCountryCodes)
 
   val testCases: TableFor3[String, String, String] = Table(
@@ -76,7 +76,7 @@ class ErsReceiptPdfBuilderServiceSpec
       s"generate the ERS summary metdata correctly when parsed the date: $inputDate and language: $language" in {
         val testMessages: MessagesImpl = MessagesImpl(i18n.Lang(language), mockMCC.messagesApi)
         when(mockErsUtil.replaceAmpersand(any[String])).thenAnswer(_.getArgument(0))
-        val output                     = testErsReceiptPdfBuilderService.addMetaData(Fixtures.ersSummary, inputDate)(testMessages)
+        val output                     = testErsReceiptPdfBuilderService.addMetaData(Fixtures.ersSummary, inputDate)(using testMessages)
 
         val expectedConfirmationMessage =
           testMessages.messages(
@@ -119,7 +119,7 @@ class ErsReceiptPdfBuilderServiceSpec
   "return HTML with correct header message" in {
 
     val testMessages: MessagesImpl = MessagesImpl(Lang.defaultLang(), mockMCC.messagesApi)
-    val output                     = testErsReceiptPdfBuilderService.pdfHeader(testMessages)
+    val output                     = testErsReceiptPdfBuilderService.pdfHeader(using testMessages)
 
     output.contains("</div><hr/>") shouldBe true
     output                           should include(testMessages("ers.pdf.header"))
@@ -127,7 +127,7 @@ class ErsReceiptPdfBuilderServiceSpec
   }
 
   "return the decorated string from a single decorator HTML with correct header message" in {
-    implicit val fakeDecorator: DecoratorController = new DecoratorController(Array()) {
+    given fakeDecorator: DecoratorController = new DecoratorController(Array()) {
       override def decorate(implicit messages: Messages): String = "<p>Summary</p>"
     }
     val output                                      = testErsReceiptPdfBuilderService.addSummary()

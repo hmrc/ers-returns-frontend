@@ -31,6 +31,7 @@ import java.time.Instant
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicLong
 import scala.concurrent.duration.FiniteDuration
+import scala.concurrent.duration.DurationInt
 
 class RateLimiterCacheSpec extends AnyWordSpecLike {
 

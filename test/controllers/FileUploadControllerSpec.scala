@@ -90,7 +90,7 @@ class FileUploadControllerSpec
   )
 
   lazy val mockUpscanService: UpscanService           = mock[UpscanService]
-  implicit val mockActorSystem: ActorSystem           = app.injector.instanceOf[ActorSystem]
+  given mockActorSystem: ActorSystem           = app.injector.instanceOf[ActorSystem]
   val globalErrorView: global_error                   = app.injector.instanceOf[global_error]
   val fileUploadErrorsView: file_upload_errors        = app.injector.instanceOf[file_upload_errors]
   val fileUploadErrorsOdsView: file_upload_errors_ods = app.injector.instanceOf[file_upload_errors_ods]
@@ -119,7 +119,7 @@ class FileUploadControllerSpec
         testAuthAction
       )
 
-  when(mockSessionService.fetch[CheckFileType](refEq("check-file-type"))(any(), any()))
+  when(mockSessionService.fetch[CheckFileType](refEq("check-file-type"))(using any(), any()))
     .thenReturn(Future.successful(CheckFileType(Some("csv"))))
 
   def failure(request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest())(handler: Future[Result] => Any): Unit =
@@ -151,11 +151,11 @@ class FileUploadControllerSpec
   }
 
   "uploadFilePage" must {
-    when(mockSessionService.fetch[RequestObject](any())(any(), any()))
+    when(mockSessionService.fetch[RequestObject](any())(using any(), any()))
       .thenReturn(Future.successful(ersRequestObject))
     "return OK" when {
       "Upscan form data is successfully returned and callback record is created in session cache" in {
-        when(mockUpscanService.getUpscanFormDataOds(anyString())(any[HeaderCarrier], any[RequestHeader]))
+        when(mockUpscanService.getUpscanFormDataOds(anyString())(using any[HeaderCarrier], any[RequestHeader]))
           .thenReturn(Future.successful(upscanInitiateResponse))
         when(mockErsConnector.createCallbackRecord(any(), any()))
           .thenReturn(Future.successful(CREATED))
@@ -170,9 +170,9 @@ class FileUploadControllerSpec
       "Upscan service returns an exception retrieving form data" in {
         reset(mockErsConnector)
         setAuthMocks()
-        when(mockUpscanService.getUpscanFormDataOds(anyString())(any[HeaderCarrier], any[RequestHeader]))
+        when(mockUpscanService.getUpscanFormDataOds(anyString())(using any[HeaderCarrier], any[RequestHeader]))
           .thenReturn(Future.failed(new Exception("Expected exception")))
-        when(mockSessionService.fetch[RequestObject](meq(ERS_REQUEST_OBJECT))(any(), any()))
+        when(mockSessionService.fetch[RequestObject](meq(ERS_REQUEST_OBJECT))(using any(), any()))
           .thenReturn(Future.successful(ersRequestObject))
 
         val result = TestFileUploadController.uploadFilePage()(testFakeRequest)
@@ -182,7 +182,7 @@ class FileUploadControllerSpec
       }
 
       "Session service returns an exception creating callback record" in {
-        when(mockUpscanService.getUpscanFormDataOds(anyString())(any[HeaderCarrier], any[RequestHeader]))
+        when(mockUpscanService.getUpscanFormDataOds(anyString())(using any[HeaderCarrier], any[RequestHeader]))
           .thenReturn(Future.successful(upscanInitiateResponse))
         when(mockErsConnector.createCallbackRecord(any(), any()))
           .thenReturn(Future.failed(new Exception("Expected exception")))
@@ -202,7 +202,7 @@ class FileUploadControllerSpec
         val fileName = "ERS return !'()-;=_`é–.ods"
         when(mockErsConnector.getCallbackRecord(any(), any))
           .thenReturn(Future.successful(Some(uploadedSuccessfully.copy(name = fileName))))
-        when(mockSessionService.cache(meq("file-name"), meq(fileName))(any(), any()))
+        when(mockSessionService.cache(meq("file-name"), meq(fileName))(using any(), any()))
           .thenReturn(Future.successful(sessionPair))
 
         setAuthMocks()
@@ -219,14 +219,14 @@ class FileUploadControllerSpec
         when(mockErsConnector.getCallbackRecord(any(), any))
           .thenReturn(Future.successful(Some(uploadedSuccessfullyInvalid)))
 
-        when(mockSessionService.cache(meq("file-name"), meq(uploadedSuccessfully.name))(any(), any()))
+        when(mockSessionService.cache(meq("file-name"), meq(uploadedSuccessfully.name))(using any(), any()))
           .thenReturn(Future.successful(sessionPair))
 
-        when(mockSessionService.fetch[RequestObject](meq(ERS_REQUEST_OBJECT))(any(), any()))
+        when(mockSessionService.fetch[RequestObject](meq(ERS_REQUEST_OBJECT))(using any(), any()))
           .thenReturn(Future.successful(ersRequestObject))
 
         when(
-          mockSessionService.fetch[CheckFileType](refEq(mockErsUtil.FILE_TYPE_CACHE))(any(), any())
+          mockSessionService.fetch[CheckFileType](refEq(mockErsUtil.FILE_TYPE_CACHE))(using any(), any())
         ).thenReturn(
           Future.successful(CheckFileType(Some("ods")))
         )
@@ -249,7 +249,7 @@ class FileUploadControllerSpec
       "caching file name fails" in {
         when(mockErsConnector.getCallbackRecord(any(), any))
           .thenReturn(Future.successful(Some(uploadedSuccessfully)))
-        when(mockSessionService.cache(meq("file-name"), meq(uploadedSuccessfully.name))(any(), any()))
+        when(mockSessionService.cache(meq("file-name"), meq(uploadedSuccessfully.name))(using any(), any()))
           .thenReturn(Future.failed(new Exception))
 
         setAuthMocks()
@@ -309,7 +309,7 @@ class FileUploadControllerSpec
 
       when(mockErsConnector.getCallbackRecord(any(), any))
         .thenReturn(Future.successful(Some(uploadedUpperOds)))
-      when(mockSessionService.cache(meq("file-name"), meq(uploadedUpperOds.name))(any(), any()))
+      when(mockSessionService.cache(meq("file-name"), meq(uploadedUpperOds.name))(using any(), any()))
         .thenReturn(Future.successful(sessionPair))
 
       setAuthMocks()
@@ -322,7 +322,7 @@ class FileUploadControllerSpec
   "validationResults" must {
     "redirect the user to SchemeOrganiserController.schemeOrganiserPage" when {
       "Ers Meta Data is returned, callback record is uploaded successfully, remove presubmission data returns OK and validate file data returns OK" in {
-        when(mockSessionService.fetch[RequestObject](anyString())(any(), any()))
+        when(mockSessionService.fetch[RequestObject](anyString())(using any(), any()))
           .thenReturn(Future.successful(ersRequestObject))
         when(mockErsConnector.getCallbackRecord(any(), any))
           .thenReturn(Future.successful(Some(uploadedSuccessfully)))
@@ -331,7 +331,7 @@ class FileUploadControllerSpec
             .removePresubmissionData(any())(any[RequestWithOptionalAuthContext[AnyContent]], any())
         )
           .thenReturn(Future.successful(HttpResponse(OK, "")))
-        when(mockSessionService.fetch[ErsMetaData](any())(any(), any()))
+        when(mockSessionService.fetch[ErsMetaData](any())(using any(), any()))
           .thenReturn(Future.successful(validErsMetaData))
         when(
           mockErsConnector.validateFileData(meq(uploadedSuccessfully), any[SchemeInfo])(
@@ -352,12 +352,12 @@ class FileUploadControllerSpec
 
     "redirect the user to FileUploadController.validationFailure()" when {
       "Ers Meta Data is returned, callback record is uploaded successfully, remove presubmission data returns OK and validate file data returns BAD_REQUEST" in {
-        when(mockSessionService.fetch[RequestObject](anyString())(any(), any()))
+        when(mockSessionService.fetch[RequestObject](anyString())(using any(), any()))
           .thenReturn(Future.successful(ersRequestObject))
         when(mockErsConnector.getCallbackRecord(any(), any)).thenReturn(Future.successful(Some(uploadedSuccessfully)))
         when(mockErsConnector.removePresubmissionData(any())(any[RequestWithOptionalAuthContext[AnyContent]], any()))
           .thenReturn(Future.successful(HttpResponse(OK, "")))
-        when(mockSessionService.fetch[ErsMetaData](any())(any(), any())).thenReturn(Future.successful(validErsMetaData))
+        when(mockSessionService.fetch[ErsMetaData](any())(using any(), any())).thenReturn(Future.successful(validErsMetaData))
         when(
           mockErsConnector.validateFileData(meq(uploadedSuccessfully), any[SchemeInfo])(
             any[RequestWithOptionalAuthContext[AnyContent]],
@@ -385,12 +385,12 @@ class FileUploadControllerSpec
         val validErsMetaData: ErsMetaData =
           ErsMetaData(schemeInfo, "ipRef", Some("aoRef"), "empRef", Some("agentRef"), Some("sapNumber"))
 
-        when(mockSessionService.fetch[RequestObject](anyString())(any(), any()))
+        when(mockSessionService.fetch[RequestObject](anyString())(using any(), any()))
           .thenReturn(Future.successful(ersRequestObject))
         when(mockErsConnector.getCallbackRecord(any(), any)).thenReturn(Future.successful(Some(uploadedSuccessfully)))
         when(mockErsConnector.removePresubmissionData(any())(any[RequestWithOptionalAuthContext[AnyContent]], any()))
           .thenReturn(Future.successful(HttpResponse(OK, "")))
-        when(mockSessionService.fetch[ErsMetaData](any())(any(), any())).thenReturn(Future.successful(validErsMetaData))
+        when(mockSessionService.fetch[ErsMetaData](any())(using any(), any())).thenReturn(Future.successful(validErsMetaData))
         when(
           mockErsConnector.validateFileData(meq(uploadedSuccessfully), any[SchemeInfo])(
             any[RequestWithOptionalAuthContext[AnyContent]],
@@ -408,12 +408,12 @@ class FileUploadControllerSpec
 
     "redirect the user to FileUploadController.odsSchemeMismatchFailure()" when {
       "Ers Meta Data is returned, callback record is uploaded successfully, remove presubmission data returns OK, validate file data returns BAD_REQUEST, where a SchemeMismatchError occurs" in {
-        when(mockSessionService.fetch[RequestObject](anyString())(any(), any()))
+        when(mockSessionService.fetch[RequestObject](anyString())(using any(), any()))
           .thenReturn(Future.successful(ersRequestObject))
         when(mockErsConnector.getCallbackRecord(any(), any)).thenReturn(Future.successful(Some(uploadedSuccessfully)))
         when(mockErsConnector.removePresubmissionData(any())(any(), any()))
           .thenReturn(Future.successful(HttpResponse(OK, "")))
-        when(mockSessionService.fetch[ErsMetaData](any())(any(), any())).thenReturn(Future.successful(validErsMetaData))
+        when(mockSessionService.fetch[ErsMetaData](any())(using any(), any())).thenReturn(Future.successful(validErsMetaData))
         when(mockErsConnector.validateFileData(meq(uploadedSuccessfully), any[SchemeInfo])(any(), any()))
           .thenReturn(
             Future.successful(
@@ -441,12 +441,12 @@ class FileUploadControllerSpec
 
     "redirect the user to FileUploadController.templateFailure()" when {
       "Ers Meta Data is returned, callback record is uploaded successfully, remove presubmission data returns OK, validate file data returns BAD_REQUEST, for CSOP with Incorrect ERS Template validation error" in {
-        when(mockSessionService.fetch[RequestObject](anyString())(any(), any()))
+        when(mockSessionService.fetch[RequestObject](anyString())(using any(), any()))
           .thenReturn(Future.successful(ersRequestObject))
         when(mockErsConnector.getCallbackRecord(any(), any)).thenReturn(Future.successful(Some(uploadedSuccessfully)))
         when(mockErsConnector.removePresubmissionData(any())(any(), any()))
           .thenReturn(Future.successful(HttpResponse(OK, "")))
-        when(mockSessionService.fetch[ErsMetaData](any())(any(), any())).thenReturn(Future.successful(validErsMetaData))
+        when(mockSessionService.fetch[ErsMetaData](any())(using any(), any())).thenReturn(Future.successful(validErsMetaData))
         when(
           mockErsConnector.validateFileData(meq(uploadedSuccessfully), any[SchemeInfo])(
             any[RequestWithOptionalAuthContext[AnyContent]],
@@ -466,12 +466,12 @@ class FileUploadControllerSpec
       "Ers Meta Data is returned, callback record is uploaded successfully, remove presubmission data returns OK, validate file data returns BAD_REQUEST, for CSOP with Incorrect ERS Template validation error when V6V7 enabled and V4'v5 disabled" in {
         when(mockAppConfig.useV6andV7Scheme).thenReturn(true)
         when(mockAppConfig.useV4andV5Scheme).thenReturn(false)
-        when(mockSessionService.fetch[RequestObject](anyString())(any(), any()))
+        when(mockSessionService.fetch[RequestObject](anyString())(using any(), any()))
           .thenReturn(Future.successful(ersRequestObject))
         when(mockErsConnector.getCallbackRecord(any(), any)).thenReturn(Future.successful(Some(uploadedSuccessfully)))
         when(mockErsConnector.removePresubmissionData(any())(any(), any()))
           .thenReturn(Future.successful(HttpResponse(OK, "")))
-        when(mockSessionService.fetch[ErsMetaData](any())(any(), any())).thenReturn(Future.successful(validErsMetaData))
+        when(mockSessionService.fetch[ErsMetaData](any())(using any(), any())).thenReturn(Future.successful(validErsMetaData))
         when(
           mockErsConnector.validateFileData(meq(uploadedSuccessfully), any[SchemeInfo])(
             any[RequestWithOptionalAuthContext[AnyContent]],
@@ -534,7 +534,7 @@ class FileUploadControllerSpec
       }
 
       "cacheUtil fails to fetch metadata and returns an exception" in {
-        when(mockSessionService.fetch[ErsMetaData](meq("ErsMetaData"))(any(), any()))
+        when(mockSessionService.fetch[ErsMetaData](meq("ErsMetaData"))(using any(), any()))
           .thenReturn(Future.failed(new Exception("Expected exception")))
         setAuthMocks()
         val result = TestFileUploadController.validationResults()(testFakeRequest)
@@ -587,9 +587,9 @@ class FileUploadControllerSpec
 
     "authorised users" must {
       "respond with a status of OK" in {
-        when(mockSessionService.fetch[RequestObject](any())(any(), any()))
+        when(mockSessionService.fetch[RequestObject](any())(using any(), any()))
           .thenReturn(Future.successful(ersRequestObject))
-        when(mockSessionService.fetch[CheckFileType](refEq("check-file-type"))(any(), any()))
+        when(mockSessionService.fetch[CheckFileType](refEq("check-file-type"))(using any(), any()))
           .thenReturn(Future.successful(CheckFileType(Some("csv"))))
         setAuthMocks()
         validationFailure() { result =>
@@ -600,9 +600,9 @@ class FileUploadControllerSpec
     }
 
     "return fileUploadErrorsView" in {
-      when(mockSessionService.fetch[RequestObject](any())(any(), any()))
+      when(mockSessionService.fetch[RequestObject](any())(using any(), any()))
         .thenReturn(Future.successful(ersRequestObject))
-      when(mockSessionService.fetch[CheckFileType](refEq("check-file-type"))(any(), any()))
+      when(mockSessionService.fetch[CheckFileType](refEq("check-file-type"))(using any(), any()))
         .thenReturn(Future.successful(CheckFileType(Some("ods"))))
       setAuthMocks()
       val result = TestFileUploadController.validationFailure()(testFakeRequest)
@@ -613,9 +613,9 @@ class FileUploadControllerSpec
 
   "odsSchemeMismatchFailure" must {
     "return fileUploadErrorsOdsView when expectedScheme and requestScheme are present in session" in {
-      when(mockSessionService.fetch[RequestObject](any())(any(), any()))
+      when(mockSessionService.fetch[RequestObject](any())(using any(), any()))
         .thenReturn(Future.successful(ersRequestObject))
-      when(mockSessionService.fetch[CheckFileType](refEq("check-file-type"))(any(), any()))
+      when(mockSessionService.fetch[CheckFileType](refEq("check-file-type"))(using any(), any()))
         .thenReturn(Future.successful(CheckFileType(Some("ods"))))
       setAuthMocks()
       val requestWithSession = testFakeRequest.withSession(
@@ -639,7 +639,7 @@ class FileUploadControllerSpec
 
     "authorised users" must {
       "respond with a status of OK" in {
-        when(mockSessionService.fetch[RequestObject](any())(any(), any()))
+        when(mockSessionService.fetch[RequestObject](any())(using any(), any()))
           .thenReturn(Future.successful(ersRequestObject))
         setAuthMocks()
         templateFailure() { result =>
@@ -658,7 +658,7 @@ class FileUploadControllerSpec
     }
 
     "return templateFailureView for 2022/23" in {
-      when(mockSessionService.fetch[RequestObject](any())(any(), any()))
+      when(mockSessionService.fetch[RequestObject](any())(using any(), any()))
         .thenReturn(Future.successful(ersRequestObject.copy(taxYear = Some("2022/23"))))
       val result = TestFileUploadController.templateFailure().apply(testFakeRequest)
 

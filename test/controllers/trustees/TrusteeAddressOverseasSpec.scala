@@ -47,7 +47,7 @@ class TrusteeAddressOverseasSpec
     with GuiceOneAppPerSuite
     with ScalaFutures {
 
-  implicit val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
+  given mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
     messagesActionBuilder,
     DefaultActionBuilder(stubBodyParser[AnyContent]()),
     cc.parsers,
@@ -70,7 +70,7 @@ class TrusteeAddressOverseasSpec
   )
 
   "calling showQuestionPage" should {
-    implicit val authRequest: RequestWithOptionalAuthContext[AnyContent] =
+    given authRequest: RequestWithOptionalAuthContext[AnyContent] =
       buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
     setAuthMocks()
     when(mockSessionService.fetch[RequestObject](any())(any(), any())).thenReturn(Future.successful(ersRequestObject))
@@ -136,7 +136,7 @@ class TrusteeAddressOverseasSpec
     "show the trustee address overseas form page with errors if the form is incorrectly filled" in {
       val trusteeAddressOverseasData                                       = Map("addressLine1" -> "")
       val form                                                             = RsFormMappings.trusteeAddressOverseasForm().bind(trusteeAddressOverseasData)
-      implicit val authRequest: RequestWithOptionalAuthContext[AnyContent] = buildRequestWithAuth(
+      given authRequest: RequestWithOptionalAuthContext[AnyContent] = buildRequestWithAuth(
         Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       )
       val result                                                           = testController.questionSubmit(1).apply(authRequest)
@@ -153,7 +153,7 @@ class TrusteeAddressOverseasSpec
 
       val trusteeAddressOverseasData                                       = Map("addressLine1" -> "123 Fake Street")
       val form                                                             = RsFormMappings.trusteeAddressOverseasForm().bind(trusteeAddressOverseasData)
-      implicit val authRequest: RequestWithOptionalAuthContext[AnyContent] = buildRequestWithAuth(
+      given authRequest: RequestWithOptionalAuthContext[AnyContent] = buildRequestWithAuth(
         Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       )
       val result                                                           = testController.questionSubmit(1).apply(authRequest)
@@ -164,7 +164,7 @@ class TrusteeAddressOverseasSpec
   }
 
   "calling editQuestion" should {
-    implicit val authRequest: RequestWithOptionalAuthContext[AnyContent] =
+    given authRequest: RequestWithOptionalAuthContext[AnyContent] =
       buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
     setAuthMocks()
     when(mockSessionService.fetch[RequestObject](any())(any(), any())).thenReturn(Future.successful(ersRequestObject))

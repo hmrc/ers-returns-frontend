@@ -17,10 +17,10 @@
 package services
 
 import models.*
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito.when
 import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
-import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
+import org.scalatest.matchers.must.Matchers.mustBe
 import org.scalatest.wordspec.AnyWordSpecLike
 import play.api.libs.json.Format
 import utils.Fixtures.{ersRequestObject, exampleTrustees}
@@ -61,7 +61,7 @@ class TrusteeServiceSpec extends AnyWordSpecLike with ErsTestHelper {
 
         val result = trusteeService.replaceTrustee(trusteeDetailsList, index, replacement)
 
-        result shouldBe expectedOutput
+        result mustBe expectedOutput
       }
     }
 
@@ -80,7 +80,7 @@ class TrusteeServiceSpec extends AnyWordSpecLike with ErsTestHelper {
 
         val result = trusteeService.replaceTrustee(trusteeDetailsList, index, replacement)
 
-        result shouldBe expectedOutput
+        result mustBe expectedOutput
       }
     }
 
@@ -92,7 +92,7 @@ class TrusteeServiceSpec extends AnyWordSpecLike with ErsTestHelper {
 
         val result = trusteeService.replaceTrustee(trusteeDetailsList, index, replacement)
 
-        result shouldBe trusteeDetailsList
+        result mustBe trusteeDetailsList
       }
     }
 
@@ -118,7 +118,7 @@ class TrusteeServiceSpec extends AnyWordSpecLike with ErsTestHelper {
 
         val result = trusteeService.replaceTrustee(duplicateTrusteeDetailsList, index, target)
 
-        result shouldBe expectedOutput
+        result mustBe expectedOutput
       }
     }
   }
@@ -126,28 +126,28 @@ class TrusteeServiceSpec extends AnyWordSpecLike with ErsTestHelper {
   "deleteTrustee" must {
     val trusteeService: TrusteeService = new TrusteeService(mockErsUtil, mockSessionService)
 
-    when(mockSessionService.fetch[RequestObject](any())(any(), any())).thenReturn(Future.successful(ersRequestObject))
-    when(mockSessionService.fetch[TrusteeDetailsList](any())(any(), any()))
+    when(mockSessionService.fetch[RequestObject](any())(using any(), any())).thenReturn(Future.successful(ersRequestObject))
+    when(mockSessionService.fetch[TrusteeDetailsList](any())(using any(), any()))
       .thenReturn(Future.successful(exampleTrustees))
 
     "return true" when {
       "delete operation was successful" in {
-        when(mockSessionService.cache(any(), any())(any(), any())).thenReturn(Future.successful(sessionPair))
+        when(mockSessionService.cache(any(), any())(using any(), any())).thenReturn(Future.successful(sessionPair))
 
         val result = trusteeService.deleteTrustee(0).futureValue
 
-        result shouldBe true
+        result mustBe true
       }
     }
 
     "return false" when {
       "delete operation failed" in {
-        when(mockSessionService.cache(any(), any())(any(), any()))
+        when(mockSessionService.cache(any(), any())(using any(), any()))
           .thenReturn(Future.failed(new Exception("caching failed")))
 
         val result = trusteeService.deleteTrustee(0).futureValue
 
-        result shouldBe false
+        result mustBe false
       }
     }
   }
@@ -164,36 +164,36 @@ class TrusteeServiceSpec extends AnyWordSpecLike with ErsTestHelper {
         val cachedTrustees                 = TrusteeDetailsList(List(trusteeOne))
 
         when(
-          mockSessionService.fetch[TrusteeName](eqTo(mockErsUtil.TRUSTEE_NAME_CACHE))(any(), any[Format[TrusteeName]])
+          mockSessionService.fetch[TrusteeName](eqTo(mockErsUtil.TRUSTEE_NAME_CACHE))(using any(), any[Format[TrusteeName]])
         )
           .thenReturn(Future.successful(trusteeName))
-        when(mockSessionService.fetchTrusteesOptionally()(any(), any()))
+        when(mockSessionService.fetchTrusteesOptionally()(using any(), any()))
           .thenReturn(Future.successful(cachedTrustees))
         when(
           mockSessionService.fetch[TrusteeAddress](eqTo(mockErsUtil.TRUSTEE_ADDRESS_CACHE))(
-            any(),
+            using any(),
             eqTo(implicitly[Format[TrusteeAddress]])
           )
         )
           .thenReturn(Future.successful(trusteeAddress))
-        when(mockSessionService.cache[TrusteeDetailsList](eqTo(mockErsUtil.TRUSTEES_CACHE), any())(any(), any()))
+        when(mockSessionService.cache[TrusteeDetailsList](eqTo(mockErsUtil.TRUSTEES_CACHE), any())(using any(), any()))
           .thenReturn(Future.successful(sessionPair))
 
         val result: Unit = trusteeService.updateTrusteeCache(index).futureValue
 
-        result shouldBe ()
+        result mustBe ()
       }
     }
 
     "handle exceptions during fetching or caching" in {
       val index = 1
 
-      when(mockSessionService.fetch[TrusteeName](eqTo(mockErsUtil.TRUSTEE_NAME_CACHE))(any(), any[Format[TrusteeName]]))
+      when(mockSessionService.fetch[TrusteeName](eqTo(mockErsUtil.TRUSTEE_NAME_CACHE))(using any(), any[Format[TrusteeName]]))
         .thenReturn(Future.failed(new Exception("Fetch failed")))
 
       val result: Unit = trusteeService.updateTrusteeCache(index).futureValue
 
-      result shouldBe ()
+      result mustBe ()
     }
   }
 

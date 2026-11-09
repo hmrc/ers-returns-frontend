@@ -43,7 +43,7 @@ class FrontendSessionsRepositorySpec
       "return CacheItem with all the data from session" in {
 
         val sessionId: SessionId                                      = SessionId(UUID.randomUUID().toString)
-        implicit val fakeRequest: FakeRequest[AnyContentAsEmpty.type] =
+        given fakeRequest: FakeRequest[AnyContentAsEmpty.type] =
           FakeRequest().withSession(("sessionId", sessionId.toString))
 
         await(sessionCacheRepo.putSession(DataKey("file-type"), "csv"))
@@ -59,7 +59,7 @@ class FrontendSessionsRepositorySpec
 
       "return None when there is no data in session" in {
         val sessionId: SessionId                                      = SessionId(UUID.randomUUID().toString)
-        implicit val fakeRequest: FakeRequest[AnyContentAsEmpty.type] =
+        given fakeRequest: FakeRequest[AnyContentAsEmpty.type] =
           FakeRequest().withSession(("sessionId", sessionId.toString))
         val result                                                    = sessionCacheRepo.getAllFromSession()
 

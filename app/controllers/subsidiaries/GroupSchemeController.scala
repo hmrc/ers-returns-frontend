@@ -73,7 +73,7 @@ class GroupSchemeController @Inject() (
     showConfirmDeleteCompanyPage(id)
   }
 
-  def showConfirmDeleteCompanyPage(
+  def  showConfirmDeleteCompanyPage(
     id: Int
   )(using request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
     getRequestObjAndCompanyDetails() transformWith {

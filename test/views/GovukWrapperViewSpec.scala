@@ -29,9 +29,9 @@ class GovukWrapperViewSpec extends ViewSpecBase {
 
   private val view = app.injector.instanceOf[govuk_wrapper]
 
-  implicit val appConfig: ApplicationConfig                 = app.injector.instanceOf[ApplicationConfig]
-  implicit val request: FakeRequest[AnyContentAsEmpty.type] = fakeRequest
-  implicit val messages: Messages                           = testMessages
+  given appConfig: ApplicationConfig                 = app.injector.instanceOf[ApplicationConfig]
+  given request: FakeRequest[AnyContentAsEmpty.type] = fakeRequest
+  given messages: Messages                           = testMessages
 
   private val exitSurveyUrl =
     "http://localhost:9553/gg/sign-out?continue=http://localhost:9514/feedback/ERS?useServiceNavigation"

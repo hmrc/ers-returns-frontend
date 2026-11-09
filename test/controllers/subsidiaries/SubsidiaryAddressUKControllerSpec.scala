@@ -49,7 +49,7 @@ class SubsidiaryAddressUKControllerSpec
     with GuiceOneAppPerSuite
     with ScalaFutures {
 
-  implicit val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
+  given mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
     messagesActionBuilder,
     DefaultActionBuilder(stubBodyParser[AnyContent]()),
     cc.parsers,
@@ -76,7 +76,7 @@ class SubsidiaryAddressUKControllerSpec
   )
 
   "calling showQuestionPage" should {
-    implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+    given authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
     setAuthMocks()
     when(mockSessionService.fetch[RequestObject](any())(any(), any())).thenReturn(Future.successful(ersRequestObject))
 
@@ -118,7 +118,7 @@ class SubsidiaryAddressUKControllerSpec
     "show company address UK form page with errors if the form is incorrectly filled" in {
       val companyAddressUkData = Map("addressLine1" -> "")
       val form                 = RsFormMappings.companyAddressUkForm().bind(companyAddressUkData)
-      implicit val authRequest = buildRequestWithAuth(
+      given authRequest = buildRequestWithAuth(
         Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       )
       val result               = testController.questionSubmit(1).apply(authRequest)
@@ -136,7 +136,7 @@ class SubsidiaryAddressUKControllerSpec
 
       val companyAddressUkData = Map("addressLine1" -> "123 Fake Street")
       val form                 = RsFormMappings.companyAddressUkForm().bind(companyAddressUkData)
-      implicit val authRequest = buildRequestWithAuth(
+      given authRequest = buildRequestWithAuth(
         Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       )
       val result               = testController.questionSubmit(1).apply(authRequest)
@@ -149,7 +149,7 @@ class SubsidiaryAddressUKControllerSpec
   }
 
   "calling editCompany" should {
-    implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+    given authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
     setAuthMocks()
     when(mockSessionService.fetch[RequestObject](any())(any(), any())).thenReturn(Future.successful(ersRequestObject))
 

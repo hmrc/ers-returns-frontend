@@ -37,7 +37,7 @@ class FileSizeLimitErrorViewSpec extends ViewSpecBase {
 
   given request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("GET", "/foo")
   given messages: Messages                           = testMessages
-  implicit val appConfig: ApplicationConfig                 = application.injector.instanceOf[ApplicationConfig]
+  given appConfig: ApplicationConfig                 = application.injector.instanceOf[ApplicationConfig]
 
   val view: file_size_limit_error = application.injector.instanceOf[file_size_limit_error]
 

@@ -22,7 +22,7 @@ import models.upscan.{Failed, NotStarted, UploadStatus, UploadedSuccessfully}
 import org.mockito.ArgumentMatchers.*
 import org.mockito.Mockito.*
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
+import org.scalatest.matchers.must.Matchers.mustBe
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.PlaySpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
@@ -42,10 +42,10 @@ class FileValidatorServiceSpec extends PlaySpec with GuiceOneAppPerSuite with Sc
 
   val mockConnector: ErsConnector = mock[ErsConnector]
 
-  implicit val executionContext: ExecutionContext = app.injector.instanceOf[ExecutionContext]
+  given executionContext: ExecutionContext = app.injector.instanceOf[ExecutionContext]
   val testService                                 = new FileValidatorService(mockConnector)
 
-  implicit val requestWithAuth: RequestWithOptionalAuthContext[AnyContent] =
+  given requestWithAuth: RequestWithOptionalAuthContext[AnyContent] =
     RequestWithOptionalAuthContext(request, defaultErsAuthData)
 
   "createCallbackRecord" must {
@@ -56,7 +56,7 @@ class FileValidatorServiceSpec extends PlaySpec with GuiceOneAppPerSuite with Sc
 
         val result = testService.createCallbackRecord.futureValue
 
-        result shouldBe CREATED
+        result mustBe CREATED
       }
     }
 
@@ -78,7 +78,7 @@ class FileValidatorServiceSpec extends PlaySpec with GuiceOneAppPerSuite with Sc
 
         val result = testService.updateCallbackRecord(NotStarted, sessionId).futureValue
 
-        result shouldBe NO_CONTENT
+        result mustBe NO_CONTENT
       }
     }
 
@@ -102,7 +102,7 @@ class FileValidatorServiceSpec extends PlaySpec with GuiceOneAppPerSuite with Sc
 
         val result = testService.getCallbackRecord.futureValue
 
-        result shouldBe mockUploadStatus
+        result mustBe mockUploadStatus
       }
     }
 
@@ -113,7 +113,7 @@ class FileValidatorServiceSpec extends PlaySpec with GuiceOneAppPerSuite with Sc
 
         val result = testService.getCallbackRecord.futureValue
 
-        result shouldBe None
+        result mustBe None
       }
     }
 
@@ -137,7 +137,7 @@ class FileValidatorServiceSpec extends PlaySpec with GuiceOneAppPerSuite with Sc
 
         val result = testService.getSuccessfulCallbackRecord.futureValue
 
-        result shouldBe Some(UploadedSuccessfully("fileId", "downloadUrl", mimeType = None))
+        result mustBe Some(UploadedSuccessfully("fileId", "downloadUrl", mimeType = None))
       }
     }
 
@@ -149,7 +149,7 @@ class FileValidatorServiceSpec extends PlaySpec with GuiceOneAppPerSuite with Sc
 
         val result = testService.getSuccessfulCallbackRecord.futureValue
 
-        result shouldBe None
+        result mustBe None
       }
 
       "no record is found" in {
@@ -158,7 +158,7 @@ class FileValidatorServiceSpec extends PlaySpec with GuiceOneAppPerSuite with Sc
 
         val result = testService.getSuccessfulCallbackRecord.futureValue
 
-        result shouldBe None
+        result mustBe None
       }
     }
 

@@ -59,9 +59,9 @@ class ReturnServiceControllerSpec
     ExecutionContext.global
   )
 
-  implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
+  given  testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
 
-  implicit lazy val mat: Materializer = app.materializer
+  given mat: Materializer = app.materializer
   val globalErrorView: global_error   = app.injector.instanceOf[global_error]
   val unauthorisedView: unauthorised  = app.injector.instanceOf[unauthorised]
   val startView: start                = app.injector.instanceOf[start]
@@ -110,10 +110,10 @@ class ReturnServiceControllerSpec
 
       when(mockRequestBuilder.execute[HttpResponse])
         .thenReturn(Future.successful(HttpResponse(OK, "")))
-      when(mockSessionService.cache(any(), any())(any(), any())).thenReturn(Future.successful(sessionPair))
-      when(mockSessionService.cache(any(), any())(any(), any())).thenReturn(Future.successful(sessionPair))
-      when(mockSessionService.remove(any())(any())).thenReturn(Future.successful(()))
-      when(mockSessionService.fetch[RequestObject](any())(any(), any()))
+      when(mockSessionService.cache(any(), any())(using any(), any())).thenReturn(Future.successful(sessionPair))
+      when(mockSessionService.cache(any(), any())(using any(), any())).thenReturn(Future.successful(sessionPair))
+      when(mockSessionService.remove(any())(using any())).thenReturn(Future.successful(()))
+      when(mockSessionService.fetch[RequestObject](any())(using any(), any()))
         .thenReturn(Future.successful(rscAsRequestObject))
     }
 
@@ -143,12 +143,12 @@ class ReturnServiceControllerSpec
   "Calling ReturnServiceController.cacheParams when schemeRef is not present" should {
     " redirect to the global error page" in {
       val controllerUnderTest = buildFakeReturnServiceController()
-      when(mockSessionService.remove(any())(any())).thenReturn(Future.failed(new Exception("failed")))
+      when(mockSessionService.remove(any())(using any())).thenReturn(Future.failed(new Exception("failed")))
       val req                 = Fixtures.buildFakeRequestWithSessionIdCSOP("GET")
       val result              =
         controllerUnderTest.cacheParams(ersRequestObject)(req)
       contentAsString(result) shouldBe contentAsString(
-        Future(controllerUnderTest.getGlobalErrorPage(req, testMessages))
+        Future(controllerUnderTest.getGlobalErrorPage(using req, testMessages))
       )
     }
   }
@@ -166,7 +166,7 @@ class ReturnServiceControllerSpec
   "Calling ReturnServiceController.hmacCheck" should {
     "without authentication should redirect to to company authentication frontend" in {
       setUnauthorisedMocks()
-      implicit val fakeRequest: FakeRequest[AnyContentAsEmpty.type] = Fixtures.buildFakeRequestWithSessionId("?")
+      given fakeRequest: FakeRequest[AnyContentAsEmpty.type] = Fixtures.buildFakeRequestWithSessionId("?")
       val controllerUnderTest                                       = buildFakeReturnServiceController(accessThresholdValue = 0)
       val result                                                    = controllerUnderTest.hmacCheck()(fakeRequest)
       Helpers.redirectLocation(result).get.startsWith(mockAppConfig.ggSignInUrl) shouldBe true
@@ -174,7 +174,7 @@ class ReturnServiceControllerSpec
 
     "with authentication should returns Ok status" in {
       setAuthMocks()
-      implicit val fakeRequest: FakeRequest[AnyContentAsEmpty.type] = Fixtures.buildFakeRequestWithSessionId("?")
+      given fakeRequest: FakeRequest[AnyContentAsEmpty.type] = Fixtures.buildFakeRequestWithSessionId("?")
       val controllerUnderTest                                       = buildFakeReturnServiceController(accessThresholdValue = 0)
       val result                                                    = controllerUnderTest.hmacCheck()(fakeRequest)
       status(result) shouldBe OK
@@ -184,7 +184,7 @@ class ReturnServiceControllerSpec
   "Calling ReturnServiceController.startPage" should {
     "without authentication should redirect to to company authentication frontend" in {
       setUnauthorisedMocks()
-      implicit val fakeRequest: FakeRequest[AnyContentAsEmpty.type] = Fixtures.buildFakeRequestWithSessionId("?")
+      given fakeRequest: FakeRequest[AnyContentAsEmpty.type] = Fixtures.buildFakeRequestWithSessionId("?")
       val controllerUnderTest                                       = buildFakeReturnServiceController(accessThresholdValue = 0)
       val result                                                    = controllerUnderTest.startPage()(fakeRequest)
       Helpers.redirectLocation(result).get.startsWith(mockAppConfig.ggSignInUrl) shouldBe true
@@ -192,7 +192,7 @@ class ReturnServiceControllerSpec
 
     "with authentication should redirect to to company authentication frontend" in {
       setAuthMocks()
-      implicit val fakeRequest: FakeRequest[AnyContentAsEmpty.type] = Fixtures.buildFakeRequestWithSessionId("?")
+      given fakeRequest: FakeRequest[AnyContentAsEmpty.type] = Fixtures.buildFakeRequestWithSessionId("?")
       val controllerUnderTest                                       = buildFakeReturnServiceController(accessThresholdValue = 0)
       val result                                                    = controllerUnderTest.startPage()(fakeRequest)
       status(result) shouldBe OK
@@ -202,9 +202,9 @@ class ReturnServiceControllerSpec
   "Calling ReturnServiceController.showUnauthorisedPage" should {
     "returns unauthorised view" in {
       setUnauthorisedMocks()
-      implicit val fakeRequest: FakeRequest[AnyContentAsEmpty.type] = Fixtures.buildFakeRequestWithSessionId("?")
+      given fakeRequest: FakeRequest[AnyContentAsEmpty.type] = Fixtures.buildFakeRequestWithSessionId("?")
       val controllerUnderTest                                       = buildFakeReturnServiceController(accessThresholdValue = 0)
-      val result                                                    = controllerUnderTest.showUnauthorisedPage(fakeRequest)
+      val result                                                    = controllerUnderTest.showUnauthorisedPage(using fakeRequest)
       status(result) shouldBe UNAUTHORIZED
     }
   }

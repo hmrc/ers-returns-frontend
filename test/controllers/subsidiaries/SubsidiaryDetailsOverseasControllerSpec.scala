@@ -46,7 +46,7 @@ class SubsidiaryDetailsOverseasControllerSpec
     with GuiceOneAppPerSuite
     with ScalaFutures {
 
-  implicit val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
+  given mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
     messagesActionBuilder,
     DefaultActionBuilder(stubBodyParser[AnyContent]()),
     cc.parsers,
@@ -72,7 +72,7 @@ class SubsidiaryDetailsOverseasControllerSpec
   )
 
   "calling showQuestionPage" should {
-    implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+    given authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
     setAuthMocks()
     when(mockSessionService.fetch[RequestObject](any())(any(), any())).thenReturn(Future.successful(ersRequestObject))
 
@@ -115,7 +115,7 @@ class SubsidiaryDetailsOverseasControllerSpec
     "show the company name form page with errors if the form is incorrectly filled" in {
       val companyData          = Map("bool" -> "")
       val form                 = RsFormMappings.companyNameForm().bind(companyData)
-      implicit val authRequest = buildRequestWithAuth(
+      given authRequest = buildRequestWithAuth(
         Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       )
       val result               = testController.questionSubmit(1).apply(authRequest)
@@ -132,7 +132,7 @@ class SubsidiaryDetailsOverseasControllerSpec
 
       val companyData          = Map("companyName" -> "Test company")
       val form                 = RsFormMappings.companyNameForm().bind(companyData)
-      implicit val authRequest = buildRequestWithAuth(
+      given authRequest = buildRequestWithAuth(
         Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       )
       val result               = testController.questionSubmit(1).apply(authRequest)
@@ -146,7 +146,7 @@ class SubsidiaryDetailsOverseasControllerSpec
   }
 
   "calling editCompany" should {
-    implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+    given authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
     setAuthMocks()
     when(mockSessionService.fetch[RequestObject](any())(any(), any())).thenReturn(Future.successful(ersRequestObject))
 
@@ -176,7 +176,7 @@ class SubsidiaryDetailsOverseasControllerSpec
 
       val companyAddressData   = Map("companyName" -> "Test person")
       val form                 = RsFormMappings.companyAddressOverseasForm().bind(companyAddressData)
-      implicit val authRequest = buildRequestWithAuth(
+      given authRequest = buildRequestWithAuth(
         Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       )
       val result               = testController.editQuestionSubmit(1).apply(authRequest)

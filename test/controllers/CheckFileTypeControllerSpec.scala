@@ -59,9 +59,9 @@ class CheckFileTypeControllerSpec
     ExecutionContext.global
   )
 
-  implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
+  given testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
 
-  implicit lazy val mat: Materializer    = app.materializer
+  given mat: Materializer    = app.materializer
   val globalErrorView: global_error      = app.injector.instanceOf[global_error]
   val checkFileTypeView: check_file_type = app.injector.instanceOf[check_file_type]
 
@@ -78,9 +78,9 @@ class CheckFileTypeControllerSpec
       checkFileTypeView,
       testAuthActionGov
     ) {
-      when(mockSessionService.fetch[CheckFileType](refEq("check-file-type"))(any(), any())).thenReturn(fileType)
-      when(mockSessionService.fetch[RequestObject](refEq(ERS_REQUEST_OBJECT))(any(), any())).thenReturn(requestObject)
-      when(mockSessionService.fetch[ErsMetaData](refEq(ERS_META_DATA))(any(), any())).thenReturn(requestMeta)
+      when(mockSessionService.fetch[CheckFileType](refEq("check-file-type"))(using any(), any())).thenReturn(fileType)
+      when(mockSessionService.fetch[RequestObject](refEq(ERS_REQUEST_OBJECT))(using any(), any())).thenReturn(requestObject)
+      when(mockSessionService.fetch[ErsMetaData](refEq(ERS_META_DATA))(using any(), any())).thenReturn(requestMeta)
     }
 
     "give a redirect status (to company authentication frontend) on GET if user is not authenticated" in {
@@ -128,7 +128,7 @@ class CheckFileTypeControllerSpec
 
       contentAsString(result)   should include(testMessages("ers.global_errors.message"))
       contentAsString(result) shouldBe contentAsString(
-        Future(controllerUnderTest.getGlobalErrorPage(req, testMessages))
+        Future(controllerUnderTest.getGlobalErrorPage(using req, testMessages))
       )
     }
 
@@ -140,9 +140,9 @@ class CheckFileTypeControllerSpec
       requestObject: Future[RequestObject] = Future.successful(ersRequestObject)
     ): CheckFileTypeController =
       new CheckFileTypeController(mockMCC, mockSessionService, globalErrorView, checkFileTypeView, testAuthActionGov) {
-        when(mockSessionService.cache(matches("check-file-type"), any())(any(), any()))
+        when(mockSessionService.cache(matches("check-file-type"), any())(using any(), any()))
           .thenReturn(if (successfulCache) Future.successful(sessionPair) else Future.failed(new Exception("error")))
-        when(mockSessionService.fetch[RequestObject](refEq(ERS_REQUEST_OBJECT))(any(), any())).thenReturn(requestObject)
+        when(mockSessionService.fetch[RequestObject](refEq(ERS_REQUEST_OBJECT))(using any(), any())).thenReturn(requestObject)
       }
 
     "give a redirect status (to company authentication frontend) on GET if user is not authenticated" in {
@@ -169,7 +169,7 @@ class CheckFileTypeControllerSpec
       val form                = RsFormMappings.checkFileTypeForm().bind(fileTypeData)
       val request             = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
 
-      val result = controllerUnderTest.showCheckFileTypeSelected()(buildRequestWithAuth(request))
+      val result = controllerUnderTest.showCheckFileTypeSelected()(using buildRequestWithAuth(request))
 
       status(result) shouldBe Status.OK
     }
@@ -180,7 +180,7 @@ class CheckFileTypeControllerSpec
       val form                = RsFormMappings.schemeTypeForm().bind(checkFileTypeData)
       val request             = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
 
-      val result = controllerUnderTest.showCheckFileTypeSelected()(buildRequestWithAuth(request))
+      val result = controllerUnderTest.showCheckFileTypeSelected()(using buildRequestWithAuth(request))
 
       status(result)                                shouldBe Status.SEE_OTHER
       result.futureValue.header.headers("Location") shouldBe routes.CheckCsvFilesController.checkCsvFilesPage().toString
@@ -192,7 +192,7 @@ class CheckFileTypeControllerSpec
       val form                = RsFormMappings.schemeTypeForm().bind(checkFileTypeData)
       val request             = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
 
-      val result = controllerUnderTest.showCheckFileTypeSelected()(buildRequestWithAuth(request))
+      val result = controllerUnderTest.showCheckFileTypeSelected()(using buildRequestWithAuth(request))
 
       status(result)                                shouldBe Status.SEE_OTHER
       result.futureValue.header.headers("Location") shouldBe routes.FileUploadController.uploadFilePage().toString
@@ -204,10 +204,10 @@ class CheckFileTypeControllerSpec
       val form                = RsFormMappings.schemeTypeForm().bind(schemeTypeData)
       val request             = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
 
-      val result = controllerUnderTest.showCheckFileTypeSelected()(buildRequestWithAuth(request))
+      val result = controllerUnderTest.showCheckFileTypeSelected()(using buildRequestWithAuth(request))
 
       contentAsString(result) shouldBe contentAsString(
-        Future(controllerUnderTest.getGlobalErrorPage(request, testMessages))
+        Future(controllerUnderTest.getGlobalErrorPage(using request, testMessages))
       )
       contentAsString(result)   should include(testMessages("ers.global_errors.message"))
     }

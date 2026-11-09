@@ -85,12 +85,12 @@ class GeneratePdfControllerSpec
       val byteArrayOutputStream: ByteArrayOutputStream = mock[ByteArrayOutputStream]
       val testItem                                     = testCacheItem[ReportableEvents](REPORTABLE_EVENTS, ReportableEvents(Some("2")))
 
-      when(mockSessionService.fetch[RequestObject](any())(any(), any())).thenReturn(Future.successful(ersRequestObject))
-      when(mockSessionService.fetch[ErsMetaData](refEq(ERS_META_DATA))(any(), any())).thenReturn(Future.successful(rsc))
-      when(mockSessionService.getAllData(any(), any())(any(), any(), any()))
+      when(mockSessionService.fetch[RequestObject](any())(using any(), any())).thenReturn(Future.successful(ersRequestObject))
+      when(mockSessionService.fetch[ErsMetaData](refEq(ERS_META_DATA))(using any(), any())).thenReturn(Future.successful(rsc))
+      when(mockSessionService.getAllData(any(), any())(using any(), any(), any()))
         .thenReturn(Future.successful(Fixtures.ersSummary))
-      when(mockSessionService.fetchAll()(any())).thenReturn(Future.successful(testItem))
-      when(pdfBuilderMock.createPdf(any(), any(), any())(any())).thenReturn(byteArrayOutputStream)
+      when(mockSessionService.fetchAll()(using any())).thenReturn(Future.successful(testItem))
+      when(pdfBuilderMock.createPdf(any(), any(), any())(using any())).thenReturn(byteArrayOutputStream)
       when(byteArrayOutputStream.toByteArray).thenReturn(Array[Byte]())
 
       val controller =
@@ -103,39 +103,39 @@ class GeneratePdfControllerSpec
     "direct to errors page if fetch all res pdf throws exception" in {
       val authRequest = buildRequestWithAuth(buildFakeRequestWithSessionIdEMI("GET"))
 
-      when(mockSessionService.fetch[RequestObject](any())(any(), any())).thenReturn(Future.successful(ersRequestObject))
-      when(mockSessionService.fetch[ErsMetaData](refEq(ERS_META_DATA))(any(), any())).thenReturn(Future.successful(rsc))
-      when(mockSessionService.getAllData(any(), any())(any(), any(), any()))
+      when(mockSessionService.fetch[RequestObject](any())(using any(), any())).thenReturn(Future.successful(ersRequestObject))
+      when(mockSessionService.fetch[ErsMetaData](refEq(ERS_META_DATA))(using any(), any())).thenReturn(Future.successful(rsc))
+      when(mockSessionService.getAllData(any(), any())(using any(), any(), any()))
         .thenReturn(Future.successful(Fixtures.ersSummary))
-      when(mockSessionService.fetchAll()(any())).thenReturn(Future.failed(new Exception("error")))
+      when(mockSessionService.fetchAll()(using any())).thenReturn(Future.failed(new Exception("error")))
 
       val controller =
         new PdfGenerationController(mockMCC, pdfBuilderMock, mockSessionService, globalErrorView, testAuthAction)
 
-      val result = controller.generatePdf("", "")(authRequest)
+      val result = controller.generatePdf("", "")(using authRequest)
 
       contentAsString(result)   should include(testMessages("ers.global_errors.message"))
       contentAsString(result) shouldBe contentAsString(
-        Future(controller.getGlobalErrorPage()(testFakeRequest, testMessages))
+        Future(controller.getGlobalErrorPage()(using testFakeRequest, testMessages))
       )
     }
 
     "direct to errors page if get all data res pdf throws exception" in {
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
 
-      when(mockSessionService.fetch[RequestObject](any())(any(), any())).thenReturn(Future.successful(ersRequestObject))
-      when(mockSessionService.fetch[ErsMetaData](refEq(ERS_META_DATA))(any(), any())).thenReturn(Future.successful(rsc))
-      when(mockSessionService.getAllData(any(), any())(any(), any(), any()))
+      when(mockSessionService.fetch[RequestObject](any())(using any(), any())).thenReturn(Future.successful(ersRequestObject))
+      when(mockSessionService.fetch[ErsMetaData](refEq(ERS_META_DATA))(using any(), any())).thenReturn(Future.successful(rsc))
+      when(mockSessionService.getAllData(any(), any())(using any(), any(), any()))
         .thenReturn(Future.failed(new Exception("error")))
 
       val controller =
         new PdfGenerationController(mockMCC, pdfBuilderMock, mockSessionService, globalErrorView, testAuthAction)
 
-      val result = controller.generatePdf("", "")(authRequest)
+      val result = controller.generatePdf("", "")(using authRequest)
 
       contentAsString(result)   should include(testMessages("ers.global_errors.message"))
       contentAsString(result) shouldBe contentAsString(
-        Future(controller.getGlobalErrorPage()(testFakeRequest, testMessages))
+        Future(controller.getGlobalErrorPage()(using testFakeRequest, testMessages))
       )
     }
 
@@ -144,18 +144,18 @@ class GeneratePdfControllerSpec
       val testItem                                     = testCacheItem[ReportableEvents](REPORTABLE_EVENTS, ReportableEvents(Some("2")))
       val authRequest                                  = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
 
-      when(mockSessionService.fetch[ErsMetaData](any())(any(), any()))
+      when(mockSessionService.fetch[ErsMetaData](any())(using any(), any()))
         .thenReturn(Future.successful(Fixtures.EMIMetaData))
-      when(mockSessionService.getAllData(any(), any())(any(), any(), any()))
+      when(mockSessionService.getAllData(any(), any())(using any(), any(), any()))
         .thenReturn(Future.successful(Fixtures.ersSummary))
-      when(mockSessionService.fetchAll()(any())).thenReturn(Future.successful(testItem))
-      when(pdfBuilderMock.createPdf(any(), any(), any())(any())).thenReturn(byteArrayOutputStream)
+      when(mockSessionService.fetchAll()(using any())).thenReturn(Future.successful(testItem))
+      when(pdfBuilderMock.createPdf(any(), any(), any())(using any())).thenReturn(byteArrayOutputStream)
       when(byteArrayOutputStream.toByteArray).thenReturn(Array[Byte]())
 
       val controller =
         new PdfGenerationController(mockMCC, pdfBuilderMock, mockSessionService, globalErrorView, testAuthAction)
 
-      val res = await(controller.generatePdf("123456", "8 August 2016, 4:28pm")(authRequest))
+      val res = await(controller.generatePdf("123456", "8 August 2016, 4:28pm")(using authRequest))
 
       res.header.headers("Content-Disposition") should include("123456-confirmation.pdf")
     }
@@ -177,18 +177,18 @@ class GeneratePdfControllerSpec
 
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
 
-      when(mockSessionService.fetch[ErsMetaData](any())(any(), any()))
+      when(mockSessionService.fetch[ErsMetaData](any())(using any(), any()))
         .thenReturn(Future.successful(Fixtures.EMIMetaData))
-      when(mockSessionService.getAllData(any(), any())(any(), any(), any()))
+      when(mockSessionService.getAllData(any(), any())(using any(), any(), any()))
         .thenReturn(Future.successful(Fixtures.ersSummary))
-      when(mockSessionService.fetchAll()(any())).thenReturn(Future.successful(testItems))
-      when(pdfBuilderMock.createPdf(any(), any(), any())(any())).thenReturn(byteArrayOutputStream)
+      when(mockSessionService.fetchAll()(using any())).thenReturn(Future.successful(testItems))
+      when(pdfBuilderMock.createPdf(any(), any(), any())(using any())).thenReturn(byteArrayOutputStream)
       when(byteArrayOutputStream.toByteArray).thenReturn(Array[Byte]())
 
       val controller =
         new PdfGenerationController(mockMCC, pdfBuilderMock, mockSessionService, globalErrorView, testAuthAction)
 
-      val res = await(controller.generatePdf("123456", "8 August 2016, 4:28pm")(authRequest))
+      val res = await(controller.generatePdf("123456", "8 August 2016, 4:28pm")(using authRequest))
 
       res.header.headers("Content-Disposition") should include("123456-confirmation.pdf")
     }
@@ -201,16 +201,16 @@ class GeneratePdfControllerSpec
       val testItem3 = testCacheItem[String](FILE_NAME_CACHE, "someFileName")
       val testItems = mergeCacheItems(Seq(testItem, testItem2, testItem3))
 
-      when(mockSessionService.fetch[ErsMetaData](any())(any(), any()))
+      when(mockSessionService.fetch[ErsMetaData](any())(using any(), any()))
         .thenReturn(Future.successful(Fixtures.EMIMetaData))
-      when(mockSessionService.getAllData(any(), any())(any(), any(), any()))
+      when(mockSessionService.getAllData(any(), any())(using any(), any(), any()))
         .thenReturn(Future.successful(Fixtures.ersSummary))
-      when(mockSessionService.fetchAll()(any())).thenReturn(Future.successful(testItems))
+      when(mockSessionService.fetchAll()(using any())).thenReturn(Future.successful(testItems))
 
       val controller =
         new PdfGenerationController(mockMCC, pdfBuilderMock, mockSessionService, globalErrorView, testAuthAction)
 
-      val res = await(controller.generatePdf("123456", "8 August 2016, 4:28pm")(authRequest))
+      val res = await(controller.generatePdf("123456", "8 August 2016, 4:28pm")(using authRequest))
 
       res.header.headers("Content-Disposition") should include("123456-confirmation.pdf")
     }

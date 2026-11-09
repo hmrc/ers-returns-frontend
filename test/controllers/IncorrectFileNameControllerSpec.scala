@@ -59,8 +59,8 @@ class IncorrectFileNameControllerSpec
   val incorrectFileNameView: incorrect_file_name = app.injector.instanceOf[incorrect_file_name]
   implicit lazy val testMessages: MessagesImpl   = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
   implicit lazy val mat: Materializer            = app.materializer
-  implicit val appConfig: ApplicationConfig      = app.injector.instanceOf[ApplicationConfig]
-  implicit val actorSystem: ActorSystem          = app.actorSystem
+  given appConfig: ApplicationConfig      = app.injector.instanceOf[ApplicationConfig]
+  given actorSystem: ActorSystem          = app.actorSystem
 
   override def beforeEach(): Unit =
     reset(mockErsUtil)
@@ -72,11 +72,11 @@ class IncorrectFileNameControllerSpec
     "return BAD_REQUEST and render incorrect file name page" in {
 
       when(
-        mockSessionService.fetch[RequestObject](any())(any(), any())
+        mockSessionService.fetch[RequestObject](any())(using any(), any())
       ) thenReturn Future.successful(ersRequestObject)
 
       val controller =
-        new IncorrectFileNameController(mockMCC, mockSessionService, incorrectFileNameView, testAuthAction)(
+        new IncorrectFileNameController(mockMCC, mockSessionService, incorrectFileNameView, testAuthAction)(using 
           ec,
           mockErsUtil,
           appConfig

@@ -30,10 +30,10 @@ class IncorrectFileNameViewSpec extends ViewSpecBase with FileUploadFixtures {
 
   val odsRequestObject: RequestObject = testRequestObject.copy(schemeType = Some("CSOP"))
 
-  implicit val ersUtil: ERSUtil                             = app.injector.instanceOf[ERSUtil]
-  implicit val appConfig: ApplicationConfig                 = app.injector.instanceOf[ApplicationConfig]
-  implicit val request: FakeRequest[AnyContentAsEmpty.type] = fakeRequest
-  implicit val messages: Messages                           = testMessages
+  given ersUtil: ERSUtil                             = app.injector.instanceOf[ERSUtil]
+  given appConfig: ApplicationConfig                 = app.injector.instanceOf[ApplicationConfig]
+  given request: FakeRequest[AnyContentAsEmpty.type] = fakeRequest
+  given messages: Messages                           = testMessages
 
   "incorrect file name view" should {
 

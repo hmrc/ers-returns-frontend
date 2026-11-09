@@ -30,7 +30,7 @@ import java.time.Instant
 class RequestObjectSpec extends AnyWordSpecLike with Matchers with GuiceOneAppPerSuite with PrivateMethodTester {
 
   def messagesApi: MessagesApi    = app.injector.instanceOf[MessagesApi]
-  implicit val messages: Messages = messagesApi.preferred(Seq(Lang.get("en").get))
+  given messages: Messages = messagesApi.preferred(Seq(Lang.get("en").get))
 
   val englishMessages: Messages = messagesApi.preferred(Seq(Lang.get("en").get))
   val welshMessages: Messages   = messagesApi.preferred(Seq(Lang.get("cy").get))
@@ -47,7 +47,7 @@ class RequestObjectSpec extends AnyWordSpecLike with Matchers with GuiceOneAppPe
     }
 
     "return a page title in Welsh with the correct format for scheme Other" in {
-      implicit val messages: Messages = messagesApi.preferred(Seq(Lang.get("cy").get))
+      given messages: Messages = messagesApi.preferred(Seq(Lang.get("cy").get))
 
       val expected =
         s"${messages(s"ers.scheme.${ersRequestObject.getSchemeType}")} - ${messages(s"ers.scheme.title", "Arall")} - ${ersRequestObject.getSchemeReference} - ${DateUtils
@@ -57,7 +57,7 @@ class RequestObjectSpec extends AnyWordSpecLike with Matchers with GuiceOneAppPe
     }
 
     "return start page title in Welsh with the correct translation for scheme Other" in {
-      implicit val messages: Messages = messagesApi.preferred(Seq(Lang.get("cy").get))
+      given messages: Messages = messagesApi.preferred(Seq(Lang.get("cy").get))
 
       messages("ers_start.page_title", ersRequestObject.getSchemeNameForDisplay) must include("Arall")
     }
@@ -153,26 +153,26 @@ class RequestObjectSpec extends AnyWordSpecLike with Matchers with GuiceOneAppPe
 
   "RequestObject.getSchemeWithArticle" should {
     "prepend 'an' for schemes beginning with vowel when lang code is 'en'" in {
-      implicit val messages: Messages = englishMessages
+      given messages: Messages = englishMessages
       val result                      = RequestObject.getSchemeWithArticle("EMI")
       result mustBe "an EMI"
     }
 
     "prepend 'a' for schemes beginning with consonant when lang code is 'en'" in {
-      implicit val messages: Messages = englishMessages
+      given messages: Messages = englishMessages
       val result                      = RequestObject.getSchemeWithArticle("CSOP")
       result mustBe "a CSOP"
     }
 
     "return 'ARALL' for scheme = 'OTHER' when lang code is 'cy'" in {
-      implicit val messages: Messages = welshMessages
+      given messages: Messages = welshMessages
       val result                      = RequestObject.getSchemeWithArticle("OTHER")
       result mustBe "ARALL"
     }
 
     "default to 'a <scheme>' for unknown lang codes" in {
       val frenchMessages: Messages    = messagesApi.preferred(Seq(Lang.get("fr").get))
-      implicit val messages: Messages = frenchMessages
+      given messages: Messages = frenchMessages
       val result                      = RequestObject.getSchemeWithArticle("CSOP")
       result mustBe "a CSOP"
     }

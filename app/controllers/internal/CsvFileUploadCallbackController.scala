@@ -75,7 +75,7 @@ class CsvFileUploadCallbackController @Inject() (
                 s"upload id: ${uploadId.value} to ${uploadStatus.getClass.getSimpleName}"
             )
             sessionService
-              .cache[UploadStatus](s"${ersUtil.CHECK_CSV_FILES}-${uploadId.value}", uploadStatus)(
+              .cache[UploadStatus](s"${ersUtil.CHECK_CSV_FILES}-${uploadId.value}", uploadStatus)(using 
                 RequestWithUpdatedSession(request, sessionId),
                 implicitly
               )

@@ -103,11 +103,11 @@ trait UpscanData {
 
   import models.upscan.UpscanCallback.*
 
-  implicit val failedWrites: OWrites[UpscanFailedCallback] = Json
+  given failedWrites: OWrites[UpscanFailedCallback] = Json
     .writes[UpscanFailedCallback]
     .transform((js: JsValue) => js.as[JsObject] + ("fileStatus" -> JsString("FAILED")))
 
-  implicit val readWrites: OWrites[UpscanReadyCallback] =
+  given readWrites: OWrites[UpscanReadyCallback] =
     Json.writes[UpscanReadyCallback].transform((js: JsValue) => js.as[JsObject] + ("fileStatus" -> JsString("READY")))
 
   val upscanInitiateResponse: UpscanInitiateResponse =

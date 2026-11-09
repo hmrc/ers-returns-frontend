@@ -59,7 +59,7 @@ class PdfDecoratorControllerFactorySpec
     override val countryCodes: CountryCodes = mockCountryCodes
 
     override val ERSUtil: ERSUtil =
-      new ERSUtil(mockAppConfig)(ec, mockCountryCodes)
+      new ERSUtil(mockAppConfig)(using ec, mockCountryCodes)
 
   }
 
@@ -123,7 +123,7 @@ class PdfDecoratorControllerFactorySpec
       val decoratorController: DecoratorController = createPdfDecoratorControllerForScheme("emi", ersSummary, None)
       val decorators: Array[Decorator]             = decoratorController.decorators
 
-      decoratorController.decorators.size shouldEqual 5
+      decoratorController.decorators.length shouldEqual 5
       decorators(0).getClass should be(classOf[YesNoDecorator])
       decorators(1).getClass should be(classOf[FileNamesDecorator])
       decorators(2).getClass should be(classOf[SchemeOrganiserDetailsDecorator])

@@ -42,7 +42,7 @@ class UpscanConnector @Inject() (appConfig: ApplicationConfig, httpClient: HttpC
   def getUpscanFormData(body: UpscanInitiateRequest)(implicit hc: HeaderCarrier): Future[UpscanInitiateResponse] =
     httpClient
       .post(url"$upscanInitiateUrl")
-      .setHeader(headers.toSeq: _*)
+      .setHeader(headers.toSeq*)
       .withBody(Json.toJson(body))
       .execute[PreparedUpload]
       .map(_.toUpscanInitiateResponse)

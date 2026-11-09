@@ -125,8 +125,8 @@ trait ErsTestHelper extends MockitoSugar with AuthHelper with ERSFakeApplication
     CacheItem("id", mergedData, Instant.now(), Instant.now())
   }
 
-  val testAuthAction    = new AuthAction(mockAuthConnector, mockAppConfig, mockSessionService, defaultParser)(ec)
-  val testAuthActionGov = new AuthActionGovGateway(mockAuthConnector, mockAppConfig, defaultParser)(ec)
+  val testAuthAction    = new AuthAction(mockAuthConnector, mockAppConfig, mockSessionService, defaultParser)(using ec)
+  val testAuthActionGov = new AuthActionGovGateway(mockAuthConnector, mockAppConfig, defaultParser)(using ec)
 
   when(mockCountryCodes.countriesMap).thenReturn(List(Country("United Kingdom", "UK"), Country("South Africa", "ZA")))
   when(mockCountryCodes.getCountry("UK")).thenReturn(Some("United Kingdom"))

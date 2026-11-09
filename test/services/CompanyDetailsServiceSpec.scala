@@ -17,10 +17,12 @@
 package services
 
 import models.*
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito.when
 import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
-import org.scalatest.matchers.should.Matchers.{contain, convertToAnyShouldWrapper}
+import org.scalatest.matchers.should.Matchers.{contain, shouldNot}
+import org.scalatest.wordspec.AnyWordSpecLike
+import org.scalatest.matchers.must.Matchers.mustBe
 import play.api.libs.json.Format
 import utils.Fixtures.ersRequestObject
 import utils.{ErsTestHelper, Fixtures}
@@ -69,7 +71,7 @@ class CompanyDetailsServiceSpec extends AnyWordSpecLike with ErsTestHelper {
 
         val result = companyService.replaceCompany(listOfCompanies, index, replacement)
 
-        result shouldBe expectedOutput
+        result mustBe expectedOutput
       }
     }
 
@@ -88,7 +90,7 @@ class CompanyDetailsServiceSpec extends AnyWordSpecLike with ErsTestHelper {
 
         val result = companyService.replaceCompany(listOfCompanies, index, replacement)
 
-        result shouldBe expectedOutput
+        result mustBe expectedOutput
       }
     }
 
@@ -100,7 +102,7 @@ class CompanyDetailsServiceSpec extends AnyWordSpecLike with ErsTestHelper {
 
         val result = companyService.replaceCompany(listOfCompanies, index, replacement)
 
-        result shouldBe listOfCompanies
+        result mustBe listOfCompanies
         result shouldNot contain(replacement)
       }
     }
@@ -128,7 +130,7 @@ class CompanyDetailsServiceSpec extends AnyWordSpecLike with ErsTestHelper {
 
         val result = companyService.replaceCompany(duplicateCompanyDetailsList, index, target)
 
-        result shouldBe expectedOutput
+        result mustBe expectedOutput
       }
     }
   }
@@ -143,43 +145,43 @@ class CompanyDetailsServiceSpec extends AnyWordSpecLike with ErsTestHelper {
         val companyAddress: CompanyAddress = Fixtures.companyAddressUK
         val cachedCompany                  = companyOne
 
-        when(mockSessionService.fetch[RequestObject](any())(any(), any()))
+        when(mockSessionService.fetch[RequestObject](any())(using any(), any()))
           .thenReturn(Future.successful(ersRequestObject))
         when(
-          mockSessionService.fetch[Company](eqTo(mockErsUtil.SCHEME_ORGANISER_NAME_CACHE))(any(), any[Format[Company]])
+          mockSessionService.fetch[Company](eqTo(mockErsUtil.SCHEME_ORGANISER_NAME_CACHE))(using any(), any[Format[Company]])
         )
           .thenReturn(Future.successful(companyName))
-        when(mockSessionService.fetchSchemeOrganiserOptionally()(any(), any()))
+        when(mockSessionService.fetchSchemeOrganiserOptionally()(using any(), any()))
           .thenReturn(Future.successful(Some(cachedCompany)))
         when(
           mockSessionService.fetch[CompanyAddress](eqTo(mockErsUtil.SCHEME_ORGANISER_ADDRESS_CACHE))(
-            any(),
+           using any(),
             eqTo(implicitly[Format[CompanyAddress]])
           )
         )
           .thenReturn(Future.successful(companyAddress))
-        when(mockSessionService.cache[CompanyDetails](eqTo(mockErsUtil.SCHEME_ORGANISER_CACHE), any())(any(), any()))
+        when(mockSessionService.cache[CompanyDetails](eqTo(mockErsUtil.SCHEME_ORGANISER_CACHE), any())(using any(), any()))
           .thenReturn(Future.successful(sessionPair))
 
         val result: Unit = companyDetailsService.updateSchemeOrganiserCache
 
-        result shouldBe ()
+        result mustBe ()
       }
     }
 
     "handle exceptions during fetching or caching" in {
 
-      when(mockSessionService.fetch[RequestObject](any())(any(), any()))
+      when(mockSessionService.fetch[RequestObject](any())(using any(), any()))
         .thenReturn(Future.successful(ersRequestObject))
 
       when(
-        mockSessionService.fetch[Company](eqTo(mockErsUtil.SCHEME_ORGANISER_NAME_CACHE))(any(), any[Format[Company]])
+        mockSessionService.fetch[Company](eqTo(mockErsUtil.SCHEME_ORGANISER_NAME_CACHE))(using any(), any[Format[Company]])
       )
         .thenReturn(Future.failed(new Exception("Fetch failed")))
 
       val result: Unit = companyDetailsService.updateSchemeOrganiserCache
 
-      result shouldBe ()
+      result mustBe ()
     }
   }
 
@@ -193,48 +195,48 @@ class CompanyDetailsServiceSpec extends AnyWordSpecLike with ErsTestHelper {
         val companyAddress: CompanyAddress = Fixtures.companyAddressUK
         val cachedCompanies                = CompanyDetailsList(List(companyOne))
 
-        when(mockSessionService.fetch[RequestObject](any())(any(), any()))
+        when(mockSessionService.fetch[RequestObject](any())(using any(), any()))
           .thenReturn(Future.successful(ersRequestObject))
         when(
           mockSessionService
-            .fetch[Company](eqTo(mockErsUtil.SUBSIDIARY_COMPANY_NAME_CACHE))(any(), any[Format[Company]])
+            .fetch[Company](eqTo(mockErsUtil.SUBSIDIARY_COMPANY_NAME_CACHE))(using any(), any[Format[Company]])
         )
           .thenReturn(Future.successful(companyName))
-        when(mockSessionService.fetchCompaniesOptionally()(any(), any()))
+        when(mockSessionService.fetchCompaniesOptionally()(using any(), any()))
           .thenReturn(Future.successful(cachedCompanies))
         when(
           mockSessionService.fetch[CompanyAddress](eqTo(mockErsUtil.SUBSIDIARY_COMPANY_ADDRESS_CACHE))(
-            any(),
+           using any(),
             eqTo(implicitly[Format[CompanyAddress]])
           )
         )
           .thenReturn(Future.successful(companyAddress))
         when(
           mockSessionService
-            .cache[CompanyDetailsList](eqTo(mockErsUtil.SUBSIDIARY_COMPANIES_CACHE), any())(any(), any())
+            .cache[CompanyDetailsList](eqTo(mockErsUtil.SUBSIDIARY_COMPANIES_CACHE), any())(using any(), any())
         )
           .thenReturn(Future.successful(sessionPair))
 
         val result: Unit = companyDetailsService.updateSubsidiaryCompanyCache(index)
 
-        result shouldBe ()
+        result mustBe ()
       }
     }
 
     "handle exceptions during fetching or caching" in {
       val index = 1
 
-      when(mockSessionService.fetch[RequestObject](any())(any(), any()))
+      when(mockSessionService.fetch[RequestObject](any())(using any(), any()))
         .thenReturn(Future.successful(ersRequestObject))
 
       when(
-        mockSessionService.fetch[Company](eqTo(mockErsUtil.SCHEME_ORGANISER_NAME_CACHE))(any(), any[Format[Company]])
+        mockSessionService.fetch[Company](eqTo(mockErsUtil.SCHEME_ORGANISER_NAME_CACHE))(using any(), any[Format[Company]])
       )
         .thenReturn(Future.failed(new Exception("Fetch failed")))
 
       val result: Unit = companyDetailsService.updateSubsidiaryCompanyCache(index)
 
-      result shouldBe ()
+      result mustBe ()
     }
   }
 
@@ -247,15 +249,15 @@ class CompanyDetailsServiceSpec extends AnyWordSpecLike with ErsTestHelper {
         ("multiple companies", CompanyDetailsList(listOfCompanies))
       ).foreach { case (numberCompanies, cachedCompanies) =>
         s"delete operation was successful with $numberCompanies" in {
-          when(mockSessionService.fetch[RequestObject](any())(any(), any()))
+          when(mockSessionService.fetch[RequestObject](any())(using any(), any()))
             .thenReturn(Future.successful(ersRequestObject))
-          when(mockSessionService.cache(any(), any())(any(), any())).thenReturn(Future.successful(sessionPair))
-          when(mockSessionService.fetchCompaniesOptionally()(any(), any()))
+          when(mockSessionService.cache(any(), any())(using any(), any())).thenReturn(Future.successful(sessionPair))
+          when(mockSessionService.fetchCompaniesOptionally()(using any(), any()))
             .thenReturn(Future.successful(cachedCompanies))
 
           val result = companyDetailsService.deleteCompany(cachedCompanies, 0).futureValue
 
-          result shouldBe true
+          result mustBe true
         }
       }
 
@@ -263,15 +265,15 @@ class CompanyDetailsServiceSpec extends AnyWordSpecLike with ErsTestHelper {
       "delete operation failed" in {
         val cachedCompanies = CompanyDetailsList(listOfCompanies)
 
-        when(mockSessionService.fetch[RequestObject](any())(any(), any()))
+        when(mockSessionService.fetch[RequestObject](any())(using any(), any()))
           .thenReturn(Future.successful(ersRequestObject))
-        when(mockSessionService.cache(any(), any())(any(), any()))
+        when(mockSessionService.cache(any(), any())(using any(), any()))
           .thenReturn(Future.failed(new Exception("caching failed")))
-        when(mockSessionService.fetchCompaniesOptionally()(any(), any())).thenReturn(Future.successful(cachedCompanies))
+        when(mockSessionService.fetchCompaniesOptionally()(using any(), any())).thenReturn(Future.successful(cachedCompanies))
 
         val result = companyDetailsService.deleteCompany(cachedCompanies, 0).futureValue
 
-        result shouldBe false
+        result mustBe false
       }
     }
   }

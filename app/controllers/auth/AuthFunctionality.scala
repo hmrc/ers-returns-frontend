@@ -80,7 +80,7 @@ class AuthAction @Inject() (
 
         if (authContext.isAgent) {
           for {
-            all    <- sessionService.fetch[ErsMetaData](ERS_METADATA)(request, implicitly)
+            all    <- sessionService.fetch[ErsMetaData](ERS_METADATA)(using request, implicitly)
             result <- block(RequestWithOptionalAuthContext(request, delegationModelUser(all, authContext: ERSAuthData)))
           } yield result
         } else {

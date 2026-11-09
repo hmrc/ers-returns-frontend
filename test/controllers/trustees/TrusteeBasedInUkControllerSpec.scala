@@ -47,7 +47,7 @@ class TrusteeBasedInUkControllerSpec
     with GuiceOneAppPerSuite
     with ScalaFutures {
 
-  implicit val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
+  given mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
     messagesActionBuilder,
     DefaultActionBuilder(stubBodyParser[AnyContent]()),
     cc.parsers,
@@ -70,7 +70,7 @@ class TrusteeBasedInUkControllerSpec
   )
 
   "calling showQuestionPage" should {
-    implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+    given authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
     setAuthMocks()
     when(mockSessionService.fetch[RequestObject](any())(any(), any())).thenReturn(Future.successful(ersRequestObject))
 
@@ -117,7 +117,7 @@ class TrusteeBasedInUkControllerSpec
       when(mockErsUtil.getPageElement(any(), any(), any(), any())(any())).thenReturn("test error message")
       val trusteeBasedData     = Map("bool" -> "")
       val form                 = RsFormMappings.trusteeBasedInUkForm().bind(trusteeBasedData)
-      implicit val authRequest = buildRequestWithAuth(
+      given authRequest = buildRequestWithAuth(
         Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       )
       val result               = testController.questionSubmit(1).apply(authRequest)
@@ -137,7 +137,7 @@ class TrusteeBasedInUkControllerSpec
 
     val trusteeBasedData     = Map("basedInUk" -> "0")
     val form                 = RsFormMappings.trusteeBasedInUkForm().bind(trusteeBasedData)
-    implicit val authRequest = buildRequestWithAuth(
+    given authRequest = buildRequestWithAuth(
       Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
     )
     val result               = testController.questionSubmit(1).apply(authRequest)
@@ -155,7 +155,7 @@ class TrusteeBasedInUkControllerSpec
 
     val trusteeBasedData     = Map("basedInUk" -> "1")
     val form                 = RsFormMappings.trusteeBasedInUkForm().bind(trusteeBasedData)
-    implicit val authRequest = buildRequestWithAuth(
+    given authRequest = buildRequestWithAuth(
       Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
     )
     val result               = testController.questionSubmit(1).apply(authRequest)
@@ -165,7 +165,7 @@ class TrusteeBasedInUkControllerSpec
   }
 
   "calling editQuestion" should {
-    implicit val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
+    given authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
     setAuthMocks()
     when(mockSessionService.fetch[RequestObject](any())(any(), any())).thenReturn(Future.successful(ersRequestObject))
 
@@ -195,7 +195,7 @@ class TrusteeBasedInUkControllerSpec
 
       val trusteeBasedData                                                 = Map("basedInUk" -> "0")
       val form                                                             = RsFormMappings.trusteeBasedInUkForm().bind(trusteeBasedData)
-      implicit val authRequest: RequestWithOptionalAuthContext[AnyContent] = buildRequestWithAuth(
+      given authRequest: RequestWithOptionalAuthContext[AnyContent] = buildRequestWithAuth(
         Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       )
       val result                                                           = testController.editQuestionSubmit(0).apply(authRequest)
@@ -215,7 +215,7 @@ class TrusteeBasedInUkControllerSpec
 
       val trusteeBasedData     = Map("basedInUk" -> "1")
       val form                 = RsFormMappings.trusteeBasedInUkForm().bind(trusteeBasedData)
-      implicit val authRequest = buildRequestWithAuth(
+      given authRequest = buildRequestWithAuth(
         Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       )
       val result               = testController.editQuestionSubmit(1).apply(authRequest)

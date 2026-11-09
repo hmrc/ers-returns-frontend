@@ -57,7 +57,7 @@ class FrontendSessionServiceSpec
     )
     .build()
 
-  implicit val fakeRequest: RequestWithOptionalAuthContext[AnyContent] = requestWithAuth
+  given fakeRequest: RequestWithOptionalAuthContext[AnyContent] = requestWithAuth
 
   val frontendSessionsRepository: FrontendSessionsRepository = mock[FrontendSessionsRepository]
   val mockApplicationConfig: ApplicationConfig               = mock[ApplicationConfig]
@@ -119,20 +119,20 @@ class FrontendSessionServiceSpec
 
   "getNoOfRows" should {
     "return None when nilReturn is 2" in {
-      val result = testService.getNoOfRows("2")(ec, fakeRequest, hc).futureValue
+      val result = testService.getNoOfRows("2")(using ec, fakeRequest, hc).futureValue
       result shouldBe None
     }
 
     "return Some with the number of rows when nilReturn is not OPTION_NIL_RETURN and rows are available" in {
       val numberOfRows = Some(5)
-      when(mockFileValidatorService.getSuccessfulCallbackRecord(any(), any()))
+      when(mockFileValidatorService.getSuccessfulCallbackRecord(using any(), any()))
         .thenReturn(Future.successful(Some(UploadedSuccessfully("", "", numberOfRows, mimeType = None))))
       val result       = testService.getNoOfRows("1").futureValue
       result shouldBe numberOfRows
     }
 
     "return None when nilReturn is not OPTION_NIL_RETURN and no rows are available" in {
-      when(mockFileValidatorService.getSuccessfulCallbackRecord(any(), any())).thenReturn(Future.successful(None))
+      when(mockFileValidatorService.getSuccessfulCallbackRecord(using any(), any())).thenReturn(Future.successful(None))
       val result = testService.getNoOfRows("1").futureValue
       result shouldBe None
     }

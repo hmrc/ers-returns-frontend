@@ -25,7 +25,7 @@ import utils.Fixtures
 
 class GroupSummaryDecoratorSpec extends AnyWordSpecLike with Matchers with OptionValues with MockitoSugar {
 
-  implicit val messages: Messages = mock[Messages]
+  given messages: Messages = mock[Messages]
 
   "GroupSummary Decorator" should {
 

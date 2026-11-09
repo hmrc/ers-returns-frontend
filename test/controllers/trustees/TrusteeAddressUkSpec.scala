@@ -47,7 +47,7 @@ class TrusteeAddressUkSpec
     with GuiceOneAppPerSuite
     with ScalaFutures {
 
-  implicit val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
+  given mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
     messagesActionBuilder,
     DefaultActionBuilder(stubBodyParser[AnyContent]()),
     cc.parsers,
@@ -70,7 +70,7 @@ class TrusteeAddressUkSpec
   )
 
   "calling showQuestionPage" should {
-    implicit val authRequest: RequestWithOptionalAuthContext[AnyContent] =
+    given authRequest: RequestWithOptionalAuthContext[AnyContent] =
       buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
     setAuthMocks()
     when(mockSessionService.fetch[RequestObject](any())(any(), any())).thenReturn(Future.successful(ersRequestObject))
@@ -135,7 +135,7 @@ class TrusteeAddressUkSpec
     "show the trustee address UK form page with errors if the form is incorrectly filled" in {
       val trusteeAddressUkData                                             = Map("addressLine1" -> "")
       val form                                                             = RsFormMappings.trusteeAddressUkForm().bind(trusteeAddressUkData)
-      implicit val authRequest: RequestWithOptionalAuthContext[AnyContent] = buildRequestWithAuth(
+      given authRequest: RequestWithOptionalAuthContext[AnyContent] = buildRequestWithAuth(
         Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
       )
       val result                                                           = testController.questionSubmit(1).apply(authRequest)
@@ -153,7 +153,7 @@ class TrusteeAddressUkSpec
 
     val trusteeAddressUkData                                             = Map("addressLine1" -> "123 Fake Street")
     val form                                                             = RsFormMappings.trusteeAddressUkForm().bind(trusteeAddressUkData)
-    implicit val authRequest: RequestWithOptionalAuthContext[AnyContent] = buildRequestWithAuth(
+    given authRequest: RequestWithOptionalAuthContext[AnyContent] = buildRequestWithAuth(
       Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
     )
     val result                                                           = testController.questionSubmit(1).apply(authRequest)
