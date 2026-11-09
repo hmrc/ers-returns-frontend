@@ -35,9 +35,9 @@ trait CountryCodes extends Logging {
 
   def environment: Environment
 
-  val jsonInputStream: Option[InputStream] = environment.resourceAsStream("country-codes.json")
+  def jsonInputStream: Option[InputStream] = environment.resourceAsStream("country-codes.json")
 
-  private val json: JsValue =
+  private lazy val json: JsValue =
     jsonInputStream match {
       case Some(inputStream) => Json.parse(Source.fromInputStream(inputStream, "UTF-8").mkString)
       case _                 =>
@@ -45,7 +45,7 @@ trait CountryCodes extends Logging {
         throw new Exception
     }
 
-  val countries: String =
+  lazy val countries: String =
     Json.toJson(json.\\("country").toList.map(x => x.toString().replaceAll("\"", ""))).toString()
 
   val countriesMap: List[Country] = {

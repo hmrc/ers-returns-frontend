@@ -57,7 +57,7 @@ class CountryCodesSpec
 
   object TestCountryCodes extends CountryCodes {
     override def environment: Environment             = appEnvironment
-    override val jsonInputStream: Option[InputStream] = appEnvironment.resourceAsStream("country-code-test.json")
+    override def jsonInputStream: Option[InputStream] = appEnvironment.resourceAsStream("country-code-test.json")
   }
 
   trait Setup {
