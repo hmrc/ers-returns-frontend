@@ -120,7 +120,7 @@ class SchemeOrganiserDetailsUkControllerSpec
       val companyData                                               = Map("bool" -> "")
       val form                                                      = RsFormMappings.companyNameForm().bind(companyData)
       given authRequest: RequestWithOptionalAuthContext[AnyContent] = buildRequestWithAuth(
-        Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*),
+        Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq*),
         authData = Fixtures.buildFakeUser
       )
       val result                                                    = testController.questionSubmit(1).apply(authRequest)
@@ -139,7 +139,7 @@ class SchemeOrganiserDetailsUkControllerSpec
       val form = RsFormMappings.companyNameForm().bind(companyData)
 
       given authRequest: RequestWithOptionalAuthContext[AnyContent] = buildRequestWithAuth(
-        Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*),
+        Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq*),
         authData = Fixtures.buildFakeUser
       )
       val result                                                    = testController.questionSubmit(1).apply(authRequest)
@@ -188,7 +188,7 @@ class SchemeOrganiserDetailsUkControllerSpec
       val companyAddressData                                        = Map("companyName" -> "Test person")
       val form                                                      = RsFormMappings.companyAddressUkForm().bind(companyAddressData)
       given authRequest: RequestWithOptionalAuthContext[AnyContent] = buildRequestWithAuth(
-        Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*),
+        Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq*),
         authData = Fixtures.buildFakeUser
       )
       val result                                                    = testController.editQuestionSubmit(1).apply(authRequest)

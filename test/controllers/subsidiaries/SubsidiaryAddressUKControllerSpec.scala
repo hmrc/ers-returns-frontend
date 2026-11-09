@@ -122,7 +122,7 @@ class SubsidiaryAddressUKControllerSpec
       val companyAddressUkData                                      = Map("addressLine1" -> "")
       val form                                                      = RsFormMappings.companyAddressUkForm().bind(companyAddressUkData)
       given authRequest: RequestWithOptionalAuthContext[AnyContent] = buildRequestWithAuth(
-        Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
+        Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq*)
       )
       val result                                                    = testController.questionSubmit(1).apply(authRequest)
 
@@ -141,7 +141,7 @@ class SubsidiaryAddressUKControllerSpec
       val companyAddressUkData                                      = Map("addressLine1" -> "123 Fake Street")
       val form                                                      = RsFormMappings.companyAddressUkForm().bind(companyAddressUkData)
       given authRequest: RequestWithOptionalAuthContext[AnyContent] = buildRequestWithAuth(
-        Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
+        Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq*)
       )
       val result                                                    = testController.questionSubmit(1).apply(authRequest)
 

@@ -370,7 +370,7 @@ class TrusteeSummaryControllerSpec
 
       val result = controllerUnderTest
         .trusteeSummaryContinue()
-        .apply(Fixtures.buildFakeRequestWithSessionIdSIP("POST").withFormUrlEncodedBody(form.data.toSeq: _*))
+        .apply(Fixtures.buildFakeRequestWithSessionIdSIP("POST").withFormUrlEncodedBody(form.data.toSeq*))
 
       status(result)           shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some("/submit-your-ers-annual-return/trustee-name")
@@ -398,7 +398,7 @@ class TrusteeSummaryControllerSpec
 
       val result = controllerUnderTest
         .trusteeSummaryContinue()
-        .apply(Fixtures.buildFakeRequestWithSessionIdSIP("POST").withFormUrlEncodedBody(form.data.toSeq: _*))
+        .apply(Fixtures.buildFakeRequestWithSessionIdSIP("POST").withFormUrlEncodedBody(form.data.toSeq*))
 
       status(result)           shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some("/submit-your-ers-annual-return/alterations-or-a-variation")

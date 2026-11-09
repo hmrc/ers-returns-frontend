@@ -265,7 +265,7 @@ class ReportableEventsControllerSpec
       val controllerUnderTest: ReportableEventsController = buildFakeReportableEventsController()
       val reportableEventsData                            = Map("" -> "")
       val form                                            = _root_.models.RsFormMappings.chooseForm().bind(reportableEventsData)
-      val request                                         = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
+      val request                                         = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq*)
       val authRequest                                     = buildRequestWithAuth(request)
 
       val result = controllerUnderTest.showReportableEventsSelected(ersRequestObject)(using authRequest)

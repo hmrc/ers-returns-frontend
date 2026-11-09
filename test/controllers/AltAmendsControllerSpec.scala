@@ -183,7 +183,7 @@ class AltAmendsControllerSpec
       val controllerUnderTest = buildFakeAltAmendsPageController()
       val altActivityData     = Map("" -> "")
       val form                = RsFormMappings.altActivityForm().bind(altActivityData)
-      val request             = Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
+      val request             = Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq*)
       val authRequest         = buildRequestWithAuth(request)
 
       val result = controllerUnderTest.showAltActivitySelected()(using authRequest)
@@ -195,7 +195,7 @@ class AltAmendsControllerSpec
       val controllerUnderTest           = buildFakeAltAmendsPageController()
       val altActivityData               = Map("altActivity" -> OPTION_NO)
       val form: Form[AltAmendsActivity] = RsFormMappings.altActivityForm().bind(altActivityData)
-      val request                       = Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
+      val request                       = Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq*)
       val authRequest                   = buildRequestWithAuth(request, Fixtures.buildFakeUser)
 
       val result = controllerUnderTest.showAltActivitySelected()(using authRequest)
@@ -209,7 +209,7 @@ class AltAmendsControllerSpec
       val controllerUnderTest = buildFakeAltAmendsPageController()
       val altActivityData     = Map("altActivity" -> OPTION_YES)
       val form                = RsFormMappings.altActivityForm().bind(altActivityData)
-      val request             = Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
+      val request             = Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq*)
       val authRequest         = buildRequestWithAuth(request, Fixtures.buildFakeUser)
 
       val result = controllerUnderTest.showAltActivitySelected()(using authRequest)
@@ -222,7 +222,7 @@ class AltAmendsControllerSpec
       val controllerUnderTest = buildFakeAltAmendsPageController(successfulCache = false)
       val altActivityData     = Map("altActivity" -> OPTION_YES)
       val form                = RsFormMappings.altActivityForm().bind(altActivityData)
-      val req                 = Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
+      val req                 = Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq*)
       val authRequest         = buildRequestWithAuth(req, Fixtures.buildFakeUser)
 
       val result = controllerUnderTest.showAltActivitySelected()(using authRequest)
@@ -238,7 +238,7 @@ class AltAmendsControllerSpec
       val controllerUnderTest = buildFakeAltAmendsPageController(successfulCache = false)
       val altActivityData     = Map("altActivity" -> OPTION_YES)
       val form                = RsFormMappings.altActivityForm().bind(altActivityData)
-      val req                 = Fixtures.buildFakeRequest("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
+      val req                 = Fixtures.buildFakeRequest("POST").withFormUrlEncodedBody(form.data.toSeq*)
       val authRequest         = buildRequestWithAuth(req, Fixtures.buildFakeUser)
 
       val result = controllerUnderTest.showAltActivitySelected()(using authRequest)
@@ -367,7 +367,7 @@ class AltAmendsControllerSpec
         "altAmendsOther"       -> ""
       )
       val form                                     = RsFormMappings.altAmendsForm().bind(altAmendsData)
-      val request                                  = Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
+      val request                                  = Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq*)
       val authRequest                              = buildRequestWithAuth(request, Fixtures.buildFakeUser)
 
       val result = controllerUnderTest.showAltAmendsSelected()(using authRequest)
@@ -385,7 +385,7 @@ class AltAmendsControllerSpec
         "altAmendsOther"       -> ""
       )
       val form                                     = RsFormMappings.altAmendsForm().bind(altAmendsData)
-      val request                                  = Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
+      val request                                  = Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq*)
       val authRequest                              = buildRequestWithAuth(request, Fixtures.buildFakeUser)
 
       val result = controllerUnderTest.showAltAmendsSelected()(using authRequest)
@@ -405,7 +405,7 @@ class AltAmendsControllerSpec
         "altAmendsOther"       -> "1"
       )
       val form                                     = RsFormMappings.altActivityForm().bind(altAmendsData)
-      val req                                      = Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
+      val req                                      = Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq*)
       val authRequest                              = buildRequestWithAuth(req, Fixtures.buildFakeUser)
 
       val result = controllerUnderTest.showAltAmendsSelected()(using authRequest)
@@ -427,7 +427,7 @@ class AltAmendsControllerSpec
         "altAmendsOther"       -> "1"
       )
       val form                                     = RsFormMappings.altActivityForm().bind(altAmendsData)
-      val request                                  = Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
+      val request                                  = Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq*)
       val authRequest                              = buildRequestWithAuth(request, Fixtures.buildFakeUser)
 
       val result = controllerUnderTest.showAltAmendsSelected()(using authRequest)

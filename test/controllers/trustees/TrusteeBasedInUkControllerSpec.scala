@@ -120,7 +120,7 @@ class TrusteeBasedInUkControllerSpec
       val trusteeBasedData                                          = Map("bool" -> "")
       val form                                                      = RsFormMappings.trusteeBasedInUkForm().bind(trusteeBasedData)
       given authRequest: RequestWithOptionalAuthContext[AnyContent] = buildRequestWithAuth(
-        Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
+        Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq*)
       )
       val result                                                    = testController.questionSubmit(1).apply(authRequest)
 
@@ -141,7 +141,7 @@ class TrusteeBasedInUkControllerSpec
     val trusteeBasedData                                          = Map("basedInUk" -> "0")
     val form                                                      = RsFormMappings.trusteeBasedInUkForm().bind(trusteeBasedData)
     given authRequest: RequestWithOptionalAuthContext[AnyContent] = buildRequestWithAuth(
-      Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
+      Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq*)
     )
     val result                                                    = testController.questionSubmit(1).apply(authRequest)
 
@@ -160,7 +160,7 @@ class TrusteeBasedInUkControllerSpec
     val trusteeBasedData                                          = Map("basedInUk" -> "1")
     val form                                                      = RsFormMappings.trusteeBasedInUkForm().bind(trusteeBasedData)
     given authRequest: RequestWithOptionalAuthContext[AnyContent] = buildRequestWithAuth(
-      Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
+      Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq*)
     )
     val result                                                    = testController.questionSubmit(1).apply(authRequest)
 
@@ -204,7 +204,7 @@ class TrusteeBasedInUkControllerSpec
       val trusteeBasedData                                          = Map("basedInUk" -> "0")
       val form                                                      = RsFormMappings.trusteeBasedInUkForm().bind(trusteeBasedData)
       given authRequest: RequestWithOptionalAuthContext[AnyContent] = buildRequestWithAuth(
-        Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
+        Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq*)
       )
       val result                                                    = testController.editQuestionSubmit(0).apply(authRequest)
 
@@ -225,7 +225,7 @@ class TrusteeBasedInUkControllerSpec
       val trusteeBasedData                                          = Map("basedInUk" -> "1")
       val form                                                      = RsFormMappings.trusteeBasedInUkForm().bind(trusteeBasedData)
       given authRequest: RequestWithOptionalAuthContext[AnyContent] = buildRequestWithAuth(
-        Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
+        Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq*)
       )
       val result                                                    = testController.editQuestionSubmit(1).apply(authRequest)
 

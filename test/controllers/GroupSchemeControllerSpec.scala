@@ -530,7 +530,7 @@ class GroupSchemeControllerSpec
         case "SIP"       => Fixtures.buildFakeRequestWithSessionIdSIP("POST")
         case "OTHER"     => Fixtures.buildFakeRequestWithSessionIdOTHER("POST")
       }
-      request.withFormUrlEncodedBody(form.data.toSeq: _*)
+      request.withFormUrlEncodedBody(form.data.toSeq*)
     }
 
     "display errors if invalid data is sent" in {

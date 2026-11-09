@@ -169,7 +169,7 @@ class CheckFileTypeControllerSpec
       val controllerUnderTest = buildFakeCheckingServiceController()
       val fileTypeData        = Map("" -> "")
       val form                = RsFormMappings.checkFileTypeForm().bind(fileTypeData)
-      val request             = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
+      val request             = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq*)
 
       val result = controllerUnderTest.showCheckFileTypeSelected()(using buildRequestWithAuth(request))
 
@@ -180,7 +180,7 @@ class CheckFileTypeControllerSpec
       val controllerUnderTest = buildFakeCheckingServiceController()
       val checkFileTypeData   = Map("checkFileType" -> "csv")
       val form                = RsFormMappings.schemeTypeForm().bind(checkFileTypeData)
-      val request             = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
+      val request             = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq*)
 
       val result = controllerUnderTest.showCheckFileTypeSelected()(using buildRequestWithAuth(request))
 
@@ -192,7 +192,7 @@ class CheckFileTypeControllerSpec
       val controllerUnderTest = buildFakeCheckingServiceController()
       val checkFileTypeData   = Map("checkFileType" -> "ods")
       val form                = RsFormMappings.schemeTypeForm().bind(checkFileTypeData)
-      val request             = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
+      val request             = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq*)
 
       val result = controllerUnderTest.showCheckFileTypeSelected()(using buildRequestWithAuth(request))
 
@@ -204,7 +204,7 @@ class CheckFileTypeControllerSpec
       val controllerUnderTest = buildFakeCheckingServiceController(successfulCache = false)
       val schemeTypeData      = Map("checkFileType" -> "csv")
       val form                = RsFormMappings.schemeTypeForm().bind(schemeTypeData)
-      val request             = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
+      val request             = Fixtures.buildFakeRequestWithSessionId("POST").withFormUrlEncodedBody(form.data.toSeq*)
 
       val result = controllerUnderTest.showCheckFileTypeSelected()(using buildRequestWithAuth(request))
 

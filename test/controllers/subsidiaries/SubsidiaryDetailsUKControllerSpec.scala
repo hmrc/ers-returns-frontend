@@ -121,7 +121,7 @@ class SubsidiaryDetailsUKControllerSpec
       val companyData                                               = Map("bool" -> "")
       val form                                                      = RsFormMappings.companyNameForm().bind(companyData)
       given authRequest: RequestWithOptionalAuthContext[AnyContent] = buildRequestWithAuth(
-        Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
+        Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq*)
       )
       val result                                                    = testController.questionSubmit(1).apply(authRequest)
 
@@ -139,7 +139,7 @@ class SubsidiaryDetailsUKControllerSpec
       val form = RsFormMappings.companyNameForm().bind(companyData)
 
       given authRequest: RequestWithOptionalAuthContext[AnyContent] = buildRequestWithAuth(
-        Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
+        Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq*)
       )
       val result                                                    = testController.questionSubmit(1).apply(authRequest)
 
@@ -185,7 +185,7 @@ class SubsidiaryDetailsUKControllerSpec
       val companyAddressData                                        = Map("companyName" -> "Test person")
       val form                                                      = RsFormMappings.companyAddressUkForm().bind(companyAddressData)
       given authRequest: RequestWithOptionalAuthContext[AnyContent] = buildRequestWithAuth(
-        Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
+        Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq*)
       )
       val result                                                    = testController.editQuestionSubmit(1).apply(authRequest)
 

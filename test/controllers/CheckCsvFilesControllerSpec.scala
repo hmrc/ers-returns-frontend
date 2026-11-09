@@ -190,7 +190,7 @@ class CheckCsvFilesControllerSpec
       )
       val form                                  = RsFormMappings.csvFileCheckForm().bind(csvFilesListData)
 
-      val request = Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
+      val request = Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq*)
       val result  = checkCsvFilesController.validateCsvFilesPageSelected()(using buildRequestWithAuth(request))
       status(result) shouldBe OK
     }
@@ -203,7 +203,7 @@ class CheckCsvFilesControllerSpec
       )
       val form                                  = RsFormMappings.csvFileCheckForm().bind(csvFilesListData)
 
-      val request = Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
+      val request = Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq*)
       val result  = checkCsvFilesController.validateCsvFilesPageSelected()(using buildRequestWithAuth(request))
 
       status(result)                                shouldBe SEE_OTHER

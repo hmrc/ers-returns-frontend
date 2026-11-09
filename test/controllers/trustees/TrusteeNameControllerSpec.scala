@@ -116,7 +116,7 @@ class TrusteeNameControllerSpec
       val trusteeBasedData                                          = Map("bool" -> "")
       val form                                                      = RsFormMappings.trusteeBasedInUkForm().bind(trusteeBasedData)
       given authRequest: RequestWithOptionalAuthContext[AnyContent] = buildRequestWithAuth(
-        Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*),
+        Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq*),
         authData = Fixtures.buildFakeUser
       )
       val result                                                    = testController.questionSubmit(1).apply(authRequest)
@@ -135,7 +135,7 @@ class TrusteeNameControllerSpec
       val trusteeBasedData                                          = Map("name" -> "Test person")
       val form                                                      = RsFormMappings.trusteeBasedInUkForm().bind(trusteeBasedData)
       given authRequest: RequestWithOptionalAuthContext[AnyContent] = buildRequestWithAuth(
-        Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*),
+        Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq*),
         authData = Fixtures.buildFakeUser
       )
       val result                                                    = testController.questionSubmit(1).apply(authRequest)
@@ -181,7 +181,7 @@ class TrusteeNameControllerSpec
       val trusteeBasedData                                          = Map("name" -> "Test person")
       val form                                                      = RsFormMappings.trusteeBasedInUkForm().bind(trusteeBasedData)
       given authRequest: RequestWithOptionalAuthContext[AnyContent] = buildRequestWithAuth(
-        Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*),
+        Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq*),
         authData = Fixtures.buildFakeUser
       )
       val result                                                    = testController.editQuestionSubmit(1).apply(authRequest)

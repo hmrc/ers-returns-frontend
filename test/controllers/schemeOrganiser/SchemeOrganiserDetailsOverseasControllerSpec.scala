@@ -117,7 +117,7 @@ class SchemeOrganiserDetailsOverseasControllerSpec
       val companyData                                               = Map("bool" -> "")
       val form                                                      = RsFormMappings.companyNameForm().bind(companyData)
       given authRequest: RequestWithOptionalAuthContext[AnyContent] = buildRequestWithAuth(
-        Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*),
+        Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq*),
         authData = Fixtures.buildFakeUser
       )
       val result                                                    = testController.questionSubmit(1).apply(authRequest)
@@ -135,7 +135,7 @@ class SchemeOrganiserDetailsOverseasControllerSpec
       val companyData                                               = Map("companyName" -> "Test company")
       val form                                                      = RsFormMappings.companyNameForm().bind(companyData)
       given authRequest: RequestWithOptionalAuthContext[AnyContent] = buildRequestWithAuth(
-        Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*),
+        Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq*),
         authData = Fixtures.buildFakeUser
       )
       val result                                                    = testController.questionSubmit(1).apply(authRequest)
@@ -183,7 +183,7 @@ class SchemeOrganiserDetailsOverseasControllerSpec
       val companyAddressData                                        = Map("companyName" -> "Test person")
       val form                                                      = RsFormMappings.companyAddressOverseasForm().bind(companyAddressData)
       given authRequest: RequestWithOptionalAuthContext[AnyContent] = buildRequestWithAuth(
-        Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*),
+        Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq*),
         authData = Fixtures.buildFakeUser
       )
       val result                                                    = testController.editQuestionSubmit(1).apply(authRequest)
