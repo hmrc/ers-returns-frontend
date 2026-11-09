@@ -69,7 +69,7 @@ class UpscanServiceSpec
         UpscanInitiateResponse(Reference("reference"), "postTarget", formFields = Map.empty[String, String])
       val initiateRequestCaptor  = ArgumentCaptor.forClass(classOf[UpscanInitiateRequest])
 
-      when(mockUpscanConnector.getUpscanFormData(initiateRequestCaptor.capture())(any[HeaderCarrier]))
+      when(mockUpscanConnector.getUpscanFormData(initiateRequestCaptor.capture())(using any[HeaderCarrier]))
         .thenReturn(Future.successful(upscanInitiateResponse))
 
       upscanService.getUpscanFormDataOds(schemeRef)(using hc, request).futureValue
@@ -94,7 +94,7 @@ class UpscanServiceSpec
         UpscanInitiateResponse(Reference("reference"), "postTarget", formFields = Map.empty[String, String])
       val initiateRequestCaptor  = ArgumentCaptor.forClass(classOf[UpscanInitiateRequest])
 
-      when(mockUpscanConnector.getUpscanFormData(initiateRequestCaptor.capture())(any[HeaderCarrier]))
+      when(mockUpscanConnector.getUpscanFormData(initiateRequestCaptor.capture())(using any[HeaderCarrier]))
         .thenReturn(Future.successful(upscanInitiateResponse))
 
       upscanService.getUpscanFormDataCsv(uploadId, scRef)(using hc, request).futureValue

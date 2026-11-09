@@ -87,7 +87,7 @@ class ReportableEventsControllerSpec
       when(mockSessionService.fetch[RequestObject](any())(using any(), any()))
         .thenReturn(Future.successful(ersRequestObject))
 
-      when(mockErsConnector.connectToEtmpSapRequest(anyString())(any(), any()))
+      when(mockErsConnector.connectToEtmpSapRequest(anyString())(using any(), any()))
         .thenReturn(
           if (sapRequestRes)
             Future.successful(Right("1234567890"))
@@ -208,7 +208,7 @@ class ReportableEventsControllerSpec
       when(mockSessionService.fetch[RequestObject](any())(using any(), any()))
         .thenReturn(Future.successful(ersRequestObject))
 
-      when(mockErsConnector.connectToEtmpSapRequest(anyString())(any(), any()))
+      when(mockErsConnector.connectToEtmpSapRequest(anyString())(using any(), any()))
         .thenReturn(
           if (sapRequestRes)
             Future.successful(Right("1234567890"))

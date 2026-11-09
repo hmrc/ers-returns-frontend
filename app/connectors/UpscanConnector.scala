@@ -27,7 +27,7 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class UpscanConnector @Inject() (appConfig: ApplicationConfig, httpClient: HttpClientV2)(implicit
+class UpscanConnector @Inject() (appConfig: ApplicationConfig, httpClient: HttpClientV2)(using
   ec: ExecutionContext
 ) {
 
@@ -39,7 +39,7 @@ class UpscanConnector @Inject() (appConfig: ApplicationConfig, httpClient: HttpC
   private[connectors] val upscanInitiatePath: String = "/upscan/v2/initiate"
   private val upscanInitiateUrl: String              = upscanInitiateHost + upscanInitiatePath
 
-  def getUpscanFormData(body: UpscanInitiateRequest)(implicit hc: HeaderCarrier): Future[UpscanInitiateResponse] =
+  def getUpscanFormData(body: UpscanInitiateRequest)(using hc: HeaderCarrier): Future[UpscanInitiateResponse] =
     httpClient
       .post(url"$upscanInitiateUrl")
       .setHeader(headers.toSeq*)

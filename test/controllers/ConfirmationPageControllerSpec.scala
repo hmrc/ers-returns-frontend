@@ -110,10 +110,10 @@ class ConfirmationPageControllerSpec
         override val logger: Logger = confirmationPageControllerLogger
 
         when(
-          mockErsConnector.connectToEtmpSummarySubmit(anyString(), any[JsValue]())(any(), any())
+          mockErsConnector.connectToEtmpSummarySubmit(anyString(), any[JsValue]())(using any(), any())
         ) thenReturn bundleRes
         when(
-          mockErsConnector.checkForPresubmission(any[SchemeInfo](), anyString())(any(), any())
+          mockErsConnector.checkForPresubmission(any[SchemeInfo](), anyString())(using any(), any())
         ) thenReturn presubmission
 
         when(mockSessionService.fetch[ErsMetaData](refEq("ErsMetaData"))(using any(), any())) thenReturn ersMetaRes
@@ -132,8 +132,8 @@ class ConfirmationPageControllerSpec
           mockSessionService.fetch[RequestObject](refEq("ErsRequestObject"))(using any(), any())
         ) thenReturn requestObjectRes
 
-        when(mockErsConnector.saveMetadata(any())(any(), any())) thenReturn Future.successful(HttpResponse(OK))
-        when(mockErsConnector.submitReturnToBackend(any())(any(), any())) thenReturn Future.successful(HttpResponse(OK))
+        when(mockErsConnector.saveMetadata(any())(using any(), any())) thenReturn Future.successful(HttpResponse(OK))
+        when(mockErsConnector.submitReturnToBackend(any())(using any(), any())) thenReturn Future.successful(HttpResponse(OK))
       }
 
     "give a redirect status (to company authentication frontend) if user is not authenticated" in {
@@ -329,7 +329,7 @@ class ConfirmationPageControllerSpec
         testAuthAction
       ) {
 
-        when(mockErsConnector.saveMetadata(any[ErsSummary]())(any(), any()))
+        when(mockErsConnector.saveMetadata(any[ErsSummary]())(using any(), any()))
           .thenReturn(
             if (saveMetadataRes) {
               Future.successful(HttpResponse(saveMetadataResponse, ""))
@@ -338,7 +338,7 @@ class ConfirmationPageControllerSpec
             }
           )
 
-        when(mockErsConnector.submitReturnToBackend(any[ErsSummary]())(any(), any())) thenReturn Future.successful(
+        when(mockErsConnector.submitReturnToBackend(any[ErsSummary]())(using any(), any())) thenReturn Future.successful(
           HttpResponse(submitReturnToBackendResponse, "")
         )
       }

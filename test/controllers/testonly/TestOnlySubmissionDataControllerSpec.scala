@@ -137,7 +137,7 @@ class TestOnlySubmissionDataControllerSpec
       reset(mockErsConnector)
       lazy val testOnlySubmissionDataController: TestOnlySubmissionDataController = new Setup(Some(mock[JsObject]))
 
-      when(mockErsConnector.retrieveSubmissionData(any[JsObject]())(any(), any()))
+      when(mockErsConnector.retrieveSubmissionData(any[JsObject]())(using any(), any()))
         .thenReturn(Future.successful(HttpResponse(OK, "")))
 
       val authRequest = buildRequestWithAuth(testFakeRequest)
@@ -150,7 +150,7 @@ class TestOnlySubmissionDataControllerSpec
       reset(mockErsConnector)
       lazy val testOnlySubmissionDataController: TestOnlySubmissionDataController = new Setup(Some(mock[JsObject]))
 
-      when(mockErsConnector.retrieveSubmissionData(any[JsObject]())(any(), any()))
+      when(mockErsConnector.retrieveSubmissionData(any[JsObject]())(using any(), any()))
         .thenReturn(Future.successful(HttpResponse(INTERNAL_SERVER_ERROR, "")))
 
       val authRequest = buildRequestWithAuth(testFakeRequest)
@@ -163,7 +163,7 @@ class TestOnlySubmissionDataControllerSpec
       reset(mockErsConnector)
       lazy val testOnlySubmissionDataController: TestOnlySubmissionDataController = new Setup(Some(mock[JsObject]))
 
-      when(mockErsConnector.retrieveSubmissionData(any[JsObject]())(any(), any()))
+      when(mockErsConnector.retrieveSubmissionData(any[JsObject]())(using any(), any()))
         .thenReturn(Future.failed(new RuntimeException))
 
       val authRequest = buildRequestWithAuth(testFakeRequest)

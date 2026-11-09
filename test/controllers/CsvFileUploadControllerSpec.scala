@@ -615,7 +615,7 @@ class CsvFileUploadControllerSpec
     "return the result of extractCsvCallbackData if deleting presubmission data is successful" in {
       reset(mockErsConnector)
       when(
-        mockErsConnector.removePresubmissionData(any[SchemeInfo]())(any(), any())
+        mockErsConnector.removePresubmissionData(any[SchemeInfo]())(using any(), any())
       ).thenReturn(
         Future.successful(HttpResponse(OK, ""))
       )
@@ -629,7 +629,7 @@ class CsvFileUploadControllerSpec
     "return Internal Server Error and show error page if deleting presubmission data fails" in {
       reset(mockErsConnector)
       when(
-        mockErsConnector.removePresubmissionData(any[SchemeInfo]())(any(), any())
+        mockErsConnector.removePresubmissionData(any[SchemeInfo]())(using any(), any())
       ).thenReturn(
         Future.successful(HttpResponse(INTERNAL_SERVER_ERROR, ""))
       )
@@ -642,7 +642,7 @@ class CsvFileUploadControllerSpec
     "direct to ers errors page if deleting presubmission data throws exception" in {
       reset(mockErsConnector)
       when(
-        mockErsConnector.removePresubmissionData(any[SchemeInfo]())(any(), any())
+        mockErsConnector.removePresubmissionData(any[SchemeInfo]())(using any(), any())
       ).thenReturn(
         Future.failed(new RuntimeException)
       )
@@ -901,7 +901,7 @@ class CsvFileUploadControllerSpec
     "redirect to schemeOrganiserPage if validating is successful" in {
       reset(mockErsConnector)
       when(
-        mockErsConnector.validateCsvFileData(any[List[UploadedSuccessfully]](), any[SchemeInfo]())(any(), any())
+        mockErsConnector.validateCsvFileData(any[List[UploadedSuccessfully]](), any[SchemeInfo]())(using any(), any())
       ).thenReturn(
         Future.successful(HttpResponse(OK, ""))
       )
@@ -919,7 +919,7 @@ class CsvFileUploadControllerSpec
     "redirect to validationFailure if validating fails" in {
       reset(mockErsConnector)
       when(
-        mockErsConnector.validateCsvFileData(any[List[UploadedSuccessfully]](), any[SchemeInfo]())(any(), any())
+        mockErsConnector.validateCsvFileData(any[List[UploadedSuccessfully]](), any[SchemeInfo]())(using any(), any())
       ).thenReturn(
         Future.successful(HttpResponse(BAD_REQUEST, ""))
       )
@@ -935,7 +935,7 @@ class CsvFileUploadControllerSpec
     "show error page if validating returns result other than OK and ACCEPTED" in {
       reset(mockErsConnector)
       when(
-        mockErsConnector.validateCsvFileData(any[List[UploadedSuccessfully]](), any[SchemeInfo]())(any(), any())
+        mockErsConnector.validateCsvFileData(any[List[UploadedSuccessfully]](), any[SchemeInfo]())(using any(), any())
       ).thenReturn(
         Future.successful(HttpResponse(INTERNAL_SERVER_ERROR, ""))
       )
@@ -949,7 +949,7 @@ class CsvFileUploadControllerSpec
     "direct to ers errors page if connecting with validator is not successful" in {
       reset(mockErsConnector)
       when(
-        mockErsConnector.validateCsvFileData(any[List[UploadedSuccessfully]](), any[SchemeInfo]())(any(), any())
+        mockErsConnector.validateCsvFileData(any[List[UploadedSuccessfully]](), any[SchemeInfo]())(using any(), any())
       ).thenReturn(
         Future.failed(new RuntimeException)
       )
@@ -1015,7 +1015,7 @@ class CsvFileUploadControllerSpec
         mockErsUtil.getPageElement(any(), any(), any(), any())(using any())
       ) thenReturn "CSOP_OptionsGranted_V4.csv"
       when(
-        mockErsConnector.validateCsvFileData(any[List[UploadedSuccessfully]](), any[SchemeInfo]())(any(), any())
+        mockErsConnector.validateCsvFileData(any[List[UploadedSuccessfully]](), any[SchemeInfo]())(using any(), any())
       ) thenReturn Future.successful(HttpResponse(OK, ""))
 
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
@@ -1059,7 +1059,7 @@ class CsvFileUploadControllerSpec
         mockErsUtil.getPageElement(any(), any(), any(), any())(using any())
       ) thenReturn "CSOP_OptionsGranted_V7.csv"
       when(
-        mockErsConnector.validateCsvFileData(any[List[UploadedSuccessfully]](), any[SchemeInfo]())(any(), any())
+        mockErsConnector.validateCsvFileData(any[List[UploadedSuccessfully]](), any[SchemeInfo]())(using any(), any())
       ) thenReturn Future.successful(HttpResponse(OK, ""))
 
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
@@ -1104,7 +1104,7 @@ class CsvFileUploadControllerSpec
       ) thenReturn "CSOP_OptionsGranted_V4.csv"
 
       when(
-        mockErsConnector.validateCsvFileData(any[List[UploadedSuccessfully]](), any[SchemeInfo]())(any(), any())
+        mockErsConnector.validateCsvFileData(any[List[UploadedSuccessfully]](), any[SchemeInfo]())(using any(), any())
       ) thenReturn Future.successful(HttpResponse(OK, ""))
 
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
