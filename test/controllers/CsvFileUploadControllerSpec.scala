@@ -22,7 +22,8 @@ import models.upscan.*
 import org.apache.pekko.actor.ActorSystem
 import org.apache.pekko.stream.Materializer
 import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers.{eq => meq, _}
+import org.mockito.ArgumentMatchers.eq as eqTo
+import org.mockito.ArgumentMatchers.{eq as meq, *}
 import org.mockito.Mockito.*
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.should.Matchers
@@ -30,26 +31,25 @@ import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatest.{BeforeAndAfterEach, OptionValues}
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.{Logger, i18n}
 import play.api.i18n.{MessagesApi, MessagesImpl}
 import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.*
 import play.api.mvc.request.RequestTarget
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
+import play.api.{Logger, i18n}
 import services.UpscanService
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.mongo.cache.CacheItem
-import utils.Fixtures.ersRequestObject
+import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
+import uk.gov.hmrc.play.bootstrap.tools.LogCapturing
 import utils.*
+import utils.Fixtures.ersRequestObject
 import views.html.*
 
 import java.time.Instant
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Random
-import org.mockito.ArgumentMatchers.{eq => eqTo}
-import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
-import uk.gov.hmrc.play.bootstrap.tools.LogCapturing
 
 class CsvFileUploadControllerSpec
     extends AnyWordSpecLike

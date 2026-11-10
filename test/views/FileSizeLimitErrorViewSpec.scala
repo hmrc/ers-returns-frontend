@@ -21,11 +21,11 @@ import org.jsoup.nodes.Document
 import play.api.Application
 import play.api.i18n.Messages
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import views.html.file_size_limit_error
 
 import scala.jdk.CollectionConverters.CollectionHasAsScala
-import play.api.mvc.AnyContentAsEmpty
 
 class FileSizeLimitErrorViewSpec extends ViewSpecBase {
 

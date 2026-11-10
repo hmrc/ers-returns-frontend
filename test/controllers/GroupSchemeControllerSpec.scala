@@ -33,7 +33,7 @@ import play.api.i18n.{Messages, MessagesApi, MessagesImpl}
 import play.api.mvc.*
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
-import utils.Fixtures.{buildFakeUser, ersRequestObject}
+import utils.Fixtures.ersRequestObject
 import utils.{ERSFakeApplicationConfig, ErsTestHelper, Fixtures}
 import views.html.{confirm_delete_company, global_error, group, group_plan_summary}
 

@@ -28,8 +28,8 @@ import play.api.i18n.MessagesApi
 import play.api.mvc.*
 import play.api.test.Helpers.{redirectLocation, status, stubBodyParser}
 import play.api.test.{DefaultAwaitTimeout, FakeRequest}
-import uk.gov.hmrc.auth.core.AffinityGroup.{Agent, Organisation}
 import uk.gov.hmrc.auth.core.*
+import uk.gov.hmrc.auth.core.AffinityGroup.{Agent, Organisation}
 import uk.gov.hmrc.domain.EmpRef
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.ErsTestHelper

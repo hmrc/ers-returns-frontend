@@ -18,6 +18,7 @@ package views
 
 import config.ApplicationConfig
 import org.jsoup.nodes.{Document, Element}
+import play.api.Application
 import play.api.i18n.Messages
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.AnyContentAsEmpty
@@ -27,7 +28,6 @@ import views.html.start
 
 import scala.collection.mutable
 import scala.jdk.CollectionConverters.*
-import play.api.Application
 
 class StartPageViewSpec extends ViewSpecBase with FileUploadFixtures {
 

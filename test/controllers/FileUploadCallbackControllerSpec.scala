@@ -20,7 +20,7 @@ import controllers.internal.{FileSizeUtils, FileUploadCallbackController}
 import models.upscan.*
 import org.apache.pekko.stream.Materializer
 import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers.{eq => meq, _}
+import org.mockito.ArgumentMatchers.{eq as meq, *}
 import org.mockito.Mockito.*
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.PlaySpec

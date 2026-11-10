@@ -29,8 +29,8 @@ import org.scalatestplus.mockito.MockitoSugar
 import play.api.i18n
 import play.api.i18n.MessagesImpl
 import play.api.libs.json.{JsObject, JsValue, Json, Writes}
-import play.api.mvc.BodyParsers.Default
 import play.api.mvc.*
+import play.api.mvc.BodyParsers.Default
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{
   contentAsString, defaultAwaitTimeout, stubBodyParser, stubControllerComponents, stubMessagesApi

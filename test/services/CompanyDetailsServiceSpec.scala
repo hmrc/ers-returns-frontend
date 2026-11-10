@@ -20,9 +20,9 @@ import models.*
 import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito.when
 import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
+import org.scalatest.matchers.must.Matchers.mustBe
 import org.scalatest.matchers.should.Matchers.{contain, shouldNot}
 import org.scalatest.wordspec.AnyWordSpecLike
-import org.scalatest.matchers.must.Matchers.mustBe
 import play.api.libs.json.Format
 import utils.Fixtures.ersRequestObject
 import utils.{ErsTestHelper, Fixtures}

@@ -20,9 +20,10 @@ import config.ApplicationConfig
 import models.upscan.{PreparedUpload, UpscanInitiateRequest, UpscanInitiateResponse}
 import play.api.http.HeaderNames
 import play.api.libs.json.Json
+import play.api.libs.ws.JsonBodyWritables.writeableOf_JsValue
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, StringContextOps}
-import play.api.libs.ws.JsonBodyWritables.writeableOf_JsValue
+
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 

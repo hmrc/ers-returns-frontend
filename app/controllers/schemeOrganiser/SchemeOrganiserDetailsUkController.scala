@@ -22,7 +22,7 @@ import controllers.auth.AuthAction
 import models.{Company, RequestObject, RsFormMappings}
 import play.api.data.Form
 import play.api.libs.json.Format
-import play.api.mvc.{AnyContent, MessagesControllerComponents, Request, RequestHeader}
+import play.api.mvc.*
 import play.twirl.api.Html
 import services.FrontendSessionService
 import uk.gov.hmrc.http.HeaderCarrier
@@ -32,7 +32,6 @@ import utils.{CountryCodes, ERSUtil}
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
-import play.api.mvc.Result
 
 class SchemeOrganiserDetailsUkController @Inject() (
   val mcc: MessagesControllerComponents,

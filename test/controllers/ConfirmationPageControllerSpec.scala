@@ -19,24 +19,24 @@ package controllers
 import models.*
 import org.apache.pekko.stream.Materializer
 import org.jsoup.Jsoup
-import org.mockito.ArgumentMatchers.{eq => eqTo, _}
+import org.mockito.ArgumentMatchers.{eq as eqTo, *}
 import org.mockito.Mockito.*
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatest.{BeforeAndAfterEach, OptionValues}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status
-import play.api.{Logger, i18n}
 import play.api.i18n.{MessagesApi, MessagesImpl}
 import play.api.libs.json.JsValue
 import play.api.mvc.*
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
+import play.api.{Logger, i18n}
 import repositories.RateLimiterCache
 import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.play.bootstrap.tools.LogCapturing
-import utils.Fixtures.ersRequestObject
 import utils.*
+import utils.Fixtures.ersRequestObject
 import views.html.{confirmation, global_error}
 
 import java.time.Instant

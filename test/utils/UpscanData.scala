@@ -17,12 +17,12 @@
 package utils
 
 import models.upscan.*
+import models.upscan.UpscanCallback.*
 import play.api.libs.json.*
 import play.api.libs.ws.JsonBodyWritables.writeableOf_JsValue
 
 import java.net.URL
 import java.time.Instant
-import models.upscan.UpscanCallback.*
 
 trait UpscanData {
 

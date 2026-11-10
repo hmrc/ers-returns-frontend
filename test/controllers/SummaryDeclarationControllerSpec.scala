@@ -33,8 +33,8 @@ import play.api.mvc.*
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import uk.gov.hmrc.mongo.cache.CacheItem
-import utils.Fixtures.ersRequestObject
 import utils.*
+import utils.Fixtures.ersRequestObject
 import views.html.{global_error, summary}
 
 import java.time.Instant

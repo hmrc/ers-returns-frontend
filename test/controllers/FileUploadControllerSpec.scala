@@ -21,7 +21,7 @@ import models.*
 import models.upscan.{Failed, UploadedSuccessfully}
 import org.apache.pekko.actor.ActorSystem
 import org.apache.pekko.stream.Materializer
-import org.mockito.ArgumentMatchers.{eq => meq, _}
+import org.mockito.ArgumentMatchers.{eq as meq, *}
 import org.mockito.Mockito.*
 import org.scalatest.Assertion
 import org.scalatestplus.mockito.MockitoSugar

@@ -18,7 +18,7 @@ package controllers.trustees
 
 import models.*
 import org.jsoup.Jsoup
-import org.mockito.ArgumentMatchers.{eq => meq, _}
+import org.mockito.ArgumentMatchers.{eq as meq, *}
 import org.mockito.Mockito.*
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.should.Matchers
@@ -33,8 +33,8 @@ import play.api.mvc.{
 }
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
-import utils.Fixtures.ersRequestObject
 import utils.*
+import utils.Fixtures.ersRequestObject
 import views.html.{global_error, trustee_summary}
 
 import java.time.Instant

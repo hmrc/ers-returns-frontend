@@ -21,8 +21,8 @@ import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.*
 import org.mockito.stubbing.OngoingStubbing
 import org.scalatestplus.mockito.MockitoSugar
-import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import uk.gov.hmrc.auth.core.*
+import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.domain.EmpRef
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector

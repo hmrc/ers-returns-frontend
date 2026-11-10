@@ -18,11 +18,11 @@ package views
 
 import config.ApplicationConfig
 import controllers.routes
+import models.RequestObject
 import play.api.i18n.Messages
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import utils.ERSUtil
-import models.RequestObject
 
 class IncorrectFileNameViewSpec extends ViewSpecBase with FileUploadFixtures {
 

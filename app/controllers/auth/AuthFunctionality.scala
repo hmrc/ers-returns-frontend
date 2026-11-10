@@ -21,12 +21,12 @@ import models.{ERSAuthData, ErsMetaData}
 import org.apache.pekko.http.scaladsl.model.Uri
 import play.api.Logging
 import play.api.libs.json.{Json, OFormat}
-import play.api.mvc.Results.Redirect
 import play.api.mvc.*
+import play.api.mvc.Results.Redirect
 import services.FrontendSessionService
+import uk.gov.hmrc.auth.core.*
 import uk.gov.hmrc.auth.core.AffinityGroup.*
 import uk.gov.hmrc.auth.core.AuthProvider.GovernmentGateway
-import uk.gov.hmrc.auth.core.*
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals.*
 import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.domain.EmpRef

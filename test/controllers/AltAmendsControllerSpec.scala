@@ -35,8 +35,8 @@ import play.api.mvc.{
 }
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
-import utils.Fixtures.ersRequestObject
 import utils.*
+import utils.Fixtures.ersRequestObject
 import views.html.{alterations_activity, alterations_amends, global_error}
 
 import scala.concurrent.{ExecutionContext, Future}

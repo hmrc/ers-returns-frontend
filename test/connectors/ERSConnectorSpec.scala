@@ -23,7 +23,7 @@ import models.{ERSAuthData, ErsMetaData, ErsSummary, SchemeInfo}
 import org.apache.pekko.stream.Materializer
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{reset => mreset, _}
+import org.mockito.Mockito.{reset as mreset, *}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatest.{BeforeAndAfter, OptionValues}

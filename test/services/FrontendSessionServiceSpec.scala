@@ -20,7 +20,7 @@ import config.ApplicationConfig
 import controllers.auth.RequestWithOptionalAuthContext
 import models.*
 import models.upscan.UploadedSuccessfully
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito.{reset, when}
 import org.scalatest.BeforeAndAfter
 import org.scalatest.matchers.should.Matchers
