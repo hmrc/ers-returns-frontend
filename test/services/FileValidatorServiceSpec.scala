@@ -22,7 +22,6 @@ import models.upscan.{Failed, NotStarted, UploadStatus, UploadedSuccessfully}
 import org.mockito.ArgumentMatchers.*
 import org.mockito.Mockito.*
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.matchers.must.Matchers.mustBe
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.PlaySpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite

@@ -178,17 +178,21 @@ class CsvFileUploadController @Inject() (
     schemeInfo: SchemeInfo
   )(using request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] =
     sessionService.fetch[UpscanCsvFilesList](ersUtil.CSV_FILES_UPLOAD).flatMap { data =>
-      sessionService
-        .fetchAll()
-        .map { cacheItem =>
-          data.ids.foldLeft(Option(List.empty[UpscanCsvFilesCallback])) {
-            case (Some(upscanCallbackList), UpscanIds(uploadId, fileId, _)) =>
-              getEntry[UploadStatus](cacheItem, DataKey(s"${ersUtil.CHECK_CSV_FILES}-${uploadId.value}")).map { status =>
-                UpscanCsvFilesCallback(uploadId, fileId, status) :: upscanCallbackList
+      (
+        () =>
+          sessionService
+            .fetchAll()
+            .map { cacheItem =>
+              data.ids.foldLeft(Option(List.empty[UpscanCsvFilesCallback])) {
+                case (Some(upscanCallbackList), UpscanIds(uploadId, fileId, _)) =>
+                  getEntry[UploadStatus](cacheItem, DataKey(s"${ersUtil.CHECK_CSV_FILES}-${uploadId.value}")).map {
+                    status =>
+                      UpscanCsvFilesCallback(uploadId, fileId, status) :: upscanCallbackList
+                  }
+                case (_, _)                                                     => None
               }
-            case (_, _)                                                     => None
-          }
-        }
+            }
+      )
         .withRetry(allCsvFilesCacheRetryAmount, Some(schemeInfo), "extractCsvCallbackData")(_.isDefined)
         .flatMap { files =>
           val csvFilesCallbackList: UpscanCsvFilesCallbackList = UpscanCsvFilesCallbackList(files.get)

@@ -31,7 +31,7 @@ import play.api.Application
 
 class StartPageViewSpec extends ViewSpecBase with FileUploadFixtures {
 
-  implicit override lazy val app: Application = new GuiceApplicationBuilder()
+  override given app: Application = new GuiceApplicationBuilder()
     .configure(
       "microservice.services.features.notification-banner.enabled"           -> true,
       "microservice.services.features.notification-banner.pre-april-enabled" -> true

@@ -37,7 +37,6 @@ class ErsUtilSpec
     with ErsTestHelper
     with ScalaFutures {
 
-//  given hc: HeaderCarrier = HeaderCarrier(sessionId = Some(SessionId("sessionId")))
   given countryCodes: CountryCodes = mockCountryCodes
   val ersUtil: ERSUtil             = new ERSUtil(mockAppConfig)
 

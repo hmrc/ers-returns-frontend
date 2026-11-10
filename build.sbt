@@ -11,12 +11,12 @@ lazy val microservice = Project("ers-returns-frontend", file("."))
     PlayKeys.playDefaultPort := 9290,
     scalacOptions ++= Seq(
       "-Wconf:src=routes/.*:s",
-      "-Wconf:msg=unused-imports&src=html/.*:s"
+      "-Wconf:msg=unused imports&src=html/.*:s"
     ),
     TwirlKeys.templateImports ++= Seq(
-      "uk.gov.hmrc.govukfrontend.views.html.components._",
-      "uk.gov.hmrc.hmrcfrontend.views.html.components._",
-      "uk.gov.hmrc.hmrcfrontend.views.html.helpers._",
+      "uk.gov.hmrc.govukfrontend.views.html.components.*",
+      "uk.gov.hmrc.hmrcfrontend.views.html.components.*",
+      "uk.gov.hmrc.hmrcfrontend.views.html.helpers.*",
       "models.upscan.{UpscanInitiateResponse, UpscanCsvFilesCallbackList, UpscanCsvFilesCallback}"
     )
   )

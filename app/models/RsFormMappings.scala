@@ -16,12 +16,11 @@
 
 package models
 
-import play.api.data.Forms.*
 import play.api.data.*
+import play.api.data.Forms.*
 import play.api.data.validation.Constraints
 import play.api.data.validation.Constraints.*
 import play.api.i18n.Messages
-import play.libs.F.Tuple
 
 object RsFormMappings {
 
@@ -124,11 +123,11 @@ object RsFormMappings {
       )
     )(AltAmends.apply)(altAmends =>
       Some(
+        altAmends.altAmendsTerms,
         altAmends.altAmendsEligibility,
         altAmends.altAmendsExchange,
-        altAmends.altAmendsOther,
-        altAmends.altAmendsTerms,
-        altAmends.altAmendsVariations
+        altAmends.altAmendsVariations,
+        altAmends.altAmendsOther
       )
     )
   )
@@ -421,11 +420,11 @@ object RsFormMappings {
     )(CompanyAddress.apply)(companyAddress =>
       Some(
         companyAddress.addressLine1,
-        companyAddress.country,
-        companyAddress.addressLine4,
-        companyAddress.addressLine3,
         companyAddress.addressLine2,
-        companyAddress.addressLine5
+        companyAddress.addressLine3,
+        companyAddress.addressLine4,
+        companyAddress.addressLine5,
+        companyAddress.country
       )
     )
   )
