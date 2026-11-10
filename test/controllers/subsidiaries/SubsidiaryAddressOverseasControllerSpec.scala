@@ -179,8 +179,8 @@ class SubsidiaryAddressOverseasControllerSpec
 
       val result = testController.nextPageRedirect(0, edit = true)(using hc, request)
 
-      status(result)                          shouldBe Status.SEE_OTHER
-      headers(result)(implicitly)("Location") shouldBe expectedRedirectUrl
+      status(result)                      shouldBe Status.SEE_OTHER
+      headers(result)(summon)("Location") shouldBe expectedRedirectUrl
     }
 
     "redirect to groupPlanSummaryPage given edit parameter is false and cache update fails" in {
@@ -194,8 +194,8 @@ class SubsidiaryAddressOverseasControllerSpec
 
       val result = testController.nextPageRedirect(index, edit = false)(using hc, request)
 
-      status(result)                          shouldBe Status.SEE_OTHER
-      headers(result)(implicitly)("Location") shouldBe expectedRedirectUrl
+      status(result)                      shouldBe Status.SEE_OTHER
+      headers(result)(summon)("Location") shouldBe expectedRedirectUrl
     }
   }
 

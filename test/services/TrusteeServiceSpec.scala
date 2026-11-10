@@ -176,7 +176,7 @@ class TrusteeServiceSpec extends AnyWordSpecLike with ErsTestHelper {
         when(
           mockSessionService.fetch[TrusteeAddress](eqTo(mockErsUtil.TRUSTEE_ADDRESS_CACHE))(using
             any(),
-            eqTo(implicitly[Format[TrusteeAddress]])
+            eqTo(summon[Format[TrusteeAddress]])
           )
         )
           .thenReturn(Future.successful(trusteeAddress))

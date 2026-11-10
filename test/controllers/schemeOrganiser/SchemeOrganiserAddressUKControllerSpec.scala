@@ -182,8 +182,8 @@ class SchemeOrganiserAddressUKControllerSpec
 
       val result = testController.nextPageRedirect(0, edit = true)(using hc, request)
 
-      status(result)                          shouldBe Status.SEE_OTHER
-      headers(result)(implicitly)("Location") shouldBe expectedRedirectUrl
+      status(result)                      shouldBe Status.SEE_OTHER
+      headers(result)(summon)("Location") shouldBe expectedRedirectUrl
     }
 
     "redirect to schemeOrganiserSummaryPage given edit parameter is false and cache update fails" in {
@@ -195,8 +195,8 @@ class SchemeOrganiserAddressUKControllerSpec
 
       val result = testController.nextPageRedirect(0, edit = false)(using hc, request)
 
-      status(result)                          shouldBe Status.SEE_OTHER
-      headers(result)(implicitly)("Location") shouldBe expectedRedirectUrl
+      status(result)                      shouldBe Status.SEE_OTHER
+      headers(result)(summon)("Location") shouldBe expectedRedirectUrl
     }
   }
 

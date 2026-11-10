@@ -52,7 +52,7 @@ class TrusteeRemoveProblemController @Inject() (
           "ers.global_errors.title",
           "ers.global_errors.heading",
           "ers.global_errors.message"
-        )(request, implicitly[Messages], appConfig)
+        )(request, summon[Messages], appConfig)
       )
     }
   }

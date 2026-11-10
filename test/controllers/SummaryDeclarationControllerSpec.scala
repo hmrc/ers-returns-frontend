@@ -201,8 +201,8 @@ class SummaryDeclarationControllerSpec
     "give a redirect status (to company authentication frontend)" in {
       setUnauthorisedMocks()
       summaryDeclarationControllerHandler(Fixtures.buildFakeRequestWithSessionId("GET")) { result =>
-        status(result)                                                  shouldBe SEE_OTHER
-        headers(result)(implicitly)("Location").contains("/gg/sign-in") shouldBe true
+        status(result)                                              shouldBe SEE_OTHER
+        headers(result)(summon)("Location").contains("/gg/sign-in") shouldBe true
       }
     }
   }

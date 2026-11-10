@@ -159,7 +159,7 @@ class CompanyDetailsServiceSpec extends AnyWordSpecLike with ErsTestHelper {
         when(
           mockSessionService.fetch[CompanyAddress](eqTo(mockErsUtil.SCHEME_ORGANISER_ADDRESS_CACHE))(using
             any(),
-            eqTo(implicitly[Format[CompanyAddress]])
+            eqTo(summon[Format[CompanyAddress]])
           )
         )
           .thenReturn(Future.successful(companyAddress))
@@ -215,7 +215,7 @@ class CompanyDetailsServiceSpec extends AnyWordSpecLike with ErsTestHelper {
         when(
           mockSessionService.fetch[CompanyAddress](eqTo(mockErsUtil.SUBSIDIARY_COMPANY_ADDRESS_CACHE))(using
             any(),
-            eqTo(implicitly[Format[CompanyAddress]])
+            eqTo(summon[Format[CompanyAddress]])
           )
         )
           .thenReturn(Future.successful(companyAddress))

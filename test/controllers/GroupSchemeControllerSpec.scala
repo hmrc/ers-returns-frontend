@@ -131,8 +131,8 @@ class GroupSchemeControllerSpec
     "redirect to sign in page if user is not authenticated" in {
       setUnauthorisedMocks()
       manualCompanyDetailsPageHandler(0, Fixtures.buildFakeRequestWithSessionId("GET")) { result =>
-        status(result)                                                  shouldBe SEE_OTHER
-        headers(result)(implicitly)("Location").contains("/gg/sign-in") shouldBe true
+        status(result)                                              shouldBe SEE_OTHER
+        headers(result)(summon)("Location").contains("/gg/sign-in") shouldBe true
       }
     }
   }
@@ -157,8 +157,8 @@ class GroupSchemeControllerSpec
     "redirect to sign in page if user is not authenticated" in {
       setUnauthorisedMocks()
       confirmDeleteCompanyHandler(0, Fixtures.buildFakeRequestWithSessionId("GET")) { result =>
-        status(result)                                                  shouldBe SEE_OTHER
-        headers(result)(implicitly)("Location").contains("/gg/sign-in") shouldBe true
+        status(result)                                              shouldBe SEE_OTHER
+        headers(result)(summon)("Location").contains("/gg/sign-in") shouldBe true
       }
     }
   }
@@ -328,8 +328,8 @@ class GroupSchemeControllerSpec
 
       val result = testGroupSchemeController.confirmDeleteCompanySubmit(0)(authRequest)
 
-      status(result)                          shouldBe SEE_OTHER
-      headers(result)(implicitly)("Location") shouldBe "/submit-your-ers-annual-return/subsidiary-company-summary"
+      status(result)                      shouldBe SEE_OTHER
+      headers(result)(summon)("Location") shouldBe "/submit-your-ers-annual-return/subsidiary-company-summary"
     }
 
     "give a redirect to groupSchemePage if the final company is deleted" in {
@@ -353,8 +353,8 @@ class GroupSchemeControllerSpec
 
       val result = testGroupSchemeController.confirmDeleteCompanySubmit(0)(authRequest)
 
-      status(result)                          shouldBe SEE_OTHER
-      headers(result)(implicitly)("Location") shouldBe "/submit-your-ers-annual-return/group-scheme"
+      status(result)                      shouldBe SEE_OTHER
+      headers(result)(summon)("Location") shouldBe "/submit-your-ers-annual-return/group-scheme"
     }
 
     "show confirmDeleteCompanyView with form errors if form is empty" in {
@@ -408,8 +408,8 @@ class GroupSchemeControllerSpec
 
       val result = testGroupSchemeController.confirmDeleteCompanySubmit(0)(authRequest)
 
-      status(result)                          shouldBe SEE_OTHER
-      headers(result)(implicitly)("Location") shouldBe "/submit-your-ers-annual-return/subsidiary-company-summary"
+      status(result)                      shouldBe SEE_OTHER
+      headers(result)(summon)("Location") shouldBe "/submit-your-ers-annual-return/subsidiary-company-summary"
     }
 
     Seq(("the final", companyDetailsListSingle), ("a", companyDetailsList)).foreach {
@@ -450,8 +450,8 @@ class GroupSchemeControllerSpec
     "redirect to sign in page if user is not authenticated" in {
       setUnauthorisedMocks()
       groupSchemePageHandler(Fixtures.buildFakeRequestWithSessionId("GET")) { result =>
-        status(result)                                                  shouldBe SEE_OTHER
-        headers(result)(implicitly)("Location").contains("/gg/sign-in") shouldBe true
+        status(result)                                              shouldBe SEE_OTHER
+        headers(result)(summon)("Location").contains("/gg/sign-in") shouldBe true
       }
     }
   }
@@ -499,8 +499,8 @@ class GroupSchemeControllerSpec
     "redirect to sign in page if user is not authenticated" in {
       setUnauthorisedMocks()
       groupSchemeSelectedHandler("", Fixtures.buildFakeRequestWithSessionId("GET")) { result =>
-        status(result)                                                  shouldBe SEE_OTHER
-        headers(result)(implicitly)("Location").contains("/gg/sign-in") shouldBe true
+        status(result)                                              shouldBe SEE_OTHER
+        headers(result)(summon)("Location").contains("/gg/sign-in") shouldBe true
       }
     }
   }
@@ -585,9 +585,9 @@ class GroupSchemeControllerSpec
         SCHEME_CSOP
       )(using authRequest)
 
-      status(result)                          shouldBe SEE_OTHER
-      headers(result)(implicitly)("Location") shouldBe "/submit-your-ers-annual-return/alterations-or-a-variation"
-      redirectLocation(result).get            shouldBe controllers.routes.AltAmendsController.altActivityPage().url
+      status(result)                      shouldBe SEE_OTHER
+      headers(result)(summon)("Location") shouldBe "/submit-your-ers-annual-return/alterations-or-a-variation"
+      redirectLocation(result).get        shouldBe controllers.routes.AltAmendsController.altActivityPage().url
     }
 
     "redirect to group plan summary page if user select yes for SAYE" in {
@@ -710,8 +710,8 @@ class GroupSchemeControllerSpec
         ersRequestObject.copy(schemeType = Some("SIP")),
         mockErsUtil.SCHEME_SIP
       )(using authRequest)
-      status(result)                          shouldBe SEE_OTHER
-      headers(result)(implicitly)("Location") shouldBe "/submit-your-ers-annual-return/trustees"
+      status(result)                      shouldBe SEE_OTHER
+      headers(result)(summon)("Location") shouldBe "/submit-your-ers-annual-return/trustees"
     }
 
     "redirect to group plan summary page if user select yes for OTHER" in {
@@ -764,8 +764,8 @@ class GroupSchemeControllerSpec
     "redirect to sign in page if user is not authenticated" in {
       setUnauthorisedMocks()
       groupPlanSummaryPageHandler(Fixtures.buildFakeRequestWithSessionId("GET")) { result =>
-        status(result)                                                  shouldBe SEE_OTHER
-        headers(result)(implicitly)("Location").contains("/gg/sign-in") shouldBe true
+        status(result)                                              shouldBe SEE_OTHER
+        headers(result)(summon)("Location").contains("/gg/sign-in") shouldBe true
       }
     }
   }
@@ -855,8 +855,8 @@ class GroupSchemeControllerSpec
     "redirect to sign in page if user is not authenticated" in {
       setUnauthorisedMocks()
       groupPlanSummaryContinueHandler("", Fixtures.buildFakeRequestWithSessionId("GET")) { result =>
-        status(result)                                                  shouldBe SEE_OTHER
-        headers(result)(implicitly)("Location").contains("/gg/sign-in") shouldBe true
+        status(result)                                              shouldBe SEE_OTHER
+        headers(result)(summon)("Location").contains("/gg/sign-in") shouldBe true
       }
     }
   }
@@ -905,9 +905,9 @@ class GroupSchemeControllerSpec
         Fixtures.buildFakeRequestWithSessionIdSIP("POST").withFormUrlEncodedBody("addCompany" -> "1")
       )
       val result      = testGroupSchemeController.continueFromGroupPlanSummaryPage(mockErsUtil.SCHEME_SIP)(using authRequest)
-      status(result)                          shouldBe SEE_OTHER
-      headers(result)(implicitly)("Location") shouldBe "/submit-your-ers-annual-return/trustees"
-      redirectLocation(result).get            shouldBe controllers.trustees.routes.TrusteeSummaryController
+      status(result)                      shouldBe SEE_OTHER
+      headers(result)(summon)("Location") shouldBe "/submit-your-ers-annual-return/trustees"
+      redirectLocation(result).get        shouldBe controllers.trustees.routes.TrusteeSummaryController
         .trusteeSummaryPage()
         .url
     }

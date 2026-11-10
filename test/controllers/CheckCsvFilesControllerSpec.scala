@@ -149,7 +149,7 @@ class CheckCsvFilesControllerSpec
         checkCsvFileView,
         testAuthAction
       ) {
-        override def validateCsvFilesPageSelected()(implicit
+        override def validateCsvFilesPageSelected()(using
           request: RequestWithOptionalAuthContext[AnyContent]
         ): Future[Result] = Future.successful(Ok)
       }
@@ -173,7 +173,7 @@ class CheckCsvFilesControllerSpec
         checkCsvFileView,
         testAuthAction
       ) {
-        override def performCsvFilesPageSelected(formData: CsvFilesList)(implicit
+        override def performCsvFilesPageSelected(formData: CsvFilesList)(using
           request: RequestHeader
         ): Future[Result] = Future.successful(Ok)
       }

@@ -486,7 +486,7 @@ class CsvFileUploadControllerSpec
         wrongCsvFileTypeView,
         testAuthAction
       ) {
-        override def processValidationResults()(implicit
+        override def processValidationResults()(using
           request: RequestWithOptionalAuthContext[AnyContent],
           hc: HeaderCarrier
         ): Future[Result] = Future(Ok)
@@ -526,7 +526,7 @@ class CsvFileUploadControllerSpec
         wrongCsvFileTypeView,
         testAuthAction
       ) {
-        override def removePresubmissionData(schemeInfo: SchemeInfo)(implicit
+        override def removePresubmissionData(schemeInfo: SchemeInfo)(using
           request: RequestWithOptionalAuthContext[AnyContent],
           hc: HeaderCarrier
         ): Future[Result] = Future(Ok)
@@ -605,7 +605,7 @@ class CsvFileUploadControllerSpec
         wrongCsvFileTypeView,
         testAuthAction
       ) {
-        override def extractCsvCallbackData(schemeInfo: SchemeInfo)(implicit
+        override def extractCsvCallbackData(schemeInfo: SchemeInfo)(using
           request: RequestWithOptionalAuthContext[AnyContent],
           hc: HeaderCarrier
         ): Future[Result] = Future(Redirect(""))

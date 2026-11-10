@@ -25,7 +25,6 @@ import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatest.{BeforeAndAfterEach, OptionValues}
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.i18n.Messages
-import uk.gov.hmrc.http.{HeaderCarrier, SessionId}
 
 class ErsUtilSpec
     extends AnyWordSpecLike

@@ -61,8 +61,8 @@ object UpscanCallback {
 
   given reads: Reads[UpscanCallback] = (json: JsValue) =>
     json \ "fileStatus" match {
-      case JsDefined(JsString("READY"))  => implicitly[Reads[UpscanReadyCallback]].reads(json)
-      case JsDefined(JsString("FAILED")) => implicitly[Reads[UpscanFailedCallback]].reads(json)
+      case JsDefined(JsString("READY"))  => summon[Reads[UpscanReadyCallback]].reads(json)
+      case JsDefined(JsString("FAILED")) => summon[Reads[UpscanFailedCallback]].reads(json)
       case JsDefined(value)              => JsError(s"Invalid type distriminator: $value")
       case JsUndefined()                 => JsError("Missing type distriminator")
     }
