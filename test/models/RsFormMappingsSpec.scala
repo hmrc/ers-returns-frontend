@@ -17,6 +17,7 @@
 package models
 
 import models.RsFormMappings.*
+import org.scalatest.matchers.should.Matchers.shouldBe
 import org.scalatestplus.play.PlaySpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.data.Form
@@ -128,9 +129,33 @@ class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPer
       assert(validatedForm.errors.head.key == companyNameFields.corporationRef)
       assert(validatedForm.errors.head.messages.head == Messages("ers_manual_company_details.err.corporation_ref"))
     }
+
+    "fill the form with correct data" in {
+      val company      = Company("Company name", Some("12345678"), Some("1234567890"))
+      val expectedData = Map(
+        companyNameFields.companyName    -> "Company name",
+        companyNameFields.companyReg     -> "12345678",
+        companyNameFields.corporationRef -> "1234567890"
+      )
+      companyNameForm().fill(company).data shouldBe expectedData
+    }
+
   }
 
   "companyAddressUk" must {
+    "fill the form with correct data" in {
+      val address      =
+        CompanyAddress("Line 1", Some("Line 2"), Some("Line 3"), Some("Line 4"), Some("Line 5"), Some("United Kingdom"))
+      val expectedData = Map(
+        companyAddressFields.addressLine1 -> "Line 1",
+        companyAddressFields.addressLine2 -> "Line 2",
+        companyAddressFields.addressLine3 -> "Line 3",
+        companyAddressFields.addressLine4 -> "Line 4",
+        companyAddressFields.addressLine5 -> "LINE 5",
+        companyAddressFields.country      -> "United Kingdom"
+      )
+      companyAddressUkForm().fill(address).data shouldBe expectedData
+    }
     "return an error if addressLine1 missing" in {
       val postData      = Json.obj(
         companyAddressFields.addressLine1 -> ""
@@ -417,6 +442,21 @@ class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPer
   }
 
   "companyAddressOverseas" must {
+
+    "fill the form with correct data" in {
+      val address      =
+        CompanyAddress("Line 1", Some("Line 2"), Some("Line 3"), Some("Line 4"), Some("Line 5"), Some("United Kingdom"))
+      val expectedData = Map(
+        companyAddressFields.addressLine1 -> "Line 1",
+        companyAddressFields.addressLine2 -> "Line 2",
+        companyAddressFields.addressLine3 -> "Line 3",
+        companyAddressFields.addressLine4 -> "Line 4",
+        companyAddressFields.addressLine5 -> "Line 5",
+        companyAddressFields.country      -> "United Kingdom"
+      )
+      companyAddressOverseasForm().fill(address).data shouldBe expectedData
+    }
+
     "return an error if addressLine1 missing" in {
       val postData      = Json.obj(
         companyAddressFields.addressLine1 -> ""
@@ -551,6 +591,12 @@ class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPer
   }
 
   "trusteeName" must {
+
+    "fill the form with correct data" in {
+      val trusteeName = TrusteeName("name")
+      trusteeNameForm().fill(trusteeName).data(trusteeNameFields.name) shouldBe "name"
+    }
+
     "return an error if trusteeName missing" in {
       val postData      = Json.obj(
         trusteeNameFields.name -> ""
@@ -580,6 +626,22 @@ class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPer
   }
 
   "trusteeAddressUk" must {
+
+    "fill the form with correct data for TrusteeAddress" in {
+      val address      =
+        TrusteeAddress("Line 1", Some("Line 2"), Some("Line 3"), Some("Line 4"), Some("Line 5"), Some("United Kingdom"))
+      val expectedData = Map(
+        trusteeAddressFields.addressLine1 -> "Line 1",
+        trusteeAddressFields.addressLine2 -> "Line 2",
+        trusteeAddressFields.addressLine3 -> "Line 3",
+        trusteeAddressFields.addressLine4 -> "Line 4",
+        trusteeAddressFields.addressLine5 -> "LINE 5",
+        trusteeAddressFields.country      -> "United Kingdom"
+      )
+
+      trusteeAddressUkForm().fill(address).data shouldBe expectedData
+    }
+
     "return an error if addressLine1 missing" in {
       val postData      = Json.obj(
         trusteeAddressFields.addressLine1 -> ""
@@ -739,6 +801,22 @@ class RsFormMappingsSpec extends PlaySpec with ErsTestHelper with GuiceOneAppPer
   }
 
   "trusteeAddressOverseas" must {
+
+    "fill the form with correct data for TrusteeAddressOverSeas" in {
+      val address      =
+        TrusteeAddress("Line 1", Some("Line 2"), Some("Line 3"), Some("Line 4"), Some("Line 5"), Some("United Kingdom"))
+      val expectedData = Map(
+        trusteeAddressFields.addressLine1 -> "Line 1",
+        trusteeAddressFields.addressLine2 -> "Line 2",
+        trusteeAddressFields.addressLine3 -> "Line 3",
+        trusteeAddressFields.addressLine4 -> "Line 4",
+        trusteeAddressFields.addressLine5 -> "Line 5",
+        trusteeAddressFields.country      -> "United Kingdom"
+      )
+
+      trusteeAddressOverseasForm().fill(address).data shouldBe expectedData
+    }
+
     "return an error if addressLine1 missing" in {
       val postData      = Json.obj(
         trusteeAddressFields.addressLine1 -> ""
