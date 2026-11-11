@@ -29,7 +29,7 @@ case class UpscanCsvFilesCallback(uploadId: UploadId, fileId: String, uploadStat
 }
 
 object UpscanCsvFilesCallback {
-  implicit val upscanCsvFileFormats: Format[UpscanCsvFilesCallback] = Json.format[UpscanCsvFilesCallback]
+  given upscanCsvFileFormats: Format[UpscanCsvFilesCallback] = Json.format[UpscanCsvFilesCallback]
 }
 
 case class UpscanCsvFilesCallbackList(files: List[UpscanCsvFilesCallback]) {
@@ -42,7 +42,7 @@ case class UpscanCsvFilesCallbackList(files: List[UpscanCsvFilesCallback]) {
 }
 
 object UpscanCsvFilesCallbackList {
-  implicit val upscanCsvCallbackListFormat: Format[UpscanCsvFilesCallbackList] = Json.format[UpscanCsvFilesCallbackList]
+  given upscanCsvCallbackListFormat: Format[UpscanCsvFilesCallbackList] = Json.format[UpscanCsvFilesCallbackList]
 }
 
 case class UpscanCsvFilesList(ids: List[UpscanIds]) {
@@ -69,7 +69,7 @@ case class UpscanCsvFilesList(ids: List[UpscanIds]) {
 
 object UpscanCsvFilesList {
 
-  implicit val upscanCsvFilesListFormat: Format[UpscanCsvFilesList] =
+  given upscanCsvFilesListFormat: Format[UpscanCsvFilesList] =
     Json.format[UpscanCsvFilesList]
 
 }
@@ -77,5 +77,5 @@ object UpscanCsvFilesList {
 case class UpscanIds(uploadId: UploadId, fileId: String, uploadStatus: UploadStatus)
 
 object UpscanIds {
-  implicit val upscanIdsFormat: Format[UpscanIds] = Json.format[UpscanIds]
+  given upscanIdsFormat: Format[UpscanIds] = Json.format[UpscanIds]
 }

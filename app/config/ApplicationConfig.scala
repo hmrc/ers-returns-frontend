@@ -21,7 +21,7 @@ import play.api.i18n.Lang
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import javax.inject.Singleton
-import scala.concurrent.duration._
+import scala.concurrent.duration.*
 import scala.util.matching.Regex
 
 @Singleton
@@ -50,7 +50,7 @@ class ApplicationConfig @Inject() (config: ServicesConfig) {
   lazy val accessThreshold: Int             = config.getInt("accessThreshold")
   lazy val timeOutSeconds: Int              = config.getInt("sessionTimeout.timeoutSeconds")
   lazy val timeOutCountDownSeconds: Int     = config.getInt("sessionTimeout.time-out-countdown-seconds")
-  lazy val timeOut                          = s"$loginCallback/signed-out"
+  lazy val timeOut: String                  = s"$loginCallback/signed-out"
 
   lazy val sentViaSchedulerNoOfRowsLimit: Int = config.getInt("sent-via-scheduler-no-of-rows-limit")
 
@@ -60,7 +60,7 @@ class ApplicationConfig @Inject() (config: ServicesConfig) {
   lazy val signOutCallback: String =
     s"${config.getString(s"microservice.services.feedback-survey-frontend.url")}?useServiceNavigation"
 
-  lazy val signOut                      = s"$basGatewayHost/gg/sign-out?continue=$signOutCallback"
+  lazy val signOut: String              = s"$basGatewayHost/gg/sign-out?continue=$signOutCallback"
   lazy val loginCallback: String        = config.getString(s"microservice.services.auth.login-callback.url")
   lazy val portalDomain: String         = config.getString("portal.domain")
   lazy val hmacToken: String            = config.getString("hmac.hmac_token")

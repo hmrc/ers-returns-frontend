@@ -26,9 +26,9 @@ class PageNotFoundViewSpec extends ViewSpecBase with Matchers {
 
   private val view = app.injector.instanceOf[views.html.page_not_found_template]
 
-  implicit val appConfig: ApplicationConfig                 = app.injector.instanceOf[ApplicationConfig]
-  implicit val request: FakeRequest[AnyContentAsEmpty.type] = fakeRequest
-  implicit val messages: Messages                           = testMessages
+  given appConfig: ApplicationConfig                 = app.injector.instanceOf[ApplicationConfig]
+  given request: FakeRequest[AnyContentAsEmpty.type] = fakeRequest
+  given messages: Messages                           = testMessages
 
   "page not found view" should {
 

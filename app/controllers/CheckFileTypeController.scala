@@ -18,14 +18,14 @@ package controllers
 
 import config.ApplicationConfig
 import controllers.auth.{AuthActionGovGateway, RequestWithOptionalAuthContext}
-import models._
+import models.*
 import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages}
-import play.api.mvc._
+import play.api.mvc.*
 import services.FrontendSessionService
 import uk.gov.hmrc.play.bootstrap.controller.WithUrlEncodedOnlyFormBinding
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
-import utils._
+import utils.*
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
@@ -37,7 +37,7 @@ class CheckFileTypeController @Inject() (
   globalErrorView: views.html.global_error,
   checkFileTypeView: views.html.check_file_type,
   authActionGovGateway: AuthActionGovGateway
-)(implicit val ec: ExecutionContext, val ersUtil: ERSUtil, val appConfig: ApplicationConfig)
+)(using val ec: ExecutionContext, val ersUtil: ERSUtil, val appConfig: ApplicationConfig)
     extends FrontendController(mcc) with I18nSupport with WithUrlEncodedOnlyFormBinding with Logging {
 
   def checkFileTypePage(): Action[AnyContent] = authActionGovGateway.async { implicit request =>
@@ -47,10 +47,10 @@ class CheckFileTypeController @Inject() (
           s"and schemeRef: ${ele.schemeInfo.schemeRef}"
       )
     }
-    showCheckFileTypePage()(request)
+    showCheckFileTypePage()(using request)
   }
 
-  def showCheckFileTypePage()(implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
+  def showCheckFileTypePage()(using request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
     (for {
       requestObject <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
       fileType      <- sessionService
@@ -66,10 +66,10 @@ class CheckFileTypeController @Inject() (
     }
 
   def checkFileTypeSelected(): Action[AnyContent] = authActionGovGateway.async { implicit request =>
-    showCheckFileTypeSelected()(request)
+    showCheckFileTypeSelected()(using request)
   }
 
-  def showCheckFileTypeSelected()(implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
+  def showCheckFileTypeSelected()(using request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
     sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT).flatMap { requestObject =>
       RsFormMappings
         .checkFileTypeForm()
@@ -95,7 +95,7 @@ class CheckFileTypeController @Inject() (
         )
     }
 
-  def getGlobalErrorPage(implicit request: RequestHeader, messages: Messages): Result =
+  def getGlobalErrorPage(using request: RequestHeader, messages: Messages): Result =
     Ok(
       globalErrorView(
         "ers.global_errors.title",

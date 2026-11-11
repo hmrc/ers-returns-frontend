@@ -16,7 +16,7 @@
 
 package controllers
 
-import _root_.models._
+import _root_.models.*
 import config.ApplicationConfig
 import connectors.ErsConnector
 import controllers.auth.{AuthAction, RequestWithOptionalAuthContext}
@@ -24,11 +24,11 @@ import models.upscan.{Failed, UploadStatus, UploadedSuccessfully}
 import org.apache.pekko.actor.ActorSystem
 import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages}
-import play.api.mvc._
+import play.api.mvc.*
 import services.{FrontendSessionService, UpscanService}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
-import utils._
+import utils.*
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
@@ -49,7 +49,7 @@ class FileUploadController @Inject() (
   fileUploadProblemView: views.html.file_upload_problem,
   invalidMimeErrorView: views.html.invalid_mime_error,
   authAction: AuthAction
-)(implicit
+)(using
   val ec: ExecutionContext,
   val ersUtil: ERSUtil,
   val appConfig: ApplicationConfig,
@@ -72,7 +72,7 @@ class FileUploadController @Inject() (
 
   def success(): Action[AnyContent] = authAction.async { implicit request =>
     val futureCallbackData: Future[Option[UploadStatus]] =
-      ersConnector.getCallbackRecord.withRetry(appConfig.odsSuccessRetryAmount, callingFunc = "success") { opt =>
+      (() => ersConnector.getCallbackRecord).withRetry(appConfig.odsSuccessRetryAmount, callingFunc = "success") { opt =>
         opt.fold(true) {
           case _: UploadedSuccessfully | Failed => true
           case _                                => false
@@ -140,9 +140,10 @@ class FileUploadController @Inject() (
 
   def validationResults(): Action[AnyContent] = authAction.async { implicit request =>
     val futureCallbackData =
-      ersConnector.getCallbackRecord.withRetry(appConfig.odsValidationRetryAmount, callingFunc = "validationResults")(
-        _.exists(_.isInstanceOf[UploadedSuccessfully])
-      )
+      (() => ersConnector.getCallbackRecord)
+        .withRetry(appConfig.odsValidationRetryAmount, callingFunc = "validationResults")(
+          _.exists(_.isInstanceOf[UploadedSuccessfully])
+        )
 
     (for {
       all                <- sessionService.fetch[ErsMetaData](ersUtil.ERS_METADATA)
@@ -174,7 +175,7 @@ class FileUploadController @Inject() (
     }
   }
 
-  def handleValidationResponse(callbackData: UploadedSuccessfully, schemeInfo: SchemeInfo)(implicit
+  def handleValidationResponse(callbackData: UploadedSuccessfully, schemeInfo: SchemeInfo)(using
     request: RequestWithOptionalAuthContext[AnyContent],
     hc: HeaderCarrier
   ): Future[Result] = {
@@ -209,7 +210,7 @@ class FileUploadController @Inject() (
     }
   }
 
-  private def handleIncorrectErsTemplate(response: HttpResponse, schemeInfo: SchemeInfo)(implicit
+  private def handleIncorrectErsTemplate(response: HttpResponse, schemeInfo: SchemeInfo)(using
     request: RequestWithOptionalAuthContext[AnyContent]
   ): Result =
 
@@ -309,14 +310,14 @@ class FileUploadController @Inject() (
     }
   }
 
-  def getFileUploadProblemPage()(implicit request: RequestHeader, messages: Messages): Result =
+  def getFileUploadProblemPage()(using request: RequestHeader, messages: Messages): Result =
     BadRequest(
       fileUploadProblemView(
         "ers.file_problem.title"
       )(request, messages, appConfig)
     )
 
-  def getGlobalErrorPage(implicit request: RequestHeader, messages: Messages): Result =
+  def getGlobalErrorPage(using request: RequestHeader, messages: Messages): Result =
     InternalServerError(
       globalErrorView(
         "ers.global_errors.title",

@@ -20,7 +20,7 @@ import play.api.i18n.Messages
 
 class AlterationsAmendsDecorator(map: Map[String, String]) extends Decorator {
 
-  def decorate(implicit messages: Messages): String =
+  def decorate(using messages: Messages): String =
     if (map.nonEmpty) {
       val keys      = Array("option1", "option2", "option3", "option4", "option5")
       val subValues = map.filter(entry => keys.contains(entry._1)).values.toArray

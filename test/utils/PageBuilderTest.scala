@@ -16,7 +16,7 @@
 
 package utils
 
-import controllers._
+import controllers.*
 import org.apache.pekko.stream.Materializer
 import org.scalatest.OptionValues
 import org.scalatest.matchers.should.Matchers
@@ -50,7 +50,7 @@ class PageBuilderTest
     ExecutionContext.global
   )
 
-  implicit lazy val mat: Materializer = app.materializer
+  given mat: Materializer = app.materializer
 
   class TestPageBuilder extends PageBuilder
 

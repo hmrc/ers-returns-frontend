@@ -22,7 +22,7 @@ import controllers.auth.AuthAction
 import models.{CompanyBasedInUk, RequestObject, RsFormMappings}
 import play.api.data.Form
 import play.api.libs.json.Format
-import play.api.mvc._
+import play.api.mvc.*
 import play.twirl.api.Html
 import services.FrontendSessionService
 import uk.gov.hmrc.http.HeaderCarrier
@@ -40,19 +40,20 @@ class SubsidiaryBasedInUkController @Inject() (
   val ersConnector: ErsConnector,
   val globalErrorView: views.html.global_error,
   val authAction: AuthAction,
-  implicit val countryCodes: CountryCodes,
-  implicit val ersUtil: ERSUtil,
-  implicit val sessionService: FrontendSessionService,
-  implicit val appConfig: ApplicationConfig,
   pageView: views.html.manual_is_the_company_in_uk
+)(using
+  val countryCodes: CountryCodes,
+  val ersUtil: ERSUtil,
+  val sessionService: FrontendSessionService,
+  val appConfig: ApplicationConfig
 ) extends FrontendController(mcc) with WithUrlEncodedOnlyFormBinding with SubsidiaryBaseController[CompanyBasedInUk] {
 
-  implicit val ec: ExecutionContext = mcc.executionContext
+  given ec: ExecutionContext = mcc.executionContext
 
-  val cacheKey: String                          = ersUtil.SUBSIDIARY_COMPANY_BASED
-  implicit val format: Format[CompanyBasedInUk] = CompanyBasedInUk.format
+  val cacheKey: String                   = ersUtil.SUBSIDIARY_COMPANY_BASED
+  given format: Format[CompanyBasedInUk] = CompanyBasedInUk.format
 
-  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit
+  def nextPageRedirect(index: Int, edit: Boolean = false)(using
     hc: HeaderCarrier,
     request: RequestHeader
   ): Future[Result] =
@@ -72,14 +73,14 @@ class SubsidiaryBasedInUkController @Inject() (
         Redirect(controllers.subsidiaries.routes.SubsidiaryDetailsOverseasController.editCompany(index))
     }
 
-  def form(implicit request: Request[AnyContent]): Form[CompanyBasedInUk] = RsFormMappings.companyBasedInUkForm()
+  def form(using request: Request[AnyContent]): Form[CompanyBasedInUk] = RsFormMappings.companyBasedInUkForm()
 
   def view(
     requestObject: RequestObject,
     index: Int,
     companyBasedInUkForm: Form[CompanyBasedInUk],
     edit: Boolean = false
-  )(implicit request: Request[AnyContent], hc: HeaderCarrier): Html =
+  )(using request: Request[AnyContent], hc: HeaderCarrier): Html =
     pageView(requestObject, index, companyBasedInUkForm, edit, schemeOrganiser = false)
 
 }

@@ -28,7 +28,7 @@ import play.api.mvc.{
   AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents
 }
 import play.api.test.Helpers.stubBodyParser
-import utils._
+import utils.*
 
 import java.time.{LocalDateTime, ZoneId, ZonedDateTime}
 import scala.concurrent.ExecutionContext
@@ -52,14 +52,14 @@ class PdfDecoratorControllerFactorySpec
     ExecutionContext.global
   )
 
-  implicit lazy val mat: Materializer = app.materializer
+  given mat: Materializer = app.materializer
 
   class TestPdfDecoratorControllerFactory extends PdfDecoratorControllerFactory {
     val mockCountryCodes: CountryCodes      = mock[CountryCodes]
     override val countryCodes: CountryCodes = mockCountryCodes
 
     override val ERSUtil: ERSUtil =
-      new ERSUtil(mockAppConfig)(ec, mockCountryCodes)
+      new ERSUtil(mockAppConfig)(using ec, mockCountryCodes)
 
   }
 
@@ -123,7 +123,7 @@ class PdfDecoratorControllerFactorySpec
       val decoratorController: DecoratorController = createPdfDecoratorControllerForScheme("emi", ersSummary, None)
       val decorators: Array[Decorator]             = decoratorController.decorators
 
-      decoratorController.decorators.size shouldEqual 5
+      decoratorController.decorators.length shouldEqual 5
       decorators(0).getClass should be(classOf[YesNoDecorator])
       decorators(1).getClass should be(classOf[FileNamesDecorator])
       decorators(2).getClass should be(classOf[SchemeOrganiserDetailsDecorator])

@@ -20,6 +20,7 @@ import config.ApplicationConfig
 import models.upscan.{PreparedUpload, UpscanInitiateRequest, UpscanInitiateResponse}
 import play.api.http.HeaderNames
 import play.api.libs.json.Json
+import play.api.libs.ws.JsonBodyWritables.writeableOf_JsValue
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, StringContextOps}
 
@@ -27,7 +28,7 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class UpscanConnector @Inject() (appConfig: ApplicationConfig, httpClient: HttpClientV2)(implicit
+class UpscanConnector @Inject() (appConfig: ApplicationConfig, httpClient: HttpClientV2)(using
   ec: ExecutionContext
 ) {
 
@@ -39,10 +40,10 @@ class UpscanConnector @Inject() (appConfig: ApplicationConfig, httpClient: HttpC
   private[connectors] val upscanInitiatePath: String = "/upscan/v2/initiate"
   private val upscanInitiateUrl: String              = upscanInitiateHost + upscanInitiatePath
 
-  def getUpscanFormData(body: UpscanInitiateRequest)(implicit hc: HeaderCarrier): Future[UpscanInitiateResponse] =
+  def getUpscanFormData(body: UpscanInitiateRequest)(using hc: HeaderCarrier): Future[UpscanInitiateResponse] =
     httpClient
       .post(url"$upscanInitiateUrl")
-      .setHeader(headers.toSeq: _*)
+      .setHeader(headers.toSeq*)
       .withBody(Json.toJson(body))
       .execute[PreparedUpload]
       .map(_.toUpscanInitiateResponse)

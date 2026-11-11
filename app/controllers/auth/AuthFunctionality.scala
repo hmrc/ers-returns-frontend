@@ -21,13 +21,13 @@ import models.{ERSAuthData, ErsMetaData}
 import org.apache.pekko.http.scaladsl.model.Uri
 import play.api.Logging
 import play.api.libs.json.{Json, OFormat}
+import play.api.mvc.*
 import play.api.mvc.Results.Redirect
-import play.api.mvc._
 import services.FrontendSessionService
-import uk.gov.hmrc.auth.core.AffinityGroup._
+import uk.gov.hmrc.auth.core.*
+import uk.gov.hmrc.auth.core.AffinityGroup.*
 import uk.gov.hmrc.auth.core.AuthProvider.GovernmentGateway
-import uk.gov.hmrc.auth.core._
-import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals._
+import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals.*
 import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.domain.EmpRef
 import uk.gov.hmrc.http.HeaderCarrier
@@ -51,7 +51,7 @@ class AuthAction @Inject() (
   appConfig: ApplicationConfig,
   sessionService: FrontendSessionService,
   val parser: BodyParsers.Default
-)(implicit val executionContext: ExecutionContext)
+)(using val executionContext: ExecutionContext)
     extends AuthorisedFunctions with AuthIdentifierAction with Constants with Logging {
 
   lazy val signInUrl: String = appConfig.ggSignInUrl
@@ -71,8 +71,8 @@ class AuthAction @Inject() (
     request: Request[A],
     block: RequestWithOptionalAuthContext[A] => Future[Result]
   ): Future[Result] = {
-    implicit val hc: HeaderCarrier                    = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
-    implicit val formatRSParams: OFormat[ErsMetaData] = Json.format[ErsMetaData]
+    given hc: HeaderCarrier                    = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
+    given formatRSParams: OFormat[ErsMetaData] = Json.format[ErsMetaData]
 
     authorised((Enrolment("IR-PAYE") or Enrolment("HMRC-AGENT-AGENT") or Agent) and AuthProviders(GovernmentGateway))
       .retrieve(authorisedEnrolments and affinityGroup) { case authorisedEnrolments ~ affinityGroup =>
@@ -80,7 +80,7 @@ class AuthAction @Inject() (
 
         if (authContext.isAgent) {
           for {
-            all    <- sessionService.fetch[ErsMetaData](ERS_METADATA)(request, implicitly)
+            all    <- sessionService.fetch[ErsMetaData](ERS_METADATA)(using request, summon)
             result <- block(RequestWithOptionalAuthContext(request, delegationModelUser(all, authContext: ERSAuthData)))
           } yield result
         } else {
@@ -107,7 +107,7 @@ class AuthActionGovGateway @Inject() (
   override val authConnector: DefaultAuthConnector,
   appConfig: ApplicationConfig,
   val parser: BodyParsers.Default
-)(implicit val executionContext: ExecutionContext)
+)(using val executionContext: ExecutionContext)
     extends AuthorisedFunctions with AuthIdentifierAction with Logging {
 
   lazy val signInUrl: String = appConfig.ggSignInUrl
@@ -127,7 +127,7 @@ class AuthActionGovGateway @Inject() (
     request: Request[A],
     block: RequestWithOptionalAuthContext[A] => Future[Result]
   ): Future[Result] = {
-    implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
+    given hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
 
     authorised(AuthProviders(GovernmentGateway)).retrieve(allEnrolments and affinityGroup) {
       case authorisedEnrolments ~ affinityGroup =>

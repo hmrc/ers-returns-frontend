@@ -26,7 +26,7 @@ import scala.concurrent.Future
 
 trait SubsidiaryBaseController[A] extends SchemeOrganiserBaseController[A] {
 
-  override def submissionHandler(requestObject: RequestObject, index: Int, edit: Boolean = false)(implicit
+  override def submissionHandler(requestObject: RequestObject, index: Int, edit: Boolean = false)(using
     request: RequestWithOptionalAuthContext[AnyContent],
     hc: HeaderCarrier
   ): Future[Result] =
@@ -58,11 +58,11 @@ trait SubsidiaryBaseController[A] extends SchemeOrganiserBaseController[A] {
         getGlobalErrorPage
       }
 
-  override def showQuestionPage(requestObject: RequestObject, index: Int, edit: Boolean = false)(implicit
+  override def showQuestionPage(requestObject: RequestObject, index: Int, edit: Boolean = false)(using
     request: RequestWithOptionalAuthContext[AnyContent],
     hc: HeaderCarrier
   ): Future[Result] =
-    sessionService.fetchPartFromCompanyDetailsList[A](index).map { previousAnswer: Option[A] =>
+    sessionService.fetchPartFromCompanyDetailsList[A](index).map { (previousAnswer: Option[A]) =>
       val preparedForm = previousAnswer.fold(form)(form.fill(_))
       Ok(view(requestObject, index, preparedForm, edit))
     } recover { case e: Exception =>

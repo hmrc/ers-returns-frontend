@@ -22,7 +22,7 @@ import controllers.auth.AuthAction
 import models.{RequestObject, RsFormMappings, TrusteeName}
 import play.api.data.Form
 import play.api.libs.json.Format
-import play.api.mvc._
+import play.api.mvc.*
 import play.twirl.api.Html
 import services.{FrontendSessionService, TrusteeService}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -41,14 +41,14 @@ class TrusteeNameController @Inject() (
   val trusteeService: TrusteeService,
   val sessionService: FrontendSessionService,
   trusteeNameView: views.html.trustee_name
-)(implicit val ec: ExecutionContext, val ersUtil: ERSUtil, val appConfig: ApplicationConfig)
+)(using val ec: ExecutionContext, val ersUtil: ERSUtil, val appConfig: ApplicationConfig)
     extends FrontendController(mcc) with WithUrlEncodedOnlyFormBinding with TrusteeBaseController[TrusteeName] {
 
-  implicit val format: Format[TrusteeName] = TrusteeName.format
+  given format: Format[TrusteeName] = TrusteeName.format
 
   val cacheKey: String = ersUtil.TRUSTEE_NAME_CACHE
 
-  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit
+  def nextPageRedirect(index: Int, edit: Boolean = false)(using
     hc: HeaderCarrier,
     request: RequestHeader
   ): Future[Result] =
@@ -58,9 +58,9 @@ class TrusteeNameController @Inject() (
       Future.successful(Redirect(controllers.trustees.routes.TrusteeBasedInUkController.questionPage()))
     }
 
-  def form(implicit request: Request[AnyContent]): Form[TrusteeName] = RsFormMappings.trusteeNameForm()
+  def form(using request: Request[AnyContent]): Form[TrusteeName] = RsFormMappings.trusteeNameForm()
 
-  def view(requestObject: RequestObject, index: Int, trusteeNameForm: Form[TrusteeName], edit: Boolean = false)(implicit
+  def view(requestObject: RequestObject, index: Int, trusteeNameForm: Form[TrusteeName], edit: Boolean = false)(using
     request: Request[AnyContent],
     hc: HeaderCarrier
   ): Html =

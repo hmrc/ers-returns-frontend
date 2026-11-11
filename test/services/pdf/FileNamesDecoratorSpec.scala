@@ -50,7 +50,7 @@ class FileNamesDecoratorSpec
     ExecutionContext.global
   )
 
-  implicit lazy val mat: Materializer = app.materializer
+  given mat: Materializer = app.materializer
 
   "file name decorator" should {
     "return an empty string when list of files is empty" in {

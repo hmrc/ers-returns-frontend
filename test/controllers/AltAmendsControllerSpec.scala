@@ -16,11 +16,11 @@
 
 package controllers
 
-import models._
+import models.*
 import org.jsoup.Jsoup
 import org.mockito.ArgumentMatchers
-import org.mockito.ArgumentMatchers._
-import org.mockito.Mockito._
+import org.mockito.ArgumentMatchers.*
+import org.mockito.Mockito.*
 import org.scalatest.OptionValues
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.should.Matchers
@@ -34,9 +34,9 @@ import play.api.mvc.{
   AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents
 }
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
+import utils.*
 import utils.Fixtures.ersRequestObject
-import utils._
 import views.html.{alterations_activity, alterations_amends, global_error}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -60,7 +60,7 @@ class AltAmendsControllerSpec
     ExecutionContext.global
   )
 
-  implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
+  given testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
 
   val fakeGroupSchemeInfo: GroupSchemeInfo     = GroupSchemeInfo(Some(OPTION_NO), Some(""))
   val fakeAltAmendsActivity: AltAmendsActivity = AltAmendsActivity("1")
@@ -84,18 +84,21 @@ class AltAmendsControllerSpec
         globalErrorView,
         testAuthAction
       ) {
-        when(mockSessionService.fetch[GroupSchemeInfo](ArgumentMatchers.eq("group-scheme-controller"))(any(), any()))
+        when(
+          mockSessionService.fetch[GroupSchemeInfo](ArgumentMatchers.eq("group-scheme-controller"))(using any(), any())
+        )
           .thenReturn(groupSchemeActivity)
 
-        when(mockSessionService.fetch[AltAmendsActivity](ArgumentMatchers.eq("alt-activity"))(any(), any()))
+        when(mockSessionService.fetch[AltAmendsActivity](ArgumentMatchers.eq("alt-activity"))(using any(), any()))
           .thenReturn(altAmendsActivity)
 
-        when(mockSessionService.fetch[RequestObject](refEq(ERS_REQUEST_OBJECT))(any(), any())).thenReturn(requestObject)
+        when(mockSessionService.fetch[RequestObject](refEq(ERS_REQUEST_OBJECT))(using any(), any()))
+          .thenReturn(requestObject)
 
-        when(mockSessionService.cache(ArgumentMatchers.eq("alt-activity"), any())(any(), any()))
+        when(mockSessionService.cache(ArgumentMatchers.eq("alt-activity"), any())(using any(), any()))
           .thenReturn(if (successfulCache) Future.successful(sessionPair) else Future.failed(new Exception("error")))
 
-        when(mockErsUtil.getPageElement(any(), any(), any(), any())(any())).thenCallRealMethod()
+        when(mockErsUtil.getPageElement(any(), any(), any(), any())(using any())).thenCallRealMethod()
       }
 
     "give a redirect status (to company authentication frontend) on GET if user is not authenticated" in {
@@ -115,22 +118,22 @@ class AltAmendsControllerSpec
     "direct to ers errors page if fetching groupSchemeActivity throws exception" in {
       val controllerUnderTest = buildFakeAltAmendsPageController(groupSchemeActivity = Future.failed(new Exception))
       val authRequest         = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"), Fixtures.buildFakeUser)
-      val result              = controllerUnderTest.showAltActivityPage()(authRequest)
+      val result              = controllerUnderTest.showAltActivityPage()(using authRequest)
 
       contentAsString(result)   should include(testMessages("ers.global_errors.message"))
       contentAsString(result) shouldBe contentAsString(
-        Future(buildFakeAltAmendsPageController().getGlobalErrorPage(testFakeRequest, testMessages))
+        Future(buildFakeAltAmendsPageController().getGlobalErrorPage(using testFakeRequest, testMessages))
       )
     }
 
     "direct to ers errors page if fetching requestObject throws exception" in {
       val controllerUnderTest = buildFakeAltAmendsPageController(requestObject = Future.failed(new Exception))
       val authRequest         = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"), Fixtures.buildFakeUser)
-      val result              = controllerUnderTest.showAltActivityPage()(authRequest)
+      val result              = controllerUnderTest.showAltActivityPage()(using authRequest)
 
       contentAsString(result)   should include(testMessages("ers.global_errors.message"))
       contentAsString(result) shouldBe contentAsString(
-        Future(buildFakeAltAmendsPageController().getGlobalErrorPage(testFakeRequest, testMessages))
+        Future(buildFakeAltAmendsPageController().getGlobalErrorPage(using testFakeRequest, testMessages))
       )
     }
 
@@ -138,7 +141,7 @@ class AltAmendsControllerSpec
       val controllerUnderTest = buildFakeAltAmendsPageController()
       val authRequest         = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"), Fixtures.buildFakeUser)
 
-      val result = controllerUnderTest.showAltActivityPage()(authRequest)
+      val result = controllerUnderTest.showAltActivityPage()(using authRequest)
 
       status(result) shouldBe Status.OK
       val document = Jsoup.parse(contentAsString(result))
@@ -150,7 +153,7 @@ class AltAmendsControllerSpec
       val controllerUnderTest = buildFakeAltAmendsPageController(altAmendsActivity = Future.failed(new Exception))
       val authRequest         = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"), Fixtures.buildFakeUser)
 
-      val result = controllerUnderTest.showAltActivityPage()(authRequest)
+      val result = controllerUnderTest.showAltActivityPage()(using authRequest)
 
       status(result) shouldBe Status.OK
       val document = Jsoup.parse(contentAsString(result))
@@ -180,10 +183,10 @@ class AltAmendsControllerSpec
       val controllerUnderTest = buildFakeAltAmendsPageController()
       val altActivityData     = Map("" -> "")
       val form                = RsFormMappings.altActivityForm().bind(altActivityData)
-      val request             = Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
+      val request             = Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq*)
       val authRequest         = buildRequestWithAuth(request)
 
-      val result = controllerUnderTest.showAltActivitySelected()(authRequest)
+      val result = controllerUnderTest.showAltActivitySelected()(using authRequest)
 
       status(result) shouldBe Status.OK
     }
@@ -192,10 +195,10 @@ class AltAmendsControllerSpec
       val controllerUnderTest           = buildFakeAltAmendsPageController()
       val altActivityData               = Map("altActivity" -> OPTION_NO)
       val form: Form[AltAmendsActivity] = RsFormMappings.altActivityForm().bind(altActivityData)
-      val request                       = Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
+      val request                       = Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq*)
       val authRequest                   = buildRequestWithAuth(request, Fixtures.buildFakeUser)
 
-      val result = controllerUnderTest.showAltActivitySelected()(authRequest)
+      val result = controllerUnderTest.showAltActivitySelected()(using authRequest)
 
       status(result)         shouldBe Status.SEE_OTHER
       result.futureValue.header
@@ -206,10 +209,10 @@ class AltAmendsControllerSpec
       val controllerUnderTest = buildFakeAltAmendsPageController()
       val altActivityData     = Map("altActivity" -> OPTION_YES)
       val form                = RsFormMappings.altActivityForm().bind(altActivityData)
-      val request             = Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
+      val request             = Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq*)
       val authRequest         = buildRequestWithAuth(request, Fixtures.buildFakeUser)
 
-      val result = controllerUnderTest.showAltActivitySelected()(authRequest)
+      val result = controllerUnderTest.showAltActivitySelected()(using authRequest)
 
       status(result)                                shouldBe Status.SEE_OTHER
       result.futureValue.header.headers("Location") shouldBe routes.AltAmendsController.altAmendsPage().toString
@@ -219,14 +222,14 @@ class AltAmendsControllerSpec
       val controllerUnderTest = buildFakeAltAmendsPageController(successfulCache = false)
       val altActivityData     = Map("altActivity" -> OPTION_YES)
       val form                = RsFormMappings.altActivityForm().bind(altActivityData)
-      val req                 = Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
+      val req                 = Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq*)
       val authRequest         = buildRequestWithAuth(req, Fixtures.buildFakeUser)
 
-      val result = controllerUnderTest.showAltActivitySelected()(authRequest)
+      val result = controllerUnderTest.showAltActivitySelected()(using authRequest)
 
       status(result)          shouldBe Status.OK
       contentAsString(result) shouldBe contentAsString(
-        Future(buildFakeAltAmendsPageController().getGlobalErrorPage(req, testMessages))
+        Future(buildFakeAltAmendsPageController().getGlobalErrorPage(using req, testMessages))
       )
       contentAsString(result)   should include(testMessages("ers.global_errors.message"))
     }
@@ -235,13 +238,13 @@ class AltAmendsControllerSpec
       val controllerUnderTest = buildFakeAltAmendsPageController(successfulCache = false)
       val altActivityData     = Map("altActivity" -> OPTION_YES)
       val form                = RsFormMappings.altActivityForm().bind(altActivityData)
-      val req                 = Fixtures.buildFakeRequest("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
+      val req                 = Fixtures.buildFakeRequest("POST").withFormUrlEncodedBody(form.data.toSeq*)
       val authRequest         = buildRequestWithAuth(req, Fixtures.buildFakeUser)
 
-      val result = controllerUnderTest.showAltActivitySelected()(authRequest)
+      val result = controllerUnderTest.showAltActivitySelected()(using authRequest)
 
       contentAsString(result) shouldBe contentAsString(
-        Future(buildFakeAltAmendsPageController().getGlobalErrorPage(req, testMessages))
+        Future(buildFakeAltAmendsPageController().getGlobalErrorPage(using req, testMessages))
       )
       contentAsString(result)   should include(testMessages("ers.global_errors.message"))
     }
@@ -267,13 +270,13 @@ class AltAmendsControllerSpec
       testAuthAction
     ) {
 
-      when(mockSessionService.fetch[RequestObject](refEq(ERS_REQUEST_OBJECT))(any(), any()))
+      when(mockSessionService.fetch[RequestObject](refEq(ERS_REQUEST_OBJECT))(using any(), any()))
         .thenReturn(requestObject)
-      when(mockSessionService.fetchOption[AltAmends](refEq("alt-amends-cache-controller"), any())(any(), any()))
+      when(mockSessionService.fetchOption[AltAmends](refEq("alt-amends-cache-controller"), any())(using any(), any()))
         .thenReturn(altAmends)
-      when(mockSessionService.cache(refEq("alt-amends-cache-controller"), any())(any(), any()))
+      when(mockSessionService.cache(refEq("alt-amends-cache-controller"), any())(using any(), any()))
         .thenReturn(if (successfulCache) Future.successful(sessionPair) else Future.failed(new Exception("error")))
-      when(mockErsUtil.getPageElement(any(), any(), any(), any())(any())).thenReturn("")
+      when(mockErsUtil.getPageElement(any(), any(), any(), any())(using any())).thenReturn("")
     }
 
     "give a redirect status (to company authentication frontend) on GET if user is not authenticated" in {
@@ -295,7 +298,7 @@ class AltAmendsControllerSpec
         buildFakeAltAmendsPageController(altAmends = Future.failed(new Exception))
       val authRequest                              = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"), Fixtures.buildFakeUser)
 
-      val result = controllerUnderTest.showAltAmendsPage()(authRequest)
+      val result = controllerUnderTest.showAltAmendsPage()(using authRequest)
 
       status(result) shouldBe Status.OK
       val document = Jsoup.parse(contentAsString(result))
@@ -311,7 +314,7 @@ class AltAmendsControllerSpec
         buildFakeAltAmendsPageController(altAmends = Future.successful(None))
       val authRequest                              = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"), Fixtures.buildFakeUser)
 
-      val result = controllerUnderTest.showAltAmendsPage()(authRequest)
+      val result = controllerUnderTest.showAltAmendsPage()(using authRequest)
 
       status(result) shouldBe Status.OK
       val document = Jsoup.parse(contentAsString(result))
@@ -326,7 +329,7 @@ class AltAmendsControllerSpec
       val controllerUnderTest: AltAmendsController = buildFakeAltAmendsPageController()
       val authRequest                              = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"), Fixtures.buildFakeUser)
 
-      val result = controllerUnderTest.showAltAmendsPage()(authRequest)
+      val result = controllerUnderTest.showAltAmendsPage()(using authRequest)
 
       status(result) shouldBe Status.OK
       val document = Jsoup.parse(contentAsString(result))
@@ -364,10 +367,10 @@ class AltAmendsControllerSpec
         "altAmendsOther"       -> ""
       )
       val form                                     = RsFormMappings.altAmendsForm().bind(altAmendsData)
-      val request                                  = Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
+      val request                                  = Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq*)
       val authRequest                              = buildRequestWithAuth(request, Fixtures.buildFakeUser)
 
-      val result = controllerUnderTest.showAltAmendsSelected()(authRequest)
+      val result = controllerUnderTest.showAltAmendsSelected()(using authRequest)
       status(result)                                shouldBe Status.SEE_OTHER
       result.futureValue.header.headers("Location") shouldBe routes.AltAmendsController.altAmendsPage().toString
     }
@@ -382,10 +385,10 @@ class AltAmendsControllerSpec
         "altAmendsOther"       -> ""
       )
       val form                                     = RsFormMappings.altAmendsForm().bind(altAmendsData)
-      val request                                  = Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
+      val request                                  = Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq*)
       val authRequest                              = buildRequestWithAuth(request, Fixtures.buildFakeUser)
 
-      val result = controllerUnderTest.showAltAmendsSelected()(authRequest)
+      val result = controllerUnderTest.showAltAmendsSelected()(using authRequest)
 
       status(result)                                shouldBe Status.SEE_OTHER
       result.futureValue.header.headers("Location") shouldBe routes.AltAmendsController.altAmendsPage().toString
@@ -402,14 +405,14 @@ class AltAmendsControllerSpec
         "altAmendsOther"       -> "1"
       )
       val form                                     = RsFormMappings.altActivityForm().bind(altAmendsData)
-      val req                                      = Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
+      val req                                      = Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq*)
       val authRequest                              = buildRequestWithAuth(req, Fixtures.buildFakeUser)
 
-      val result = controllerUnderTest.showAltAmendsSelected()(authRequest)
+      val result = controllerUnderTest.showAltAmendsSelected()(using authRequest)
 
       status(result)          shouldBe Status.OK
       contentAsString(result) shouldBe contentAsString(
-        Future(buildFakeAltAmendsPageController().getGlobalErrorPage(req, testMessages))
+        Future(buildFakeAltAmendsPageController().getGlobalErrorPage(using req, testMessages))
       )
       contentAsString(result)   should include(testMessages("ers.global_errors.message"))
     }
@@ -424,10 +427,10 @@ class AltAmendsControllerSpec
         "altAmendsOther"       -> "1"
       )
       val form                                     = RsFormMappings.altActivityForm().bind(altAmendsData)
-      val request                                  = Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
+      val request                                  = Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq*)
       val authRequest                              = buildRequestWithAuth(request, Fixtures.buildFakeUser)
 
-      val result = controllerUnderTest.showAltAmendsSelected()(authRequest)
+      val result = controllerUnderTest.showAltAmendsSelected()(using authRequest)
 
       status(result)         shouldBe Status.SEE_OTHER
       result.futureValue.header

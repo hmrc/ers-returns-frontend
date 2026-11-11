@@ -18,9 +18,9 @@ package services
 
 import config.ApplicationConfig
 import controllers.auth.RequestWithOptionalAuthContext
-import models._
+import models.*
 import models.upscan.UploadedSuccessfully
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito.{reset, when}
 import org.scalatest.BeforeAndAfter
 import org.scalatest.matchers.should.Matchers
@@ -50,14 +50,14 @@ class FrontendSessionServiceSpec
     with MongoSupport
     with BeforeAndAfter {
 
-  override lazy val fakeApplication: Application = new GuiceApplicationBuilder()
+  override def fakeApplication(): Application = new GuiceApplicationBuilder()
     .configure("metrics.enabled" -> "false")
     .overrides(
       bind(classOf[MongoComponent]).toInstance(mongoComponent)
     )
     .build()
 
-  implicit val fakeRequest: RequestWithOptionalAuthContext[AnyContent] = requestWithAuth
+  given fakeRequest: RequestWithOptionalAuthContext[AnyContent] = requestWithAuth
 
   val frontendSessionsRepository: FrontendSessionsRepository = mock[FrontendSessionsRepository]
   val mockApplicationConfig: ApplicationConfig               = mock[ApplicationConfig]
@@ -119,20 +119,20 @@ class FrontendSessionServiceSpec
 
   "getNoOfRows" should {
     "return None when nilReturn is 2" in {
-      val result = testService.getNoOfRows("2")(ec, fakeRequest, hc).futureValue
+      val result = testService.getNoOfRows("2")(using ec, fakeRequest, hc).futureValue
       result shouldBe None
     }
 
     "return Some with the number of rows when nilReturn is not OPTION_NIL_RETURN and rows are available" in {
       val numberOfRows = Some(5)
-      when(mockFileValidatorService.getSuccessfulCallbackRecord(any(), any()))
+      when(mockFileValidatorService.getSuccessfulCallbackRecord(using any(), any()))
         .thenReturn(Future.successful(Some(UploadedSuccessfully("", "", numberOfRows, mimeType = None))))
       val result       = testService.getNoOfRows("1").futureValue
       result shouldBe numberOfRows
     }
 
     "return None when nilReturn is not OPTION_NIL_RETURN and no rows are available" in {
-      when(mockFileValidatorService.getSuccessfulCallbackRecord(any(), any())).thenReturn(Future.successful(None))
+      when(mockFileValidatorService.getSuccessfulCallbackRecord(using any(), any())).thenReturn(Future.successful(None))
       val result = testService.getNoOfRows("1").futureValue
       result shouldBe None
     }
@@ -251,14 +251,14 @@ class FrontendSessionServiceSpec
         Instant.now()
       )
 
-      when(frontendSessionsRepository.getAllFromSession()(any())).thenReturn(Future.successful(Some(cacheItem)))
+      when(frontendSessionsRepository.getAllFromSession()(using any())).thenReturn(Future.successful(Some(cacheItem)))
 
       val result = testService.fetchAll().futureValue
       result shouldBe cacheItem
     }
 
     "throw Exception with a specific message when no data is found in the session" in {
-      when(frontendSessionsRepository.getAllFromSession()(any())).thenReturn(Future.successful(None))
+      when(frontendSessionsRepository.getAllFromSession()(using any())).thenReturn(Future.successful(None))
 
       val thrown = intercept[Exception] {
         testService.fetchAll().futureValue
@@ -268,7 +268,7 @@ class FrontendSessionServiceSpec
 
     "throw Exception when there is an error fetching data" in {
       val exception = new RuntimeException("Test exception")
-      when(frontendSessionsRepository.getAllFromSession()(any())).thenReturn(Future.failed(exception))
+      when(frontendSessionsRepository.getAllFromSession()(using any())).thenReturn(Future.failed(exception))
 
       val thrown = intercept[Exception] {
         testService.fetchAll().futureValue

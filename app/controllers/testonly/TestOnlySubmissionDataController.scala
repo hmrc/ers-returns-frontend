@@ -22,7 +22,7 @@ import controllers.auth.{AuthAction, RequestWithOptionalAuthContext}
 import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.libs.json.{JsObject, Json}
-import play.api.mvc._
+import play.api.mvc.*
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.ERSUtil
@@ -37,14 +37,14 @@ class TestOnlySubmissionDataController @Inject() (
   val ersConnector: ErsConnector,
   globalErrorView: views.html.global_error,
   authAction: AuthAction
-)(implicit val ec: ExecutionContext, val ersUtil: ERSUtil, val appConfig: ApplicationConfig)
+)(using val ec: ExecutionContext, val ersUtil: ERSUtil, val appConfig: ApplicationConfig)
     extends FrontendController(mcc) with I18nSupport with Logging {
 
   def retrieveSubmissionData(): Action[AnyContent] = authAction.async { implicit request =>
     getRetrieveSubmissionData()
   }
 
-  def getRetrieveSubmissionData()(implicit
+  def getRetrieveSubmissionData()(using
     request: RequestWithOptionalAuthContext[AnyContent],
     hc: HeaderCarrier
   ): Future[Result] = {
@@ -91,7 +91,7 @@ class TestOnlySubmissionDataController @Inject() (
       case _                                 => None
     }
 
-  private def getGlobalErrorPage()(implicit request: RequestHeader, messages: Messages): Result =
+  private def getGlobalErrorPage()(using request: RequestHeader, messages: Messages): Result =
     Ok(
       globalErrorView(
         "ers.global_errors.title",
@@ -100,7 +100,7 @@ class TestOnlySubmissionDataController @Inject() (
       )(request, messages, appConfig)
     )
 
-  private def notFoundGlobalErrorView()(implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
+  private def notFoundGlobalErrorView()(using request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
     Future.successful(
       NotFound(
         globalErrorView(

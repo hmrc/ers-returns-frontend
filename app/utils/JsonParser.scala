@@ -36,7 +36,7 @@ trait JsonParser {
 
 object JsonUtils {
 
-  implicit class RichJsArray(array: JsArray) {
+  extension (array: JsArray) {
 
     def applyOption(index: Int): Option[JsValue] =
       if (index >= 0 && index < array.value.size) Some(array.value(index))

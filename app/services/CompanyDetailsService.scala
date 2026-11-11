@@ -16,7 +16,7 @@
 
 package services
 
-import models._
+import models.*
 import play.api.Logging
 import play.api.mvc.RequestHeader
 import utils.ERSUtil
@@ -27,13 +27,13 @@ import scala.concurrent.{ExecutionContext, Future}
 class CompanyDetailsService @Inject() (
   ersUtil: ERSUtil,
   sessionService: FrontendSessionService
-)(implicit ec: ExecutionContext)
+)(using val ec: ExecutionContext)
     extends Logging {
 
   private def filterOutDeletedCompany(companyList: CompanyDetailsList, indexToDelete: Int): List[CompanyDetails] =
     companyList.companies.zipWithIndex.filterNot(_._2 == indexToDelete).map(_._1)
 
-  def deleteCompany(companies: CompanyDetailsList, index: Int)(implicit request: RequestHeader): Future[Boolean] = {
+  def deleteCompany(companies: CompanyDetailsList, index: Int)(using request: RequestHeader): Future[Boolean] = {
     val activeCompanies = CompanyDetailsList(filterOutDeletedCompany(companies, index))
     (for {
       _ <- sessionService.cache(ersUtil.SUBSIDIARY_COMPANIES_CACHE, activeCompanies)
@@ -47,7 +47,7 @@ class CompanyDetailsService @Inject() (
     }
   }
 
-  def updateSubsidiaryCompanyCache(index: Int)(implicit request: RequestHeader): Future[Unit] =
+  def updateSubsidiaryCompanyCache(index: Int)(using request: RequestHeader): Future[Unit] =
     (for {
       name              <- sessionService.fetch[Company](ersUtil.SUBSIDIARY_COMPANY_NAME_CACHE)
       cachedCompanies   <- sessionService.fetchCompaniesOptionally()
@@ -60,7 +60,7 @@ class CompanyDetailsService @Inject() (
       Future.failed(ex)
     }
 
-  def updateSchemeOrganiserCache(implicit request: RequestHeader): Future[Unit] =
+  def updateSchemeOrganiserCache(using request: RequestHeader): Future[Unit] =
     (for {
       name    <- sessionService.fetch[Company](ersUtil.SCHEME_ORGANISER_NAME_CACHE)
       address <- sessionService.fetch[CompanyAddress](ersUtil.SCHEME_ORGANISER_ADDRESS_CACHE)

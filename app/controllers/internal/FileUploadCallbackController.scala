@@ -16,7 +16,7 @@
 
 package controllers.internal
 
-import models.upscan._
+import models.upscan.*
 import play.api.Logging
 import play.api.libs.json.JsValue
 import play.api.mvc.{Action, MessagesControllerComponents}
@@ -32,7 +32,7 @@ class FileUploadCallbackController @Inject() (
   val mcc: MessagesControllerComponents,
   fileValidatorService: FileValidatorService,
   fileSizeUtils: FileSizeUtils
-)(implicit val ec: ExecutionContext)
+)(using val ec: ExecutionContext)
     extends FrontendController(mcc) with Logging with Constants {
 
   def callback(schemeRef: String, sessionId: String): Action[JsValue] = Action.async(parse.json) { implicit request =>

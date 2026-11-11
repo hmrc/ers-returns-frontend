@@ -25,13 +25,13 @@ import scala.collection.mutable
 trait PdfDecoratorControllerFactory extends PageBuilder {
 
   val countryCodes: CountryCodes
-  implicit val ERSUtil: ERSUtil
+  given ERSUtil: ERSUtil
 
   def createPdfDecoratorControllerForScheme(
     scheme: String,
     ersSummary: ErsSummary,
     filesUploaded: Option[List[String]]
-  )(implicit messages: Messages): DecoratorController =
+  )(using messages: Messages): DecoratorController =
     scheme.trim.toLowerCase match {
       case "emi" =>
         new DecoratorController(Array[Decorator]())
@@ -91,7 +91,7 @@ trait PdfDecoratorControllerFactory extends PageBuilder {
       "5" -> altAmends.altAmendsOther.getOrElse(OPTION_NO)
     )
 
-  def createAltAmendOptionsFor(ersSummary: ErsSummary, variant: String)(implicit
+  def createAltAmendOptionsFor(ersSummary: ErsSummary, variant: String)(using
     messages: Messages
   ): Map[String, String] = {
     val map: mutable.HashMap[String, String] = mutable.HashMap()

@@ -20,7 +20,7 @@ import org.apache.pekko.stream.Materializer
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatest.matchers.should.Matchers
-import org.scalatest.prop.TableDrivenPropertyChecks._
+import org.scalatest.prop.TableDrivenPropertyChecks.*
 import org.scalatest.prop.TableFor3
 import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatest.{BeforeAndAfterEach, OptionValues}
@@ -34,7 +34,7 @@ import play.api.mvc.{
 import play.api.test.Helpers.stubBodyParser
 import play.i18n.Lang
 import services.pdf.{DecoratorController, ErsReceiptPdfBuilderService}
-import utils._
+import utils.*
 
 import java.io.ByteArrayOutputStream
 import scala.concurrent.ExecutionContext
@@ -59,8 +59,8 @@ class ErsReceiptPdfBuilderServiceSpec
     ExecutionContext.global
   )
 
-  implicit lazy val mat: Materializer = app.materializer
-  implicit val ersUtil: ERSUtil       = mockErsUtil
+  given mat: Materializer             = app.materializer
+  given ersUtil: ERSUtil              = mockErsUtil
   val testErsReceiptPdfBuilderService = new ErsReceiptPdfBuilderService(mockCountryCodes)
 
   val testCases: TableFor3[String, String, String] = Table(
@@ -76,7 +76,7 @@ class ErsReceiptPdfBuilderServiceSpec
       s"generate the ERS summary metdata correctly when parsed the date: $inputDate and language: $language" in {
         val testMessages: MessagesImpl = MessagesImpl(i18n.Lang(language), mockMCC.messagesApi)
         when(mockErsUtil.replaceAmpersand(any[String])).thenAnswer(_.getArgument(0))
-        val output                     = testErsReceiptPdfBuilderService.addMetaData(Fixtures.ersSummary, inputDate)(testMessages)
+        val output                     = testErsReceiptPdfBuilderService.addMetaData(Fixtures.ersSummary, inputDate)(using testMessages)
 
         val expectedConfirmationMessage =
           testMessages.messages(
@@ -119,7 +119,7 @@ class ErsReceiptPdfBuilderServiceSpec
   "return HTML with correct header message" in {
 
     val testMessages: MessagesImpl = MessagesImpl(Lang.defaultLang(), mockMCC.messagesApi)
-    val output                     = testErsReceiptPdfBuilderService.pdfHeader(testMessages)
+    val output                     = testErsReceiptPdfBuilderService.pdfHeader(using testMessages)
 
     output.contains("</div><hr/>") shouldBe true
     output                           should include(testMessages("ers.pdf.header"))
@@ -127,10 +127,10 @@ class ErsReceiptPdfBuilderServiceSpec
   }
 
   "return the decorated string from a single decorator HTML with correct header message" in {
-    implicit val fakeDecorator: DecoratorController = new DecoratorController(Array()) {
-      override def decorate(implicit messages: Messages): String = "<p>Summary</p>"
+    given fakeDecorator: DecoratorController = new DecoratorController(Array()) {
+      override def decorate(using messages: Messages): String = "<p>Summary</p>"
     }
-    val output                                      = testErsReceiptPdfBuilderService.addSummary()
+    val output                               = testErsReceiptPdfBuilderService.addSummary()
 
     output.contains("Summary") shouldBe true
 

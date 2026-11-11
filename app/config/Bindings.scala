@@ -22,7 +22,7 @@ import utils.{CountryCodes, CountryCodesImpl}
 
 class Bindings extends Module {
 
-  override def bindings(environment: Environment, configuration: Configuration): Seq[Binding[_]] =
+  override def bindings(environment: Environment, configuration: Configuration): Seq[Binding[?]] =
     bindDeps()
 
   private def bindDeps(): Seq[Binding[CountryCodes]] = Seq(

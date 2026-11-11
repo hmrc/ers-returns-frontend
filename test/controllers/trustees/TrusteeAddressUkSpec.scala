@@ -47,7 +47,7 @@ class TrusteeAddressUkSpec
     with GuiceOneAppPerSuite
     with ScalaFutures {
 
-  implicit val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
+  given mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
     messagesActionBuilder,
     DefaultActionBuilder(stubBodyParser[AnyContent]()),
     cc.parsers,
@@ -57,7 +57,7 @@ class TrusteeAddressUkSpec
     ExecutionContext.global
   )
 
-  implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
+  given testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
 
   val testController = new TrusteeAddressUkController(
     mockMCC,
@@ -70,13 +70,14 @@ class TrusteeAddressUkSpec
   )
 
   "calling showQuestionPage" should {
-    implicit val authRequest: RequestWithOptionalAuthContext[AnyContent] =
+    given authRequest: RequestWithOptionalAuthContext[AnyContent] =
       buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
     setAuthMocks()
-    when(mockSessionService.fetch[RequestObject](any())(any(), any())).thenReturn(Future.successful(ersRequestObject))
+    when(mockSessionService.fetch[RequestObject](any())(using any(), any()))
+      .thenReturn(Future.successful(ersRequestObject))
 
     "show the empty trustee address UK question page when there is nothing to prefill" in {
-      when(mockSessionService.fetchPartFromTrusteeDetailsList[TrusteeAddress](any())(any(), any()))
+      when(mockSessionService.fetchPartFromTrusteeDetailsList[TrusteeAddress](any())(using any(), any()))
         .thenReturn(Future.successful(None))
 
       val result = testController.questionPage(1).apply(authRequest)
@@ -87,7 +88,7 @@ class TrusteeAddressUkSpec
     }
 
     "show the prefilled trustee address UK question page when there is data to prefill" in {
-      when(mockSessionService.fetchPartFromTrusteeDetailsList[TrusteeAddress](any())(any(), any()))
+      when(mockSessionService.fetchPartFromTrusteeDetailsList[TrusteeAddress](any())(using any(), any()))
         .thenReturn(Future.successful(Some(trusteeAddressUk)))
 
       val result = testController.questionPage(1).apply(authRequest)
@@ -99,7 +100,7 @@ class TrusteeAddressUkSpec
     }
 
     "show the global error page if an exception occurs while retrieving cached data" in {
-      when(mockSessionService.fetchPartFromTrusteeDetailsList[TrusteeAddress](any())(any(), any()))
+      when(mockSessionService.fetchPartFromTrusteeDetailsList[TrusteeAddress](any())(using any(), any()))
         .thenReturn(Future.failed(new RuntimeException("Failure scenario")))
 
       val result = testController.questionPage(1).apply(authRequest)
@@ -113,7 +114,8 @@ class TrusteeAddressUkSpec
 
   "nextPageRedirect" should {
     setAuthMocks()
-    when(mockSessionService.fetch[RequestObject](any())(any(), any())).thenReturn(Future.successful(ersRequestObject))
+    when(mockSessionService.fetch[RequestObject](any())(using any(), any()))
+      .thenReturn(Future.successful(ersRequestObject))
 
     "redirect to TrusteeSummaryController.trusteeSummaryPage if edit true" in {
 
@@ -123,7 +125,7 @@ class TrusteeAddressUkSpec
     }
 
     "update trustee cache and redirect to TrusteeSummaryController.trusteeSummaryPage if edit false" in {
-      when(mockTrusteeService.updateTrusteeCache(any())(any())).thenReturn(Future.successful(()))
+      when(mockTrusteeService.updateTrusteeCache(any())(using any())).thenReturn(Future.successful(()))
 
       val result = testController.nextPageRedirect(0, edit = false)
 
@@ -133,12 +135,12 @@ class TrusteeAddressUkSpec
 
   "calling handleQuestionSubmit" should {
     "show the trustee address UK form page with errors if the form is incorrectly filled" in {
-      val trusteeAddressUkData                                             = Map("addressLine1" -> "")
-      val form                                                             = RsFormMappings.trusteeAddressUkForm().bind(trusteeAddressUkData)
-      implicit val authRequest: RequestWithOptionalAuthContext[AnyContent] = buildRequestWithAuth(
-        Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
+      val trusteeAddressUkData                                      = Map("addressLine1" -> "")
+      val form                                                      = RsFormMappings.trusteeAddressUkForm().bind(trusteeAddressUkData)
+      given authRequest: RequestWithOptionalAuthContext[AnyContent] = buildRequestWithAuth(
+        Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq*)
       )
-      val result                                                           = testController.questionSubmit(1).apply(authRequest)
+      val result                                                    = testController.questionSubmit(1).apply(authRequest)
 
       status(result)        shouldBe Status.BAD_REQUEST
       contentAsString(result) should include(testMessages("ers_trustee_address.title"))
@@ -147,16 +149,17 @@ class TrusteeAddressUkSpec
   }
 
   "successfully bind the form and go to the trustee summary page" in {
-    when(mockSessionService.cache[TrusteeAddress](any(), any())(any(), any()))
+    when(mockSessionService.cache[TrusteeAddress](any(), any())(using any(), any()))
       .thenReturn(Future.successful(sessionPair))
-    when(mockTrusteeService.updateTrusteeCache(any())(any())).thenReturn(Future.successful(()), Future.successful(()))
+    when(mockTrusteeService.updateTrusteeCache(any())(using any()))
+      .thenReturn(Future.successful(()), Future.successful(()))
 
-    val trusteeAddressUkData                                             = Map("addressLine1" -> "123 Fake Street")
-    val form                                                             = RsFormMappings.trusteeAddressUkForm().bind(trusteeAddressUkData)
-    implicit val authRequest: RequestWithOptionalAuthContext[AnyContent] = buildRequestWithAuth(
-      Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq: _*)
+    val trusteeAddressUkData                                      = Map("addressLine1" -> "123 Fake Street")
+    val form                                                      = RsFormMappings.trusteeAddressUkForm().bind(trusteeAddressUkData)
+    given authRequest: RequestWithOptionalAuthContext[AnyContent] = buildRequestWithAuth(
+      Fixtures.buildFakeRequestWithSessionIdCSOP("POST").withFormUrlEncodedBody(form.data.toSeq*)
     )
-    val result                                                           = testController.questionSubmit(1).apply(authRequest)
+    val result                                                    = testController.questionSubmit(1).apply(authRequest)
 
     status(result)               shouldBe Status.SEE_OTHER
     redirectLocation(result).get shouldBe routes.TrusteeSummaryController.trusteeSummaryPage().url

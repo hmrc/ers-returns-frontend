@@ -26,9 +26,9 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status.UNAUTHORIZED
 import play.api.i18n
 import play.api.i18n.{MessagesApi, MessagesImpl}
-import play.api.mvc._
+import play.api.mvc.*
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import utils.ErsTestHelper
 import views.html.{not_authorised, signedOut, unauthorised}
 
@@ -47,15 +47,15 @@ class ApplicationControllerSpec extends PlaySpec with ErsTestHelper with GuiceOn
     ExecutionContext.global
   )
 
-  implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
+  given testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
 
-  implicit lazy val materializer: Materializer     = app.materializer
+  given materializer: Materializer                 = app.materializer
   val unauthorisedView: unauthorised               = app.injector.instanceOf[unauthorised]
   val signedOutView: signedOut                     = app.injector.instanceOf[signedOut]
   val notAuthorisedView: views.html.not_authorised = app.injector.instanceOf[not_authorised]
 
   override val testAuthActionGov: AuthActionGovGateway =
-    new AuthActionGovGateway(mockAuthConnector, mockAppConfig, defaultParser)(ec) {
+    new AuthActionGovGateway(mockAuthConnector, mockAppConfig, defaultParser)(using ec) {
       override def invokeBlock[A](
         request: Request[A],
         block: RequestWithOptionalAuthContext[A] => Future[Result]
@@ -152,10 +152,10 @@ class ApplicationControllerSpec extends PlaySpec with ErsTestHelper with GuiceOn
       val validErsMetaData: ErsMetaData =
         ErsMetaData(schemeInfo, "ipRef", Some("aoRef"), "empRef", Some("agentRef"), Some("sapNumber"))
 
-      when(mockSessionService.fetch[ErsMetaData](any())(any(), any()))
+      when(mockSessionService.fetch[ErsMetaData](any())(using any(), any()))
         .thenReturn(Future.successful(validErsMetaData))
 
-      when(mockSessionService.cache(any(), any())(any(), any()))
+      when(mockSessionService.cache(any(), any())(using any(), any()))
         .thenReturn(Future.successful(sessionPair))
 
       val result = testController.keepAlive.apply(FakeRequest())
@@ -165,7 +165,7 @@ class ApplicationControllerSpec extends PlaySpec with ErsTestHelper with GuiceOn
     }
 
     "return 500 Internal Server Error when no session data is found" in {
-      when(mockSessionService.fetch[ErsMetaData](any())(any(), any()))
+      when(mockSessionService.fetch[ErsMetaData](any())(using any(), any()))
         .thenReturn(Future.successful(null))
 
       val result = testController.keepAlive.apply(FakeRequest())
@@ -175,7 +175,7 @@ class ApplicationControllerSpec extends PlaySpec with ErsTestHelper with GuiceOn
     }
 
     "return 500 Internal Server Error on unexpected exception" in {
-      when(mockSessionService.fetch[ErsMetaData](any())(any(), any()))
+      when(mockSessionService.fetch[ErsMetaData](any())(using any(), any()))
         .thenReturn(Future.failed(new RuntimeException("DB failure")))
 
       val result = testController.keepAlive.apply(FakeRequest())
@@ -199,10 +199,10 @@ class ApplicationControllerSpec extends PlaySpec with ErsTestHelper with GuiceOn
       val validErsMetaData: ErsMetaData =
         ErsMetaData(schemeInfo, "ipRef", Some("aoRef"), "empRef", Some("agentRef"), Some("sapNumber"))
 
-      when(mockSessionService.fetch[ErsMetaData](any())(any(), any()))
+      when(mockSessionService.fetch[ErsMetaData](any())(using any(), any()))
         .thenReturn(Future.successful(validErsMetaData))
 
-      when(mockSessionService.cache(any(), any())(any(), any()))
+      when(mockSessionService.cache(any(), any())(using any(), any()))
         .thenReturn(Future.failed(new RuntimeException("Cache write failure")))
 
       val result = testController.keepAlive.apply(FakeRequest())

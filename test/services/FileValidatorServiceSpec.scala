@@ -19,10 +19,9 @@ package services
 import connectors.ErsConnector
 import controllers.auth.RequestWithOptionalAuthContext
 import models.upscan.{Failed, NotStarted, UploadStatus, UploadedSuccessfully}
-import org.mockito.ArgumentMatchers._
-import org.mockito.Mockito._
+import org.mockito.ArgumentMatchers.*
+import org.mockito.Mockito.*
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.PlaySpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
@@ -38,31 +37,31 @@ class FileValidatorServiceSpec extends PlaySpec with GuiceOneAppPerSuite with Sc
 
   val sessionId                    = "sessionId"
   val request: Request[AnyContent] = FakeRequest()
-  implicit val hc: HeaderCarrier   = HeaderCarrier().copy(sessionId = Some(SessionId(sessionId)))
+  given hc: HeaderCarrier          = HeaderCarrier().copy(sessionId = Some(SessionId(sessionId)))
 
   val mockConnector: ErsConnector = mock[ErsConnector]
 
-  implicit val executionContext: ExecutionContext = app.injector.instanceOf[ExecutionContext]
-  val testService                                 = new FileValidatorService(mockConnector)
+  given executionContext: ExecutionContext = app.injector.instanceOf[ExecutionContext]
+  val testService                          = new FileValidatorService(mockConnector)
 
-  implicit val requestWithAuth: RequestWithOptionalAuthContext[AnyContent] =
+  given requestWithAuth: RequestWithOptionalAuthContext[AnyContent] =
     RequestWithOptionalAuthContext(request, defaultErsAuthData)
 
   "createCallbackRecord" must {
     "return CREATED " when {
       "callback record was created successfully" in {
-        when(mockConnector.createCallbackRecord(any(), any()))
+        when(mockConnector.createCallbackRecord(using any(), any()))
           .thenReturn(Future.successful(CREATED))
 
         val result = testService.createCallbackRecord.futureValue
 
-        result shouldBe CREATED
+        result mustBe CREATED
       }
     }
 
     "throw an exception" when {
       "creating callback record fails" in {
-        when(mockConnector.createCallbackRecord(any(), any()))
+        when(mockConnector.createCallbackRecord(using any(), any()))
           .thenReturn(Future.failed(new Exception("Expected exception")))
 
         an[Exception] should be thrownBy testService.createCallbackRecord.futureValue
@@ -73,18 +72,18 @@ class FileValidatorServiceSpec extends PlaySpec with GuiceOneAppPerSuite with Sc
   "updateCallbackRecord" must {
     "return NO_CONTENT" when {
       "update was successful" in {
-        when(mockConnector.updateCallbackRecord(any(), any())(any()))
+        when(mockConnector.updateCallbackRecord(any(), any())(using any()))
           .thenReturn(Future.successful(NO_CONTENT))
 
         val result = testService.updateCallbackRecord(NotStarted, sessionId).futureValue
 
-        result shouldBe NO_CONTENT
+        result mustBe NO_CONTENT
       }
     }
 
     "throw an exception" when {
       "updating callback fails" in {
-        when(mockConnector.updateCallbackRecord(any(), any())(any()))
+        when(mockConnector.updateCallbackRecord(any(), any())(using any()))
           .thenReturn(Future.failed(new Exception("Expected exception")))
 
         an[Exception] should be thrownBy testService.updateCallbackRecord(Failed, sessionId).futureValue
@@ -97,29 +96,29 @@ class FileValidatorServiceSpec extends PlaySpec with GuiceOneAppPerSuite with Sc
       "record is successfully retrieved" in {
         val mockUploadStatus: Option[UploadStatus] =
           Some(UploadedSuccessfully("fileId", "downloadUrl", mimeType = None))
-        when(mockConnector.getCallbackRecord(any(), any()))
+        when(mockConnector.getCallbackRecord(using any(), any()))
           .thenReturn(Future.successful(mockUploadStatus))
 
         val result = testService.getCallbackRecord.futureValue
 
-        result shouldBe mockUploadStatus
+        result mustBe mockUploadStatus
       }
     }
 
     "return None" when {
       "no record is found" in {
-        when(mockConnector.getCallbackRecord(any(), any()))
+        when(mockConnector.getCallbackRecord(using any(), any()))
           .thenReturn(Future.successful(None))
 
         val result = testService.getCallbackRecord.futureValue
 
-        result shouldBe None
+        result mustBe None
       }
     }
 
     "throw an exception" when {
       "retrieving callback record fails" in {
-        when(mockConnector.getCallbackRecord(any(), any()))
+        when(mockConnector.getCallbackRecord(using any(), any()))
           .thenReturn(Future.failed(new Exception("Expected exception")))
 
         an[Exception] should be thrownBy testService.getCallbackRecord.futureValue
@@ -132,39 +131,39 @@ class FileValidatorServiceSpec extends PlaySpec with GuiceOneAppPerSuite with Sc
       "record is successfully retrieved and is UploadedSuccessfully" in {
         val mockUploadStatus: Option[UploadStatus] =
           Some(UploadedSuccessfully("fileId", "downloadUrl", mimeType = None))
-        when(mockConnector.getCallbackRecord(any(), any()))
+        when(mockConnector.getCallbackRecord(using any(), any()))
           .thenReturn(Future.successful(mockUploadStatus))
 
         val result = testService.getSuccessfulCallbackRecord.futureValue
 
-        result shouldBe Some(UploadedSuccessfully("fileId", "downloadUrl", mimeType = None))
+        result mustBe Some(UploadedSuccessfully("fileId", "downloadUrl", mimeType = None))
       }
     }
 
     "return None" when {
       "record is successfully retrieved but is not UploadedSuccessfully" in {
         val mockUploadStatus: Option[UploadStatus] = Some(NotStarted)
-        when(mockConnector.getCallbackRecord(any(), any()))
+        when(mockConnector.getCallbackRecord(using any(), any()))
           .thenReturn(Future.successful(mockUploadStatus))
 
         val result = testService.getSuccessfulCallbackRecord.futureValue
 
-        result shouldBe None
+        result mustBe None
       }
 
       "no record is found" in {
-        when(mockConnector.getCallbackRecord(any(), any()))
+        when(mockConnector.getCallbackRecord(using any(), any()))
           .thenReturn(Future.successful(None))
 
         val result = testService.getSuccessfulCallbackRecord.futureValue
 
-        result shouldBe None
+        result mustBe None
       }
     }
 
     "throw an exception" when {
       "retrieving successful callback record fails" in {
-        when(mockConnector.getCallbackRecord(any(), any()))
+        when(mockConnector.getCallbackRecord(using any(), any()))
           .thenReturn(Future.failed(new Exception("Expected exception")))
 
         an[Exception] should be thrownBy testService.getSuccessfulCallbackRecord.futureValue

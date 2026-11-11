@@ -49,7 +49,7 @@ class ContentUtilTest
     ExecutionContext.global
   )
 
-  implicit lazy val mat: Materializer = app.materializer
+  given mat: Materializer = app.materializer
 
   "getSchemeName" should {
     "return CSOP scheme name for CSOP scheme type \"1\"" in {

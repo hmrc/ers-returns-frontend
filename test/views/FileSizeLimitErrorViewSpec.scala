@@ -21,6 +21,7 @@ import org.jsoup.nodes.Document
 import play.api.Application
 import play.api.i18n.Messages
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import views.html.file_size_limit_error
 
@@ -34,11 +35,11 @@ class FileSizeLimitErrorViewSpec extends ViewSpecBase {
     .configure("file-size.uploadSizeLimit" -> oneHundredMbInBytes)
     .build()
 
-  implicit val request                      = FakeRequest("GET", "/foo")
-  implicit val messages: Messages           = testMessages
-  implicit val appConfig: ApplicationConfig = application.injector.instanceOf[ApplicationConfig]
+  given request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("GET", "/foo")
+  given messages: Messages                           = testMessages
+  given appConfig: ApplicationConfig                 = application.injector.instanceOf[ApplicationConfig]
 
-  val view = application.injector.instanceOf[file_size_limit_error]
+  val view: file_size_limit_error = application.injector.instanceOf[file_size_limit_error]
 
   "file size limit error view" should {
 

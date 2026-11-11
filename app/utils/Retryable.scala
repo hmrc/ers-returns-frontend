@@ -31,20 +31,21 @@ trait Retryable extends Logging {
   case class LoopException[A](retryNumber: Int, finalFutureData: Option[A])
       extends Exception(s"Failed to meet predicate after retrying $retryNumber times.")
 
-  implicit class RetryCache[A](f: => Future[A]) {
+  extension [A](f: () => Future[A]) {
 
     def withRetry(
       maxTimes: Int,
       maybeSchemeInfo: Option[SchemeInfo] = None,
       callingFunc: String
-    )(pToBreakLoop: A => Boolean)(implicit actorSystem: ActorSystem, ec: ExecutionContext): Future[A] = {
-      val delay: FiniteDuration                                       = appConfig.retryDelay
-      val scheduler: Scheduler                                        = actorSystem.getScheduler
-      val schemeRef                                                   = maybeSchemeInfo.map(_.schemeRef).getOrElse("<<NOT DEFINED>>")
+    )(pToBreakLoop: A => Boolean)(using actorSystem: ActorSystem, ec: ExecutionContext): Future[A] = {
+      val delay: FiniteDuration = appConfig.retryDelay
+      val scheduler: Scheduler  = actorSystem.getScheduler
+      val schemeRef             = maybeSchemeInfo.map(_.schemeRef).getOrElse("<<NOT DEFINED>>")
+
       def loop(count: Int = 0, previous: Option[A] = None): Future[A] = {
         logger.info(s"[Retryable][withRetry] - [$callingFunc] call x$count, schemeRef: $schemeRef")
         if (count < maxTimes) {
-          f.flatMap { data =>
+          f().flatMap { data =>
             if (pToBreakLoop(data)) {
               Future.successful(data)
             } else {

@@ -16,26 +16,26 @@
 
 package models
 
-import play.api.data.Forms._
-import play.api.data._
+import play.api.data.*
+import play.api.data.Forms.*
 import play.api.data.validation.Constraints
-import play.api.data.validation.Constraints._
+import play.api.data.validation.Constraints.*
 import play.api.i18n.Messages
 
 object RsFormMappings {
 
-  import fieldValidationPatterns._
+  import fieldValidationPatterns.*
   val postcodeMinLength: Int      = 5
   val postcodeMaxLength: Int      = 8
   /*
    * scheme type Form definition.
    */
-  val schemeForm: Form[RS_scheme] = Form(mapping("scheme" -> text)(RS_scheme.apply)(RS_scheme.unapply))
+  val schemeForm: Form[RS_scheme] = Form(mapping("scheme" -> text)(RS_scheme.apply)(rs => Some(rs.scheme)))
 
   /*
    * activity type Form definition
    */
-  def chooseForm()(implicit messages: Messages): Form[ReportableEvents] = Form(
+  def chooseForm()(using messages: Messages): Form[ReportableEvents] = Form(
     mapping(
       reportableEventsFields.isNilReturn -> optional(text)
         .verifying(Messages("ers_choose.err.message"), _.nonEmpty)
@@ -43,13 +43,13 @@ object RsFormMappings {
           Messages("ers.invalidCharacters"),
           so => validInputCharacters(so.getOrElse("1"), fieldValidationPatterns.yesNoRegPattern)
         )
-    )(ReportableEvents.apply)(ReportableEvents.unapply)
+    )(ReportableEvents.apply)(reportableEvents => Some(reportableEvents.isNilReturn))
   )
 
   /*
    * check file type Form definition
    */
-  def checkFileTypeForm()(implicit messages: Messages): Form[CheckFileType] = Form(
+  def checkFileTypeForm()(using messages: Messages): Form[CheckFileType] = Form(
     mapping(
       checkFileTypeFields.checkFileType ->
         optional(text)
@@ -58,43 +58,43 @@ object RsFormMappings {
             Messages("ers.invalidCharacters"),
             so => validInputCharacters(so.getOrElse("csv"), csvOdsRegPattern)
           )
-    )(CheckFileType.apply)(CheckFileType.unapply)
+    )(CheckFileType.apply)(checkFile => Some(checkFile.checkFileType))
   )
 
   /*
    * Is a group scheme Form definition
    */
-  def groupForm()(implicit messages: Messages): Form[RS_groupScheme] = Form(
+  def groupForm()(using messages: Messages): Form[RS_groupScheme] = Form(
     mapping(
       "groupScheme" ->
         optional(text)
           .verifying("required field", _.nonEmpty)
           .verifying(Messages("ers.invalidCharacters"), so => validInputCharacters(so.getOrElse("1"), yesNoRegPattern))
-    )(RS_groupScheme.apply)(RS_groupScheme.unapply)
+    )(RS_groupScheme.apply)(rs => Some(rs.groupScheme))
   )
 
   /*
    * Is a group scheme type Form definition
    */
   def groupTypeForm(): Form[RS_groupSchemeType] =
-    Form(mapping("groupSchemeType" -> text)(RS_groupSchemeType.apply)(RS_groupSchemeType.unapply))
+    Form(mapping("groupSchemeType" -> text)(RS_groupSchemeType.apply)(rs => Some(rs.groupSchemeType)))
 
   /*
    * Alterations Activity Form definition
    */
-  def altActivityForm()(implicit messages: Messages): Form[AltAmendsActivity] =
+  def altActivityForm()(using messages: Messages): Form[AltAmendsActivity] =
     Form(
       mapping(
         "altActivity" -> text
           .verifying("required field", _.nonEmpty)
           .verifying(Messages("ers.invalidCharacters"), so => validInputCharacters(so, yesNoRegPattern))
-      )(AltAmendsActivity.apply)(AltAmendsActivity.unapply)
+      )(AltAmendsActivity.apply)(altAmends => Some(altAmends.altActivity))
     )
 
   /*
    * Alterations Amends Form definition
    */
-  def altAmendsForm()(implicit messages: Messages): Form[AltAmends] = Form(
+  def altAmendsForm()(using messages: Messages): Form[AltAmends] = Form(
     mapping(
       "altAmendsTerms"       -> optional(
         text
@@ -121,49 +121,57 @@ object RsFormMappings {
           .verifying("required field", _.nonEmpty)
           .verifying(Messages("ers.invalidCharacters"), so => validInputCharacters(so, yesNoRegPattern))
       )
-    )(AltAmends.apply)(AltAmends.unapply)
+    )(AltAmends.apply)(altAmends =>
+      Some(
+        altAmends.altAmendsTerms,
+        altAmends.altAmendsEligibility,
+        altAmends.altAmendsExchange,
+        altAmends.altAmendsVariations,
+        altAmends.altAmendsOther
+      )
+    )
   )
 
   /*
    * CSV file check
    */
 
-  def csvFileCheckForm()(implicit messages: Messages): Form[CsvFilesList] = Form(
+  def csvFileCheckForm()(using messages: Messages): Form[CsvFilesList] = Form(
     mapping(
       "files" -> list(
         mapping(
           "fileId" -> text
             .verifying("required field", _.nonEmpty)
             .verifying(Messages("ers.invalidCharacters"), so => validInputCharacters(so, csvFileNameRegx))
-        )(CsvFiles.apply)(CsvFiles.unapply)
+        )(CsvFiles.apply)(csvFiles => Some(csvFiles.fileId))
       )
-    )(CsvFilesList.apply)(CsvFilesList.unapply)
+    )(CsvFilesList.apply)(csv => Some(csv.files))
   )
 
   def addTrusteeForm(): Form[AddTrustee] = Form(
     mapping(
       "addTrustee" -> nonEmptyText
         .transform(int => if (int == "0") true else false, (bool: Boolean) => if (bool) "0" else "1")
-    )(AddTrustee.apply)(AddTrustee.unapply)
+    )(AddTrustee.apply)(at => Some(at.addTrustee))
   )
 
   def trusteeBasedInUkForm(): Form[TrusteeBasedInUk] = Form(
     mapping(
       trusteeBasedInUkFields.basedInUk -> nonEmptyText
         .transform(int => if (int == "0") true else false, (bool: Boolean) => if (bool) "0" else "1")
-    )(TrusteeBasedInUk.apply)(TrusteeBasedInUk.unapply)
+    )(TrusteeBasedInUk.apply)(tb => Some(tb.basedInUk))
   )
 
-  def trusteeNameForm()(implicit messages: Messages): Form[TrusteeName] = Form(
+  def trusteeNameForm()(using messages: Messages): Form[TrusteeName] = Form(
     mapping(
       trusteeNameFields.name -> text
         .verifying(Messages("ers_trustee_details.err.summary.name_required"), _.nonEmpty)
         .verifying(Messages("ers_trustee_details.err.name"), so => checkLength(so, "trusteeNameFields.name"))
         .verifying(Messages("ers_trustee_details.err.invalidChars.name"), so => validInputCharacters(so, addresssRegx))
-    )(TrusteeName.apply)(TrusteeName.unapply)
+    )(TrusteeName.apply)(tn => Some(tn.name))
   )
 
-  def trusteeAddressOverseasForm()(implicit messages: Messages): Form[TrusteeAddress] = Form(
+  def trusteeAddressOverseasForm()(using messages: Messages): Form[TrusteeAddress] = Form(
     mapping(
       trusteeAddressFields.addressLine1 -> text
         .verifying(Messages("ers_trustee_details.err.summary.address_line1_required"), _.nonEmpty)
@@ -223,10 +231,12 @@ object RsFormMappings {
         text
           verifying pattern(countryCodeRegx.r, error = Messages("ers_scheme_organiser.err.summary.invalid_country"))
       )
-    )(TrusteeAddress.apply)(TrusteeAddress.unapply)
+    )(TrusteeAddress.apply)(ta =>
+      Some(ta.addressLine1, ta.addressLine2, ta.addressLine3, ta.addressLine4, ta.addressLine5, ta.country)
+    )
   )
 
-  def trusteeAddressUkForm()(implicit messages: Messages): Form[TrusteeAddress] = Form(
+  def trusteeAddressUkForm()(using messages: Messages): Form[TrusteeAddress] = Form(
     mapping(
       trusteeAddressFields.addressLine1 -> text
         .verifying(Messages("ers_trustee_details.err.summary.address_line1_required"), _.nonEmpty)
@@ -278,10 +288,12 @@ object RsFormMappings {
         text
           .verifying(pattern(countryCodeRegx.r, error = Messages("ers_scheme_organiser.err.summary.invalid_country")))
       )
-    )(TrusteeAddress.apply)(TrusteeAddress.unapply)
+    )(TrusteeAddress.apply)(ta =>
+      Some(ta.addressLine1, ta.addressLine2, ta.addressLine3, ta.addressLine4, ta.addressLine5, ta.country)
+    )
   )
 
-  def companyAddressUkForm()(implicit messages: Messages): Form[CompanyAddress] = Form(
+  def companyAddressUkForm()(using messages: Messages): Form[CompanyAddress] = Form(
     mapping(
       companyAddressFields.addressLine1 -> text
         .verifying(Messages("ers_manual_company_details.err.summary.address_line1_required"), _.nonEmpty)
@@ -333,10 +345,19 @@ object RsFormMappings {
         text
           .verifying(pattern(countryCodeRegx.r, error = Messages("ers_scheme_organiser.err.summary.invalid_country")))
       )
-    )(CompanyAddress.apply)(CompanyAddress.unapply)
+    )(CompanyAddress.apply)(companyAddress =>
+      Some(
+        companyAddress.addressLine1,
+        companyAddress.addressLine2,
+        companyAddress.addressLine3,
+        companyAddress.addressLine4,
+        companyAddress.addressLine5,
+        companyAddress.country
+      )
+    )
   )
 
-  def companyAddressOverseasForm()(implicit messages: Messages): Form[CompanyAddress] = Form(
+  def companyAddressOverseasForm()(using messages: Messages): Form[CompanyAddress] = Form(
     mapping(
       companyAddressFields.addressLine1 -> text
         .verifying(Messages("ers_manual_company_details.err.summary.address_line1_required"), _.nonEmpty)
@@ -396,27 +417,36 @@ object RsFormMappings {
         text
           .verifying(pattern(countryCodeRegx.r, error = Messages("ers_scheme_organiser.err.summary.invalid_country")))
       )
-    )(CompanyAddress.apply)(CompanyAddress.unapply)
+    )(CompanyAddress.apply)(companyAddress =>
+      Some(
+        companyAddress.addressLine1,
+        companyAddress.addressLine2,
+        companyAddress.addressLine3,
+        companyAddress.addressLine4,
+        companyAddress.addressLine5,
+        companyAddress.country
+      )
+    )
   )
 
   /*
   Subsidiary Company Form Definition
    */
 
-  def companyBasedInUkForm()(implicit messages: Messages): Form[CompanyBasedInUk] = Form(
+  def companyBasedInUkForm()(using messages: Messages): Form[CompanyBasedInUk] = Form(
     mapping(
       companyBasedInUkFields.basedInUk -> text
         .verifying(Constraints.nonEmpty(errorMessage = "problem with companyBasedInUkForm"))
         .verifying(Messages("ers_trustee_details.err.summary.name_required"), _.nonEmpty)
         .transform(int => if (int == "0") true else false, (bool: Boolean) => if (bool) "0" else "1")
-    )(CompanyBasedInUk.apply)(CompanyBasedInUk.unapply)
+    )(CompanyBasedInUk.apply)(cb => Some(cb.basedInUk))
   )
 
   object companyBasedInUkFields {
     val basedInUk = "basedInUk"
   }
 
-  def companyNameForm(isSchemeOrganiser: Boolean = false)(implicit messages: Messages): Form[Company] = {
+  def companyNameForm(isSchemeOrganiser: Boolean = false)(using messages: Messages): Form[Company] = {
     val prefix =
       if (isSchemeOrganiser) ("schemeOrganiserFields", "ers_scheme_organiser")
       else ("companyDetailsFields", "ers_manual_company_details")
@@ -444,7 +474,7 @@ object RsFormMappings {
               pattern(corporationRefPattern.r, error = Messages("ers_manual_company_details.err.corporation_ref"))
             )
         )
-      )(Company.apply)(Company.unapply)
+      )(Company.apply)(c => Some((c.companyName, c.companyReg, c.corporationRef)))
     )
   }
 
@@ -452,14 +482,14 @@ object RsFormMappings {
     mapping(
       "addCompany" -> nonEmptyText
         .transform(int => if (int == "0") true else false, (bool: Boolean) => if (bool) "0" else "1")
-    )(AddCompany.apply)(AddCompany.unapply)
+    )(AddCompany.apply)(ac => Some(ac.addCompany))
   )
 
   /*
    * scheme type Form definition.
    */
   def schemeTypeForm(): Form[RS_schemeType] = Form(
-    mapping("schemeType" -> text)(RS_schemeType.apply)(RS_schemeType.unapply)
+    mapping("schemeType" -> text)(RS_schemeType.apply)(rs => Some(rs.schemeType))
   )
 
   def checkAddressLength(so: String, field: String): Boolean =

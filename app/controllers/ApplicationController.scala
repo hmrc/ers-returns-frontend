@@ -37,7 +37,7 @@ class ApplicationController @Inject() (
   notAuthorisedView: views.html.not_authorised,
   val sessionService: FrontendSessionService,
   authAction: AuthActionGovGateway
-)(implicit val ec: ExecutionContext, val ersUtil: ERSUtil, val appConfig: ApplicationConfig)
+)(using val ec: ExecutionContext, val ersUtil: ERSUtil, val appConfig: ApplicationConfig)
     extends FrontendController(mcc) with I18nSupport {
 
   def unauthorised(): Action[AnyContent] = Action { implicit request =>

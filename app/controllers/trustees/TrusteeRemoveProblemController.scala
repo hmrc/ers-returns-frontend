@@ -37,7 +37,7 @@ class TrusteeRemoveProblemController @Inject() (
   val sessionService: FrontendSessionService,
   trusteeRemoveProblemView: views.html.trustee_remove_problem,
   globalErrorView: views.html.global_error
-)(implicit executionContext: ExecutionContext, appConfig: ApplicationConfig)
+)(using val executionContext: ExecutionContext, val appConfig: ApplicationConfig)
     extends FrontendController(mcc) with WithUrlEncodedOnlyFormBinding with I18nSupport with Logging {
 
   def onPageLoad(): Action[AnyContent] = authAction.async { implicit request =>
@@ -52,7 +52,7 @@ class TrusteeRemoveProblemController @Inject() (
           "ers.global_errors.title",
           "ers.global_errors.heading",
           "ers.global_errors.message"
-        )(request, implicitly[Messages], appConfig)
+        )(request, summon[Messages], appConfig)
       )
     }
   }

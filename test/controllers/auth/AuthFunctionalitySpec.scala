@@ -19,17 +19,17 @@ package controllers.auth
 import config.ApplicationConfig
 import models.{ERSAuthData, ErsMetaData, RequestObject, SchemeInfo}
 import org.mockito.ArgumentMatchers
-import org.mockito.Mockito._
+import org.mockito.Mockito.*
 import org.scalatest.OptionValues
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatestplus.play.guice.GuiceFakeApplicationFactory
 import play.api.i18n.MessagesApi
-import play.api.mvc._
+import play.api.mvc.*
 import play.api.test.Helpers.{redirectLocation, status, stubBodyParser}
 import play.api.test.{DefaultAwaitTimeout, FakeRequest}
+import uk.gov.hmrc.auth.core.*
 import uk.gov.hmrc.auth.core.AffinityGroup.{Agent, Organisation}
-import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.domain.EmpRef
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.ErsTestHelper
@@ -88,7 +88,7 @@ class AuthFunctionalitySpec
     val reqObj: RequestObject = RequestObject(None, None, None, None, None, None, Some("1234/GA4567"), None, None)
 
     when(
-      mockSessionService.fetch[RequestObject](ArgumentMatchers.any())(
+      mockSessionService.fetch[RequestObject](ArgumentMatchers.any())(using
         ArgumentMatchers.any(),
         ArgumentMatchers.any()
       )
@@ -96,7 +96,7 @@ class AuthFunctionalitySpec
       .thenReturn(Future.successful(reqObj))
 
     when(
-      mockSessionService.fetch[ErsMetaData](ArgumentMatchers.any())(
+      mockSessionService.fetch[ErsMetaData](ArgumentMatchers.any())(using
         ArgumentMatchers.any(),
         ArgumentMatchers.any()
       )
@@ -136,7 +136,7 @@ class AuthFunctionalitySpec
       "it receives a NoActiveSessionException and preserves query parameters" in new Setup(invalidEnrolmentSet) {
         setUnauthorisedMocks()
 
-        implicit val testFakeRequest: FakeRequest[AnyContent]           = FakeRequest("GET", "/my-resources?a=1&b=2&c=3")
+        given testFakeRequest: FakeRequest[AnyContent]                  = FakeRequest("GET", "/my-resources?a=1&b=2&c=3")
         val requestWithAuth: RequestWithOptionalAuthContext[AnyContent] =
           RequestWithOptionalAuthContext(testFakeRequest, defaultErsAuthData)
 
@@ -196,7 +196,7 @@ class AuthFunctionalitySpec
       "it receives a NoActiveSessionException and preserves query parameters" in new Setup(invalidEnrolmentSet) {
         setUnauthorisedMocks()
 
-        implicit val testFakeRequest: FakeRequest[AnyContent]           = FakeRequest("GET", "/my-resources?a=1&b=2&c=3")
+        given testFakeRequest: FakeRequest[AnyContent]                  = FakeRequest("GET", "/my-resources?a=1&b=2&c=3")
         val requestWithAuth: RequestWithOptionalAuthContext[AnyContent] =
           RequestWithOptionalAuthContext(testFakeRequest, defaultErsAuthData)
 

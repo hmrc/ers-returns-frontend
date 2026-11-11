@@ -41,5 +41,5 @@ trait DateTimeFormats {
 
   private val dateTimeWrite: Writes[Instant] = (o: Instant) => JsNumber(o.toEpochMilli)
 
-  implicit val dateTimeFormats: Format[Instant] = Format(dateTimeRead, dateTimeWrite)
+  given dateTimeFormats: Format[Instant] = Format(dateTimeRead, dateTimeWrite)
 }

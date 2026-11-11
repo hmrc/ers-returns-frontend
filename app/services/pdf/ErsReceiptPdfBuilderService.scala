@@ -30,16 +30,16 @@ import javax.inject.{Inject, Singleton}
 import scala.io.Source
 
 @Singleton
-class ErsReceiptPdfBuilderService @Inject() (val countryCodes: CountryCodes)(implicit val ERSUtil: ERSUtil)
+class ErsReceiptPdfBuilderService @Inject() (val countryCodes: CountryCodes)(using val ERSUtil: ERSUtil)
     extends PdfDecoratorControllerFactory with Logging {
 
   XRLog.listRegisteredLoggers.forEach((logger: String) => XRLog.setLevel(logger, java.util.logging.Level.WARNING))
 
-  def createPdf(ersSummary: ErsSummary, filesUploaded: Option[List[String]], dateSubmitted: String)(implicit
+  def createPdf(ersSummary: ErsSummary, filesUploaded: Option[List[String]], dateSubmitted: String)(using
     messages: Messages
   ): ByteArrayOutputStream = {
 
-    implicit val decorator: DecoratorController =
+    given decorator: DecoratorController =
       createPdfDecoratorControllerForScheme(ersSummary.metaData.schemeInfo.schemeType, ersSummary, filesUploaded)
 
     val startBoilerplate =
@@ -67,7 +67,7 @@ class ErsReceiptPdfBuilderService @Inject() (val countryCodes: CountryCodes)(imp
     buildPdf(html)
   }
 
-  def addMetaData(ersSummary: ErsSummary, dateSubmitted: String)(implicit messages: Messages): String =
+  def addMetaData(ersSummary: ErsSummary, dateSubmitted: String)(using messages: Messages): String =
     ERSUtil.replaceAmpersand(
       s"""
        |<h1 style="padding-top: 3em;">${messages("ers.pdf.title")}</h1>
@@ -104,7 +104,7 @@ class ErsReceiptPdfBuilderService @Inject() (val countryCodes: CountryCodes)(imp
        |""".stripMargin
     )
 
-  def pdfHeader(implicit messages: Messages): String = {
+  def pdfHeader(using messages: Messages): String = {
     val crownIcon   = Source.fromFile(getClass.getResource("/resources/crown.svg").toURI)
     val startHtml   = s"""<div style="padding-bottom: 0.3em; margin-top: -1em;">"""
     val endHtml     =
@@ -117,7 +117,7 @@ class ErsReceiptPdfBuilderService @Inject() (val countryCodes: CountryCodes)(imp
     headingHtml
   }
 
-  def addSummary()(implicit decorator: DecoratorController, messages: Messages): String =
+  def addSummary()(using decorator: DecoratorController, messages: Messages): String =
     decorator.decorate
 
   def buildPdf(html: String): ByteArrayOutputStream = {

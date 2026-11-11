@@ -26,7 +26,7 @@ class SchemeOrganiserDetailsDecorator(
   countryCodes: CountryCodes
 ) extends Decorator {
 
-  def decorate(implicit messages: Messages): String =
+  def decorate(using messages: Messages): String =
     buildEntryMultiple(title, schemeOrganiser.toArray(countryCodes))
 
 }

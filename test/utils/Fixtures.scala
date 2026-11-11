@@ -16,15 +16,15 @@
 
 package utils
 
-import models._
-import play.api.libs.json._
+import models.*
+import play.api.libs.json.*
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import uk.gov.hmrc.domain.Generator
 
 import java.time.{Instant, LocalDateTime, ZoneId, ZonedDateTime}
 import scala.collection.mutable.ListBuffer
-import scala.concurrent.duration._
+import scala.concurrent.duration.*
 
 object Fixtures extends AuthHelper {
   val firstName    = "FirstName"
@@ -67,7 +67,7 @@ object Fixtures extends AuthHelper {
       "screenSchemeInfo" -> "3 - OTHER - MYScheme - XX12345678 - 2016"
     )
 
-  def buildFakeRequest(method: String) = FakeRequest(method, "/")
+  def buildFakeRequest(method: String): FakeRequest[AnyContentAsEmpty.type] = FakeRequest(method, "/")
 
   def schemeRef: String = "XYZ12345"
 
@@ -84,7 +84,7 @@ object Fixtures extends AuthHelper {
     schemeType = schemeType
   )
 
-  val EMIMetaData = ErsMetaData(
+  val EMIMetaData: ErsMetaData = ErsMetaData(
     schemeInfo = EMISchemeInfo,
     ipRef = "127.0.0.0",
     aoRef = Some("123AA12345678"),
@@ -179,11 +179,11 @@ object Fixtures extends AuthHelper {
     true
   )
 
-  val groupScheme = GroupSchemeInfo(Some("1"), Some("emi"))
+  val groupScheme: GroupSchemeInfo = GroupSchemeInfo(Some("1"), Some("emi"))
 
-  val companiesList = CompanyDetailsList(List(companyDetails))
+  val companiesList: CompanyDetailsList = CompanyDetailsList(List(companyDetails))
 
-  val ersSummary = ErsSummary(
+  val ersSummary: ErsSummary = ErsSummary(
     "testbundle",
     "1",
     None,
@@ -201,7 +201,7 @@ object Fixtures extends AuthHelper {
 
   val metadataJson: JsObject = Json.toJson(EMIMetaData).as[JsObject]
 
-  val ersRequestObject =
+  val ersRequestObject: RequestObject =
     RequestObject(
       Some("123AA12345678"),
       Some("2014/15"),

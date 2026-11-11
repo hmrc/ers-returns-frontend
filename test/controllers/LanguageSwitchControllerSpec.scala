@@ -22,9 +22,9 @@ import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatest.{OptionValues, PrivateMethodTester}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.i18n.{Lang, MessagesApi}
-import play.api.mvc._
+import play.api.mvc.*
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import utils.ErsTestHelper
 
 import scala.concurrent.ExecutionContext
@@ -36,8 +36,6 @@ class LanguageSwitchControllerSpec
     with ErsTestHelper
     with GuiceOneAppPerSuite
     with PrivateMethodTester {
-
-  implicit override val ec: ExecutionContext = app.injector.instanceOf[ExecutionContext]
 
   val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
     messagesActionBuilder,

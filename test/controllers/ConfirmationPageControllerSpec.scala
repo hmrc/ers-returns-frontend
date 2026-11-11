@@ -16,27 +16,27 @@
 
 package controllers
 
-import models._
+import models.*
 import org.apache.pekko.stream.Materializer
 import org.jsoup.Jsoup
-import org.mockito.ArgumentMatchers.{eq => eqTo, _}
-import org.mockito.Mockito._
+import org.mockito.ArgumentMatchers.{eq as eqTo, *}
+import org.mockito.Mockito.*
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatest.{BeforeAndAfterEach, OptionValues}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status
-import play.api.{Logger, i18n}
 import play.api.i18n.{MessagesApi, MessagesImpl}
 import play.api.libs.json.JsValue
-import play.api.mvc._
+import play.api.mvc.*
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
+import play.api.{Logger, i18n}
 import repositories.RateLimiterCache
 import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.play.bootstrap.tools.LogCapturing
+import utils.*
 import utils.Fixtures.ersRequestObject
-import utils._
 import views.html.{confirmation, global_error}
 
 import java.time.Instant
@@ -64,11 +64,11 @@ class ConfirmationPageControllerSpec
     ExecutionContext.global
   )
 
-  implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
+  given testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
 
-  implicit lazy val mat: Materializer = app.materializer
-  val globalErrorView: global_error   = app.injector.instanceOf[global_error]
-  val confirmationView: confirmation  = app.injector.instanceOf[confirmation]
+  given mat: Materializer            = app.materializer
+  val globalErrorView: global_error  = app.injector.instanceOf[global_error]
+  val confirmationView: confirmation = app.injector.instanceOf[confirmation]
 
   override def beforeEach(): Unit = {
     super.beforeEach()
@@ -110,28 +110,32 @@ class ConfirmationPageControllerSpec
         override val logger: Logger = confirmationPageControllerLogger
 
         when(
-          mockErsConnector.connectToEtmpSummarySubmit(anyString(), any[JsValue]())(any(), any())
+          mockErsConnector.connectToEtmpSummarySubmit(anyString(), any[JsValue]())(using any(), any())
         ) thenReturn bundleRes
         when(
-          mockErsConnector.checkForPresubmission(any[SchemeInfo](), anyString())(any(), any())
+          mockErsConnector.checkForPresubmission(any[SchemeInfo](), anyString())(using any(), any())
         ) thenReturn presubmission
 
-        when(mockSessionService.fetch[ErsMetaData](refEq("ErsMetaData"))(any(), any())) thenReturn ersMetaRes
+        when(mockSessionService.fetch[ErsMetaData](refEq("ErsMetaData"))(using any(), any())) thenReturn ersMetaRes
 
-        when(mockSessionService.getAllData(anyString(), any[ErsMetaData]())(any(), any(), any())) thenReturn Future
+        when(
+          mockSessionService.getAllData(anyString(), any[ErsMetaData]())(using any(), any(), any())
+        ) thenReturn Future
           .successful(
             if (isNilReturn) ersSummaryNilReturn2 else ersSummary
           )
 
-        when(mockSessionService.fetch[String](refEq("validated-sheets"))(any(), any())) thenReturn Future
+        when(mockSessionService.fetch[String](refEq("validated-sheets"))(using any(), any())) thenReturn Future
           .successful("")
 
         when(
-          mockSessionService.fetch[RequestObject](refEq("ErsRequestObject"))(any(), any())
+          mockSessionService.fetch[RequestObject](refEq("ErsRequestObject"))(using any(), any())
         ) thenReturn requestObjectRes
 
-        when(mockErsConnector.saveMetadata(any())(any(), any())) thenReturn Future.successful(HttpResponse(OK))
-        when(mockErsConnector.submitReturnToBackend(any())(any(), any())) thenReturn Future.successful(HttpResponse(OK))
+        when(mockErsConnector.saveMetadata(any())(using any(), any())) thenReturn Future.successful(HttpResponse(OK))
+        when(mockErsConnector.submitReturnToBackend(any())(using any(), any())) thenReturn Future.successful(
+          HttpResponse(OK)
+        )
       }
 
     "give a redirect status (to company authentication frontend) if user is not authenticated" in {
@@ -163,21 +167,21 @@ class ConfirmationPageControllerSpec
       val controllerUnderTest: ConfirmationPageController =
         buildFakeConfirmationPageController(bundleRes = Future.failed(new RuntimeException))
       val authRequest                                     = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
-      val result                                          = controllerUnderTest.showConfirmationPage()(authRequest, hc)
+      val result                                          = controllerUnderTest.showConfirmationPage()(using authRequest, hc)
       contentAsString(result) shouldBe contentAsString(
-        Future(controllerUnderTest.getGlobalErrorPage(testFakeRequest, testMessages))
+        Future(controllerUnderTest.getGlobalErrorPage(using testFakeRequest, testMessages))
       )
       contentAsString(result)   should include(testMessages("ers.global_errors.message"))
     }
 
     "direct to ers errors page if fetching all data throws exception" in {
       val controllerUnderTest = buildFakeConfirmationPageController()
-      when(mockSessionService.getAllData(anyString(), any[ErsMetaData]())(any(), any(), any()))
+      when(mockSessionService.getAllData(anyString(), any[ErsMetaData]())(using any(), any(), any()))
         .thenReturn(Future.failed(new RuntimeException))
       val authRequest         = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
-      val result              = controllerUnderTest.showConfirmationPage()(authRequest, hc)
+      val result              = controllerUnderTest.showConfirmationPage()(using authRequest, hc)
       contentAsString(result) shouldBe contentAsString(
-        Future(controllerUnderTest.getGlobalErrorPage(testFakeRequest, testMessages))
+        Future(controllerUnderTest.getGlobalErrorPage(using testFakeRequest, testMessages))
       )
       contentAsString(result)   should include(testMessages("ers.global_errors.message"))
     }
@@ -186,9 +190,9 @@ class ConfirmationPageControllerSpec
       val controllerUnderTest =
         buildFakeConfirmationPageController(requestObjectRes = Future.failed(new RuntimeException))
       val authRequest         = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
-      val result              = controllerUnderTest.showConfirmationPage()(authRequest, hc)
+      val result              = controllerUnderTest.showConfirmationPage()(using authRequest, hc)
       contentAsString(result) shouldBe contentAsString(
-        Future(controllerUnderTest.getGlobalErrorPage(testFakeRequest, testMessages))
+        Future(controllerUnderTest.getGlobalErrorPage(using testFakeRequest, testMessages))
       )
       contentAsString(result)   should include(testMessages("ers.global_errors.message"))
     }
@@ -208,16 +212,16 @@ class ConfirmationPageControllerSpec
       val controllerUnderTest = buildFakeConfirmationPageController(isNilReturn = true)
       val authRequest         = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
 
-      val result = controllerUnderTest.showConfirmationPage()(authRequest, hc)
+      val result = controllerUnderTest.showConfirmationPage()(using authRequest, hc)
       status(result) shouldBe Status.OK
     }
 
     "direct to ers errors page if fetching metadata throws exception" in {
       val controllerUnderTest = buildFakeConfirmationPageController(ersMetaRes = Future.failed(new RuntimeException))
       val authRequest         = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
-      val result              = controllerUnderTest.showConfirmationPage()(authRequest, hc)
+      val result              = controllerUnderTest.showConfirmationPage()(using authRequest, hc)
       contentAsString(result) shouldBe contentAsString(
-        Future(controllerUnderTest.getGlobalErrorPage(testFakeRequest, testMessages))
+        Future(controllerUnderTest.getGlobalErrorPage(using testFakeRequest, testMessages))
       )
       contentAsString(result)   should include(testMessages("ers.global_errors.message"))
     }
@@ -225,7 +229,7 @@ class ConfirmationPageControllerSpec
     "returns OK for NilReturn if there are no exceptions thrown" in {
       val request             = FakeRequest().withSession("screenSchemeInfo" -> "10 MAR 2016")
       val controllerUnderTest = buildFakeConfirmationPageController(isNilReturn = true)
-      val result              = controllerUnderTest.showConfirmationPage()(buildRequestWithAuth(request), hc)
+      val result              = controllerUnderTest.showConfirmationPage()(using buildRequestWithAuth(request), hc)
       status(result) shouldBe Status.OK
     }
 
@@ -233,7 +237,7 @@ class ConfirmationPageControllerSpec
       val controllerUnderTest = buildFakeConfirmationPageController()
       val authRequest         = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
 
-      val result = controllerUnderTest.showConfirmationPage()(authRequest, hc)
+      val result = controllerUnderTest.showConfirmationPage()(using authRequest, hc)
       status(result) shouldBe Status.OK
     }
 
@@ -241,9 +245,9 @@ class ConfirmationPageControllerSpec
       val controllerUnderTest =
         buildFakeConfirmationPageController(presubmission = Future.successful(HttpResponse(INTERNAL_SERVER_ERROR, "")))
       val authRequest         = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
-      val result              = controllerUnderTest.showConfirmationPage()(authRequest, hc)
+      val result              = controllerUnderTest.showConfirmationPage()(using authRequest, hc)
       contentAsString(result) shouldBe contentAsString(
-        Future(controllerUnderTest.getGlobalErrorPage(testFakeRequest, testMessages))
+        Future(controllerUnderTest.getGlobalErrorPage(using testFakeRequest, testMessages))
       )
       contentAsString(result)   should include(testMessages("ers.global_errors.message"))
     }
@@ -251,9 +255,9 @@ class ConfirmationPageControllerSpec
     "direct to ers errors page if check for presubmission fails" in {
       val controllerUnderTest = buildFakeConfirmationPageController(presubmission = Future.failed(new RuntimeException))
       val authRequest         = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
-      val result              = controllerUnderTest.showConfirmationPage()(authRequest, hc)
+      val result              = controllerUnderTest.showConfirmationPage()(using authRequest, hc)
       contentAsString(result) shouldBe contentAsString(
-        Future(controllerUnderTest.getGlobalErrorPage(testFakeRequest, testMessages))
+        Future(controllerUnderTest.getGlobalErrorPage(using testFakeRequest, testMessages))
       )
       contentAsString(result)   should include(testMessages("ers.global_errors.message"))
     }
@@ -270,7 +274,7 @@ class ConfirmationPageControllerSpec
               ("dateTimeSubmitted", "8 April 2016, 4:50pm")
             )
         )
-      val result              = controllerUnderTest.showConfirmationPage()(authRequest, hc)
+      val result              = controllerUnderTest.showConfirmationPage()(using authRequest, hc)
 
       status(result)        shouldBe Status.OK
       contentAsString(result) should include(testMessages("ers_confirmation.submitted"))
@@ -327,7 +331,7 @@ class ConfirmationPageControllerSpec
         testAuthAction
       ) {
 
-        when(mockErsConnector.saveMetadata(any[ErsSummary]())(any(), any()))
+        when(mockErsConnector.saveMetadata(any[ErsSummary]())(using any(), any()))
           .thenReturn(
             if (saveMetadataRes) {
               Future.successful(HttpResponse(saveMetadataResponse, ""))
@@ -336,9 +340,10 @@ class ConfirmationPageControllerSpec
             }
           )
 
-        when(mockErsConnector.submitReturnToBackend(any[ErsSummary]())(any(), any())) thenReturn Future.successful(
-          HttpResponse(submitReturnToBackendResponse, "")
-        )
+        when(mockErsConnector.submitReturnToBackend(any[ErsSummary]())(using any(), any())) thenReturn Future
+          .successful(
+            HttpResponse(submitReturnToBackendResponse, "")
+          )
       }
 
     "returns OK for Submission if there are no exceptions thrown - submit to backend successful" in {
@@ -346,7 +351,7 @@ class ConfirmationPageControllerSpec
       val authRequest         = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
 
       val result =
-        controllerUnderTest.saveAndSubmit(ersSummary, ersSummary.metaData, ersSummary.bundleRef)(authRequest, hc)
+        controllerUnderTest.saveAndSubmit(ersSummary, ersSummary.metaData, ersSummary.bundleRef)(using authRequest, hc)
       status(result) shouldBe Status.OK
     }
 
@@ -356,7 +361,7 @@ class ConfirmationPageControllerSpec
       val authRequest         = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
 
       val result =
-        controllerUnderTest.saveAndSubmit(ersSummary, ersSummary.metaData, ersSummary.bundleRef)(authRequest, hc)
+        controllerUnderTest.saveAndSubmit(ersSummary, ersSummary.metaData, ersSummary.bundleRef)(using authRequest, hc)
       status(result) shouldBe Status.OK
     }
 
@@ -365,9 +370,9 @@ class ConfirmationPageControllerSpec
       val authRequest         = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
 
       val result =
-        controllerUnderTest.saveAndSubmit(ersSummary, ersSummary.metaData, ersSummary.bundleRef)(authRequest, hc)
+        controllerUnderTest.saveAndSubmit(ersSummary, ersSummary.metaData, ersSummary.bundleRef)(using authRequest, hc)
       contentAsString(result) shouldBe contentAsString(
-        Future(controllerUnderTest.getGlobalErrorPage(testFakeRequest, testMessages))
+        Future(controllerUnderTest.getGlobalErrorPage(using testFakeRequest, testMessages))
       )
       contentAsString(result)   should include(testMessages("ers.global_errors.message"))
     }
@@ -376,9 +381,9 @@ class ConfirmationPageControllerSpec
       val controllerUnderTest = buildFakeConfirmationPageController(saveMetadataRes = false)
       val authRequest         = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
       val result              =
-        controllerUnderTest.saveAndSubmit(ersSummary, ersSummary.metaData, ersSummary.bundleRef)(authRequest, hc)
+        controllerUnderTest.saveAndSubmit(ersSummary, ersSummary.metaData, ersSummary.bundleRef)(using authRequest, hc)
       contentAsString(result) shouldBe contentAsString(
-        Future(controllerUnderTest.getGlobalErrorPage(testFakeRequest, testMessages))
+        Future(controllerUnderTest.getGlobalErrorPage(using testFakeRequest, testMessages))
       )
       contentAsString(result)   should include(testMessages("ers.global_errors.message"))
     }

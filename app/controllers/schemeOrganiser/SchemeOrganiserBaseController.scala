@@ -23,7 +23,7 @@ import play.api.Logging
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.libs.json.Format
-import play.api.mvc._
+import play.api.mvc.*
 import play.twirl.api.Html
 import services.FrontendSessionService
 import uk.gov.hmrc.http.HeaderCarrier
@@ -40,17 +40,17 @@ trait SchemeOrganiserBaseController[A] extends FrontendController with I18nSuppo
   val globalErrorView: views.html.global_error
   val appConfig: ApplicationConfig
   val cacheKey: String
-  implicit val ec: ExecutionContext
-  implicit val format: Format[A]
+  given ec: ExecutionContext
+  given format: Format[A]
 
-  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit
+  def nextPageRedirect(index: Int, edit: Boolean = false)(using
     hc: HeaderCarrier,
     request: RequestHeader
   ): Future[Result]
 
-  def form(implicit request: Request[AnyContent]): Form[A]
+  def form(using request: Request[AnyContent]): Form[A]
 
-  def view(requestObject: RequestObject, index: Int, form: Form[A], edit: Boolean = false)(implicit
+  def view(requestObject: RequestObject, index: Int, form: Form[A], edit: Boolean = false)(using
     request: Request[AnyContent],
     hc: HeaderCarrier
   ): Html
@@ -67,11 +67,11 @@ trait SchemeOrganiserBaseController[A] extends FrontendController with I18nSuppo
     }
   }
 
-  def showQuestionPage(requestObject: RequestObject, index: Int, edit: Boolean = false)(implicit
+  def showQuestionPage(requestObject: RequestObject, index: Int, edit: Boolean = false)(using
     request: RequestWithOptionalAuthContext[AnyContent],
     hc: HeaderCarrier
   ): Future[Result] =
-    sessionService.fetchPartFromCompanyDetails[A]().map { previousAnswer: Option[A] =>
+    sessionService.fetchPartFromCompanyDetails[A]().map { (previousAnswer: Option[A]) =>
       val preparedForm = previousAnswer.fold(form)(form.fill(_))
       Ok(view(requestObject, index, preparedForm, edit))
     } recover { case e: Exception =>
@@ -83,11 +83,11 @@ trait SchemeOrganiserBaseController[A] extends FrontendController with I18nSuppo
 
   def questionSubmit(index: Int): Action[AnyContent] = authAction.async { implicit request =>
     sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT).flatMap { requestObject =>
-      submissionHandler(requestObject, index)(request, hc)
+      submissionHandler(requestObject, index)(using request, hc)
     }
   }
 
-  def submissionHandler(requestObject: RequestObject, index: Int, edit: Boolean = false)(implicit
+  def submissionHandler(requestObject: RequestObject, index: Int, edit: Boolean = false)(using
     request: RequestWithOptionalAuthContext[AnyContent],
     hc: HeaderCarrier
   ): Future[Result] =
@@ -118,17 +118,17 @@ trait SchemeOrganiserBaseController[A] extends FrontendController with I18nSuppo
 
   def editCompany(index: Int): Action[AnyContent] = authAction.async { implicit request =>
     sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT).flatMap { requestObject =>
-      showQuestionPage(requestObject, index, edit = true)(request, hc)
+      showQuestionPage(requestObject, index, edit = true)(using request, hc)
     }
   }
 
   def editQuestionSubmit(index: Int): Action[AnyContent] = authAction.async { implicit request =>
     sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT).flatMap { requestObject =>
-      submissionHandler(requestObject, index, edit = true)(request, hc)
+      submissionHandler(requestObject, index, edit = true)(using request, hc)
     }
   }
 
-  def getGlobalErrorPage(implicit request: RequestHeader, messages: Messages): Result =
+  def getGlobalErrorPage(using request: RequestHeader, messages: Messages): Result =
     Ok(
       globalErrorView(
         "ers.global_errors.title",

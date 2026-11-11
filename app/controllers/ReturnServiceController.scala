@@ -16,17 +16,17 @@
 
 package controllers
 
-import _root_.models._
-import config._
+import _root_.models.*
+import config.*
 import controllers.auth.AuthActionGovGateway
 import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.libs.json.{Json, OFormat}
-import play.api.mvc._
+import play.api.mvc.*
 import services.FrontendSessionService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
+import utils.*
 import utils.SessionKeys.{BUNDLE_REF, DATE_TIME_SUBMITTED}
-import utils._
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
@@ -39,23 +39,23 @@ class ReturnServiceController @Inject() (
   unauthorisedView: views.html.unauthorised,
   startView: views.html.start,
   authActionGovGateway: AuthActionGovGateway
-)(implicit val ec: ExecutionContext, val ersUtil: ERSUtil, val appConfig: ApplicationConfig)
+)(using val ec: ExecutionContext, val ersUtil: ERSUtil, val appConfig: ApplicationConfig)
     extends FrontendController(mcc) with I18nSupport with HMACUtil with Logging {
 
   lazy val accessThreshold: Int = appConfig.accessThreshold
   val accessDeniedUrl           = "/outage-ers-frontend/index.html"
 
-  def cacheParams(ersRequestObject: RequestObject)(implicit request: RequestHeader): Future[Result] = {
-    implicit val formatRSParams: OFormat[RequestObject] = Json.format[RequestObject]
+  def cacheParams(ersRequestObject: RequestObject)(using request: RequestHeader): Future[Result] = {
+    given formatRSParams: OFormat[RequestObject] = Json.format[RequestObject]
     logger.debug("Request Object created --> " + ersRequestObject)
-    val futureResult                                    = for {
+    val futureResult                             = for {
       _ <- sessionService.remove(ersRequestObject.getSchemeReference)
       _ <- sessionService.cache(ersUtil.ERS_METADATA, ersRequestObject.toErsMetaData)
       _ <- sessionService.cache(ersUtil.ERS_REQUEST_OBJECT, ersRequestObject)
     } yield {
       logger.info(s"[ReturnServiceController][cacheParams] Meta Data Cached --> ${ersRequestObject.toErsMetaData}")
       logger.info(s"[ReturnServiceController][cacheParams] Request Object Cached -->  $ersRequestObject")
-      showInitialStartPage(ersRequestObject)(request)
+      showInitialStartPage(ersRequestObject)(using request)
     }
     futureResult recover { case e: Exception =>
       logger.warn(s"[ReturnServiceController][cacheParams] Caught exception ${e.getMessage}", e)
@@ -94,12 +94,12 @@ class ReturnServiceController @Inject() (
         }
       } else {
         logger.warn("[ReturnServiceController][hmacCheck] HMAC Check Invalid")
-        showUnauthorisedPage(request)
+        showUnauthorisedPage(using request)
       }
     }
   }
 
-  def showInitialStartPage(requestObject: RequestObject)(implicit request: RequestHeader): Result = {
+  def showInitialStartPage(requestObject: RequestObject)(using request: RequestHeader): Result = {
     val sessionData = s"${requestObject.getSchemeId} - ${requestObject.getPageTitle}"
     Ok(startView(requestObject)).withSession(
       request.session + ("screenSchemeInfo" -> sessionData) - BUNDLE_REF - DATE_TIME_SUBMITTED
@@ -112,10 +112,10 @@ class ReturnServiceController @Inject() (
     }
   }
 
-  def showUnauthorisedPage(implicit request: RequestHeader): Future[Result] =
+  def showUnauthorisedPage(using request: RequestHeader): Future[Result] =
     Future.successful(Unauthorized(unauthorisedView()))
 
-  def getGlobalErrorPage(implicit request: RequestHeader, messages: Messages): Result =
+  def getGlobalErrorPage(using request: RequestHeader, messages: Messages): Result =
     Ok(
       globalErrorView(
         "ers.global_errors.title",

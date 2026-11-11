@@ -18,14 +18,14 @@ package controllers.schemeOrganiser
 
 import config.ApplicationConfig
 import controllers.auth.{AuthAction, RequestWithOptionalAuthContext}
-import models._
+import models.*
 import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages}
-import play.api.mvc._
+import play.api.mvc.*
 import services.FrontendSessionService
 import uk.gov.hmrc.play.bootstrap.controller.WithUrlEncodedOnlyFormBinding
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
-import utils._
+import utils.*
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
@@ -33,16 +33,17 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class SchemeOrganiserController @Inject() (
   val mcc: MessagesControllerComponents,
-  implicit val countryCodes: CountryCodes,
-  implicit val ersUtil: ERSUtil,
-  implicit val sessionService: FrontendSessionService,
-  implicit val appConfig: ApplicationConfig,
   globalErrorView: views.html.global_error,
   schemeOrganiserSummaryView: views.html.scheme_organiser_summary,
   authAction: AuthAction
+)(using
+  val countryCodes: CountryCodes,
+  val ersUtil: ERSUtil,
+  val sessionService: FrontendSessionService,
+  val appConfig: ApplicationConfig
 ) extends FrontendController(mcc) with I18nSupport with WithUrlEncodedOnlyFormBinding with Logging {
 
-  implicit val ec: ExecutionContext = mcc.executionContext
+  given ec: ExecutionContext = mcc.executionContext
 
   def schemeOrganiserSummaryPage: Action[AnyContent] = authAction.async { implicit request =>
     sessionService.fetch[ErsMetaData](ersUtil.ERS_METADATA).map { ele =>
@@ -51,10 +52,10 @@ class SchemeOrganiserController @Inject() (
           s"and schemeRef: ${ele.schemeInfo.schemeRef}"
       )
     }
-    showSchemeOrganiserSummaryPage(request)
+    showSchemeOrganiserSummaryPage(using request)
   }
 
-  def showSchemeOrganiserSummaryPage(implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
+  def showSchemeOrganiserSummaryPage(using request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] =
     (for {
       requestObject  <- sessionService.fetch[RequestObject](ersUtil.ERS_REQUEST_OBJECT)
       companyDetails <- sessionService.fetchSchemeOrganiserOptionally()
@@ -77,7 +78,7 @@ class SchemeOrganiserController @Inject() (
   def continueFromCompanySummaryPage()(): Future[Result] =
     Future(Redirect(controllers.subsidiaries.routes.GroupSchemeController.groupSchemePage()))
 
-  def getGlobalErrorPage(implicit request: RequestHeader, messages: Messages): Result =
+  def getGlobalErrorPage(using request: RequestHeader, messages: Messages): Result =
     Ok(
       globalErrorView(
         "ers.global_errors.title",

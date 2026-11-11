@@ -19,18 +19,18 @@ package controllers
 import config.ApplicationConfig
 import connectors.ErsConnector
 import controllers.auth.{AuthAction, RequestWithOptionalAuthContext}
-import models._
-import models.upscan._
+import models.*
+import models.upscan.*
 import org.apache.pekko.actor.ActorSystem
 import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages}
-import play.api.mvc._
+import play.api.mvc.*
 import services.audit.AuditEvents
 import services.{FrontendSessionService, UpscanService}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.mongo.cache.DataKey
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
-import utils._
+import utils.*
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
@@ -51,7 +51,7 @@ class CsvFileUploadController @Inject() (
   invalidMimeErrorView: views.html.invalid_mime_error,
   wrongCsvFileTypeView: views.html.wrong_csv_file_type,
   authAction: AuthAction
-)(implicit
+)(using
   val ec: ExecutionContext,
   val ersUtil: ERSUtil,
   val appConfig: ApplicationConfig,
@@ -141,7 +141,7 @@ class CsvFileUploadController @Inject() (
     processValidationResults()
   }
 
-  def processValidationResults()(implicit
+  def processValidationResults()(using
     request: RequestWithOptionalAuthContext[AnyContent],
     hc: HeaderCarrier
   ): Future[Result] =
@@ -157,7 +157,7 @@ class CsvFileUploadController @Inject() (
 
   def removePresubmissionData(
     schemeInfo: SchemeInfo
-  )(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] =
+  )(using request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] =
     ersConnector.removePresubmissionData(schemeInfo).flatMap { result =>
       result.status match {
         case OK => extractCsvCallbackData(schemeInfo)
@@ -176,19 +176,23 @@ class CsvFileUploadController @Inject() (
 
   def extractCsvCallbackData(
     schemeInfo: SchemeInfo
-  )(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] =
+  )(using request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] =
     sessionService.fetch[UpscanCsvFilesList](ersUtil.CSV_FILES_UPLOAD).flatMap { data =>
-      sessionService
-        .fetchAll()
-        .map { cacheItem =>
-          data.ids.foldLeft(Option(List.empty[UpscanCsvFilesCallback])) {
-            case (Some(upscanCallbackList), UpscanIds(uploadId, fileId, _)) =>
-              getEntry[UploadStatus](cacheItem, DataKey(s"${ersUtil.CHECK_CSV_FILES}-${uploadId.value}")).map { status =>
-                UpscanCsvFilesCallback(uploadId, fileId, status) :: upscanCallbackList
+      (
+        () =>
+          sessionService
+            .fetchAll()
+            .map { cacheItem =>
+              data.ids.foldLeft(Option(List.empty[UpscanCsvFilesCallback])) {
+                case (Some(upscanCallbackList), UpscanIds(uploadId, fileId, _)) =>
+                  getEntry[UploadStatus](cacheItem, DataKey(s"${ersUtil.CHECK_CSV_FILES}-${uploadId.value}")).map {
+                    status =>
+                      UpscanCsvFilesCallback(uploadId, fileId, status) :: upscanCallbackList
+                  }
+                case (_, _)                                                     => None
               }
-            case (_, _)                                                     => None
-          }
-        }
+            }
+      )
         .withRetry(allCsvFilesCacheRetryAmount, Some(schemeInfo), "extractCsvCallbackData")(_.isDefined)
         .flatMap { files =>
           val csvFilesCallbackList: UpscanCsvFilesCallbackList = UpscanCsvFilesCallbackList(files.get)
@@ -237,7 +241,7 @@ class CsvFileUploadController @Inject() (
               Future.successful(getGlobalErrorPage)
             }
           }
-        } recover { case e: LoopException[_] =>
+        } recover { case e: LoopException[?] =>
         logger.error(
           s"[CsvFileUploadController][extractCsvCallbackData] Could not fetch all files from cache map. UploadIds: ${data.ids.map(_.uploadId).mkString}",
           e
@@ -252,7 +256,9 @@ class CsvFileUploadController @Inject() (
       getGlobalErrorPage
     }
 
-  def getAllPageElementsFromPageId(schemeInfo: SchemeInfo, pageId: String)(para: String)(implicit messages: Messages) =
+  def getAllPageElementsFromPageId(schemeInfo: SchemeInfo, pageId: String)(
+    para: String
+  )(using messages: Messages): String =
     ersUtil.getPageElement(
       schemeInfo.schemeId,
       ersUtil.PAGE_CHECK_CSV_FILE,
@@ -264,7 +270,7 @@ class CsvFileUploadController @Inject() (
     schemeInfo: SchemeInfo,
     list: UpscanCsvFilesList,
     requestObject: RequestObject
-  )(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
+  )(using request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[Result] = {
 
     val fileName                                                 = ersUtil.getFileNameSuffix(
       schemeInfo.schemeType == "CSOP",
@@ -299,7 +305,7 @@ class CsvFileUploadController @Inject() (
     }
   }
 
-  def checkFileNames(csvCallbackData: List[UploadedSuccessfully], schemeInfo: SchemeInfo)(implicit
+  def checkFileNames(csvCallbackData: List[UploadedSuccessfully], schemeInfo: SchemeInfo)(using
     request: RequestWithOptionalAuthContext[AnyContent],
     hc: HeaderCarrier
   ): Future[Result] = {
@@ -316,7 +322,7 @@ class CsvFileUploadController @Inject() (
     getGlobalErrorPage
   }
 
-  def validateCsv(csvCallbackData: List[UploadedSuccessfully], schemeInfo: SchemeInfo)(implicit
+  def validateCsv(csvCallbackData: List[UploadedSuccessfully], schemeInfo: SchemeInfo)(using
     request: RequestWithOptionalAuthContext[AnyContent],
     hc: HeaderCarrier
   ): Future[Result] =
@@ -353,10 +359,10 @@ class CsvFileUploadController @Inject() (
     }
 
   def validationFailure(): Action[AnyContent] = authAction.async { implicit request =>
-    processValidationFailure()(request)
+    processValidationFailure()(using request)
   }
 
-  def processValidationFailure()(implicit request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] = {
+  def processValidationFailure()(using request: RequestWithOptionalAuthContext[AnyContent]): Future[Result] = {
     logger.info(
       "[CsvFileUploadController][processValidationFailure] Validation Failure: " + (System.currentTimeMillis() / 1000)
     )
@@ -388,14 +394,14 @@ class CsvFileUploadController @Inject() (
     }
   }
 
-  def getFileUploadProblemPage()(implicit request: RequestHeader, messages: Messages): Result =
+  def getFileUploadProblemPage()(using request: RequestHeader, messages: Messages): Result =
     BadRequest(
       fileUploadProblemView(
         "ers.file_problem.title"
       )(request, messages, appConfig)
     )
 
-  def getWrongCsvFileTypePage(requestObject: RequestObject, expectedFiles: Seq[(String, String)])(implicit
+  def getWrongCsvFileTypePage(requestObject: RequestObject, expectedFiles: Seq[(String, String)])(using
     request: RequestHeader,
     messages: Messages
   ): Result =
@@ -403,7 +409,7 @@ class CsvFileUploadController @Inject() (
       wrongCsvFileTypeView(requestObject, expectedFiles)(request, messages, appConfig)
     )
 
-  def getGlobalErrorPage(implicit request: RequestHeader, messages: Messages): Result =
+  def getGlobalErrorPage(using request: RequestHeader, messages: Messages): Result =
     InternalServerError(
       globalErrorView(
         "ers.global_errors.title",

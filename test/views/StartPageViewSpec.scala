@@ -18,6 +18,7 @@ package views
 
 import config.ApplicationConfig
 import org.jsoup.nodes.{Document, Element}
+import play.api.Application
 import play.api.i18n.Messages
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.AnyContentAsEmpty
@@ -26,11 +27,11 @@ import utils.ERSUtil
 import views.html.start
 
 import scala.collection.mutable
-import scala.jdk.CollectionConverters._
+import scala.jdk.CollectionConverters.*
 
 class StartPageViewSpec extends ViewSpecBase with FileUploadFixtures {
 
-  implicit override lazy val app = new GuiceApplicationBuilder()
+  override given app: Application = new GuiceApplicationBuilder()
     .configure(
       "microservice.services.features.notification-banner.enabled"           -> true,
       "microservice.services.features.notification-banner.pre-april-enabled" -> true
@@ -39,10 +40,10 @@ class StartPageViewSpec extends ViewSpecBase with FileUploadFixtures {
 
   private val view = app.injector.instanceOf[start]
 
-  implicit val ersUtil: ERSUtil                             = app.injector.instanceOf[ERSUtil]
-  implicit val appConfig: ApplicationConfig                 = app.injector.instanceOf[ApplicationConfig]
-  implicit val request: FakeRequest[AnyContentAsEmpty.type] = fakeRequest
-  implicit val messages: Messages                           = testMessages
+  given ersUtil: ERSUtil                             = app.injector.instanceOf[ERSUtil]
+  given appConfig: ApplicationConfig                 = app.injector.instanceOf[ApplicationConfig]
+  given request: FakeRequest[AnyContentAsEmpty.type] = fakeRequest
+  given messages: Messages                           = testMessages
 
   // for all pages except SIP scheme
   val expectedBullets: List[String] = List(

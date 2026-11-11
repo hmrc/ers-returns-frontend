@@ -18,7 +18,7 @@ package controllers.internal
 
 import connectors.ErsConnector
 import models.RequestWithUpdatedSession
-import models.upscan._
+import models.upscan.*
 import play.api.Logging
 import play.api.libs.json.JsValue
 import play.api.mvc.{Action, MessagesControllerComponents}
@@ -36,7 +36,7 @@ class CsvFileUploadCallbackController @Inject() (
   val ersConnector: ErsConnector,
   val sessionService: FrontendSessionService,
   val fileSizeUtils: FileSizeUtils
-)(implicit val ec: ExecutionContext, ersUtil: ERSUtil)
+)(using val ec: ExecutionContext, ersUtil: ERSUtil)
     extends FrontendController(mcc) with Logging {
 
   def callback(uploadId: UploadId, scRef: String, sessionId: String): Action[JsValue] =
@@ -75,9 +75,9 @@ class CsvFileUploadCallbackController @Inject() (
                 s"upload id: ${uploadId.value} to ${uploadStatus.getClass.getSimpleName}"
             )
             sessionService
-              .cache[UploadStatus](s"${ersUtil.CHECK_CSV_FILES}-${uploadId.value}", uploadStatus)(
+              .cache[UploadStatus](s"${ersUtil.CHECK_CSV_FILES}-${uploadId.value}", uploadStatus)(using
                 RequestWithUpdatedSession(request, sessionId),
-                implicitly
+                summon
               )
               .map { _ =>
                 Ok

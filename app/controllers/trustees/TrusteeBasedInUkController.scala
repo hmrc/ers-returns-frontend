@@ -22,7 +22,7 @@ import controllers.auth.AuthAction
 import models.{RequestObject, RsFormMappings, TrusteeBasedInUk}
 import play.api.data.Form
 import play.api.libs.json.Format
-import play.api.mvc._
+import play.api.mvc.*
 import play.twirl.api.Html
 import services.{FrontendSessionService, TrusteeService}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -41,18 +41,18 @@ class TrusteeBasedInUkController @Inject() (
   val trusteeService: TrusteeService,
   val sessionService: FrontendSessionService,
   trusteeBasedInUkView: views.html.trustee_based_in_uk
-)(implicit
+)(using
   val ec: ExecutionContext,
   val ersUtil: ERSUtil,
   val appConfig: ApplicationConfig,
   val countryCodes: CountryCodes
 ) extends FrontendController(mcc) with WithUrlEncodedOnlyFormBinding with TrusteeBaseController[TrusteeBasedInUk] {
 
-  implicit val format: Format[TrusteeBasedInUk] = TrusteeBasedInUk.format
+  given format: Format[TrusteeBasedInUk] = TrusteeBasedInUk.format
 
   val cacheKey: String = ersUtil.TRUSTEE_BASED_CACHE
 
-  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit
+  def nextPageRedirect(index: Int, edit: Boolean = false)(using
     hc: HeaderCarrier,
     request: RequestHeader
   ): Future[Result] =
@@ -71,14 +71,14 @@ class TrusteeBasedInUkController @Inject() (
       case (false, false) => Redirect(controllers.trustees.routes.TrusteeAddressOverseasController.questionPage())
     }
 
-  def form(implicit request: Request[AnyContent]): Form[TrusteeBasedInUk] = RsFormMappings.trusteeBasedInUkForm()
+  def form(using request: Request[AnyContent]): Form[TrusteeBasedInUk] = RsFormMappings.trusteeBasedInUkForm()
 
   def view(
     requestObject: RequestObject,
     index: Int,
     trusteeBasedInUkForm: Form[TrusteeBasedInUk],
     edit: Boolean = false
-  )(implicit request: Request[AnyContent], hc: HeaderCarrier): Html =
+  )(using request: Request[AnyContent], hc: HeaderCarrier): Html =
     trusteeBasedInUkView(requestObject, index, trusteeBasedInUkForm, edit)
 
 }

@@ -16,7 +16,7 @@
 
 package services.pdf
 
-import models._
+import models.*
 import org.apache.pekko.stream.Materializer
 import org.scalatest.OptionValues
 import org.scalatest.matchers.should.Matchers
@@ -51,7 +51,7 @@ class AlterationsAmendsDecoratorSpec
     ExecutionContext.global
   )
 
-  implicit lazy val mat: Materializer = app.materializer
+  given mat: Materializer = app.materializer
 
   lazy val altAmends: AlterationAmends = AlterationAmends(
     altAmendsTerms = Some("1"),

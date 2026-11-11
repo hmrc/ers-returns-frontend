@@ -22,7 +22,7 @@ import controllers.auth.AuthAction
 import models.{CompanyAddress, RequestObject, RsFormMappings}
 import play.api.data.Form
 import play.api.libs.json.Format
-import play.api.mvc._
+import play.api.mvc.*
 import play.twirl.api.Html
 import services.{CompanyDetailsService, FrontendSessionService}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -40,20 +40,21 @@ class SubsidiaryAddressUkController @Inject() (
   val ersConnector: ErsConnector,
   val globalErrorView: views.html.global_error,
   val authAction: AuthAction,
-  implicit val countryCodes: CountryCodes,
-  implicit val ersUtil: ERSUtil,
-  implicit val sessionService: FrontendSessionService,
-  implicit val appConfig: ApplicationConfig,
   companyDetailsService: CompanyDetailsService,
   trusteeAddressUkView: views.html.manual_address_uk
+)(using
+  val countryCodes: CountryCodes,
+  val ersUtil: ERSUtil,
+  val sessionService: FrontendSessionService,
+  val appConfig: ApplicationConfig
 ) extends FrontendController(mcc) with WithUrlEncodedOnlyFormBinding with SubsidiaryBaseController[CompanyAddress] {
 
-  implicit val ec: ExecutionContext = mcc.executionContext
+  given ec: ExecutionContext = mcc.executionContext
 
-  val cacheKey: String                        = ersUtil.SUBSIDIARY_COMPANY_ADDRESS_CACHE
-  implicit val format: Format[CompanyAddress] = CompanyAddress.format
+  val cacheKey: String                 = ersUtil.SUBSIDIARY_COMPANY_ADDRESS_CACHE
+  given format: Format[CompanyAddress] = CompanyAddress.format
 
-  def nextPageRedirect(index: Int, edit: Boolean = false)(implicit
+  def nextPageRedirect(index: Int, edit: Boolean = false)(using
     hc: HeaderCarrier,
     request: RequestHeader
   ): Future[Result] = {
@@ -72,10 +73,10 @@ class SubsidiaryAddressUkController @Inject() (
     }
   }
 
-  def form(implicit request: Request[AnyContent]): Form[CompanyAddress] = RsFormMappings.companyAddressUkForm()
+  def form(using request: Request[AnyContent]): Form[CompanyAddress] = RsFormMappings.companyAddressUkForm()
 
   def view(requestObject: RequestObject, index: Int, companyAddressUkForm: Form[CompanyAddress], edit: Boolean = false)(
-    implicit
+    using
     request: Request[AnyContent],
     hc: HeaderCarrier
   ): Html =

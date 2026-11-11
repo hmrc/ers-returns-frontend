@@ -20,7 +20,7 @@ import config.ApplicationConfig
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.scalatestplus.play.PlaySpec
-import org.scalatestplus.play.guice._
+import org.scalatestplus.play.guice.*
 import play.api.i18n.{Messages, MessagesApi}
 import play.api.inject.Injector
 import play.api.mvc.AnyContentAsEmpty
@@ -33,7 +33,7 @@ trait ViewSpecBase extends PlaySpec with GuiceOneAppPerSuite {
 
   def injector: Injector = app.injector
 
-  implicit val ec: ExecutionContext = injector.instanceOf[ExecutionContext]
+  given ec: ExecutionContext = injector.instanceOf[ExecutionContext]
 
   def frontendAppConfig: ApplicationConfig = injector.instanceOf[ApplicationConfig]
 

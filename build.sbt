@@ -1,5 +1,5 @@
-ThisBuild / majorVersion := 1
-ThisBuild / scalaVersion := "2.13.18"
+ThisBuild / majorVersion := 2
+ThisBuild / scalaVersion := "3.3.9"
 
 lazy val microservice = Project("ers-returns-frontend", file("."))
   .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin)
@@ -11,12 +11,12 @@ lazy val microservice = Project("ers-returns-frontend", file("."))
     PlayKeys.playDefaultPort := 9290,
     scalacOptions ++= Seq(
       "-Wconf:src=routes/.*:s",
-      "-Wconf:cat=unused-imports&src=html/.*:s"
+      "-Wconf:msg=unused import&src=html/.*:s"
     ),
     TwirlKeys.templateImports ++= Seq(
-      "uk.gov.hmrc.govukfrontend.views.html.components._",
-      "uk.gov.hmrc.hmrcfrontend.views.html.components._",
-      "uk.gov.hmrc.hmrcfrontend.views.html.helpers._",
+      "uk.gov.hmrc.govukfrontend.views.html.components.*",
+      "uk.gov.hmrc.hmrcfrontend.views.html.components.*",
+      "uk.gov.hmrc.hmrcfrontend.views.html.helpers.*",
       "models.upscan.{UpscanInitiateResponse, UpscanCsvFilesCallbackList, UpscanCsvFilesCallback}"
     )
   )

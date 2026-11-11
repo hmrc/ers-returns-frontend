@@ -18,8 +18,8 @@ package controllers.testonly
 
 import connectors.ErsConnector
 import org.apache.pekko.stream.Materializer
-import org.mockito.ArgumentMatchers._
-import org.mockito.Mockito._
+import org.mockito.ArgumentMatchers.*
+import org.mockito.Mockito.*
 import org.scalatest.OptionValues
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
@@ -27,9 +27,9 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.i18n
 import play.api.i18n.{MessagesApi, MessagesImpl}
 import play.api.libs.json.{JsObject, Json}
-import play.api.mvc._
+import play.api.mvc.*
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import uk.gov.hmrc.http.HttpResponse
 import utils.{ERSFakeApplicationConfig, ErsTestHelper, Fixtures}
 import views.html.global_error
@@ -54,10 +54,10 @@ class TestOnlySubmissionDataControllerSpec
     ExecutionContext.global
   )
 
-  implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
+  given testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
 
-  implicit lazy val mat: Materializer = app.materializer
-  val globalErrorView: global_error   = app.injector.instanceOf[global_error]
+  given mat: Materializer           = app.materializer
+  val globalErrorView: global_error = app.injector.instanceOf[global_error]
 
   "calling createSchemeInfoFromURL" should {
 
@@ -129,7 +129,7 @@ class TestOnlySubmissionDataControllerSpec
       lazy val testOnlySubmissionDataController: TestOnlySubmissionDataController = new Setup()
       val authRequest                                                             = buildRequestWithAuth(testFakeRequest)
 
-      val result = testOnlySubmissionDataController.getRetrieveSubmissionData()(authRequest, hc)
+      val result = testOnlySubmissionDataController.getRetrieveSubmissionData()(using authRequest, hc)
       status(result) shouldBe NOT_FOUND
     }
 
@@ -137,11 +137,11 @@ class TestOnlySubmissionDataControllerSpec
       reset(mockErsConnector)
       lazy val testOnlySubmissionDataController: TestOnlySubmissionDataController = new Setup(Some(mock[JsObject]))
 
-      when(mockErsConnector.retrieveSubmissionData(any[JsObject]())(any(), any()))
+      when(mockErsConnector.retrieveSubmissionData(any[JsObject]())(using any(), any()))
         .thenReturn(Future.successful(HttpResponse(OK, "")))
 
       val authRequest = buildRequestWithAuth(testFakeRequest)
-      val result      = testOnlySubmissionDataController.getRetrieveSubmissionData()(authRequest, hc)
+      val result      = testOnlySubmissionDataController.getRetrieveSubmissionData()(using authRequest, hc)
       status(result)                                       shouldBe OK
       contentAsString(result).contains("Retrieve Failure") shouldBe false
     }
@@ -150,11 +150,11 @@ class TestOnlySubmissionDataControllerSpec
       reset(mockErsConnector)
       lazy val testOnlySubmissionDataController: TestOnlySubmissionDataController = new Setup(Some(mock[JsObject]))
 
-      when(mockErsConnector.retrieveSubmissionData(any[JsObject]())(any(), any()))
+      when(mockErsConnector.retrieveSubmissionData(any[JsObject]())(using any(), any()))
         .thenReturn(Future.successful(HttpResponse(INTERNAL_SERVER_ERROR, "")))
 
       val authRequest = buildRequestWithAuth(testFakeRequest)
-      val result      = testOnlySubmissionDataController.getRetrieveSubmissionData()(authRequest, hc)
+      val result      = testOnlySubmissionDataController.getRetrieveSubmissionData()(using authRequest, hc)
       status(result)                                                              shouldBe OK
       contentAsString(result).contains(testMessages("ers.global_errors.message")) shouldBe true
     }
@@ -163,11 +163,11 @@ class TestOnlySubmissionDataControllerSpec
       reset(mockErsConnector)
       lazy val testOnlySubmissionDataController: TestOnlySubmissionDataController = new Setup(Some(mock[JsObject]))
 
-      when(mockErsConnector.retrieveSubmissionData(any[JsObject]())(any(), any()))
+      when(mockErsConnector.retrieveSubmissionData(any[JsObject]())(using any(), any()))
         .thenReturn(Future.failed(new RuntimeException))
 
       val authRequest = buildRequestWithAuth(testFakeRequest)
-      val result      = testOnlySubmissionDataController.getRetrieveSubmissionData()(authRequest, hc)
+      val result      = testOnlySubmissionDataController.getRetrieveSubmissionData()(using authRequest, hc)
       status(result)                                                              shouldBe OK
       contentAsString(result).contains(testMessages("ers.global_errors.message")) shouldBe true
     }
@@ -184,7 +184,7 @@ class TestOnlySubmissionDataControllerSpec
 
       val authRequest = buildRequestWithAuth(testFakeRequest)
 
-      val result = testOnlySubmissionDataController.getRetrieveSubmissionData()(authRequest, hc)
+      val result = testOnlySubmissionDataController.getRetrieveSubmissionData()(using authRequest, hc)
       status(result) shouldBe NOT_FOUND
     }
   }

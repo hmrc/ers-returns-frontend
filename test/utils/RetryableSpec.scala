@@ -47,14 +47,14 @@ class RetryableSpec
   val retryTestLogger: Logger = Logger(classOf[RetryTest])
 
   class RetryTest extends Retryable {
-    import scala.concurrent.duration._
+    import scala.concurrent.duration.*
 
     override val logger: Logger          = retryTestLogger
     val mockAppConfig: ApplicationConfig = mock[ApplicationConfig]
     when(mockAppConfig.retryDelay).thenReturn(1.millisecond)
 
-    implicit lazy val actorSystem: ActorSystem = app.actorSystem
-    override val appConfig: ApplicationConfig  = mockAppConfig
+    given actorSystem: ActorSystem            = app.actorSystem
+    override val appConfig: ApplicationConfig = mockAppConfig
 
     trait RetryTestUtil {
       def f: Future[Boolean]
@@ -85,7 +85,7 @@ class RetryableSpec
       when(retryMock.f).thenReturn(Future.successful(true))
       val expectedLogMessage = "[Retryable][withRetry] - [RetryableSpec] call x0, schemeRef: <<NOT DEFINED>>"
       withCaptureOfLoggingFrom(retryTestLogger) { captureEvents =>
-        val result: Boolean = retryMock.f.withRetry(5, callingFunc = "RetryableSpec")(b => b).futureValue
+        val result: Boolean = (() => retryMock.f).withRetry(5, callingFunc = "RetryableSpec")(b => b).futureValue
         assert(result)
         assert(captureEvents.exists(_.getMessage.contains(expectedLogMessage)))
       }
@@ -101,7 +101,7 @@ class RetryableSpec
       )
 
       withCaptureOfLoggingFrom(retryTestLogger) { captureEvents =>
-        val result: Boolean = retryMock.f.withRetry(5, callingFunc = "RetryableSpec")(b => b).futureValue
+        val result: Boolean = (() => retryMock.f).withRetry(5, callingFunc = "RetryableSpec")(b => b).futureValue
         assert(result)
         captureEvents.map(_.getMessage) should contain theSameElementsAs generateExpectedRetryLogMessages(3)
       }
@@ -122,7 +122,7 @@ class RetryableSpec
       withCaptureOfLoggingFrom(retryTestLogger) { captureEvents =>
         val error: LoopException[Boolean] = intercept[LoopException[Boolean]] {
           await(
-            retryMock.f.withRetry(3, maybeSchemeInfo = Some(schemeInfo), callingFunc = "RetryableSpec")(b => b),
+            (() => retryMock.f).withRetry(3, maybeSchemeInfo = Some(schemeInfo), callingFunc = "RetryableSpec")(b => b),
             1,
             SECONDS
           )
@@ -140,7 +140,7 @@ class RetryableSpec
     "return a LoopException if the predicate is never fulfilled" in new RetryTest {
       when(retryMock.f).thenReturn(Future.successful(false))
       val exception: LoopException[Boolean] = intercept[LoopException[Boolean]] {
-        await(retryMock.f.withRetry(1, callingFunc = "RetryableSpec")(b => b), 1, SECONDS)
+        await((() => retryMock.f).withRetry(1, callingFunc = "RetryableSpec")(b => b), 1, SECONDS)
       }
       exception.finalFutureData shouldBe Some(false)
       exception.retryNumber     shouldBe 1

@@ -19,13 +19,14 @@ package connectors
 import config.ApplicationConfig
 import controllers.auth.RequestWithOptionalAuthContext
 import metrics.Metrics
-import models._
+import models.*
 import models.upscan.{UploadStatus, UploadedSuccessfully}
 import play.api.Logging
-import play.api.http.Status._
-import play.api.libs.json._
+import play.api.http.Status.*
+import play.api.libs.json.*
+import play.api.libs.ws.JsonBodyWritables.writeableOf_JsValue
 import play.api.mvc.AnyContent
-import uk.gov.hmrc.http.HttpReads.Implicits._
+import uk.gov.hmrc.http.HttpReads.Implicits.*
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps}
 
@@ -34,7 +35,7 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class ErsConnector @Inject() (http: HttpClientV2, appConfig: ApplicationConfig)(implicit ec: ExecutionContext)
+class ErsConnector @Inject() (http: HttpClientV2, appConfig: ApplicationConfig)(using ec: ExecutionContext)
     extends Logging with Metrics {
 
   lazy val ersUrl: String       = appConfig.ersUrl
@@ -42,7 +43,7 @@ class ErsConnector @Inject() (http: HttpClientV2, appConfig: ApplicationConfig)(
 
   def connectToEtmpSapRequest(
     schemeRef: String
-  )(implicit
+  )(using
     request: RequestWithOptionalAuthContext[AnyContent],
     hc: HeaderCarrier
   ): Future[Either[Throwable, String]] = {
@@ -75,7 +76,7 @@ class ErsConnector @Inject() (http: HttpClientV2, appConfig: ApplicationConfig)(
       }
   }
 
-  def connectToEtmpSummarySubmit(sap: String, payload: JsValue)(implicit
+  def connectToEtmpSummarySubmit(sap: String, payload: JsValue)(using
     request: RequestWithOptionalAuthContext[AnyContent],
     hc: HeaderCarrier
   ): Future[String] = {
@@ -102,7 +103,7 @@ class ErsConnector @Inject() (http: HttpClientV2, appConfig: ApplicationConfig)(
 
   def submitReturnToBackend(
     allData: ErsSummary
-  )(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[HttpResponse] = {
+  )(using request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[HttpResponse] = {
     val empRef: String = request.authData.empRef.encodedValue
     val url: String    = s"$ersUrl/ers/$empRef/saveReturnData"
     http
@@ -111,7 +112,7 @@ class ErsConnector @Inject() (http: HttpClientV2, appConfig: ApplicationConfig)(
       .execute[HttpResponse]
   }
 
-  def validateFileData(callbackData: UploadedSuccessfully, schemeInfo: SchemeInfo)(implicit
+  def validateFileData(callbackData: UploadedSuccessfully, schemeInfo: SchemeInfo)(using
     request: RequestWithOptionalAuthContext[AnyContent],
     hc: HeaderCarrier
   ): Future[HttpResponse] = {
@@ -149,7 +150,7 @@ class ErsConnector @Inject() (http: HttpClientV2, appConfig: ApplicationConfig)(
       }
   }
 
-  def validateCsvFileData(callbackData: List[UploadedSuccessfully], schemeInfo: SchemeInfo)(implicit
+  def validateCsvFileData(callbackData: List[UploadedSuccessfully], schemeInfo: SchemeInfo)(using
     request: RequestWithOptionalAuthContext[AnyContent],
     hc: HeaderCarrier
   ): Future[HttpResponse] = {
@@ -183,7 +184,7 @@ class ErsConnector @Inject() (http: HttpClientV2, appConfig: ApplicationConfig)(
 
   def saveMetadata(
     allData: ErsSummary
-  )(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[HttpResponse] = {
+  )(using request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[HttpResponse] = {
     val empRef: String = request.authData.empRef.encodedValue
     val url: String    = s"$ersUrl/ers/$empRef/saveMetadata"
     http
@@ -192,7 +193,7 @@ class ErsConnector @Inject() (http: HttpClientV2, appConfig: ApplicationConfig)(
       .execute[HttpResponse]
   }
 
-  def checkForPresubmission(schemeInfo: SchemeInfo, validatedSheets: String)(implicit
+  def checkForPresubmission(schemeInfo: SchemeInfo, validatedSheets: String)(using
     request: RequestWithOptionalAuthContext[AnyContent],
     hc: HeaderCarrier
   ): Future[HttpResponse] = {
@@ -206,7 +207,7 @@ class ErsConnector @Inject() (http: HttpClientV2, appConfig: ApplicationConfig)(
 
   def removePresubmissionData(
     schemeInfo: SchemeInfo
-  )(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[HttpResponse] = {
+  )(using request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[HttpResponse] = {
     val empRef: String = request.authData.empRef.encodedValue
     val url: String    = s"$ersUrl/ers/$empRef/removePresubmissionData"
     http
@@ -217,7 +218,7 @@ class ErsConnector @Inject() (http: HttpClientV2, appConfig: ApplicationConfig)(
 
   def retrieveSubmissionData(
     data: JsObject
-  )(implicit request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[HttpResponse] = {
+  )(using request: RequestWithOptionalAuthContext[AnyContent], hc: HeaderCarrier): Future[HttpResponse] = {
     val empRef: String = request.authData.empRef.encodedValue
     val url: String    = s"$ersUrl/ers/$empRef/retrieve-submission-data"
     http
@@ -226,7 +227,7 @@ class ErsConnector @Inject() (http: HttpClientV2, appConfig: ApplicationConfig)(
       .execute[HttpResponse]
   }
 
-  def createCallbackRecord(implicit
+  def createCallbackRecord(using
     request: RequestWithOptionalAuthContext[AnyContent],
     hc: HeaderCarrier
   ): Future[Int] =
@@ -256,7 +257,7 @@ class ErsConnector @Inject() (http: HttpClientV2, appConfig: ApplicationConfig)(
       )
     )
 
-  def updateCallbackRecord(uploadStatus: UploadStatus, sessionId: String)(implicit hc: HeaderCarrier): Future[Int] = {
+  def updateCallbackRecord(uploadStatus: UploadStatus, sessionId: String)(using hc: HeaderCarrier): Future[Int] = {
     val url: String = s"$validatorUrl/ers/$sessionId/update-callback"
     val mimeType    = uploadStatus match {
       case s: UploadedSuccessfully => s.mimeTypeOrMissing
@@ -282,7 +283,7 @@ class ErsConnector @Inject() (http: HttpClientV2, appConfig: ApplicationConfig)(
       }
   }
 
-  def getCallbackRecord(implicit
+  def getCallbackRecord(using
     request: RequestWithOptionalAuthContext[AnyContent],
     hc: HeaderCarrier
   ): Future[Option[UploadStatus]] =
@@ -314,7 +315,7 @@ class ErsConnector @Inject() (http: HttpClientV2, appConfig: ApplicationConfig)(
       ifNone = Future.successful(None)
     )
 
-  def withOptionalSession[A](ifSome: String => Future[A], ifNone: => Future[A])(implicit
+  def withOptionalSession[A](ifSome: String => Future[A], ifNone: => Future[A])(using
     request: RequestWithOptionalAuthContext[AnyContent]
   ): Future[A] =
     request.session.get("sessionId") match {

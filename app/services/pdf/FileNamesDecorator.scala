@@ -22,7 +22,7 @@ import utils.PageBuilder
 class FileNamesDecorator(reportableEvents: String, filesUploaded: Option[List[String]])
     extends Decorator with PageBuilder {
 
-  def decorate(implicit messages: Messages): String =
+  def decorate(using messages: Messages): String =
     if (reportableEvents != OPTION_NIL_RETURN) {
       val heading = if (filesUploaded.get.length == 1) {
         messages("ers_summary_declaration.file_name")

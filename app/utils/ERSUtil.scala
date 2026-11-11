@@ -17,7 +17,7 @@
 package utils
 
 import config.ApplicationConfig
-import models._
+import models.*
 import play.api.Logging
 import play.api.i18n.Messages
 
@@ -25,7 +25,7 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
 @Singleton
-class ERSUtil @Inject() (val appConfig: ApplicationConfig)(implicit
+class ERSUtil @Inject() (val appConfig: ApplicationConfig)(using
   val ec: ExecutionContext,
   countryCodes: CountryCodes
 ) extends PageBuilder with Constants with Logging {
@@ -115,7 +115,7 @@ class ERSUtil @Inject() (val appConfig: ApplicationConfig)(implicit
     fileId: String,
     schemeId: String,
     useCsopV5V7Templates: Boolean
-  )(implicit messages: Messages): String = {
+  )(using messages: Messages): String = {
 
     val fileNameKey = getFileNameSuffix(schemeId == "1", useCsopV5V7Templates)
     getPageElement(schemeId, PAGE_CHECK_CSV_FILE, s"$fileId$fileNameKey")

@@ -33,7 +33,7 @@ object DateUtils extends Logging {
     formatter.format(instant)
   }
 
-  def convertDate(date: String)(implicit messages: Messages): String = {
+  def convertDate(date: String)(using messages: Messages): String = {
     val locale: ULocale           = new ULocale(messages.lang.code)
     val timeOut: SimpleDateFormat = new SimpleDateFormat("h:mma", locale)
     val dateOut                   = new SimpleDateFormat("E d MMMM yyyy", locale)
@@ -41,7 +41,7 @@ object DateUtils extends Logging {
     s"${timeOut.format(dateFrm)} ${messages("ers-confirmation.submission_on")} ${dateOut.format(dateFrm)}"
   }
 
-  def getFullTaxYear(taxYear: String)(implicit messages: Messages): String =
+  def getFullTaxYear(taxYear: String)(using messages: Messages): String =
     s"${taxYear.take(4)} ${messages("ers.taxYear.text")} ${taxYear.take(2)}${taxYear.takeRight(2)}"
 
 }

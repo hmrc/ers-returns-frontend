@@ -16,13 +16,12 @@
 
 package repository
 
-import scala.concurrent.duration._
 import com.github.benmanes.caffeine.cache.Ticker
 import com.github.benmanes.caffeine.cache.Ticker.systemTicker
 import com.github.blemale.scaffeine.{Cache, Scaffeine}
 import config.ApplicationConfig
-import org.mockito.Mockito.when
-import org.scalatest.matchers.must.Matchers.convertToAnyMustWrapper
+import org.mockito.Mockito.*
+import org.scalatest.matchers.must.Matchers.mustBe
 import org.scalatest.wordspec.AnyWordSpecLike
 import repositories.RateLimiterCache
 import utils.Fixtures.mock
@@ -30,7 +29,8 @@ import utils.Fixtures.mock
 import java.time.Instant
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicLong
-import scala.concurrent.duration.FiniteDuration
+import scala.concurrent.duration
+import scala.concurrent.duration.{DurationInt, FiniteDuration}
 
 class RateLimiterCacheSpec extends AnyWordSpecLike {
 

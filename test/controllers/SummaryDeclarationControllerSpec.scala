@@ -16,25 +16,25 @@
 
 package controllers
 
-import models._
-import models.upscan._
+import models.*
+import models.upscan.*
 import org.apache.pekko.stream.Materializer
 import org.jsoup.Jsoup
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito._
+import org.mockito.Mockito.*
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatest.{BeforeAndAfterEach, OptionValues}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.i18n
 import play.api.i18n.{Messages, MessagesApi, MessagesImpl}
-import play.api.libs.json._
-import play.api.mvc._
+import play.api.libs.json.*
+import play.api.mvc.*
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import uk.gov.hmrc.mongo.cache.CacheItem
+import utils.*
 import utils.Fixtures.ersRequestObject
-import utils._
 import views.html.{global_error, summary}
 
 import java.time.Instant
@@ -60,12 +60,12 @@ class SummaryDeclarationControllerSpec
     ExecutionContext.global
   )
 
-  implicit lazy val testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
-  implicit val countryCodes: CountryCodes      = mockCountryCodes
+  given testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
+  given countryCodes: CountryCodes = mockCountryCodes
 
-  implicit lazy val materializer: Materializer = app.materializer
-  val globalErrorView: global_error            = app.injector.instanceOf[global_error]
-  val summaryView: summary                     = app.injector.instanceOf[summary]
+  given materializer: Materializer  = app.materializer
+  val globalErrorView: global_error = app.injector.instanceOf[global_error]
+  val summaryView: summary          = app.injector.instanceOf[summary]
 
   val schemeInfo: SchemeInfo = SchemeInfo("XA1100000000000", Instant.now, "2", "2016", "EMI", "EMI")
 
@@ -173,7 +173,7 @@ class SummaryDeclarationControllerSpec
     when(mockErsUtil.SCHEME_SIP).thenReturn("5")
     when(mockErsUtil.OPTION_YES).thenReturn("1")
     when(mockErsUtil.OPTION_NO).thenReturn("2")
-    when(mockErsUtil.getPageElement(any(), any(), any(), any())(any())).thenCallRealMethod()
+    when(mockErsUtil.getPageElement(any(), any(), any(), any())(using any())).thenCallRealMethod()
     when(mockErsUtil.MSG_CSOP).thenReturn(".csop.")
     when(mockErsUtil.PAGE_GROUP_SUMMARY).thenReturn("ers_group_summary")
     when(mockErsUtil.PAGE_SUMMARY_DECLARATION).thenReturn("ers_summary_declaration")
@@ -201,8 +201,8 @@ class SummaryDeclarationControllerSpec
     "give a redirect status (to company authentication frontend)" in {
       setUnauthorisedMocks()
       summaryDeclarationControllerHandler(Fixtures.buildFakeRequestWithSessionId("GET")) { result =>
-        status(result)                                                  shouldBe SEE_OTHER
-        headers(result)(implicitly)("Location").contains("/gg/sign-in") shouldBe true
+        status(result)                                              shouldBe SEE_OTHER
+        headers(result)(summon)("Location").contains("/gg/sign-in") shouldBe true
       }
     }
   }
@@ -210,9 +210,9 @@ class SummaryDeclarationControllerSpec
   "Calling SummaryDeclarationController.showSummaryDeclarationPage (GET) with authentication, missing elements in the cache" should {
     "direct to ers errors page" in {
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionId("GET"))
-      when(mockSessionService.fetchAll()(any())).thenReturn(Future.failed(new NoSuchElementException))
+      when(mockSessionService.fetchAll()(using any())).thenReturn(Future.failed(new NoSuchElementException))
 
-      val result = testSummaryDeclarationController.showSummaryDeclarationPage(ersRequestObject)(authRequest)
+      val result = testSummaryDeclarationController.showSummaryDeclarationPage(ersRequestObject)(using authRequest)
 
       status(result) shouldBe INTERNAL_SERVER_ERROR
       val document = Jsoup.parse(contentAsString(result))
@@ -231,9 +231,10 @@ class SummaryDeclarationControllerSpec
       )
 
       when(mockErsUtil.buildEntitySummary(any())).thenReturn(schemeOrganiserString)
-      when(mockSessionService.fetchAll()(any())).thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
+      when(mockSessionService.fetchAll()(using any()))
+        .thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
 
-      val result = testSummaryDeclarationController.showSummaryDeclarationPage(ersRequestObject)(authRequest)
+      val result = testSummaryDeclarationController.showSummaryDeclarationPage(ersRequestObject)(using authRequest)
 
       status(result) shouldBe OK
       val document = Jsoup.parse(contentAsString(result))
@@ -255,9 +256,10 @@ class SummaryDeclarationControllerSpec
       )
 
       when(mockErsUtil.buildEntitySummary(any())).thenReturn(schemeOrganiserString)
-      when(mockSessionService.fetchAll()(any())).thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
+      when(mockSessionService.fetchAll()(using any()))
+        .thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
 
-      val result = testSummaryDeclarationController.showSummaryDeclarationPage(ersRequestObject)(authRequest)
+      val result = testSummaryDeclarationController.showSummaryDeclarationPage(ersRequestObject)(using authRequest)
 
       status(result) shouldBe OK
       val document = Jsoup.parse(contentAsString(result))
@@ -279,9 +281,10 @@ class SummaryDeclarationControllerSpec
       )
 
       when(mockErsUtil.buildEntitySummary(any())).thenReturn(schemeOrganiserString)
-      when(mockSessionService.fetchAll()(any())).thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
+      when(mockSessionService.fetchAll()(using any()))
+        .thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
 
-      val result = testSummaryDeclarationController.showSummaryDeclarationPage(ersRequestObject)(authRequest)
+      val result = testSummaryDeclarationController.showSummaryDeclarationPage(ersRequestObject)(using authRequest)
 
       status(result) shouldBe OK
       val document = Jsoup.parse(contentAsString(result))
@@ -310,9 +313,10 @@ class SummaryDeclarationControllerSpec
       )
 
       when(mockErsUtil.buildEntitySummary(any())).thenReturn(schemeOrganiserString)
-      when(mockSessionService.fetchAll()(any())).thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
+      when(mockSessionService.fetchAll()(using any()))
+        .thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
 
-      val result = testSummaryDeclarationController.showSummaryDeclarationPage(ersRequestObject)(authRequest)
+      val result = testSummaryDeclarationController.showSummaryDeclarationPage(ersRequestObject)(using authRequest)
 
       status(result) shouldBe OK
       val document = Jsoup.parse(contentAsString(result))
@@ -333,9 +337,10 @@ class SummaryDeclarationControllerSpec
         )
 
       when(mockErsUtil.buildEntitySummary(any())).thenReturn(schemeOrganiserString)
-      when(mockSessionService.fetchAll()(any())).thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
+      when(mockSessionService.fetchAll()(using any()))
+        .thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
 
-      val result = testSummaryDeclarationController.showSummaryDeclarationPage(ersRequestObject)(authRequest)
+      val result = testSummaryDeclarationController.showSummaryDeclarationPage(ersRequestObject)(using authRequest)
 
       status(result) shouldBe INTERNAL_SERVER_ERROR
       val document = Jsoup.parse(contentAsString(result))
@@ -356,9 +361,10 @@ class SummaryDeclarationControllerSpec
         )
 
       when(mockErsUtil.buildEntitySummary(any())).thenReturn(schemeOrganiserString)
-      when(mockSessionService.fetchAll()(any())).thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
+      when(mockSessionService.fetchAll()(using any()))
+        .thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
 
-      val result = testSummaryDeclarationController.showSummaryDeclarationPage(ersRequestObject)(authRequest)
+      val result = testSummaryDeclarationController.showSummaryDeclarationPage(ersRequestObject)(using authRequest)
 
       status(result) shouldBe INTERNAL_SERVER_ERROR
       val document = Jsoup.parse(contentAsString(result))
@@ -377,9 +383,10 @@ class SummaryDeclarationControllerSpec
         )
 
       when(mockErsUtil.buildEntitySummary(any())).thenReturn(schemeOrganiserString)
-      when(mockSessionService.fetchAll()(any())).thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
+      when(mockSessionService.fetchAll()(using any()))
+        .thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
 
-      val result = testSummaryDeclarationController.showSummaryDeclarationPage(ersRequestObject)(authRequest)
+      val result = testSummaryDeclarationController.showSummaryDeclarationPage(ersRequestObject)(using authRequest)
 
       status(result) shouldBe OK
       val document = Jsoup.parse(contentAsString(result))
@@ -401,9 +408,10 @@ class SummaryDeclarationControllerSpec
         )
 
       when(mockErsUtil.buildEntitySummary(any())).thenReturn(schemeOrganiserString)
-      when(mockSessionService.fetchAll()(any())).thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
+      when(mockSessionService.fetchAll()(using any()))
+        .thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
 
-      val result = testSummaryDeclarationController.showSummaryDeclarationPage(ersRequestObject)(authRequest)
+      val result = testSummaryDeclarationController.showSummaryDeclarationPage(ersRequestObject)(using authRequest)
 
       status(result) shouldBe INTERNAL_SERVER_ERROR
       val document = Jsoup.parse(contentAsString(result))
@@ -423,9 +431,10 @@ class SummaryDeclarationControllerSpec
         )
 
       when(mockErsUtil.buildEntitySummary(any())).thenReturn(schemeOrganiserString)
-      when(mockSessionService.fetchAll()(any())).thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
+      when(mockSessionService.fetchAll()(using any()))
+        .thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
 
-      val result = testSummaryDeclarationController.showSummaryDeclarationPage(ersRequestObject)(authRequest)
+      val result = testSummaryDeclarationController.showSummaryDeclarationPage(ersRequestObject)(using authRequest)
 
       status(result) shouldBe OK
       val document = Jsoup.parse(contentAsString(result))
@@ -446,9 +455,10 @@ class SummaryDeclarationControllerSpec
         )
 
       when(mockErsUtil.buildEntitySummary(any())).thenReturn(schemeOrganiserString)
-      when(mockSessionService.fetchAll()(any())).thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
+      when(mockSessionService.fetchAll()(using any()))
+        .thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
 
-      val result = testSummaryDeclarationController.showSummaryDeclarationPage(csopRequestObject)(authRequest)
+      val result = testSummaryDeclarationController.showSummaryDeclarationPage(csopRequestObject)(using authRequest)
 
       status(result) shouldBe INTERNAL_SERVER_ERROR
       val document = Jsoup.parse(contentAsString(result))
@@ -475,9 +485,10 @@ class SummaryDeclarationControllerSpec
         )
 
       when(mockErsUtil.buildEntitySummary(any())).thenReturn(schemeOrganiserString)
-      when(mockSessionService.fetchAll()(any())).thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
+      when(mockSessionService.fetchAll()(using any()))
+        .thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
 
-      val result = testSummaryDeclarationController.showSummaryDeclarationPage(csopRequestObject)(authRequest)
+      val result = testSummaryDeclarationController.showSummaryDeclarationPage(csopRequestObject)(using authRequest)
 
       status(result) shouldBe OK
       val document = Jsoup.parse(contentAsString(result))
@@ -506,9 +517,10 @@ class SummaryDeclarationControllerSpec
         )
 
       when(mockErsUtil.buildEntitySummary(any())).thenReturn(schemeOrganiserString)
-      when(mockSessionService.fetchAll()(any())).thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
+      when(mockSessionService.fetchAll()(using any()))
+        .thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
 
-      val result = testSummaryDeclarationController.showSummaryDeclarationPage(csopRequestObject)(authRequest)
+      val result = testSummaryDeclarationController.showSummaryDeclarationPage(csopRequestObject)(using authRequest)
 
       status(result) shouldBe INTERNAL_SERVER_ERROR
       val document = Jsoup.parse(contentAsString(result))
@@ -528,9 +540,10 @@ class SummaryDeclarationControllerSpec
         )
 
       when(mockErsUtil.buildEntitySummary(any())).thenReturn(schemeOrganiserString)
-      when(mockSessionService.fetchAll()(any())).thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
+      when(mockSessionService.fetchAll()(using any()))
+        .thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
 
-      val result = testSummaryDeclarationController.showSummaryDeclarationPage(csopRequestObject)(authRequest)
+      val result = testSummaryDeclarationController.showSummaryDeclarationPage(csopRequestObject)(using authRequest)
 
       status(result) shouldBe OK
       val document = Jsoup.parse(contentAsString(result))
@@ -551,9 +564,10 @@ class SummaryDeclarationControllerSpec
         )
 
       when(mockErsUtil.buildEntitySummary(any())).thenReturn(schemeOrganiserString)
-      when(mockSessionService.fetchAll()(any())).thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
+      when(mockSessionService.fetchAll()(using any()))
+        .thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
 
-      val result = testSummaryDeclarationController.showSummaryDeclarationPage(csopRequestObject)(authRequest)
+      val result = testSummaryDeclarationController.showSummaryDeclarationPage(csopRequestObject)(using authRequest)
 
       status(result) shouldBe OK
       val document = Jsoup.parse(contentAsString(result))
@@ -579,9 +593,10 @@ class SummaryDeclarationControllerSpec
         )
 
       when(mockErsUtil.buildEntitySummary(any())).thenReturn(schemeOrganiserString)
-      when(mockSessionService.fetchAll()(any())).thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
+      when(mockSessionService.fetchAll()(using any()))
+        .thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
 
-      val result = testSummaryDeclarationController.showSummaryDeclarationPage(csopRequestObject)(authRequest)
+      val result = testSummaryDeclarationController.showSummaryDeclarationPage(csopRequestObject)(using authRequest)
 
       status(result) shouldBe INTERNAL_SERVER_ERROR
       val document = Jsoup.parse(contentAsString(result))
@@ -603,9 +618,10 @@ class SummaryDeclarationControllerSpec
         )
 
       when(mockErsUtil.buildEntitySummary(any())).thenReturn(schemeOrganiserString)
-      when(mockSessionService.fetchAll()(any())).thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
+      when(mockSessionService.fetchAll()(using any()))
+        .thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
 
-      val result = testSummaryDeclarationController.showSummaryDeclarationPage(ersRequestObject)(authRequest)
+      val result = testSummaryDeclarationController.showSummaryDeclarationPage(ersRequestObject)(using authRequest)
 
       status(result) shouldBe OK
       val document = Jsoup.parse(contentAsString(result))
@@ -631,9 +647,10 @@ class SummaryDeclarationControllerSpec
         )
 
       when(mockErsUtil.buildEntitySummary(any())).thenReturn(schemeOrganiserString)
-      when(mockSessionService.fetchAll()(any())).thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
+      when(mockSessionService.fetchAll()(using any()))
+        .thenReturn(Future.successful(setCacheItem("id1", findList, addList)))
 
-      val result = testSummaryDeclarationController.showSummaryDeclarationPage(ersRequestObject)(authRequest)
+      val result = testSummaryDeclarationController.showSummaryDeclarationPage(ersRequestObject)(using authRequest)
 
       status(result) shouldBe INTERNAL_SERVER_ERROR
       val document = Jsoup.parse(contentAsString(result))

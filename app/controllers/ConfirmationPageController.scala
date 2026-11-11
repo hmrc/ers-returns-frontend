@@ -16,24 +16,24 @@
 
 package controllers
 
-import _root_.models._
+import _root_.models.*
 import config.ApplicationConfig
 import connectors.ErsConnector
 import controllers.auth.{AuthAction, RequestWithOptionalAuthContext}
 import metrics.Metrics
 import play.api.Logging
 import play.api.i18n.{I18nSupport, Messages}
-import play.api.mvc._
+import play.api.mvc.*
 import repositories.RateLimiterCache
 import services.FrontendSessionService
 import services.audit.AuditEvents
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
+import utils.*
 import utils.SessionKeys.{BUNDLE_REF, DATE_TIME_SUBMITTED}
-import utils._
 
-import java.time.{Instant, ZoneId}
 import java.time.format.DateTimeFormatter
+import java.time.{Instant, ZoneId}
 import java.util.concurrent.TimeUnit
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
@@ -49,7 +49,7 @@ class ConfirmationPageController @Inject() (
   globalErrorView: views.html.global_error,
   confirmationView: views.html.confirmation,
   authAction: AuthAction
-)(implicit val ec: ExecutionContext, val ersUtil: ERSUtil, val appConfig: ApplicationConfig)
+)(using val ec: ExecutionContext, val ersUtil: ERSUtil, val appConfig: ApplicationConfig)
     extends FrontendController(mcc) with I18nSupport with Metrics with JsonParser with Logging with Throttle {
 
   def generateRateLimitId(metadata: ErsMetaData): String = {
@@ -60,7 +60,7 @@ class ConfirmationPageController @Inject() (
     s"$schemeRef-$taxYear-$empRef"
   }
 
-  def confirmationPage() = authAction.async { implicit request =>
+  def confirmationPage(): Action[AnyContent] = authAction.async { implicit request =>
     {
       for {
         metadata: ErsMetaData <- sessionService.fetch[ErsMetaData](ersUtil.ERS_METADATA)
@@ -69,7 +69,7 @@ class ConfirmationPageController @Inject() (
             s"[ConfirmationPageController][confirmationPage] Fetched request object with SAP Number: ${metadata.sapNumber} " +
               s"and schemeRef: ${metadata.schemeInfo.schemeRef}"
           )
-        output                <- withThrottle(generateRateLimitId(metadata), showConfirmationPage()(request, hc))
+        output                <- withThrottle(generateRateLimitId(metadata), showConfirmationPage()(using request, hc))
       } yield output
     }.recoverWith { case RateLimitedException =>
       logger.info("[ConfirmationPageController][confirmationPage] Encountered RateLimitedException")
@@ -77,7 +77,7 @@ class ConfirmationPageController @Inject() (
     }
   }
 
-  def showConfirmationPage()(implicit
+  def showConfirmationPage()(using
     request: RequestWithOptionalAuthContext[AnyContent],
     hc: HeaderCarrier
   ): Future[Result] =
@@ -144,7 +144,7 @@ class ConfirmationPageController @Inject() (
       Future.successful(getGlobalErrorPage)
     }
 
-  def saveAndSubmit(alldata: ErsSummary, all: ErsMetaData, bundle: String)(implicit
+  def saveAndSubmit(alldata: ErsSummary, all: ErsMetaData, bundle: String)(using
     request: RequestWithOptionalAuthContext[AnyContent],
     hc: HeaderCarrier
   ): Future[Result] = {
@@ -208,7 +208,7 @@ class ConfirmationPageController @Inject() (
     }
   }
 
-  def getGlobalErrorPage(implicit request: RequestHeader, messages: Messages): Result =
+  def getGlobalErrorPage(using request: RequestHeader, messages: Messages): Result =
     Ok(
       globalErrorView(
         "ers.global_errors.title",

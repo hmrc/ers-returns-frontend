@@ -25,7 +25,7 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import java.net.URI
 import scala.concurrent.ExecutionContext
 
-class LanguageSwitchController @Inject() (appConfig: ApplicationConfig, val mcc: MessagesControllerComponents)(implicit
+class LanguageSwitchController @Inject() (appConfig: ApplicationConfig, val mcc: MessagesControllerComponents)(using
   val ec: ExecutionContext
 ) extends FrontendController(mcc) with I18nSupport {
 

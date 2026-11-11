@@ -16,7 +16,7 @@
 
 package services
 
-import models._
+import models.*
 import play.api.Logging
 import play.api.mvc.RequestHeader
 import utils.ERSUtil
@@ -25,10 +25,11 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class TrusteeService @Inject() (ersUtil: ERSUtil, sessionService: FrontendSessionService)(implicit ec: ExecutionContext)
-    extends Logging {
+class TrusteeService @Inject() (ersUtil: ERSUtil, sessionService: FrontendSessionService)(using
+  val ec: ExecutionContext
+) extends Logging {
 
-  def updateTrusteeCache(index: Int)(implicit request: RequestHeader): Future[Unit] =
+  def updateTrusteeCache(index: Int)(using request: RequestHeader): Future[Unit] =
     (for {
         name               <- sessionService.fetch[TrusteeName](ersUtil.TRUSTEE_NAME_CACHE)
         cachedTrustees     <- sessionService.fetchTrusteesOptionally()
@@ -54,7 +55,7 @@ class TrusteeService @Inject() (ersUtil: ERSUtil, sessionService: FrontendSessio
        }
      }).distinct
 
-  def deleteTrustee(index: Int)(implicit request: RequestHeader): Future[Boolean] =
+  def deleteTrustee(index: Int)(using request: RequestHeader): Future[Boolean] =
     (for {
       cachedTrusteeList <- sessionService.fetch[TrusteeDetailsList](ersUtil.TRUSTEES_CACHE)
       trusteeDetailsList = TrusteeDetailsList(filterDeletedTrustee(cachedTrusteeList, index))

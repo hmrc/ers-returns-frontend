@@ -22,11 +22,11 @@ import utils.{CountryCodes, ERSUtil}
 
 import javax.inject.Inject
 
-class DecoratorController @Inject() (val decorators: Array[Decorator])(implicit ERSUtil: ERSUtil) {
+class DecoratorController @Inject() (val decorators: Array[Decorator])(using ERSUtil: ERSUtil) {
 
   def addDecorator(decorator: Decorator): DecoratorController = new DecoratorController(decorators :+ decorator)
 
-  def decorate(implicit messages: Messages): String =
+  def decorate(using messages: Messages): String =
     ERSUtil.replaceAmpersand(
       decorators.map(decorator => decorator.decorate).mkString
     )
@@ -40,13 +40,13 @@ class DecoratorController @Inject() (val decorators: Array[Decorator])(implicit 
   def addAlterationsAmendsDecorator(altAmendsMap: Map[String, String]): DecoratorController =
     addDecorator(new AlterationsAmendsDecorator(altAmendsMap))
 
-  def addYesNoDecorator(msgKey: String, ersSummaryValue: String)(implicit messages: Messages): DecoratorController =
+  def addYesNoDecorator(msgKey: String, ersSummaryValue: String)(using messages: Messages): DecoratorController =
     addDecorator(new YesNoDecorator(Messages(msgKey), ersSummaryValue))
 
-  def addGroupSummaryDecorator(key: String, ersSummary: ErsSummary)(implicit messages: Messages): DecoratorController =
+  def addGroupSummaryDecorator(key: String, ersSummary: ErsSummary)(using messages: Messages): DecoratorController =
     addDecorator(new GroupSummaryDecorator(Messages(s"ers_group_summary.$key.title"), ersSummary.companies))
 
-  def addSchemeOrganiserDetailsDecorator(key: String, ersSummary: ErsSummary, countryCodes: CountryCodes)(implicit
+  def addSchemeOrganiserDetailsDecorator(key: String, ersSummary: ErsSummary, countryCodes: CountryCodes)(using
     messages: Messages
   ): DecoratorController =
     addDecorator(

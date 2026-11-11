@@ -21,7 +21,7 @@ import play.api.i18n.Messages
 
 class TrusteesDecorator(trusteesList: Option[TrusteeDetailsList]) extends Decorator {
 
-  def decorate(implicit messages: Messages): String =
+  def decorate(using messages: Messages): String =
     if (trusteesList.isDefined) {
       buildEntryMultiple(messages("ers_trustee_summary.title"), trusteesList.get.trustees.map(_.name).toArray)
     } else {

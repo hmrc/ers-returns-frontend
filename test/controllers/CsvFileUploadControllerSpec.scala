@@ -17,39 +17,39 @@
 package controllers
 
 import controllers.auth.RequestWithOptionalAuthContext
-import models._
-import models.upscan._
+import models.*
+import models.upscan.*
 import org.apache.pekko.actor.ActorSystem
 import org.apache.pekko.stream.Materializer
 import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers.{eq => meq, _}
-import org.mockito.Mockito._
+import org.mockito.ArgumentMatchers.eq as eqTo
+import org.mockito.ArgumentMatchers.{eq as meq, *}
+import org.mockito.Mockito.*
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatest.{BeforeAndAfterEach, OptionValues}
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.{Logger, i18n}
 import play.api.i18n.{MessagesApi, MessagesImpl}
 import play.api.libs.json.{JsObject, Json}
-import play.api.mvc._
+import play.api.mvc.*
 import play.api.mvc.request.RequestTarget
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
+import play.api.{Logger, i18n}
 import services.UpscanService
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.mongo.cache.CacheItem
+import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
+import uk.gov.hmrc.play.bootstrap.tools.LogCapturing
+import utils.*
 import utils.Fixtures.ersRequestObject
-import utils._
-import views.html._
+import views.html.*
 
 import java.time.Instant
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Random
-import org.mockito.ArgumentMatchers.{eq => eqTo}
-import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
-import uk.gov.hmrc.play.bootstrap.tools.LogCapturing
 
 class CsvFileUploadControllerSpec
     extends AnyWordSpecLike
@@ -74,9 +74,9 @@ class CsvFileUploadControllerSpec
     ExecutionContext.global
   )
 
-  implicit lazy val testMessages: MessagesImpl                 = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
-  implicit lazy val mat: Materializer                          = app.materializer
-  implicit val mockActorSystem: ActorSystem                    = app.injector.instanceOf[ActorSystem]
+  given testMessages: MessagesImpl                             = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
+  given mat: Materializer                                      = app.materializer
+  given mockActorSystem: ActorSystem                           = app.injector.instanceOf[ActorSystem]
   val globalErrorView: global_error                            = app.injector.instanceOf[global_error]
   val upscanCsvFileUploadView: upscan_csv_file_upload          = app.injector.instanceOf[upscan_csv_file_upload]
   val fileUploadErrorsView: file_upload_errors                 = app.injector.instanceOf[file_upload_errors]
@@ -106,7 +106,7 @@ class CsvFileUploadControllerSpec
       invalidMimeError,
       wrongCsvFileTypeView,
       testAuthAction
-    )(ec, ersUtil = ersUtil, mockAppConfig, mockActorSystem) {
+    )(using ec, ersUtil = ersUtil, mockAppConfig, mockActorSystem) {
       override lazy val allCsvFilesCacheRetryAmount: Int = 1
       override val logger: Logger                        = csvFileUploadControllerLogger
     }
@@ -114,24 +114,24 @@ class CsvFileUploadControllerSpec
   override def beforeEach(): Unit =
     setAuthMocks()
 
-  when(mockSessionService.fetch[RequestObject](refEq(mockErsUtil.ERS_REQUEST_OBJECT))(any(), any()))
+  when(mockSessionService.fetch[RequestObject](refEq(mockErsUtil.ERS_REQUEST_OBJECT))(using any(), any()))
     .thenReturn(Future.successful(ersRequestObject))
 
   when(
-    mockSessionService.fetch[ErsMetaData](refEq(mockErsUtil.ERS_METADATA))(any(), any())
+    mockSessionService.fetch[ErsMetaData](refEq(mockErsUtil.ERS_METADATA))(using any(), any())
   ).thenReturn(
     Future.successful(ErsMetaData(SchemeInfo("", Instant.now, "", "", "", ""), "", None, "", None, None))
   )
 
-  when(mockAuditEvents.auditSelectedCsvRadioButtons(any())(any())).thenReturn(Future.successful(Success))
+  when(mockAuditEvents.auditSelectedCsvRadioButtons(any())(using any())).thenReturn(Future.successful(Success))
 
   "uploadFilePage" should {
     "display file upload page" when {
       "form data is successfully retrieved from upscan" in {
         when(
-          mockSessionService.fetch[UpscanCsvFilesList](meq("csv-files-upload"))(any(), any())
+          mockSessionService.fetch[UpscanCsvFilesList](meq("csv-files-upload"))(using any(), any())
         ).thenReturn(Future.successful(notStartedUpscanCsvFilesList))
-        when(mockUpscanService.getUpscanFormDataCsv(UploadId(anyString()), any())(any(), any())) thenReturn Future
+        when(mockUpscanService.getUpscanFormDataCsv(UploadId(anyString()), any())(using any(), any())) thenReturn Future
           .successful(UpscanInitiateResponse(Reference("Reference"), "postTarget", formFields = Map()))
 
         val result = csvFileUploadController.uploadFilePage()(testFakeRequest)
@@ -149,10 +149,10 @@ class CsvFileUploadControllerSpec
           )
         )
         when(
-          mockSessionService.fetch[UpscanCsvFilesCallbackList](meq("check-csv-files"))(any(), any())
+          mockSessionService.fetch[UpscanCsvFilesCallbackList](meq("check-csv-files"))(using any(), any())
         ) thenReturn Future.successful(upscanCsvFilesCallbackList)
 
-        when(mockUpscanService.getUpscanFormDataCsv(UploadId(anyString()), any())(any(), any()))
+        when(mockUpscanService.getUpscanFormDataCsv(UploadId(anyString()), any())(using any(), any()))
           .thenReturn(Future.failed(new Exception("Expected exception")))
 
         val result = csvFileUploadController.uploadFilePage()(testFakeRequest)
@@ -161,7 +161,7 @@ class CsvFileUploadControllerSpec
       }
 
       "fetching cache data throws an exception" in {
-        when(mockSessionService.fetch[UpscanCsvFilesCallbackList](meq("check-csv-files"))(any(), any()))
+        when(mockSessionService.fetch[UpscanCsvFilesCallbackList](meq("check-csv-files"))(using any(), any()))
           .thenReturn(Future.failed(new Exception("Expected exception")))
 
         val result = csvFileUploadController.uploadFilePage()(testFakeRequest)
@@ -176,7 +176,7 @@ class CsvFileUploadControllerSpec
           )
         )
         when(
-          mockSessionService.fetch[UpscanCsvFilesCallbackList](meq("check-csv-files"))(any(), any())
+          mockSessionService.fetch[UpscanCsvFilesCallbackList](meq("check-csv-files"))(using any(), any())
         ) thenReturn Future.successful(upscanCsvFilesCallbackList)
 
         val result = csvFileUploadController.uploadFilePage()(testFakeRequest)
@@ -197,7 +197,7 @@ class CsvFileUploadControllerSpec
       val expectedLogMessage = "[CsvFileUploadController][uploadFilePage] The following files were selected to be " +
         "uploaded: Other_Grants_V4.csv, Other_Options_V4.csv, Other_Acquisition_V4.csv"
 
-      when(mockSessionService.fetch[UpscanCsvFilesList](meq("csv-files-upload"))(any(), any()))
+      when(mockSessionService.fetch[UpscanCsvFilesList](meq("csv-files-upload"))(using any(), any()))
         .thenReturn(Future.successful(UpscanCsvFilesList(upscanIds)))
 
       withCaptureOfLoggingFrom(csvFileUploadControllerLogger) { captureEvents =>
@@ -207,7 +207,7 @@ class CsvFileUploadControllerSpec
 
       verify(mockAuditEvents, times(1)).auditSelectedCsvRadioButtons(
         meq(List("Other_Grants_V4.csv", "Other_Options_V4.csv", "Other_Acquisition_V4.csv"))
-      )(any())
+      )(using any())
     }
 
     "log the selected csv files for SIP V7 when useV6andV7Scheme is enabled" in {
@@ -218,7 +218,7 @@ class CsvFileUploadControllerSpec
         schemeType = Some("SIP")
       )
 
-      when(mockSessionService.fetch[RequestObject](refEq(mockErsUtil.ERS_REQUEST_OBJECT))(any(), any()))
+      when(mockSessionService.fetch[RequestObject](refEq(mockErsUtil.ERS_REQUEST_OBJECT))(using any(), any()))
         .thenReturn(Future.successful(sipV7RequestObject))
       when(mockAppConfig.useV4andV5Scheme).thenReturn(false)
       when(mockAppConfig.useV6andV7Scheme).thenReturn(true)
@@ -230,7 +230,7 @@ class CsvFileUploadControllerSpec
       val expectedLogMessage            = "[CsvFileUploadController][uploadFilePage] The following files were selected to be " +
         "uploaded: SIP_Awards_V7.csv, SIP_Out_V7.csv"
 
-      when(mockSessionService.fetch[UpscanCsvFilesList](meq("csv-files-upload"))(any(), any()))
+      when(mockSessionService.fetch[UpscanCsvFilesList](meq("csv-files-upload"))(using any(), any()))
         .thenReturn(Future.successful(UpscanCsvFilesList(upscanSipIds)))
 
       withCaptureOfLoggingFrom(csvFileUploadControllerLogger) { captureEvents =>
@@ -240,7 +240,7 @@ class CsvFileUploadControllerSpec
 
       verify(mockAuditEvents, times(1)).auditSelectedCsvRadioButtons(
         meq(List("SIP_Awards_V7.csv", "SIP_Out_V7.csv"))
-      )(any[HeaderCarrier])
+      )(using any[HeaderCarrier])
 
     }
 
@@ -252,7 +252,7 @@ class CsvFileUploadControllerSpec
         schemeType = Some("CSOP")
       )
 
-      when(mockSessionService.fetch[RequestObject](refEq(mockErsUtil.ERS_REQUEST_OBJECT))(any(), any()))
+      when(mockSessionService.fetch[RequestObject](refEq(mockErsUtil.ERS_REQUEST_OBJECT))(using any(), any()))
         .thenReturn(Future.successful(csopV5RequestObject))
       when(mockAppConfig.useV4andV5Scheme).thenReturn(true)
       when(mockAppConfig.useV6andV7Scheme).thenReturn(false)
@@ -260,7 +260,7 @@ class CsvFileUploadControllerSpec
       val expectedLogMessage = "[CsvFileUploadController][uploadFilePage] The following files were selected to be " +
         "uploaded: CSOP_OptionsGranted_V5.csv, CSOP_OptionsRCL_V5.csv, CSOP_OptionsExercised_V5.csv"
 
-      when(mockSessionService.fetch[UpscanCsvFilesList](meq("csv-files-upload"))(any(), any()))
+      when(mockSessionService.fetch[UpscanCsvFilesList](meq("csv-files-upload"))(using any(), any()))
         .thenReturn(Future.successful(UpscanCsvFilesList(upscanIds)))
 
       withCaptureOfLoggingFrom(csvFileUploadControllerLogger) { captureEvents =>
@@ -270,7 +270,7 @@ class CsvFileUploadControllerSpec
 
       verify(mockAuditEvents, times(1)).auditSelectedCsvRadioButtons(
         meq(List("CSOP_OptionsGranted_V5.csv", "CSOP_OptionsRCL_V5.csv", "CSOP_OptionsExercised_V5.csv"))
-      )(any())
+      )(using any())
 
     }
   }
@@ -279,11 +279,11 @@ class CsvFileUploadControllerSpec
     "update the cache for the relevant uploadId to InProgress" in {
       val updatedCallbackCaptor: ArgumentCaptor[UpscanCsvFilesList] =
         ArgumentCaptor.forClass(classOf[UpscanCsvFilesList])
-      when(mockSessionService.fetch[UpscanCsvFilesList](meq("csv-files-upload"))(any(), any()))
+      when(mockSessionService.fetch[UpscanCsvFilesList](meq("csv-files-upload"))(using any(), any()))
         .thenReturn(Future.successful(notStartedUpscanCsvFilesList))
       when(
         mockSessionService
-          .cache[UpscanCsvFilesList](meq("csv-files-upload"), updatedCallbackCaptor.capture())(any(), any())
+          .cache[UpscanCsvFilesList](meq("csv-files-upload"), updatedCallbackCaptor.capture())(using any(), any())
       )
         .thenReturn(Future.successful(sessionPair))
 
@@ -293,9 +293,9 @@ class CsvFileUploadControllerSpec
 
     "redirect the user to validation results" when {
       "no file in the cache has UploadStatus of NotStarted after update" in {
-        when(mockSessionService.fetch[UpscanCsvFilesList](meq("csv-files-upload"))(any(), any()))
+        when(mockSessionService.fetch[UpscanCsvFilesList](meq("csv-files-upload"))(using any(), any()))
           .thenReturn(Future.successful(notStartedUpscanCsvFilesList))
-        when(mockSessionService.cache(meq("csv-files-upload"), any[UpscanCsvFilesList])(any(), any()))
+        when(mockSessionService.cache(meq("csv-files-upload"), any[UpscanCsvFilesList])(using any(), any()))
           .thenReturn(Future.successful(sessionPair))
 
         val result = csvFileUploadController.success(testUploadId)(testFakeRequest)
@@ -307,9 +307,9 @@ class CsvFileUploadControllerSpec
 
   "redirect the user to upload a file" when {
     "a file in the cache has an UploadStatus of NotStarted after update" in {
-      when(mockSessionService.fetch[UpscanCsvFilesList](meq("csv-files-upload"))(any(), any()))
+      when(mockSessionService.fetch[UpscanCsvFilesList](meq("csv-files-upload"))(using any(), any()))
         .thenReturn(Future.successful(multipleNotStartedUpscanCsvFilesList))
-      when(mockSessionService.cache(meq("csv-files-upload"), any[UpscanCsvFilesList])(any(), any()))
+      when(mockSessionService.cache(meq("csv-files-upload"), any[UpscanCsvFilesList])(using any(), any()))
         .thenReturn(Future.successful(sessionPair))
       val result = csvFileUploadController.success(testUploadId)(testFakeRequest)
       status(result)           shouldBe SEE_OTHER
@@ -320,7 +320,7 @@ class CsvFileUploadControllerSpec
 
   "display global error page" when {
     "Fetching the cache fails" in {
-      when(mockSessionService.fetch[UpscanCsvFilesList](meq("csv-files-upload"))(any(), any()))
+      when(mockSessionService.fetch[UpscanCsvFilesList](meq("csv-files-upload"))(using any(), any()))
         .thenReturn(Future.failed(new Exception("Expected Exception")))
 
       val result = csvFileUploadController.success(testUploadId)(testFakeRequest)
@@ -329,9 +329,9 @@ class CsvFileUploadControllerSpec
     }
 
     "saving the cache fails" in {
-      when(mockSessionService.fetch[UpscanCsvFilesList](meq("csv-files-upload"))(any(), any()))
+      when(mockSessionService.fetch[UpscanCsvFilesList](meq("csv-files-upload"))(using any(), any()))
         .thenReturn(Future.successful(multipleNotStartedUpscanCsvFilesList))
-      when(mockSessionService.cache(meq("csv-files-upload"), any[UpscanCsvFilesCallbackList])(any(), any()))
+      when(mockSessionService.cache(meq("csv-files-upload"), any[UpscanCsvFilesCallbackList])(using any(), any()))
         .thenReturn(Future.failed(new Exception("Expected Exception")))
 
       val result = csvFileUploadController.success(testUploadId)(testFakeRequest)
@@ -371,12 +371,12 @@ class CsvFileUploadControllerSpec
 
     "show the result of processValidationFailure() for authorised users" in {
       when(
-        mockSessionService.fetch[RequestObject](refEq(mockErsUtil.ERS_REQUEST_OBJECT))(any(), any())
+        mockSessionService.fetch[RequestObject](refEq(mockErsUtil.ERS_REQUEST_OBJECT))(using any(), any())
       ).thenReturn(
         Future.successful(ersRequestObject)
       )
       when(
-        mockSessionService.fetch[CheckFileType](refEq(mockErsUtil.FILE_TYPE_CACHE))(any(), any())
+        mockSessionService.fetch[CheckFileType](refEq(mockErsUtil.FILE_TYPE_CACHE))(using any(), any())
       ).thenReturn(
         Future.successful(CheckFileType(Some("csv")))
       )
@@ -410,59 +410,59 @@ class CsvFileUploadControllerSpec
 
     "return Ok if fetching CheckFileType from cache is successful" in {
       when(
-        mockSessionService.fetch[RequestObject](refEq(mockErsUtil.ERS_REQUEST_OBJECT))(any(), any())
+        mockSessionService.fetch[RequestObject](refEq(mockErsUtil.ERS_REQUEST_OBJECT))(using any(), any())
       ).thenReturn(
         Future.successful(ersRequestObject)
       )
       when(
-        mockSessionService.fetch[CheckFileType](refEq(mockErsUtil.FILE_TYPE_CACHE))(any(), any())
+        mockSessionService.fetch[CheckFileType](refEq(mockErsUtil.FILE_TYPE_CACHE))(using any(), any())
       ).thenReturn(
         Future.successful(CheckFileType(Some("csv")))
       )
 
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
-      val result      = csvFileUploadController.processValidationFailure()(authRequest)
+      val result      = csvFileUploadController.processValidationFailure()(using authRequest)
       status(result)        shouldBe OK
       contentAsString(result) should include(testMessages("file_upload_errors.title"))
     }
 
     "return the globalErrorPage if fetching CheckFileType from cache fails" in {
       when(
-        mockSessionService.fetch[CheckFileType](refEq("check-file-type"))(any(), any())
+        mockSessionService.fetch[CheckFileType](refEq("check-file-type"))(using any(), any())
       ).thenReturn(
         Future.failed(new RuntimeException)
       )
       when(
-        mockSessionService.fetch[RequestObject](any())(any(), any())
+        mockSessionService.fetch[RequestObject](any())(using any(), any())
       ).thenReturn(
         Future.successful(ersRequestObject)
       )
 
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
-      val result      = csvFileUploadController.processValidationFailure()(authRequest)
+      val result      = csvFileUploadController.processValidationFailure()(using authRequest)
       status(result)          shouldBe 500
       contentAsString(result) shouldBe contentAsString(
-        Future.successful(csvFileUploadController.getGlobalErrorPage(testFakeRequest, testMessages))
+        Future.successful(csvFileUploadController.getGlobalErrorPage(using testFakeRequest, testMessages))
       )
     }
 
     "return the globalErrorPage if fetching requestObject from cache fails" in {
       when(
-        mockSessionService.fetch[CheckFileType](refEq("check-file-type"))(any(), any())
+        mockSessionService.fetch[CheckFileType](refEq("check-file-type"))(using any(), any())
       ).thenReturn(
         Future.successful(CheckFileType(Some("csv")))
       )
       when(
-        mockSessionService.fetch[RequestObject](any())(any(), any())
+        mockSessionService.fetch[RequestObject](any())(using any(), any())
       ).thenReturn(
         Future.failed(new Exception)
       )
 
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
-      val result      = csvFileUploadController.processValidationFailure()(authRequest)
+      val result      = csvFileUploadController.processValidationFailure()(using authRequest)
       status(result)          shouldBe 500
       contentAsString(result) shouldBe contentAsString(
-        Future.successful(csvFileUploadController.getGlobalErrorPage(testFakeRequest, testMessages))
+        Future.successful(csvFileUploadController.getGlobalErrorPage(using testFakeRequest, testMessages))
       )
     }
 
@@ -486,7 +486,7 @@ class CsvFileUploadControllerSpec
         wrongCsvFileTypeView,
         testAuthAction
       ) {
-        override def processValidationResults()(implicit
+        override def processValidationResults()(using
           request: RequestWithOptionalAuthContext[AnyContent],
           hc: HeaderCarrier
         ): Future[Result] = Future(Ok)
@@ -526,7 +526,7 @@ class CsvFileUploadControllerSpec
         wrongCsvFileTypeView,
         testAuthAction
       ) {
-        override def removePresubmissionData(schemeInfo: SchemeInfo)(implicit
+        override def removePresubmissionData(schemeInfo: SchemeInfo)(using
           request: RequestWithOptionalAuthContext[AnyContent],
           hc: HeaderCarrier
         ): Future[Result] = Future(Ok)
@@ -535,54 +535,54 @@ class CsvFileUploadControllerSpec
 
     "return result of removePresubmissionData if fetching from the cache is successful" in {
       when(
-        mockSessionService.fetch[RequestObject](refEq(mockErsUtil.ERS_REQUEST_OBJECT))(any(), any())
+        mockSessionService.fetch[RequestObject](refEq(mockErsUtil.ERS_REQUEST_OBJECT))(using any(), any())
       ).thenReturn(
         Future.successful(ersRequestObject)
       )
       when(
-        mockSessionService.fetch[ErsMetaData](refEq(mockErsUtil.ERS_METADATA))(any(), any())
+        mockSessionService.fetch[ErsMetaData](refEq(mockErsUtil.ERS_METADATA))(using any(), any())
       ).thenReturn(
         Future.successful(ErsMetaData(SchemeInfo("", Instant.now, "", "", "", ""), "", None, "", None, None))
       )
 
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
-      val result      = csvFileUploadController.processValidationResults()(authRequest, hc)
+      val result      = csvFileUploadController.processValidationResults()(using authRequest, hc)
       status(result) shouldBe OK
     }
 
     "direct to ers errors page if fetching metaData from cache fails" in {
       when(
-        mockSessionService.fetch[ErsMetaData](anyString())(any(), any())
+        mockSessionService.fetch[ErsMetaData](anyString())(using any(), any())
       ).thenReturn(
         Future.failed(new RuntimeException)
       )
 
       when(
-        mockSessionService.fetch[RequestObject](any())(any(), any())
+        mockSessionService.fetch[RequestObject](any())(using any(), any())
       ).thenReturn(
         Future.successful(ersRequestObject)
       )
 
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
-      status(csvFileUploadController.processValidationResults()(authRequest, hc))
+      status(csvFileUploadController.processValidationResults()(using authRequest, hc))
 
     }
 
     "direct to ers errors page if fetching requestObject from cache fails" in {
       when(
-        mockSessionService.fetch[ErsMetaData](anyString())(any(), any())
+        mockSessionService.fetch[ErsMetaData](anyString())(using any(), any())
       ).thenReturn(
         Future.successful(ErsMetaData(SchemeInfo("", Instant.now, "", "", "", ""), "", None, "", None, None))
       )
 
       when(
-        mockSessionService.fetch[RequestObject](anyString())(any(), any())
+        mockSessionService.fetch[RequestObject](anyString())(using any(), any())
       ).thenReturn(
         Future.failed(new Exception)
       )
 
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
-      status(csvFileUploadController.processValidationResults()(authRequest, hc))
+      status(csvFileUploadController.processValidationResults()(using authRequest, hc))
 
     }
 
@@ -605,7 +605,7 @@ class CsvFileUploadControllerSpec
         wrongCsvFileTypeView,
         testAuthAction
       ) {
-        override def extractCsvCallbackData(schemeInfo: SchemeInfo)(implicit
+        override def extractCsvCallbackData(schemeInfo: SchemeInfo)(using
           request: RequestWithOptionalAuthContext[AnyContent],
           hc: HeaderCarrier
         ): Future[Result] = Future(Redirect(""))
@@ -615,13 +615,13 @@ class CsvFileUploadControllerSpec
     "return the result of extractCsvCallbackData if deleting presubmission data is successful" in {
       reset(mockErsConnector)
       when(
-        mockErsConnector.removePresubmissionData(any[SchemeInfo]())(any(), any())
+        mockErsConnector.removePresubmissionData(any[SchemeInfo]())(using any(), any())
       ).thenReturn(
         Future.successful(HttpResponse(OK, ""))
       )
 
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
-      val result      = csvFileUploadController.removePresubmissionData(mock[SchemeInfo])(authRequest, hc)
+      val result      = csvFileUploadController.removePresubmissionData(mock[SchemeInfo])(using authRequest, hc)
       status(result)                                           shouldBe SEE_OTHER
       result.futureValue.header.headers("Location").equals("") shouldBe true
     }
@@ -629,28 +629,28 @@ class CsvFileUploadControllerSpec
     "return Internal Server Error and show error page if deleting presubmission data fails" in {
       reset(mockErsConnector)
       when(
-        mockErsConnector.removePresubmissionData(any[SchemeInfo]())(any(), any())
+        mockErsConnector.removePresubmissionData(any[SchemeInfo]())(using any(), any())
       ).thenReturn(
         Future.successful(HttpResponse(INTERNAL_SERVER_ERROR, ""))
       )
 
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
-      val result      = csvFileUploadController.removePresubmissionData(mock[SchemeInfo])(authRequest, hc)
+      val result      = csvFileUploadController.removePresubmissionData(mock[SchemeInfo])(using authRequest, hc)
       status(result) shouldBe INTERNAL_SERVER_ERROR
     }
 
     "direct to ers errors page if deleting presubmission data throws exception" in {
       reset(mockErsConnector)
       when(
-        mockErsConnector.removePresubmissionData(any[SchemeInfo]())(any(), any())
+        mockErsConnector.removePresubmissionData(any[SchemeInfo]())(using any(), any())
       ).thenReturn(
         Future.failed(new RuntimeException)
       )
 
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
       contentAsBytes(
-        csvFileUploadController.removePresubmissionData(mock[SchemeInfo])(authRequest, hc)
-      ) shouldBe contentAsBytes(Future(csvFileUploadController.getGlobalErrorPage(testFakeRequest, testMessages)))
+        csvFileUploadController.removePresubmissionData(mock[SchemeInfo])(using authRequest, hc)
+      ) shouldBe contentAsBytes(Future(csvFileUploadController.getGlobalErrorPage(using testFakeRequest, testMessages)))
 
     }
 
@@ -675,7 +675,7 @@ class CsvFileUploadControllerSpec
       ) {
         override lazy val allCsvFilesCacheRetryAmount: Int = retryTimes
 
-        override def checkFileNames(csvCallbackData: List[UploadedSuccessfully], schemeInfo: SchemeInfo)(implicit
+        override def checkFileNames(csvCallbackData: List[UploadedSuccessfully], schemeInfo: SchemeInfo)(using
           request: RequestWithOptionalAuthContext[AnyContent],
           hc: HeaderCarrier
         ): Future[Result] = Future.successful(Ok("Validated"))
@@ -685,21 +685,23 @@ class CsvFileUploadControllerSpec
 
     "return global error page" when {
       "fetching data from cache util fails" in {
-        when(mockSessionService.fetch[UpscanCsvFilesCallbackList](anyString())(any(), any()))
+        when(mockSessionService.fetch[UpscanCsvFilesCallbackList](anyString())(using any(), any()))
           .thenReturn(Future.failed(new RuntimeException))
 
         val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
         contentAsString(
-          csvFileUploadController.extractCsvCallbackData(Fixtures.EMISchemeInfo)(authRequest, hc)
-        ) shouldBe contentAsString(Future(csvFileUploadController.getGlobalErrorPage(testFakeRequest, testMessages)))
+          csvFileUploadController.extractCsvCallbackData(Fixtures.EMISchemeInfo)(using authRequest, hc)
+        ) shouldBe contentAsString(
+          Future(csvFileUploadController.getGlobalErrorPage(using testFakeRequest, testMessages))
+        )
       }
 
       "data is missing from the cache map" in {
         when(
-          mockSessionService.fetch[UpscanCsvFilesList](meq("csv-files-upload"))(any(), any())
+          mockSessionService.fetch[UpscanCsvFilesList](meq("csv-files-upload"))(using any(), any())
         ).thenReturn(Future.successful(multipleInPrgoressUpscanCsvFilesList))
         when(
-          mockSessionService.fetchAll()(any())
+          mockSessionService.fetchAll()(using any())
         ) thenReturn Future.successful(
           CacheItem(
             "id",
@@ -716,14 +718,14 @@ class CsvFileUploadControllerSpec
           )
         )
         when(
-          mockSessionService.cache(any(), any())(any(), any())
+          mockSessionService.cache(any(), any())(using any(), any())
         ) thenReturn Future.successful(sessionPair)
 
         val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
-        val result      = csvFileUploadController.extractCsvCallbackData(Fixtures.EMISchemeInfo)(authRequest, hc)
+        val result      = csvFileUploadController.extractCsvCallbackData(Fixtures.EMISchemeInfo)(using authRequest, hc)
         status(result)          shouldBe INTERNAL_SERVER_ERROR
         contentAsString(result) shouldBe contentAsString(
-          Future(csvFileUploadController.getGlobalErrorPage(testFakeRequest, testMessages))
+          Future(csvFileUploadController.getGlobalErrorPage(using testFakeRequest, testMessages))
         )
       }
     }
@@ -733,10 +735,10 @@ class CsvFileUploadControllerSpec
       when(mockErsUtil.CHECK_CSV_FILES).thenReturn("check-csv-files")
       when(mockErsUtil.CSV_FILES_UPLOAD).thenReturn("csv-files-upload")
 
-      when(mockSessionService.fetch[UpscanCsvFilesList](meq("csv-files-upload"))(any(), any()))
+      when(mockSessionService.fetch[UpscanCsvFilesList](meq("csv-files-upload"))(using any(), any()))
         .thenReturn(Future.successful(multipleInPrgoressUpscanCsvFilesList))
 
-      when(mockSessionService.fetchAll()(any())).thenReturn(
+      when(mockSessionService.fetchAll()(using any())).thenReturn(
         Future(
           CacheItem(
             "id",
@@ -768,11 +770,11 @@ class CsvFileUploadControllerSpec
           )
         )
       )
-      when(mockSessionService.cache(any(), any())(any(), any())).thenReturn(Future.successful(sessionPair))
+      when(mockSessionService.cache(any(), any())(using any(), any())).thenReturn(Future.successful(sessionPair))
 
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
-      await(csvFileUploadControllerWithRetry(3).extractCsvCallbackData(Fixtures.EMISchemeInfo)(authRequest, hc))
-      verify(mockSessionService, times(2)).fetchAll()(any())
+      await(csvFileUploadControllerWithRetry(3).extractCsvCallbackData(Fixtures.EMISchemeInfo)(using authRequest, hc))
+      verify(mockSessionService, times(2)).fetchAll()(using any())
     }
 
     "return the result of validateCsv if fetching from cache is successful for one file" in {
@@ -781,10 +783,10 @@ class CsvFileUploadControllerSpec
       when(mockErsUtil.CSV_FILES_UPLOAD).thenReturn("csv-files-upload")
 
       when(
-        mockSessionService.fetch[UpscanCsvFilesList](meq("csv-files-upload"))(any(), any())
+        mockSessionService.fetch[UpscanCsvFilesList](meq("csv-files-upload"))(using any(), any())
       ).thenReturn(Future.successful(inProgressUpscanCsvFilesList))
       when(
-        mockSessionService.fetchAll()(any())
+        mockSessionService.fetchAll()(using any())
       ) thenReturn Future.successful(
         CacheItem(
           "id",
@@ -801,24 +803,25 @@ class CsvFileUploadControllerSpec
         )
       )
       when(
-        mockSessionService.cache(any(), any())(any(), any())
+        mockSessionService.cache(any(), any())(using any(), any())
       ) thenReturn Future.successful(sessionPair)
 
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
-      val result      = csvFileUploadControllerWithRetry(3).extractCsvCallbackData(Fixtures.EMISchemeInfo)(authRequest, hc)
+      val result      =
+        csvFileUploadControllerWithRetry(3).extractCsvCallbackData(Fixtures.EMISchemeInfo)(using authRequest, hc)
 
       status(result)          shouldBe OK
       contentAsString(result) shouldBe "Validated"
 
-      verify(mockSessionService, times(1)).fetchAll()(any())
+      verify(mockSessionService, times(1)).fetchAll()(using any())
     }
 
     "return the result of validateCsv if fetching from cache is successful for multiple files" in {
       when(
-        mockSessionService.fetch[UpscanCsvFilesList](meq("csv-files-upload"))(any(), any())
+        mockSessionService.fetch[UpscanCsvFilesList](meq("csv-files-upload"))(using any(), any())
       ).thenReturn(Future.successful(multipleInPrgoressUpscanCsvFilesList))
       when(
-        mockSessionService.fetchAll()(any())
+        mockSessionService.fetchAll()(using any())
       ) thenReturn Future.successful(
         CacheItem(
           "id",
@@ -835,11 +838,11 @@ class CsvFileUploadControllerSpec
         )
       )
       when(
-        mockSessionService.cache(any(), any())(any(), any())
+        mockSessionService.cache(any(), any())(using any(), any())
       ) thenReturn Future.successful(sessionPair)
 
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
-      val result      = csvFileUploadController.extractCsvCallbackData(Fixtures.EMISchemeInfo)(authRequest, hc)
+      val result      = csvFileUploadController.extractCsvCallbackData(Fixtures.EMISchemeInfo)(using authRequest, hc)
       status(result)          shouldBe OK
       contentAsString(result) shouldBe "Validated"
     }
@@ -847,24 +850,28 @@ class CsvFileUploadControllerSpec
     "direct to ers errors" when {
       "fetching from cache is successful but there is no callbackData" in {
         when(
-          mockSessionService.fetch[UpscanCsvFilesCallbackList](anyString())(any(), any())
+          mockSessionService.fetch[UpscanCsvFilesCallbackList](anyString())(using any(), any())
         ).thenReturn(Future.successful(UpscanCsvFilesCallbackList(List())))
 
         val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
         contentAsString(
-          csvFileUploadController.extractCsvCallbackData(Fixtures.EMISchemeInfo)(authRequest, hc)
-        ) shouldBe contentAsString(Future(csvFileUploadController.getGlobalErrorPage(testFakeRequest, testMessages)))
+          csvFileUploadController.extractCsvCallbackData(Fixtures.EMISchemeInfo)(using authRequest, hc)
+        ) shouldBe contentAsString(
+          Future(csvFileUploadController.getGlobalErrorPage(using testFakeRequest, testMessages))
+        )
       }
 
       "one of the files are not complete" in {
         when(
-          mockSessionService.fetch[UpscanCsvFilesCallbackList](anyString())(any(), any())
+          mockSessionService.fetch[UpscanCsvFilesCallbackList](anyString())(using any(), any())
         ).thenReturn(Future.successful(UpscanCsvFilesCallbackList(List())))
 
         val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
         contentAsString(
-          csvFileUploadController.extractCsvCallbackData(Fixtures.EMISchemeInfo)(authRequest, hc)
-        ) shouldBe contentAsString(Future(csvFileUploadController.getGlobalErrorPage(testFakeRequest, testMessages)))
+          csvFileUploadController.extractCsvCallbackData(Fixtures.EMISchemeInfo)(using authRequest, hc)
+        ) shouldBe contentAsString(
+          Future(csvFileUploadController.getGlobalErrorPage(using testFakeRequest, testMessages))
+        )
       }
     }
 
@@ -894,14 +901,14 @@ class CsvFileUploadControllerSpec
     "redirect to schemeOrganiserPage if validating is successful" in {
       reset(mockErsConnector)
       when(
-        mockErsConnector.validateCsvFileData(any[List[UploadedSuccessfully]](), any[SchemeInfo]())(any(), any())
+        mockErsConnector.validateCsvFileData(any[List[UploadedSuccessfully]](), any[SchemeInfo]())(using any(), any())
       ).thenReturn(
         Future.successful(HttpResponse(OK, ""))
       )
 
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
       val result      =
-        csvFileUploadController.validateCsv(mock[List[UploadedSuccessfully]], mock[SchemeInfo])(authRequest, hc)
+        csvFileUploadController.validateCsv(mock[List[UploadedSuccessfully]], mock[SchemeInfo])(using authRequest, hc)
       status(result)         shouldBe SEE_OTHER
       result.futureValue.header
         .headers("Location") shouldBe controllers.schemeOrganiser.routes.SchemeOrganiserBasedInUkController
@@ -912,14 +919,14 @@ class CsvFileUploadControllerSpec
     "redirect to validationFailure if validating fails" in {
       reset(mockErsConnector)
       when(
-        mockErsConnector.validateCsvFileData(any[List[UploadedSuccessfully]](), any[SchemeInfo]())(any(), any())
+        mockErsConnector.validateCsvFileData(any[List[UploadedSuccessfully]](), any[SchemeInfo]())(using any(), any())
       ).thenReturn(
         Future.successful(HttpResponse(BAD_REQUEST, ""))
       )
 
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
       val result      =
-        csvFileUploadController.validateCsv(mock[List[UploadedSuccessfully]], mock[SchemeInfo])(authRequest, hc)
+        csvFileUploadController.validateCsv(mock[List[UploadedSuccessfully]], mock[SchemeInfo])(using authRequest, hc)
       status(result)         shouldBe SEE_OTHER
       result.futureValue.header
         .headers("Location") shouldBe controllers.routes.CsvFileUploadController.validationFailure().toString
@@ -928,29 +935,31 @@ class CsvFileUploadControllerSpec
     "show error page if validating returns result other than OK and ACCEPTED" in {
       reset(mockErsConnector)
       when(
-        mockErsConnector.validateCsvFileData(any[List[UploadedSuccessfully]](), any[SchemeInfo]())(any(), any())
+        mockErsConnector.validateCsvFileData(any[List[UploadedSuccessfully]](), any[SchemeInfo]())(using any(), any())
       ).thenReturn(
         Future.successful(HttpResponse(INTERNAL_SERVER_ERROR, ""))
       )
 
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
       val result      =
-        csvFileUploadController.validateCsv(mock[List[UploadedSuccessfully]], mock[SchemeInfo])(authRequest, hc)
+        csvFileUploadController.validateCsv(mock[List[UploadedSuccessfully]], mock[SchemeInfo])(using authRequest, hc)
       status(result) shouldBe INTERNAL_SERVER_ERROR
     }
 
     "direct to ers errors page if connecting with validator is not successful" in {
       reset(mockErsConnector)
       when(
-        mockErsConnector.validateCsvFileData(any[List[UploadedSuccessfully]](), any[SchemeInfo]())(any(), any())
+        mockErsConnector.validateCsvFileData(any[List[UploadedSuccessfully]](), any[SchemeInfo]())(using any(), any())
       ).thenReturn(
         Future.failed(new RuntimeException)
       )
 
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
       contentAsString(
-        csvFileUploadController.validateCsv(mock[List[UploadedSuccessfully]], mock[SchemeInfo])(authRequest, hc)
-      ) shouldBe contentAsString(Future(csvFileUploadController.getGlobalErrorPage(testFakeRequest, testMessages)))
+        csvFileUploadController.validateCsv(mock[List[UploadedSuccessfully]], mock[SchemeInfo])(using authRequest, hc)
+      ) shouldBe contentAsString(
+        Future(csvFileUploadController.getGlobalErrorPage(using testFakeRequest, testMessages))
+      )
     }
   }
 
@@ -996,22 +1005,22 @@ class CsvFileUploadControllerSpec
       when(testRequestObject.schemeType).thenReturn(Some("CSOP"))
 
       when(
-        mockSessionService.fetch[UpscanCsvFilesList](eqTo(mockErsUtil.CSV_FILES_UPLOAD))(any(), any())
+        mockSessionService.fetch[UpscanCsvFilesList](eqTo(mockErsUtil.CSV_FILES_UPLOAD))(using any(), any())
       ) thenReturn Future.successful(testUpscanCsvFileList)
 
       when(
-        mockSessionService.fetch[RequestObject](eqTo(mockErsUtil.ERS_REQUEST_OBJECT))(any(), any())
+        mockSessionService.fetch[RequestObject](eqTo(mockErsUtil.ERS_REQUEST_OBJECT))(using any(), any())
       ) thenReturn Future.successful(testRequestObject)
       when(
-        mockErsUtil.getPageElement(any(), any(), any(), any())(any())
+        mockErsUtil.getPageElement(any(), any(), any(), any())(using any())
       ) thenReturn "CSOP_OptionsGranted_V4.csv"
       when(
-        mockErsConnector.validateCsvFileData(any[List[UploadedSuccessfully]](), any[SchemeInfo]())(any(), any())
+        mockErsConnector.validateCsvFileData(any[List[UploadedSuccessfully]](), any[SchemeInfo]())(using any(), any())
       ) thenReturn Future.successful(HttpResponse(OK, ""))
 
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
       val result      = csvFileUploadController
-        .checkFileNames(testCsvCallbackData, mockSchemeInfo)(authRequest, hc)
+        .checkFileNames(testCsvCallbackData, mockSchemeInfo)(using authRequest, hc)
       status(result)         shouldBe SEE_OTHER
       result.futureValue.header
         .headers("Location") shouldBe controllers.schemeOrganiser.routes.SchemeOrganiserBasedInUkController
@@ -1040,22 +1049,22 @@ class CsvFileUploadControllerSpec
       when(testRequestObject.schemeType).thenReturn(Some("CSOP"))
 
       when(
-        mockSessionService.fetch[UpscanCsvFilesList](eqTo(mockErsUtil.CSV_FILES_UPLOAD))(any(), any())
+        mockSessionService.fetch[UpscanCsvFilesList](eqTo(mockErsUtil.CSV_FILES_UPLOAD))(using any(), any())
       ) thenReturn Future.successful(testUpscanCsvFileList)
 
       when(
-        mockSessionService.fetch[RequestObject](eqTo(mockErsUtil.ERS_REQUEST_OBJECT))(any(), any())
+        mockSessionService.fetch[RequestObject](eqTo(mockErsUtil.ERS_REQUEST_OBJECT))(using any(), any())
       ) thenReturn Future.successful(testRequestObject)
       when(
-        mockErsUtil.getPageElement(any(), any(), any(), any())(any())
+        mockErsUtil.getPageElement(any(), any(), any(), any())(using any())
       ) thenReturn "CSOP_OptionsGranted_V7.csv"
       when(
-        mockErsConnector.validateCsvFileData(any[List[UploadedSuccessfully]](), any[SchemeInfo]())(any(), any())
+        mockErsConnector.validateCsvFileData(any[List[UploadedSuccessfully]](), any[SchemeInfo]())(using any(), any())
       ) thenReturn Future.successful(HttpResponse(OK, ""))
 
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
       val result      = csvFileUploadController
-        .checkFileNames(testCsvCallbackData, mockSchemeInfo)(authRequest, hc)
+        .checkFileNames(testCsvCallbackData, mockSchemeInfo)(using authRequest, hc)
       status(result)         shouldBe SEE_OTHER
       result.futureValue.header
         .headers("Location") shouldBe controllers.schemeOrganiser.routes.SchemeOrganiserBasedInUkController
@@ -1083,24 +1092,24 @@ class CsvFileUploadControllerSpec
       when(testRequestObject.schemeType).thenReturn(Some("csop"))
 
       when(
-        mockSessionService.fetch[UpscanCsvFilesList](eqTo(mockErsUtil.CSV_FILES_UPLOAD))(any(), any())
+        mockSessionService.fetch[UpscanCsvFilesList](eqTo(mockErsUtil.CSV_FILES_UPLOAD))(using any(), any())
       ) thenReturn Future.successful(testUpscanCsvFileList)
 
       when(
-        mockSessionService.fetch[RequestObject](eqTo(mockErsUtil.ERS_REQUEST_OBJECT))(any(), any())
+        mockSessionService.fetch[RequestObject](eqTo(mockErsUtil.ERS_REQUEST_OBJECT))(using any(), any())
       ) thenReturn Future.successful(testRequestObject)
 
       when(
-        mockErsUtil.getPageElement(any(), any(), any(), any())(any())
+        mockErsUtil.getPageElement(any(), any(), any(), any())(using any())
       ) thenReturn "CSOP_OptionsGranted_V4.csv"
 
       when(
-        mockErsConnector.validateCsvFileData(any[List[UploadedSuccessfully]](), any[SchemeInfo]())(any(), any())
+        mockErsConnector.validateCsvFileData(any[List[UploadedSuccessfully]](), any[SchemeInfo]())(using any(), any())
       ) thenReturn Future.successful(HttpResponse(OK, ""))
 
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
       val result      = csvFileUploadController
-        .checkFileNames(testCsvCallbackData, mockSchemeInfo)(authRequest, hc)
+        .checkFileNames(testCsvCallbackData, mockSchemeInfo)(using authRequest, hc)
 
       status(result)         shouldBe SEE_OTHER
       result.futureValue.header
@@ -1132,21 +1141,21 @@ class CsvFileUploadControllerSpec
       when(testRequestObject.getPageTitle)
         .thenReturn("CSOP - Company Share Option Plan scheme - XA1100000000000 - 2014 to 2015")
       when(
-        mockSessionService.fetch[UpscanCsvFilesList](eqTo(mockErsUtil.CSV_FILES_UPLOAD))(any(), any())
+        mockSessionService.fetch[UpscanCsvFilesList](eqTo(mockErsUtil.CSV_FILES_UPLOAD))(using any(), any())
       ) thenReturn Future.successful(testUpscanCsvFileList)
       when(testRequestObject.taxYear).thenReturn(Some("2014/15"))
       when(testRequestObject.schemeType).thenReturn(Some("CSOP"))
 
       when(
-        mockSessionService.fetch[RequestObject](eqTo(mockErsUtil.ERS_REQUEST_OBJECT))(any(), any())
+        mockSessionService.fetch[RequestObject](eqTo(mockErsUtil.ERS_REQUEST_OBJECT))(using any(), any())
       ) thenReturn Future.successful(testRequestObject)
       when(
-        mockErsUtil.getPageElement(any(), any(), any(), any())(any())
+        mockErsUtil.getPageElement(any(), any(), any(), any())(using any())
       ) thenReturn "CSOP_OptionsGranted_V4.csv"
 
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
       val result      = csvFileUploadController
-        .checkFileNames(testCsvCallbackData, mockSchemeInfo)(authRequest, hc)
+        .checkFileNames(testCsvCallbackData, mockSchemeInfo)(using authRequest, hc)
       status(result) shouldBe BAD_REQUEST
       val pageContent = contentAsString(result)
 
@@ -1167,17 +1176,17 @@ class CsvFileUploadControllerSpec
       val mockSchemeInfo: SchemeInfo = mock[SchemeInfo]
 
       when(
-        mockSessionService.fetch[UpscanCsvFilesList](any())(any(), any())
+        mockSessionService.fetch[UpscanCsvFilesList](any())(using any(), any())
       ).thenReturn(
         Future.failed(new RuntimeException)
       )
 
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
       val result      = csvFileUploadController
-        .checkFileNames(testCsvCallbackData, mockSchemeInfo)(authRequest, hc)
+        .checkFileNames(testCsvCallbackData, mockSchemeInfo)(using authRequest, hc)
       status(result)          shouldBe INTERNAL_SERVER_ERROR
       contentAsString(result) shouldBe contentAsString(
-        Future(csvFileUploadController.getGlobalErrorPage(testFakeRequest, testMessages))
+        Future(csvFileUploadController.getGlobalErrorPage(using testFakeRequest, testMessages))
       )
     }
 
@@ -1208,34 +1217,34 @@ class CsvFileUploadControllerSpec
         .thenReturn("CSOP - Company Share Option Plan scheme - XA1100000000000 - 2014 to 2015")
 
       when(
-        mockSessionService.fetch[UpscanCsvFilesList](eqTo(mockErsUtil.CSV_FILES_UPLOAD))(any(), any())
+        mockSessionService.fetch[UpscanCsvFilesList](eqTo(mockErsUtil.CSV_FILES_UPLOAD))(using any(), any())
       ) thenReturn Future.successful(testUpscanCsvFileList)
 
       when(
-        mockSessionService.fetch[RequestObject](eqTo(mockErsUtil.ERS_REQUEST_OBJECT))(any(), any())
+        mockSessionService.fetch[RequestObject](eqTo(mockErsUtil.ERS_REQUEST_OBJECT))(using any(), any())
       ) thenReturn Future.successful(testRequestObject)
 
       when(
-        mockErsUtil.getPageElement(any(), any(), eqTo("file0.file_name"), any())(any())
+        mockErsUtil.getPageElement(any(), any(), eqTo("file0.file_name"), any())(using any())
       ) thenReturn "CSOP_OptionsGranted_V4.csv"
 
       when(
-        mockErsUtil.getPageElement(any(), any(), eqTo("file0.description"), any())(any())
+        mockErsUtil.getPageElement(any(), any(), eqTo("file0.description"), any())(using any())
       ) thenReturn "Options granted"
 
       when(
-        mockErsUtil.getPageElement(any(), any(), eqTo("file1.file_name"), any())(any())
+        mockErsUtil.getPageElement(any(), any(), eqTo("file1.file_name"), any())(using any())
       ) thenReturn "CSOP_OptionsRCL_V4.csv"
 
       when(
-        mockErsUtil.getPageElement(any(), any(), eqTo("file1.description"), any())(any())
+        mockErsUtil.getPageElement(any(), any(), eqTo("file1.description"), any())(using any())
       ) thenReturn "Options released"
 
       when(mockErsUtil.getFileNameSuffix(any(), any())) thenReturn ".file_name"
       val authRequest = buildRequestWithAuth(Fixtures.buildFakeRequestWithSessionIdCSOP("GET"))
 
       val result =
-        csvFileUploadController.checkFileNames(testCsvCallbackData, mockSchemeInfo)(authRequest, hc)
+        csvFileUploadController.checkFileNames(testCsvCallbackData, mockSchemeInfo)(using authRequest, hc)
 
       status(result) shouldBe BAD_REQUEST
 

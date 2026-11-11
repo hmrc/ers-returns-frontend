@@ -23,7 +23,7 @@ import models.RequestObject
 import play.api.Logging
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, Messages}
-import play.api.mvc._
+import play.api.mvc.*
 import services.{FrontendSessionService, TrusteeService}
 import uk.gov.hmrc.play.bootstrap.controller.WithUrlEncodedOnlyFormBinding
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -40,7 +40,7 @@ class TrusteeRemoveController @Inject() (
   globalErrorView: views.html.global_error,
   trusteeService: TrusteeService,
   val sessionService: FrontendSessionService
-)(implicit executionContext: ExecutionContext, appConfig: ApplicationConfig, ersUtil: ERSUtil)
+)(using val executionContext: ExecutionContext, val appConfig: ApplicationConfig, val ersUtil: ERSUtil)
     extends FrontendController(mcc) with WithUrlEncodedOnlyFormBinding with I18nSupport with Logging {
 
   private val form: Form[Boolean] = yesNoFormProvider.withPrefix("ers_trustee_remove")
@@ -97,7 +97,7 @@ class TrusteeRemoveController @Inject() (
     }
   }
 
-  def getGlobalErrorPage(implicit request: RequestHeader, messages: Messages): Result =
+  def getGlobalErrorPage(using request: RequestHeader, messages: Messages): Result =
     Ok(
       globalErrorView(
         "ers.global_errors.title",

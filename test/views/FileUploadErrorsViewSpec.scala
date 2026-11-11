@@ -29,10 +29,10 @@ class FileUploadErrorsViewSpec extends ViewSpecBase with FileUploadFixtures with
 
   private val view = app.injector.instanceOf[file_upload_errors]
 
-  implicit val ersUtil: ERSUtil                             = app.injector.instanceOf[ERSUtil]
-  implicit val appConfig: ApplicationConfig                 = app.injector.instanceOf[ApplicationConfig]
-  implicit val request: FakeRequest[AnyContentAsEmpty.type] = fakeRequest
-  implicit val messages: Messages                           = testMessages
+  given ersUtil: ERSUtil                             = app.injector.instanceOf[ERSUtil]
+  given appConfig: ApplicationConfig                 = app.injector.instanceOf[ApplicationConfig]
+  given request: FakeRequest[AnyContentAsEmpty.type] = fakeRequest
+  given messages: Messages                           = testMessages
 
   "file_upload_errors_ods view" should {
 
