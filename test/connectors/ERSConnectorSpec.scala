@@ -17,62 +17,33 @@
 package connectors
 
 import com.github.tomakehurst.wiremock.client.WireMock.*
+import com.github.tomakehurst.wiremock.http.Fault
 import controllers.auth.RequestWithOptionalAuthContext
 import models.upscan.UploadedSuccessfully
 import models.{ERSAuthData, ErsMetaData, ErsSummary, SchemeInfo}
-import org.apache.pekko.stream.Materializer
-import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{reset as mreset, *}
+import org.mockito.Mockito.reset as mreset
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
-import org.scalatest.{BeforeAndAfter, OptionValues}
-import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.i18n
-import play.api.i18n.{MessagesApi, MessagesImpl}
 import play.api.libs.json.{JsObject, Json}
-import play.api.mvc.{
-  AnyContent, DefaultActionBuilder, DefaultMessagesControllerComponents, MessagesControllerComponents
-}
+import play.api.mvc.AnyContent
 import play.api.test.Helpers.*
-import uk.gov.hmrc.http.HttpReads.Implicits.*
+import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.http.client.HttpClientV2
-import uk.gov.hmrc.http.{HttpReads, HttpResponse}
-import utils.{ERSFakeApplicationConfig, ErsTestHelper, UpscanData, WireMockHelper}
+import utils.{ErsTestHelper, UpscanData, WireMockHelper}
 
-import java.net.URL
 import java.time.Instant
-import scala.concurrent.{ExecutionContext, Future}
 
 class ERSConnectorSpec
     extends AnyWordSpecLike
     with Matchers
-    with OptionValues
-    with MockitoSugar
-    with ERSFakeApplicationConfig
     with ErsTestHelper
     with WireMockHelper
     with UpscanData
-    with BeforeAndAfter
     with GuiceOneAppPerSuite {
 
-  lazy val newConfig: Map[String, Any] = config + ("microservice.services.ers-file-validator.port" -> server.port())
-
-  val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
-    messagesActionBuilder,
-    DefaultActionBuilder(stubBodyParser[AnyContent]()),
-    cc.parsers,
-    fakeApplication().injector.instanceOf[MessagesApi],
-    cc.langs,
-    cc.fileMimeTypes,
-    ExecutionContext.global
-  )
-
-  given testMessages: MessagesImpl = MessagesImpl(i18n.Lang("en"), mockMCC.messagesApi)
-  given mat: Materializer          = app.materializer
-  given authContext: ERSAuthData   = defaultErsAuthData
-  lazy val testHttp: HttpClientV2  = app.injector.instanceOf[HttpClientV2]
+  given authContext: ERSAuthData  = defaultErsAuthData
+  lazy val testHttp: HttpClientV2 = app.injector.instanceOf[HttpClientV2]
 
   override val requestWithAuth: RequestWithOptionalAuthContext[AnyContent] =
     RequestWithOptionalAuthContext(testFakeRequest.withSession("sessionId" -> "someSessionId"), defaultErsAuthData)
@@ -80,13 +51,8 @@ class ERSConnectorSpec
   lazy val schemeInfo: SchemeInfo = SchemeInfo("XA1100000000000", Instant.now, "1", "2016", "EMI", "EMI")
 
   lazy val ersConnector: ErsConnector = new ErsConnector(testHttp, mockAppConfig) {
-    override lazy val ersUrl       = "ers-returns"
+    override lazy val ersUrl       = server.baseUrl()
     override lazy val validatorUrl = s"http://localhost:${server.port()}/process-file"
-  }
-
-  lazy val ersConnectorMockHttp: ErsConnector = new ErsConnector(mockHttp, mockAppConfig) {
-    override lazy val ersUrl       = "http://localhost:9226"
-    override lazy val validatorUrl = "http://localhost:9226"
   }
 
   val mockSchemeInfo: SchemeInfo = SchemeInfo("schemeRef", Instant.now, "1", "2020", "schemeType", "schemeName")
@@ -95,37 +61,26 @@ class ERSConnectorSpec
   val mockErsSummary: ErsSummary =
     ErsSummary("", "", None, Instant.now, ersMetaData, None, None, None, None, None, None, None, None)
 
-  override def beforeEach(): Unit = {
-    super.beforeEach()
-
-    mreset(mockHttp)
-    mreset(mockRequestBuilder)
-
-    when(mockHttp.get(any())(any())).thenReturn(mockRequestBuilder)
-    when(mockHttp.post(any())(any())).thenReturn(mockRequestBuilder)
-    when(mockHttp.put(any())(any())).thenReturn(mockRequestBuilder)
-    when(mockRequestBuilder.setHeader(any())).thenReturn(mockRequestBuilder)
-    when(mockRequestBuilder.withBody(any())(any(), any(), any())).thenReturn(mockRequestBuilder)
-  }
-
   lazy val data: JsObject = Json.obj(
     "schemeRef" -> "XA1100000000000",
     "confTime"  -> "2016-08-05T11:14:43"
   )
 
   "validateFileData" should {
+
     "call file validator using empref from auth context" in {
+      val expectedPath = urlEqualTo("/process-file/ers/123%2FABCDE/process-file")
 
-      val stringCaptor: ArgumentCaptor[URL] = ArgumentCaptor.forClass(classOf[URL])
-      when(mockHttp.post(stringCaptor.capture())(any())).thenReturn(mockRequestBuilder)
-      when(mockRequestBuilder.withBody(any())(any(), any(), any())).thenReturn(mockRequestBuilder)
-      when(mockRequestBuilder.execute(any[HttpReads[HttpResponse]], any()))
-        .thenReturn(Future(HttpResponse(status = OK, body = "")))
+      server.stubFor(
+        post(expectedPath).willReturn(aResponse().withStatus(OK))
+      )
 
-      val result =
-        await(ersConnectorMockHttp.validateFileData(uploadedSuccessfully, schemeInfo)(using requestWithAuth, hc))
-      result.status                shouldBe OK
-      stringCaptor.getValue.toString should include("123%2FABCDE")
+      val result = await(
+        ersConnector.validateFileData(uploadedSuccessfully, schemeInfo)(using requestWithAuth, hc)
+      )
+
+      server.verify(1, postRequestedFor(expectedPath))
+      result.status shouldBe OK
     }
 
     "return the response from file-validator" when {
@@ -184,28 +139,40 @@ class ERSConnectorSpec
       }
 
       "validator throw Exception" in {
-        when(mockRequestBuilder.execute(any[HttpReads[HttpResponse]], any()))
-          .thenReturn(Future.failed(new Exception("Test exception")))
-        val result =
-          await(ersConnectorMockHttp.validateFileData(uploadedSuccessfully, schemeInfo)(using requestWithAuth, hc))
+
+        val expectedPath = urlEqualTo("/process-file/ers/123%2FABCDE/process-file")
+
+        server.stubFor(
+          post(expectedPath)
+            .willReturn(aResponse().withFault(Fault.EMPTY_RESPONSE))
+        )
+
+        val result = await(
+          ersConnector.validateFileData(uploadedSuccessfully, schemeInfo)(using requestWithAuth, hc)
+        )
+
+        server.verify(postRequestedFor(expectedPath))
         result.status shouldBe BAD_REQUEST
+        result.body   shouldBe ""
+
       }
     }
   }
 
   "validateCsvFileData" should {
     "call file validator using empref from auth context" in {
-      val stringCaptor: ArgumentCaptor[URL] = ArgumentCaptor.forClass(classOf[URL])
+      val expectedPath = urlEqualTo("/process-file/ers/123%2FABCDE/process-file")
 
-      when(mockHttp.post(stringCaptor.capture())(any())).thenReturn(mockRequestBuilder)
-      when(mockRequestBuilder.withBody(any())(any(), any(), any())).thenReturn(mockRequestBuilder)
-      when(mockRequestBuilder.execute(any[HttpReads[HttpResponse]], any()))
-        .thenReturn(Future(HttpResponse(status = OK, body = "")))
+      server.stubFor(
+        post(expectedPath).willReturn(aResponse().withStatus(OK))
+      )
 
-      val result =
-        await(ersConnectorMockHttp.validateFileData(uploadedSuccessfully, schemeInfo)(using requestWithAuth, hc))
-      result.status                shouldBe OK
-      stringCaptor.getValue.toString should include("123%2FABCDE")
+      val result = await(
+        ersConnector.validateFileData(uploadedSuccessfully, schemeInfo)(using requestWithAuth, hc)
+      )
+
+      server.verify(1, postRequestedFor(expectedPath))
+      result.status shouldBe OK
     }
 
     "return the response from file-validator" when {
@@ -285,65 +252,86 @@ class ERSConnectorSpec
   }
 
   "calling retrieveSubmissionData" should {
+    val path = urlEqualTo("/ers/123%2FABCDE/retrieve-submission-data")
     "successful retrieving" in {
-      when(mockRequestBuilder.execute(any[HttpReads[HttpResponse]], any()))
-        .thenReturn(Future.successful(HttpResponse(OK, "")))
+      server.stubFor(
+        post(path)
+          .withRequestBody(equalToJson(Json.stringify(data)))
+          .willReturn(aResponse().withStatus(OK))
+      )
 
-      val result = await(ersConnectorMockHttp.retrieveSubmissionData(data)(using requestWithAuth, hc))
+      val result = await(ersConnector.retrieveSubmissionData(data)(using requestWithAuth, hc))
+
+      server.verify(postRequestedFor(path))
       result.status shouldBe OK
     }
 
     "failed retrieving" in {
-      when(mockRequestBuilder.execute(any[HttpReads[HttpResponse]], any()))
-        .thenReturn(Future.successful(HttpResponse(INTERNAL_SERVER_ERROR, "")))
+      server.stubFor(
+        post(path)
+          .withRequestBody(equalToJson(Json.stringify(data)))
+          .willReturn(aResponse().withStatus(INTERNAL_SERVER_ERROR))
+      )
 
-      val result = await(ersConnectorMockHttp.retrieveSubmissionData(data)(using requestWithAuth, hc))
+      val result = await(ersConnector.retrieveSubmissionData(data)(using requestWithAuth, hc))
+
+      server.verify(postRequestedFor(path))
       result.status shouldBe INTERNAL_SERVER_ERROR
     }
 
     "throws exception" in {
-      when(mockRequestBuilder.execute(any[HttpReads[HttpResponse]], any()))
-        .thenReturn(Future.failed(new RuntimeException))
+      val expectedBody = equalToJson(Json.stringify(data))
+
+      server.stubFor(
+        post(path)
+          .withRequestBody(expectedBody)
+          .willReturn(aResponse().withFault(Fault.EMPTY_RESPONSE))
+      )
 
       intercept[Exception] {
         await(ersConnector.retrieveSubmissionData(data)(using requestWithAuth, hc))
       }
+
+      server.verify(postRequestedFor(path).withRequestBody(expectedBody))
+
     }
   }
 
   "getCallbackRecord" should {
     "return an UploadStatus" when {
       "the response is successful and the status is OK" in {
-        val expectedName       = "fileName"
-        val expectedUrl        = "downloadUrl"
-        val json               =
-          s"""{"_type": "UploadedSuccessfully", "name": "$expectedName", "downloadUrl": "$expectedUrl"}"""
-        val successfulResponse = HttpResponse(OK, json, Map.empty)
+        val path         = urlEqualTo("/process-file/ers/someSessionId/get-callback")
+        val expectedName = "fileName"
+        val expectedUrl  = "downloadUrl"
 
-        when(mockRequestBuilder.execute(any[HttpReads[HttpResponse]], any()))
-          .thenReturn(Future.successful(successfulResponse))
+        val json = Json.obj(
+          "_type"       -> "UploadedSuccessfully",
+          "name"        -> expectedName,
+          "downloadUrl" -> expectedUrl
+        )
 
-        val result = await(ersConnectorMockHttp.getCallbackRecord(using requestWithAuth, hc))
-        result shouldBe Some(UploadedSuccessfully("fileName", "downloadUrl", mimeType = None))
+        server.stubFor(
+          get(path).willReturn(okJson(Json.stringify(json)))
+        )
+
+        val result = await(ersConnector.getCallbackRecord(using requestWithAuth, hc))
+
+        server.verify(1, getRequestedFor(path))
+        result shouldBe Some(UploadedSuccessfully(expectedName, expectedUrl, mimeType = None))
       }
     }
 
     "return None" when {
       "the response status is not OK" in {
-        when(mockRequestBuilder.execute(any[HttpReads[HttpResponse]], any()))
-          .thenReturn(Future.successful(HttpResponse(NOT_FOUND, "")))
-
-        val result = await(ersConnectorMockHttp.getCallbackRecord(using requestWithAuth, hc))
+        val result = await(ersConnector.getCallbackRecord(using requestWithAuth, hc))
         result shouldBe None
       }
     }
 
     "return None" when {
       "an exception occurs during the GET request" in {
-        when(mockRequestBuilder.execute(any[HttpReads[HttpResponse]], any()))
-          .thenReturn(Future.failed(new Exception("Test exception")))
 
-        val result = await(ersConnectorMockHttp.getCallbackRecord(using requestWithAuth, hc))
+        val result = await(ersConnector.getCallbackRecord(using requestWithAuth, hc))
         result shouldBe None
       }
     }
@@ -352,14 +340,21 @@ class ERSConnectorSpec
   "updateCallbackRecord" should {
     "return NO_CONTENT" when {
       "update is successful" in {
-        when(mockRequestBuilder.execute(any[HttpReads[HttpResponse]], any()))
-          .thenReturn(Future.successful(HttpResponse(NO_CONTENT, "")))
+        val sessionId    = "sessionId"
+        val path         = urlEqualTo(s"/process-file/ers/$sessionId/update-callback")
+        val uploadStatus = UploadedSuccessfully("fileId", "downloadUrl", mimeType = None)
 
-        val result = await(
-          ersConnectorMockHttp.updateCallbackRecord(
-            UploadedSuccessfully("fileId", "downloadUrl", mimeType = None),
-            "sessionId"
-          )(using hc)
+        server.stubFor(
+          put(path).willReturn(aResponse().withStatus(NO_CONTENT))
+        )
+
+        val result = await(ersConnector.updateCallbackRecord(uploadStatus, sessionId)(using hc))
+
+        server.verify(
+          1,
+          putRequestedFor(path).withRequestBody(
+            equalToJson("""{"_type":"UploadedSuccessfully","name":"fileId","downloadUrl":"downloadUrl"}""")
+          )
         )
         result shouldBe NO_CONTENT
       }
@@ -367,11 +362,8 @@ class ERSConnectorSpec
 
     "throw an exception" when {
       "response status is not NO_CONTENT" in {
-        when(mockRequestBuilder.execute(any[HttpReads[HttpResponse]], any()))
-          .thenReturn(Future.successful(HttpResponse(BAD_REQUEST, "")))
-
         an[Exception] should be thrownBy await(
-          ersConnectorMockHttp.updateCallbackRecord(
+          ersConnector.updateCallbackRecord(
             UploadedSuccessfully("fileId", "downloadUrl", mimeType = None),
             "sessionId"
           )(using hc)
@@ -381,11 +373,8 @@ class ERSConnectorSpec
 
     "throw an exception" when {
       "an exception occurs during the PUT request" in {
-        when(mockHttp.put(any())(any()).execute[HttpResponse])
-          .thenReturn(Future.failed(new Exception("Test exception")))
-
         an[Exception] should be thrownBy await(
-          ersConnectorMockHttp.updateCallbackRecord(
+          ersConnector.updateCallbackRecord(
             UploadedSuccessfully("fileId", "downloadUrl", mimeType = None),
             "sessionId"
           )(using hc)
@@ -396,30 +385,29 @@ class ERSConnectorSpec
 
   "createCallbackRecord" should {
     "return CREATED" when {
-      "callback record is created successfully" in {
-        when(mockRequestBuilder.execute(any[HttpReads[HttpResponse]], any()))
-          .thenReturn(Future.successful(HttpResponse(CREATED, "")))
+      val path = urlEqualTo("/process-file/ers/someSessionId/create-callback")
+      "return CREATED when the callback record is created successfully" in {
 
-        val result = await(ersConnectorMockHttp.createCallbackRecord(using requestWithAuth, hc))
+        server.stubFor(
+          post(path).willReturn(aResponse().withStatus(CREATED))
+        )
+
+        val result = await(ersConnector.createCallbackRecord(using requestWithAuth, hc))
+        server.verify(1, postRequestedFor(path))
+
         result shouldBe CREATED
       }
     }
 
     "throw an exception" when {
       "response status is not CREATED" in {
-        when(mockRequestBuilder.execute(any[HttpReads[HttpResponse]], any()))
-          .thenReturn(Future.successful(HttpResponse(BAD_REQUEST, "")))
-
-        an[Exception] should be thrownBy await(ersConnectorMockHttp.createCallbackRecord(using requestWithAuth, hc))
+        an[Exception] should be thrownBy await(ersConnector.createCallbackRecord(using requestWithAuth, hc))
       }
     }
 
     "throw an exception" when {
       "an exception occurs during the POST request" in {
-        when(mockRequestBuilder.execute(any[HttpReads[HttpResponse]], any()))
-          .thenReturn(Future.failed(new Exception("Test exception")))
-
-        an[Exception] should be thrownBy await(ersConnectorMockHttp.createCallbackRecord(using requestWithAuth, hc))
+        an[Exception] should be thrownBy await(ersConnector.createCallbackRecord(using requestWithAuth, hc))
       }
     }
 
@@ -427,11 +415,9 @@ class ERSConnectorSpec
       "no session ID in the request" in {
         val requestWithAuthNoSession: RequestWithOptionalAuthContext[AnyContent] =
           RequestWithOptionalAuthContext(testFakeRequest, defaultErsAuthData)
-        when(mockRequestBuilder.execute(any[HttpReads[HttpResponse]], any()))
-          .thenReturn(Future.failed(new Exception("Test exception")))
 
         an[Exception] should be thrownBy await(
-          ersConnectorMockHttp.createCallbackRecord(using requestWithAuthNoSession, hc)
+          ersConnector.createCallbackRecord(using requestWithAuthNoSession, hc)
         )
       }
     }
@@ -441,37 +427,63 @@ class ERSConnectorSpec
     "return an HttpResponse" when {
 
       "the POST request is successful" in {
-        val mockData: JsObject = Json.obj("key" -> "value")
-        val successfulResponse = HttpResponse(OK, "")
-        when(mockRequestBuilder.execute(any[HttpReads[HttpResponse]], any()))
-          .thenReturn(Future.successful(successfulResponse))
+        val mockData = Json.obj("key" -> "value")
+        val path     = urlEqualTo("/ers/123%2FABCDE/retrieve-submission-data")
 
-        val result = await(ersConnectorMockHttp.retrieveSubmissionData(mockData)(using requestWithAuth, hc))
-        result.status shouldBe successfulResponse.status
+        server.stubFor(
+          post(path).willReturn(aResponse().withStatus(OK))
+        )
+
+        val result = await(ersConnector.retrieveSubmissionData(mockData)(using requestWithAuth, hc))
+
+        server.verify(
+          1,
+          postRequestedFor(path).withRequestBody(equalToJson(Json.stringify(mockData)))
+        )
+        result.status shouldBe OK
       }
     }
 
     "return an error HttpResponse" when {
 
       "response status is not OK" in {
-        val mockData: JsObject = Json.obj("key" -> "value")
-        when(mockRequestBuilder.execute(any[HttpReads[HttpResponse]], any()))
-          .thenReturn(Future.successful(HttpResponse(BAD_REQUEST, "")))
+        val mockData = Json.obj("key" -> "value")
+        val path     = urlEqualTo("/ers/123%2FABCDE/retrieve-submission-data")
 
-        val result = await(ersConnectorMockHttp.retrieveSubmissionData(mockData)(using requestWithAuth, hc))
+        server.stubFor(
+          post(path).willReturn(aResponse().withStatus(BAD_REQUEST))
+        )
+
+        val result = await(
+          ersConnector.retrieveSubmissionData(mockData)(using requestWithAuth, hc)
+        )
+
+        server.verify(
+          1,
+          postRequestedFor(path).withRequestBody(equalToJson(Json.stringify(mockData)))
+        )
         result.status shouldBe BAD_REQUEST
       }
     }
 
     "throw an exception" when {
       "an exception occurs during the POST request" in {
-        val mockData: JsObject = Json.obj("key" -> "value")
-        when(mockRequestBuilder.execute(any[HttpReads[HttpResponse]], any()))
-          .thenReturn(Future.failed(new Exception("Test exception")))
+        val mockData     = Json.obj("key" -> "value")
+        val path         = urlEqualTo("/ers/123%2FABCDE/retrieve-submission-data")
+        val expectedBody = equalToJson(Json.stringify(mockData))
 
-        an[Exception] should be thrownBy await(
-          ersConnectorMockHttp.retrieveSubmissionData(mockData)(using requestWithAuth, hc)
+        server.stubFor(
+          post(path)
+            .withRequestBody(expectedBody)
+            .willReturn(aResponse().withFault(Fault.EMPTY_RESPONSE))
         )
+
+        val failure = await(
+          ersConnector.retrieveSubmissionData(mockData)(using requestWithAuth, hc).failed
+        )
+
+        server.verify(postRequestedFor(path).withRequestBody(expectedBody))
+        failure shouldBe an[Exception]
       }
     }
   }
@@ -480,11 +492,18 @@ class ERSConnectorSpec
     "return an HttpResponse" when {
 
       "the POST request is successful" in {
-        val successfulResponse = HttpResponse(OK, "")
-        when(mockRequestBuilder.execute(any[HttpReads[HttpResponse]], any()))
-          .thenReturn(Future.successful(successfulResponse))
+        val path         = urlEqualTo("/ers/123%2FABCDE/removePresubmissionData")
+        val expectedBody = equalToJson(Json.stringify(Json.toJson(mockSchemeInfo)))
 
-        val result = await(ersConnectorMockHttp.removePresubmissionData(mockSchemeInfo)(using requestWithAuth, hc))
+        server.stubFor(
+          post(path).willReturn(aResponse().withStatus(OK))
+        )
+
+        val result = await(
+          ersConnector.removePresubmissionData(mockSchemeInfo)(using requestWithAuth, hc)
+        )
+
+        server.verify(1, postRequestedFor(path).withRequestBody(expectedBody))
         result.status shouldBe OK
       }
     }
@@ -492,22 +511,41 @@ class ERSConnectorSpec
     "return an error HttpResponse" when {
 
       "response status is not OK" in {
-        when(mockRequestBuilder.execute(any[HttpReads[HttpResponse]], any()))
-          .thenReturn(Future.successful(HttpResponse(BAD_REQUEST, "")))
+        val path         = urlEqualTo("/ers/123%2FABCDE/removePresubmissionData")
+        val expectedBody = equalToJson(Json.stringify(Json.toJson(mockSchemeInfo)))
 
-        val result = await(ersConnectorMockHttp.removePresubmissionData(mockSchemeInfo)(using requestWithAuth, hc))
+        server.stubFor(
+          post(path).willReturn(aResponse().withStatus(BAD_REQUEST))
+        )
+
+        val result = await(
+          ersConnector.removePresubmissionData(mockSchemeInfo)(using requestWithAuth, hc)
+        )
+
+        server.verify(1, postRequestedFor(path).withRequestBody(expectedBody))
         result.status shouldBe BAD_REQUEST
       }
     }
 
     "throw an exception" when {
-      "an exception occurs during the POST request" in {
-        when(mockRequestBuilder.execute(any[HttpReads[HttpResponse]], any()))
-          .thenReturn(Future.failed(new Exception("Test exception")))
+      import com.github.tomakehurst.wiremock.http.Fault
 
-        an[Exception] should be thrownBy await(
-          ersConnectorMockHttp.removePresubmissionData(mockSchemeInfo)(using requestWithAuth, hc)
+      "an exception occurs during the POST request" in {
+        val path         = urlEqualTo("/ers/123%2FABCDE/removePresubmissionData")
+        val expectedBody = equalToJson(Json.stringify(Json.toJson(mockSchemeInfo)))
+
+        server.stubFor(
+          post(path)
+            .withRequestBody(expectedBody)
+            .willReturn(aResponse().withFault(Fault.EMPTY_RESPONSE))
         )
+
+        val failure = await(
+          ersConnector.removePresubmissionData(mockSchemeInfo)(using requestWithAuth, hc).failed
+        )
+
+        server.verify(postRequestedFor(path).withRequestBody(expectedBody))
+        failure shouldBe an[Exception]
       }
     }
   }
@@ -515,14 +553,19 @@ class ERSConnectorSpec
   "checkForPresubmission" should {
     "return an HttpResponse" when {
       "the POST request is successful" in {
-        val validatedSheets    = "sheet1,sheet2"
-        val successfulResponse = HttpResponse(OK, "")
+        val validatedSheets = "sheet1,sheet2"
+        val path            = urlEqualTo(s"/ers/123%2FABCDE/check-for-presubmission/$validatedSheets")
+        val expectedBody    = equalToJson(Json.stringify(Json.toJson(mockSchemeInfo)))
 
-        when(mockRequestBuilder.execute(any[HttpReads[HttpResponse]], any()))
-          .thenReturn(Future.successful(successfulResponse))
+        server.stubFor(
+          post(path).willReturn(aResponse().withStatus(OK))
+        )
 
-        val result =
-          await(ersConnectorMockHttp.checkForPresubmission(mockSchemeInfo, validatedSheets)(using requestWithAuth, hc))
+        val result = await(
+          ersConnector.checkForPresubmission(mockSchemeInfo, validatedSheets)(using requestWithAuth, hc)
+        )
+
+        server.verify(1, postRequestedFor(path).withRequestBody(expectedBody))
         result.status shouldBe OK
       }
     }
@@ -530,24 +573,40 @@ class ERSConnectorSpec
     "return an error HttpResponse" when {
       "response status is not OK" in {
         val validatedSheets = "sheet1,sheet2"
-        when(mockRequestBuilder.execute(any[HttpReads[HttpResponse]], any()))
-          .thenReturn(Future.successful(HttpResponse(BAD_REQUEST, "")))
+        val path            = urlEqualTo(s"/ers/123%2FABCDE/check-for-presubmission/$validatedSheets")
+        val expectedBody    = equalToJson(Json.stringify(Json.toJson(mockSchemeInfo)))
 
-        val result =
-          await(ersConnectorMockHttp.checkForPresubmission(mockSchemeInfo, validatedSheets)(using requestWithAuth, hc))
+        server.stubFor(
+          post(path).willReturn(aResponse().withStatus(BAD_REQUEST))
+        )
+
+        val result = await(
+          ersConnector.checkForPresubmission(mockSchemeInfo, validatedSheets)(using requestWithAuth, hc)
+        )
+        server.verify(1, postRequestedFor(path).withRequestBody(expectedBody))
+
         result.status shouldBe BAD_REQUEST
       }
     }
 
     "throw an exception" when {
+
       "an exception occurs during the POST request" in {
         val validatedSheets = "sheet1,sheet2"
-        when(mockRequestBuilder.execute(any[HttpReads[HttpResponse]], any()))
-          .thenReturn(Future.failed(new Exception("Test exception")))
-
-        an[Exception] should be thrownBy await(
-          ersConnectorMockHttp.checkForPresubmission(mockSchemeInfo, validatedSheets)(using requestWithAuth, hc)
+        val path            = urlEqualTo(s"/ers/123%2FABCDE/check-for-presubmission/$validatedSheets")
+        val expectedBody    = equalToJson(Json.stringify(Json.toJson(mockSchemeInfo)))
+        server.stubFor(
+          post(path)
+            .withRequestBody(expectedBody)
+            .willReturn(aResponse().withFault(Fault.EMPTY_RESPONSE))
         )
+
+        val failure = await(
+          ersConnector.checkForPresubmission(mockSchemeInfo, validatedSheets)(using requestWithAuth, hc).failed
+        )
+
+        server.verify(postRequestedFor(path).withRequestBody(expectedBody))
+        failure shouldBe an[Exception]
       }
     }
   }
@@ -555,33 +614,58 @@ class ERSConnectorSpec
   "saveMetadata" should {
     "return an HttpResponse" when {
       "the POST request is successful" in {
-        val successfulResponse = HttpResponse(OK, "")
-        when(mockRequestBuilder.execute(any[HttpReads[HttpResponse]], any()))
-          .thenReturn(Future.successful(successfulResponse))
+        val path         = urlEqualTo("/ers/123%2FABCDE/saveMetadata")
+        val expectedBody = equalToJson(Json.stringify(Json.toJson(mockErsSummary)))
 
-        val result = await(ersConnectorMockHttp.saveMetadata(mockErsSummary)(using requestWithAuth, hc))
+        server.stubFor(
+          post(path).willReturn(aResponse().withStatus(OK))
+        )
+
+        val result = await(
+          ersConnector.saveMetadata(mockErsSummary)(using requestWithAuth, hc)
+        )
+
+        server.verify(1, postRequestedFor(path).withRequestBody(expectedBody))
         result.status shouldBe OK
       }
     }
 
     "return an error HttpResponse" when {
       "response status is not OK" in {
-        when(mockRequestBuilder.execute(any[HttpReads[HttpResponse]], any()))
-          .thenReturn(Future.successful(HttpResponse(BAD_REQUEST, "")))
 
-        val result = await(ersConnectorMockHttp.saveMetadata(mockErsSummary)(using requestWithAuth, hc))
+        val path         = urlEqualTo("/ers/123%2FABCDE/saveMetadata")
+        val expectedBody = equalToJson(Json.stringify(Json.toJson(mockErsSummary)))
+
+        server.stubFor(
+          post(path).willReturn(aResponse().withStatus(BAD_REQUEST))
+        )
+
+        val result = await(
+          ersConnector.saveMetadata(mockErsSummary)(using requestWithAuth, hc)
+        )
+
+        server.verify(1, postRequestedFor(path).withRequestBody(expectedBody))
         result.status shouldBe BAD_REQUEST
       }
     }
 
     "throw an exception" when {
       "an exception occurs during the POST request" in {
-        when(mockRequestBuilder.execute(any[HttpReads[HttpResponse]], any()))
-          .thenReturn(Future.failed(new Exception("Test exception")))
+        val path         = urlEqualTo("/ers/123%2FABCDE/saveMetadata")
+        val expectedBody = equalToJson(Json.stringify(Json.toJson(mockErsSummary)))
 
-        an[Exception] should be thrownBy await(
-          ersConnectorMockHttp.saveMetadata(mockErsSummary)(using requestWithAuth, hc)
+        server.stubFor(
+          post(path)
+            .withRequestBody(expectedBody)
+            .willReturn(aResponse().withFault(Fault.EMPTY_RESPONSE))
         )
+
+        val failure = await(
+          ersConnector.saveMetadata(mockErsSummary)(using requestWithAuth, hc).failed
+        )
+
+        server.verify(postRequestedFor(path).withRequestBody(expectedBody))
+        failure shouldBe an[Exception]
       }
     }
   }
@@ -589,49 +673,80 @@ class ERSConnectorSpec
   "submitReturnToBackend" should {
     "return an HttpResponse" when {
       "the POST request is successful" in {
-        val successfulResponse = HttpResponse(OK, "")
-        when(mockRequestBuilder.execute(any[HttpReads[HttpResponse]], any()))
-          .thenReturn(Future.successful(successfulResponse))
+        val path         = urlEqualTo("/ers/123%2FABCDE/saveReturnData")
+        val expectedBody = equalToJson(Json.stringify(Json.toJson(mockErsSummary)))
 
-        val result = await(ersConnectorMockHttp.submitReturnToBackend(mockErsSummary)(using requestWithAuth, hc))
+        server.stubFor(
+          post(path).willReturn(aResponse().withStatus(OK))
+        )
+
+        val result = await(
+          ersConnector.submitReturnToBackend(mockErsSummary)(using requestWithAuth, hc)
+        )
+
+        server.verify(1, postRequestedFor(path).withRequestBody(expectedBody))
         result.status shouldBe OK
       }
     }
 
     "return an error HttpResponse" when {
       "response status is not OK" in {
-        when(mockRequestBuilder.execute(any[HttpReads[HttpResponse]], any()))
-          .thenReturn(Future.successful(HttpResponse(BAD_REQUEST, "")))
+        val path         = urlEqualTo("/ers/123%2FABCDE/saveReturnData")
+        val expectedBody = equalToJson(Json.stringify(Json.toJson(mockErsSummary)))
 
-        val result = await(ersConnectorMockHttp.submitReturnToBackend(mockErsSummary)(using requestWithAuth, hc))
+        server.stubFor(
+          post(path).willReturn(aResponse().withStatus(BAD_REQUEST))
+        )
+
+        val result = await(
+          ersConnector.submitReturnToBackend(mockErsSummary)(using requestWithAuth, hc)
+        )
+
+        server.verify(1, postRequestedFor(path).withRequestBody(expectedBody))
         result.status shouldBe BAD_REQUEST
+
       }
     }
 
     "throw an exception" when {
       "an exception occurs during the POST request" in {
-        when(mockRequestBuilder.execute(any[HttpReads[HttpResponse]], any()))
-          .thenReturn(Future.failed(new Exception("Test exception")))
+        val path         = urlEqualTo("/ers/123%2FABCDE/saveReturnData")
+        val expectedBody = equalToJson(Json.stringify(Json.toJson(mockErsSummary)))
 
-        an[Exception] should be thrownBy await(
-          ersConnectorMockHttp.submitReturnToBackend(mockErsSummary)(using requestWithAuth, hc)
+        server.stubFor(
+          post(path)
+            .withRequestBody(expectedBody)
+            .willReturn(aResponse().withFault(Fault.EMPTY_RESPONSE))
         )
+
+        val failure = await(
+          ersConnector.submitReturnToBackend(mockErsSummary)(using requestWithAuth, hc).failed
+        )
+
+        server.verify(postRequestedFor(path).withRequestBody(expectedBody))
+        failure shouldBe an[Exception]
       }
     }
   }
 
   "connectToEtmpSummarySubmit" should {
     "return a bundle reference number" when {
-      // failed
       "the POST request is successful and status is OK" in {
-        val sap                = "sap123"
-        val payload            = Json.obj("key" -> "value")
-        val bundleRef          = "bundleRef123"
-        val successfulResponse = HttpResponse(OK, Json.obj("Form Bundle Number" -> bundleRef).toString())
-        when(mockRequestBuilder.execute(any[HttpReads[HttpResponse]], any()))
-          .thenReturn(Future.successful(successfulResponse))
+        val sap          = "sap123"
+        val payload      = Json.obj("key" -> "value")
+        val bundleRef    = "bundleRef123"
+        val path         = urlEqualTo(s"/ers/123%2FABCDE/summarySubmit/$sap")
+        val responseBody = Json.obj("Form Bundle Number" -> bundleRef)
 
-        val result = await(ersConnectorMockHttp.connectToEtmpSummarySubmit(sap, payload)(using requestWithAuth, hc))
+        server.stubFor(
+          post(path).willReturn(okJson(Json.stringify(responseBody)))
+        )
+
+        val result = await(
+          ersConnector.connectToEtmpSummarySubmit(sap, payload)(using requestWithAuth, hc)
+        )
+
+        server.verify(1, postRequestedFor(path).withRequestBody(equalToJson(Json.stringify(payload))))
         result shouldBe bundleRef
       }
     }
@@ -640,11 +755,9 @@ class ERSConnectorSpec
       "response status is not OK" in {
         val sap     = "sap123"
         val payload = Json.obj("key" -> "value")
-        when(mockRequestBuilder.execute(any[HttpReads[HttpResponse]], any()))
-          .thenReturn(Future.successful(HttpResponse(BAD_REQUEST, "")))
 
         an[Exception] should be thrownBy await(
-          ersConnectorMockHttp.connectToEtmpSummarySubmit(sap, payload)(using requestWithAuth, hc)
+          ersConnector.connectToEtmpSummarySubmit(sap, payload)(using requestWithAuth, hc)
         )
       }
     }
@@ -653,11 +766,9 @@ class ERSConnectorSpec
       "an exception occurs during the POST request" in {
         val sap     = "sap123"
         val payload = Json.obj("key" -> "value")
-        when(mockHttp.post(any())(any()).execute[HttpResponse])
-          .thenReturn(Future.failed(new Exception("Test exception")))
 
         an[Exception] should be thrownBy await(
-          ersConnectorMockHttp.connectToEtmpSummarySubmit(sap, payload)(using requestWithAuth, hc)
+          ersConnector.connectToEtmpSummarySubmit(sap, payload)(using requestWithAuth, hc)
         )
       }
     }
@@ -666,14 +777,20 @@ class ERSConnectorSpec
   "connectToEtmpSapRequest" should {
     "return a SAP number" when {
       "the GET request is successful and status is OK" in {
-        val schemeRef          = "scheme123"
-        val sapNumber          = "sapNumber123"
-        val successfulResponse = HttpResponse(OK, Json.obj("SAP Number" -> sapNumber).toString())
+        val schemeRef    = "scheme123"
+        val sapNumber    = "sapNumber123"
+        val path         = urlEqualTo(s"/ers/123%2FABCDE/sapRequest/$schemeRef")
+        val responseBody = Json.obj("SAP Number" -> sapNumber)
 
-        when(mockRequestBuilder.execute(any[HttpReads[HttpResponse]], any()))
-          .thenReturn(Future.successful(successfulResponse))
+        server.stubFor(
+          get(path).willReturn(okJson(Json.stringify(responseBody)))
+        )
 
-        val result = await(ersConnectorMockHttp.connectToEtmpSapRequest(schemeRef)(using requestWithAuth, hc))
+        val result = await(
+          ersConnector.connectToEtmpSapRequest(schemeRef)(using requestWithAuth, hc)
+        )
+
+        server.verify(1, getRequestedFor(path))
         result shouldBe Right(sapNumber)
       }
     }
@@ -681,11 +798,9 @@ class ERSConnectorSpec
     "throw an exception" when {
       "response status is not OK" in {
         val schemeRef = "scheme123"
-        when(mockRequestBuilder.execute(any[HttpReads[HttpResponse]], any()))
-          .thenReturn(Future.successful(HttpResponse(BAD_REQUEST, "")))
 
         an[Exception] should be thrownBy await(
-          ersConnectorMockHttp.connectToEtmpSapRequest(schemeRef)(using requestWithAuth, hc)
+          ersConnector.connectToEtmpSapRequest(schemeRef)(using requestWithAuth, hc)
         )
       }
     }
@@ -693,11 +808,9 @@ class ERSConnectorSpec
     "throw an exception" when {
       "an exception occurs during the GET request" in {
         val schemeRef = "scheme123"
-        when(mockRequestBuilder.execute(any[HttpReads[HttpResponse]], any()))
-          .thenReturn(Future.failed(new Exception("Test exception")))
 
         an[Exception] should be thrownBy await(
-          ersConnectorMockHttp.connectToEtmpSapRequest(schemeRef)(using requestWithAuth, hc)
+          ersConnector.connectToEtmpSapRequest(schemeRef)(using requestWithAuth, hc)
         )
       }
     }
