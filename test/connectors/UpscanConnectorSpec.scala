@@ -33,13 +33,7 @@ import utils.WireMockHelper
 
 import scala.concurrent.duration.SECONDS
 
-class UpscanConnectorSpec
-    extends AnyWordSpecLike
-    with Matchers
-    with OptionValues
-    with GuiceOneAppPerSuite
-    with MockitoSugar
-    with WireMockHelper {
+class UpscanConnectorSpec extends AnyWordSpecLike with Matchers with GuiceOneAppPerSuite with WireMockHelper {
 
   lazy val connector: UpscanConnector = app.injector.instanceOf[UpscanConnector]
   given hc: HeaderCarrier             = HeaderCarrier()
