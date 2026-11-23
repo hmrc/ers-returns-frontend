@@ -92,7 +92,7 @@ class ReturnServiceControllerSpec
     when(mockHttp.post(any())(any())).thenReturn(mockRequestBuilder)
     when(mockHttp.get(any())(any())).thenReturn(mockRequestBuilder)
     when(mockRequestBuilder.setHeader(any())).thenReturn(mockRequestBuilder)
-    when(mockRequestBuilder.withBody(any[JsObject])(any(), any(), any())).thenReturn(mockRequestBuilder)
+    when(mockRequestBuilder.withBody(any[JsObject])(using any(), any(), any())).thenReturn(mockRequestBuilder)
   }
 
   def buildFakeReturnServiceController(accessThresholdValue: Int = hundred): ReturnServiceController =

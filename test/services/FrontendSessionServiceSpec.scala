@@ -161,12 +161,12 @@ class FrontendSessionServiceSpec
 
       when(
         frontendSessionsRepository
-          .getFromSession[GroupSchemeInfo](DataKey(eqTo("group-scheme-controller")))(any(), any())
+          .getFromSession[GroupSchemeInfo](DataKey(eqTo("group-scheme-controller")))(using any(), any())
       )
         .thenReturn(Future.successful(Some(groupSchemeInfo)))
       when(
         frontendSessionsRepository
-          .getFromSession[CompanyDetailsList](DataKey(eqTo("subsidiary-companies")))(any(), any())
+          .getFromSession[CompanyDetailsList](DataKey(eqTo("subsidiary-companies")))(using any(), any())
       )
         .thenReturn(Future.successful(Some(companyDetailsList)))
 
@@ -180,7 +180,7 @@ class FrontendSessionServiceSpec
 
       when(
         frontendSessionsRepository
-          .getFromSession[GroupSchemeInfo](DataKey(eqTo("group-scheme-controller")))(any(), any())
+          .getFromSession[GroupSchemeInfo](DataKey(eqTo("group-scheme-controller")))(using any(), any())
       )
         .thenReturn(Future.successful(Some(groupSchemeInfo)))
 
@@ -193,7 +193,7 @@ class FrontendSessionServiceSpec
 
       when(
         frontendSessionsRepository
-          .getFromSession[GroupSchemeInfo](DataKey(eqTo("group-scheme-controller")))(any(), any())
+          .getFromSession[GroupSchemeInfo](DataKey(eqTo("group-scheme-controller")))(using any(), any())
       )
         .thenReturn(Future.successful(None))
 
@@ -208,11 +208,13 @@ class FrontendSessionServiceSpec
       val altAmendsActivity = AltAmendsActivity("1")
       val alterationAmends  = AlterationAmends(Some("1"), Some("1"), Some("1"), Some("1"), Some("1"))
 
-      when(frontendSessionsRepository.getFromSession[AltAmendsActivity](DataKey(eqTo("alt-activity")))(any(), any()))
+      when(
+        frontendSessionsRepository.getFromSession[AltAmendsActivity](DataKey(eqTo("alt-activity")))(using any(), any())
+      )
         .thenReturn(Future.successful(Some(altAmendsActivity)))
       when(
         frontendSessionsRepository
-          .getFromSession[AlterationAmends](DataKey(eqTo("alt-amends-cache-controller")))(any(), any())
+          .getFromSession[AlterationAmends](DataKey(eqTo("alt-amends-cache-controller")))(using any(), any())
       )
         .thenReturn(Future.successful(Some(alterationAmends)))
 
@@ -224,7 +226,9 @@ class FrontendSessionServiceSpec
       val schemeRef         = "testSchemeRef"
       val altAmendsActivity = AltAmendsActivity("2")
 
-      when(frontendSessionsRepository.getFromSession[AltAmendsActivity](DataKey(eqTo("alt-activity")))(any(), any()))
+      when(
+        frontendSessionsRepository.getFromSession[AltAmendsActivity](DataKey(eqTo("alt-activity")))(using any(), any())
+      )
         .thenReturn(Future.successful(Some(altAmendsActivity)))
 
       val result = testService.getAltAmmendsData(schemeRef).futureValue
@@ -234,7 +238,9 @@ class FrontendSessionServiceSpec
     "not fetch AlterationAmends when AltAmendsActivity is not present" in {
       val schemeRef = "testSchemeRef"
 
-      when(frontendSessionsRepository.getFromSession[AltAmendsActivity](DataKey(eqTo("alt-activity")))(any(), any()))
+      when(
+        frontendSessionsRepository.getFromSession[AltAmendsActivity](DataKey(eqTo("alt-activity")))(using any(), any())
+      )
         .thenReturn(Future.successful(None))
 
       val result = testService.getAltAmmendsData(schemeRef).futureValue
@@ -283,7 +289,7 @@ class FrontendSessionServiceSpec
       val cacheId  = "testCacheId"
       val testData = Some("testData")
 
-      when(frontendSessionsRepository.getFromSession[String](DataKey(eqTo(key)))(any(), any()))
+      when(frontendSessionsRepository.getFromSession[String](DataKey(eqTo(key)))(using any(), any()))
         .thenReturn(Future.successful(testData))
 
       val result = testService.fetchOption[String](key, cacheId).futureValue
@@ -294,7 +300,7 @@ class FrontendSessionServiceSpec
       val key     = "testKey"
       val cacheId = "testCacheId"
 
-      when(frontendSessionsRepository.getFromSession[String](DataKey(eqTo(key)))(any(), any()))
+      when(frontendSessionsRepository.getFromSession[String](DataKey(eqTo(key)))(using any(), any()))
         .thenReturn(Future.failed(new NoSuchElementException("No data found")))
 
       val result = testService.fetchOption[String](key, cacheId).futureValue
@@ -306,7 +312,7 @@ class FrontendSessionServiceSpec
       val cacheId   = "testCacheId"
       val exception = new RuntimeException("Unexpected exception")
 
-      when(frontendSessionsRepository.getFromSession[String](DataKey(eqTo(key)))(any(), any()))
+      when(frontendSessionsRepository.getFromSession[String](DataKey(eqTo(key)))(using any(), any()))
         .thenReturn(Future.failed(exception))
 
       val result = testService.fetchOption[String](key, cacheId).futureValue
@@ -321,7 +327,7 @@ class FrontendSessionServiceSpec
         Json.toJson(TrusteeDetails("First Trustee", "1 The Street", None, None, None, Some("UK"), None, true))
       val trusteesCacheData = Json.toJson(Map("trustees" -> Json.arr(trusteeDetails)))
 
-      when(frontendSessionsRepository.getFromSession[JsValue](DataKey(eqTo("trustees")))(any(), any()))
+      when(frontendSessionsRepository.getFromSession[JsValue](DataKey(eqTo("trustees")))(using any(), any()))
         .thenReturn(Future.successful(Some(trusteesCacheData)))
 
       val result = testService.fetchPartFromTrusteeDetailsList[JsValue](index).futureValue
@@ -333,7 +339,7 @@ class FrontendSessionServiceSpec
       val trusteesCacheData =
         Json.toJson(Map("trustees" -> Json.arr(Json.obj("key" -> "value")))) // Single item in the array
 
-      when(frontendSessionsRepository.getFromSession[JsValue](DataKey(eqTo("trustees")))(any(), any()))
+      when(frontendSessionsRepository.getFromSession[JsValue](DataKey(eqTo("trustees")))(using any(), any()))
         .thenReturn(Future.successful(Some(trusteesCacheData)))
 
       val result = testService.fetchPartFromTrusteeDetailsList[JsValue](index).futureValue
@@ -344,7 +350,7 @@ class FrontendSessionServiceSpec
       val index     = 0
       val exception = new RuntimeException("Unexpected exception")
 
-      when(frontendSessionsRepository.getFromSession[JsValue](DataKey(eqTo("trustees")))(any(), any()))
+      when(frontendSessionsRepository.getFromSession[JsValue](DataKey(eqTo("trustees")))(using any(), any()))
         .thenReturn(Future.failed(exception))
 
       val result = testService.fetchPartFromTrusteeDetailsList[JsValue](index).futureValue
@@ -357,7 +363,7 @@ class FrontendSessionServiceSpec
       val trusteeDetailsList = TrusteeDetailsList(
         List(TrusteeDetails("First Trustee", "1 The Street", None, None, None, Some("UK"), None, true))
       )
-      when(frontendSessionsRepository.getFromSession[JsValue](DataKey(eqTo("trustees")))(any(), any()))
+      when(frontendSessionsRepository.getFromSession[JsValue](DataKey(eqTo("trustees")))(using any(), any()))
         .thenReturn(Future.successful(Some(Json.toJson(trusteeDetailsList))))
 
       val result = testService.fetchTrusteesOptionally().futureValue
@@ -365,7 +371,7 @@ class FrontendSessionServiceSpec
     }
 
     "return an empty TrusteeDetailsList when fetching fails" in {
-      when(frontendSessionsRepository.getFromSession[TrusteeDetailsList](DataKey(eqTo("trustees")))(any(), any()))
+      when(frontendSessionsRepository.getFromSession[TrusteeDetailsList](DataKey(eqTo("trustees")))(using any(), any()))
         .thenReturn(Future.failed(new Exception("Fetching error")))
 
       val result = testService.fetchTrusteesOptionally().futureValue
@@ -378,7 +384,7 @@ class FrontendSessionServiceSpec
     "return data when it is successfully found in the session" in {
       val testData = "testData"
 
-      when(frontendSessionsRepository.getFromSession[JsValue](DataKey(eqTo(key)))(any(), any()))
+      when(frontendSessionsRepository.getFromSession[JsValue](DataKey(eqTo(key)))(using any(), any()))
         .thenReturn(Future.successful(Some(Json.toJson(testData))))
 
       val result = testService.fetch[String](key).futureValue
@@ -388,7 +394,7 @@ class FrontendSessionServiceSpec
     "throw Exception when an unexpected exception occurs" in {
       val exception = new RuntimeException("Test exception")
 
-      when(frontendSessionsRepository.getFromSession[String](DataKey(eqTo(key)))(any(), any()))
+      when(frontendSessionsRepository.getFromSession[String](DataKey(eqTo(key)))(using any(), any()))
         .thenReturn(Future.failed(exception))
 
       val thrown = testService.fetch[String](key).failed.futureValue
@@ -398,7 +404,7 @@ class FrontendSessionServiceSpec
 
     "throw JsResultException when session data cannot be parsed" in {
 
-      when(frontendSessionsRepository.getFromSession[JsValue](DataKey(eqTo(key)))(any(), any()))
+      when(frontendSessionsRepository.getFromSession[JsValue](DataKey(eqTo(key)))(using any(), any()))
         .thenReturn(Future.successful(Some(Json.toJson(123))))
 
       val thrown =
@@ -413,7 +419,7 @@ class FrontendSessionServiceSpec
 
     "throw NoSuchElementException when no data is found for the key" in {
 
-      when(frontendSessionsRepository.getFromSession[JsValue](DataKey(eqTo(key)))(any(), any()))
+      when(frontendSessionsRepository.getFromSession[JsValue](DataKey(eqTo(key)))(using any(), any()))
         .thenReturn(Future.successful(None))
 
       val thrown = testService.fetch[String](key).failed.futureValue
@@ -430,7 +436,7 @@ class FrontendSessionServiceSpec
       val testData         = "testData"
       val expectedResponse = ("cacheId", "key")
 
-      when(frontendSessionsRepository.putSession[String](DataKey(eqTo(key)), eqTo(testData))(any(), any()))
+      when(frontendSessionsRepository.putSession[String](DataKey(eqTo(key)), eqTo(testData))(using any(), any()))
         .thenReturn(Future.successful(expectedResponse))
 
       val result = testService.cache(key, testData).futureValue
@@ -442,7 +448,7 @@ class FrontendSessionServiceSpec
       val testData  = "testData"
       val exception = new RuntimeException("Cache operation failed")
 
-      when(frontendSessionsRepository.putSession[String](DataKey(eqTo(key)), eqTo(testData))(any(), any()))
+      when(frontendSessionsRepository.putSession[String](DataKey(eqTo(key)), eqTo(testData))(using any(), any()))
         .thenReturn(Future.failed(exception))
 
       val result = testService.cache(key, testData).failed.futureValue
@@ -455,7 +461,7 @@ class FrontendSessionServiceSpec
     "successfully remove data from the cache" in {
       val key = "testKey"
 
-      when(frontendSessionsRepository.deleteFromSession(DataKey(eqTo(key)))(any()))
+      when(frontendSessionsRepository.deleteFromSession(DataKey(eqTo(key)))(using any()))
         .thenReturn(Future.successful(()))
 
       noException shouldBe thrownBy(testService.remove(key).futureValue)
@@ -465,7 +471,7 @@ class FrontendSessionServiceSpec
       val key       = "testKey"
       val exception = new RuntimeException("Removal operation failed")
 
-      when(frontendSessionsRepository.deleteFromSession(DataKey(eqTo(key)))(any()))
+      when(frontendSessionsRepository.deleteFromSession(DataKey(eqTo(key)))(using any()))
         .thenReturn(Future.failed(exception))
 
       val result = testService.remove(key).failed.futureValue
@@ -481,7 +487,9 @@ class FrontendSessionServiceSpec
         Json.toJson(CompanyDetails("First Company", "UK line 1", None, None, None, None, None, None, None, true))
       val companiesCacheData = Json.toJson(Map("companies" -> Json.arr(companyDetails)))
 
-      when(frontendSessionsRepository.getFromSession[JsValue](DataKey(eqTo("subsidiary-companies")))(any(), any()))
+      when(
+        frontendSessionsRepository.getFromSession[JsValue](DataKey(eqTo("subsidiary-companies")))(using any(), any())
+      )
         .thenReturn(Future.successful(Some(companiesCacheData)))
 
       val result = testService.fetchPartFromCompanyDetailsList[JsValue](index).futureValue
@@ -493,7 +501,9 @@ class FrontendSessionServiceSpec
       val companiesCacheData =
         Json.toJson(Map("subsidiary-companies" -> Json.arr(Json.obj("key" -> "value")))) // Single item in the array
 
-      when(frontendSessionsRepository.getFromSession[JsValue](DataKey(eqTo("subsidiary-companies")))(any(), any()))
+      when(
+        frontendSessionsRepository.getFromSession[JsValue](DataKey(eqTo("subsidiary-companies")))(using any(), any())
+      )
         .thenReturn(Future.successful(Some(companiesCacheData)))
 
       val result = testService.fetchPartFromCompanyDetailsList[JsValue](index).futureValue
@@ -504,7 +514,9 @@ class FrontendSessionServiceSpec
       val index     = 0
       val exception = new RuntimeException("Unexpected exception")
 
-      when(frontendSessionsRepository.getFromSession[JsValue](DataKey(eqTo("subsidiary-companies")))(any(), any()))
+      when(
+        frontendSessionsRepository.getFromSession[JsValue](DataKey(eqTo("subsidiary-companies")))(using any(), any())
+      )
         .thenReturn(Future.failed(exception))
 
       val result = testService.fetchPartFromCompanyDetailsList[JsValue](index).futureValue
@@ -517,7 +529,9 @@ class FrontendSessionServiceSpec
       val companiesDetailsList = CompanyDetailsList(
         List(CompanyDetails("First Company", "UK line 1", None, None, None, None, None, None, None, true))
       )
-      when(frontendSessionsRepository.getFromSession[JsValue](DataKey(eqTo("subsidiary-companies")))(any(), any()))
+      when(
+        frontendSessionsRepository.getFromSession[JsValue](DataKey(eqTo("subsidiary-companies")))(using any(), any())
+      )
         .thenReturn(Future.successful(Some(Json.toJson(companiesDetailsList))))
 
       val result = testService.fetchCompaniesOptionally().futureValue
@@ -527,7 +541,7 @@ class FrontendSessionServiceSpec
     "return an empty CompanyDetailsList when fetching fails" in {
       when(
         frontendSessionsRepository
-          .getFromSession[CompanyDetailsList](DataKey(eqTo("subsidiary-companies")))(any(), any())
+          .getFromSession[CompanyDetailsList](DataKey(eqTo("subsidiary-companies")))(using any(), any())
       )
         .thenReturn(Future.failed(new Exception("Fetching error")))
 
@@ -543,7 +557,7 @@ class FrontendSessionServiceSpec
         Json.toJson(CompanyDetails("First Company", "UK line 1", None, None, None, None, None, None, None, true))
       val companyCacheData = Json.toJson(companyDetails)
 
-      when(frontendSessionsRepository.getFromSession[JsValue](DataKey(eqTo("scheme-organiser")))(any(), any()))
+      when(frontendSessionsRepository.getFromSession[JsValue](DataKey(eqTo("scheme-organiser")))(using any(), any()))
         .thenReturn(Future.successful(Some(companyCacheData)))
 
       val result = testService.fetchPartFromCompanyDetails[JsValue]().futureValue
@@ -552,7 +566,7 @@ class FrontendSessionServiceSpec
 
     "return None when no data is found" in {
 
-      when(frontendSessionsRepository.getFromSession[JsValue](DataKey(eqTo("scheme-organiser")))(any(), any()))
+      when(frontendSessionsRepository.getFromSession[JsValue](DataKey(eqTo("scheme-organiser")))(using any(), any()))
         .thenReturn(Future.successful(None))
 
       val result = testService.fetchPartFromCompanyDetails[JsValue]().futureValue
@@ -563,7 +577,7 @@ class FrontendSessionServiceSpec
 
       val exception = new RuntimeException("Unexpected exception")
 
-      when(frontendSessionsRepository.getFromSession[JsValue](DataKey(eqTo("scheme-organiser")))(any(), any()))
+      when(frontendSessionsRepository.getFromSession[JsValue](DataKey(eqTo("scheme-organiser")))(using any(), any()))
         .thenReturn(Future.failed(exception))
 
       val result = testService.fetchPartFromCompanyDetails[JsValue]().futureValue
@@ -574,7 +588,7 @@ class FrontendSessionServiceSpec
   "fetchSchemeOrganiserOptionally" should {
     "return a CompanyDetails when data is successfully fetched" in {
       val companyDetails = CompanyDetails("First Company", "UK line 1", None, None, None, None, None, None, None, true)
-      when(frontendSessionsRepository.getFromSession[JsValue](DataKey(eqTo("scheme-organiser")))(any(), any()))
+      when(frontendSessionsRepository.getFromSession[JsValue](DataKey(eqTo("scheme-organiser")))(using any(), any()))
         .thenReturn(Future.successful(Some(Json.toJson(companyDetails))))
 
       val result = testService.fetchSchemeOrganiserOptionally().futureValue
@@ -582,7 +596,9 @@ class FrontendSessionServiceSpec
     }
 
     "return an empty CompanyDetails when fetching fails" in {
-      when(frontendSessionsRepository.getFromSession[CompanyDetails](DataKey(eqTo("scheme-organiser")))(any(), any()))
+      when(
+        frontendSessionsRepository.getFromSession[CompanyDetails](DataKey(eqTo("scheme-organiser")))(using any(), any())
+      )
         .thenReturn(Future.failed(new Exception("Fetching error")))
 
       val result = testService.fetchSchemeOrganiserOptionally().futureValue
