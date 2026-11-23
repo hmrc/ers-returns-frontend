@@ -55,7 +55,7 @@ class ApplicationConfigSpec extends AnyWordSpecLike with GuiceOneAppPerSuite {
           .withoutPath("microservice.services.features.scheme-version.use-V4-and-V5")
           .withoutPath("microservice.services.features.scheme-version.use-V6-and-V7")
       )
-      val config = new ApplicationConfig(new ServicesConfig(stripped))
+      val config   = new ApplicationConfig(new ServicesConfig(stripped))
       config.useV4andV5Scheme mustBe true
       config.useV6andV7Scheme mustBe false
 

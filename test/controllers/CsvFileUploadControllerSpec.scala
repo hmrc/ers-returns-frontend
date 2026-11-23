@@ -263,10 +263,10 @@ class CsvFileUploadControllerSpec
         UpscanIds(UploadId("789"), "file2", NotStarted),
         UpscanIds(UploadId("000"), "file3", NotStarted),
         UpscanIds(UploadId("745"), "file4", NotStarted)
-
       )
-      val expectedLogMessage = "[CsvFileUploadController][uploadFilePage] The following files were selected to be uploaded: " +
-        "EMI40_Adjustments_V7.csv, EMI40_Replaced_V7.csv, EMI40_RLC_V7.csv, EMI40_NonTaxable_V7.csv, EMI40_Taxable_V7.csv"
+      val expectedLogMessage            =
+        "[CsvFileUploadController][uploadFilePage] The following files were selected to be uploaded: " +
+          "EMI40_Adjustments_V7.csv, EMI40_Replaced_V7.csv, EMI40_RLC_V7.csv, EMI40_NonTaxable_V7.csv, EMI40_Taxable_V7.csv"
 
       when(mockSessionService.fetch[UpscanCsvFilesList](meq("csv-files-upload"))(using any(), any()))
         .thenReturn(Future.successful(UpscanCsvFilesList(upscanSipIds)))
@@ -278,7 +278,15 @@ class CsvFileUploadControllerSpec
       }
 
       verify(mockAuditEvents, times(1)).auditSelectedCsvRadioButtons(
-        meq(List("EMI40_Adjustments_V7.csv", "EMI40_Replaced_V7.csv", "EMI40_RLC_V7.csv", "EMI40_NonTaxable_V7.csv", "EMI40_Taxable_V7.csv"))
+        meq(
+          List(
+            "EMI40_Adjustments_V7.csv",
+            "EMI40_Replaced_V7.csv",
+            "EMI40_RLC_V7.csv",
+            "EMI40_NonTaxable_V7.csv",
+            "EMI40_Taxable_V7.csv"
+          )
+        )
       )(using any[HeaderCarrier])
 
     }
