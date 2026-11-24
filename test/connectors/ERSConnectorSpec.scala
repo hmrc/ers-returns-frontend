@@ -237,7 +237,7 @@ class ERSConnectorSpec
   }
 
   "getCallbackRecord" should {
-    val path = urlPathMatching("/(.*)/get-callback")
+    val path = urlEqualTo("/ers/someSessionId/get-callback")
     "return an UploadStatus" when {
       "the response is successful and the status is OK" in {
         val expectedName = "fileName"
@@ -290,8 +290,8 @@ class ERSConnectorSpec
   }
 
   "updateCallbackRecord" should {
-    val path      = urlPathMatching("/(.*)/update-callback")
     val sessionId = "sessionId"
+    val path      = urlEqualTo(s"/ers/$sessionId/update-callback")
 
     "return NO_CONTENT" when {
       "update is successful" in {
@@ -340,7 +340,7 @@ class ERSConnectorSpec
   }
 
   "createCallbackRecord" should {
-    val path = urlPathMatching("/(.*)/create-callback")
+    val path = urlEqualTo("/ers/someSessionId/create-callback")
     "return CREATED" when {
       "return CREATED when the callback record is created successfully" in {
         server.stubFor(
@@ -385,7 +385,7 @@ class ERSConnectorSpec
   }
 
   "retrieveSubmissionData" should {
-    val path         = urlPathMatching("/(.*)/retrieve-submission-data")
+    val path         = urlEqualTo("/ers/123%2FABCDE/retrieve-submission-data")
     val expectedBody = equalToJson(Json.stringify(data))
     "return OK when the POST request is successful" in {
       server.stubFor(
@@ -441,7 +441,7 @@ class ERSConnectorSpec
   }
 
   "removePresubmissionData" should {
-    val path         = urlPathMatching("/(.*)/removePresubmissionData")
+    val path         = urlEqualTo("/ers/123%2FABCDE/removePresubmissionData")
     val expectedBody = equalToJson(Json.stringify(Json.toJson(mockSchemeInfo)))
     "return an HttpResponse" when {
       "the POST request is successful" in {
