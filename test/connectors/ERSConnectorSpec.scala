@@ -70,7 +70,7 @@ class ERSConnectorSpec
   )
 
   "validateFileData" should {
-    val expectedPath = urlPathMatching("/(.*)/process-file")
+    val expectedPath = urlEqualTo("/ers/123%2FABCDE/process-file")
     "call file validator using empref from auth context" in {
       server.stubFor(
         post(expectedPath).willReturn(aResponse().withStatus(OK))
@@ -148,7 +148,7 @@ class ERSConnectorSpec
   }
 
   "validateCsvFileData" should {
-    val process_CSV_URL = urlPathMatching("/(.*)/process-csv-file")
+    val process_CSV_URL = urlEqualTo("/ers/v2/123%2FABCDE/process-csv-file")
     "call file validator using empref from auth context" in {
       server.stubFor(
         post(process_CSV_URL).willReturn(aResponse().withStatus(OK))
@@ -161,6 +161,7 @@ class ERSConnectorSpec
       )
       server.verify(1, postRequestedFor(process_CSV_URL))
       result.status shouldBe OK
+      result.body   shouldBe ""
     }
 
     "return the response from file-validator" when {
@@ -371,7 +372,16 @@ class ERSConnectorSpec
         )
         server.verify(postRequestedFor(path))
       }
+
+      "no session ID in the request" in {
+        val requestWithAuthNoSession = RequestWithOptionalAuthContext(testFakeRequest, defaultErsAuthData)
+        an[Exception] should be thrownBy await(
+          ersConnector.createCallbackRecord(using requestWithAuthNoSession, hc)
+        )
+        server.verify(0, postRequestedFor(path))
+      }
     }
+
   }
 
   "retrieveSubmissionData" should {

@@ -39,7 +39,6 @@ import play.twirl.api.Html
 import repositories.FrontendSessionsRepository
 import services.audit.AuditEvents
 import services.{CompanyDetailsService, FileValidatorService, FrontendSessionService, TrusteeService}
-import uk.gov.hmrc.http.client.{HttpClientV2, RequestBuilder}
 import uk.gov.hmrc.http.{HeaderCarrier, SessionKeys}
 import uk.gov.hmrc.mongo.cache.CacheItem
 
