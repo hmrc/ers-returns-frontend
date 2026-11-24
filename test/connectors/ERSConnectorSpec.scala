@@ -119,6 +119,7 @@ class ERSConnectorSpec
         )
         val result = await(ersConnector.validateFileData(uploadedSuccessfully, schemeInfo)(using requestWithAuth, hc))
         result.status shouldBe BAD_REQUEST
+        result.body   shouldBe ""
       }
 
       "file-validator returns 5xx" in {
@@ -161,7 +162,6 @@ class ERSConnectorSpec
       )
       server.verify(1, postRequestedFor(process_CSV_URL))
       result.status shouldBe OK
-      result.body   shouldBe ""
     }
 
     "return the response from file-validator" when {
