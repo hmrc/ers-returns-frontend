@@ -20,7 +20,7 @@ import models.*
 import play.api.libs.json.*
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
-import uk.gov.hmrc.domain.Generator
+import uk.gov.hmrc.domain.NinoGenerator
 
 import java.time.{Instant, LocalDateTime, ZoneId, ZonedDateTime}
 import scala.collection.mutable.ListBuffer
@@ -30,7 +30,7 @@ object Fixtures extends AuthHelper {
   val firstName    = "FirstName"
   val middleName   = "MiddleName"
   val surname      = "Surname"
-  val nino: String = new Generator().nextNino.nino
+  val nino: String = NinoGenerator().nextNino.nino
   val companyName  = "Company Name"
 
   def getAwaitDuration: Duration = 60.seconds
