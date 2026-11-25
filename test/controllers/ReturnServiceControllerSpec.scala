@@ -20,19 +20,17 @@ import models.*
 import org.apache.pekko.stream.Materializer
 import org.jsoup.Jsoup
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{reset as mreset, *}
+import org.mockito.Mockito.*
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
-import org.scalatest.{BeforeAndAfter, OptionValues}
+import org.scalatest.OptionValues
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status
 import play.api.i18n
 import play.api.i18n.{Messages, MessagesApi, MessagesImpl}
-import play.api.libs.json.JsObject
 import play.api.mvc.*
 import play.api.test.Helpers.*
 import play.api.test.{FakeRequest, Helpers}
-import uk.gov.hmrc.http.HttpResponse
 import utils.Fixtures.ersRequestObject
 import utils.{ERSFakeApplicationConfig, ErsTestHelper, Fixtures}
 import views.html.{global_error, start, unauthorised}
@@ -46,7 +44,6 @@ class ReturnServiceControllerSpec
     with OptionValues
     with ERSFakeApplicationConfig
     with ErsTestHelper
-    with BeforeAndAfter
     with GuiceOneAppPerSuite {
 
   val mockMCC: MessagesControllerComponents = DefaultMessagesControllerComponents(
@@ -85,17 +82,9 @@ class ReturnServiceControllerSpec
     Some("hmac")
   )
 
-  before {
-    mreset(mockHttp)
-    mreset(mockRequestBuilder)
-
-    when(mockHttp.post(any())(any())).thenReturn(mockRequestBuilder)
-    when(mockHttp.get(any())(any())).thenReturn(mockRequestBuilder)
-    when(mockRequestBuilder.setHeader(any())).thenReturn(mockRequestBuilder)
-    when(mockRequestBuilder.withBody(any[JsObject])(any(), any(), any())).thenReturn(mockRequestBuilder)
-  }
-
-  def buildFakeReturnServiceController(accessThresholdValue: Int = hundred): ReturnServiceController =
+  def buildFakeReturnServiceController(
+    accessThresholdValue: Int = hundred
+  ): ReturnServiceController =
     new ReturnServiceController(
       mockMCC,
       mockSessionService,
@@ -108,11 +97,12 @@ class ReturnServiceControllerSpec
       override lazy val accessThreshold: Int = accessThresholdValue
       override val accessDeniedUrl: String   = "/denied.html"
 
-      when(mockRequestBuilder.execute[HttpResponse])
-        .thenReturn(Future.successful(HttpResponse(OK, "")))
-      when(mockSessionService.cache(any(), any())(using any(), any())).thenReturn(Future.successful(sessionPair))
-      when(mockSessionService.cache(any(), any())(using any(), any())).thenReturn(Future.successful(sessionPair))
-      when(mockSessionService.remove(any())(using any())).thenReturn(Future.successful(()))
+      when(mockSessionService.cache(any(), any())(using any(), any()))
+        .thenReturn(Future.successful(sessionPair))
+
+      when(mockSessionService.remove(any())(using any()))
+        .thenReturn(Future.successful(()))
+
       when(mockSessionService.fetch[RequestObject](any())(using any(), any()))
         .thenReturn(Future.successful(rscAsRequestObject))
     }
