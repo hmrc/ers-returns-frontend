@@ -244,6 +244,49 @@ class CsvFileUploadControllerSpec
 
     }
 
+    "log the selected csv files for SAYE V7 when useV6andV7Scheme is enabled" in {
+
+      val sayeV7RequestObject = ersRequestObject.copy(
+        taxYear = Some("2024/25"),
+        schemeName = Some("Saye"),
+        schemeType = Some("SAYE")
+      )
+
+      when(mockSessionService.fetch[RequestObject](refEq(mockErsUtil.ERS_REQUEST_OBJECT))(using any(), any()))
+        .thenReturn(Future.successful(sayeV7RequestObject))
+      when(mockAppConfig.useV4andV5Scheme).thenReturn(false)
+      when(mockAppConfig.useV6andV7Scheme).thenReturn(true)
+
+      val upscanSipIds: List[UpscanIds] = List(
+        UpscanIds(UploadId("123"), "file0", NotStarted),
+        UpscanIds(UploadId("456"), "file1", NotStarted),
+        UpscanIds(UploadId("789"), "file2", NotStarted)
+      )
+      val expectedLogMessage            =
+        "[CsvFileUploadController][uploadFilePage] The following files were selected to be uploaded: " +
+          "SAYE_Granted_V7.csv, SAYE_RCL_V7.csv, SAYE_Exercised_V7.csv"
+
+      when(mockSessionService.fetch[UpscanCsvFilesList](meq("csv-files-upload"))(using any(), any()))
+        .thenReturn(Future.successful(UpscanCsvFilesList(upscanSipIds)))
+
+      withCaptureOfLoggingFrom(csvFileUploadControllerLogger) { captureEvents =>
+        await(csvFileUploadController.uploadFilePage()(testFakeRequest))
+        println(captureEvents)
+        assert(captureEvents.exists(_.getMessage.contains(expectedLogMessage)))
+      }
+
+      verify(mockAuditEvents, times(1)).auditSelectedCsvRadioButtons(
+        meq(
+          List(
+            "SAYE_Granted_V7.csv",
+            "SAYE_RCL_V7.csv",
+            "SAYE_Exercised_V7.csv"
+          )
+        )
+      )(using any[HeaderCarrier])
+
+    }
+
     "log the selected csv files for EMI V7 when useV6andV7Scheme is enabled" in {
 
       val emiV7RequestObject = ersRequestObject.copy(
